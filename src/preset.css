@@ -1,0 +1,125 @@
+/* =============================================================
+   KSK Design System — Preset CSS
+
+   外部プロジェクト向けプリセット。
+   1行の @import で全トークン + shadcn互換 + アニメーションが有効になる。
+
+   使い方:
+   @import "@ksk/design-system/preset";
+   ============================================================= */
+
+@import "./styles/primitive.css";
+@import "./styles/semantic.css";
+@import "./styles/typography.css";
+
+/* ─── Bridge Layer: shadcn/ui 互換マッピング ─── */
+:root {
+  --radius: 0.5rem;
+
+  --background: var(--Surface-Primary);
+  --foreground: var(--Text-High-Emphasis);
+
+  --card: var(--Surface-Primary);
+  --card-foreground: var(--Text-High-Emphasis);
+
+  --popover: var(--Surface-Primary);
+  --popover-foreground: var(--Text-High-Emphasis);
+
+  --primary: var(--Brand-Primary);
+  --primary-foreground: var(--Text-on-Inverse);
+
+  --secondary: var(--Surface-Secondary);
+  --secondary-foreground: var(--Text-High-Emphasis);
+
+  --muted: var(--Surface-Tertiary);
+  --muted-foreground: var(--Text-Low-Emphasis);
+
+  --accent: var(--Surface-Secondary);
+  --accent-foreground: var(--Text-High-Emphasis);
+
+  --destructive: var(--Caution-Base);
+  --destructive-foreground: var(--Text-on-Inverse);
+
+  --border: var(--Border-Medium-Emphasis);
+  --input: var(--Border-Medium-Emphasis);
+  --ring: var(--Focus-High-Emphasis);
+
+  --sidebar-background: var(--Surface-Primary);
+  --sidebar-foreground: var(--Text-High-Emphasis);
+  --sidebar-primary: var(--Brand-Primary);
+  --sidebar-primary-foreground: var(--Text-on-Inverse);
+  --sidebar-accent: var(--Surface-Accent-Primary-Light);
+  --sidebar-accent-foreground: var(--Text-Accent-Primary);
+  --sidebar-border: var(--Border-Low-Emphasis);
+  --sidebar-ring: var(--Focus-High-Emphasis);
+}
+
+.dark {
+  --background: var(--Surface-Primary);
+  --foreground: var(--Text-High-Emphasis);
+  --card: var(--Surface-Secondary);
+  --card-foreground: var(--Text-High-Emphasis);
+  --popover: var(--Surface-Secondary);
+  --popover-foreground: var(--Text-High-Emphasis);
+  --primary: var(--Brand-Primary);
+  --primary-foreground: var(--Text-on-Inverse);
+  --secondary: var(--Surface-Tertiary);
+  --secondary-foreground: var(--Text-High-Emphasis);
+  --muted: var(--Surface-Tertiary);
+  --muted-foreground: var(--Text-Low-Emphasis);
+  --accent: var(--Surface-Tertiary);
+  --accent-foreground: var(--Text-High-Emphasis);
+  --destructive: var(--Caution-Base);
+  --destructive-foreground: var(--Text-on-Inverse);
+  --border: var(--Border-Medium-Emphasis);
+  --input: var(--Border-Medium-Emphasis);
+  --ring: var(--Focus-High-Emphasis);
+}
+
+/* ─── Shadow Tokens ─── */
+:root {
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 0 8px rgba(20, 20, 20, 0.08);
+  --shadow-lg: 0px 12px 32px -4px rgba(24, 39, 75, 0.12), 0px 8px 16px -6px rgba(24, 39, 75, 0.12);
+  --shadow-dialog: 0px 12px 32px -4px rgba(24, 39, 75, 0.12), 0px 8px 16px -6px rgba(24, 39, 75, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2);
+  --shadow-tooltip: 0px 8px 8px -4px rgba(24, 39, 75, 0.08), 0px 4px 6px -4px rgba(24, 39, 75, 0.12);
+}
+
+/* ─── Animation ─── */
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@theme inline {
+  --animate-slide-in-right: slide-in-right 200ms ease-out;
+  --animate-slide-in-left:  slide-in-left 200ms ease-out;
+  --animate-fade-in:        fade-in 150ms ease-out;
+  --animate-fade-in-up:     fade-in-up 200ms ease-out;
+  --animate-scale-in:       scale-in 150ms ease-out;
+}
+
+/* ─── Scrollbar Hide Utility ─── */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,0 +1,161 @@
+/* =============================================================
+   KSK Design System — Primitive Color Tokens
+
+   Layer 1: 原色パレット
+   テーマファイル（src/themes/*.css）で Brand 色を上書きすることで
+   全セマンティックトークンが自動的に切り替わる。
+
+   ベースパレットはニュートラル（Gray, Red, Green, Blue 等）を定義し、
+   ブランドカラーはデフォルトテーマ（Blue）を初期値として設定する。
+   ============================================================= */
+
+@theme {
+  /* ─── Brand（テーマ差し替え対象） ─── */
+  --Primitive-Brand-50:  #EFF6FF;
+  --Primitive-Brand-100: #DBEAFE;
+  --Primitive-Brand-200: #BFDBFE;
+  --Primitive-Brand-300: #93C5FD;
+  --Primitive-Brand-400: #60A5FA;
+  --Primitive-Brand-500: #3B82F6;
+  --Primitive-Brand-600: #2563EB;
+  --Primitive-Brand-700: #1D4ED8;
+  --Primitive-Brand-800: #1E40AF;
+  --Primitive-Brand-900: #1E3A8A;
+
+  /* ─── Gray ─── */
+  --Primitive-Gray-50:  #F9FAFB;
+  --Primitive-Gray-100: #F3F4F6;
+  --Primitive-Gray-200: #E5E7EB;
+  --Primitive-Gray-300: #D1D5DB;
+  --Primitive-Gray-400: #9CA3AF;
+  --Primitive-Gray-500: #6B7280;
+  --Primitive-Gray-600: #4B5563;
+  --Primitive-Gray-700: #374151;
+  --Primitive-Gray-800: #1F2937;
+  --Primitive-Gray-900: #111827;
+
+  /* ─── Red（Caution / Destructive） ─── */
+  --Primitive-Red-50:  #FEF2F2;
+  --Primitive-Red-100: #FEE2E2;
+  --Primitive-Red-200: #FECACA;
+  --Primitive-Red-300: #FCA5A5;
+  --Primitive-Red-400: #F87171;
+  --Primitive-Red-500: #EF4444;
+  --Primitive-Red-600: #DC2626;
+  --Primitive-Red-700: #B91C1C;
+  --Primitive-Red-800: #991B1B;
+  --Primitive-Red-900: #7F1D1D;
+
+  /* ─── Orange（Warning） ─── */
+  --Primitive-Orange-50:  #FFF7ED;
+  --Primitive-Orange-100: #FFEDD5;
+  --Primitive-Orange-200: #FED7AA;
+  --Primitive-Orange-300: #FDBA74;
+  --Primitive-Orange-400: #FB923C;
+  --Primitive-Orange-500: #F97316;
+  --Primitive-Orange-600: #EA580C;
+  --Primitive-Orange-700: #C2410C;
+  --Primitive-Orange-800: #9A3412;
+  --Primitive-Orange-900: #7C2D12;
+
+  /* ─── Amber ─── */
+  --Primitive-Amber-50:  #FFFBEB;
+  --Primitive-Amber-100: #FEF3C7;
+  --Primitive-Amber-200: #FDE68A;
+  --Primitive-Amber-300: #FCD34D;
+  --Primitive-Amber-400: #FBBF24;
+  --Primitive-Amber-500: #F59E0B;
+  --Primitive-Amber-600: #D97706;
+  --Primitive-Amber-700: #B45309;
+  --Primitive-Amber-800: #92400E;
+  --Primitive-Amber-900: #78350F;
+
+  /* ─── Green（Success） ─── */
+  --Primitive-Green-50:  #F0FDF4;
+  --Primitive-Green-100: #DCFCE7;
+  --Primitive-Green-200: #BBF7D0;
+  --Primitive-Green-300: #86EFAC;
+  --Primitive-Green-400: #4ADE80;
+  --Primitive-Green-500: #22C55E;
+  --Primitive-Green-600: #16A34A;
+  --Primitive-Green-700: #15803D;
+  --Primitive-Green-800: #166534;
+  --Primitive-Green-900: #14532D;
+
+  /* ─── Teal ─── */
+  --Primitive-Teal-50:  #F0FDFA;
+  --Primitive-Teal-100: #CCFBF1;
+  --Primitive-Teal-200: #99F6E4;
+  --Primitive-Teal-300: #5EEAD4;
+  --Primitive-Teal-400: #2DD4BF;
+  --Primitive-Teal-500: #14B8A6;
+  --Primitive-Teal-600: #0D9488;
+  --Primitive-Teal-700: #0F766E;
+  --Primitive-Teal-800: #115E59;
+  --Primitive-Teal-900: #134E4A;
+
+  /* ─── Blue（Info） ─── */
+  --Primitive-Blue-50:  #EFF6FF;
+  --Primitive-Blue-100: #DBEAFE;
+  --Primitive-Blue-200: #BFDBFE;
+  --Primitive-Blue-300: #93C5FD;
+  --Primitive-Blue-400: #60A5FA;
+  --Primitive-Blue-500: #3B82F6;
+  --Primitive-Blue-600: #2563EB;
+  --Primitive-Blue-700: #1D4ED8;
+  --Primitive-Blue-800: #1E40AF;
+  --Primitive-Blue-900: #1E3A8A;
+
+  /* ─── Violet ─── */
+  --Primitive-Violet-50:  #F5F3FF;
+  --Primitive-Violet-100: #EDE9FE;
+  --Primitive-Violet-200: #DDD6FE;
+  --Primitive-Violet-300: #C4B5FD;
+  --Primitive-Violet-400: #A78BFA;
+  --Primitive-Violet-500: #8B5CF6;
+  --Primitive-Violet-600: #7C3AED;
+  --Primitive-Violet-700: #6D28D9;
+  --Primitive-Violet-800: #5B21B6;
+  --Primitive-Violet-900: #4C1D95;
+
+  /* ─── Pink ─── */
+  --Primitive-Pink-50:  #FDF2F8;
+  --Primitive-Pink-100: #FCE7F3;
+  --Primitive-Pink-200: #FBCFE8;
+  --Primitive-Pink-300: #F9A8D4;
+  --Primitive-Pink-400: #F472B6;
+  --Primitive-Pink-500: #EC4899;
+  --Primitive-Pink-600: #DB2777;
+  --Primitive-Pink-700: #BE185D;
+  --Primitive-Pink-800: #9D174D;
+  --Primitive-Pink-900: #831843;
+
+  /* ─── Alpha（透過） ─── */
+  --Primitive-Gray-Alpha-50:   rgba(17, 24, 39, 0.02);
+  --Primitive-Gray-Alpha-100:  rgba(17, 24, 39, 0.04);
+  --Primitive-Gray-Alpha-200:  rgba(17, 24, 39, 0.08);
+  --Primitive-Gray-Alpha-300:  rgba(17, 24, 39, 0.12);
+  --Primitive-Gray-Alpha-400:  rgba(17, 24, 39, 0.16);
+  --Primitive-Gray-Alpha-500:  rgba(17, 24, 39, 0.24);
+  --Primitive-Gray-Alpha-600:  rgba(17, 24, 39, 0.36);
+  --Primitive-Gray-Alpha-700:  rgba(17, 24, 39, 0.48);
+  --Primitive-Gray-Alpha-800:  rgba(17, 24, 39, 0.64);
+  --Primitive-Gray-Alpha-900:  rgba(17, 24, 39, 0.80);
+  --Primitive-Gray-Alpha-1000: rgba(17, 24, 39, 0.92);
+
+  --Primitive-White-Alpha-50:   rgba(255, 255, 255, 0.02);
+  --Primitive-White-Alpha-100:  rgba(255, 255, 255, 0.04);
+  --Primitive-White-Alpha-200:  rgba(255, 255, 255, 0.08);
+  --Primitive-White-Alpha-300:  rgba(255, 255, 255, 0.16);
+  --Primitive-White-Alpha-400:  rgba(255, 255, 255, 0.24);
+  --Primitive-White-Alpha-500:  rgba(255, 255, 255, 0.36);
+  --Primitive-White-Alpha-600:  rgba(255, 255, 255, 0.48);
+  --Primitive-White-Alpha-700:  rgba(255, 255, 255, 0.64);
+  --Primitive-White-Alpha-800:  rgba(255, 255, 255, 0.80);
+  --Primitive-White-Alpha-900:  rgba(255, 255, 255, 0.92);
+  --Primitive-White-Alpha-1000: rgba(255, 255, 255, 1.00);
+
+  /* ─── 純色 ─── */
+  --Primitive-White: #FFFFFF;
+  --Primitive-Black: #000000;
+}

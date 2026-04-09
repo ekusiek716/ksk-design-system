@@ -1,0 +1,12 @@
+/* =============================================================
+   KSK Design System — Entry Point (Dev / Storybook)
+   ============================================================= */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./preset.css";
+
+/* ─── iconsax React 19 互換 ─── */
+svg[class*="iconsax"] path {
+  color: inherit;
+}

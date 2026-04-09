@@ -1,0 +1,22 @@
+/* =============================================================
+   KSK Design System — Violet Theme
+
+   プレミアム・クリエイティブ・教育系クライアント向け。
+   洗練された印象のバイオレットテーマ。
+
+   使い方:
+   @import "@ksk/design-system/themes/violet";
+   ============================================================= */
+
+@theme {
+  --Primitive-Brand-50:  #F5F3FF;
+  --Primitive-Brand-100: #EDE9FE;
+  --Primitive-Brand-200: #DDD6FE;
+  --Primitive-Brand-300: #C4B5FD;
+  --Primitive-Brand-400: #A78BFA;
+  --Primitive-Brand-500: #7C3AED;
+  --Primitive-Brand-600: #6D28D9;
+  --Primitive-Brand-700: #5B21B6;
+  --Primitive-Brand-800: #4C1D95;
+  --Primitive-Brand-900: #3B0764;
+}

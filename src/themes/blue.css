@@ -1,0 +1,22 @@
+/* =============================================================
+   KSK Design System — Blue Theme
+
+   BtoB・SaaS・リクルート系クライアント向け。
+   助太刀のカラー体系をベースにした信頼感テーマ。
+
+   使い方:
+   @import "@ksk/design-system/themes/blue";
+   ============================================================= */
+
+@theme {
+  --Primitive-Brand-50:  #EFF6FF;
+  --Primitive-Brand-100: #DBEAFE;
+  --Primitive-Brand-200: #BFDBFE;
+  --Primitive-Brand-300: #93C5FD;
+  --Primitive-Brand-400: #60A5FA;
+  --Primitive-Brand-500: #3B82F6;
+  --Primitive-Brand-600: #2563EB;
+  --Primitive-Brand-700: #1D4ED8;
+  --Primitive-Brand-800: #1E40AF;
+  --Primitive-Brand-900: #1E3A8A;
+}

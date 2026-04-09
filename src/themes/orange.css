@@ -1,0 +1,22 @@
+/* =============================================================
+   KSK Design System — Orange Theme
+
+   EC・フード・エンタメ系クライアント向け。
+   Cake.jp のカラー体系をベースにしたウォームテーマ。
+
+   使い方:
+   @import "@ksk/design-system/themes/orange";
+   ============================================================= */
+
+@theme {
+  --Primitive-Brand-50:  #FFF7ED;
+  --Primitive-Brand-100: #FFEDD5;
+  --Primitive-Brand-200: #FED7AA;
+  --Primitive-Brand-300: #FDBA74;
+  --Primitive-Brand-400: #FB923C;
+  --Primitive-Brand-500: #E04B00;
+  --Primitive-Brand-600: #EA580C;
+  --Primitive-Brand-700: #C2410C;
+  --Primitive-Brand-800: #9A3412;
+  --Primitive-Brand-900: #7C2D12;
+}

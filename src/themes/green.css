@@ -1,0 +1,22 @@
+/* =============================================================
+   KSK Design System — Green Theme
+
+   ヘルスケア・サステナ・金融系クライアント向け。
+   安心感・成長を表現するグリーンテーマ。
+
+   使い方:
+   @import "@ksk/design-system/themes/green";
+   ============================================================= */
+
+@theme {
+  --Primitive-Brand-50:  #F0FDF4;
+  --Primitive-Brand-100: #DCFCE7;
+  --Primitive-Brand-200: #BBF7D0;
+  --Primitive-Brand-300: #86EFAC;
+  --Primitive-Brand-400: #4ADE80;
+  --Primitive-Brand-500: #16A34A;
+  --Primitive-Brand-600: #15803D;
+  --Primitive-Brand-700: #166534;
+  --Primitive-Brand-800: #14532D;
+  --Primitive-Brand-900: #052E16;
+}

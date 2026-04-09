@@ -1,0 +1,136 @@
+/* =============================================================
+   KSK Design System — Typography Utilities
+
+   Layer 3: typo-* ユーティリティクラス
+   font-size / line-height / font-weight / letter-spacing を
+   1クラスに集約し、デザインのブレを防止する。
+
+   ルール:
+   1. 必ず typo-* クラスを使う（text-sm font-bold 等の個別指定は禁止）
+   2. typo-* と text-* / font-* / leading-* / tracking-* を混在させない
+   3. カラーは別途指定: className="typo-body-sm text-[var(--Text-Low-Emphasis)]"
+   4. レスポンシブ対応可: md:typo-heading-xl
+   5. CVA 内でも typo-* を使用する
+   ============================================================= */
+
+/* ─── Heading（見出し） ─── */
+
+@utility typo-heading-3xl {
+  font-size: 28px;
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility typo-heading-2xl {
+  font-size: 24px;
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility typo-heading-xl {
+  font-size: 21px;
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility typo-heading-lg {
+  font-size: 18px;
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility typo-heading-md {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility typo-heading-sm {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Body（本文） ─── */
+
+@utility typo-body-lg {
+  font-size: 16px;
+  line-height: 1.75;
+  font-weight: 400;
+}
+
+@utility typo-body-md {
+  font-size: 14px;
+  line-height: 1.75;
+  font-weight: 400;
+}
+
+@utility typo-body-sm {
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+@utility typo-body-xs {
+  font-size: 10px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* ─── Label（ボタン・ナビ・タグ） ─── */
+
+@utility typo-label-lg {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility typo-label-md {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@utility typo-label-sm {
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+@utility typo-label-xs {
+  font-size: 10px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* ─── Display（ヒーロー・ランディング用） ─── */
+
+@utility typo-display-xl {
+  font-size: 48px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+@utility typo-display-lg {
+  font-size: 36px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ─── Caption（注釈・法律表記） ─── */
+
+@utility typo-caption {
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 400;
+}

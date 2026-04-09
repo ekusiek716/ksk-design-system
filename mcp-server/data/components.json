@@ -1,0 +1,228 @@
+{
+  "components": {
+    "ui": [
+      {
+        "name": "Button",
+        "path": "components/ui/button",
+        "category": "action",
+        "variants": ["default", "secondary", "secondary-switch", "tertiary", "ghost", "destructive", "link"],
+        "sizes": ["xs", "sm", "default", "lg", "xl", "icon", "icon-sm", "icon-lg"],
+        "description": "アクションボタン。画面内で最も重要なCTAにはdefaultを使用"
+      },
+      {
+        "name": "Input",
+        "path": "components/ui/input",
+        "category": "input",
+        "description": "テキスト入力。h-12, rounded-sm, セマンティックトークン使用"
+      },
+      {
+        "name": "Textarea",
+        "path": "components/ui/textarea",
+        "category": "input",
+        "description": "複数行テキスト入力"
+      },
+      {
+        "name": "Label",
+        "path": "components/ui/label",
+        "category": "input",
+        "description": "フォームラベル。全入力に必須"
+      },
+      {
+        "name": "Select",
+        "path": "components/ui/select",
+        "category": "input",
+        "description": "ドロップダウン選択。Radix UIベース"
+      },
+      {
+        "name": "Checkbox",
+        "path": "components/ui/checkbox",
+        "category": "input",
+        "description": "チェックボックス"
+      },
+      {
+        "name": "RadioGroup",
+        "path": "components/ui/radio-group",
+        "category": "input",
+        "description": "ラジオボタングループ"
+      },
+      {
+        "name": "Switch",
+        "path": "components/ui/switch",
+        "category": "input",
+        "description": "トグルスイッチ"
+      },
+      {
+        "name": "Card",
+        "path": "components/ui/card",
+        "category": "layout",
+        "subComponents": ["CardHeader", "CardTitle", "CardDescription", "CardAction", "CardContent", "CardFooter"],
+        "description": "コンテンツカード。@containerクエリ対応"
+      },
+      {
+        "name": "Badge",
+        "path": "components/ui/badge",
+        "category": "display",
+        "variants": ["default", "secondary", "outline", "destructive", "success", "warning", "info", "subtle", "ghost"],
+        "description": "ステータスバッジ"
+      },
+      {
+        "name": "Avatar",
+        "path": "components/ui/avatar",
+        "category": "display",
+        "subComponents": ["AvatarImage", "AvatarFallback"],
+        "description": "ユーザーアバター"
+      },
+      {
+        "name": "Dialog",
+        "path": "components/ui/dialog",
+        "category": "overlay",
+        "description": "モーダルダイアログ。max-w-480px, rounded-lg"
+      },
+      {
+        "name": "Sheet",
+        "path": "components/ui/sheet",
+        "category": "overlay",
+        "variants": ["top", "bottom", "left", "right"],
+        "description": "サイドパネル / ボトムシート"
+      },
+      {
+        "name": "Popover",
+        "path": "components/ui/popover",
+        "category": "overlay",
+        "description": "ポップオーバー"
+      },
+      {
+        "name": "Tooltip",
+        "path": "components/ui/tooltip",
+        "category": "overlay",
+        "description": "ツールチップ"
+      },
+      {
+        "name": "Tabs",
+        "path": "components/ui/tabs",
+        "category": "navigation",
+        "description": "タブナビゲーション"
+      },
+      {
+        "name": "Accordion",
+        "path": "components/ui/accordion",
+        "category": "layout",
+        "description": "アコーディオン"
+      },
+      {
+        "name": "Separator",
+        "path": "components/ui/separator",
+        "category": "layout",
+        "description": "区切り線"
+      },
+      {
+        "name": "Progress",
+        "path": "components/ui/progress",
+        "category": "display",
+        "description": "プログレスバー"
+      },
+      {
+        "name": "ScrollArea",
+        "path": "components/ui/scroll-area",
+        "category": "layout",
+        "description": "カスタムスクロールエリア"
+      },
+      {
+        "name": "Pagination",
+        "path": "components/ui/pagination",
+        "category": "navigation",
+        "description": "ページネーション"
+      },
+      {
+        "name": "Breadcrumb",
+        "path": "components/ui/breadcrumb",
+        "category": "navigation",
+        "description": "パンくずリスト"
+      },
+      {
+        "name": "Skeleton",
+        "path": "components/ui/skeleton",
+        "category": "display",
+        "description": "ローディングプレースホルダー"
+      }
+    ],
+    "patterns": [
+      {
+        "name": "Banner",
+        "path": "components/patterns/banner",
+        "category": "feedback",
+        "variants": ["info", "success", "warning", "caution"],
+        "description": "フィードバックバナー"
+      },
+      {
+        "name": "EmptyState",
+        "path": "components/patterns/empty-state",
+        "category": "feedback",
+        "description": "空状態プレースホルダー"
+      },
+      {
+        "name": "ErrorState",
+        "path": "components/patterns/error-state",
+        "category": "feedback",
+        "description": "エラー状態 + リトライ"
+      },
+      {
+        "name": "SectionHeader",
+        "path": "components/patterns/section-header",
+        "category": "layout",
+        "description": "セクション見出し + アクション"
+      },
+      {
+        "name": "StatCard",
+        "path": "components/patterns/stat-card",
+        "category": "display",
+        "description": "統計値カード（数値 + トレンド）"
+      },
+      {
+        "name": "ListItem",
+        "path": "components/patterns/list-item",
+        "category": "layout",
+        "description": "汎用リストアイテム（left/right/bottomスロット）"
+      },
+      {
+        "name": "SearchBar",
+        "path": "components/patterns/search-bar",
+        "category": "input",
+        "description": "検索バー（アイコン + 入力）"
+      },
+      {
+        "name": "Chip",
+        "path": "components/patterns/chip",
+        "category": "input",
+        "variants": ["filled", "accent", "outline"],
+        "sizes": ["sm", "md", "lg"],
+        "description": "インタラクティブチップ（フィルター / キーワード）"
+      },
+      {
+        "name": "Tag",
+        "path": "components/patterns/tag",
+        "category": "display",
+        "variants": ["default", "brand", "caution", "success", "warning", "info"],
+        "description": "表示のみラベル"
+      },
+      {
+        "name": "NotificationBadge",
+        "path": "components/patterns/notification-badge",
+        "category": "display",
+        "description": "件数バッジ（99+対応）"
+      },
+      {
+        "name": "ProgressSteps",
+        "path": "components/patterns/progress-steps",
+        "category": "navigation",
+        "description": "ステップ進捗表示"
+      },
+      {
+        "name": "FormField",
+        "path": "components/patterns/form-field",
+        "category": "input",
+        "description": "ラベル + 入力 + エラーのラッパー"
+      }
+    ]
+  }
+}

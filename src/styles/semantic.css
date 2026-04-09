@@ -1,0 +1,175 @@
+/* =============================================================
+   KSK Design System — Semantic Color Tokens
+
+   Layer 2: 用途別カラートークン
+   Primitive トークンを参照し、Light / Dark モードを自動切替。
+   コンポーネント内では必ずこのレイヤーのトークンを使用すること。
+
+   命名規則: --{Category}-{Role}
+   Category: Surface, Text, Border, Object, Brand, Hover, Active,
+             Overlay, Focus, Caution, Success, Warning, Info
+   ============================================================= */
+
+:root {
+  /* ─── Surface（背景） ─── */
+  --Surface-Primary:               var(--Primitive-White);
+  --Surface-Secondary:             var(--Primitive-Gray-50);
+  --Surface-Tertiary:              var(--Primitive-Gray-100);
+  --Surface-Quaternary:            var(--Primitive-Gray-200);
+  --Surface-Disable:               var(--Primitive-Gray-100);
+  --Surface-Inverse:               var(--Primitive-Gray-900);
+  --Surface-Accent-Primary:        var(--Primitive-Brand-500);
+  --Surface-Accent-Primary-Light:  var(--Primitive-Brand-50);
+  --Surface-Accent-Primary-Ultra-Light: var(--Primitive-Brand-50);
+  --Surface-Caution:               var(--Primitive-Red-50);
+  --Surface-Success:               var(--Primitive-Green-50);
+  --Surface-Warning:               var(--Primitive-Amber-50);
+  --Surface-Info:                  var(--Primitive-Blue-50);
+
+  /* ─── Text（テキスト） ─── */
+  --Text-High-Emphasis:    var(--Primitive-Gray-900);
+  --Text-Medium-Emphasis:  var(--Primitive-Gray-700);
+  --Text-Low-Emphasis:     var(--Primitive-Gray-500);
+  --Text-Disable:          var(--Primitive-Gray-400);
+  --Text-on-Inverse:       var(--Primitive-White);
+  --Text-on-Inverse-Secondary: var(--Primitive-White-Alpha-800);
+  --Text-Accent-Primary:   var(--Primitive-Brand-600);
+  --Text-Success:          var(--Primitive-Green-700);
+  --Text-Caution:          var(--Primitive-Red-600);
+  --Text-Warning:          var(--Primitive-Orange-600);
+  --Text-Info:             var(--Primitive-Blue-600);
+
+  /* ─── Object（アイコン・UI要素） ─── */
+  --Object-High-Emphasis:   var(--Primitive-Gray-900);
+  --Object-Medium-Emphasis: var(--Primitive-Gray-600);
+  --Object-Low-Emphasis:    var(--Primitive-Gray-400);
+  --Object-Disable:         var(--Primitive-Gray-300);
+  --Object-on-Inverse:      var(--Primitive-White);
+  --Object-Accent-Primary:  var(--Primitive-Brand-500);
+  --Object-Caution:         var(--Primitive-Red-500);
+  --Object-Success:         var(--Primitive-Green-500);
+  --Object-Warning:         var(--Primitive-Orange-500);
+  --Object-Info:            var(--Primitive-Blue-500);
+  --Object-Favorite:        var(--Primitive-Red-500);
+
+  /* ─── Border（罫線） ─── */
+  --Border-High-Emphasis:   var(--Primitive-Gray-700);
+  --Border-Medium-Emphasis: var(--Primitive-Gray-300);
+  --Border-Low-Emphasis:    var(--Primitive-Gray-200);
+  --Border-Disable:         var(--Primitive-Gray-200);
+  --Border-Accent-Primary:  var(--Primitive-Brand-500);
+  --Border-Caution:         var(--Primitive-Red-500);
+  --Border-Success:         var(--Primitive-Green-500);
+  --Border-Info:            var(--Primitive-Blue-500);
+
+  /* ─── Brand ─── */
+  --Brand-Primary:           var(--Primitive-Brand-500);
+  --Brand-Action:            var(--Primitive-Brand-700);
+  --Brand-Light:             var(--Primitive-Brand-100);
+  --Brand-Ultra-Light:       var(--Primitive-Brand-50);
+
+  /* ─── Interactive States ─── */
+  --Hover-Primary-Button:    var(--Primitive-Brand-700);
+  --Active-Primary-Button:   var(--Primitive-Brand-800);
+  --Hover-Secondary-Button:  var(--Primitive-Brand-50);
+  --Active-Secondary-Button: var(--Primitive-Brand-100);
+  --Hover-Tertiary-Button:   var(--Primitive-Gray-100);
+  --Active-Tertiary-Button:  var(--Primitive-Gray-200);
+  --Hover-Ghost-Button:      var(--Primitive-Gray-100);
+  --Hover-Destructive-Button: var(--Primitive-Red-700);
+  --Active-Destructive-Button: var(--Primitive-Red-800);
+
+  /* ─── Overlay ─── */
+  --Overlay-Dark:   var(--Primitive-Gray-Alpha-800);
+  --Overlay-Medium: var(--Primitive-Gray-Alpha-600);
+  --Overlay-Light:  var(--Primitive-Gray-Alpha-200);
+
+  /* ─── Focus ─── */
+  --Focus-High-Emphasis: #1FCC84;
+
+  /* ─── Semantic Functional ─── */
+  --Caution-Base:    var(--Primitive-Red-600);
+  --Caution-Action:  var(--Primitive-Red-700);
+  --Success-Base:    var(--Primitive-Green-600);
+  --Warning-Base:    var(--Primitive-Orange-600);
+  --Info-Base:       var(--Primitive-Blue-600);
+}
+
+/* ─── Dark Mode ─── */
+.dark {
+  --Surface-Primary:               var(--Primitive-Gray-900);
+  --Surface-Secondary:             var(--Primitive-Gray-800);
+  --Surface-Tertiary:              var(--Primitive-Gray-700);
+  --Surface-Quaternary:            var(--Primitive-Gray-600);
+  --Surface-Disable:               var(--Primitive-Gray-800);
+  --Surface-Inverse:               var(--Primitive-White);
+  --Surface-Accent-Primary:        var(--Primitive-Brand-500);
+  --Surface-Accent-Primary-Light:  var(--Primitive-Brand-900);
+  --Surface-Accent-Primary-Ultra-Light: var(--Primitive-Brand-900);
+  --Surface-Caution:               var(--Primitive-Red-900);
+  --Surface-Success:               var(--Primitive-Green-900);
+  --Surface-Warning:               var(--Primitive-Amber-900);
+  --Surface-Info:                  var(--Primitive-Blue-900);
+
+  --Text-High-Emphasis:    var(--Primitive-White-Alpha-1000);
+  --Text-Medium-Emphasis:  var(--Primitive-White-Alpha-800);
+  --Text-Low-Emphasis:     var(--Primitive-White-Alpha-600);
+  --Text-Disable:          var(--Primitive-White-Alpha-400);
+  --Text-on-Inverse:       var(--Primitive-Gray-900);
+  --Text-on-Inverse-Secondary: var(--Primitive-Gray-700);
+  --Text-Accent-Primary:   var(--Primitive-Brand-400);
+  --Text-Success:          var(--Primitive-Green-400);
+  --Text-Caution:          var(--Primitive-Red-400);
+  --Text-Warning:          var(--Primitive-Orange-400);
+  --Text-Info:             var(--Primitive-Blue-400);
+
+  --Object-High-Emphasis:   var(--Primitive-White-Alpha-1000);
+  --Object-Medium-Emphasis: var(--Primitive-White-Alpha-700);
+  --Object-Low-Emphasis:    var(--Primitive-White-Alpha-500);
+  --Object-Disable:         var(--Primitive-White-Alpha-300);
+  --Object-on-Inverse:      var(--Primitive-Gray-900);
+  --Object-Accent-Primary:  var(--Primitive-Brand-400);
+  --Object-Caution:         var(--Primitive-Red-400);
+  --Object-Success:         var(--Primitive-Green-400);
+  --Object-Warning:         var(--Primitive-Orange-400);
+  --Object-Info:            var(--Primitive-Blue-400);
+  --Object-Favorite:        var(--Primitive-Red-400);
+
+  --Border-High-Emphasis:   var(--Primitive-White-Alpha-500);
+  --Border-Medium-Emphasis: var(--Primitive-White-Alpha-300);
+  --Border-Low-Emphasis:    var(--Primitive-White-Alpha-200);
+  --Border-Disable:         var(--Primitive-White-Alpha-100);
+  --Border-Accent-Primary:  var(--Primitive-Brand-400);
+  --Border-Caution:         var(--Primitive-Red-400);
+  --Border-Success:         var(--Primitive-Green-400);
+  --Border-Info:            var(--Primitive-Blue-400);
+
+  --Brand-Primary:           var(--Primitive-Brand-400);
+  --Brand-Action:            var(--Primitive-Brand-300);
+  --Brand-Light:             var(--Primitive-Brand-900);
+  --Brand-Ultra-Light:       var(--Primitive-Brand-900);
+
+  --Hover-Primary-Button:    var(--Primitive-Brand-500);
+  --Active-Primary-Button:   var(--Primitive-Brand-600);
+  --Hover-Secondary-Button:  var(--Primitive-Brand-900);
+  --Active-Secondary-Button: var(--Primitive-Brand-800);
+  --Hover-Tertiary-Button:   var(--Primitive-White-Alpha-100);
+  --Active-Tertiary-Button:  var(--Primitive-White-Alpha-200);
+  --Hover-Ghost-Button:      var(--Primitive-White-Alpha-100);
+  --Hover-Destructive-Button: var(--Primitive-Red-500);
+  --Active-Destructive-Button: var(--Primitive-Red-600);
+
+  --Overlay-Dark:   var(--Primitive-Gray-Alpha-900);
+  --Overlay-Medium: var(--Primitive-Gray-Alpha-700);
+  --Overlay-Light:  var(--Primitive-Gray-Alpha-400);
+
+  /* ─── Focus ─── */
+  --Focus-High-Emphasis: #1FCC84;
+
+  /* ─── Semantic Functional ─── */
+  --Caution-Base:    var(--Primitive-Red-400);
+  --Caution-Action:  var(--Primitive-Red-500);
+  --Success-Base:    var(--Primitive-Green-400);
+  --Warning-Base:    var(--Primitive-Orange-400);
+  --Info-Base:       var(--Primitive-Blue-400);
+}
