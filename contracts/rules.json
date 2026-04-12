@@ -1,0 +1,276 @@
+{
+  "meta": {
+    "name": "KSK Design System — Rules Contracts",
+    "version": "1.0.0",
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。"
+  },
+  "prohibited": [
+    {
+      "id": "P001",
+      "severity": "error",
+      "category": "component",
+      "pattern": "<button\\b",
+      "excludes": ["data-slot", ".stories.", "components/ui/", "components/patterns/"],
+      "message": "生の <button> 禁止",
+      "fix": "<Button variant=\"...\" size=\"...\"> を使用"
+    },
+    {
+      "id": "P002",
+      "severity": "error",
+      "category": "component",
+      "pattern": "<input\\b",
+      "excludes": ["data-slot", ".stories.", "type=\"search\"", "type=\"file\"", "components/ui/", "components/patterns/"],
+      "message": "生の <input> 禁止",
+      "fix": "<Input> コンポーネントを使用"
+    },
+    {
+      "id": "P003",
+      "severity": "error",
+      "category": "component",
+      "pattern": "<a href",
+      "excludes": [".stories.", "data-slot", "components/ui/", "components/patterns/"],
+      "message": "生の <a href> 禁止",
+      "fix": "<Button variant=\"link\"> を使用"
+    },
+    {
+      "id": "P004",
+      "severity": "error",
+      "category": "asset",
+      "pattern": "pravatar\\.cc",
+      "message": "pravatar.cc 禁止",
+      "fix": "DiceBear shapes を使用 (https://api.dicebear.com/9.x/shapes/svg?seed=...)"
+    },
+    {
+      "id": "P005",
+      "severity": "warning",
+      "category": "typography",
+      "pattern": "\"font-bold|'font-bold| font-bold",
+      "excludes": [".stories.", "cva", "variants"],
+      "message": "font-bold 直書き禁止",
+      "fix": "typo-* クラスを使用 (例: typo-label-md)"
+    },
+    {
+      "id": "P006",
+      "severity": "warning",
+      "category": "typography",
+      "pattern": "\"font-semibold|'font-semibold| font-semibold",
+      "excludes": [".stories.", "cva", "variants"],
+      "message": "font-semibold 直書き禁止",
+      "fix": "typo-* クラスを使用"
+    },
+    {
+      "id": "P007",
+      "severity": "warning",
+      "category": "typography",
+      "pattern": "\"font-medium|'font-medium| font-medium",
+      "excludes": [".stories.", "cva", "variants"],
+      "message": "font-medium 直書き禁止",
+      "fix": "typo-* クラスを使用"
+    },
+    {
+      "id": "P008",
+      "severity": "warning",
+      "category": "typography",
+      "pattern": "text-\\[[0-9]*px\\]",
+      "excludes": [".stories."],
+      "message": "text-[Npx] 直書き禁止",
+      "fix": "typo-* クラスを使用"
+    },
+    {
+      "id": "P009",
+      "severity": "warning",
+      "category": "color",
+      "pattern": "text-white\\b",
+      "excludes": [".stories."],
+      "message": "text-white 禁止",
+      "fix": "text-[var(--Text-on-Inverse)]"
+    },
+    {
+      "id": "P010",
+      "severity": "warning",
+      "category": "color",
+      "pattern": "bg-white\\b",
+      "excludes": [".stories."],
+      "message": "bg-white 禁止",
+      "fix": "bg-[var(--Surface-Primary)]"
+    },
+    {
+      "id": "P011",
+      "severity": "warning",
+      "category": "color",
+      "pattern": "text-black\\b",
+      "excludes": [".stories."],
+      "message": "text-black 禁止",
+      "fix": "text-[var(--Text-High-Emphasis)]"
+    },
+    {
+      "id": "P012",
+      "severity": "warning",
+      "category": "color",
+      "pattern": "text-gray-|bg-gray-|text-blue-|bg-blue-|text-red-|bg-red-|text-green-|bg-green-",
+      "excludes": [".stories."],
+      "message": "Tailwind 標準色クラス禁止",
+      "fix": "セマンティックトークン var(--...) を使用"
+    },
+    {
+      "id": "P013",
+      "severity": "warning",
+      "category": "color",
+      "pattern": "#[0-9A-Fa-f]{6}",
+      "excludes": [".stories.", ".css", "shadow"],
+      "message": "HEX ハードコード禁止",
+      "fix": "セマンティックトークン var(--...) を使用"
+    },
+    {
+      "id": "P014",
+      "severity": "warning",
+      "category": "layout",
+      "pattern": "rounded-md\\b|rounded-xl\\b|rounded-3xl\\b",
+      "excludes": [".stories."],
+      "message": "DS 定義外の角丸禁止",
+      "fix": "rounded-none / rounded-sm / rounded-lg / rounded-2xl / rounded-full のみ使用"
+    },
+    {
+      "id": "P015",
+      "severity": "warning",
+      "category": "layout",
+      "pattern": "shadow-md\\b|shadow-lg\\b|shadow-xl\\b|shadow-2xl\\b",
+      "excludes": [".stories.", "shadow-\\[", "components/ui/", "components/patterns/"],
+      "message": "DS 定義外のシャドウ禁止",
+      "fix": "shadow-[var(--shadow-sm/md/lg/dialog/tooltip)]"
+    },
+    {
+      "id": "P016",
+      "severity": "warning",
+      "category": "layout",
+      "pattern": "border-t-4|border-l-4|border-r-4|border-b-4",
+      "excludes": [".stories."],
+      "message": "カラーバー（片側ボーダー太め）禁止",
+      "fix": "全周ボーダーを使用"
+    },
+    {
+      "id": "P017",
+      "severity": "warning",
+      "category": "layout",
+      "pattern": "bg-gradient-to-",
+      "excludes": [".stories."],
+      "message": "グラデーション背景禁止",
+      "fix": "単色背景を使用（DS にグラデーション定義なし）"
+    },
+    {
+      "id": "P018",
+      "severity": "warning",
+      "category": "accessibility",
+      "pattern": "outline-none\\b",
+      "excludes": [".stories.", "focus-visible", "components/ui/", "components/patterns/"],
+      "message": "outline-none 禁止（フォーカス消去）",
+      "fix": "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+    },
+    {
+      "id": "P019",
+      "severity": "warning",
+      "category": "layout",
+      "pattern": "z-\\[9999\\]|z-\\[999\\]",
+      "message": "過剰な z-index 禁止",
+      "fix": "z-50 を使用"
+    }
+  ],
+  "accessibility": {
+    "wcag": "2.1 AA",
+    "requirements": [
+      {
+        "id": "A001",
+        "rule": "通常テキストのコントラスト比 4.5:1 以上"
+      },
+      {
+        "id": "A002",
+        "rule": "大テキスト（18px+ bold）のコントラスト比 3:1 以上"
+      },
+      {
+        "id": "A003",
+        "rule": "UI 要素・アイコンのコントラスト比 3:1 以上"
+      },
+      {
+        "id": "A004",
+        "rule": "タッチターゲット最小 24×24px"
+      },
+      {
+        "id": "A005",
+        "rule": "フォーカスリング必須: focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+      },
+      {
+        "id": "A006",
+        "rule": "アイコンボタンに aria-label 必須"
+      },
+      {
+        "id": "A007",
+        "rule": "フォーム入力に <Label> 必須"
+      },
+      {
+        "id": "A008",
+        "rule": "エラー表示は 色 + アイコン + テキスト の3点セット必須（色のみ禁止）"
+      },
+      {
+        "id": "A009",
+        "rule": "ステータス区別は 色 + アイコン + テキスト（色のみ禁止）"
+      }
+    ]
+  },
+  "typography": {
+    "rule": "必ず typo-* クラスを使用。text-sm font-bold 等の個別指定禁止。",
+    "classes": [
+      { "class": "typo-display-xl", "size": "48px", "weight": "bold", "use": "ヒーロー" },
+      { "class": "typo-display-lg", "size": "36px", "weight": "bold", "use": "LP見出し" },
+      { "class": "typo-heading-3xl", "size": "28px", "weight": "bold", "use": "ページタイトル" },
+      { "class": "typo-heading-2xl", "size": "24px", "weight": "bold", "use": "主要セクション" },
+      { "class": "typo-heading-xl", "size": "21px", "weight": "bold", "use": "サブセクション" },
+      { "class": "typo-heading-lg", "size": "18px", "weight": "bold", "use": "グループ見出し" },
+      { "class": "typo-heading-md", "size": "16px", "weight": "bold", "use": "小見出し" },
+      { "class": "typo-heading-sm", "size": "14px", "weight": "bold", "use": "ラベル的見出し" },
+      { "class": "typo-body-lg", "size": "16px", "weight": "normal", "use": "本文（大）" },
+      { "class": "typo-body-md", "size": "14px", "weight": "normal", "use": "本文（標準）" },
+      { "class": "typo-body-sm", "size": "12px", "weight": "normal", "use": "補足テキスト" },
+      { "class": "typo-body-xs", "size": "10px", "weight": "normal", "use": "最小テキスト" },
+      { "class": "typo-label-lg", "size": "16px", "weight": "bold", "use": "ボタン大" },
+      { "class": "typo-label-md", "size": "14px", "weight": "bold", "use": "ボタン・ナビ" },
+      { "class": "typo-label-sm", "size": "12px", "weight": "medium", "use": "タグ・バッジ" },
+      { "class": "typo-label-xs", "size": "10px", "weight": "medium", "use": "小タグ" },
+      { "class": "typo-caption", "size": "11px", "weight": "normal", "use": "注釈" }
+    ]
+  },
+  "tokens": {
+    "spacing": {
+      "rule": "4px グリッド。gap-1〜gap-6 / p-1〜p-6 のみ使用。",
+      "allowed": ["gap-1 (4px)", "gap-2 (8px)", "gap-3 (12px)", "gap-4 (16px)", "gap-6 (24px)"]
+    },
+    "borderRadius": {
+      "rule": "5値のみ。それ以外（rounded-md, rounded-xl 等）は禁止。",
+      "allowed": [
+        { "class": "rounded-none", "value": "0", "use": "角丸なし" },
+        { "class": "rounded-sm", "value": "4px", "use": "Tag, 小要素" },
+        { "class": "rounded-lg", "value": "8px", "use": "Input, Card, Dialog" },
+        { "class": "rounded-2xl", "value": "16px", "use": "Modal, 大Card" },
+        { "class": "rounded-full", "value": "50%", "use": "Button, Avatar, Badge, Chip" }
+      ]
+    },
+    "shadow": {
+      "rule": "DS定義トークンのみ。shadow-md等のTailwind標準は禁止。",
+      "allowed": [
+        { "token": "var(--shadow-sm)", "use": "微細な浮き" },
+        { "token": "var(--shadow-md)", "use": "Card, 標準浮き" },
+        { "token": "var(--shadow-lg)", "use": "Popover, Dropdown" },
+        { "token": "var(--shadow-dialog)", "use": "Dialog, Modal" },
+        { "token": "var(--shadow-tooltip)", "use": "Tooltip" }
+      ]
+    }
+  },
+  "writing": {
+    "rules": [
+      "和文は全角、欧文・算用数字は半角",
+      "見出し文末に「。」をつけない",
+      "バリデーションエラー文末に句読点をつけない",
+      "日付: YYYY/MM/DD（0なし: 2026/4/7）",
+      "ボタン: 動詞で表記（「削除する」「保存する」）"
+    ]
+  }
+}

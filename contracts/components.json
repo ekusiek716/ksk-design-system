@@ -1,0 +1,334 @@
+{
+  "meta": {
+    "name": "KSK Design System — Component Contracts",
+    "version": "1.0.0",
+    "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
+    "counts": {
+      "ui": 25,
+      "patterns": 13,
+      "commerce": 9,
+      "admin": 7,
+      "shells": 3,
+      "total": 57
+    }
+  },
+  "ui": [
+    {
+      "name": "Button",
+      "path": "src/components/ui/button.tsx",
+      "variants": ["default", "secondary", "outline", "ghost", "link", "destructive", "caution"],
+      "sizes": ["xs", "sm", "md", "lg", "xl", "2xl", "icon"],
+      "accessibility": ["aria-label required for icon-only buttons"],
+      "rules": ["Must use <Button> not <button>", "Rounded-full only"]
+    },
+    {
+      "name": "Input",
+      "path": "src/components/ui/input.tsx",
+      "variants": [],
+      "accessibility": ["Must pair with <Label>"],
+      "rules": ["Must use <Input> not <input>"]
+    },
+    {
+      "name": "Textarea",
+      "path": "src/components/ui/textarea.tsx",
+      "variants": [],
+      "accessibility": ["Must pair with <Label>"],
+      "rules": ["Must use <Textarea> not <textarea>"]
+    },
+    {
+      "name": "Label",
+      "path": "src/components/ui/label.tsx",
+      "variants": [],
+      "rules": ["Always pair with form control via htmlFor"]
+    },
+    {
+      "name": "Select",
+      "path": "src/components/ui/select.tsx",
+      "variants": [],
+      "accessibility": ["Must pair with <Label>"],
+      "rules": ["Must use <Select> not <select>"]
+    },
+    {
+      "name": "Checkbox",
+      "path": "src/components/ui/checkbox.tsx",
+      "variants": [],
+      "accessibility": ["Must pair with <Label>"]
+    },
+    {
+      "name": "RadioGroup",
+      "path": "src/components/ui/radio-group.tsx",
+      "variants": [],
+      "accessibility": ["Must pair with <Label> for each item"]
+    },
+    {
+      "name": "Switch",
+      "path": "src/components/ui/switch.tsx",
+      "variants": [],
+      "accessibility": ["Must pair with <Label>"]
+    },
+    {
+      "name": "Card",
+      "path": "src/components/ui/card.tsx",
+      "subcomponents": ["CardHeader", "CardTitle", "CardDescription", "CardAction", "CardContent", "CardFooter"],
+      "rules": ["rounded-lg (8px)"]
+    },
+    {
+      "name": "Badge",
+      "path": "src/components/ui/badge.tsx",
+      "variants": ["default", "secondary", "outline", "destructive", "caution", "success", "info", "pending", "inactive"],
+      "rules": ["rounded-full only"]
+    },
+    {
+      "name": "Avatar",
+      "path": "src/components/ui/avatar.tsx",
+      "subcomponents": ["AvatarImage", "AvatarFallback"],
+      "rules": ["rounded-full only", "Use DiceBear shapes for placeholder, not pravatar.cc"]
+    },
+    {
+      "name": "Dialog",
+      "path": "src/components/ui/dialog.tsx",
+      "subcomponents": ["DialogTrigger", "DialogContent", "DialogHeader", "DialogTitle", "DialogDescription", "DialogFooter", "DialogClose"],
+      "rules": ["rounded-2xl (16px)", "shadow-[var(--shadow-dialog)]", "p-6 padding"]
+    },
+    {
+      "name": "Sheet",
+      "path": "src/components/ui/sheet.tsx",
+      "subcomponents": ["SheetTrigger", "SheetContent", "SheetHeader", "SheetTitle", "SheetDescription", "SheetFooter", "SheetClose"],
+      "rules": ["Side panel, not modal"]
+    },
+    {
+      "name": "Popover",
+      "path": "src/components/ui/popover.tsx",
+      "subcomponents": ["PopoverTrigger", "PopoverContent", "PopoverAnchor"],
+      "rules": ["shadow-[var(--shadow-lg)]"]
+    },
+    {
+      "name": "Tooltip",
+      "path": "src/components/ui/tooltip.tsx",
+      "subcomponents": ["TooltipProvider", "TooltipTrigger", "TooltipContent"],
+      "rules": ["shadow-[var(--shadow-tooltip)]"]
+    },
+    {
+      "name": "Tabs",
+      "path": "src/components/ui/tabs.tsx",
+      "subcomponents": ["TabsList", "TabsTrigger", "TabsContent"]
+    },
+    {
+      "name": "Accordion",
+      "path": "src/components/ui/accordion.tsx",
+      "subcomponents": ["AccordionItem", "AccordionTrigger", "AccordionContent"]
+    },
+    {
+      "name": "Separator",
+      "path": "src/components/ui/separator.tsx"
+    },
+    {
+      "name": "Progress",
+      "path": "src/components/ui/progress.tsx"
+    },
+    {
+      "name": "ScrollArea",
+      "path": "src/components/ui/scroll-area.tsx",
+      "subcomponents": ["ScrollBar"]
+    },
+    {
+      "name": "Pagination",
+      "path": "src/components/ui/pagination.tsx",
+      "subcomponents": ["PaginationContent", "PaginationItem", "PaginationLink", "PaginationNext", "PaginationPrevious", "PaginationEllipsis"]
+    },
+    {
+      "name": "Breadcrumb",
+      "path": "src/components/ui/breadcrumb.tsx",
+      "subcomponents": ["BreadcrumbList", "BreadcrumbItem", "BreadcrumbLink", "BreadcrumbPage", "BreadcrumbSeparator", "BreadcrumbEllipsis"]
+    },
+    {
+      "name": "Skeleton",
+      "path": "src/components/ui/skeleton.tsx"
+    },
+    {
+      "name": "ResponsiveDialog",
+      "path": "src/components/ui/responsive-dialog.tsx",
+      "subcomponents": ["ResponsiveDialogTrigger", "ResponsiveDialogContent", "ResponsiveDialogHeader", "ResponsiveDialogTitle", "ResponsiveDialogDescription", "ResponsiveDialogFooter", "ResponsiveDialogClose"],
+      "rules": ["Dialog on desktop, Sheet on mobile. Use useMediaQuery hook."]
+    },
+    {
+      "name": "Toast",
+      "path": "src/components/ui/toast.tsx",
+      "variants": ["default", "success", "caution", "destructive"],
+      "rules": ["Use useToast hook to trigger"]
+    }
+  ],
+  "patterns": [
+    {
+      "name": "Banner",
+      "path": "src/components/patterns/banner.tsx",
+      "variants": ["info", "success", "warning", "caution"],
+      "rules": ["Color + icon + text (never color alone)"]
+    },
+    {
+      "name": "EmptyState",
+      "path": "src/components/patterns/empty-state.tsx",
+      "rules": ["Always include an action or explanation"]
+    },
+    {
+      "name": "ErrorState",
+      "path": "src/components/patterns/error-state.tsx",
+      "rules": ["Color + icon + text. Include retry action."]
+    },
+    {
+      "name": "SectionHeader",
+      "path": "src/components/patterns/section-header.tsx",
+      "rules": ["typo-heading-* for title"]
+    },
+    {
+      "name": "StatCard",
+      "path": "src/components/patterns/stat-card.tsx"
+    },
+    {
+      "name": "ListItem",
+      "path": "src/components/patterns/list-item.tsx"
+    },
+    {
+      "name": "SearchBar",
+      "path": "src/components/patterns/search-bar.tsx"
+    },
+    {
+      "name": "Chip",
+      "path": "src/components/patterns/chip.tsx",
+      "variants": ["default", "active", "disabled"],
+      "rules": ["rounded-full only", "For filters and keywords"]
+    },
+    {
+      "name": "Tag",
+      "path": "src/components/patterns/tag.tsx",
+      "rules": ["rounded-sm (4px)", "Display-only, not interactive"]
+    },
+    {
+      "name": "NotificationBadge",
+      "path": "src/components/patterns/notification-badge.tsx",
+      "rules": ["rounded-full only", "Max display: 99+"]
+    },
+    {
+      "name": "ProgressSteps",
+      "path": "src/components/patterns/progress-steps.tsx"
+    },
+    {
+      "name": "FormField",
+      "path": "src/components/patterns/form-field.tsx",
+      "rules": ["Label + Input + error message as unit"]
+    },
+    {
+      "name": "Form",
+      "path": "src/components/patterns/form.tsx",
+      "subcomponents": ["FormRoot", "FormSection", "FormActions"]
+    }
+  ],
+  "commerce": [
+    {
+      "name": "ProductCard",
+      "path": "src/components/patterns/commerce/product-card.tsx",
+      "variants": ["vertical", "horizontal"],
+      "features": ["favorite", "discount-badge", "cart-button"],
+      "rules": ["rounded-lg for card", "PriceDisplay for price", "RatingDisplay for rating"]
+    },
+    {
+      "name": "ProductCarousel",
+      "path": "src/components/patterns/commerce/product-carousel.tsx",
+      "features": ["section-header", "horizontal-scroll", "ranking"]
+    },
+    {
+      "name": "PriceDisplay",
+      "path": "src/components/patterns/commerce/price-display.tsx",
+      "sizes": ["xs", "sm", "md", "lg"],
+      "features": ["sale", "range", "tax-inclusive"]
+    },
+    {
+      "name": "RatingDisplay",
+      "path": "src/components/patterns/commerce/rating-display.tsx",
+      "features": ["star-rating", "review-count"]
+    },
+    {
+      "name": "QuantitySelector",
+      "path": "src/components/patterns/commerce/quantity-selector.tsx",
+      "sizes": ["sm", "md"],
+      "rules": ["sm: cart compact, md: product detail page"]
+    },
+    {
+      "name": "OrderSummary",
+      "path": "src/components/patterns/commerce/order-summary.tsx",
+      "variants": ["fixed", "inline"]
+    },
+    {
+      "name": "ImageCarousel",
+      "path": "src/components/patterns/commerce/image-carousel.tsx",
+      "features": ["scroll-snap", "dots", "arrows", "autoPlay"]
+    },
+    {
+      "name": "BottomNav",
+      "path": "src/components/patterns/commerce/bottom-nav.tsx",
+      "features": ["badge", "safe-area"],
+      "rules": ["Mobile only. Use safe-area-inset-bottom."]
+    },
+    {
+      "name": "FilterBar",
+      "path": "src/components/patterns/commerce/filter-bar.tsx",
+      "features": ["chips", "sort", "count"]
+    }
+  ],
+  "admin": [
+    {
+      "name": "DataTable",
+      "path": "src/components/patterns/admin/data-table.tsx",
+      "features": ["sort", "checkbox", "actions", "inline-edit", "drag"],
+      "rules": ["20+ sub-components. Use DataTableHead, DataTableRow, DataTableCell."]
+    },
+    {
+      "name": "KebabMenu",
+      "path": "src/components/patterns/admin/kebab-menu.tsx",
+      "rules": ["For table row actions only"]
+    },
+    {
+      "name": "BulkActionBar",
+      "path": "src/components/patterns/admin/bulk-action-bar.tsx",
+      "rules": ["Show only when rows are selected"]
+    },
+    {
+      "name": "StatusTabs",
+      "path": "src/components/patterns/admin/status-tabs.tsx",
+      "features": ["count-badge"]
+    },
+    {
+      "name": "SearchPanel",
+      "path": "src/components/patterns/admin/search-panel.tsx",
+      "layouts": ["grid", "flex"],
+      "features": ["search", "reset"]
+    },
+    {
+      "name": "ImageUploader",
+      "path": "src/components/patterns/admin/image-uploader.tsx",
+      "features": ["upload", "delete", "grid-layout"]
+    },
+    {
+      "name": "NotificationList",
+      "path": "src/components/patterns/admin/notification-list.tsx",
+      "layouts": ["vertical", "horizontal"]
+    }
+  ],
+  "shells": [
+    {
+      "name": "AdminShell",
+      "path": "src/components/patterns/shells/admin-shell.tsx",
+      "rules": ["For admin/dashboard pages"]
+    },
+    {
+      "name": "AppShell",
+      "path": "src/components/patterns/shells/app-shell.tsx",
+      "rules": ["For general app pages"]
+    },
+    {
+      "name": "MarketingShell",
+      "path": "src/components/patterns/shells/marketing-shell.tsx",
+      "rules": ["For LP/marketing pages"]
+    }
+  ]
+}
