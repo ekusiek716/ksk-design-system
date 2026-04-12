@@ -1,4 +1,4 @@
-# KSK Design System — 設計ルールブック
+# KSK Design System — 設計ルールブック（Codex向け）
 
 ## このDSについて
 
@@ -7,6 +7,38 @@
 2つのプロダクションDSの設計思想を統合:
 - **助太刀 inc.** のCore UI DS（BtoB / SaaS / リクルート向け）
 - **Cake.jp** のCake DS（EC / BtoC / コマース向け）
+
+---
+
+## 必須: セッション開始時に読み込むファイル
+
+コードを書く前に、以下を必ず読み込むこと:
+
+```
+contracts/components.json   # 全57コンポーネントの定義・バリアント・ルール
+contracts/rules.json        # 禁止パターン19件・アクセシビリティ要件・タイポグラフィ定義
+tokens.json                 # カラー・スペーシング・シャドウトークン
+```
+
+特に `contracts/rules.json` の `prohibited` 配列を確認してから実装すること。
+
+---
+
+## 必須: ファイル編集後に実行するコマンド
+
+**.tsx ファイルを作成・編集した後は必ず実行:**
+
+```bash
+bash scripts/lint-scratch.sh
+```
+
+**コンポーネントを追加・削除した後は必ず実行:**
+
+```bash
+bash scripts/check-drift.sh
+```
+
+エラーが出た場合は修正してから次に進むこと。
 
 ---
 
@@ -29,9 +61,12 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 
 ## 技術スタック
 
-- React 19 + TypeScript / Vite / Tailwind CSS v4
+- React 19 + TypeScript / Vite / **Tailwind CSS v4**（`@import "tailwindcss"` 構文）
 - shadcn/ui（Radix UI ベース） / CVA（バリアント管理）
-- iconsax-reactjs（アイコン） / Storybook（ドキュメント）
+- **iconsax-reactjs**（アイコン。lucide-react や heroicons は使わない）
+- Storybook（ドキュメント）
+
+> **注意**: Tailwind CSS は v4 です。`@tailwind base` 等の v3 構文は使わないこと。
 
 ---
 
@@ -39,14 +74,11 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 
 | ファイル | 内容 |
 |---------|------|
-| **CLAUDE.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート（Claude Code用） |
-| **AGENTS.md** | 同上（Codex用。セッション開始時の読み込み指示・編集後コマンドを明記） |
+| **AGENTS.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート |
 | **contracts/components.json** | 全57コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
 | **contracts/rules.json** | 禁止パターン19件・アクセシビリティ要件・タイポグラフィ定義 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
 | **CAKE_COMPONENTS.md** | Cake.jp固有コンポーネント一覧（EC案件時に参照） |
-
-**コードを書く前に `contracts/rules.json` の `prohibited` を確認すること。**
 
 ---
 
@@ -69,27 +101,6 @@ src/
 ├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット
 └── index.ts           # Public API（57コンポーネント）
-```
-
----
-
-## コマンド
-
-```bash
-# 開発サーバー（Storybook）
-npm run storybook
-
-# ビルド
-npm run build-storybook
-
-# スクラッチ検出（実装後に必ず実行）
-bash scripts/lint-scratch.sh
-
-# ドリフト検出（コンポーネント追加後に実行）
-bash scripts/check-drift.sh
-
-# 全チェック
-npm run check
 ```
 
 ---
