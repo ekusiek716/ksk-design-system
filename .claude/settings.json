@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // \"\"' | { read -r f; echo \"$f\" | grep -q '\\.tsx$' && bash scripts/lint-scratch.sh 2>&1 | tail -20 || true; }"
+          }
+        ]
+      }
+    ]
+  }
+}
