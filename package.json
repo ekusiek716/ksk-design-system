@@ -6,12 +6,22 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
+  "bin": {
+    "ksk-ds": "./bin/init.js"
+  },
   "files": [
     "dist",
+    "bin",
+    "templates",
+    "contracts",
+    "tokens.json",
+    "AGENTS.md",
+    "CLAUDE.md",
     "src/preset.css",
     "src/preset-standalone.css",
     "src/styles",
-    "src/themes"
+    "src/themes",
+    "src/components/COMPONENT_LOOKUP.md"
   ],
   "exports": {
     ".": {
@@ -46,7 +56,10 @@
     "build-storybook": "storybook build",
     "lint:scratch": "bash scripts/lint-scratch.sh",
     "generate:lookup": "node scripts/generate-component-lookup.mjs",
-    "check": "tsc --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-drift.sh && node scripts/generate-component-lookup.mjs"
+    "check": "tsc --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-drift.sh && node scripts/generate-component-lookup.mjs",
+    "postinstall": "node bin/init.js postinstall",
+    "mcp:build": "cd mcp-server && npm install && npm run build",
+    "mcp:start": "node mcp-server/dist/index.js"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
