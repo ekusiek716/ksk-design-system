@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Rules Contracts",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。"
   },
   "prohibited": [
@@ -27,13 +27,103 @@
       "id": "P003",
       "severity": "error",
       "category": "component",
-      "pattern": "<a href",
-      "excludes": [".stories.", "data-slot", "components/ui/", "components/patterns/"],
-      "message": "生の <a href> 禁止",
-      "fix": "<Button variant=\"link\"> を使用"
+      "pattern": "<textarea\\b",
+      "excludes": ["data-slot", ".stories.", "components/ui/", "components/patterns/"],
+      "message": "生の <textarea> 禁止",
+      "fix": "<Textarea> コンポーネントを使用"
     },
     {
       "id": "P004",
+      "severity": "error",
+      "category": "component",
+      "pattern": "<select\\b",
+      "excludes": ["data-slot", ".stories.", "components/ui/", "components/patterns/"],
+      "message": "生の <select> 禁止",
+      "fix": "<Select><SelectItem> コンポーネントを使用"
+    },
+    {
+      "id": "P005",
+      "severity": "error",
+      "category": "component",
+      "pattern": "<table\\b",
+      "excludes": ["data-slot", ".stories.", "components/ui/", "components/patterns/"],
+      "message": "生の <table> 禁止（CLS・スタイル崩れの原因）",
+      "fix": "DataTable 等 DS のテーブルコンポーネントを使用"
+    },
+    {
+      "id": "P006",
+      "severity": "error",
+      "category": "component",
+      "pattern": "<a href",
+      "excludes": [".stories.", "data-slot", "asChild", "components/ui/", "components/patterns/"],
+      "message": "生の <a href> 禁止",
+      "fix": "<Button variant=\"link\"> を使用（<Button asChild><a href> も可）"
+    },
+    {
+      "id": "P007",
+      "severity": "error",
+      "category": "modal",
+      "pattern": "div.*fixed.*inset-0|fixed.*inset-0.*div",
+      "excludes": [".stories.", "components/ui/", "components/patterns/"],
+      "message": "div.fixed.inset-0 による自作モーダル禁止",
+      "fix": "<Dialog> または <Sheet> を使用"
+    },
+    {
+      "id": "P008",
+      "severity": "error",
+      "category": "color",
+      "pattern": "#[0-9A-Fa-f]{6}",
+      "excludes": [".stories.", ".css", "shadow", "fill=", "stroke="],
+      "message": "HEX ハードコード禁止",
+      "fix": "セマンティックトークン var(--...) を使用"
+    },
+    {
+      "id": "P009",
+      "severity": "error",
+      "category": "color",
+      "pattern": "(text|bg|border)-(gray|slate|zinc|neutral|stone|red|orange|amber|yellow|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]+",
+      "excludes": [".stories."],
+      "message": "Tailwind 標準色クラス禁止",
+      "fix": "セマンティックトークン var(--...) を使用"
+    },
+    {
+      "id": "P010",
+      "severity": "error",
+      "category": "color",
+      "pattern": "text-white\\b|bg-white\\b",
+      "excludes": [".stories."],
+      "message": "text-white / bg-white 禁止（テーマ切替で追従できない）",
+      "fix": "text-[var(--Text-on-Inverse)] / bg-[var(--Surface-Primary)]"
+    },
+    {
+      "id": "P011",
+      "severity": "error",
+      "category": "typography",
+      "pattern": "text-\\[[0-9]+px\\]",
+      "excludes": [".stories."],
+      "message": "フォントサイズ直書き禁止",
+      "fix": "typo-* クラスを使用"
+    },
+    {
+      "id": "P012",
+      "severity": "error",
+      "category": "spacing",
+      "pattern": "(p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|space-x|space-y)-\\[[0-9]+px\\]",
+      "excludes": [".stories."],
+      "message": "任意値スペーシング禁止（4px グリッド外）",
+      "fix": "gap-1〜gap-6 / p-1〜p-6 の Tailwind 標準クラスを使用"
+    },
+    {
+      "id": "P013",
+      "severity": "error",
+      "category": "ai-pattern",
+      "pattern": "border-l-4|border-t-4|border-r-4|border-b-4",
+      "excludes": [".stories."],
+      "message": "カラーバー（片側ボーダー太め）禁止（AI 生成パターン）",
+      "fix": "全周ボーダーを使用"
+    },
+    {
+      "id": "P014",
       "severity": "error",
       "category": "asset",
       "pattern": "pravatar\\.cc",
@@ -41,61 +131,34 @@
       "fix": "DiceBear shapes を使用 (https://api.dicebear.com/9.x/shapes/svg?seed=...)"
     },
     {
-      "id": "P005",
-      "severity": "warning",
-      "category": "typography",
-      "pattern": "\"font-bold|'font-bold| font-bold",
-      "excludes": [".stories.", "cva", "variants"],
-      "message": "font-bold 直書き禁止",
-      "fix": "typo-* クラスを使用 (例: typo-label-md)"
+      "id": "P015",
+      "severity": "error",
+      "category": "theme",
+      "pattern": "--Primitive-Brand",
+      "excludes": ["src/styles/", "src/themes/", ".css"],
+      "message": "Primitive Brand トークン直接使用禁止（テーマ切替が機能しなくなる）",
+      "fix": "var(--Brand-Primary) 等セマンティックトークンを使用"
     },
     {
-      "id": "P006",
+      "id": "P016",
       "severity": "warning",
       "category": "typography",
-      "pattern": "\"font-semibold|'font-semibold| font-semibold",
-      "excludes": [".stories.", "cva", "variants"],
-      "message": "font-semibold 直書き禁止",
-      "fix": "typo-* クラスを使用"
+      "pattern": "\"font-bold|'font-bold| font-bold|\"font-semibold|'font-semibold| font-semibold|\"font-medium|'font-medium| font-medium",
+      "excludes": [".stories.", "cva(", "variants"],
+      "message": "font-bold / font-semibold / font-medium 直書き禁止",
+      "fix": "typo-* クラスを使用（例: typo-label-md）"
     },
     {
-      "id": "P007",
+      "id": "P017",
       "severity": "warning",
       "category": "typography",
-      "pattern": "\"font-medium|'font-medium| font-medium",
-      "excludes": [".stories.", "cva", "variants"],
-      "message": "font-medium 直書き禁止",
-      "fix": "typo-* クラスを使用"
-    },
-    {
-      "id": "P008",
-      "severity": "warning",
-      "category": "typography",
-      "pattern": "text-\\[[0-9]*px\\]",
+      "pattern": "tracking-tight|tracking-tighter",
       "excludes": [".stories."],
-      "message": "text-[Npx] 直書き禁止",
-      "fix": "typo-* クラスを使用"
+      "message": "tracking-tight 禁止（日本語の可読性が著しく低下）",
+      "fix": "letter-spacing は typo-* クラスに内包されている"
     },
     {
-      "id": "P009",
-      "severity": "warning",
-      "category": "color",
-      "pattern": "text-white\\b",
-      "excludes": [".stories."],
-      "message": "text-white 禁止",
-      "fix": "text-[var(--Text-on-Inverse)]"
-    },
-    {
-      "id": "P010",
-      "severity": "warning",
-      "category": "color",
-      "pattern": "bg-white\\b",
-      "excludes": [".stories."],
-      "message": "bg-white 禁止",
-      "fix": "bg-[var(--Surface-Primary)]"
-    },
-    {
-      "id": "P011",
+      "id": "P018",
       "severity": "warning",
       "category": "color",
       "pattern": "text-black\\b",
@@ -104,25 +167,7 @@
       "fix": "text-[var(--Text-High-Emphasis)]"
     },
     {
-      "id": "P012",
-      "severity": "warning",
-      "category": "color",
-      "pattern": "text-gray-|bg-gray-|text-blue-|bg-blue-|text-red-|bg-red-|text-green-|bg-green-",
-      "excludes": [".stories."],
-      "message": "Tailwind 標準色クラス禁止",
-      "fix": "セマンティックトークン var(--...) を使用"
-    },
-    {
-      "id": "P013",
-      "severity": "warning",
-      "category": "color",
-      "pattern": "#[0-9A-Fa-f]{6}",
-      "excludes": [".stories.", ".css", "shadow"],
-      "message": "HEX ハードコード禁止",
-      "fix": "セマンティックトークン var(--...) を使用"
-    },
-    {
-      "id": "P014",
+      "id": "P019",
       "severity": "warning",
       "category": "layout",
       "pattern": "rounded-md\\b|rounded-xl\\b|rounded-3xl\\b",
@@ -131,7 +176,7 @@
       "fix": "rounded-none / rounded-sm / rounded-lg / rounded-2xl / rounded-full のみ使用"
     },
     {
-      "id": "P015",
+      "id": "P020",
       "severity": "warning",
       "category": "layout",
       "pattern": "shadow-md\\b|shadow-lg\\b|shadow-xl\\b|shadow-2xl\\b",
@@ -140,126 +185,233 @@
       "fix": "shadow-[var(--shadow-sm/md/lg/dialog/tooltip)]"
     },
     {
-      "id": "P016",
-      "severity": "warning",
-      "category": "layout",
-      "pattern": "border-t-4|border-l-4|border-r-4|border-b-4",
-      "excludes": [".stories."],
-      "message": "カラーバー（片側ボーダー太め）禁止",
-      "fix": "全周ボーダーを使用"
-    },
-    {
-      "id": "P017",
+      "id": "P021",
       "severity": "warning",
       "category": "layout",
       "pattern": "bg-gradient-to-",
       "excludes": [".stories."],
-      "message": "グラデーション背景禁止",
+      "message": "グラデーション背景禁止（AI 生成パターン）",
       "fix": "単色背景を使用（DS にグラデーション定義なし）"
     },
     {
-      "id": "P018",
-      "severity": "warning",
-      "category": "accessibility",
-      "pattern": "outline-none\\b",
-      "excludes": [".stories.", "focus-visible", "components/ui/", "components/patterns/"],
-      "message": "outline-none 禁止（フォーカス消去）",
-      "fix": "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
-    },
-    {
-      "id": "P019",
+      "id": "P022",
       "severity": "warning",
       "category": "layout",
       "pattern": "z-\\[9999\\]|z-\\[999\\]",
       "message": "過剰な z-index 禁止",
       "fix": "z-50 を使用"
+    },
+    {
+      "id": "P023",
+      "severity": "warning",
+      "category": "accessibility",
+      "pattern": "outline-none\\b",
+      "excludes": [".stories.", "focus-visible", "components/ui/", "components/patterns/"],
+      "message": "outline-none 禁止（フォーカスリング削除はアクセシビリティ違反）",
+      "fix": "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+    },
+    {
+      "id": "P024",
+      "severity": "warning",
+      "category": "accessibility",
+      "pattern": "<div.*onClick|<span.*onClick",
+      "excludes": [".stories."],
+      "message": "<div onClick> 禁止（キーボード操作・スクリーンリーダー不可）",
+      "fix": "<button> / <Button> を使用"
+    },
+    {
+      "id": "P025",
+      "severity": "warning",
+      "category": "accessibility",
+      "pattern": "<img(?![^>]*alt=)",
+      "excludes": [".stories.", "components/ui/", "components/patterns/"],
+      "message": "<img> に alt 属性なし禁止",
+      "fix": "alt=\"説明テキスト\" を必ず付ける（装飾画像は alt=\"\"）"
+    },
+    {
+      "id": "P026",
+      "severity": "warning",
+      "category": "form",
+      "pattern": "placeholder=.*(?!.*<Label|.*<label)",
+      "excludes": [".stories.", "components/ui/", "components/patterns/"],
+      "message": "placeholder のみでラベルを省略しない",
+      "fix": "<Label> を必ず付ける（スクリーンリーダーはplaceholderを読まない）"
+    },
+    {
+      "id": "P027",
+      "severity": "warning",
+      "category": "form",
+      "pattern": "type=['\"]text['\"].*email|email.*type=['\"]text['\"]",
+      "excludes": [".stories."],
+      "message": "メールアドレス欄に type='text' 禁止",
+      "fix": "type=\"email\" を使用"
+    },
+    {
+      "id": "P028",
+      "severity": "warning",
+      "category": "layout",
+      "pattern": "style=.*margin|style=.*padding",
+      "excludes": [".stories."],
+      "message": "インラインスタイルで余白指定禁止",
+      "fix": "Tailwind スペーシングクラス（p-* / m-* / gap-*）を使用"
+    },
+    {
+      "id": "P029",
+      "severity": "warning",
+      "category": "component",
+      "pattern": "className=.*\\$\\{",
+      "excludes": [".stories.", "components/ui/", "components/patterns/", "cn("],
+      "message": "テンプレートリテラルで className を組み立てない",
+      "fix": "cn() / clsx() / CVA を使用"
+    },
+    {
+      "id": "P030",
+      "severity": "warning",
+      "category": "animation",
+      "pattern": "duration-[3-9][0-9]{2}|duration-[0-9]{4}",
+      "excludes": [".stories.", "components/ui/"],
+      "message": "300ms 以上の遅いアニメーション禁止",
+      "fix": "duration-150 / duration-200 を使用"
+    },
+    {
+      "id": "P031",
+      "severity": "warning",
+      "category": "layout",
+      "pattern": "w-\\[375px\\]|w-\\[390px\\]|w-\\[414px\\]|w-\\[428px\\]",
+      "excludes": [".stories."],
+      "message": "固定デバイス幅指定禁止（375px等）",
+      "fix": "w-full + max-w-* でレスポンシブに対応"
     }
   ],
-  "accessibility": {
-    "wcag": "2.1 AA",
-    "requirements": [
+  "aiPatterns": {
+    "description": "AI（Claude / Copilot / Codex 等）がコード生成時に典型的に犯すパターン。コード生成前に必ず確認すること。",
+    "patterns": [
       {
-        "id": "A001",
-        "rule": "通常テキストのコントラスト比 4.5:1 以上"
+        "id": "AI1",
+        "name": "カード上部カラーバー",
+        "pattern": "border-t-4|border-l-4",
+        "description": "カードの上部または左端に太いボーダーで色ストライプをつける AI 定番パターン",
+        "fix": "全周ボーダー + Badge でステータスを表現"
       },
       {
-        "id": "A002",
-        "rule": "大テキスト（18px+ bold）のコントラスト比 3:1 以上"
+        "id": "AI2",
+        "name": "グラデーション背景",
+        "pattern": "bg-gradient-to-",
+        "description": "bg-gradient-to-r from-blue-500 to-purple-600 などを安易に使う",
+        "fix": "DS にグラデーション定義なし。単色背景を使用"
       },
       {
-        "id": "A003",
-        "rule": "UI 要素・アイコンのコントラスト比 3:1 以上"
+        "id": "AI3",
+        "name": "DS 定義外の角丸",
+        "pattern": "rounded-md|rounded-xl|rounded-3xl",
+        "description": "rounded-xl / rounded-2xl / rounded-3xl を場当たり的に使う",
+        "fix": "rounded-none / rounded-sm / rounded-lg / rounded-2xl / rounded-full の5値のみ"
       },
       {
-        "id": "A004",
-        "rule": "タッチターゲット最小 24×24px"
+        "id": "AI4",
+        "name": "tracking-tight（日本語不可）",
+        "pattern": "tracking-tight|tracking-tighter",
+        "description": "英語デザインを真似て文字間隔を詰める。日本語で使うと可読性が著しく低下する",
+        "fix": "letter-spacing は typo-* クラスに最適化済み。直接指定不要"
       },
       {
-        "id": "A005",
-        "rule": "フォーカスリング必須: focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+        "id": "AI5",
+        "name": "Shadow 過剰使用",
+        "pattern": "shadow-xl|shadow-2xl",
+        "description": "カードや要素に過剰なシャドウを付けて「立体感」を演出する",
+        "fix": "shadow-[var(--shadow-sm)] か shadow-[var(--shadow-md)] のみ"
       },
       {
-        "id": "A006",
-        "rule": "アイコンボタンに aria-label 必須"
+        "id": "AI6",
+        "name": "Tailwind 標準色の使用",
+        "pattern": "(text|bg|border)-(blue|gray|red|green|yellow|indigo)-[0-9]+",
+        "description": "var(--...) を調べずに Tailwind 標準色クラスをそのまま使う",
+        "fix": "必ず var(--Brand-Primary) / var(--Text-High-Emphasis) 等のセマンティックトークンを使用"
       },
       {
-        "id": "A007",
-        "rule": "フォーム入力に <Label> 必須"
+        "id": "AI7",
+        "name": "Primitive トークン直接参照",
+        "pattern": "var\\(--Primitive-Brand",
+        "description": "var(--Primitive-Brand-500) 等を直接使う（テーマ切替が壊れる）",
+        "fix": "var(--Brand-Primary) / var(--Brand-Secondary) 等セマンティック層を使用"
       },
       {
-        "id": "A008",
-        "rule": "エラー表示は 色 + アイコン + テキスト の3点セット必須（色のみ禁止）"
+        "id": "AI8",
+        "name": "div.fixed モーダル",
+        "pattern": "div.*fixed.*inset-0",
+        "description": "div.fixed.inset-0 で自作モーダルを作る（フォーカストラップなし・a11y 違反）",
+        "fix": "<Dialog> / <Sheet> コンポーネントを使用"
       },
       {
-        "id": "A009",
-        "rule": "ステータス区別は 色 + アイコン + テキスト（色のみ禁止）"
+        "id": "AI9",
+        "name": "常時ループアニメーション",
+        "pattern": "animate-spin|animate-bounce|animate-pulse",
+        "description": "ローディング以外の場所に常時動くアニメーションを付ける",
+        "fix": "アニメーションはローディング状態限定。静的 UI には使わない"
       }
     ]
   },
+  "accessibility": {
+    "wcag": "2.1 AA",
+    "requirements": [
+      { "id": "A001", "rule": "通常テキストのコントラスト比 4.5:1 以上" },
+      { "id": "A002", "rule": "大テキスト（18px+ bold）のコントラスト比 3:1 以上" },
+      { "id": "A003", "rule": "UI 要素・アイコンのコントラスト比 3:1 以上" },
+      { "id": "A004", "rule": "タッチターゲット最小 44×44px（WCAG 2.5.5 AAA）" },
+      { "id": "A005", "rule": "フォーカスリング必須: focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50" },
+      { "id": "A006", "rule": "アイコンボタンに aria-label 必須" },
+      { "id": "A007", "rule": "フォーム入力に <Label> 必須（placeholder のみ禁止）" },
+      { "id": "A008", "rule": "エラー表示は 色 + アイコン + テキスト の3点セット必須（色のみ禁止）" },
+      { "id": "A009", "rule": "ステータス区別は 色 + アイコン + テキスト（色のみ禁止）" },
+      { "id": "A010", "rule": "<div onClick> 禁止: 操作可能要素は必ず <button> / <Button>" },
+      { "id": "A011", "rule": "<img> に alt 属性必須（装飾画像は alt=\"\"）" },
+      { "id": "A012", "rule": "モーダルは <Dialog> を使用し、フォーカストラップを保証" }
+    ]
+  },
   "typography": {
-    "rule": "必ず typo-* クラスを使用。text-sm font-bold 等の個別指定禁止。",
+    "rule": "必ず typo-* クラスを使用。text-sm font-bold 等の個別指定禁止。typo-* クラスに font-weight / line-height / letter-spacing が内包されているため、追加指定不要。",
     "classes": [
-      { "class": "typo-display-xl", "size": "48px", "weight": "bold", "use": "ヒーロー" },
-      { "class": "typo-display-lg", "size": "36px", "weight": "bold", "use": "LP見出し" },
-      { "class": "typo-heading-3xl", "size": "28px", "weight": "bold", "use": "ページタイトル" },
-      { "class": "typo-heading-2xl", "size": "24px", "weight": "bold", "use": "主要セクション" },
-      { "class": "typo-heading-xl", "size": "21px", "weight": "bold", "use": "サブセクション" },
-      { "class": "typo-heading-lg", "size": "18px", "weight": "bold", "use": "グループ見出し" },
-      { "class": "typo-heading-md", "size": "16px", "weight": "bold", "use": "小見出し" },
-      { "class": "typo-heading-sm", "size": "14px", "weight": "bold", "use": "ラベル的見出し" },
-      { "class": "typo-body-lg", "size": "16px", "weight": "normal", "use": "本文（大）" },
-      { "class": "typo-body-md", "size": "14px", "weight": "normal", "use": "本文（標準）" },
-      { "class": "typo-body-sm", "size": "12px", "weight": "normal", "use": "補足テキスト" },
-      { "class": "typo-body-xs", "size": "10px", "weight": "normal", "use": "最小テキスト" },
-      { "class": "typo-label-lg", "size": "16px", "weight": "bold", "use": "ボタン大" },
-      { "class": "typo-label-md", "size": "14px", "weight": "bold", "use": "ボタン・ナビ" },
-      { "class": "typo-label-sm", "size": "12px", "weight": "medium", "use": "タグ・バッジ" },
-      { "class": "typo-label-xs", "size": "10px", "weight": "medium", "use": "小タグ" },
-      { "class": "typo-caption", "size": "11px", "weight": "normal", "use": "注釈" }
+      { "class": "typo-display-xl",  "size": "48px", "weight": "bold",   "use": "ヒーロー" },
+      { "class": "typo-display-lg",  "size": "36px", "weight": "bold",   "use": "LP見出し" },
+      { "class": "typo-heading-3xl", "size": "28px", "weight": "bold",   "use": "ページタイトル" },
+      { "class": "typo-heading-2xl", "size": "24px", "weight": "bold",   "use": "主要セクション" },
+      { "class": "typo-heading-xl",  "size": "21px", "weight": "bold",   "use": "サブセクション" },
+      { "class": "typo-heading-lg",  "size": "18px", "weight": "bold",   "use": "グループ見出し" },
+      { "class": "typo-heading-md",  "size": "16px", "weight": "bold",   "use": "小見出し" },
+      { "class": "typo-heading-sm",  "size": "14px", "weight": "bold",   "use": "ラベル的見出し" },
+      { "class": "typo-body-lg",     "size": "16px", "weight": "normal", "use": "本文（大）" },
+      { "class": "typo-body-md",     "size": "14px", "weight": "normal", "use": "本文（標準）" },
+      { "class": "typo-body-sm",     "size": "12px", "weight": "normal", "use": "補足テキスト" },
+      { "class": "typo-body-xs",     "size": "10px", "weight": "normal", "use": "最小テキスト" },
+      { "class": "typo-label-lg",    "size": "16px", "weight": "bold",   "use": "ボタン大" },
+      { "class": "typo-label-md",    "size": "14px", "weight": "bold",   "use": "ボタン・ナビ" },
+      { "class": "typo-label-sm",    "size": "12px", "weight": "medium", "use": "タグ・バッジ" },
+      { "class": "typo-label-xs",    "size": "10px", "weight": "medium", "use": "小タグ" },
+      { "class": "typo-caption",     "size": "11px", "weight": "normal", "use": "注釈" }
     ]
   },
   "tokens": {
     "spacing": {
-      "rule": "4px グリッド。gap-1〜gap-6 / p-1〜p-6 のみ使用。",
+      "rule": "4px グリッド。gap-1〜gap-6 / p-1〜p-6 のみ使用。px-[17px] 等の任意値禁止。",
       "allowed": ["gap-1 (4px)", "gap-2 (8px)", "gap-3 (12px)", "gap-4 (16px)", "gap-6 (24px)"]
     },
     "borderRadius": {
-      "rule": "5値のみ。それ以外（rounded-md, rounded-xl 等）は禁止。",
+      "rule": "5値のみ。rounded-md / rounded-xl / rounded-3xl 等は禁止。",
       "allowed": [
-        { "class": "rounded-none", "value": "0", "use": "角丸なし" },
-        { "class": "rounded-sm", "value": "4px", "use": "Tag, 小要素" },
-        { "class": "rounded-lg", "value": "8px", "use": "Input, Card, Dialog" },
-        { "class": "rounded-2xl", "value": "16px", "use": "Modal, 大Card" },
-        { "class": "rounded-full", "value": "50%", "use": "Button, Avatar, Badge, Chip" }
+        { "class": "rounded-none", "value": "0",   "use": "角丸なし" },
+        { "class": "rounded-sm",   "value": "4px",  "use": "Tag・小要素" },
+        { "class": "rounded-lg",   "value": "8px",  "use": "Input・Card・Dialog" },
+        { "class": "rounded-2xl",  "value": "16px", "use": "Modal・大Card" },
+        { "class": "rounded-full", "value": "50%",  "use": "Button・Avatar・Badge・Chip" }
       ]
     },
     "shadow": {
-      "rule": "DS定義トークンのみ。shadow-md等のTailwind標準は禁止。",
+      "rule": "DS 定義トークンのみ。Tailwind 標準（shadow-md 等）は禁止。",
       "allowed": [
-        { "token": "var(--shadow-sm)", "use": "微細な浮き" },
-        { "token": "var(--shadow-md)", "use": "Card, 標準浮き" },
-        { "token": "var(--shadow-lg)", "use": "Popover, Dropdown" },
-        { "token": "var(--shadow-dialog)", "use": "Dialog, Modal" },
+        { "token": "var(--shadow-sm)",      "use": "微細な浮き" },
+        { "token": "var(--shadow-md)",      "use": "Card・標準浮き" },
+        { "token": "var(--shadow-lg)",      "use": "Popover・Dropdown" },
+        { "token": "var(--shadow-dialog)",  "use": "Dialog・Modal" },
         { "token": "var(--shadow-tooltip)", "use": "Tooltip" }
       ]
     }
@@ -269,8 +421,9 @@
       "和文は全角、欧文・算用数字は半角",
       "見出し文末に「。」をつけない",
       "バリデーションエラー文末に句読点をつけない",
-      "日付: YYYY/MM/DD（0なし: 2026/4/7）",
-      "ボタン: 動詞で表記（「削除する」「保存する」）"
+      "日付: YYYY/MM/DD（ゼロなし: 2026/4/7）",
+      "ボタン: 動詞で表記（「削除する」「保存する」）",
+      "エラーメッセージ: ユーザーが次に取るべき行動を明示する"
     ]
   }
 }

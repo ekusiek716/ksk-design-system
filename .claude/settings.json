@@ -6,7 +6,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path // \"\"' | { read -r f; echo \"$f\" | grep -q '\\.tsx$' && bash scripts/lint-scratch.sh 2>&1 | tail -20 || true; }"
+            "command": "jq -r '.tool_input.file_path // \"\"' | { read -r f; echo \"$f\" | grep -q '\\.tsx$' && bash scripts/lint-scratch.sh \"$f\" 2>&1 | tail -20 || true; }"
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // \"\"' | { read -r f; echo \"$f\" | grep -qE 'src/components/(ui|patterns)/.+\\.tsx$' && node scripts/generate-component-lookup.mjs 2>&1 | tail -5 || true; }"
           }
         ]
       }

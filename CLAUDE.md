@@ -42,11 +42,14 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **CLAUDE.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート（Claude Code用） |
 | **AGENTS.md** | 同上（Codex用。セッション開始時の読み込み指示・編集後コマンドを明記） |
 | **contracts/components.json** | 全57コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
-| **contracts/rules.json** | 禁止パターン19件・アクセシビリティ要件・タイポグラフィ定義 |
+| **contracts/rules.json** | 禁止パターン31件・AIアンチパターン9件・アクセシビリティ要件 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
+| **src/components/COMPONENT_LOOKUP.md** | 全57コンポーネントのバリアント・インポートパス一覧（自動生成） |
 | **CAKE_COMPONENTS.md** | Cake.jp固有コンポーネント一覧（EC案件時に参照） |
 
-**コードを書く前に `contracts/rules.json` の `prohibited` を確認すること。**
+**コードを書く前に:**
+1. `contracts/rules.json` の `prohibited` と `aiPatterns` を確認
+2. `src/components/COMPONENT_LOOKUP.md` で既存コンポーネントを確認（手書き防止）
 
 ---
 
@@ -88,7 +91,10 @@ bash scripts/lint-scratch.sh
 # ドリフト検出（コンポーネント追加後に実行）
 bash scripts/check-drift.sh
 
-# 全チェック
+# COMPONENT_LOOKUP.md 再生成（コンポーネント追加後に実行）
+npm run generate:lookup
+
+# 全チェック（tsc + lint + drift + lookup 一括）
 npm run check
 ```
 
@@ -155,3 +161,4 @@ import { Button, Card, Input, FormField } from "@ksk/design-system"
 - [ ] `contracts/components.json` の `meta.counts` を更新
 - [ ] `bash scripts/check-drift.sh` を実行して乖離がないことを確認
 - [ ] Storybook のストーリーファイル（`.stories.tsx`）を作成
+- [ ] `npm run generate:lookup` を実行して COMPONENT_LOOKUP.md を更新

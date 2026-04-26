@@ -15,12 +15,16 @@
 コードを書く前に、以下を必ず読み込むこと:
 
 ```
-contracts/components.json   # 全57コンポーネントの定義・バリアント・ルール
-contracts/rules.json        # 禁止パターン19件・アクセシビリティ要件・タイポグラフィ定義
-tokens.json                 # カラー・スペーシング・シャドウトークン
+contracts/rules.json                     # 禁止パターン31件・AIアンチパターン9件・a11y要件
+contracts/components.json               # 全57コンポーネントの定義・バリアント・ルール
+tokens.json                             # カラー・スペーシング・シャドウトークン
+src/components/COMPONENT_LOOKUP.md      # バリアント・インポートパス一覧（自動生成）
 ```
 
-特に `contracts/rules.json` の `prohibited` 配列を確認してから実装すること。
+**必ず `contracts/rules.json` の `prohibited` と `aiPatterns` を確認してから実装すること。**
+特に `aiPatterns` は AI が典型的に犯すパターン集 — 自分が生成しようとしているコードと照合すること。
+
+コンポーネントを新規作成する前に `COMPONENT_LOOKUP.md` で同等品がないか確認すること。
 
 ---
 
@@ -36,6 +40,7 @@ bash scripts/lint-scratch.sh
 
 ```bash
 bash scripts/check-drift.sh
+node scripts/generate-component-lookup.mjs
 ```
 
 エラーが出た場合は修正してから次に進むこと。
@@ -76,8 +81,9 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 |---------|------|
 | **AGENTS.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート |
 | **contracts/components.json** | 全57コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
-| **contracts/rules.json** | 禁止パターン19件・アクセシビリティ要件・タイポグラフィ定義 |
+| **contracts/rules.json** | 禁止パターン31件・AIアンチパターン9件・アクセシビリティ要件 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
+| **src/components/COMPONENT_LOOKUP.md** | 全57コンポーネントのバリアント・インポートパス（自動生成） |
 | **CAKE_COMPONENTS.md** | Cake.jp固有コンポーネント一覧（EC案件時に参照） |
 
 ---
@@ -166,3 +172,4 @@ import { Button, Card, Input, FormField } from "@ksk/design-system"
 - [ ] `contracts/components.json` の `meta.counts` を更新
 - [ ] `bash scripts/check-drift.sh` を実行して乖離がないことを確認
 - [ ] Storybook のストーリーファイル（`.stories.tsx`）を作成
+- [ ] `node scripts/generate-component-lookup.mjs` を実行して COMPONENT_LOOKUP.md を更新
