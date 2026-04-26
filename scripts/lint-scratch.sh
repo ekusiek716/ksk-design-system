@@ -3,118 +3,280 @@
 # KSK Design System — スクラッチ検出スクリプト
 #
 # 禁止パターンをgrepで検出し、違反があればCI失敗させる。
-# 実行: bash scripts/lint-scratch.sh
+# 実行: bash scripts/lint-scratch.sh [ファイルパス...]
+# 引数なしの場合は src/components/ui/ patterns/ icons/ を対象
+# ※ ui/ patterns/ のコンポーネント定義は検査対象外（自分自身を検査しない）
 # =============================================================
 
 set -euo pipefail
-
-SRC_DIR="src"
-ERRORS=0
-WARNINGS=0
 
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 GREEN='\033[0;32m'
 NC='\033[0m'
+ERRORS=0
+WARNINGS=0
 
-error() {
-  echo -e "${RED}[ERROR]${NC} $1"
-  ERRORS=$((ERRORS + 1))
-}
-
-warn() {
-  echo -e "${YELLOW}[WARN]${NC} $1"
-  WARNINGS=$((WARNINGS + 1))
-}
+# 検査対象: 引数があればそれを使う、なければ全 .tsx
+if [ $# -gt 0 ]; then
+  FILES="$@"
+else
+  FILES=$(find src -name '*.tsx' \
+    -not -path '*/node_modules/*' \
+    -not -name '*.stories.tsx' \
+    -not -path '*/components/ui/*' \
+    -not -path '*/components/patterns/*' \
+    -not -path '*/components/icons/*' \
+    2>/dev/null)
+fi
 
 echo "🔍 KSK Design System — スクラッチ検出"
 echo "======================================="
 
-# ─── コンポーネント禁止パターン（エラー） ───
-# 注意: components/ui/ と components/patterns/ 内のDS定義ファイルは除外
-if grep -rn '<button\b' "$SRC_DIR" --include="*.tsx" --include="*.ts" | grep -v 'data-slot' | grep -v '.stories.' | grep -v 'node_modules' | grep -v "import" | grep -v 'components/ui/' | grep -v 'components/patterns/' | head -5; then
-  error "生の <button> を検出。<Button variant=\"...\" size=\"...\"> を使用してください"
-fi
+for FILE in $FILES; do
+  echo "$FILE" | grep -qE '\.(css|json|js|mjs)$' && continue
 
-if grep -rn '<input\b' "$SRC_DIR" --include="*.tsx" --include="*.ts" | grep -v 'data-slot' | grep -v '.stories.' | grep -v 'node_modules' | grep -v "import" | grep -v 'type="search"' | grep -v 'type="file"' | grep -v 'components/ui/' | grep -v 'components/patterns/' | head -5; then
-  error "生の <input> を検出。<Input> コンポーネントを使用してください"
-fi
+  # ──────────────────────────────────────────
+  # エラー（修正必須）
+  # ──────────────────────────────────────────
 
-if grep -rn '<a href' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | grep -v 'data-slot' | grep -v 'components/ui/' | grep -v 'components/patterns/' | head -5; then
-  error "生の <a href> を検出。<Button variant=\"link\"> を使用してください"
-fi
-
-if grep -rn 'pravatar\.cc' "$SRC_DIR" --include="*.tsx" | head -5; then
-  error "pravatar.cc を検出。DiceBear shapes を使用してください"
-fi
-
-# ─── テキスト禁止パターン（警告） ───
-for pattern in "font-bold" "font-semibold" "font-medium" "font-light"; do
-  if grep -rn "\"$pattern\|'$pattern\| $pattern" "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | grep -v 'cva\|variants' | head -3; then
-    warn "$pattern を検出。typo-* クラスを使用してください"
+  # 1. 生の <button>
+  MATCHES=$(grep -n '<button ' "$FILE" 2>/dev/null \
+    | grep -v 'data-slot\|asChild\|Comp\|Primitive' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: 生の<button> → <Button variant=\"...\" size=\"...\">を使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
   fi
+
+  # 2. 生の <input>
+  MATCHES=$(grep -n '<input ' "$FILE" 2>/dev/null \
+    | grep -v 'type="hidden"\|type="search"\|type="file"\|data-slot\|asChild\|Comp\|Primitive' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: 生の<input> → <Input>コンポーネントを使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 3. 生の <textarea>
+  MATCHES=$(grep -n '<textarea ' "$FILE" 2>/dev/null \
+    | grep -v 'data-slot\|asChild\|Comp\|Primitive' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: 生の<textarea> → <Textarea>コンポーネントを使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 4. 生の <select>
+  MATCHES=$(grep -n '<select ' "$FILE" 2>/dev/null \
+    | grep -v 'data-slot\|asChild\|Comp\|Primitive' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: 生の<select> → <Select>コンポーネントを使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 5. 生の <table>
+  MATCHES=$(grep -n '<table\b' "$FILE" 2>/dev/null \
+    | grep -v 'data-slot\|asChild\|Comp\|Primitive\|// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: 生の<table> → DataTable等のDSコンポーネントを使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 6. 生の <a href>（asChild 内を除く）
+  MATCHES=""
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    LN=$(echo "$line" | cut -d: -f1)
+    S=$((LN - 3)); [ $S -lt 1 ] && S=1
+    if ! sed -n "${S},${LN}p" "$FILE" 2>/dev/null | grep -q 'asChild'; then
+      MATCHES="${MATCHES}${line}\n"
+    fi
+  done < <(grep -n '<a href' "$FILE" 2>/dev/null | grep -v '// \|/\*' || true)
+  MATCHES=$(printf "%b" "$MATCHES" | sed '/^[[:space:]]*$/d')
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: 生の<a href> → <Button variant=\"link\">を使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 7. HEX ハードコード
+  MATCHES=$(grep -n '#[0-9a-fA-F]\{6\}' "$FILE" 2>/dev/null \
+    | grep -v 'var(\|// \|/\*\|fill="\|stroke="\|src=' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: HEXハードコード → var(--Token-Name)を使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 8. Tailwind 標準色クラス
+  MATCHES=$(grep -noE '\b(text|bg|border)-(gray|slate|zinc|neutral|stone|red|orange|amber|yellow|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]+' \
+    "$FILE" 2>/dev/null | grep -v '// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: Tailwind標準色 → セマンティックトークン var(--)を使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 9. text-white / bg-white
+  MATCHES=$(grep -n '\btext-white\b\|\bbg-white\b' "$FILE" 2>/dev/null \
+    | grep -v '// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: text-white/bg-white → セマンティックトークンを使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 10. フォントサイズ直書き text-[14px]
+  MATCHES=$(grep -noE 'text-\[[0-9]+px\]' "$FILE" 2>/dev/null \
+    | grep -v '// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: フォントサイズ直書き → typo-*クラスを使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 11. 任意値スペーシング px-[17px] 等
+  MATCHES=$(grep -noE '(p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|space-x|space-y)-\[[0-9]+px\]' \
+    "$FILE" 2>/dev/null | grep -v '// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: 任意値スペーシング → spacingトークン（4の倍数）を使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 12. AI 生成パターン: カラーバー border-l-4 等
+  MATCHES=$(grep -n 'border-l-4\|border-t-4\|border-r-4\|border-b-4' "$FILE" 2>/dev/null \
+    | grep -v '// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: カラーバー（AI生成パターン禁止）→ 全周ボーダーを使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # 13. pravatar.cc（ダミー画像サービス禁止）
+  MATCHES=$(grep -n 'pravatar\.cc' "$FILE" 2>/dev/null || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${RED}❌ $FILE: pravatar.cc → DiceBear shapes を使う${NC}"
+    echo "$MATCHES" | head -3
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # ──────────────────────────────────────────
+  # 警告（推奨修正）
+  # ──────────────────────────────────────────
+
+  # W1. font-bold 等の直書き
+  MATCHES=$(grep -n 'font-bold\|font-semibold\|font-medium\|font-light\|font-normal' \
+    "$FILE" 2>/dev/null \
+    | grep -v 'typo-\|cva(\|variants\|// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: font-*直接使用 → typo-*クラスを使う${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W2. text-black
+  MATCHES=$(grep -n '\btext-black\b' "$FILE" 2>/dev/null \
+    | grep -v '// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: text-black → text-[var(--Text-High-Emphasis)]を使う${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W3. DS 外の角丸
+  MATCHES=$(grep -noE '\brounded-(md|xl|3xl)\b' "$FILE" 2>/dev/null \
+    | grep -v '// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: DS外の角丸 → rounded-none/sm/lg/2xl/full のみ${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W4. DS 外のシャドウ
+  MATCHES=$(grep -n 'shadow-md\|shadow-lg\|shadow-xl\|shadow-2xl' "$FILE" 2>/dev/null \
+    | grep -v '// \|/\*\|shadow-\[' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: DS外シャドウ → shadow-[var(--shadow-*)]を使う${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W5. グラデーション背景（AI 生成パターン）
+  MATCHES=$(grep -n 'bg-gradient-to-' "$FILE" 2>/dev/null \
+    | grep -v '// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: グラデーション → DSにグラデーション定義なし${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W6. tracking-tight（日本語可読性低下）
+  MATCHES=$(grep -n 'tracking-tight\|tracking-tighter' "$FILE" 2>/dev/null \
+    | grep -v '// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: tracking-tight → 日本語の可読性が低下${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W7. outline-none（フォーカスリング削除）
+  MATCHES=$(grep -n 'outline-none\b' "$FILE" 2>/dev/null \
+    | grep -v 'focus-visible\|// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: outline-none → focus-visible:ring で代替${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W8. 過剰な z-index
+  MATCHES=$(grep -n 'z-\[9999\]\|z-\[999\]' "$FILE" 2>/dev/null || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: 過剰なz-index → z-50を使う${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W9. <div onClick> / <span onClick>（アクセシビリティ）
+  MATCHES=$(grep -n '<div.*onClick\|<span.*onClick' "$FILE" 2>/dev/null \
+    | grep -v '// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: <div onClick> → <button>/<Button>を使う（キーボード操作不可）${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W10. <img> に alt なし
+  MATCHES=$(grep -n '<img ' "$FILE" 2>/dev/null \
+    | grep -v 'alt=\|// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: <img>にalt属性なし → alt=\"説明テキスト\"を必ず付ける${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W11. 生の <header> / <footer>
+  MATCHES=$(grep -n '<header \|<footer ' "$FILE" 2>/dev/null \
+    | grep -v 'data-slot\|// \|/\*' || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: 生の<header>/<footer> → AppShell等のDSシェルを検討${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
 done
 
-if grep -rn 'text-\[[0-9]*px\]' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | head -3; then
-  warn "text-[Npx] を検出。typo-* クラスを使用してください"
-fi
-
-# ─── カラー禁止パターン（警告） ───
-if grep -rn 'text-white\b' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | head -3; then
-  warn "text-white を検出。text-[var(--Text-on-Inverse)] を使用してください"
-fi
-
-if grep -rn 'bg-white\b' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | head -3; then
-  warn "bg-white を検出。bg-[var(--Surface-Primary)] を使用してください"
-fi
-
-if grep -rn 'text-black\b' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | head -3; then
-  warn "text-black を検出。text-[var(--Text-High-Emphasis)] を使用してください"
-fi
-
-if grep -rn 'text-gray-\|bg-gray-\|text-blue-\|bg-blue-\|text-red-\|bg-red-\|text-green-\|bg-green-' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | head -5; then
-  warn "Tailwind 標準色を検出。セマンティックトークン var(--...) を使用してください"
-fi
-
-if grep -rn '#[0-9A-Fa-f]\{6\}' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | grep -v '.css' | grep -v 'shadow' | head -3; then
-  warn "HEX 直書きを検出。セマンティックトークンを使用してください"
-fi
-
-# ─── レイアウト禁止パターン（警告） ───
-if grep -rn 'rounded-md\b\|rounded-xl\b\|rounded-3xl\b' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | head -3; then
-  warn "DS 定義外の角丸を検出。rounded-none/sm/lg/2xl/full のみ使用してください"
-fi
-
-if grep -rn 'shadow-md\b\|shadow-lg\b\|shadow-xl\b\|shadow-2xl\b' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | grep -v 'shadow-\[' | grep -v 'components/ui/' | grep -v 'components/patterns/' | head -3; then
-  warn "DS 定義外のシャドウを検出。shadow-[var(--shadow-*)] を使用してください"
-fi
-
-if grep -rn 'border-t-4\|border-l-4\|border-r-4\|border-b-4' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | head -3; then
-  warn "AI 生成パターン（カラーバー）を検出。全周ボーダーを使用してください"
-fi
-
-if grep -rn 'bg-gradient-to-' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | head -3; then
-  warn "グラデーション背景を検出。DS にグラデーション定義はありません"
-fi
-
-if grep -rn 'outline-none\b' "$SRC_DIR" --include="*.tsx" | grep -v '.stories.' | grep -v 'node_modules' | grep -v 'focus-visible' | grep -v 'components/ui/' | grep -v 'components/patterns/' | head -3; then
-  warn "outline-none を検出。focus-visible:ring で代替してください"
-fi
-
-if grep -rn 'z-\[9999\]\|z-\[999\]' "$SRC_DIR" --include="*.tsx" | grep -v 'node_modules' | head -3; then
-  warn "過剰な z-index を検出。z-50 を使用してください"
-fi
-
-# ─── 結果 ───
 echo ""
 echo "======================================="
 if [ $ERRORS -gt 0 ]; then
-  echo -e "${RED}✗ エラー: $ERRORS 件${NC}"
-  echo -e "${YELLOW}  警告: $WARNINGS 件${NC}"
-  echo "  エラーを修正してください"
+  echo -e "${RED}✗ エラー: ${ERRORS}件  警告: ${WARNINGS}件${NC}"
+  echo "  エラーを修正してください（contracts/rules.json を参照）"
   exit 1
 elif [ $WARNINGS -gt 0 ]; then
-  echo -e "${YELLOW}△ 警告: $WARNINGS 件${NC}"
+  echo -e "${YELLOW}△ 警告: ${WARNINGS}件${NC}"
   echo "  修正を推奨します"
   exit 0
 else

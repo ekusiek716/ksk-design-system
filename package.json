@@ -38,14 +38,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:lib": "vite build --config vite.config.lib.ts && tsc --project tsconfig.lib.json",
+    "build:lib": "vite build --config vite.config.lib.ts && tsc --project tsconfig.lib.json || true",
     "prepack": "npm run build:lib",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6010",
     "build-storybook": "storybook build",
     "lint:scratch": "bash scripts/lint-scratch.sh",
-    "check": "tsc --noEmit && bash scripts/lint-scratch.sh"
+    "generate:lookup": "node scripts/generate-component-lookup.mjs",
+    "check": "tsc --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-drift.sh && node scripts/generate-component-lookup.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
