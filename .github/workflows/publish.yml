@@ -1,0 +1,56 @@
+name: Publish to npm
+
+# トリガー:
+#   1. タグ push (v*.*.*)   → 自動で publish
+#   2. workflow_dispatch    → 手動実行（緊急用）
+#
+# 前提: GitHub リポジトリの Secrets に NPM_TOKEN を登録すること
+#       （npmjs.com の Access Token を発行 → リポジトリの
+#        Settings > Secrets and variables > Actions > New repository secret で NPM_TOKEN として保存）
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (npm publish --dry-run)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write  # npm provenance 用
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: 'https://registry.npmjs.org/'
+
+      - run: npm ci
+
+      - run: npm run build:lib
+
+      - name: Verify package contents
+        run: npm pack --dry-run
+
+      - name: Publish (dry run)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: npm publish --access public --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
