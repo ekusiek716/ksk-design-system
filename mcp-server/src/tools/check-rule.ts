@@ -3,43 +3,54 @@ import { loadRules } from "../utils/loader.js";
 export interface Violation {
   class: string;
   ruleId: string;
-  level: "error" | "warn";
+  severity: "error" | "warn";
   category: string;
   message: string;
   fix: string;
 }
 
+export interface AiPatternMatch {
+  class: string;
+  patternId: string;
+  name: string;
+  description: string;
+  fix: string;
+}
+
+export interface CheckResult {
+  violations: Violation[];
+  aiPatternMatches: AiPatternMatch[];
+}
+
 /**
- * Check Tailwind classes against KSK DS prohibition rules.
- * Returns an array of violations found.
+ * Check Tailwind classes against KSK DS prohibition rules and AI anti-patterns.
  */
-export function checkRule(classes: string): Violation[] {
-  const { rules } = loadRules();
+export function checkRule(classes: string): CheckResult {
+  const { prohibited, aiPatterns } = loadRules();
   const violations: Violation[] = [];
+  const aiPatternMatches: AiPatternMatch[] = [];
   const classList = classes.split(/\s+/).filter(Boolean);
 
   for (const cls of classList) {
-    for (const rule of rules) {
-      // Pattern can be a regex string (e.g. "font-bold|font-semibold")
+    // Check prohibited rules
+    for (const rule of prohibited) {
       try {
-        const regex = new RegExp(rule.pattern);
-        if (regex.test(cls)) {
+        if (new RegExp(rule.pattern).test(cls)) {
           violations.push({
             class: cls,
             ruleId: rule.id,
-            level: rule.level,
+            severity: rule.severity,
             category: rule.category,
             message: rule.message,
             fix: rule.fix,
           });
         }
       } catch {
-        // Fallback to plain string includes if regex is invalid
-        if (cls.includes(rule.pattern) || rule.pattern.includes(cls)) {
+        if (cls.includes(rule.pattern)) {
           violations.push({
             class: cls,
             ruleId: rule.id,
-            level: rule.level,
+            severity: rule.severity,
             category: rule.category,
             message: rule.message,
             fix: rule.fix,
@@ -47,7 +58,32 @@ export function checkRule(classes: string): Violation[] {
         }
       }
     }
+
+    // Check AI anti-patterns
+    for (const ap of aiPatterns.patterns) {
+      try {
+        if (new RegExp(ap.pattern).test(cls)) {
+          aiPatternMatches.push({
+            class: cls,
+            patternId: ap.id,
+            name: ap.name,
+            description: ap.description,
+            fix: ap.fix,
+          });
+        }
+      } catch {
+        if (cls.includes(ap.pattern)) {
+          aiPatternMatches.push({
+            class: cls,
+            patternId: ap.id,
+            name: ap.name,
+            description: ap.description,
+            fix: ap.fix,
+          });
+        }
+      }
+    }
   }
 
-  return violations;
+  return { violations, aiPatternMatches };
 }

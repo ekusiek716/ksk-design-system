@@ -1,31 +1,41 @@
 import { loadComponents } from "../utils/loader.js";
 import type { ComponentEntry } from "../utils/loader.js";
 
+interface ComponentResult extends ComponentEntry {
+  importPath: string;
+  group: string;
+}
+
 /**
- * Get component metadata by name or ID.
- * Searches both ui/ and patterns/ categories.
+ * Get component metadata by name or path fragment.
+ * Searches all groups: ui, patterns, commerce, admin, shells.
  */
-export function getComponent(id: string): (ComponentEntry & { importPath: string }) | null {
+export function getComponent(id: string): ComponentResult | null {
   const data = loadComponents();
   const normalized = id.toLowerCase().replace(/\s+/g, "-");
 
-  const allComponents = [
-    ...data.components.ui.map((c) => ({ ...c, importPath: `@ksk/design-system` })),
-    ...data.components.patterns.map((c) => ({ ...c, importPath: `@ksk/design-system` })),
-  ];
+  const groups = [
+    { key: "ui", items: data.ui },
+    { key: "patterns", items: data.patterns },
+    { key: "commerce", items: data.commerce },
+    { key: "admin", items: data.admin },
+    { key: "shells", items: data.shells },
+  ] as const;
 
-  // Exact match by name (case-insensitive)
-  const exact = allComponents.find(
-    (c) => c.name.toLowerCase() === normalized || c.path.toLowerCase().endsWith(normalized)
-  );
-  if (exact) return exact;
+  for (const { key, items } of groups) {
+    // Exact name match
+    const exact = items.find((c) => c.name.toLowerCase() === normalized);
+    if (exact) return { ...exact, importPath: "@ksk/design-system", group: key };
 
-  // Partial match
-  const partial = allComponents.find(
-    (c) =>
-      c.name.toLowerCase().includes(normalized) ||
-      c.path.toLowerCase().includes(normalized) ||
-      c.description.toLowerCase().includes(normalized)
-  );
-  return partial ?? null;
+    // Path or partial name match
+    const partial = items.find(
+      (c) =>
+        c.path.toLowerCase().endsWith(normalized) ||
+        c.name.toLowerCase().includes(normalized) ||
+        c.path.toLowerCase().includes(normalized)
+    );
+    if (partial) return { ...partial, importPath: "@ksk/design-system", group: key };
+  }
+
+  return null;
 }

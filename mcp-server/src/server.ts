@@ -115,17 +115,21 @@ export function createServer(): Server {
       }
 
       case "check_rule": {
-        const violations = checkRule(args?.classes as string);
+        const { violations, aiPatternMatches } = checkRule(args?.classes as string);
+        const total = violations.length + aiPatternMatches.length;
+        let text = "";
+        if (total === 0) {
+          text = "✅ 違反なし";
+        } else {
+          if (violations.length > 0) {
+            text += `❌ 禁止パターン ${violations.length}件:\n${JSON.stringify(violations, null, 2)}\n`;
+          }
+          if (aiPatternMatches.length > 0) {
+            text += `⚠️ AIアンチパターン ${aiPatternMatches.length}件:\n${JSON.stringify(aiPatternMatches, null, 2)}`;
+          }
+        }
         return {
-          content: [
-            {
-              type: "text" as const,
-              text:
-                violations.length === 0
-                  ? "✅ 違反なし"
-                  : `❌ ${violations.length}件の違反:\n${JSON.stringify(violations, null, 2)}`,
-            },
-          ],
+          content: [{ type: "text" as const, text }],
         };
       }
 
