@@ -1,8 +1,10 @@
-import {
-  loadPrimitiveTokens,
-  loadSemanticTokens,
-} from "../utils/loader.js";
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { TokenEntry } from "../utils/loader.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const projectRoot = resolve(__dirname, "../../..");
 
 interface TokenResult {
   category: string;
@@ -10,140 +12,185 @@ interface TokenResult {
   count: number;
 }
 
-const typographyTokens: TokenEntry[] = [
-  { name: "typo-heading-3xl", value: "28px / bold / 1.5 / 0.04em — ページタイトル" },
-  { name: "typo-heading-2xl", value: "24px / bold / 1.5 / 0.04em — 主要セクション" },
-  { name: "typo-heading-xl", value: "21px / bold / 1.5 / 0.04em — サブセクション" },
-  { name: "typo-heading-lg", value: "18px / bold / 1.5 / 0.04em — グループ見出し" },
-  { name: "typo-heading-md", value: "16px / bold / 1.5 / 0.04em — 小見出し" },
-  { name: "typo-heading-sm", value: "14px / bold / 1.5 / 0.04em — ラベル的見出し" },
-  { name: "typo-body-lg", value: "16px / normal / 1.75 — 本文テキスト（大）" },
-  { name: "typo-body-md", value: "14px / normal / 1.75 — 本文テキスト（標準）" },
-  { name: "typo-body-sm", value: "12px / normal / 1.5 — 補足テキスト" },
-  { name: "typo-body-xs", value: "10px / normal / 1.5 — 最小テキスト" },
-  { name: "typo-label-lg", value: "16px / bold / 1.5 / 0.04em — ボタン大, CTA" },
-  { name: "typo-label-md", value: "14px / bold / 1.5 / 0.04em — ボタン標準, ナビ" },
-  { name: "typo-label-sm", value: "12px / medium / 1.5 — タグ, バッジ, メタ情報" },
-  { name: "typo-label-xs", value: "10px / medium / 1.5 — 小タグ" },
-  { name: "typo-mono-md", value: "14px / normal / 1.5 — コード, 数値" },
-  { name: "typo-mono-sm", value: "12px / normal / 1.5 — 小コード" },
-  { name: "typo-caption", value: "11px / normal / 1.5 — キャプション" },
-];
+// --- tokens.json loader (cached) ---
 
-const spacingTokens: TokenEntry[] = [
-  { name: "gap-0.5 / p-0.5", value: "2px — 密接した要素間" },
-  { name: "gap-1 / p-1", value: "4px — アイコンとラベル間" },
-  { name: "gap-1.5 / p-1.5", value: "6px — チップ間, タグ間" },
-  { name: "gap-2 / p-2", value: "8px — 標準要素間" },
-  { name: "gap-3 / p-3", value: "12px — セクション内要素間" },
-  { name: "gap-4 / p-4", value: "16px — セクション間" },
-  { name: "gap-6 / p-6", value: "24px — カード・ダイアログ内パディング" },
-  { name: "px-4", value: "16px — ページ左右マージン（SP）" },
-  { name: "px-6", value: "24px — ページ左右マージン（PC）" },
-];
+interface TokensJson {
+  colors: {
+    primitive: Record<string, Record<string, string>>;
+    semantic: Record<string, Record<string, string>>;
+  };
+  typography: {
+    heading: Record<string, { size: string; weight: number; lineHeight: number; letterSpacing?: string }>;
+    body: Record<string, { size: string; weight: number | string; lineHeight: number }>;
+    label: Record<string, { size: string; weight: number | string; lineHeight: number; letterSpacing?: string }>;
+    display?: Record<string, unknown>;
+  };
+  spacing: { unit: string; scale: number[] };
+  borderRadius: Record<string, string>;
+  shadows: Record<string, string>;
+  touchTargets: Record<string, unknown>;
+}
 
-const radiusTokens: TokenEntry[] = [
-  { name: "rounded-none", value: "0px — 角丸なし" },
-  { name: "rounded-sm", value: "4px — タグ, 入力フィールド" },
-  { name: "rounded-lg", value: "8px — カード（標準）, ダイアログ" },
-  { name: "rounded-2xl", value: "16px — モーダル" },
-  { name: "rounded-full", value: "50% — ボタン丸型, アバター, バッジ" },
-];
+let tokensJsonCache: TokensJson | null = null;
 
-const shadowTokens: TokenEntry[] = [
-  { name: "--shadow-sm", value: "小さいシャドウ。リスト項目ホバー等" },
-  { name: "--shadow-md", value: "標準シャドウ。カード等に使用" },
-  { name: "--shadow-dialog", value: "モーダル・ダイアログ用シャドウ" },
-];
+function loadTokensJson(): TokensJson {
+  if (!tokensJsonCache) {
+    tokensJsonCache = JSON.parse(
+      readFileSync(resolve(projectRoot, "tokens.json"), "utf-8")
+    );
+  }
+  return tokensJsonCache!;
+}
 
-const sizeTokens: TokenEntry[] = [
-  { name: "max-w-screen-xl", value: "PCメインコンテンツ最大幅" },
-  { name: "button-xs", value: "24px — 極小ボタン" },
-  { name: "button-sm", value: "32px — コンパクトUI" },
-  { name: "button-default", value: "40px — 標準ボタン" },
-  { name: "button-lg", value: "48px — 強調CTA" },
-  { name: "button-xl", value: "56px — フルワイドCTA" },
-];
+// --- Converters ---
 
-/**
- * Get design tokens by category.
- */
+function flattenColors(obj: Record<string, Record<string, string>>, prefix: string): TokenEntry[] {
+  const result: TokenEntry[] = [];
+  for (const [group, values] of Object.entries(obj)) {
+    for (const [shade, value] of Object.entries(values)) {
+      result.push({ name: `--${prefix}-${group}-${shade}`, value });
+    }
+  }
+  return result;
+}
+
+function flattenSemanticColors(semantic: Record<string, Record<string, string>>): TokenEntry[] {
+  const result: TokenEntry[] = [];
+  const categoryMap: Record<string, string> = {
+    surface: "Surface",
+    text: "Text",
+    brand: "Brand",
+    focus: "Focus",
+    border: "Border",
+    status: "Status",
+  };
+  for (const [group, values] of Object.entries(semantic)) {
+    const prefix = categoryMap[group] ?? group;
+    for (const [role, value] of Object.entries(values)) {
+      const rolePascal = role.split("-").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join("-");
+      result.push({ name: `var(--${prefix}-${rolePascal})`, value });
+    }
+  }
+  return result;
+}
+
+function typographyTokens(tokens: TokensJson): TokenEntry[] {
+  const result: TokenEntry[] = [];
+  for (const [variant, sizes] of Object.entries(tokens.typography)) {
+    for (const [size, props] of Object.entries(sizes as Record<string, Record<string, unknown>>)) {
+      const desc = Object.entries(props)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(", ");
+      result.push({ name: `typo-${variant}-${size}`, value: desc });
+    }
+  }
+  return result;
+}
+
+function spacingTokens(tokens: TokensJson): TokenEntry[] {
+  return tokens.spacing.scale.map((px) => ({
+    name: `gap-${px / 4} / p-${px / 4}`,
+    value: `${px}px`,
+  }));
+}
+
+function radiusTokens(tokens: TokensJson): TokenEntry[] {
+  return Object.entries(tokens.borderRadius).map(([key, value]) => ({
+    name: `rounded-${key}`,
+    value,
+  }));
+}
+
+function shadowTokens(tokens: TokensJson): TokenEntry[] {
+  return Object.entries(tokens.shadows).map(([key, value]) => ({
+    name: `shadow-[var(--shadow-${key})]`,
+    value,
+  }));
+}
+
+// --- Public API ---
+
 export function getToken(category: string): TokenResult {
   const cat = category.toLowerCase();
+  const tokens = loadTokensJson();
 
   switch (cat) {
     case "color":
     case "colors":
     case "colour": {
-      const primitive = loadPrimitiveTokens();
-      const semantic = loadSemanticTokens();
-      return {
-        category: "color",
-        tokens: [...semantic, ...primitive],
-        count: semantic.length + primitive.length,
-      };
-    }
-
-    case "primitive":
-    case "primitive-color": {
-      const tokens = loadPrimitiveTokens();
-      return { category: "primitive", tokens, count: tokens.length };
+      const semantic = flattenSemanticColors(tokens.colors.semantic);
+      const primitive = flattenColors(tokens.colors.primitive, "Primitive");
+      return { category: "color", tokens: [...semantic, ...primitive], count: semantic.length + primitive.length };
     }
 
     case "semantic":
     case "semantic-color": {
-      const tokens = loadSemanticTokens();
-      return { category: "semantic", tokens, count: tokens.length };
+      const t = flattenSemanticColors(tokens.colors.semantic);
+      return { category: "semantic", tokens: t, count: t.length };
+    }
+
+    case "primitive":
+    case "primitive-color": {
+      const t = flattenColors(tokens.colors.primitive, "Primitive");
+      return { category: "primitive", tokens: t, count: t.length };
     }
 
     case "typography":
     case "typo":
     case "font":
-    case "text":
-      return { category: "typography", tokens: typographyTokens, count: typographyTokens.length };
+    case "text": {
+      const t = typographyTokens(tokens);
+      return { category: "typography", tokens: t, count: t.length };
+    }
 
     case "spacing":
     case "space":
     case "gap":
     case "margin":
-    case "padding":
-      return { category: "spacing", tokens: spacingTokens, count: spacingTokens.length };
+    case "padding": {
+      const t = spacingTokens(tokens);
+      return { category: "spacing", tokens: t, count: t.length };
+    }
 
     case "radius":
     case "rounded":
     case "corner":
-    case "角丸":
-      return { category: "radius", tokens: radiusTokens, count: radiusTokens.length };
+    case "角丸": {
+      const t = radiusTokens(tokens);
+      return { category: "radius", tokens: t, count: t.length };
+    }
 
     case "shadow":
-    case "elevation":
-      return { category: "shadow", tokens: shadowTokens, count: shadowTokens.length };
+    case "elevation": {
+      const t = shadowTokens(tokens);
+      return { category: "shadow", tokens: t, count: t.length };
+    }
 
     case "size":
-    case "sizes":
-    case "dimension":
-      return { category: "size", tokens: sizeTokens, count: sizeTokens.length };
+    case "touch":
+    case "target": {
+      const t = Object.entries(tokens.touchTargets).map(([k, v]) => ({
+        name: k,
+        value: JSON.stringify(v),
+      }));
+      return { category: "touchTargets", tokens: t, count: t.length };
+    }
 
     default: {
       const allTokens = [
-        ...loadSemanticTokens(),
-        ...loadPrimitiveTokens(),
-        ...typographyTokens,
-        ...spacingTokens,
-        ...radiusTokens,
-        ...shadowTokens,
-        ...sizeTokens,
+        ...flattenSemanticColors(tokens.colors.semantic),
+        ...flattenColors(tokens.colors.primitive, "Primitive"),
+        ...typographyTokens(tokens),
+        ...spacingTokens(tokens),
+        ...radiusTokens(tokens),
+        ...shadowTokens(tokens),
       ];
       const filtered = allTokens.filter(
         (t) =>
           t.name.toLowerCase().includes(cat) ||
           t.value.toLowerCase().includes(cat)
       );
-      return {
-        category: `search: ${category}`,
-        tokens: filtered,
-        count: filtered.length,
-      };
+      return { category: `search: ${category}`, tokens: filtered, count: filtered.length };
     }
   }
 }
