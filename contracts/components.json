@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 25,
@@ -16,6 +16,7 @@
     {
       "name": "Button",
       "path": "src/components/ui/button.tsx",
+      "description": "アクションボタン。画面内で最も重要なCTAにはdefaultを使用。アイコン単独の場合はiconサイズ。",
       "variants": ["default", "secondary", "outline", "ghost", "link", "destructive", "caution"],
       "sizes": ["xs", "sm", "md", "lg", "xl", "2xl", "icon"],
       "accessibility": ["aria-label required for icon-only buttons"],
@@ -24,6 +25,7 @@
     {
       "name": "Input",
       "path": "src/components/ui/input.tsx",
+      "description": "テキスト入力フィールド。h-12, rounded-sm, セマンティックトークン使用。必ずLabelとセットで使う。",
       "variants": [],
       "accessibility": ["Must pair with <Label>"],
       "rules": ["Must use <Input> not <input>"]
@@ -31,6 +33,7 @@
     {
       "name": "Textarea",
       "path": "src/components/ui/textarea.tsx",
+      "description": "複数行テキスト入力。コメント・説明文など長文入力に使用。必ずLabelとセットで使う。",
       "variants": [],
       "accessibility": ["Must pair with <Label>"],
       "rules": ["Must use <Textarea> not <textarea>"]
@@ -38,12 +41,14 @@
     {
       "name": "Label",
       "path": "src/components/ui/label.tsx",
+      "description": "フォームラベル。すべての入力コントロールに対して必須。htmlForで入力と紐付ける。",
       "variants": [],
       "rules": ["Always pair with form control via htmlFor"]
     },
     {
       "name": "Select",
       "path": "src/components/ui/select.tsx",
+      "description": "ドロップダウン選択。Radix UIベース。SelectTrigger / SelectContent / SelectItemで構成。",
       "variants": [],
       "accessibility": ["Must pair with <Label>"],
       "rules": ["Must use <Select> not <select>"]
@@ -51,109 +56,129 @@
     {
       "name": "Checkbox",
       "path": "src/components/ui/checkbox.tsx",
+      "description": "チェックボックス。複数選択・同意確認に使用。必ずLabelとセットで使う。",
       "variants": [],
       "accessibility": ["Must pair with <Label>"]
     },
     {
       "name": "RadioGroup",
       "path": "src/components/ui/radio-group.tsx",
+      "description": "ラジオボタングループ。単一選択に使用。各RadioGroupItemにLabelが必要。",
       "variants": [],
       "accessibility": ["Must pair with <Label> for each item"]
     },
     {
       "name": "Switch",
       "path": "src/components/ui/switch.tsx",
+      "description": "トグルスイッチ。設定のON/OFFなど即時反映するアクションに使用。",
       "variants": [],
       "accessibility": ["Must pair with <Label>"]
     },
     {
       "name": "Card",
       "path": "src/components/ui/card.tsx",
+      "description": "コンテンツカード。@containerクエリ対応。CardHeader/CardContent/CardFooterで構成。",
       "subcomponents": ["CardHeader", "CardTitle", "CardDescription", "CardAction", "CardContent", "CardFooter"],
       "rules": ["rounded-lg (8px)"]
     },
     {
       "name": "Badge",
       "path": "src/components/ui/badge.tsx",
+      "description": "ステータスバッジ。状態表示・カウント表示に使用。interactive要素には使わない。",
       "variants": ["default", "secondary", "outline", "destructive", "caution", "success", "info", "pending", "inactive"],
       "rules": ["rounded-full only"]
     },
     {
       "name": "Avatar",
       "path": "src/components/ui/avatar.tsx",
+      "description": "ユーザーアバター。AvatarImage（画像）とAvatarFallback（イニシャル・アイコン）で構成。",
       "subcomponents": ["AvatarImage", "AvatarFallback"],
       "rules": ["rounded-full only", "Use DiceBear shapes for placeholder, not pravatar.cc"]
     },
     {
       "name": "Dialog",
       "path": "src/components/ui/dialog.tsx",
+      "description": "モーダルダイアログ。重要な確認・フォーム入力に使用。モバイルではResponsiveDialogを推奨。",
       "subcomponents": ["DialogTrigger", "DialogContent", "DialogHeader", "DialogTitle", "DialogDescription", "DialogFooter", "DialogClose"],
       "rules": ["rounded-2xl (16px)", "shadow-[var(--shadow-dialog)]", "p-6 padding"]
     },
     {
       "name": "Sheet",
       "path": "src/components/ui/sheet.tsx",
+      "description": "サイドパネル・ボトムシート。フィルター・メニュー・補助入力に使用。モーダルより軽いコンテキストに。",
       "subcomponents": ["SheetTrigger", "SheetContent", "SheetHeader", "SheetTitle", "SheetDescription", "SheetFooter", "SheetClose"],
       "rules": ["Side panel, not modal"]
     },
     {
       "name": "Popover",
       "path": "src/components/ui/popover.tsx",
+      "description": "ポップオーバー。ツールチップより情報量が多い場合・インタラクティブな補助UIに使用。",
       "subcomponents": ["PopoverTrigger", "PopoverContent", "PopoverAnchor"],
       "rules": ["shadow-[var(--shadow-lg)]"]
     },
     {
       "name": "Tooltip",
       "path": "src/components/ui/tooltip.tsx",
+      "description": "ツールチップ。アイコンや省略テキストへの補足説明に使用。テキストのみ・短文のみ。",
       "subcomponents": ["TooltipProvider", "TooltipTrigger", "TooltipContent"],
       "rules": ["shadow-[var(--shadow-tooltip)]"]
     },
     {
       "name": "Tabs",
       "path": "src/components/ui/tabs.tsx",
+      "description": "タブナビゲーション。同一コンテキスト内のビュー切り替えに使用。",
       "subcomponents": ["TabsList", "TabsTrigger", "TabsContent"]
     },
     {
       "name": "Accordion",
       "path": "src/components/ui/accordion.tsx",
+      "description": "アコーディオン。FAQ・設定項目など折りたたみコンテンツに使用。",
       "subcomponents": ["AccordionItem", "AccordionTrigger", "AccordionContent"]
     },
     {
       "name": "Separator",
-      "path": "src/components/ui/separator.tsx"
+      "path": "src/components/ui/separator.tsx",
+      "description": "区切り線。セクション間・リスト項目間の視覚的分離に使用。"
     },
     {
       "name": "Progress",
-      "path": "src/components/ui/progress.tsx"
+      "path": "src/components/ui/progress.tsx",
+      "description": "プログレスバー。処理進行状況・達成率の表示に使用。アニメーション付き。"
     },
     {
       "name": "ScrollArea",
       "path": "src/components/ui/scroll-area.tsx",
+      "description": "カスタムスクロールエリア。OSネイティブスクロールを隠してDS統一スクロールバーを表示。",
       "subcomponents": ["ScrollBar"]
     },
     {
       "name": "Pagination",
       "path": "src/components/ui/pagination.tsx",
+      "description": "ページネーション。リスト・テーブルのページ送りに使用。",
       "subcomponents": ["PaginationContent", "PaginationItem", "PaginationLink", "PaginationNext", "PaginationPrevious", "PaginationEllipsis"]
     },
     {
       "name": "Breadcrumb",
       "path": "src/components/ui/breadcrumb.tsx",
+      "description": "パンくずリスト。現在位置の階層表示に使用。",
       "subcomponents": ["BreadcrumbList", "BreadcrumbItem", "BreadcrumbLink", "BreadcrumbPage", "BreadcrumbSeparator", "BreadcrumbEllipsis"]
     },
     {
       "name": "Skeleton",
-      "path": "src/components/ui/skeleton.tsx"
+      "path": "src/components/ui/skeleton.tsx",
+      "description": "ローディングスケルトン。データ取得中のプレースホルダー表示に使用。"
     },
     {
       "name": "ResponsiveDialog",
       "path": "src/components/ui/responsive-dialog.tsx",
+      "description": "レスポンシブダイアログ。PCではDialog、モバイルではSheetに自動切り替え。useMediaQueryフック使用。",
       "subcomponents": ["ResponsiveDialogTrigger", "ResponsiveDialogContent", "ResponsiveDialogHeader", "ResponsiveDialogTitle", "ResponsiveDialogDescription", "ResponsiveDialogFooter", "ResponsiveDialogClose"],
       "rules": ["Dialog on desktop, Sheet on mobile. Use useMediaQuery hook."]
     },
     {
       "name": "Toast",
       "path": "src/components/ui/toast.tsx",
+      "description": "トースト通知。操作結果フィードバックに使用。useToastフックで呼び出す。",
       "variants": ["default", "success", "caution", "destructive"],
       "rules": ["Use useToast hook to trigger"]
     }
@@ -162,64 +187,77 @@
     {
       "name": "Banner",
       "path": "src/components/patterns/banner.tsx",
+      "description": "フィードバックバナー。情報・成功・警告・注意の状態を色+アイコン+テキストで表示。",
       "variants": ["info", "success", "warning", "caution"],
       "rules": ["Color + icon + text (never color alone)"]
     },
     {
       "name": "EmptyState",
       "path": "src/components/patterns/empty-state.tsx",
+      "description": "空状態プレースホルダー。データゼロ時のUX向上に使用。アクションまたは説明文を必ず含める。",
       "rules": ["Always include an action or explanation"]
     },
     {
       "name": "ErrorState",
       "path": "src/components/patterns/error-state.tsx",
+      "description": "エラー状態表示。API失敗・権限エラー等に使用。リトライアクションを必ず含める。",
       "rules": ["Color + icon + text. Include retry action."]
     },
     {
       "name": "SectionHeader",
       "path": "src/components/patterns/section-header.tsx",
+      "description": "セクション見出し+アクションのセット。リスト上部の「一覧」+「もっと見る」等に使用。",
       "rules": ["typo-heading-* for title"]
     },
     {
       "name": "StatCard",
-      "path": "src/components/patterns/stat-card.tsx"
+      "path": "src/components/patterns/stat-card.tsx",
+      "description": "統計値カード。数値+トレンド（増減）+ラベルを表示。ダッシュボードのKPI表示に使用。"
     },
     {
       "name": "ListItem",
-      "path": "src/components/patterns/list-item.tsx"
+      "path": "src/components/patterns/list-item.tsx",
+      "description": "汎用リストアイテム。left/right/bottomスロット付き。設定・通知・ユーザー一覧等に使用。"
     },
     {
       "name": "SearchBar",
-      "path": "src/components/patterns/search-bar.tsx"
+      "path": "src/components/patterns/search-bar.tsx",
+      "description": "検索バー。アイコン+テキスト入力の組み合わせ。ページ内検索・フィルタリングに使用。"
     },
     {
       "name": "Chip",
       "path": "src/components/patterns/chip.tsx",
+      "description": "インタラクティブチップ。フィルター・キーワード選択に使用。Tagと違いクリック可能。",
       "variants": ["default", "active", "disabled"],
       "rules": ["rounded-full only", "For filters and keywords"]
     },
     {
       "name": "Tag",
       "path": "src/components/patterns/tag.tsx",
+      "description": "表示のみラベル。カテゴリ・ステータスの視覚的表示に使用。Chipと違いクリック不可。",
       "rules": ["rounded-sm (4px)", "Display-only, not interactive"]
     },
     {
       "name": "NotificationBadge",
       "path": "src/components/patterns/notification-badge.tsx",
+      "description": "通知件数バッジ。アイコン・アバターに重ねて件数表示。99件超は「99+」表示。",
       "rules": ["rounded-full only", "Max display: 99+"]
     },
     {
       "name": "ProgressSteps",
-      "path": "src/components/patterns/progress-steps.tsx"
+      "path": "src/components/patterns/progress-steps.tsx",
+      "description": "ステップ進捗表示。チェックアウト・登録フロー等の多段階プロセスの現在地を示す。"
     },
     {
       "name": "FormField",
       "path": "src/components/patterns/form-field.tsx",
+      "description": "フォームフィールドラッパー。Label+Input+エラーメッセージをセットで管理。バリデーション表示付き。",
       "rules": ["Label + Input + error message as unit"]
     },
     {
       "name": "Form",
       "path": "src/components/patterns/form.tsx",
+      "description": "フォームコンテナ。FormRoot/FormSection/FormActionsで構成。複数FormFieldをまとめる。",
       "subcomponents": ["FormRoot", "FormSection", "FormActions"]
     }
   ],
@@ -227,6 +265,7 @@
     {
       "name": "ProductCard",
       "path": "src/components/patterns/commerce/product-card.tsx",
+      "description": "商品カード。縦型・横型レイアウト対応。お気に入り・割引バッジ・カートボタンを内包。",
       "variants": ["vertical", "horizontal"],
       "features": ["favorite", "discount-badge", "cart-button"],
       "rules": ["rounded-lg for card", "PriceDisplay for price", "RatingDisplay for rating"]
@@ -234,44 +273,52 @@
     {
       "name": "ProductCarousel",
       "path": "src/components/patterns/commerce/product-carousel.tsx",
+      "description": "商品横スクロールカルーセル。おすすめ・ランキング表示に使用。SectionHeader統合済み。",
       "features": ["section-header", "horizontal-scroll", "ranking"]
     },
     {
       "name": "PriceDisplay",
       "path": "src/components/patterns/commerce/price-display.tsx",
+      "description": "価格表示コンポーネント。税込表示・セール価格・範囲価格に対応。ProductCardと組み合わせて使用。",
       "sizes": ["xs", "sm", "md", "lg"],
       "features": ["sale", "range", "tax-inclusive"]
     },
     {
       "name": "RatingDisplay",
       "path": "src/components/patterns/commerce/rating-display.tsx",
+      "description": "星評価+レビュー件数表示。ProductCardと組み合わせて使用。",
       "features": ["star-rating", "review-count"]
     },
     {
       "name": "QuantitySelector",
       "path": "src/components/patterns/commerce/quantity-selector.tsx",
+      "description": "数量増減セレクター。カート内(sm)・商品詳細ページ(md)で使用。最小値1のガード付き。",
       "sizes": ["sm", "md"],
       "rules": ["sm: cart compact, md: product detail page"]
     },
     {
       "name": "OrderSummary",
       "path": "src/components/patterns/commerce/order-summary.tsx",
+      "description": "注文サマリー。小計・送料・合計の表示。fixed(画面固定)とinline(ページ内埋め込み)に対応。",
       "variants": ["fixed", "inline"]
     },
     {
       "name": "ImageCarousel",
       "path": "src/components/patterns/commerce/image-carousel.tsx",
+      "description": "商品画像カルーセル。スクロールスナップ・ドット・矢印・自動再生対応。商品詳細ページに使用。",
       "features": ["scroll-snap", "dots", "arrows", "autoPlay"]
     },
     {
       "name": "BottomNav",
       "path": "src/components/patterns/commerce/bottom-nav.tsx",
+      "description": "モバイル底部ナビゲーション。ホーム・検索・カート・マイページ等への導線。セーフエリア対応。",
       "features": ["badge", "safe-area"],
       "rules": ["Mobile only. Use safe-area-inset-bottom."]
     },
     {
       "name": "FilterBar",
       "path": "src/components/patterns/commerce/filter-bar.tsx",
+      "description": "商品フィルターバー。Chip+ソート+件数表示の組み合わせ。商品一覧ページの上部に配置。",
       "features": ["chips", "sort", "count"]
     }
   ],
@@ -279,38 +326,45 @@
     {
       "name": "DataTable",
       "path": "src/components/patterns/admin/data-table.tsx",
+      "description": "管理画面データテーブル。ソート・チェックボックス・行アクション・インライン編集・ドラッグ並び替え対応。",
       "features": ["sort", "checkbox", "actions", "inline-edit", "drag"],
       "rules": ["20+ sub-components. Use DataTableHead, DataTableRow, DataTableCell."]
     },
     {
       "name": "KebabMenu",
       "path": "src/components/patterns/admin/kebab-menu.tsx",
+      "description": "テーブル行アクションメニュー（⋮ボタン）。編集・削除・複製等の行単位操作に使用。",
       "rules": ["For table row actions only"]
     },
     {
       "name": "BulkActionBar",
       "path": "src/components/patterns/admin/bulk-action-bar.tsx",
+      "description": "一括操作バー。DataTableで行を選択した際に上部に表示。選択件数表示+一括削除/更新ボタン。",
       "rules": ["Show only when rows are selected"]
     },
     {
       "name": "StatusTabs",
       "path": "src/components/patterns/admin/status-tabs.tsx",
+      "description": "ステータス別タブ。受付中・処理中・完了等のステータスで一覧を切り替え。カウントバッジ付き。",
       "features": ["count-badge"]
     },
     {
       "name": "SearchPanel",
       "path": "src/components/patterns/admin/search-panel.tsx",
+      "description": "管理画面検索パネル。複数条件の絞り込みフォーム。grid/flexレイアウト・リセットボタン付き。",
       "layouts": ["grid", "flex"],
       "features": ["search", "reset"]
     },
     {
       "name": "ImageUploader",
       "path": "src/components/patterns/admin/image-uploader.tsx",
+      "description": "画像アップロードコンポーネント。ドラッグ&ドロップ・複数ファイル対応。グリッドレイアウト表示。",
       "features": ["upload", "delete", "grid-layout"]
     },
     {
       "name": "NotificationList",
       "path": "src/components/patterns/admin/notification-list.tsx",
+      "description": "通知リスト。縦型（フィード）・横型（ヘッダードロップダウン）レイアウトに対応。",
       "layouts": ["vertical", "horizontal"]
     }
   ],
@@ -318,16 +372,19 @@
     {
       "name": "AdminShell",
       "path": "src/components/patterns/shells/admin-shell.tsx",
+      "description": "管理画面レイアウトシェル。サイドバー+ヘッダー+メインコンテンツ構成。管理・ダッシュボード系ページ用。",
       "rules": ["For admin/dashboard pages"]
     },
     {
       "name": "AppShell",
       "path": "src/components/patterns/shells/app-shell.tsx",
+      "description": "汎用アプリレイアウトシェル。ヘッダー+メインコンテンツ+フッター構成。一般的なWebアプリページ用。",
       "rules": ["For general app pages"]
     },
     {
       "name": "MarketingShell",
       "path": "src/components/patterns/shells/marketing-shell.tsx",
+      "description": "マーケティング・LPレイアウトシェル。最大幅コントロール・ヒーロー対応。LP・ランディングページ用。",
       "rules": ["For LP/marketing pages"]
     }
   ]
