@@ -19,12 +19,13 @@
 | Calendar | `@/components/ui/calendar` | — | — |
 | Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter | `@/components/ui/card` | — | FullCard, MinimalCard, HeaderOnly |
 | Checkbox | `@/components/ui/checkbox` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, MultipleOptions |
-| DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, Disabled, RangePicker, CalendarOnly |
+| DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, Disabled, RangePicker, CalendarOnly, CalendarRange |
 | Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm |
 | Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, DisabledState |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis |
+| PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small |
 | Popover, PopoverTrigger, PopoverContent, PopoverAnchor | `@/components/ui/popover` | — | ClickToShow, SimpleContent |
 | ProgressRing | `@/components/ui/progress-ring` | — | Default, Empty, Full, AllSizes, CustomLabel, Animated |
 | Progress | `@/components/ui/progress` | — | Default, Empty, Half, Full, AllStates |
@@ -35,6 +36,7 @@
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
 | Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right` | RightSide, LeftSide |
 | Skeleton | `@/components/ui/skeleton` | — | CardSkeleton, TextSkeleton, AvatarWithText |
+| StarRating | `@/components/ui/star-rating` | — | Interactive, ReadOnly, Sizes |
 | Switch | `@/components/ui/switch` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, SettingsList |
 | Tabs, TabsList, TabsTrigger, TabsContent | `@/components/ui/tabs` | — | ThreeTabs, WithDisabledTab |
 | Textarea | `@/components/ui/textarea` | — | Default, WithPlaceholder, Disabled, Error |
@@ -63,7 +65,10 @@
 |-----------|--------|----------|---------|
 | AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky |
 | Banner | `@/components/patterns/banner` | **variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants |
+| BottomSheetForm | `@/components/patterns/bottom-sheet-form` | — | Default, WithLoading |
+| ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, WithMax |
 | Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `sm`, `md`, `lg`<br>**shape**: `pill`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape |
+| ConfirmDialog | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly |
 | ErrorState | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry |
 | FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithSelect, CompleteForm |

@@ -4,12 +4,12 @@
     "version": "1.1.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 29,
-      "patterns": 16,
+      "ui": 31,
+      "patterns": 19,
       "commerce": 9,
       "admin": 7,
       "shells": 3,
-      "total": 64
+      "total": 69
     }
   },
   "ui": [
@@ -211,6 +211,20 @@
       "description": "数値入力コンポーネント。+/-ボタン付き。min/max/stepのガード・通貨フォーマット対応。<input type='number'>の代替。",
       "features": ["increment", "decrement", "min-max-clamp", "format", "keyboard-arrow"],
       "rules": ["Use NumberInput not <input type='number'>", "Use format prop for currency display"]
+    },
+    {
+      "name": "PillToggle",
+      "path": "src/components/ui/pill-toggle.tsx",
+      "description": "ピル型トグルセグメント。2〜4選択肢の切り替えに使用。TabsよりコンパクトなビューフィルターUI。",
+      "sizes": ["sm", "md"],
+      "rules": ["Use for 2-4 options only. For 5+ options use Tabs."]
+    },
+    {
+      "name": "StarRating",
+      "path": "src/components/ui/star-rating.tsx",
+      "description": "星評価コンポーネント。onChange省略で表示専用、指定でインタラクティブ入力。0.5刻みの半星表示対応。",
+      "sizes": ["sm", "md", "lg"],
+      "rules": ["Omit onChange for read-only display. Pass onChange for interactive input."]
     }
   ],
   "patterns": [
@@ -310,6 +324,27 @@
       "description": "スワイプアクション付きリスト行。左スワイプでアクションボタンを表示。タッチ/マウス両対応。",
       "features": ["swipe-to-reveal", "snap-behavior", "multiple-actions"],
       "rules": ["Mobile list items with swipe actions (delete, archive, etc.)"]
+    },
+    {
+      "name": "ConfirmDialog",
+      "path": "src/components/patterns/confirm-dialog.tsx",
+      "description": "確認ダイアログ。削除・送信等の重要操作前の確認に使用。非同期onConfirm対応・ローディング状態あり。",
+      "variants": ["default", "destructive"],
+      "rules": ["Use destructive variant for delete/irreversible actions", "Use ConfirmDialog not custom Dialog for confirmation flows"]
+    },
+    {
+      "name": "BottomSheetForm",
+      "path": "src/components/patterns/bottom-sheet-form.tsx",
+      "description": "ボトムシートフォーム。タスク追加・編集等のフォームをモバイルシートで表示。ドラッグハンドル・固定フッター付き。",
+      "features": ["drag-handle", "scrollable-content", "fixed-footer", "async-submit"],
+      "rules": ["Use for mobile form inputs. Sheet side is always bottom."]
+    },
+    {
+      "name": "ChipSelector",
+      "path": "src/components/patterns/chip-selector.tsx",
+      "description": "チップ複数選択コンポーネント。カテゴリ・タグ等の複数/単一選択に使用。max上限・removableバッジ対応。",
+      "features": ["multi-select", "single-select", "max-limit", "removable"],
+      "rules": ["Use multiple=false for single-select. Use max to limit selection count."]
     }
   ],
   "commerce": [
