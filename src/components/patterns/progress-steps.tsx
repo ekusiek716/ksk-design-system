@@ -15,33 +15,24 @@ function ProgressSteps({
   return (
     <div
       data-slot="progress-steps"
-      className={cn("flex flex-col gap-2", className)}
+      className={cn("flex items-start", className)}
       role="progressbar"
       aria-valuenow={currentStep + 1}
       aria-valuemin={1}
       aria-valuemax={steps.length}
       {...props}
     >
-      {/* サークル + ライン行 */}
-      <div className="flex items-center">
-        {steps.map((_, index) => {
-          const isCompleted = index < currentStep
-          const isCurrent = index === currentStep
-          return (
-            <React.Fragment key={index}>
-              {index > 0 && (
-                <div
-                  className={cn(
-                    "flex-1 h-0.5",
-                    isCompleted
-                      ? "bg-[var(--Brand-Primary)]"
-                      : "bg-[var(--Border-Low-Emphasis)]"
-                  )}
-                />
-              )}
+      {steps.map((step, index) => {
+        const isCompleted = index < currentStep
+        const isCurrent = index === currentStep
+        const isLast = index === steps.length - 1
+        return (
+          <React.Fragment key={index}>
+            {/* ステップ（サークル + ラベル） */}
+            <div className="flex flex-col items-center gap-1.5 shrink-0">
               <div
                 className={cn(
-                  "flex items-center justify-center size-8 rounded-full typo-label-sm transition-colors shrink-0",
+                  "flex items-center justify-center size-8 rounded-full typo-label-sm transition-colors",
                   isCompleted
                     ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
                     : isCurrent
@@ -57,31 +48,32 @@ function ProgressSteps({
                   index + 1
                 )}
               </div>
-            </React.Fragment>
-          )
-        })}
-      </div>
-      {/* ラベル行 */}
-      <div className="flex justify-between">
-        {steps.map((step, index) => {
-          const isCurrent = index === currentStep
-          return (
-            <span
-              key={index}
-              className={cn(
-                "typo-label-xs whitespace-nowrap text-center",
-                index === 0 ? "text-left" : index === steps.length - 1 ? "text-right" : "text-center",
-                isCurrent
-                  ? "text-[var(--Text-High-Emphasis)]"
-                  : "text-[var(--Text-Low-Emphasis)]"
-              )}
-              style={{ width: `${100 / steps.length}%` }}
-            >
-              {step}
-            </span>
-          )
-        })}
-      </div>
+              <span
+                className={cn(
+                  "typo-label-xs text-center whitespace-nowrap",
+                  isCurrent
+                    ? "text-[var(--Text-High-Emphasis)] font-medium"
+                    : "text-[var(--Text-Low-Emphasis)]"
+                )}
+              >
+                {step}
+              </span>
+            </div>
+
+            {/* コネクターライン（最後のステップには不要） */}
+            {!isLast && (
+              <div
+                className={cn(
+                  "flex-1 h-0.5 mt-4 mx-1",
+                  isCompleted
+                    ? "bg-[var(--Brand-Primary)]"
+                    : "bg-[var(--Border-Low-Emphasis)]"
+                )}
+              />
+            )}
+          </React.Fragment>
+        )
+      })}
     </div>
   )
 }
