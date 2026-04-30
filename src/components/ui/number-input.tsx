@@ -11,11 +11,17 @@ interface NumberInputProps {
   format?: (value: number) => string
   placeholder?: string
   disabled?: boolean
+  size?: "sm" | "md"
   className?: string
 }
 
+const SIZE = {
+  sm: { wrap: "h-9 gap-2", btn: "w-8 h-8", icon: 14, text: "typo-label-sm w-8" },
+  md: { wrap: "h-12 gap-3", btn: "w-10 h-10", icon: 16, text: "typo-body-md w-10" },
+} as const
+
 function NumberInput({
-  value,
+  value = 0,
   onChange,
   min = -Infinity,
   max = Infinity,
@@ -23,65 +29,68 @@ function NumberInput({
   format,
   placeholder = "0",
   disabled = false,
+  size = "md",
   className,
 }: NumberInputProps) {
-  const [raw, setRaw] = React.useState(value !== undefined ? String(value) : "")
+  const [raw, setRaw] = React.useState(String(value))
   const [focused, setFocused] = React.useState(false)
 
-  // 外部 value が変わったら同期
   React.useEffect(() => {
-    if (!focused && value !== undefined) setRaw(String(value))
+    if (!focused) setRaw(String(value))
   }, [value, focused])
 
   const commit = (str: string) => {
     const num = parseFloat(str.replace(/[^0-9.-]/g, ""))
-    if (isNaN(num)) { setRaw(value !== undefined ? String(value) : ""); return }
+    if (isNaN(num)) { setRaw(String(value)); return }
     const clamped = Math.min(max, Math.max(min, num))
     setRaw(String(clamped))
     onChange?.(clamped)
   }
 
   const increment = () => {
-    const current = parseFloat(raw) || 0
-    const next = Math.min(max, current + step)
+    const next = Math.min(max, value + step)
     setRaw(String(next))
     onChange?.(next)
   }
 
   const decrement = () => {
-    const current = parseFloat(raw) || 0
-    const next = Math.max(min, current - step)
+    const next = Math.max(min, value - step)
     setRaw(String(next))
     onChange?.(next)
   }
 
-  const displayValue = focused
-    ? raw
-    : (value !== undefined && format ? format(value) : raw)
+  const displayValue = focused ? raw : (format ? format(value) : raw)
+  const s = SIZE[size]
+
+  const btnBase = cn(
+    "flex items-center justify-center rounded-full border shrink-0 transition-colors select-none",
+    s.btn,
+    "border-[var(--Border-Medium-Emphasis)] text-[var(--Object-Medium-Emphasis)]",
+    "hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)] hover:bg-[var(--Brand-Ultra-Light)]",
+    "active:scale-95",
+    "disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[var(--Border-Medium-Emphasis)] disabled:hover:text-[var(--Object-Medium-Emphasis)] disabled:hover:bg-transparent"
+  )
 
   return (
     <div
       data-slot="number-input"
-      className={cn(
-        "flex h-12 w-full items-center rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] overflow-hidden transition-colors",
-        "focus-within:ring-[3px] focus-within:ring-[var(--Focus-High-Emphasis)]/50 focus-within:border-[var(--Border-Accent-Primary)]",
-        disabled && "opacity-50 cursor-not-allowed",
-        className
-      )}
+      className={cn("inline-flex items-center", s.wrap, disabled && "opacity-50 pointer-events-none", className)}
     >
+      {/* Decrement */}
       <button
         type="button"
         tabIndex={-1}
-        disabled={disabled || (value !== undefined && value <= min)}
+        disabled={disabled || value <= min}
         onClick={decrement}
-        className="flex items-center justify-center w-10 h-full shrink-0 text-[var(--Object-Medium-Emphasis)] hover:text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Secondary)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         aria-label="減らす"
+        className={btnBase}
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <svg width={s.icon} height={s.icon} viewBox="0 0 16 16" fill="none">
           <path d="M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </button>
 
+      {/* Value */}
       <input
         type="text"
         inputMode="decimal"
@@ -89,25 +98,29 @@ function NumberInput({
         placeholder={placeholder}
         disabled={disabled}
         onChange={(e) => setRaw(e.target.value)}
-        onFocus={() => { setFocused(true); setRaw(value !== undefined ? String(value) : "") }}
+        onFocus={() => { setFocused(true); setRaw(String(value)) }}
         onBlur={(e) => { setFocused(false); commit(e.target.value) }}
         onKeyDown={(e) => {
           if (e.key === "Enter") (e.target as HTMLInputElement).blur()
           if (e.key === "ArrowUp") { e.preventDefault(); increment() }
           if (e.key === "ArrowDown") { e.preventDefault(); decrement() }
         }}
-        className="flex-1 h-full text-center typo-body-md text-[var(--Text-High-Emphasis)] bg-transparent outline-none placeholder:text-[var(--Text-Low-Emphasis)] disabled:cursor-not-allowed"
+        className={cn(
+          "text-center bg-transparent outline-none text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] tabular-nums",
+          s.text
+        )}
       />
 
+      {/* Increment */}
       <button
         type="button"
         tabIndex={-1}
-        disabled={disabled || (value !== undefined && value >= max)}
+        disabled={disabled || value >= max}
         onClick={increment}
-        className="flex items-center justify-center w-10 h-full shrink-0 text-[var(--Object-Medium-Emphasis)] hover:text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Secondary)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         aria-label="増やす"
+        className={btnBase}
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <svg width={s.icon} height={s.icon} viewBox="0 0 16 16" fill="none">
           <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </button>

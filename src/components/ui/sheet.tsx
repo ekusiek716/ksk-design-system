@@ -39,8 +39,8 @@ const sheetVariants = cva(
   {
     variants: {
       side: {
-        top: "inset-x-0 top-0 border-b border-[var(--Border-Low-Emphasis)] data-[state=open]:animate-slide-in-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top",
-        bottom: "inset-x-0 bottom-0 border-t border-[var(--Border-Low-Emphasis)] rounded-t-2xl data-[state=open]:animate-slide-in-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom",
+        top: "inset-x-0 top-0 border-b border-[var(--Border-Low-Emphasis)] data-[state=open]:animate-in data-[state=open]:slide-in-from-top data-[state=open]:duration-200 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=closed]:duration-150",
+        bottom: "inset-x-0 bottom-0 border-t border-[var(--Border-Low-Emphasis)] rounded-t-2xl data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom data-[state=open]:duration-200 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=closed]:duration-150",
         left: "inset-y-0 left-0 h-full w-3/4 max-w-sm border-r border-[var(--Border-Low-Emphasis)] data-[state=open]:animate-slide-in-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left",
         right: "inset-y-0 right-0 h-full w-3/4 max-w-sm border-l border-[var(--Border-Low-Emphasis)] data-[state=open]:animate-slide-in-right data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right",
       },

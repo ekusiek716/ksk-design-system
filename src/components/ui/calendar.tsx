@@ -1,5 +1,6 @@
 import * as React from "react"
 import { DayPicker } from "react-day-picker"
+import { ja } from "react-day-picker/locale"
 import { cn } from "@/lib/utils"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
@@ -8,6 +9,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      locale={ja}
       className={cn("p-3", className)}
       classNames={{
         root: "relative w-fit",

@@ -5,7 +5,9 @@ interface StarRatingProps {
   value: number
   onChange?: (value: number) => void
   max?: number
-  size?: "sm" | "md" | "lg"
+  size?: "sm" | "md" | "lg" | "xl"
+  /** 右端に "2/5" 形式のテキストを表示 */
+  showLabel?: boolean
   className?: string
 }
 
@@ -13,6 +15,14 @@ const STAR_SIZE = {
   sm: "w-4 h-4",
   md: "w-5 h-5",
   lg: "w-6 h-6",
+  xl: "w-8 h-8",
+} as const
+
+const LABEL_SIZE = {
+  sm: "typo-label-xs",
+  md: "typo-label-sm",
+  lg: "typo-label-md",
+  xl: "typo-label-lg",
 } as const
 
 function StarIcon({ filled, half, className }: { filled: boolean; half?: boolean; className?: string }) {
@@ -55,6 +65,7 @@ function StarRating({
   onChange,
   max = 5,
   size = "md",
+  showLabel = false,
   className,
 }: StarRatingProps) {
   const [hovered, setHovered] = React.useState<number | null>(null)
@@ -101,6 +112,11 @@ function StarRating({
           </button>
         )
       })}
+      {showLabel && (
+        <span className={cn("ml-1 text-[var(--Text-Medium-Emphasis)]", LABEL_SIZE[size])}>
+          {value}/{max}
+        </span>
+      )}
     </div>
   )
 }

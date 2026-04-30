@@ -45,7 +45,7 @@ function AppHeader({
       <div className="flex-1 flex flex-col justify-center min-w-0">
         {title && (
           typeof title === "string"
-            ? <span className="typo-label-lg text-[var(--Text-High-Emphasis)] truncate">{title}</span>
+            ? <span className="typo-heading-sm text-[var(--Text-High-Emphasis)] truncate">{title}</span>
             : title
         )}
         {subtitle && (

@@ -24,6 +24,7 @@ function TagInput({
 }: TagInputProps) {
   const [input, setInput] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const skipBlurRef = React.useRef(false)
 
   const addTag = React.useCallback(
     (raw: string) => {
@@ -47,6 +48,7 @@ function TagInput({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault()
+      skipBlurRef.current = true
       addTag(input)
     }
     if (e.key === "Backspace" && input === "" && value.length > 0) {
@@ -94,7 +96,10 @@ function TagInput({
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        onBlur={() => { if (input.trim()) addTag(input) }}
+        onBlur={() => {
+          if (skipBlurRef.current) { skipBlurRef.current = false; return }
+          if (input.trim()) addTag(input)
+        }}
         disabled={disabled || (max !== undefined && value.length >= max)}
         placeholder={value.length === 0 ? placeholder : ""}
         className="flex-1 min-w-24 bg-transparent outline-none typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] disabled:cursor-not-allowed"

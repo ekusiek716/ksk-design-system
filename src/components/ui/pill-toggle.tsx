@@ -33,7 +33,7 @@ function PillToggle<T extends string = string>({
       role="group"
       className={cn(
         "inline-flex items-center rounded-full p-0.5",
-        "bg-[var(--Surface-Secondary)]",
+        "bg-[var(--Surface-Tertiary)]",
         className
       )}
     >

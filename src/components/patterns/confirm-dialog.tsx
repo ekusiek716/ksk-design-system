@@ -55,7 +55,7 @@ function ConfirmDialog({
             <ResponsiveDialogDescription>{description}</ResponsiveDialogDescription>
           )}
         </ResponsiveDialogHeader>
-        <ResponsiveDialogFooter>
+        <ResponsiveDialogFooter className="mt-4">
           <Button
             variant="secondary"
             onClick={() => onOpenChange(false)}
