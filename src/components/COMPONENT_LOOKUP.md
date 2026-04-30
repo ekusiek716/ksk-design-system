@@ -16,13 +16,17 @@
 | Badge | `@/components/ui/badge` | **variant**: `default`, `secondary`, `outline`, `destructive`, `success`, `warning`, `info`, `subtle`, `ghost` | Default, Secondary, Outline, Destructive, Success, Warning, Info, Subtle, Ghost, AllVariants |
 | Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis | `@/components/ui/breadcrumb` | — | ThreeLevel, WithEllipsis |
 | Button | `@/components/ui/button` | **variant**: `default`, `secondary`, `secondary-switch`, `tertiary`, `ghost`, `destructive`, `link`<br>**size**: `xs`, `sm`, `default`, `lg`, `xl`, `icon`, `icon-sm`, `icon-lg` | Default, Secondary, SecondarySwitch, Tertiary, Ghost, Destructive, Link, AllVariants, AllSizes, Disabled, DisabledAllVariants, IconButton, WithIcon |
+| Calendar | `@/components/ui/calendar` | — | — |
 | Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter | `@/components/ui/card` | — | FullCard, MinimalCard, HeaderOnly |
 | Checkbox | `@/components/ui/checkbox` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, MultipleOptions |
+| DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, Disabled, RangePicker, CalendarOnly |
 | Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm |
 | Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, DisabledState |
+| NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis |
 | Popover, PopoverTrigger, PopoverContent, PopoverAnchor | `@/components/ui/popover` | — | ClickToShow, SimpleContent |
+| ProgressRing | `@/components/ui/progress-ring` | — | Default, Empty, Full, AllSizes, CustomLabel, Animated |
 | Progress | `@/components/ui/progress` | — | Default, Empty, Half, Full, AllStates |
 | RadioGroup, RadioGroupItem | `@/components/ui/radio-group` | — | ThreeOptions, WithDisabled |
 | ResponsiveDialog, ResponsiveDialogTrigger, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter, ResponsiveDialogClose | `@/components/ui/responsive-dialog` | — | Default |
@@ -57,6 +61,7 @@
 
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
+| AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky |
 | Banner | `@/components/patterns/banner` | **variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants |
 | Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `sm`, `md`, `lg`<br>**shape**: `pill`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly |
@@ -69,6 +74,8 @@
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch |
 | SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
 | StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, MultipleCards |
+| SwipeRow | `@/components/patterns/swipe-row` | — | Default |
+| TagInput | `@/components/patterns/tag-input` | — | Default, WithInitialTags, WithMax, Disabled |
 | Tag | `@/components/patterns/tag` | **variant**: `default`, `brand`, `caution`, `success`, `warning`, `info` | Default, Brand, Caution, Success, Warning, Info, AllVariants |
 
 ### patterns/commerce/
@@ -108,3 +115,28 @@
 | `<div className="rounded-xl border p-4">` | `<Card><CardContent>` |
 | `text-blue-500` 等 Tailwind 標準色 | `text-[var(--Brand-Primary)]` 等セマンティックトークン |
 | `font-bold` 直書き | `typo-body-md-bold` 等 typo-* クラス |
+
+---
+
+## 「DSにない」と誤解されやすいコンポーネント対応表
+
+> **新規コンポーネントを提案・実装する前に必ずこの表を確認すること。**
+
+| やりたいこと | 正しい使い方 | インポート |
+|---|---|---|
+| アイコンだけのボタン | `<Button size="icon">` / `"icon-sm"` / `"icon-lg"` | `Button` |
+| リンク見た目のボタン | `<Button variant="link">` | `Button` |
+| チェックボックス | `<Checkbox>` | `Checkbox` |
+| ラジオボタン | `<RadioGroup><RadioGroupItem>` | `RadioGroup, RadioGroupItem` |
+| Badge の色違い | `<Badge variant="success">` / `"caution"` / `"warning"` / `"info"` | `Badge` |
+| 空状態の表示 | `<EmptyState>` | `EmptyState` |
+| 数値カード | `<StatCard>` | `StatCard` |
+| トースト通知 | `<Toaster>` + `useToast()` | `Toaster, useToast` |
+| スケルトン | `<Skeleton>` | `Skeleton` |
+| 下部ナビゲーション | `<BottomNav>` | `BottomNav` |
+| プログレスバー | `<Progress>` | `Progress` |
+| フォームフィールド | `<FormField>` | `FormField` |
+| ケバブメニュー | `<KebabMenu>` | `KebabMenu` |
+| モーダル（PC） | `<Dialog>` | `Dialog, DialogContent, ...` |
+| ドロワー（モバイル） | `<Sheet side="bottom">` | `Sheet, SheetContent, ...` |
+| PC/モバイル自動切替モーダル | `<ResponsiveDialog>` | `ResponsiveDialog, ...` |

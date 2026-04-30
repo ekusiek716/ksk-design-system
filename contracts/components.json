@@ -4,12 +4,12 @@
     "version": "1.1.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 25,
-      "patterns": 13,
+      "ui": 29,
+      "patterns": 16,
       "commerce": 9,
       "admin": 7,
       "shells": 3,
-      "total": 57
+      "total": 64
     }
   },
   "ui": [
@@ -29,6 +29,22 @@
       "variants": [],
       "accessibility": ["Must pair with <Label>"],
       "rules": ["Must use <Input> not <input>"]
+    },
+    {
+      "name": "Calendar",
+      "path": "src/components/ui/calendar.tsx",
+      "description": "月間カレンダーグリッド。react-day-picker v9ベース。DatePickerの内部コンポーネントとして使用。",
+      "variants": [],
+      "accessibility": ["Keyboard navigable", "aria-selected on selected day"],
+      "rules": ["Use DatePicker instead of Calendar directly unless embedding in custom UI"]
+    },
+    {
+      "name": "DatePicker",
+      "path": "src/components/ui/date-picker.tsx",
+      "description": "日付選択UI。Popover + Calendar の組み合わせ。<input type='date'>の代替。ブラウザ依存なし。",
+      "variants": [],
+      "accessibility": ["Must pair with <Label>", "aria-expanded on trigger button"],
+      "rules": ["Use DatePicker not <input type='date'>", "Use DateRangePicker for date range selection"]
     },
     {
       "name": "Textarea",
@@ -181,6 +197,20 @@
       "description": "トースト通知。操作結果フィードバックに使用。useToastフックで呼び出す。",
       "variants": ["default", "success", "caution", "destructive"],
       "rules": ["Use useToast hook to trigger"]
+    },
+    {
+      "name": "ProgressRing",
+      "path": "src/components/ui/progress-ring.tsx",
+      "description": "円形プログレス表示。SVGベース。0〜100の進捗を円弧で表示。中央にラベル（%またはカスタム）表示。",
+      "sizes": ["sm", "md", "lg", "xl"],
+      "rules": ["Use for circular progress only. Use <Progress> for linear progress bar."]
+    },
+    {
+      "name": "NumberInput",
+      "path": "src/components/ui/number-input.tsx",
+      "description": "数値入力コンポーネント。+/-ボタン付き。min/max/stepのガード・通貨フォーマット対応。<input type='number'>の代替。",
+      "features": ["increment", "decrement", "min-max-clamp", "format", "keyboard-arrow"],
+      "rules": ["Use NumberInput not <input type='number'>", "Use format prop for currency display"]
     }
   ],
   "patterns": [
@@ -259,6 +289,27 @@
       "path": "src/components/patterns/form.tsx",
       "description": "フォームコンテナ。FormRoot/FormSection/FormActionsで構成。複数FormFieldをまとめる。",
       "subcomponents": ["FormRoot", "FormSection", "FormActions"]
+    },
+    {
+      "name": "AppHeader",
+      "path": "src/components/patterns/app-header.tsx",
+      "description": "モバイルアプリ向けページヘッダー。leading（戻るボタン等）・title・subtitle・trailingスロット付き。sticky/bordered対応。",
+      "slots": ["leading", "title", "subtitle", "trailing"],
+      "rules": ["For mobile app page headers. Use sticky prop for fixed-top behavior."]
+    },
+    {
+      "name": "TagInput",
+      "path": "src/components/patterns/tag-input.tsx",
+      "description": "タグ複数入力フィールド。Enter/カンマで追加・Backspaceで削除。max・allowDuplicates制御対応。",
+      "features": ["add-on-enter", "add-on-comma", "remove-on-backspace", "max", "duplicates-control"],
+      "rules": ["Use for multi-value text input (tags, emails, keywords)"]
+    },
+    {
+      "name": "SwipeRow",
+      "path": "src/components/patterns/swipe-row.tsx",
+      "description": "スワイプアクション付きリスト行。左スワイプでアクションボタンを表示。タッチ/マウス両対応。",
+      "features": ["swipe-to-reveal", "snap-behavior", "multiple-actions"],
+      "rules": ["Mobile list items with swipe actions (delete, archive, etc.)"]
     }
   ],
   "commerce": [

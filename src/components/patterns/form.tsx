@@ -8,9 +8,9 @@ interface FormRootProps extends React.ComponentProps<"form"> {
 }
 
 function FormRoot({ className, preventDefault = true, onSubmit, ...props }: FormRootProps) {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     if (preventDefault) e.preventDefault()
-    onSubmit?.(e)
+    onSubmit?.(e as never)
   }
 
   return (

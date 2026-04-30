@@ -6,7 +6,7 @@ interface StatusTabItem {
   count: number
 }
 
-interface StatusTabsProps extends React.ComponentProps<"div"> {
+interface StatusTabsProps extends Omit<React.ComponentProps<"div">, "onSelect"> {
   items: StatusTabItem[]
   activeIndex?: number
   onSelect?: (index: number) => void

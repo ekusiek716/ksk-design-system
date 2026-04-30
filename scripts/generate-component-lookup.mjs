@@ -164,6 +164,31 @@ function generateMarkdown(ui, patterns) {
     "",
   )
 
+  // ── 「ない」と思われがちだが既にあるもの ──
+  lines.push("---", "", "## 「DSにない」と誤解されやすいコンポーネント対応表", "",
+    "> **新規コンポーネントを提案・実装する前に必ずこの表を確認すること。**",
+    "",
+    "| やりたいこと | 正しい使い方 | インポート |",
+    "|---|---|---|",
+    "| アイコンだけのボタン | `<Button size=\"icon\">` / `\"icon-sm\"` / `\"icon-lg\"` | `Button` |",
+    "| リンク見た目のボタン | `<Button variant=\"link\">` | `Button` |",
+    "| チェックボックス | `<Checkbox>` | `Checkbox` |",
+    "| ラジオボタン | `<RadioGroup><RadioGroupItem>` | `RadioGroup, RadioGroupItem` |",
+    "| Badge の色違い | `<Badge variant=\"success\">` / `\"caution\"` / `\"warning\"` / `\"info\"` | `Badge` |",
+    "| 空状態の表示 | `<EmptyState>` | `EmptyState` |",
+    "| 数値カード | `<StatCard>` | `StatCard` |",
+    "| トースト通知 | `<Toaster>` + `useToast()` | `Toaster, useToast` |",
+    "| スケルトン | `<Skeleton>` | `Skeleton` |",
+    "| 下部ナビゲーション | `<BottomNav>` | `BottomNav` |",
+    "| プログレスバー | `<Progress>` | `Progress` |",
+    "| フォームフィールド | `<FormField>` | `FormField` |",
+    "| ケバブメニュー | `<KebabMenu>` | `KebabMenu` |",
+    "| モーダル（PC） | `<Dialog>` | `Dialog, DialogContent, ...` |",
+    "| ドロワー（モバイル） | `<Sheet side=\"bottom\">` | `Sheet, SheetContent, ...` |",
+    "| PC/モバイル自動切替モーダル | `<ResponsiveDialog>` | `ResponsiveDialog, ...` |",
+    "",
+  )
+
   return lines.join("\n")
 }
 

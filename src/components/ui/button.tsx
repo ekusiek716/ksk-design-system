@@ -33,19 +33,41 @@ const buttonVariants = cva(
   }
 )
 
-function Button({
-  className,
-  variant,
-  size,
-  ...props
-}: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants>) {
+/** navigator.vibrate のパターン (ms) */
+const HAPTIC_PATTERNS: Record<string, number | number[]> = {
+  light:   10,
+  medium:  25,
+  heavy:   50,
+  warning: [30, 50, 30],
+}
+
+type HapticType = keyof typeof HAPTIC_PATTERNS
+
+interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
+  /** モバイルでの触覚フィードバック。navigator.vibrate() を使用。未対応環境では無視される。 */
+  haptic?: HapticType
+}
+
+function Button({ className, variant, size, haptic, onClick, ...props }: ButtonProps) {
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (haptic && typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(HAPTIC_PATTERNS[haptic])
+      }
+      onClick?.(e)
+    },
+    [haptic, onClick]
+  )
+
   return (
     <button
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      onClick={handleClick}
       {...props}
     />
   )
 }
 
 export { Button, buttonVariants }
+export type { ButtonProps, HapticType }

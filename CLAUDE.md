@@ -41,10 +41,10 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 |---------|------|
 | **CLAUDE.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート（Claude Code用） |
 | **AGENTS.md** | 同上（Codex用。セッション開始時の読み込み指示・編集後コマンドを明記） |
-| **contracts/components.json** | 全57コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
+| **contracts/components.json** | 全64コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
 | **contracts/rules.json** | 禁止パターン31件・AIアンチパターン9件・アクセシビリティ要件 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
-| **src/components/COMPONENT_LOOKUP.md** | 全57コンポーネントのバリアント・インポートパス一覧（自動生成） |
+| **src/components/COMPONENT_LOOKUP.md** | 全64コンポーネントのバリアント・インポートパス一覧（自動生成） |
 | **CAKE_COMPONENTS.md** | Cake.jp固有コンポーネント一覧（EC案件時に参照） |
 
 **コードを書く前に:**
@@ -58,12 +58,12 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 ```
 src/
 ├── components/
-│   ├── ui/           # 汎用UIコンポーネント 25個
+│   ├── ui/           # 汎用UIコンポーネント 29個
 │   ├── patterns/
 │   │   ├── commerce/ # EC系 9個
 │   │   ├── admin/    # 管理画面系 7個
 │   │   ├── shells/   # レイアウトシェル 3個
-│   │   └── ...       # 汎用パターン 13個
+│   │   └── ...       # 汎用パターン 16個
 │   └── icons/
 ├── styles/
 │   ├── primitive.css  # Layer 1: 原色パレット
@@ -71,7 +71,7 @@ src/
 │   └── typography.css # typo-* ユーティリティ 17クラス
 ├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット
-└── index.ts           # Public API（57コンポーネント）
+└── index.ts           # Public API（64コンポーネント）
 ```
 
 ---

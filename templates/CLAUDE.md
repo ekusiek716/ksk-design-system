@@ -35,6 +35,30 @@ Claude Code は UI 作業を始める前に、以下のファイルを**必ず**
 
 DS に該当パターンが無い場合のみカスタム実装を許可。その場合は**必ずコメントで理由を記載**すること。
 
+## 新規コンポーネントを作る前に必ず確認する
+
+**`node_modules/@ksk/design-system/src/components/COMPONENT_LOOKUP.md` を読んでから実装・提案すること。**
+以下は「DSにない」と誤解されやすいが既に存在するもの:
+
+| やりたいこと | 正しい使い方 |
+|---|---|
+| アイコンだけのボタン | `<Button size="icon">` / `"icon-sm"` / `"icon-lg"` |
+| リンク見た目のボタン | `<Button variant="link">` |
+| チェックボックス | `<Checkbox>` |
+| ラジオボタン | `<RadioGroup><RadioGroupItem>` |
+| Badge の色違い | `<Badge variant="success">` / `"caution"` / `"warning"` / `"info"` |
+| 空状態の表示 | `<EmptyState>` |
+| 数値カード | `<StatCard>` |
+| トースト通知 | `<Toaster>` + `useToast()` |
+| スケルトン | `<Skeleton>` |
+| 下部ナビゲーション | `<BottomNav>` |
+| プログレスバー | `<Progress>` |
+| フォームフィールド | `<FormField>` |
+| ケバブメニュー | `<KebabMenu>` |
+| モーダル（PC） | `<Dialog>` |
+| ドロワー（モバイル） | `<Sheet side="bottom">` |
+| PC/モバイル自動切替モーダル | `<ResponsiveDialog>` |
+
 ## 使用方法
 
 ### CSS のセットアップ

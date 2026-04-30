@@ -260,7 +260,7 @@ const dataTableCellVariants = cva("px-3 py-2.5 typo-body-md text-[var(--Text-Hig
 })
 
 interface DataTableCellProps
-  extends React.ComponentProps<"td">,
+  extends Omit<React.ComponentProps<"td">, "align" | "width">,
     VariantProps<typeof dataTableCellVariants> {}
 
 function DataTableCell({ className, align, width, children, ...props }: DataTableCellProps) {
@@ -466,7 +466,7 @@ function DataTableActionCell({ className, items, ...props }: DataTableActionCell
 
 // ─── 12. DataTableInputCell ───
 
-interface DataTableInputCellProps extends React.ComponentProps<"td"> {
+interface DataTableInputCellProps extends Omit<React.ComponentProps<"td">, "onChange"> {
   value?: string
   onChange?: (value: string) => void
   placeholder?: string
