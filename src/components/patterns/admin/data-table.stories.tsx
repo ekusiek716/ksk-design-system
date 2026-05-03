@@ -26,7 +26,7 @@ import type { SortDirection } from "./data-table"
 import { Badge } from "../../ui/badge"
 
 const meta: Meta = {
-  title: "Admin/DataTable",
+  title: "Components/Admin/DataTable",
 }
 export default meta
 

@@ -9,7 +9,7 @@ import { Input } from "../ui/input"
 import { Button } from "../ui/button"
 
 const meta: Meta<typeof FormRoot> = {
-  title: "Patterns/Form",
+  title: "Components/Form",
   component: FormRoot,
 }
 export default meta

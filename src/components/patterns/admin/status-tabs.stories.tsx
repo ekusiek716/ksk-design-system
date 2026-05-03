@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { StatusTabs } from "./status-tabs"
 
-const meta: Meta<typeof StatusTabs> = { title: "Admin/StatusTabs", component: StatusTabs }
+const meta: Meta<typeof StatusTabs> = { title: "Components/StatusTabs", component: StatusTabs }
 export default meta
 type Story = StoryObj<typeof StatusTabs>
 

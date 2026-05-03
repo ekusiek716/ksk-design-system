@@ -40,10 +40,21 @@ function triggerClass(open: boolean, hasValue: boolean, className?: string) {
 interface DatePickerProps {
   value?: Date
   onChange?: (date: Date | undefined) => void
+  /**
+   * トリガーボタンのプレースホルダーテキスト。
+   * i18n 対応: 英語では "Select date"、日本語では "日付を選択" を渡す。
+   * @default "日付を選択"
+   */
   placeholder?: string
   disabled?: boolean
   className?: string
   dateFormat?: string
+  /**
+   * トリガーボタンのアクセシビリティラベル。
+   * カレンダーポップアップを開くボタンの読み上げテキスト。
+   * @default placeholder と同じ値
+   */
+  triggerLabel?: string
 }
 
 function DatePicker({
@@ -53,6 +64,7 @@ function DatePicker({
   disabled = false,
   className,
   dateFormat = "yyyy/MM/dd",
+  triggerLabel,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
   const formatted = value ? formatDate(value, dateFormat) : null
@@ -64,6 +76,7 @@ function DatePicker({
           data-slot="date-picker-trigger"
           disabled={disabled}
           aria-expanded={open}
+          aria-label={triggerLabel ?? placeholder}
           className={triggerClass(open, !!formatted, className)}
         >
           <span>{formatted ?? placeholder}</span>
@@ -88,10 +101,26 @@ function DatePicker({
 interface DateRangePickerProps {
   value?: { from?: Date; to?: Date }
   onChange?: (range: { from?: Date; to?: Date } | undefined) => void
+  /**
+   * トリガーボタンのプレースホルダーテキスト。
+   * @default "期間を選択"
+   */
   placeholder?: string
+  /**
+   * 開始日フィールドのプレースホルダー（分割レイアウト用）。
+   * @default "開始日"
+   */
+  fromPlaceholder?: string
+  /**
+   * 終了日フィールドのプレースホルダー（分割レイアウト用）。
+   * @default "終了日"
+   */
+  toPlaceholder?: string
   disabled?: boolean
   className?: string
   dateFormat?: string
+  /** アクセシビリティラベル */
+  triggerLabel?: string
 }
 
 function DateRangePicker({
@@ -101,6 +130,7 @@ function DateRangePicker({
   disabled = false,
   className,
   dateFormat = "yyyy/MM/dd",
+  triggerLabel,
 }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false)
   const formatted = value?.from
@@ -116,6 +146,7 @@ function DateRangePicker({
           data-slot="date-range-picker-trigger"
           disabled={disabled}
           aria-expanded={open}
+          aria-label={triggerLabel ?? placeholder}
           className={triggerClass(open, !!formatted, className)}
         >
           <span>{formatted ?? placeholder}</span>

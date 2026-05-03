@@ -3,7 +3,7 @@ import * as React from "react"
 import { StarRating } from "./star-rating"
 
 const meta: Meta<typeof StarRating> = {
-  title: "UI/StarRating",
+  title: "Components/StarRating",
   component: StarRating,
   tags: ["autodocs"],
 }

@@ -7,7 +7,7 @@ import { EmptyState } from "./empty-state"
 import { Button } from "../ui/button"
 
 const meta: Meta<typeof EmptyState> = {
-  title: "Patterns/EmptyState",
+  title: "Components/EmptyState",
   component: EmptyState,
 }
 export default meta

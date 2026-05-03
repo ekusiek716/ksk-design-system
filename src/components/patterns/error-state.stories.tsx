@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { ErrorState } from "./error-state"
 
 const meta: Meta<typeof ErrorState> = {
-  title: "Patterns/ErrorState",
+  title: "Components/ErrorState",
   component: ErrorState,
 }
 export default meta

@@ -7,7 +7,7 @@ import { ScrollArea } from "./scroll-area"
 import { Separator } from "./separator"
 
 const meta: Meta<typeof ScrollArea> = {
-  title: "UI/ScrollArea",
+  title: "Components/ScrollArea",
   component: ScrollArea,
 }
 export default meta

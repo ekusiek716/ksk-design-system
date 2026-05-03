@@ -12,17 +12,29 @@
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
 | Accordion, AccordionItem, AccordionTrigger, AccordionContent | `@/components/ui/accordion` | — | ThreeItems, MultipleOpen |
+| AlertDialog, AlertDialogTrigger, AlertDialogPortal, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel | `@/components/ui/alert-dialog` | — | Default, Small |
+| Alert, AlertTitle, AlertDescription | `@/components/ui/alert` | **variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning`<br>**variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning` | Info, Success, Error, Warning, InlineInfo, InlineCaution, InlineWarning, AllVariants |
 | Avatar, AvatarImage, AvatarFallback | `@/components/ui/avatar` | — | WithImage, Fallback, Sizes, Group |
 | Badge | `@/components/ui/badge` | **variant**: `default`, `secondary`, `outline`, `destructive`, `success`, `warning`, `info`, `subtle`, `ghost` | Default, Secondary, Outline, Destructive, Success, Warning, Info, Subtle, Ghost, AllVariants |
 | Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis | `@/components/ui/breadcrumb` | — | ThreeLevel, WithEllipsis |
-| Button | `@/components/ui/button` | **variant**: `default`, `secondary`, `secondary-switch`, `tertiary`, `ghost`, `destructive`, `link`<br>**size**: `xs`, `sm`, `default`, `lg`, `xl`, `icon`, `icon-sm`, `icon-lg` | Default, Secondary, SecondarySwitch, Tertiary, Ghost, Destructive, Link, AllVariants, AllSizes, Disabled, DisabledAllVariants, IconButton, WithIcon |
+| Button | `@/components/ui/button` | **variant**: `default`, `secondary`, `secondary-switch`, `tertiary`, `ghost`, `destructive`, `link`, `glass`<br>**size**: `xs`, `sm`, `default`, `lg`, `xl`, `icon`, `icon-sm`, `icon-lg`, `icon-xl` | Default, Secondary, SecondarySwitch, Tertiary, Ghost, Destructive, Link, AllVariants, AllSizes, Disabled, DisabledAllVariants, IconButton, Glass — Liquid Glass (iOS 26), WithIcon |
 | Calendar | `@/components/ui/calendar` | — | — |
 | Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter | `@/components/ui/card` | — | FullCard, MinimalCard, HeaderOnly |
+| CheckboxCardGroup, CheckboxCardItem | `@/components/ui/checkbox-card` | — | Default, WithDescription, WithExpandedContent, Disabled |
+| CheckboxGroup, CheckboxGroupItem | `@/components/ui/checkbox-group` | — | Default, Required, WithError, SingleColumn |
 | Checkbox | `@/components/ui/checkbox` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, MultipleOptions |
+| CoachMark | `@/components/ui/coach-mark` | — | Default, Brand, Placements, Onboarding, Hover |
+| Collapsible, CollapsibleTrigger, CollapsibleContent | `@/components/ui/collapsible` | — | Default, FAQ |
+| CountdownTimer | `@/components/ui/countdown-timer` | — | Filled, Ghost, Compact, Ended, AllVariants |
 | DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, Disabled, RangePicker, CalendarOnly, CalendarRange |
 | Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm |
+| DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent | `@/components/ui/dropdown-menu` | — | Default, WithCheckbox, WithRadio, WithSubmenu |
+| Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField | `@/components/ui/form` | — | BasicForm, WithSelect |
+| HoverCard, HoverCardTrigger, HoverCardContent | `@/components/ui/hover-card` | — | Default |
+| ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |
 | Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, DisabledState |
+| NavigationBar, IconClose, IconBack, IconShareIos | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis |
 | PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small |
@@ -34,9 +46,13 @@
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | — | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
-| Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right` | RightSide, LeftSide |
+| Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float` | BottomSheet, FloatSheet, RightSheet, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass) |
 | Skeleton | `@/components/ui/skeleton` | — | CardSkeleton, TextSkeleton, AvatarWithText |
+| Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Disabled |
+| SocialLoginButton | `@/components/ui/social-login-button` | — | Line, Google, Apple, Amazon, AllProviders, Loading |
+| Spinner | `@/components/ui/spinner` | — | Default, AllSizes |
 | StarRating | `@/components/ui/star-rating` | — | Interactive, ReadOnly, Sizes |
+| SubNav | `@/components/ui/sub-nav` | — | Underline, Chip, WithBadge |
 | Switch | `@/components/ui/switch` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, SettingsList |
 | Tabs, TabsList, TabsTrigger, TabsContent | `@/components/ui/tabs` | — | ThreeTabs, WithDisabledTab |
 | Textarea | `@/components/ui/textarea` | — | Default, WithPlaceholder, Disabled, Error |
@@ -51,7 +67,8 @@
 
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
-| BulkActionBar | `@/components/patterns/admin/bulk-action-bar` | — | Default, ManySelected |
+| BulkActions | `@/components/patterns/admin/bulk-actions` | — | Default, ManySelected |
+| ChartControls | `@/components/patterns/admin/chart-controls` | — | Default, PeriodOnly |
 | DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState | `@/components/patterns/admin/data-table` | — | Default, Empty, WithSections, CellVariants |
 | ImageUploader | `@/components/patterns/admin/image-uploader` | — | Default, Empty |
 | KebabMenu | `@/components/patterns/admin/kebab-menu` | — | Default |
@@ -63,23 +80,30 @@
 
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
-| AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky |
+| AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky, Glass — Liquid Glass (over gradient), Transparent — scrollable reveal |
+| BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
 | Banner | `@/components/patterns/banner` | **variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants |
 | BottomSheetForm | `@/components/patterns/bottom-sheet-form` | — | Default, WithLoading |
+| CategoryNav | `@/components/patterns/category-nav` | — | Default, WithSelection |
+| CategoryScroll | `@/components/patterns/category-scroll` | — | Default, CircleShape, GridLayout |
 | ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, WithMax |
 | Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `sm`, `md`, `lg`<br>**shape**: `pill`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape |
 | ConfirmDialog | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly |
 | ErrorState | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry |
+| Footer | `@/components/patterns/footer` | — | Default, Minimal |
 | FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithSelect, CompleteForm |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot |
+| MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | ProgressSteps | `@/components/patterns/progress-steps` | — | Step2Active, FirstStep, ThirdStep, AllComplete, ThreeSteps |
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch |
 | SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
+| ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders |
 | StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, MultipleCards |
-| SwipeRow | `@/components/patterns/swipe-row` | — | Default |
+| StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |
+| SwipeRow | `@/components/patterns/swipe-row` | — | Default, SingleAction |
 | TagInput | `@/components/patterns/tag-input` | — | Default, WithInitialTags, WithMax, Disabled |
 | Tag | `@/components/patterns/tag` | **variant**: `default`, `brand`, `caution`, `success`, `warning`, `info` | Default, Brand, Caution, Success, Warning, Info, AllVariants |
 
@@ -87,7 +111,7 @@
 
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
-| BottomNav | `@/components/patterns/commerce/bottom-nav` | — | Default |
+| BottomTabBar | `@/components/patterns/commerce/bottom-tab-bar` | — | Default, Pill — iOS 26 Liquid Glass, Pill — on light background |
 | FilterBar | `@/components/patterns/commerce/filter-bar` | — | Default, Interactive |
 | ImageCarousel | `@/components/patterns/commerce/image-carousel` | — | Banner, Square, Video, AutoPlay |
 | OrderSummary | `@/components/patterns/commerce/order-summary` | — | Default, Simple |
@@ -96,6 +120,8 @@
 | ProductCarousel | `@/components/patterns/commerce/product-carousel` | — | Default, WithRanking, WithCartButton, LargeCards |
 | QuantitySelector | `@/components/patterns/commerce/quantity-selector` | — | Medium, Small, WithTrash, Disabled |
 | RatingDisplay | `@/components/patterns/commerce/rating-display` | — | Default, AllSizes, ValueOnly |
+| ReviewCard, StarRow | `@/components/patterns/commerce/review-card` | — | Default, LowRating, WithSummary |
+| ReviewSummary | `@/components/patterns/commerce/review-summary` | — | — |
 
 ### patterns/shells/
 

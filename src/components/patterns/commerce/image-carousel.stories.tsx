@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { ImageCarousel } from "./image-carousel"
 
-const meta: Meta<typeof ImageCarousel> = { title: "Commerce/ImageCarousel", component: ImageCarousel }
+const meta: Meta<typeof ImageCarousel> = { title: "Components/ImageCarousel", component: ImageCarousel }
 export default meta
 type Story = StoryObj<typeof ImageCarousel>
 

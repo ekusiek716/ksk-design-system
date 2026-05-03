@@ -3,7 +3,7 @@ import * as React from "react"
 import { PillToggle } from "./pill-toggle"
 
 const meta: Meta<typeof PillToggle> = {
-  title: "UI/PillToggle",
+  title: "Components/PillToggle",
   component: PillToggle,
   tags: ["autodocs"],
 }

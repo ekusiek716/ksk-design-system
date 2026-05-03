@@ -6,8 +6,10 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs"
 
 const meta: Meta<typeof Tabs> = {
-  title: "UI/Tabs",
+  title: "Components/Tabs",
   component: Tabs,
+  tags: ["autodocs"],
+  parameters: { layout: "padded" },
 }
 export default meta
 

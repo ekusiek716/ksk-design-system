@@ -8,7 +8,7 @@ import { DatePicker, DateRangePicker } from "./date-picker"
 import { Calendar } from "./calendar"
 
 const meta: Meta<typeof DatePicker> = {
-  title: "UI/DatePicker",
+  title: "Components/DatePicker",
   component: DatePicker,
 }
 export default meta

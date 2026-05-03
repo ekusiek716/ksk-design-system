@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-interface BulkActionBarProps extends React.ComponentProps<"div"> {
+interface BulkActionsProps extends React.ComponentProps<"div"> {
   /** 選択件数 */
   selectedCount: number
   /** 選択解除ボタンクリック時 */
@@ -15,12 +15,12 @@ interface BulkActionBarProps extends React.ComponentProps<"div"> {
  * 選択件数 + アクションボタン群を横並びで表示。
  * selectedCount が 0 のとき自動で非表示になる。
  */
-function BulkActionBar({ selectedCount, onClear, children, className, ...props }: BulkActionBarProps) {
+function BulkActions({ selectedCount, onClear, children, className, ...props }: BulkActionsProps) {
   if (selectedCount === 0) return null
 
   return (
     <div
-      data-slot="bulk-action-bar"
+      data-slot="bulk-actions"
       className={cn(
         "fixed inset-x-0 bottom-6 z-50 mx-auto w-fit max-w-[calc(100%-32px)]",
         "flex items-center gap-3 rounded-full bg-[var(--Surface-Inverse)] px-5 py-3 shadow-[var(--shadow-dialog)]",
@@ -64,4 +64,5 @@ function BulkActionBar({ selectedCount, onClear, children, className, ...props }
   )
 }
 
-export { BulkActionBar }
+export { BulkActions }
+export type { BulkActionsProps }

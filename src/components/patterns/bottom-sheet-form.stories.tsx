@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 const meta: Meta<typeof BottomSheetForm> = {
-  title: "Patterns/BottomSheetForm",
+  title: "Components/BottomSheetForm",
   component: BottomSheetForm,
   tags: ["autodocs"],
 }

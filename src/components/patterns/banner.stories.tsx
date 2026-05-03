@@ -7,7 +7,7 @@ import { Banner } from "./banner"
 import { Button } from "../ui/button"
 
 const meta: Meta<typeof Banner> = {
-  title: "Patterns/Banner",
+  title: "Components/Banner",
   component: Banner,
   argTypes: {
     variant: {

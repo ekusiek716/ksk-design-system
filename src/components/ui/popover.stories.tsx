@@ -9,7 +9,7 @@ import { Input } from "./input"
 import { Label } from "./label"
 
 const meta: Meta<typeof Popover> = {
-  title: "UI/Popover",
+  title: "Components/Popover",
   component: Popover,
 }
 export default meta

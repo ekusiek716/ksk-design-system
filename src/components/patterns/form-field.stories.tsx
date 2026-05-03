@@ -9,7 +9,7 @@ import { Textarea } from "../ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 
 const meta: Meta<typeof FormField> = {
-  title: "Patterns/FormField",
+  title: "Components/FormField",
   component: FormField,
 }
 export default meta

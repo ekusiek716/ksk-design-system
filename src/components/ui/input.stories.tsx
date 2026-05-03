@@ -7,7 +7,7 @@ import { Input } from "./input"
 import { Label } from "./label"
 
 const meta: Meta<typeof Input> = {
-  title: "UI/Input",
+  title: "Components/Input",
   component: Input,
 }
 export default meta

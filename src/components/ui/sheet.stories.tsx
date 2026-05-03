@@ -1,72 +1,149 @@
-/**
- * @file Sheet のストーリー
- * @description サイドパネルコンポーネント。右側シートをコンテンツ付きで表示
- */
 import type { Meta, StoryObj } from "@storybook/react"
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "./sheet"
+import * as React from "react"
+import {
+  Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose,
+} from "./sheet"
 import { Button } from "./button"
-import { Input } from "./input"
-import { Label } from "./label"
 
 const meta: Meta<typeof Sheet> = {
-  title: "UI/Sheet",
+  title: "Components/Sheet",
   component: Sheet,
+  tags: ["autodocs"],
+  parameters: { layout: "centered" },
 }
 export default meta
-
 type Story = StoryObj<typeof Sheet>
 
-export const RightSide: Story = {
+// ─── Standard variants ────────────────────────────────────────────────────────
+
+export const BottomSheet: Story = {
   render: () => (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="secondary">シートを開く</Button>
+        <Button>ボトムシートを開く</Button>
       </SheetTrigger>
-      <SheetContent side="right">
-        <SheetHeader>
-          <SheetTitle>プロフィール編集</SheetTitle>
-          <SheetDescription>
-            プロフィール情報を変更できます。完了したら保存してください。
-          </SheetDescription>
+      <SheetContent side="bottom" className="px-5 pt-0 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <SheetHeader className="mb-4">
+          <SheetTitle>シートタイトル</SheetTitle>
+          <SheetDescription>下から少しフェードインします。</SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col gap-4 py-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="sheet-name">名前</Label>
-            <Input id="sheet-name" defaultValue="山田太郎" />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="sheet-email">メールアドレス</Label>
-            <Input id="sheet-email" defaultValue="yamada@example.com" />
-          </div>
-        </div>
+        <p className="typo-body-md text-[var(--Text-Medium-Emphasis)] mb-6">
+          コンテンツ領域です。フォームや一覧など何でも配置できます。
+        </p>
         <SheetFooter>
           <SheetClose asChild>
-            <Button variant="secondary">キャンセル</Button>
+            <Button className="w-full" size="lg">閉じる</Button>
           </SheetClose>
-          <Button>保存する</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
   ),
 }
 
-export const LeftSide: Story = {
+export const FloatSheet: Story = {
   render: () => (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="secondary">左シートを開く</Button>
+        <Button variant="secondary">フローティングシートを開く</Button>
       </SheetTrigger>
-      <SheetContent side="left">
-        <SheetHeader>
-          <SheetTitle>ナビゲーション</SheetTitle>
-          <SheetDescription>メニューを選択してください。</SheetDescription>
+      <SheetContent side="float" className="px-5 pt-0 pb-5">
+        <SheetHeader className="mb-4">
+          <SheetTitle>追加する</SheetTitle>
+          <SheetDescription>左右・下に余白があるカード型シートです。</SheetDescription>
         </SheetHeader>
-        <nav className="flex flex-col gap-2 py-4">
-          <a href="#" className="typo-label-md text-[var(--Text-High-Emphasis)] px-2 py-1.5 rounded-lg hover:bg-[var(--Surface-Secondary)]">ダッシュボード</a>
-          <a href="#" className="typo-label-md text-[var(--Text-High-Emphasis)] px-2 py-1.5 rounded-lg hover:bg-[var(--Surface-Secondary)]">プロジェクト</a>
-          <a href="#" className="typo-label-md text-[var(--Text-High-Emphasis)] px-2 py-1.5 rounded-lg hover:bg-[var(--Surface-Secondary)]">設定</a>
-        </nav>
+        <SheetFooter className="flex-row gap-2">
+          <SheetClose asChild>
+            <Button variant="secondary" className="flex-1" size="lg">キャンセル</Button>
+          </SheetClose>
+          <SheetClose asChild>
+            <Button className="flex-1" size="lg">追加する</Button>
+          </SheetClose>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
+  ),
+}
+
+export const RightSheet: Story = {
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="secondary">右シートを開く</Button>
+      </SheetTrigger>
+      <SheetContent side="right">
+        <SheetHeader className="mb-4">
+          <SheetTitle>サイドパネル</SheetTitle>
+          <SheetDescription>右から開くシートです。</SheetDescription>
+        </SheetHeader>
+        <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+          詳細情報や設定パネルに使います。
+        </p>
+      </SheetContent>
+    </Sheet>
+  ),
+}
+
+// ─── Liquid Glass variants ────────────────────────────────────────────────────
+
+export const FloatGlass: Story = {
+  name: "Float Glass (Liquid Glass)",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div
+      className="w-full min-h-screen flex flex-col items-center justify-center gap-6 p-8"
+      style={{ background: "linear-gradient(160deg, #a8c8f8 0%, #3b82f6 60%, #1e3a8a 100%)" }}
+    >
+      <p className="text-white typo-heading-md opacity-70">背景コンテンツ</p>
+      <p className="text-white typo-body-sm opacity-50">ボタンを押してガラスシートを開く</p>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="secondary" size="lg">ガラスシートを開く</Button>
+        </SheetTrigger>
+        <SheetContent side="float-glass" className="px-5 pt-0 pb-5">
+          <SheetHeader className="mb-4">
+            <SheetTitle>Liquid Glass Sheet</SheetTitle>
+            <SheetDescription>背景が透けるガラス素材のシートです。</SheetDescription>
+          </SheetHeader>
+          <SheetFooter className="flex-row gap-2">
+            <SheetClose asChild>
+              <Button variant="secondary" className="flex-1" size="lg">キャンセル</Button>
+            </SheetClose>
+            <SheetClose asChild>
+              <Button className="flex-1" size="lg">OK</Button>
+            </SheetClose>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    </div>
+  ),
+}
+
+export const BottomGlass: Story = {
+  name: "Bottom Glass (Liquid Glass)",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div
+      className="w-full min-h-screen flex flex-col items-center justify-center gap-6 p-8"
+      style={{ background: "linear-gradient(160deg, #f8a8c8 0%, #e83b82 60%, #8a1e4a 100%)" }}
+    >
+      <p className="text-white typo-heading-md opacity-70">背景コンテンツ</p>
+      <p className="text-white typo-body-sm opacity-50">ボタンを押してガラスシートを開く</p>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="secondary" size="lg">ガラスボトムシートを開く</Button>
+        </SheetTrigger>
+        <SheetContent side="bottom-glass" className="px-5 pt-0 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <SheetHeader className="mb-4">
+            <SheetTitle>アクション</SheetTitle>
+            <SheetDescription>Liquid Glass ボトムシート。</SheetDescription>
+          </SheetHeader>
+          <SheetFooter>
+            <SheetClose asChild>
+              <Button className="w-full" size="lg">実行する</Button>
+            </SheetClose>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    </div>
   ),
 }

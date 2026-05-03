@@ -85,7 +85,7 @@
   --Overlay-Light:  var(--Primitive-Gray-Alpha-200);
 
   /* ─── Focus ─── */
-  --Focus-High-Emphasis: #1FCC84;
+  --Focus-High-Emphasis: var(--Primitive-Brand-400);
 
   /* ─── Semantic Functional ─── */
   --Caution-Base:    var(--Primitive-Red-600);
@@ -106,7 +106,7 @@
   --Surface-Accent-Primary:        var(--Primitive-Brand-500);
   --Surface-Accent-Primary-Light:  var(--Primitive-Brand-900);
   --Surface-Accent-Primary-Ultra-Light: var(--Primitive-Brand-900);
-  --Surface-Caution:               var(--Primitive-Red-900);
+  --Surface-Caution:               #2d1414; /* Red-900(#7F1D1D)より彩度を落とした暗赤色 */
   --Surface-Success:               var(--Primitive-Green-900);
   --Surface-Warning:               var(--Primitive-Amber-900);
   --Surface-Info:                  var(--Primitive-Blue-900);
@@ -164,7 +164,7 @@
   --Overlay-Light:  var(--Primitive-Gray-Alpha-400);
 
   /* ─── Focus ─── */
-  --Focus-High-Emphasis: #1FCC84;
+  --Focus-High-Emphasis: var(--Primitive-Brand-400);
 
   /* ─── Semantic Functional ─── */
   --Caution-Base:    var(--Primitive-Red-400);

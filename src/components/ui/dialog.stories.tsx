@@ -9,7 +9,7 @@ import { Input } from "./input"
 import { Label } from "./label"
 
 const meta: Meta<typeof Dialog> = {
-  title: "UI/Dialog",
+  title: "Components/Dialog",
   component: Dialog,
 }
 export default meta

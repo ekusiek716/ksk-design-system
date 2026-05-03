@@ -7,7 +7,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { FilterBar } from "./filter-bar"
 
 const meta: Meta<typeof FilterBar> = {
-  title: "Commerce/FilterBar",
+  title: "Components/FilterBar",
   component: FilterBar,
 }
 export default meta

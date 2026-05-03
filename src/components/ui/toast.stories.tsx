@@ -7,7 +7,7 @@ import { Toaster, useToast } from "./toast"
 import { Button } from "./button"
 
 const meta: Meta = {
-  title: "UI/Toast",
+  title: "Components/Toast",
 }
 export default meta
 

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { KebabMenu } from "./kebab-menu"
 
-const meta: Meta<typeof KebabMenu> = { title: "Admin/KebabMenu", component: KebabMenu }
+const meta: Meta<typeof KebabMenu> = { title: "Components/KebabMenu", component: KebabMenu }
 export default meta
 type Story = StoryObj<typeof KebabMenu>
 

@@ -16,7 +16,7 @@ import {
 import { Button } from "./button"
 
 const meta: Meta<typeof ResponsiveDialog> = {
-  title: "UI/ResponsiveDialog",
+  title: "Components/ResponsiveDialog",
   component: ResponsiveDialog,
 }
 export default meta

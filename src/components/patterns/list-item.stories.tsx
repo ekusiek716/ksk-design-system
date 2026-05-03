@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "../ui/avatar"
 import { Badge } from "../ui/badge"
 
 const meta: Meta<typeof ListItem> = {
-  title: "Patterns/ListItem",
+  title: "Components/ListItem",
   component: ListItem,
 }
 export default meta

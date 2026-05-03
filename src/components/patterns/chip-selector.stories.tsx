@@ -3,7 +3,7 @@ import * as React from "react"
 import { ChipSelector } from "./chip-selector"
 
 const meta: Meta<typeof ChipSelector> = {
-  title: "Patterns/ChipSelector",
+  title: "Components/ChipSelector",
   component: ChipSelector,
   tags: ["autodocs"],
 }

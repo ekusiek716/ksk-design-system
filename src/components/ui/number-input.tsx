@@ -13,6 +13,10 @@ interface NumberInputProps {
   disabled?: boolean
   size?: "sm" | "md"
   className?: string
+  /** 減算ボタンの aria-label。i18n 対応: 英語では "Decrease" を渡す。@default "減らす" */
+  decrementLabel?: string
+  /** 加算ボタンの aria-label。i18n 対応: 英語では "Increase" を渡す。@default "増やす" */
+  incrementLabel?: string
 }
 
 const SIZE = {
@@ -31,6 +35,8 @@ function NumberInput({
   disabled = false,
   size = "md",
   className,
+  decrementLabel = "減らす",
+  incrementLabel = "増やす",
 }: NumberInputProps) {
   const [raw, setRaw] = React.useState(String(value))
   const [focused, setFocused] = React.useState(false)
@@ -82,7 +88,7 @@ function NumberInput({
         tabIndex={-1}
         disabled={disabled || value <= min}
         onClick={decrement}
-        aria-label="減らす"
+        aria-label={decrementLabel}
         className={btnBase}
       >
         <svg width={s.icon} height={s.icon} viewBox="0 0 16 16" fill="none">
@@ -117,7 +123,7 @@ function NumberInput({
         tabIndex={-1}
         disabled={disabled || value >= max}
         onClick={increment}
-        aria-label="増やす"
+        aria-label={incrementLabel}
         className={btnBase}
       >
         <svg width={s.icon} height={s.icon} viewBox="0 0 16 16" fill="none">

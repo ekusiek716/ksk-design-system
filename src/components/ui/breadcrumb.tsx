@@ -1,8 +1,16 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
-  return <nav aria-label="パンくずリスト" data-slot="breadcrumb" {...props} />
+interface BreadcrumbProps extends React.ComponentProps<"nav"> {
+  /**
+   * nav 要素の aria-label。i18n 対応: 英語では "Breadcrumb" を渡す。
+   * @default "パンくずリスト"
+   */
+  label?: string
+}
+
+function Breadcrumb({ label = "パンくずリスト", ...props }: BreadcrumbProps) {
+  return <nav aria-label={label} data-slot="breadcrumb" {...props} />
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {

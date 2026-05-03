@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { ProductCarousel } from "./product-carousel"
 
 const meta: Meta<typeof ProductCarousel> = {
-  title: "Commerce/ProductCarousel",
+  title: "Components/Commerce/ProductCarousel",
   component: ProductCarousel,
 }
 export default meta

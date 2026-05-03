@@ -7,7 +7,7 @@ import { Switch } from "./switch"
 import { Label } from "./label"
 
 const meta: Meta<typeof Switch> = {
-  title: "UI/Switch",
+  title: "Components/Switch",
   component: Switch,
 }
 export default meta

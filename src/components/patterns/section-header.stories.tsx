@@ -7,7 +7,7 @@ import { SectionHeader } from "./section-header"
 import { Button } from "../ui/button"
 
 const meta: Meta<typeof SectionHeader> = {
-  title: "Patterns/SectionHeader",
+  title: "Components/SectionHeader",
   component: SectionHeader,
 }
 export default meta

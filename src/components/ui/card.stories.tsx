@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, 
 import { Button } from "./button"
 
 const meta: Meta<typeof Card> = {
-  title: "UI/Card",
+  title: "Components/Card",
   component: Card,
 }
 export default meta

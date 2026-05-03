@@ -3,7 +3,7 @@ import * as React from "react"
 import { ProgressRing } from "./progress-ring"
 
 const meta: Meta<typeof ProgressRing> = {
-  title: "UI/ProgressRing",
+  title: "Components/ProgressRing",
   component: ProgressRing,
   tags: ["autodocs"],
 }

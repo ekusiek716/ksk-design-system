@@ -4,18 +4,72 @@
 
 // ─── UI Components ───
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "./components/ui/accordion"
+export { Alert, AlertTitle, AlertDescription } from "./components/ui/alert"
+export type { AlertVariant } from "./components/ui/alert"
+export {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogPortal,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "./components/ui/alert-dialog"
 export { Avatar, AvatarImage, AvatarFallback } from "./components/ui/avatar"
 export { Badge, badgeVariants } from "./components/ui/badge"
 export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from "./components/ui/breadcrumb"
 export { Button, buttonVariants } from "./components/ui/button"
 export { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from "./components/ui/card"
 export { Checkbox } from "./components/ui/checkbox"
+export { CheckboxCardGroup, CheckboxCardItem } from "./components/ui/checkbox-card"
+export { CheckboxGroup, CheckboxGroupItem } from "./components/ui/checkbox-group"
+export type { CheckboxGroupProps } from "./components/ui/checkbox-group"
+export { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./components/ui/collapsible"
 export { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger } from "./components/ui/dialog"
+export {
+  Form,
+  FormField as RhfFormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+  useFormField,
+} from "./components/ui/form"
+export {
+  DropdownMenu,
+  DropdownMenuPortal,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from "./components/ui/dropdown-menu"
+export { HoverCard, HoverCardTrigger, HoverCardContent } from "./components/ui/hover-card"
 export { Input } from "./components/ui/input"
+export type { InputProps } from "./components/ui/input"
 export { Calendar } from "./components/ui/calendar"
 export type { CalendarProps } from "./components/ui/calendar"
 export { DatePicker, DateRangePicker } from "./components/ui/date-picker"
 export type { DatePickerProps, DateRangePickerProps } from "./components/ui/date-picker"
+export { TimePicker } from "./components/ui/time-picker"
+export type { TimePickerProps } from "./components/ui/time-picker"
+export { Combobox } from "./components/ui/combobox"
+export type { ComboboxProps, ComboboxOption } from "./components/ui/combobox"
+export { MultiSelect } from "./components/ui/multi-select"
+export type { MultiSelectProps, MultiSelectOption } from "./components/ui/multi-select"
 export { Label } from "./components/ui/label"
 export { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "./components/ui/pagination"
 export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from "./components/ui/popover"
@@ -26,6 +80,9 @@ export { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSepa
 export { Separator } from "./components/ui/separator"
 export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription } from "./components/ui/sheet"
 export { Skeleton } from "./components/ui/skeleton"
+export { Slider } from "./components/ui/slider"
+export { Spinner } from "./components/ui/spinner"
+export type { SpinnerProps } from "./components/ui/spinner"
 export { Switch } from "./components/ui/switch"
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs"
 export { Textarea } from "./components/ui/textarea"
@@ -38,6 +95,18 @@ export { PillToggle } from "./components/ui/pill-toggle"
 export type { PillToggleProps, PillToggleOption } from "./components/ui/pill-toggle"
 export { StarRating } from "./components/ui/star-rating"
 export type { StarRatingProps } from "./components/ui/star-rating"
+export { CountdownTimer } from "./components/ui/countdown-timer"
+export type { CountdownTimerProps } from "./components/ui/countdown-timer"
+export { SubNav } from "./components/ui/sub-nav"
+export type { SubNavProps, SubNavItem } from "./components/ui/sub-nav"
+export { CoachMark } from "./components/ui/coach-mark"
+export type { CoachMarkProps, CoachMarkPlacement, CoachMarkVariant } from "./components/ui/coach-mark"
+export { SocialLoginButton } from "./components/ui/social-login-button"
+export type { SocialLoginButtonProps, SocialProvider } from "./components/ui/social-login-button"
+export { ImageGallery } from "./components/ui/image-gallery"
+export type { ImageGalleryProps, GalleryImage } from "./components/ui/image-gallery"
+export { NavigationBar } from "./components/ui/navigation-bar"
+export type { NavigationBarProps } from "./components/ui/navigation-bar"
 
 // ─── Pattern Components ───
 export { AppHeader } from "./components/patterns/app-header"
@@ -63,6 +132,7 @@ export { ProgressSteps } from "./components/patterns/progress-steps"
 export { SearchBar } from "./components/patterns/search-bar"
 export { SectionHeader } from "./components/patterns/section-header"
 export { StatCard } from "./components/patterns/stat-card"
+export type { StatCardProps, StatCardVariant } from "./components/patterns/stat-card"
 export { Tag, tagVariants } from "./components/patterns/tag"
 export { ResponsiveDialog, ResponsiveDialogTrigger, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter, ResponsiveDialogClose, useMediaQuery } from "./components/ui/responsive-dialog"
 export { Toaster, useToast } from "./components/ui/toast"
@@ -81,18 +151,28 @@ export { ProductCard } from "./components/patterns/commerce/product-card"
 export type { ProductCardProps, ProductCardTag } from "./components/patterns/commerce/product-card"
 export { ProductCarousel } from "./components/patterns/commerce/product-carousel"
 export { ImageCarousel } from "./components/patterns/commerce/image-carousel"
-export { BottomNav } from "./components/patterns/commerce/bottom-nav"
+export { BottomTabBar } from "./components/patterns/commerce/bottom-tab-bar"
+export type { BottomTabBarItem, BottomTabBarProps } from "./components/patterns/commerce/bottom-tab-bar"
 export { FilterBar } from "./components/patterns/commerce/filter-bar"
+export { ReviewCard } from "./components/patterns/commerce/review-card"
+export type { ReviewCardProps } from "./components/patterns/commerce/review-card"
+export { ReviewSummary } from "./components/patterns/commerce/review-summary"
+export type { ReviewSummaryProps } from "./components/patterns/commerce/review-summary"
 
 // ─── Admin Components ───
 export { KebabMenu } from "./components/patterns/admin/kebab-menu"
 export type { KebabMenuItem } from "./components/patterns/admin/kebab-menu"
-export { BulkActionBar } from "./components/patterns/admin/bulk-action-bar"
+export { BulkActions } from "./components/patterns/admin/bulk-actions"
+export type { BulkActionsProps } from "./components/patterns/admin/bulk-actions"
 export { StatusTabs } from "./components/patterns/admin/status-tabs"
 export type { StatusTabItem } from "./components/patterns/admin/status-tabs"
 export { SearchPanel } from "./components/patterns/admin/search-panel"
 export { ImageUploader } from "./components/patterns/admin/image-uploader"
+export { FileUpload } from "./components/patterns/file-upload"
+export type { FileUploadProps, UploadedFile } from "./components/patterns/file-upload"
 export { NotificationList } from "./components/patterns/admin/notification-list"
+export { ChartControls } from "./components/patterns/admin/chart-controls"
+export type { ChartControlsProps, Granularity, Period } from "./components/patterns/admin/chart-controls"
 export type { NotificationItem } from "./components/patterns/admin/notification-list"
 export {
   DataTable,
@@ -117,6 +197,21 @@ export {
   DataTableEmptyState,
 } from "./components/patterns/admin/data-table"
 export type { SortDirection, DataTableActionMenuItem } from "./components/patterns/admin/data-table"
+
+export { MenuDrawer } from "./components/patterns/menu-drawer"
+export type { MenuDrawerProps, MenuDrawerSection, MenuDrawerItem } from "./components/patterns/menu-drawer"
+export { Footer } from "./components/patterns/footer"
+export type { FooterProps, FooterLinkGroup } from "./components/patterns/footer"
+export { ShareButtons } from "./components/patterns/share-buttons"
+export type { ShareButtonsProps, ShareProvider, ShareLayout } from "./components/patterns/share-buttons"
+export { BannerCarousel } from "./components/patterns/banner-carousel"
+export type { BannerCarouselProps, BannerItem } from "./components/patterns/banner-carousel"
+export { StickyActionBar } from "./components/patterns/sticky-action-bar"
+export type { StickyActionBarProps } from "./components/patterns/sticky-action-bar"
+export { CategoryNav } from "./components/patterns/category-nav"
+export type { CategoryNavItem, CategoryNavProps } from "./components/patterns/category-nav"
+export { CategoryScroll } from "./components/patterns/category-scroll"
+export type { CategoryScrollItem, CategoryScrollProps } from "./components/patterns/category-scroll"
 
 // ─── Utilities ───
 export { cn } from "./lib/utils"

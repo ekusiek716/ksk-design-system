@@ -3,7 +3,7 @@ import * as React from "react"
 import { SwipeRow } from "./swipe-row"
 
 const meta: Meta<typeof SwipeRow> = {
-  title: "Patterns/SwipeRow",
+  title: "Components/SwipeRow",
   component: SwipeRow,
   tags: ["autodocs"],
 }

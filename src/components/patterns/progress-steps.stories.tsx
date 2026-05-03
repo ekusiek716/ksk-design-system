@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { ProgressSteps } from "./progress-steps"
 
 const meta: Meta<typeof ProgressSteps> = {
-  title: "Patterns/ProgressSteps",
+  title: "Components/ProgressSteps",
   component: ProgressSteps,
   argTypes: {
     currentStep: { control: { type: "number", min: 0, max: 3 } },

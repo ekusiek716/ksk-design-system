@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { PriceDisplay } from "./price-display"
 
-const meta: Meta<typeof PriceDisplay> = { title: "Commerce/PriceDisplay", component: PriceDisplay }
+const meta: Meta<typeof PriceDisplay> = { title: "Components/Commerce/PriceDisplay", component: PriceDisplay }
 export default meta
 type Story = StoryObj<typeof PriceDisplay>
 

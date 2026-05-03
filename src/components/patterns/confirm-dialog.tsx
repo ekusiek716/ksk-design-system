@@ -16,6 +16,12 @@ interface ConfirmDialogProps {
   description?: string
   confirmLabel?: string
   cancelLabel?: string
+  /**
+   * 処理中に表示するラベル。
+   * i18n 対応: 英語では "Processing…" など任意文字列を渡す。
+   * @default "処理中…"
+   */
+  loadingLabel?: string
   /** destructive にすると確認ボタンが赤くなる */
   variant?: "default" | "destructive"
   onConfirm: () => void | Promise<void>
@@ -29,6 +35,7 @@ function ConfirmDialog({
   description,
   confirmLabel = "確認",
   cancelLabel = "キャンセル",
+  loadingLabel = "処理中…",
   variant = "default",
   onConfirm,
   loading = false,
@@ -68,7 +75,7 @@ function ConfirmDialog({
             onClick={handleConfirm}
             disabled={isLoading}
           >
-            {isLoading ? "処理中…" : confirmLabel}
+            {isLoading ? loadingLabel : confirmLabel}
           </Button>
         </ResponsiveDialogFooter>
       </ResponsiveDialogContent>

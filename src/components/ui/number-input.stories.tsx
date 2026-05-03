@@ -3,7 +3,7 @@ import * as React from "react"
 import { NumberInput } from "./number-input"
 
 const meta: Meta<typeof NumberInput> = {
-  title: "UI/NumberInput",
+  title: "Components/NumberInput",
   component: NumberInput,
   tags: ["autodocs"],
 }

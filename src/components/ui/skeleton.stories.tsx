@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { Skeleton } from "./skeleton"
 
 const meta: Meta<typeof Skeleton> = {
-  title: "UI/Skeleton",
+  title: "Components/Skeleton",
   component: Skeleton,
 }
 export default meta

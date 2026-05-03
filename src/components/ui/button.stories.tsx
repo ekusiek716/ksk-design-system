@@ -6,16 +6,16 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { Button } from "./button"
 
 const meta: Meta<typeof Button> = {
-  title: "UI/Button",
+  title: "Components/Button",
   component: Button,
   argTypes: {
     variant: {
       control: "select",
-      options: ["default", "secondary", "secondary-switch", "tertiary", "ghost", "destructive", "link"],
+      options: ["default", "secondary", "secondary-switch", "tertiary", "ghost", "destructive", "link", "glass"],
     },
     size: {
       control: "select",
-      options: ["xs", "sm", "default", "lg", "xl", "icon", "icon-sm", "icon-lg"],
+      options: ["xs", "sm", "default", "lg", "xl", "icon", "icon-sm", "icon-lg", "icon-xl"],
     },
     disabled: { control: "boolean" },
   },
@@ -107,6 +107,46 @@ export const IconButton: Story = {
       <Button size="icon-lg" variant="default" aria-label="追加">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
       </Button>
+    </div>
+  ),
+}
+
+// ─── Liquid Glass ─────────────────────────────────────────────────────────────
+
+const ShareIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <path d="M12 3v12M8 7l4-4 4 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M7 11H5a2 2 0 00-2 2v6a2 2 0 002 2h14a2 2 0 002-2v-6a2 2 0 00-2-2h-2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+  </svg>
+)
+const CloseIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+
+export const Glass: Story = {
+  name: "Glass — Liquid Glass (iOS 26)",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div
+      className="flex flex-col items-center justify-center gap-8 min-h-screen p-8"
+      style={{ background: "linear-gradient(160deg, #a8c8f8 0%, #3b82f6 60%, #1e40af 100%)" }}
+    >
+      <p className="text-white typo-label-sm opacity-60">variant="glass" — グラデーション・写真背景上で使用</p>
+      {/* アイコンボタン */}
+      <div className="flex items-center gap-4">
+        <Button variant="glass" size="icon-xl" aria-label="閉じる"><CloseIcon /></Button>
+        <Button variant="glass" size="icon-xl" aria-label="シェア"><ShareIcon /></Button>
+        <Button variant="glass" size="icon-lg" aria-label="シェア"><ShareIcon /></Button>
+        <Button variant="glass" size="icon" aria-label="シェア"><ShareIcon /></Button>
+      </div>
+      {/* テキストボタン */}
+      <div className="flex items-center gap-3">
+        <Button variant="glass" size="sm">キャンセル</Button>
+        <Button variant="glass" size="default">アクション</Button>
+        <Button variant="glass" size="lg">実行する</Button>
+      </div>
     </div>
   ),
 }

@@ -3,7 +3,7 @@ import * as React from "react"
 import { TagInput } from "./tag-input"
 
 const meta: Meta<typeof TagInput> = {
-  title: "Patterns/TagInput",
+  title: "Components/TagInput",
   component: TagInput,
   tags: ["autodocs"],
 }

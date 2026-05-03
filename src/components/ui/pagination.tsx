@@ -37,39 +37,54 @@ function PaginationLink({ className, isActive, size = "icon", ...props }: Pagina
   )
 }
 
-function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof PaginationLink>) {
+type PaginationPreviousProps = React.ComponentProps<typeof PaginationLink> & {
+  /** aria-label とボタンテキスト。i18n 対応: 英語では "Previous" を渡す。@default "前へ" */
+  label?: string
+}
+
+function PaginationPrevious({ className, label = "前へ", ...props }: PaginationPreviousProps) {
   return (
     <PaginationLink
-      aria-label="前のページへ"
+      aria-label={label}
       size="default"
       className={cn("gap-1 pl-2.5", className)}
       {...props}
     >
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-      <span>前へ</span>
+      <span>{label}</span>
     </PaginationLink>
   )
 }
 
-function PaginationNext({ className, ...props }: React.ComponentProps<typeof PaginationLink>) {
+type PaginationNextProps = React.ComponentProps<typeof PaginationLink> & {
+  /** aria-label とボタンテキスト。i18n 対応: 英語では "Next" を渡す。@default "次へ" */
+  label?: string
+}
+
+function PaginationNext({ className, label = "次へ", ...props }: PaginationNextProps) {
   return (
     <PaginationLink
-      aria-label="次のページへ"
+      aria-label={label}
       size="default"
       className={cn("gap-1 pr-2.5", className)}
       {...props}
     >
-      <span>次へ</span>
+      <span>{label}</span>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
     </PaginationLink>
   )
 }
 
-function PaginationEllipsis({ className, ...props }: React.ComponentProps<"span">) {
+type PaginationEllipsisProps = React.ComponentProps<"span"> & {
+  /** スクリーンリーダー向けラベル。@default "その他のページ" */
+  label?: string
+}
+
+function PaginationEllipsis({ className, label = "その他のページ", ...props }: PaginationEllipsisProps) {
   return (
     <span aria-hidden data-slot="pagination-ellipsis" className={cn("flex size-10 items-center justify-center", className)} {...props}>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="3" cy="8" r="1" fill="currentColor" /><circle cx="8" cy="8" r="1" fill="currentColor" /><circle cx="13" cy="8" r="1" fill="currentColor" /></svg>
-      <span className="sr-only">その他のページ</span>
+      <span className="sr-only">{label}</span>
     </span>
   )
 }

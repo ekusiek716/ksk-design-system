@@ -1,0 +1,212 @@
+/* =============================================================
+   KSK Design System — Liquid Glass Material
+   iOS 26 / macOS 26 スタイルのガラス素材トークン + ユーティリティ
+
+   使い方:
+     クラスを直接付与: <div class="glass">...</div>
+     または CSS 変数を参照: backdrop-filter: var(--glass-blur);
+   ============================================================= */
+
+/* ─── Liquid Glass トークン ─── */
+:root {
+  /* Blur */
+  --glass-blur-sm:  blur(16px) saturate(1.6);
+  --glass-blur:     blur(40px) saturate(1.8);
+  --glass-blur-lg:  blur(60px) saturate(2.0);
+
+  /* Background */
+  --glass-bg:         rgba(255, 255, 255, 0.18);
+  --glass-bg-subtle:  rgba(255, 255, 255, 0.10);
+  --glass-bg-medium:  rgba(255, 255, 255, 0.28);
+  --glass-bg-strong:  rgba(255, 255, 255, 0.55);
+  --glass-bg-dark:    rgba(10, 10, 20, 0.25);
+
+  /* Border — 上端の光の屈折を模した細い輪郭 */
+  --glass-border:      rgba(255, 255, 255, 0.42);
+  --glass-border-dark: rgba(255, 255, 255, 0.15);
+
+  /* Inner specular highlight — レンズ上端の白い光 */
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.60),
+                     inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+
+  /* Shadow — ガラスを浮かせる影 */
+  --glass-shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.08),
+                     0 1px 4px  rgba(0, 0, 0, 0.05);
+  --glass-shadow:    0 8px 32px  rgba(0, 0, 0, 0.12),
+                     0 2px 8px   rgba(0, 0, 0, 0.06);
+  --glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.16),
+                     0 4px 12px  rgba(0, 0, 0, 0.08);
+
+  /* Overlay blur — モーダル背景の軽いすりガラス */
+  --glass-overlay-bg:   rgba(0, 0, 0, 0.15);
+  --glass-overlay-blur: blur(8px);
+}
+
+/* ─── Dark mode overrides ─── */
+.dark {
+  --glass-bg:         rgba(20, 20, 30, 0.35);
+  --glass-bg-subtle:  rgba(20, 20, 30, 0.20);
+  --glass-bg-medium:  rgba(20, 20, 30, 0.50);
+  --glass-bg-strong:  rgba(20, 20, 30, 0.70);
+  --glass-bg-dark:    rgba(0, 0, 10, 0.45);
+  --glass-border:      rgba(255, 255, 255, 0.18);
+  --glass-border-dark: rgba(255, 255, 255, 0.08);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.20),
+                     inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  --glass-overlay-bg:   rgba(0, 0, 0, 0.40);
+}
+
+/* ─── ユーティリティクラス ─── */
+
+/**
+ * .glass
+ * 標準ガラス素材。ナビゲーションバー・ツールバー・ピルボタンに。
+ */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 0.5px solid var(--glass-border);
+  box-shadow: var(--glass-highlight), var(--glass-shadow);
+}
+
+/**
+ * .glass-subtle
+ * 薄いガラス素材。フローティング要素の背景に軽く使う。
+ */
+.glass-subtle {
+  background: var(--glass-bg-subtle);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 0.5px solid rgba(255, 255, 255, 0.22);
+  box-shadow: var(--glass-shadow-sm);
+}
+
+/**
+ * .glass-medium
+ * 中程度ガラス。シート・カードのヘッダー部分等。
+ */
+.glass-medium {
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 0.5px solid var(--glass-border);
+  box-shadow: var(--glass-highlight), var(--glass-shadow);
+}
+
+/**
+ * .glass-strong
+ * 濃いガラス。アクションシート・確認ダイアログ等の可読性が必要な場面。
+ */
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 0.5px solid var(--glass-border);
+  box-shadow: var(--glass-highlight), var(--glass-shadow-lg);
+}
+
+/**
+ * .glass-dark
+ * ダークコンテンツ上用ガラス（グラデーション・写真上に重ねる）。
+ */
+.glass-dark {
+  background: var(--glass-bg-dark);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 0.5px solid var(--glass-border-dark);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12),
+              0 8px 32px rgba(0, 0, 0, 0.28);
+}
+
+/**
+ * .glass-overlay
+ * モーダル背景。真っ暗なスクリムの代わりに軽くすりガラス風にぼかす。
+ */
+.glass-overlay {
+  background: var(--glass-overlay-bg);
+  backdrop-filter: var(--glass-overlay-blur);
+  -webkit-backdrop-filter: var(--glass-overlay-blur);
+}
+
+/**
+ * .glass-accent
+ * ブランドカラーを帯びたガラス素材。FAB・主要アクションのフローティング要素に。
+ * --Brand-Primary を低透明度で重ねることで、テーマカラーに追従する。
+ */
+.glass-accent {
+  background: color-mix(in srgb, var(--Brand-Primary) 15%, rgba(255, 255, 255, 0.12));
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 0.5px solid color-mix(in srgb, var(--Brand-Primary) 30%, rgba(255, 255, 255, 0.30));
+  box-shadow: var(--glass-highlight), var(--glass-shadow),
+              inset 0 0 0 0.5px color-mix(in srgb, var(--Brand-Primary) 20%, transparent);
+}
+
+.dark .glass-accent {
+  background: color-mix(in srgb, var(--Brand-Primary) 20%, rgba(20, 20, 30, 0.40));
+  border: 0.5px solid color-mix(in srgb, var(--Brand-Primary) 25%, rgba(255, 255, 255, 0.15));
+}
+
+/* ─── Specular layer (::before) ─── */
+/**
+ * .glass-specular
+ * 上-左方向への反射グラデーションをレンズ上面に追加するヘルパー。
+ * position: relative が必要。
+ */
+.glass-specular {
+  position: relative;
+  overflow: hidden;
+}
+.glass-specular::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    150deg,
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.10) 35%,
+    transparent 65%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+.glass-specular > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Reduced-transparency fallback ─── */
+/**
+ * アクセシビリティ: ユーザーが「透明度を下げる」を有効にしている場合、
+ * backdrop-filter を無効化して不透明な背景にフォールバックする。
+ */
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-subtle,
+  .glass-medium,
+  .glass-strong,
+  .glass-dark,
+  .glass-accent {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--Surface-Primary);
+    border-color: var(--Border-Low-Emphasis);
+  }
+
+  .dark .glass,
+  .dark .glass-subtle,
+  .dark .glass-medium,
+  .dark .glass-strong,
+  .dark .glass-dark,
+  .dark .glass-accent {
+    background: var(--Surface-Inverse);
+  }
+
+  .glass-overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(0, 0, 0, 0.6);
+  }
+}

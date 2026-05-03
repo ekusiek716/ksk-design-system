@@ -11,6 +11,12 @@ interface TagInputProps {
   /** 重複タグを許可するか */
   allowDuplicates?: boolean
   className?: string
+  /**
+   * タグ入力フィールドの aria-label。
+   * i18n 対応: 英語では "Add tag" を渡す。
+   * @default "タグ入力"
+   */
+  inputLabel?: string
 }
 
 function TagInput({
@@ -21,6 +27,7 @@ function TagInput({
   max,
   allowDuplicates = false,
   className,
+  inputLabel = "タグ入力",
 }: TagInputProps) {
   const [input, setInput] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
@@ -103,7 +110,7 @@ function TagInput({
         disabled={disabled || (max !== undefined && value.length >= max)}
         placeholder={value.length === 0 ? placeholder : ""}
         className="flex-1 min-w-24 bg-transparent outline-none typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] disabled:cursor-not-allowed"
-        aria-label="タグ入力"
+        aria-label={inputLabel}
       />
     </div>
   )

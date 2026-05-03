@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { StatCard } from "./stat-card"
 
 const meta: Meta<typeof StatCard> = {
-  title: "Patterns/StatCard",
+  title: "Components/StatCard",
   component: StatCard,
 }
 export default meta
@@ -45,6 +45,18 @@ export const NoTrend: Story = {
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="4" stroke="currentColor" strokeWidth="1.5" /><path d="M3 18C3 14.1 6.1 11 10 11C13.9 11 17 14.1 17 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
     ),
   },
+}
+
+export const Variants: Story = {
+  render: () => (
+    <div className="grid grid-cols-2 gap-4 max-w-xl">
+      <StatCard label="標準" value="1,234" variant="default" trend={{ value: 5, label: "前月比" }} />
+      <StatCard label="成功" value="98.5" unit="%" variant="success" trend={{ value: 2.1, label: "前月比" }} />
+      <StatCard label="注意" value="3.2" unit="%" variant="caution" trend={{ value: -0.8, label: "前月比" }} />
+      <StatCard label="情報" value="8,420" unit="人" variant="info" />
+      <StatCard label="ブランド" value="¥1.2M" variant="accent" trend={{ value: 8.3, label: "前月比" }} />
+    </div>
+  ),
 }
 
 export const MultipleCards: Story = {

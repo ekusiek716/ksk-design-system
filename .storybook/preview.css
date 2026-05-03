@@ -1,0 +1,7 @@
+/* Storybook canvas background — ライトモード固定 */
+html,
+body,
+.sb-show-main,
+.sb-main-padded {
+  background-color: #ffffff !important;
+}

@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { NotificationBadge } from "./notification-badge"
 
 const meta: Meta<typeof NotificationBadge> = {
-  title: "Patterns/NotificationBadge",
+  title: "Components/NotificationBadge",
   component: NotificationBadge,
   argTypes: {
     count: { control: { type: "number", min: 0, max: 200 } },

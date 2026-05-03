@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { NotificationList } from "./notification-list"
 
-const meta: Meta<typeof NotificationList> = { title: "Admin/NotificationList", component: NotificationList }
+const meta: Meta<typeof NotificationList> = { title: "Components/Admin/NotificationList", component: NotificationList }
 export default meta
 type Story = StoryObj<typeof NotificationList>
 

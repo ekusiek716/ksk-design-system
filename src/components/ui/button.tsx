@@ -14,6 +14,12 @@ const buttonVariants = cva(
         ghost: "text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Ghost-Button)] rounded-full",
         destructive: "bg-[var(--Caution-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Destructive-Button)] active:bg-[var(--Active-Destructive-Button)] rounded-full",
         link: "text-[var(--Text-Accent-Primary)] underline-offset-4 hover:underline",
+        /**
+         * Liquid Glass ボタン — iOS 26 スタイル。
+         * 背景が透けるガラス素材。グラデーション・写真上に重ねて使う。
+         * glass / glass-specular クラスは preset.css (styles/glass.css) で定義。
+         */
+        glass: "glass glass-specular text-[var(--Text-High-Emphasis)] active:opacity-55 rounded-full",
       },
       size: {
         xs: "h-6 px-2 typo-label-xs",
@@ -24,6 +30,8 @@ const buttonVariants = cva(
         icon: "size-10",
         "icon-sm": "size-8",
         "icon-lg": "size-12",
+        /** iOS 26 ナビゲーションバー用の大判丸ボタン (44×44px, Apple HIG minimum tap target) */
+        "icon-xl": "size-11",
       },
     },
     defaultVariants: {

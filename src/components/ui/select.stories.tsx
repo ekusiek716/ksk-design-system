@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "./select"
 
 const meta: Meta<typeof Select> = {
-  title: "UI/Select",
+  title: "Components/Select",
   component: Select,
 }
 export default meta

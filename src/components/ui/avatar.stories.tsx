@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { Avatar, AvatarImage, AvatarFallback } from "./avatar"
 
 const meta: Meta<typeof Avatar> = {
-  title: "UI/Avatar",
+  title: "Components/Avatar",
   component: Avatar,
 }
 export default meta

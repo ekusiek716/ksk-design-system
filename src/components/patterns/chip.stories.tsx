@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { Chip } from "./chip"
 
 const meta: Meta<typeof Chip> = {
-  title: "Patterns/Chip",
+  title: "Components/Chip",
   component: Chip,
   argTypes: {
     variant: {

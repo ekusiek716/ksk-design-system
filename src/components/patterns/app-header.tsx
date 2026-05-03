@@ -14,6 +14,13 @@ interface AppHeaderProps {
   sticky?: boolean
   /** 下線ボーダー */
   bordered?: boolean
+  /**
+   * 外観バリアント:
+   * - "default"     : 通常（Surface-Primary 背景 + ボーダー）
+   * - "glass"       : Liquid Glass（コンテンツに重ねる半透明）
+   * - "transparent" : 完全透明（スクロール連動で背景を切り替えるときの初期状態）
+   */
+  variant?: "default" | "glass" | "transparent"
   className?: string
 }
 
@@ -24,15 +31,26 @@ function AppHeader({
   trailing,
   sticky = false,
   bordered = true,
+  variant = "default",
   className,
 }: AppHeaderProps) {
+  const isGlass = variant === "glass"
+  const isTransparent = variant === "transparent"
+
   return (
     <header
       data-slot="app-header"
+      data-variant={variant}
       className={cn(
-        "flex items-center gap-2 h-14 px-4 bg-[var(--Surface-Primary)]",
+        "flex items-center gap-2 h-14 px-4",
+        // 背景
+        isGlass && "glass",
+        !isGlass && !isTransparent && "bg-[var(--Surface-Primary)]",
+        // ボーダー
+        bordered && !isGlass && !isTransparent && "border-b border-[var(--Border-Low-Emphasis)]",
+        bordered && isGlass && "border-b border-[rgba(255,255,255,0.25)]",
+        // Sticky
         sticky && "sticky top-0 z-40",
-        bordered && "border-b border-[var(--Border-Low-Emphasis)]",
         className
       )}
     >
@@ -41,7 +59,7 @@ function AppHeader({
         <div className="flex items-center shrink-0">{leading}</div>
       )}
 
-      {/* Title */}
+      {/* Title (flex-1 で leading/trailing の幅を確保しつつ中央寄り) */}
       <div className="flex-1 flex flex-col justify-center min-w-0">
         {title && (
           typeof title === "string"

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { SearchPanel } from "./search-panel"
 
-const meta: Meta<typeof SearchPanel> = { title: "Admin/SearchPanel", component: SearchPanel }
+const meta: Meta<typeof SearchPanel> = { title: "Components/Admin/SearchPanel", component: SearchPanel }
 export default meta
 type Story = StoryObj<typeof SearchPanel>
 

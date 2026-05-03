@@ -6,11 +6,18 @@
 
    使い方:
    @import "@ksk/design-system/preset";
+
+   ─── Tailwind CSS v4 の @source 設定（重要） ───────────────────
+   Tailwind v4 はデフォルトで node_modules を走査しません。
+   コンポーネントの Tailwind クラスを検出するため、CSS ファイルに
+   @source ディレクティブで dist フォルダを指定してください。
+   詳細は CLAUDE.md / README を参照。
    ============================================================= */
 
 @import "./styles/primitive.css";
 @import "./styles/semantic.css";
 @import "./styles/typography.css";
+@import "./styles/glass.css";
 
 /* ─── Bridge Layer: shadcn/ui 互換マッピング ─── */
 :root {

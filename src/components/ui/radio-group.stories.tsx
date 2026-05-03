@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "./radio-group"
 import { Label } from "./label"
 
 const meta: Meta<typeof RadioGroup> = {
-  title: "UI/RadioGroup",
+  title: "Components/RadioGroup",
   component: RadioGroup,
 }
 export default meta

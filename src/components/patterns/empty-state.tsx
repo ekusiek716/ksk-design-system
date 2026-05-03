@@ -6,6 +6,12 @@ interface EmptyStateProps extends React.ComponentProps<"div"> {
   title: string
   description?: string
   action?: React.ReactNode
+  /**
+   * アイコンの色クラスを上書きする。コンテキストに応じてアイコン色を変えたいとき。
+   * @example iconClassName="text-[var(--Object-Caution)]"
+   * @default "text-[var(--Object-Low-Emphasis)]"
+   */
+  iconClassName?: string
 }
 
 function EmptyState({
@@ -14,6 +20,7 @@ function EmptyState({
   title,
   description,
   action,
+  iconClassName,
   ...props
 }: EmptyStateProps) {
   return (
@@ -26,7 +33,7 @@ function EmptyState({
       {...props}
     >
       {icon && (
-        <div className="mb-4 text-[var(--Object-Low-Emphasis)]">{icon}</div>
+        <div className={cn("mb-4 text-[var(--Object-Low-Emphasis)]", iconClassName)}>{icon}</div>
       )}
       <h3 className="typo-heading-md text-[var(--Text-High-Emphasis)]">
         {title}

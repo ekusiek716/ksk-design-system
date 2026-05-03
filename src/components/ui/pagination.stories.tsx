@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from "./pagination"
 
 const meta: Meta<typeof Pagination> = {
-  title: "UI/Pagination",
+  title: "Components/Pagination",
   component: Pagination,
 }
 export default meta

@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { SearchBar } from "./search-bar"
 
 const meta: Meta<typeof SearchBar> = {
-  title: "Patterns/SearchBar",
+  title: "Components/SearchBar",
   component: SearchBar,
 }
 export default meta

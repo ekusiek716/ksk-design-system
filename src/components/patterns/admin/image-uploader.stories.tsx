@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { ImageUploader } from "./image-uploader"
 
-const meta: Meta<typeof ImageUploader> = { title: "Admin/ImageUploader", component: ImageUploader }
+const meta: Meta<typeof ImageUploader> = { title: "Components/Admin/ImageUploader", component: ImageUploader }
 export default meta
 type Story = StoryObj<typeof ImageUploader>
 

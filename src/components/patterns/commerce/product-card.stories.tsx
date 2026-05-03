@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { ProductCard } from "./product-card"
 
 const meta: Meta<typeof ProductCard> = {
-  title: "Commerce/ProductCard",
+  title: "Components/Commerce/ProductCard",
   component: ProductCard,
 }
 export default meta

@@ -1,5 +1,6 @@
 import type { Preview } from "@storybook/react-vite"
 import "../src/index.css"
+import "./preview.css"
 
 // テーマごとの --Primitive-Brand-* 変数定義
 const THEMES: Record<string, Record<string, string>> = {
@@ -76,6 +77,13 @@ function applyTheme(theme: string) {
 const preview: Preview = {
   parameters: {
     layout: "fullscreen",
+    backgrounds: {
+      default: "light",
+      values: [
+        { name: "light", value: "#FFFFFF" },
+        { name: "gray",  value: "#F7F7F8" },
+      ],
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,

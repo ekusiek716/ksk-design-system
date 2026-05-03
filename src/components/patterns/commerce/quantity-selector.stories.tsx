@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { QuantitySelector } from "./quantity-selector"
 import * as React from "react"
 
-const meta: Meta<typeof QuantitySelector> = { title: "Commerce/QuantitySelector", component: QuantitySelector }
+const meta: Meta<typeof QuantitySelector> = { title: "Components/QuantitySelector", component: QuantitySelector }
 export default meta
 type Story = StoryObj<typeof QuantitySelector>
 

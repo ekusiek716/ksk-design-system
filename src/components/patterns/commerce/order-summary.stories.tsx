@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { OrderSummary } from "./order-summary"
 
-const meta: Meta<typeof OrderSummary> = { title: "Commerce/OrderSummary", component: OrderSummary }
+const meta: Meta<typeof OrderSummary> = { title: "Components/Commerce/OrderSummary", component: OrderSummary }
 export default meta
 type Story = StoryObj<typeof OrderSummary>
 
