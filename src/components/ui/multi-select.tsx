@@ -180,4 +180,3 @@ function MultiSelect({
 }
 
 export { MultiSelect }
-export type { MultiSelectProps }

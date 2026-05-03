@@ -140,4 +140,3 @@ function TimePicker({
 }
 
 export { TimePicker }
-export type { TimePickerProps }
