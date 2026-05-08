@@ -31,3 +31,11 @@ export const Error: Story = {
     "aria-invalid": true,
   },
 }
+
+export const AutoGrow: Story = {
+  args: {
+    autoGrow: true,
+    placeholder: "入力すると自動で伸びます…",
+    rows: 1,
+  },
+}

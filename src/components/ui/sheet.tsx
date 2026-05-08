@@ -66,7 +66,7 @@ const sheetVariants = cva(
           "data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=closed]:duration-150",
         ].join(" "),
         bottom: [
-          "inset-x-0 bottom-0 rounded-t-[20px]",
+          "inset-x-0 bottom-0 rounded-t-[32px]",
           "bg-[var(--Surface-Primary)]",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150",
@@ -88,7 +88,7 @@ const sheetVariants = cva(
          * 左右・下に余白を持つカード型。モバイルの入力シートに最適。
          */
         float: [
-          "inset-x-3 bottom-3 rounded-[20px] max-w-lg mx-auto",
+          "inset-x-3 bottom-3 rounded-[32px] max-w-lg mx-auto",
           "bg-[var(--Surface-Primary)]",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150",
@@ -99,7 +99,7 @@ const sheetVariants = cva(
          * アクション確認シートに最適。
          */
         "float-glass": [
-          "inset-x-3 bottom-3 rounded-[20px] max-w-lg mx-auto",
+          "inset-x-3 bottom-3 rounded-[32px] max-w-lg mx-auto",
           "glass glass-specular",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150",
@@ -109,7 +109,7 @@ const sheetVariants = cva(
          * 下から全幅で出るガラス素材シート。
          */
         "bottom-glass": [
-          "inset-x-0 bottom-0 rounded-t-[20px]",
+          "inset-x-0 bottom-0 rounded-t-[32px]",
           "glass-strong",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150",

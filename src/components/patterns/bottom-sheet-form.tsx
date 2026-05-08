@@ -53,13 +53,10 @@ function BottomSheetForm({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className={cn("p-0 rounded-t-2xl max-h-[90dvh] flex flex-col", className)}
+        className={cn("p-0 rounded-t-[32px] max-h-[90dvh] flex flex-col", className)}
       >
-        {/* ドラッグハンドル */}
-        <div className="mx-auto mt-3 mb-1 h-1 w-10 rounded-full bg-[var(--Border-Medium-Emphasis)] shrink-0" />
-
-        <SheetHeader className="px-5 pt-2 shrink-0">
-          <SheetTitle>{title}</SheetTitle>
+        <SheetHeader className="px-5 pt-0 shrink-0">
+          <SheetTitle className="!text-[28px] !font-bold">{title}</SheetTitle>
           {description && <SheetDescription>{description}</SheetDescription>}
         </SheetHeader>
 

@@ -53,8 +53,10 @@ function Chip({
       data-slot="chip"
       data-selected={selected || undefined}
       className={cn(
-        chipVariants({ variant: selected ? "accent" : variant, size, shape }),
-        selected && "border-[var(--Border-Accent-Primary)]",
+        chipVariants({ variant, size, shape }),
+        // 選択状態は Brand-Primary 背景 + 白文字 + bold で強調。
+        // 他 CTA / PillRow と一貫した「選択 = ピンク + 白文字」表現に揃える。
+        selected && "!bg-[var(--Brand-Primary)] !text-[var(--Text-on-Inverse)] hover:!bg-[var(--Hover-Primary-Button)] !border-[var(--Brand-Primary)] font-bold",
         className
       )}
       {...props}
