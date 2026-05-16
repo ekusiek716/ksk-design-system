@@ -48,6 +48,13 @@ export default defineConfig({
         "@radix-ui/react-toast",
         "@radix-ui/react-tooltip",
       ],
+      output: {
+        // Mark the entire DS bundle as a Client Module so it can be imported
+        // from Next.js App Router Server Components without triggering
+        // `React.createContext is not a function` (the bundle pulls in Radix
+        // primitives that call createContext at module load).
+        banner: '"use client";',
+      },
     },
     outDir: "dist",
     emptyOutDir: true,

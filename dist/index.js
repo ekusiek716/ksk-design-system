@@ -1,3 +1,4 @@
+"use client";
 import { jsx as n, jsxs as f, Fragment as we } from "react/jsx-runtime";
 import { Accordion as Fe, AlertDialog as pe, Avatar as Dt, Checkbox as De, Label as tn, Collapsible as Pt, Dialog as V, Slot as rn, DropdownMenu as $, HoverCard as nt, Popover as _e, Progress as er, RadioGroup as St, ScrollArea as je, Select as X, Separator as an, Slider as Ke, Switch as tr, Tabs as ot, Tooltip as Ae } from "radix-ui";
 import { clsx as nn } from "clsx";
