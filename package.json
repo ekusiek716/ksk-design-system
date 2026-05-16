@@ -1,6 +1,6 @@
 {
   "name": "@ksk/design-system",
-  "version": "1.13.1",
+  "version": "1.13.2",
   "type": "module",
   "description": "KSK Design System — フリーランス向けマルチテーマ対応デザインシステム",
   "main": "./dist/index.js",
@@ -69,6 +69,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "peerDependencies": {
+    "@radix-ui/react-slot": "^1.0.0",
     "iconsax-reactjs": "^0.0.8",
     "radix-ui": "^1.0.0",
     "react": "^18.0.0 || ^19.0.0",

@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { Label as LabelPrimitive } from "radix-ui";
-import { Slot } from "radix-ui";
+import { Slot } from "@radix-ui/react-slot";
 import { type ControllerProps, type FieldPath, type FieldValues } from "react-hook-form";
 /**
  * Form — react-hook-form 統合フォームラッパー
@@ -55,7 +55,7 @@ declare function FormItem({ className, ...props }: React.ComponentProps<"div">):
 declare function FormLabel({ className, required, children, ...props }: React.ComponentProps<typeof LabelPrimitive.Root> & {
     required?: boolean;
 }): import("react/jsx-runtime").JSX.Element;
-declare function FormControl({ ...props }: React.ComponentProps<typeof Slot.Root>): import("react/jsx-runtime").JSX.Element;
+declare function FormControl({ ...props }: React.ComponentProps<typeof Slot>): import("react/jsx-runtime").JSX.Element;
 declare function FormDescription({ className, ...props }: React.ComponentProps<"p">): import("react/jsx-runtime").JSX.Element;
 declare function FormMessage({ className, ...props }: React.ComponentProps<"p">): import("react/jsx-runtime").JSX.Element;
 export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField, };

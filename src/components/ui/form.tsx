@@ -1,6 +1,12 @@
 import * as React from "react"
 import type { Label as LabelPrimitive } from "radix-ui"
-import { Slot } from "radix-ui"
+// Importing Slot directly from @radix-ui/react-slot instead of via
+// the radix-ui meta-package: webpack's static analysis cannot follow
+// `export * as Slot` namespace re-exports, which produced a noisy
+// "'Slot'.'Root' is not exported from 'radix-ui'" warning on every
+// consuming project's dev build. The direct import has no such issue
+// and the runtime behavior is identical.
+import { Slot } from "@radix-ui/react-slot"
 import {
   Controller,
   FormProvider,
@@ -146,11 +152,11 @@ function FormLabel({
   )
 }
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot.Root>) {
+function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
 
   return (
-    <Slot.Root
+    <Slot
       data-slot="form-control"
       id={formItemId}
       aria-describedby={
