@@ -23,11 +23,11 @@ export const Default: Story = {
 
 export const Required: Story = {
   render: () => (
-    <CheckboxGroup label="お好みのカテゴリ" required helpText="複数選択可" className="max-w-sm">
-      <CheckboxGroupItem>バースデーケーキ</CheckboxGroupItem>
-      <CheckboxGroupItem>記念日ケーキ</CheckboxGroupItem>
-      <CheckboxGroupItem>ロールケーキ</CheckboxGroupItem>
-      <CheckboxGroupItem>チーズケーキ</CheckboxGroupItem>
+    <CheckboxGroup label="興味のあるトピック" required helpText="複数選択可" className="max-w-sm">
+      <CheckboxGroupItem>テクノロジー</CheckboxGroupItem>
+      <CheckboxGroupItem>ビジネス</CheckboxGroupItem>
+      <CheckboxGroupItem>デザイン</CheckboxGroupItem>
+      <CheckboxGroupItem>マーケティング</CheckboxGroupItem>
     </CheckboxGroup>
   ),
 }

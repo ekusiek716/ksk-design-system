@@ -12,21 +12,21 @@ type Story = StoryObj<typeof Footer>
 
 const LINK_GROUPS = [
   {
-    title: "サービス",
+    title: "プロダクト",
     links: [
-      { label: "ウェディングケーキ" },
-      { label: "誕生日ケーキ" },
-      { label: "記念日ケーキ" },
-      { label: "ギフト" },
+      { label: "機能一覧" },
+      { label: "料金プラン" },
+      { label: "導入事例" },
+      { label: "アップデート情報" },
     ],
   },
   {
     title: "サポート",
     links: [
-      { label: "よくある質問" },
+      { label: "ヘルプセンター" },
       { label: "お問い合わせ" },
-      { label: "配送について" },
-      { label: "返品・キャンセル" },
+      { label: "利用ガイド" },
+      { label: "稼働ステータス" },
     ],
   },
   {
@@ -34,7 +34,7 @@ const LINK_GROUPS = [
     links: [
       { label: "会社概要" },
       { label: "採用情報" },
-      { label: "プレスリリース" },
+      { label: "お知らせ" },
     ],
   },
   {

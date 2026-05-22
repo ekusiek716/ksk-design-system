@@ -12,18 +12,21 @@ const meta: Meta<typeof MenuDrawer> = {
 export default meta
 type Story = StoryObj<typeof MenuDrawer>
 
-const CakeIcon = () => (
+const HomeIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path d="M2 10h12v4H2zM4 10V7a4 4 0 018 0v3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-    <path d="M8 3V1M6 3c0-1.1.9-2 2-2s2 .9 2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+    <path d="M2 7l6-5 6 5v6a1 1 0 01-1 1H3a1 1 0 01-1-1V7z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+    <path d="M6 14V9h4v5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
   </svg>
 )
-const GiftIcon = () => (
+const BellIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <rect x="1" y="6" width="14" height="9" rx="1" stroke="currentColor" strokeWidth="1.3"/>
-    <path d="M8 6v9M1 9h14" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-    <path d="M5 6c-1.1 0-2-.9-2-2s.9-2 2-2c1.5 0 2.5 1.5 3 4-1.5 0-2.5-.5-3-2z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
-    <path d="M11 6c1.1 0 2-.9 2-2s-.9-2-2-2c-1.5 0-2.5 1.5-3 4 1.5 0 2.5-.5 3-2z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+    <path d="M4 7a4 4 0 018 0c0 3 1 4 1 4H3s1-1 1-4z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+    <path d="M6.5 13a1.5 1.5 0 003 0" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+  </svg>
+)
+const FolderIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path d="M2 4a1 1 0 011-1h3l1.5 2H13a1 1 0 011 1v6a1 1 0 01-1 1H3a1 1 0 01-1-1V4z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
   </svg>
 )
 const UserIcon = () => (
@@ -43,16 +46,16 @@ const SECTIONS = [
   {
     title: "メニュー",
     items: [
-      { label: "ウェディングケーキ", icon: <CakeIcon /> },
-      { label: "ギフト・プレゼント", icon: <GiftIcon />, badge: 3 },
-      { label: "記念日ケーキ", icon: <CakeIcon /> },
+      { label: "ダッシュボード", icon: <HomeIcon /> },
+      { label: "お知らせ", icon: <BellIcon />, badge: 3 },
+      { label: "プロジェクト", icon: <FolderIcon /> },
     ],
   },
   {
     title: "アカウント",
     items: [
       { label: "マイページ", icon: <UserIcon /> },
-      { label: "注文履歴", icon: <BoxIcon /> },
+      { label: "アクティビティ", icon: <BoxIcon /> },
     ],
   },
 ]
@@ -73,8 +76,8 @@ export const Default: Story = {
           open={open}
           onClose={() => setOpen(false)}
           banner={
-            <div className="rounded-xl p-3 text-white text-sm font-bold" style={{ background: "linear-gradient(135deg,#E8426B,#F9AABF)" }}>
-              春の早割キャンペーン開催中！
+            <div className="rounded-xl p-3 text-white text-sm font-bold" style={{ background: "linear-gradient(135deg,#3B82F6,#60A5FA)" }}>
+              新機能が利用可能になりました
             </div>
           }
           sections={SECTIONS}

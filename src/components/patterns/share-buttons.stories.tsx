@@ -13,7 +13,7 @@ type Story = StoryObj<typeof ShareButtons>
 export const Circle: Story = {
   args: {
     url: "https://example.com/product/1",
-    title: "素敵なウェディングケーキを見つけました！",
+    title: "この記事をシェアする",
     layout: "circle",
   },
 }
@@ -21,7 +21,7 @@ export const Circle: Story = {
 export const Inline: Story = {
   args: {
     url: "https://example.com/product/1",
-    title: "素敵なウェディングケーキを見つけました！",
+    title: "この記事をシェアする",
     layout: "inline",
   },
 }

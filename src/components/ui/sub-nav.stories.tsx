@@ -2,22 +2,22 @@ import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
 import { SubNav } from "./sub-nav"
 
-const meta: Meta<typeof NavigationRibbon> = {
+const meta: Meta<typeof SubNav> = {
   title: "Components/SubNav",
   component: SubNav,
   tags: ["autodocs"],
   parameters: { layout: "padded" },
 }
 export default meta
-type Story = StoryObj<typeof NavigationRibbon>
+type Story = StoryObj<typeof SubNav>
 
 const categories = [
   { label: "すべて", value: "all" },
-  { label: "ウェディングケーキ", value: "wedding" },
-  { label: "誕生日ケーキ", value: "birthday" },
-  { label: "記念日", value: "anniversary" },
-  { label: "バースデー", value: "bday" },
-  { label: "ギフト", value: "gift" },
+  { label: "概要", value: "overview" },
+  { label: "アクティビティ", value: "activity" },
+  { label: "メンバー", value: "members" },
+  { label: "設定", value: "settings" },
+  { label: "請求", value: "billing" },
 ]
 
 export const Underline: Story = {
