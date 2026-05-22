@@ -1,7 +1,23 @@
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { type VariantProps } from "class-variance-authority";
-declare function Sheet({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>): import("react/jsx-runtime").JSX.Element;
+type SnapPoint = number | string;
+interface SheetProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
+    snapPoints?: SnapPoint[];
+    activeSnapPoint?: SnapPoint | null;
+    setActiveSnapPoint?: (s: SnapPoint | null) => void;
+    /** index in `snapPoints` from which the backdrop overlay starts to fade in */
+    fadeFromIndex?: number;
+    dismissible?: boolean;
+    /**
+     * When false, the backdrop overlay is not rendered. Use for "push-up"
+     * layouts where the sheet shares the viewport with other UI (e.g. a
+     * video that resizes as the sheet expands).
+     * Default: true.
+     */
+    overlay?: boolean;
+}
+declare function Sheet({ snapPoints, activeSnapPoint: activeSnapPointProp, setActiveSnapPoint: setActiveSnapPointProp, fadeFromIndex, dismissible, overlay, onOpenChange, open, ...props }: SheetProps): import("react/jsx-runtime").JSX.Element;
 declare function SheetTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>): import("react/jsx-runtime").JSX.Element;
 declare function SheetClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>): import("react/jsx-runtime").JSX.Element;
 /** ドラッグインジケーター（Apple HIG: 36×5pt, gray, centered） */
@@ -12,10 +28,17 @@ declare const sheetVariants: (props?: {
 interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.Content>, VariantProps<typeof sheetVariants> {
     /** オーバーレイをガラス調にする（glass系 side では自動で true） */
     glassOverlay?: boolean;
+    /**
+     * Portal target element. When provided, the sheet portals into this element
+     * instead of document.body. Useful for inheriting CSS transforms (e.g. forced
+     * landscape rotation in mobile apps). Defaults to document.body if omitted.
+     */
+    container?: HTMLElement | null;
 }
-declare function SheetContent({ className, children, side, glassOverlay, ...props }: SheetContentProps): import("react/jsx-runtime").JSX.Element;
+declare function SheetContent({ className, children, side, glassOverlay, container, ...props }: SheetContentProps): import("react/jsx-runtime").JSX.Element;
 declare function SheetHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function SheetFooter({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): import("react/jsx-runtime").JSX.Element;
 declare function SheetDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>): import("react/jsx-runtime").JSX.Element;
 export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator, };
+export type { SheetProps, SheetContentProps, SnapPoint };

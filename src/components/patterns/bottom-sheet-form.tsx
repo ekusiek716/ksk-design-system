@@ -55,7 +55,7 @@ function BottomSheetForm({
         side="bottom"
         className={cn("p-0 rounded-t-[32px] max-h-[90dvh] flex flex-col", className)}
       >
-        <SheetHeader className="px-5 pt-0 shrink-0">
+        <SheetHeader className="px-5 pt-6 shrink-0">
           <SheetTitle className="!text-[28px] !font-bold">{title}</SheetTitle>
           {description && <SheetDescription>{description}</SheetDescription>}
         </SheetHeader>

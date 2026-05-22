@@ -155,8 +155,24 @@
  * position: relative が必要。
  */
 .glass-specular {
-  position: relative;
+  /*
+   * Establish a containing block for the ::before highlight.
+   * We use `isolation: isolate` instead of `position: relative` so the
+   * sheet can stay `position: fixed` when needed (the `.fixed` utility
+   * would otherwise be overridden by this rule's same-specificity
+   * later-in-stylesheet `position: relative`).
+   * Add `position: relative` only when there is no other positioning,
+   * via a fallback selector below.
+   */
+  isolation: isolate;
   overflow: hidden;
+}
+/*
+ * Fallback: if the element is not already positioned (fixed/absolute/sticky),
+ * fall back to position: relative so the ::before still anchors correctly.
+ */
+.glass-specular:not(.fixed):not(.absolute):not(.sticky) {
+  position: relative;
 }
 .glass-specular::before {
   content: '';

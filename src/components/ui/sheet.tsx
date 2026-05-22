@@ -3,8 +3,149 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
-function Sheet({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="sheet" {...props} />
+// ============================================================================
+// Snap points context
+// ----------------------------------------------------------------------------
+// When `snapPoints` is provided to <Sheet>, descendant <SheetContent
+// side="bottom"> renders in "snap mode": the sheet height is fixed to the
+// largest snap, and translateY is computed from the active snap. Drag on the
+// indicator moves the sheet, release snaps to the nearest point. Dragging
+// below the smallest snap (with dismissible) closes the sheet.
+//
+// Snap points are accepted as numbers (viewport ratio 0..1) for now; string
+// values like "450px" are accepted but treated as their parsed ratio against
+// window.innerHeight.
+// ============================================================================
+
+type SnapPoint = number | string
+
+interface SheetSnapContextValue {
+  snapPoints: SnapPoint[]
+  /** normalized snap ratios (0..1) parallel to `snapPoints` */
+  snapRatios: number[]
+  activeSnapPoint: SnapPoint | null
+  setActiveSnapPoint: (s: SnapPoint | null) => void
+  dismissible: boolean
+  fadeFromIndex: number
+  /** When false, render no backdrop overlay (push-up / inline mode). */
+  overlay: boolean
+  close: () => void
+}
+
+const SheetSnapContext = React.createContext<SheetSnapContextValue | null>(null)
+
+function snapToRatio(snap: SnapPoint): number {
+  if (typeof snap === "number") return Math.min(1, Math.max(0, snap))
+  // "450px" → 450 / window.innerHeight
+  const px = parseFloat(snap)
+  if (Number.isNaN(px)) return 0.9
+  if (typeof window === "undefined") return 0.9
+  return Math.min(1, Math.max(0, px / window.innerHeight))
+}
+
+interface SheetProps
+  extends React.ComponentProps<typeof DialogPrimitive.Root> {
+  snapPoints?: SnapPoint[]
+  activeSnapPoint?: SnapPoint | null
+  setActiveSnapPoint?: (s: SnapPoint | null) => void
+  /** index in `snapPoints` from which the backdrop overlay starts to fade in */
+  fadeFromIndex?: number
+  dismissible?: boolean
+  /**
+   * When false, the backdrop overlay is not rendered. Use for "push-up"
+   * layouts where the sheet shares the viewport with other UI (e.g. a
+   * video that resizes as the sheet expands).
+   * Default: true.
+   */
+  overlay?: boolean
+}
+
+function Sheet({
+  snapPoints,
+  activeSnapPoint: activeSnapPointProp,
+  setActiveSnapPoint: setActiveSnapPointProp,
+  fadeFromIndex,
+  dismissible = true,
+  overlay = true,
+  onOpenChange,
+  open,
+  ...props
+}: SheetProps) {
+  const snapRatios = React.useMemo(
+    () => (snapPoints ?? []).map(snapToRatio),
+    [snapPoints]
+  )
+
+  const isControlledSnap = activeSnapPointProp !== undefined
+  // Uncontrolled default = the *lowest* snap (peek). Callers who want
+  // a different initial state pass `activeSnapPoint` (controlled).
+  const defaultSnap: SnapPoint | null = snapPoints?.[0] ?? null
+  const [internalSnap, setInternalSnap] = React.useState<SnapPoint | null>(defaultSnap)
+  const activeSnapPoint = isControlledSnap ? activeSnapPointProp! : internalSnap
+  const setActiveSnapPoint = React.useCallback(
+    (s: SnapPoint | null) => {
+      if (!isControlledSnap) setInternalSnap(s)
+      setActiveSnapPointProp?.(s)
+    },
+    [isControlledSnap, setActiveSnapPointProp]
+  )
+
+  // For uncontrolled snap state only: when the sheet opens we reset to the
+  // *lowest* snap (the most common "default open" expectation: peek state).
+  // Controlled callers own the initial value via `activeSnapPoint` so we
+  // never override their choice.
+  React.useEffect(() => {
+    if (open && !isControlledSnap && snapPoints && snapPoints.length > 0) {
+      setInternalSnap(snapPoints[0])
+    }
+    // We intentionally only react to `open` flipping true here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      // Same logic on close: only reset our internal state if we own it.
+      if (!next && !isControlledSnap && snapPoints && snapPoints.length > 0) {
+        setInternalSnap(snapPoints[0])
+      }
+      onOpenChange?.(next)
+    },
+    [onOpenChange, snapPoints, isControlledSnap]
+  )
+
+  const ctx = React.useMemo<SheetSnapContextValue | null>(() => {
+    if (!snapPoints || snapPoints.length === 0) return null
+    return {
+      snapPoints,
+      snapRatios,
+      activeSnapPoint,
+      setActiveSnapPoint,
+      dismissible,
+      fadeFromIndex: fadeFromIndex ?? 0,
+      overlay,
+      close: () => handleOpenChange(false),
+    }
+  }, [
+    snapPoints,
+    snapRatios,
+    activeSnapPoint,
+    setActiveSnapPoint,
+    dismissible,
+    fadeFromIndex,
+    overlay,
+    handleOpenChange,
+  ])
+
+  return (
+    <SheetSnapContext.Provider value={ctx}>
+      <DialogPrimitive.Root
+        data-slot="sheet"
+        open={open}
+        onOpenChange={handleOpenChange}
+        {...props}
+      />
+    </SheetSnapContext.Provider>
+  )
 }
 
 function SheetTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
@@ -25,21 +166,37 @@ interface SheetOverlayProps extends React.ComponentProps<typeof DialogPrimitive.
    * （真っ暗なスクリムの代わりに軽いすりガラス風）
    */
   glass?: boolean
+  /** 0..1 — controlled opacity for snap-mode overlays */
+  opacity?: number
 }
 
-function SheetOverlay({ className, glass = false, ...props }: SheetOverlayProps) {
+function SheetOverlay({
+  className,
+  glass = false,
+  opacity,
+  style,
+  ...props
+}: SheetOverlayProps) {
+  const controlled = opacity != null
   return (
     <DialogPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50",
-        glass
-          ? "glass-overlay"
-          : "bg-black/40",
-        "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200",
-        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150",
+        // Overlay sits *under* SheetContent (z-50). Using z-40 prevents
+        // the glass scrim from covering the sheet content.
+        "fixed inset-0 z-40",
+        // For "glass" sheets, the sheet itself provides the frosted-glass
+        // visual via its own backdrop-filter. Doubling that with a blurred
+        // overlay washes out the sheet completely. Use a subtle dark scrim
+        // (no backdrop blur) instead — the glass sheet on top reads clearly.
+        glass ? "bg-black/30" : "bg-black/40",
+        // When opacity is not controlled, fall back to a simple opacity
+        // transition (no fade-in-0 keyframes which can leave the layer
+        // permanently at opacity 0 in some Tailwind / animate plugin combos).
+        !controlled && "transition-opacity duration-200",
         className
       )}
+      style={controlled ? { ...style, opacity } : style}
       {...props}
     />
   )
@@ -68,8 +225,6 @@ const sheetVariants = cva(
         bottom: [
           "inset-x-0 bottom-0 rounded-t-[32px]",
           "bg-[var(--Surface-Primary)]",
-          "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200",
-          "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150",
         ].join(" "),
         left: [
           "inset-y-0 left-0 h-full w-3/4 max-w-sm border-r border-[var(--Border-Low-Emphasis)]",
@@ -90,8 +245,6 @@ const sheetVariants = cva(
         float: [
           "inset-x-3 bottom-3 rounded-[32px] max-w-lg mx-auto",
           "bg-[var(--Surface-Primary)]",
-          "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200",
-          "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150",
         ].join(" "),
         /**
          * Liquid Glass フローティングシート
@@ -101,8 +254,6 @@ const sheetVariants = cva(
         "float-glass": [
           "inset-x-3 bottom-3 rounded-[32px] max-w-lg mx-auto",
           "glass glass-specular",
-          "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200",
-          "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150",
         ].join(" "),
         /**
          * Liquid Glass ボトムシート
@@ -111,8 +262,6 @@ const sheetVariants = cva(
         "bottom-glass": [
           "inset-x-0 bottom-0 rounded-t-[32px]",
           "glass-strong",
-          "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:duration-200",
-          "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:duration-150",
         ].join(" "),
       },
     },
@@ -129,6 +278,12 @@ interface SheetContentProps
     VariantProps<typeof sheetVariants> {
   /** オーバーレイをガラス調にする（glass系 side では自動で true） */
   glassOverlay?: boolean
+  /**
+   * Portal target element. When provided, the sheet portals into this element
+   * instead of document.body. Useful for inheriting CSS transforms (e.g. forced
+   * landscape rotation in mobile apps). Defaults to document.body if omitted.
+   */
+  container?: HTMLElement | null
 }
 
 function SheetContent({
@@ -136,21 +291,244 @@ function SheetContent({
   children,
   side = "right",
   glassOverlay,
+  container,
   ...props
 }: SheetContentProps) {
-  const hasIndicator = side === "bottom" || side === "float" || side === "float-glass" || side === "bottom-glass"
+  const snapCtx = React.useContext(SheetSnapContext)
+  // The drag indicator is an iOS HIG "this can be dragged" affordance.
+  // Without an actual drag-to-dismiss / drag-to-snap interaction it's a
+  // misleading hint, so we only render it for variants that actually wire
+  // drag behavior — currently just snap-mode bottom sheets. Consumers who
+  // implement their own drag handling can still render <SheetDragIndicator />
+  // manually inside their content.
   const useGlassOverlay = glassOverlay ?? glassSides.has(side as string)
 
+  // Snap mode kicks in only for `side="bottom"` when the parent Sheet was
+  // given `snapPoints`. Other sides ignore snap entirely (per spec).
+  if (snapCtx && side === "bottom") {
+    return (
+      <SnapBottomSheetContent
+        snapCtx={snapCtx}
+        className={className}
+        glassOverlay={useGlassOverlay}
+        container={container}
+        {...props}
+      >
+        {children}
+      </SnapBottomSheetContent>
+    )
+  }
+
   return (
-    <SheetPortal>
+    <SheetPortal container={container}>
       <SheetOverlay glass={useGlassOverlay} />
       <DialogPrimitive.Content
         data-slot="sheet-content"
         className={cn(sheetVariants({ side }), "p-6", className)}
         {...props}
       >
-        {hasIndicator && <SheetDragIndicator />}
         {children}
+      </DialogPrimitive.Content>
+    </SheetPortal>
+  )
+}
+
+// ============================================================================
+// Snap-mode bottom sheet
+// ----------------------------------------------------------------------------
+// - Height is fixed to `maxSnap * 100svh`
+// - translateY = (maxSnap - activeRatio) / maxSnap * 100%
+// - Drag on the indicator (and the top header row) moves the sheet
+// - On release, snap to nearest point; if past min*0.5 and dismissible, close
+// ============================================================================
+
+interface SnapBottomSheetContentProps
+  extends React.ComponentProps<typeof DialogPrimitive.Content> {
+  snapCtx: SheetSnapContextValue
+  className?: string
+  glassOverlay?: boolean
+  container?: HTMLElement | null
+  children?: React.ReactNode
+}
+
+function SnapBottomSheetContent({
+  snapCtx,
+  className,
+  glassOverlay,
+  container,
+  children,
+  style,
+  ...props
+}: SnapBottomSheetContentProps) {
+  const {
+    snapRatios,
+    activeSnapPoint,
+    setActiveSnapPoint,
+    dismissible,
+    close,
+    snapPoints,
+    fadeFromIndex,
+    overlay,
+  } = snapCtx
+
+  const maxSnap = React.useMemo(
+    () => (snapRatios.length > 0 ? Math.max(...snapRatios) : 0.9),
+    [snapRatios]
+  )
+  const minSnap = React.useMemo(
+    () => (snapRatios.length > 0 ? Math.min(...snapRatios) : 0.4),
+    [snapRatios]
+  )
+  const activeRatio = React.useMemo(() => {
+    if (activeSnapPoint == null) return maxSnap
+    return snapToRatio(activeSnapPoint)
+  }, [activeSnapPoint, maxSnap])
+
+  // Drag tracking — we update activeSnapPoint continuously during drag so
+  // any parent listening (e.g. a video container that resizes to share the
+  // viewport with the sheet) can stay in sync without waiting for release.
+  const [dragging, setDragging] = React.useState(false)
+  const dragStartYRef = React.useRef(0)
+  const dragStartRatioRef = React.useRef(activeRatio)
+  const sheetRef = React.useRef<HTMLDivElement>(null)
+
+  // translateY is purely a function of activeRatio, so during drag we just
+  // push activeSnapPoint and let the render pipeline place the sheet.
+  const baseTranslatePct = ((maxSnap - activeRatio) / maxSnap) * 100
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Only respond to primary pointer (touch / left mouse)
+    if (e.button != null && e.button !== 0) return
+    setDragging(true)
+    dragStartYRef.current = e.clientY
+    dragStartRatioRef.current = activeRatio
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId)
+    } catch {}
+  }
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging) return
+    const dy = e.clientY - dragStartYRef.current
+    const vh = typeof window === "undefined" ? 1 : window.innerHeight
+    // dragging down = bigger dy = smaller visible portion
+    const newRatio = Math.max(
+      0,
+      Math.min(maxSnap, dragStartRatioRef.current - dy / vh)
+    )
+    setActiveSnapPoint(newRatio)
+  }
+
+  const finishDrag = (_e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging) return
+    setDragging(false)
+
+    const newRatio = activeRatio
+
+    // Dismiss if dragged well below the lowest snap
+    if (dismissible && newRatio < minSnap * 0.5) {
+      close()
+      return
+    }
+
+    // Snap to the nearest snap point
+    let bestIdx = 0
+    let bestDist = Math.abs(newRatio - snapRatios[0])
+    for (let i = 1; i < snapRatios.length; i++) {
+      const d = Math.abs(newRatio - snapRatios[i])
+      if (d < bestDist) {
+        bestDist = d
+        bestIdx = i
+      }
+    }
+    setActiveSnapPoint(snapPoints[bestIdx])
+  }
+
+  // Overlay opacity tracks the active snap: lowest = transparent (or
+  // fadeFromIndex baseline) and goes up to full at max snap.
+  const overlayOpacity = React.useMemo(() => {
+    if (snapRatios.length === 0) return 1
+    const fadeStart = snapRatios[Math.min(fadeFromIndex, snapRatios.length - 1)]
+    if (activeRatio <= fadeStart) return 0
+    if (maxSnap <= fadeStart) return 1
+    return Math.min(1, (activeRatio - fadeStart) / (maxSnap - fadeStart))
+  }, [snapRatios, fadeFromIndex, activeRatio, maxSnap])
+
+  const transform = `translate3d(0, ${baseTranslatePct}%, 0)`
+
+  // Optional ↑/↓ keyboard navigation between snaps when the sheet has focus
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return
+    const currentIdx = snapRatios.findIndex((r) => r === activeRatio)
+    if (currentIdx === -1) return
+    const next =
+      e.key === "ArrowUp"
+        ? Math.min(snapRatios.length - 1, currentIdx + 1)
+        : Math.max(0, currentIdx - 1)
+    if (next !== currentIdx) {
+      e.preventDefault()
+      setActiveSnapPoint(snapPoints[next])
+    }
+  }
+
+  return (
+    <SheetPortal container={container}>
+      {overlay && (
+        <SheetOverlay glass={glassOverlay} opacity={overlayOpacity} />
+      )}
+      <DialogPrimitive.Content
+        ref={sheetRef}
+        data-slot="sheet-content"
+        data-snap-active={activeSnapPoint ?? undefined}
+        onKeyDown={onKeyDown}
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-50 flex flex-col",
+          "bg-[var(--Surface-Primary)] rounded-t-[32px] shadow-[var(--shadow-dialog)]",
+          // Suppress Radix open/close fade — we manage transform ourselves
+          "data-[state=open]:animate-none data-[state=closed]:animate-none",
+          "outline-none",
+          className
+        )}
+        style={{
+          ...style,
+          height: `${maxSnap * 100}svh`,
+          transform,
+          transition: dragging
+            ? "none"
+            : "transform 320ms cubic-bezier(0.32, 0.72, 0, 1)",
+          willChange: "transform",
+          touchAction: "none",
+        }}
+        {...props}
+      >
+        {/* Drag handle row — pointer events here drive the snap drag */}
+        <div
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={finishDrag}
+          onPointerCancel={finishDrag}
+          className="cursor-grab active:cursor-grabbing select-none"
+        >
+          <SheetDragIndicator />
+        </div>
+        {/*
+          Inner content scrolls within the *visible* slice — not the full
+          90svh shell. Otherwise at low snaps the scroll area extends below
+          the viewport and the user can't scroll to the actual bottom of
+          their content (rows ~18-20 in the snap story).
+          We subtract a small allowance for the drag indicator row (~22px).
+        */}
+        <div
+          className="flex-1 min-h-0 overflow-y-auto"
+          style={{
+            maxHeight: `calc(${activeRatio * 100}svh - 22px)`,
+            transition: dragging
+              ? "none"
+              : "max-height 320ms cubic-bezier(0.32, 0.72, 0, 1)",
+          }}
+        >
+          {children}
+        </div>
       </DialogPrimitive.Content>
     </SheetPortal>
   )
@@ -177,3 +555,4 @@ export {
   SheetHeader, SheetFooter, SheetTitle, SheetDescription,
   SheetDragIndicator,
 }
+export type { SheetProps, SheetContentProps, SnapPoint }
