@@ -7652,25 +7652,37 @@ function Bf({
   title: o,
   description: s,
   interactive: l = !1,
-  children: i,
-  ...c
+  variant: i = "default",
+  children: c,
+  ...d
 }) {
+  const h = i === "destructive";
   return /* @__PURE__ */ f(
     "div",
     {
       "data-slot": "list-item",
+      "data-variant": i,
       className: u(
         "flex items-start gap-3 py-3 px-4 border-b border-[var(--Border-Low-Emphasis)]",
-        l && "cursor-pointer hover:bg-[var(--Surface-Secondary)] transition-colors",
+        l && (h ? "cursor-pointer hover:bg-[var(--Surface-Caution-Subtle)] transition-colors" : "cursor-pointer hover:bg-[var(--Surface-Secondary)] transition-colors"),
         e
       ),
-      ...c,
+      ...d,
       children: [
         t && /* @__PURE__ */ n("div", { className: "shrink-0", children: t }),
         /* @__PURE__ */ f("div", { className: "flex-1 min-w-0", children: [
-          o && /* @__PURE__ */ n("p", { className: "typo-label-md text-[var(--Text-High-Emphasis)] truncate", children: o }),
+          o && /* @__PURE__ */ n(
+            "p",
+            {
+              className: u(
+                "typo-label-md truncate",
+                h ? "text-[var(--Caution-Base)]" : "text-[var(--Text-High-Emphasis)]"
+              ),
+              children: o
+            }
+          ),
           s && /* @__PURE__ */ n("p", { className: "typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-0.5", children: s }),
-          i,
+          c,
           a && /* @__PURE__ */ n("div", { className: "mt-2", children: a })
         ] }),
         r && /* @__PURE__ */ n("div", { className: "shrink-0", children: r })

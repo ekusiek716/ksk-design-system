@@ -49,7 +49,7 @@
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
-| Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float` | BottomSheet, FloatSheet, RightSheet, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout) |
+| Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float` | BottomSheet, FloatSheet, RightSheet, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout) |
 | Skeleton | `@/components/ui/skeleton` | — | CardSkeleton, TextSkeleton, AvatarWithText |
 | Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Disabled |
 | SocialLoginButton | `@/components/ui/social-login-button` | — | Line, Google, Apple, Amazon, AllProviders, Loading |
@@ -74,7 +74,7 @@
 |-----------|--------|----------|---------|
 | BulkActions | `@/components/patterns/admin/bulk-actions` | — | Default, ManySelected |
 | ChartControls | `@/components/patterns/admin/chart-controls` | — | Default, PeriodOnly |
-| DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState | `@/components/patterns/admin/data-table` | — | Default, Empty, WithSections, CellVariants |
+| DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState | `@/components/patterns/admin/data-table` | — | Default, Empty, WithSections, CellVariants, Sticky Columns (左端固定) |
 | ImageUploader | `@/components/patterns/admin/image-uploader` | — | Default, Empty |
 | KebabMenu | `@/components/patterns/admin/kebab-menu` | — | Default |
 | NotificationList | `@/components/patterns/admin/notification-list` | — | Vertical, Horizontal, Empty |
@@ -108,6 +108,7 @@
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch |
 | SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
 | ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders |
+| SimplePagination | `@/components/patterns/simple-pagination` | — | アイテム数指定 (items), ページ数指定 (pages), compact (モバイル省略表示), 境界での disabled, 0 件 |
 | StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, Variants, MultipleCards |
 | StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |
 | SwipeRow | `@/components/patterns/swipe-row` | — | Default, SingleAction |

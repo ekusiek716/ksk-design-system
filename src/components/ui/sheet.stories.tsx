@@ -207,45 +207,6 @@ export const BottomSheetSwipeToClose: Story = {
   },
 }
 
-export const BottomGlassSwipeToClose: Story = {
-  name: "Bottom Glass — swipeToClose",
-  parameters: { layout: "fullscreen" },
-  render: () => {
-    const [open, setOpen] = React.useState(false)
-    return (
-      <div
-        className="w-full min-h-screen flex flex-col items-center justify-center gap-6 p-8"
-        style={{ background: "linear-gradient(160deg, #f8a8c8 0%, #e83b82 60%, #8a1e4a 100%)" }}
-      >
-        <p className="text-white typo-heading-md opacity-70">背景コンテンツ</p>
-        <Button variant="secondary" size="lg" onClick={() => setOpen(true)}>
-          ガラスシートを開く
-        </Button>
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetContent
-            side="bottom-glass"
-            swipeToClose
-            className="pb-[max(1.5rem,env(safe-area-inset-bottom))]"
-          >
-            <SheetHeader className="mb-4">
-              <SheetTitle>アクション</SheetTitle>
-              <SheetDescription>
-                glass + swipe-to-close。バーを下にスワイプ。
-              </SheetDescription>
-            </SheetHeader>
-            <SheetFooter>
-              <SheetClose asChild>
-                <Button className="w-full" size="lg">実行</Button>
-              </SheetClose>
-            </SheetFooter>
-          </SheetContent>
-        </Sheet>
-      </div>
-    )
-  },
-}
-
-
 // ─── Snap points ──────────────────────────────────────────────────────────────
 
 export const BottomSheetSnap: Story = {
