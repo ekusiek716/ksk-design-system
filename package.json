@@ -1,6 +1,6 @@
 {
   "name": "@ksk/design-system",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "type": "module",
   "description": "KSK Design System — フリーランス向けマルチテーマ対応デザインシステム",
   "main": "./dist/index.js",
@@ -28,6 +28,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./class-names": {
+      "types": "./dist/types/class-names.d.ts",
+      "import": "./dist/class-names.js",
+      "default": "./dist/class-names.js"
     },
     "./package.json": "./package.json",
     "./preset": "./src/preset.css",

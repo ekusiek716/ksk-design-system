@@ -1,15 +1,32 @@
 import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+const cardVariants = cva(
+  "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] flex flex-col rounded-lg border border-[var(--Border-Low-Emphasis)] shadow-[var(--shadow-md)] @container",
+  {
+    variants: {
+      variant: {
+        /** 既定: 内側に p-6 と gap-6（情報を持つカード向け）。 */
+        default: "gap-6 p-6",
+        /** メディアカード: padding/gap なし。サムネ等を端まで広げる用途。
+         *  オーバーレイで title/badge を絶対配置するときに p-6 が邪魔だったケースに。 */
+        media: "gap-0 p-0 overflow-hidden",
+      },
+    },
+    defaultVariants: { variant: "default" },
+  }
+)
+
+interface CardProps
+  extends React.ComponentProps<"div">,
+    VariantProps<typeof cardVariants> {}
+
+function Card({ className, variant, ...props }: CardProps) {
   return (
     <div
       data-slot="card"
-      className={cn(
-        "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] flex flex-col gap-6 rounded-lg border border-[var(--Border-Low-Emphasis)] p-6 shadow-[var(--shadow-md)]",
-        "@container",
-        className
-      )}
+      className={cn(cardVariants({ variant }), className)}
       {...props}
     />
   )
@@ -74,4 +91,5 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-export { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter }
+export { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter, cardVariants }
+export type { CardProps }

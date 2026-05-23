@@ -15,6 +15,45 @@ import {
 
 type SortDirection = "asc" | "desc" | null
 
+/** 列の sticky 位置。`true` は `"left"` のエイリアス。 */
+type StickyPosition = "left" | "right" | true
+
+/**
+ * 横スクロール時に列を「貼り付け」表示するためのスタイル/クラスを生成するヘルパ。
+ *
+ * `DataTable` 自体が `overflow-x-auto` のスクロールコンテナになっているため、
+ * 子の `<th>` / `<td>` に `position: sticky` と `left`/`right` を指定するだけで
+ * 縦方向（行）にもスクロールしながら水平方向の固定が可能になります。
+ *
+ * 行ホバー時の背景色を上書きするため、固定列は不透明な `--Surface-Primary` を
+ * 明示的に塗ります（ヘッダー行は `--Surface-Secondary`）。
+ *
+ * @param position - "left" | "right" | true (= "left")
+ * @param offset - 同じ側に複数の固定列がある場合のオフセット(px)
+ * @param isHeader - ヘッダー行のセルの場合は true
+ */
+function getStickyCellProps(
+  position: StickyPosition,
+  offset = 0,
+  isHeader = false
+): { className: string; style: React.CSSProperties } {
+  const side: "left" | "right" = position === "right" ? "right" : "left"
+  const bg = isHeader ? "var(--Surface-Secondary)" : "var(--Surface-Primary)"
+  return {
+    className: cn(
+      "sticky z-[1]",
+      // 影で「貼り付き」の境界を視覚化（軽め）
+      side === "left"
+        ? "shadow-[1px_0_0_var(--Border-Low-Emphasis)]"
+        : "shadow-[-1px_0_0_var(--Border-Low-Emphasis)]"
+    ),
+    style: {
+      [side]: offset,
+      backgroundColor: bg,
+    } as React.CSSProperties,
+  }
+}
+
 // ─── Inline SVG Icons ───
 
 function SortIcon({ direction }: { direction: SortDirection }) {
@@ -197,6 +236,10 @@ interface DataTableHeadProps extends React.ComponentProps<"th"> {
   sortable?: boolean
   sortDirection?: SortDirection
   onSort?: () => void
+  /** 横スクロール時に列を貼り付け表示する */
+  sticky?: StickyPosition
+  /** 同じ側に複数の固定列がある場合のオフセット(px) */
+  stickyOffset?: number
 }
 
 function DataTableHead({
@@ -205,16 +248,22 @@ function DataTableHead({
   sortable,
   sortDirection,
   onSort,
+  sticky,
+  stickyOffset,
+  style,
   ...props
 }: DataTableHeadProps) {
+  const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset, true) : null
   return (
     <th
       data-slot="data-table-head"
       className={cn(
         "px-3 py-2.5 text-left typo-label-sm text-[var(--Text-Medium-Emphasis)]",
         sortable && "cursor-pointer select-none",
+        stickyProps?.className,
         className
       )}
+      style={stickyProps ? { ...stickyProps.style, ...style } : style}
       onClick={sortable ? onSort : undefined}
       aria-sort={
         sortDirection === "asc" ? "ascending" : sortDirection === "desc" ? "descending" : undefined
@@ -261,13 +310,29 @@ const dataTableCellVariants = cva("px-3 py-2.5 typo-body-md text-[var(--Text-Hig
 
 interface DataTableCellProps
   extends Omit<React.ComponentProps<"td">, "align" | "width">,
-    VariantProps<typeof dataTableCellVariants> {}
+    VariantProps<typeof dataTableCellVariants> {
+  /** 横スクロール時に列を貼り付け表示する */
+  sticky?: StickyPosition
+  /** 同じ側に複数の固定列がある場合のオフセット(px) */
+  stickyOffset?: number
+}
 
-function DataTableCell({ className, align, width, children, ...props }: DataTableCellProps) {
+function DataTableCell({
+  className,
+  align,
+  width,
+  children,
+  sticky,
+  stickyOffset,
+  style,
+  ...props
+}: DataTableCellProps) {
+  const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
   return (
     <td
       data-slot="data-table-cell"
-      className={cn(dataTableCellVariants({ align, width }), className)}
+      className={cn(dataTableCellVariants({ align, width }), stickyProps?.className, className)}
+      style={stickyProps ? { ...stickyProps.style, ...style } : style}
       {...props}
     >
       {children}
@@ -282,6 +347,10 @@ interface DataTableAvatarCellProps extends React.ComponentProps<"td"> {
   fallback?: string
   title: string
   caption?: string
+  /** 横スクロール時に列を貼り付け表示する */
+  sticky?: StickyPosition
+  /** 同じ側に複数の固定列がある場合のオフセット(px) */
+  stickyOffset?: number
 }
 
 function DataTableAvatarCell({
@@ -290,12 +359,17 @@ function DataTableAvatarCell({
   fallback,
   title,
   caption,
+  sticky,
+  stickyOffset,
+  style,
   ...props
 }: DataTableAvatarCellProps) {
+  const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
   return (
     <td
       data-slot="data-table-avatar-cell"
-      className={cn("px-3 py-2.5", className)}
+      className={cn("px-3 py-2.5", stickyProps?.className, className)}
+      style={stickyProps ? { ...stickyProps.style, ...style } : style}
       {...props}
     >
       <div className="flex items-center gap-3">
@@ -371,6 +445,10 @@ interface DataTableCheckboxCellProps extends React.ComponentProps<"td"> {
   checked?: boolean
   onCheckedChange?: (checked: boolean) => void
   indeterminate?: boolean
+  /** 横スクロール時に列を貼り付け表示する */
+  sticky?: StickyPosition
+  /** 同じ側に複数の固定列がある場合のオフセット(px) */
+  stickyOffset?: number
 }
 
 function DataTableCheckboxCell({
@@ -378,12 +456,17 @@ function DataTableCheckboxCell({
   checked,
   onCheckedChange,
   indeterminate,
+  sticky,
+  stickyOffset,
+  style,
   ...props
 }: DataTableCheckboxCellProps) {
+  const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
   return (
     <td
       data-slot="data-table-checkbox-cell"
-      className={cn("w-[40px] px-3 py-2.5", className)}
+      className={cn("w-[40px] px-3 py-2.5", stickyProps?.className, className)}
+      style={stickyProps ? { ...stickyProps.style, ...style } : style}
       {...props}
     >
       <Checkbox
@@ -798,4 +881,5 @@ export {
   DataTableEmptyState,
 }
 
-export type { SortDirection, DataTableActionMenuItem }
+export { getStickyCellProps }
+export type { SortDirection, DataTableActionMenuItem, StickyPosition }

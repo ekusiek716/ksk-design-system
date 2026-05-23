@@ -15,15 +15,22 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: path.resolve(__dirname, "src/index.ts"),
+      // Multi-entry build:
+      //   index       → 全コンポーネント（"use client" 付きの Client Module）
+      //   class-names → Server-safe な cva variants 集（バナーなし、RSC から import 可）
+      entry: {
+        index: path.resolve(__dirname, "src/index.ts"),
+        "class-names": path.resolve(__dirname, "src/class-names.ts"),
+      },
       formats: ["es"],
-      fileName: "index",
+      fileName: (_format, entryName) => `${entryName}.js`,
     },
     cssFileName: "styles",
     rollupOptions: {
       external: [
         "react",
         "react-dom",
+        "react-dom/client",
         "react/jsx-runtime",
         "iconsax-reactjs",
         "lucide-react",
@@ -49,11 +56,28 @@ export default defineConfig({
         "@radix-ui/react-tooltip",
       ],
       output: {
-        // Mark the entire DS bundle as a Client Module so it can be imported
+        // src/lib/server-variants/* に置いた pure cva 定義を独立チャンクに
+        // 切り出す。class-names エントリと index エントリの両方から参照される
+        // 共通モジュールとして、deterministic な名前で chunk 化することで
+        // banner 制御を予測可能にする。
+        manualChunks: (id) => {
+          if (id.includes("/src/lib/server-variants/")) {
+            return "server-variants"
+          }
+          return undefined
+        },
+        // Mark the main bundle as a Client Module so it can be imported
         // from Next.js App Router Server Components without triggering
         // `React.createContext is not a function` (the bundle pulls in Radix
         // primitives that call createContext at module load).
-        banner: '"use client";',
+        // class-names / server-variants は React に依存しないので banner を
+        // 付けず、RSC から import 可能にする。
+        banner: (chunk) => {
+          if (chunk.name === "class-names" || chunk.name === "server-variants") {
+            return ""
+          }
+          return '"use client";'
+        },
       },
     },
     outDir: "dist",

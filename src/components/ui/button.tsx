@@ -1,45 +1,10 @@
 import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+import { type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap typo-label-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 cursor-pointer",
-  {
-    variants: {
-      variant: {
-        default: "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Primary-Button)] active:bg-[var(--Active-Primary-Button)] rounded-full",
-        secondary: "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)] border border-[var(--Border-Medium-Emphasis)] hover:bg-[var(--Hover-Secondary-Button)] rounded-full",
-        "secondary-switch": "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] border border-[var(--Border-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)] rounded-full",
-        tertiary: "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] border border-[var(--Border-Medium-Emphasis)] hover:bg-[var(--Hover-Tertiary-Button)] rounded-full",
-        ghost: "text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Ghost-Button)] rounded-full",
-        destructive: "bg-[var(--Caution-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Destructive-Button)] active:bg-[var(--Active-Destructive-Button)] rounded-full",
-        link: "text-[var(--Text-Accent-Primary)] underline-offset-4 hover:underline",
-        /**
-         * Liquid Glass ボタン — iOS 26 スタイル。
-         * 背景が透けるガラス素材。グラデーション・写真上に重ねて使う。
-         * glass / glass-specular クラスは preset.css (styles/glass.css) で定義。
-         */
-        glass: "glass glass-specular text-[var(--Text-High-Emphasis)] active:opacity-55 rounded-full",
-      },
-      size: {
-        xs: "h-6 px-2 typo-label-xs",
-        sm: "h-8 px-3 typo-label-sm",
-        default: "h-10 px-4 typo-label-md",
-        lg: "h-12 px-6 typo-label-md",
-        xl: "h-14 px-8 typo-label-lg",
-        icon: "size-10",
-        "icon-sm": "size-8",
-        "icon-lg": "size-12",
-        /** iOS 26 ナビゲーションバー用の大判丸ボタン (44×44px, Apple HIG minimum tap target) */
-        "icon-xl": "size-11",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
+// 純粋な variants 定義は React に依存しない別ファイルに切り出し。
+// 同じ buttonVariants を `@ksk/design-system/class-names` から Server Component
+// 経由でも参照できるようにするため。詳細は server-variants/button-variants.ts。
+import { buttonVariants } from "@/lib/server-variants/button-variants"
 
 /** navigator.vibrate のパターン (ms) */
 const HAPTIC_PATTERNS: Record<string, number | number[]> = {
@@ -56,7 +21,7 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
   haptic?: HapticType
 }
 
-function Button({ className, variant, size, haptic, onClick, ...props }: ButtonProps) {
+function Button({ className, variant, size, layout, haptic, onClick, ...props }: ButtonProps) {
   const handleClick = React.useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       if (haptic && typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -70,7 +35,7 @@ function Button({ className, variant, size, haptic, onClick, ...props }: ButtonP
   return (
     <button
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, layout, className }))}
       onClick={handleClick}
       {...props}
     />

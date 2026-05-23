@@ -1,6 +1,25 @@
 import * as React from "react"
 import { Select as SelectPrimitive } from "radix-ui"
+import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+
+/**
+ * SelectTrigger のサイズ規格。Button/Input と揃えて 3 段階を用意。
+ * 既定は default (h-12) — 既存挙動と完全互換。
+ */
+const selectTriggerVariants = cva(
+  "flex w-full items-center justify-between rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] focus:outline-none focus:ring-[3px] focus:ring-[var(--Focus-High-Emphasis)]/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+  {
+    variants: {
+      size: {
+        sm:      "h-9 px-2.5 typo-body-sm",
+        default: "h-12 px-3 typo-body-md",
+        lg:      "h-14 px-4 typo-body-md",
+      },
+    },
+    defaultVariants: { size: "default" },
+  }
+)
 
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />
@@ -14,18 +33,15 @@ function SelectValue({ ...props }: React.ComponentProps<typeof SelectPrimitive.V
   return <SelectPrimitive.Value data-slot="select-value" {...props} />
 }
 
-function SelectTrigger({ className, children, ...props }: React.ComponentProps<typeof SelectPrimitive.Trigger>) {
+interface SelectTriggerProps
+  extends React.ComponentProps<typeof SelectPrimitive.Trigger>,
+    VariantProps<typeof selectTriggerVariants> {}
+
+function SelectTrigger({ className, children, size, ...props }: SelectTriggerProps) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
-      className={cn(
-        "flex h-12 w-full items-center justify-between rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-3 typo-body-md text-[var(--Text-High-Emphasis)]",
-        "placeholder:text-[var(--Text-Low-Emphasis)]",
-        "focus:outline-none focus:ring-[3px] focus:ring-[var(--Focus-High-Emphasis)]/50",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        "[&>span]:line-clamp-1",
-        className
-      )}
+      className={cn(selectTriggerVariants({ size }), className)}
       {...props}
     >
       {children}
@@ -101,4 +117,6 @@ function SelectLabel({ className, ...props }: React.ComponentProps<typeof Select
 export {
   Select, SelectContent, SelectGroup, SelectItem,
   SelectLabel, SelectSeparator, SelectTrigger, SelectValue,
+  selectTriggerVariants,
 }
+export type { SelectTriggerProps }

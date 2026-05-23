@@ -34,6 +34,14 @@ interface SheetSnapContextValue {
 
 const SheetSnapContext = React.createContext<SheetSnapContextValue | null>(null)
 
+// Always-on context provided by <Sheet> so descendant content can request a
+// close without rendering a hidden <DialogPrimitive.Close>. Used by snap-mode
+// drag-dismiss and by non-snap `swipeToClose`.
+interface SheetRootContextValue {
+  close: () => void
+}
+const SheetRootContext = React.createContext<SheetRootContextValue | null>(null)
+
 function snapToRatio(snap: SnapPoint): number {
   if (typeof snap === "number") return Math.min(1, Math.max(0, snap))
   // "450px" → 450 / window.innerHeight
@@ -136,15 +144,22 @@ function Sheet({
     handleOpenChange,
   ])
 
+  const rootCtx = React.useMemo<SheetRootContextValue>(
+    () => ({ close: () => handleOpenChange(false) }),
+    [handleOpenChange]
+  )
+
   return (
-    <SheetSnapContext.Provider value={ctx}>
-      <DialogPrimitive.Root
-        data-slot="sheet"
-        open={open}
-        onOpenChange={handleOpenChange}
-        {...props}
-      />
-    </SheetSnapContext.Provider>
+    <SheetRootContext.Provider value={rootCtx}>
+      <SheetSnapContext.Provider value={ctx}>
+        <DialogPrimitive.Root
+          data-slot="sheet"
+          open={open}
+          onOpenChange={handleOpenChange}
+          {...props}
+        />
+      </SheetSnapContext.Provider>
+    </SheetRootContext.Provider>
   )
 }
 
@@ -284,7 +299,24 @@ interface SheetContentProps
    * landscape rotation in mobile apps). Defaults to document.body if omitted.
    */
   container?: HTMLElement | null
+  /**
+   * シートのデフォルト内側余白（p-6）を制御。
+   * - true（既定）: p-6 を付与（従来通り）
+   * - false       : p-0。スクロール領域＋固定フッタなど自前で内側レイアウトを
+   *                 組むときに使用。これまで `className="!p-0"` で潰していた
+   *                 ケースを正規化する。
+   */
+  padding?: boolean
+  /**
+   * Bottom-anchored sheets only (`side="bottom"` / `"bottom-glass"`). When true,
+   * <SheetDragIndicator /> is auto-rendered at the top and dragging it down
+   * past ~30% of the sheet height calls onOpenChange(false). Ignored when
+   * the parent <Sheet> uses `snapPoints` (snap mode handles its own drag).
+   */
+  swipeToClose?: boolean
 }
+
+const swipeSides = new Set(["bottom", "bottom-glass"])
 
 function SheetContent({
   className,
@@ -292,15 +324,18 @@ function SheetContent({
   side = "right",
   glassOverlay,
   container,
+  padding = true,
+  swipeToClose,
   ...props
 }: SheetContentProps) {
   const snapCtx = React.useContext(SheetSnapContext)
   // The drag indicator is an iOS HIG "this can be dragged" affordance.
-  // Without an actual drag-to-dismiss / drag-to-snap interaction it's a
-  // misleading hint, so we only render it for variants that actually wire
-  // drag behavior — currently just snap-mode bottom sheets. Consumers who
-  // implement their own drag handling can still render <SheetDragIndicator />
-  // manually inside their content.
+  // Auto-rendered in two cases:
+  //   1. Snap mode (parent <Sheet> has `snapPoints`).
+  //   2. `swipeToClose` is set and `side` is a bottom-anchored variant.
+  // In any other case the indicator is hidden — rendering it without
+  // backing drag behavior is a misleading hint. Consumers can still
+  // render <SheetDragIndicator /> manually if they wire their own drag.
   const useGlassOverlay = glassOverlay ?? glassSides.has(side as string)
 
   // Snap mode kicks in only for `side="bottom"` when the parent Sheet was
@@ -319,14 +354,135 @@ function SheetContent({
     )
   }
 
+  if (swipeToClose && swipeSides.has(side as string)) {
+    return (
+      <SwipeToCloseBottomSheet
+        side={side as "bottom" | "bottom-glass"}
+        className={className}
+        glassOverlay={useGlassOverlay}
+        container={container}
+        padding={padding}
+        {...props}
+      >
+        {children}
+      </SwipeToCloseBottomSheet>
+    )
+  }
+
   return (
     <SheetPortal container={container}>
       <SheetOverlay glass={useGlassOverlay} />
       <DialogPrimitive.Content
         data-slot="sheet-content"
-        className={cn(sheetVariants({ side }), "p-6", className)}
+        className={cn(sheetVariants({ side }), padding && "p-6", className)}
         {...props}
       >
+        {children}
+      </DialogPrimitive.Content>
+    </SheetPortal>
+  )
+}
+
+// ============================================================================
+// swipeToClose bottom sheet (non-snap)
+// ----------------------------------------------------------------------------
+// Content-sized sheet (height auto). On pointer-down over the drag indicator
+// we capture the pointer, translate the sheet downward while the pointer
+// moves down, and on release either dismiss (dragged > 30% of sheet height)
+// or spring back to translate 0. Mirrors snap-mode semantics: position-only
+// threshold, no velocity, no rubber-band, no reduced-motion branch. Upward
+// drags are clamped at 0 (same as snap mode clamping at maxSnap).
+// ============================================================================
+
+interface SwipeToCloseBottomSheetProps
+  extends React.ComponentProps<typeof DialogPrimitive.Content> {
+  side: "bottom" | "bottom-glass"
+  className?: string
+  glassOverlay?: boolean
+  container?: HTMLElement | null
+  padding?: boolean
+  children?: React.ReactNode
+}
+
+function SwipeToCloseBottomSheet({
+  side,
+  className,
+  glassOverlay,
+  container,
+  padding = true,
+  children,
+  style,
+  ...props
+}: SwipeToCloseBottomSheetProps) {
+  const rootCtx = React.useContext(SheetRootContext)
+  const [dragY, setDragY] = React.useState(0)
+  const [dragging, setDragging] = React.useState(false)
+  const startYRef = React.useRef(0)
+  const sheetRef = React.useRef<HTMLDivElement>(null)
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button != null && e.button !== 0) return
+    setDragging(true)
+    startYRef.current = e.clientY
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId)
+    } catch {}
+  }
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging) return
+    const dy = e.clientY - startYRef.current
+    // Downward only — upward drags are clamped at 0 (matches snap-mode
+    // clamping at maxSnap; no rubber-band for consistency).
+    setDragY(Math.max(0, dy))
+  }
+
+  const finishDrag = () => {
+    if (!dragging) return
+    setDragging(false)
+    const h = sheetRef.current?.offsetHeight ?? 0
+    const threshold = h > 0 ? h * 0.3 : 200
+    if (dragY > threshold) {
+      rootCtx?.close()
+    }
+    // Always spring back. If close succeeded the sheet unmounts and this
+    // is a no-op visually; if it didn't (controlled parent kept open) the
+    // sheet returns to its rest position.
+    setDragY(0)
+  }
+
+  return (
+    <SheetPortal container={container}>
+      <SheetOverlay glass={glassOverlay} />
+      <DialogPrimitive.Content
+        ref={sheetRef}
+        data-slot="sheet-content"
+        className={cn(sheetVariants({ side }), padding && "p-6", className)}
+        style={{
+          ...style,
+          transform: `translate3d(0, ${dragY}px, 0)`,
+          transition: dragging
+            ? "none"
+            : "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
+          willChange: "transform",
+        }}
+        {...props}
+      >
+        <div
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={finishDrag}
+          onPointerCancel={finishDrag}
+          className={cn(
+            "cursor-grab active:cursor-grabbing select-none",
+            // Pull the indicator row out of the sheet's own padding so it
+            // sits flush against the top edge, matching the snap-mode layout.
+            padding && "-mx-6 -mt-6"
+          )}
+          style={{ touchAction: "none" }}
+        >
+          <SheetDragIndicator />
+        </div>
         {children}
       </DialogPrimitive.Content>
     </SheetPortal>

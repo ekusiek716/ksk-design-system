@@ -3,7 +3,7 @@
  * @description トースト通知コンポーネント。default, success, caution, warning, info の全バリアントを網羅
  */
 import type { Meta, StoryObj } from "@storybook/react"
-import { Toaster, useToast } from "./toast"
+import { Toaster, useToast, toast } from "./toast"
 import { Button } from "./button"
 
 const meta: Meta = {
@@ -186,4 +186,47 @@ export const AllVariants: Story = {
       <AllToastsDemo />
     </Toaster>
   ),
+}
+
+/**
+ * Fire-and-forget API。`<Toaster />` を一切設置せず、
+ * モジュールレベルの `toast()` だけで動作することを確認するストーリー。
+ * 初回呼び出し時に `document.body` 直下に portal root が自動挿入される。
+ */
+function FireAndForgetDemo() {
+  return (
+    <div className="flex flex-wrap gap-3">
+      <Button variant="secondary" onClick={() => toast("カスタム", { duration: 2500 })}>
+        toast(...)
+      </Button>
+      <Button variant="secondary" onClick={() => toast.success("保存しました")}>
+        toast.success
+      </Button>
+      <Button variant="secondary" onClick={() => toast.error("ネットワークエラー")}>
+        toast.error
+      </Button>
+      <Button variant="secondary" onClick={() => toast.info("お知らせがあります")}>
+        toast.info
+      </Button>
+      <Button variant="secondary" onClick={() => toast.warning("警告メッセージ")}>
+        toast.warning
+      </Button>
+      <Button
+        variant="secondary"
+        onClick={() =>
+          toast.success("操作完了", {
+            description: "description 付きトーストも OK",
+            duration: 4000,
+          })
+        }
+      >
+        with description
+      </Button>
+    </div>
+  )
+}
+
+export const FireAndForget: Story = {
+  name: "Fire-and-forget (no <Toaster />)",
+  render: () => <FireAndForgetDemo />,
 }

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { type VariantProps } from "class-variance-authority";
 declare const chipVariants: (props?: {
-    variant?: "outline" | "filled" | "accent";
+    variant?: "accent" | "outline" | "filled";
     size?: "sm" | "lg" | "md";
     shape?: "square" | "pill";
 } & import("class-variance-authority/types").ClassProp) => string;

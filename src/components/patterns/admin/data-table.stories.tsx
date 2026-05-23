@@ -393,3 +393,75 @@ export const CellVariants: StoryObj = {
     )
   },
 }
+
+// ─── Sticky Columns ───
+
+export const StickyColumns: StoryObj = {
+  name: "Sticky Columns (左端固定)",
+  render: function StickyColumnsStory() {
+    const rows = Array.from({ length: 12 }).map((_, i) => ({
+      id: `row-${i + 1}`,
+      name: `ユーザー ${i + 1}`,
+      email: `user${i + 1}@example.com`,
+      department: ["営業", "開発", "デザイン", "マーケ"][i % 4],
+      country: ["JP", "US", "DE", "SG", "FR"][i % 5],
+      city: ["Tokyo", "NYC", "Berlin", "Singapore", "Paris"][i % 5],
+      role: ["Manager", "Lead", "Member", "Owner"][i % 4],
+      joined: `2024-${String((i % 12) + 1).padStart(2, "0")}-01`,
+      revenue: 100000 + i * 31337,
+      orders: 3 + i,
+      lastLogin: `2026-05-${String((i % 28) + 1).padStart(2, "0")}`,
+    }))
+
+    return (
+      <div className="p-6">
+        <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mb-3">
+          横スクロールして左端 2 列が固定されることを確認。
+          `sticky` prop を `DataTableHead` / `DataTableCell` 系に付与。
+        </p>
+        <DataTable>
+          <DataTableTable className="min-w-[1200px]">
+            <DataTableHeader>
+              <tr>
+                <DataTableHead sticky="left" stickyOffset={0} className="w-[140px]">
+                  名前
+                </DataTableHead>
+                <DataTableHead sticky="left" stickyOffset={140} className="w-[200px]">
+                  メールアドレス
+                </DataTableHead>
+                <DataTableHead>部署</DataTableHead>
+                <DataTableHead>国</DataTableHead>
+                <DataTableHead>都市</DataTableHead>
+                <DataTableHead>役割</DataTableHead>
+                <DataTableHead>入社日</DataTableHead>
+                <DataTableHead>売上</DataTableHead>
+                <DataTableHead>注文数</DataTableHead>
+                <DataTableHead>最終ログイン</DataTableHead>
+              </tr>
+            </DataTableHeader>
+            <DataTableBody>
+              {rows.map((r) => (
+                <DataTableRow key={r.id}>
+                  <DataTableCell sticky="left" stickyOffset={0} className="w-[140px]">
+                    {r.name}
+                  </DataTableCell>
+                  <DataTableCell sticky="left" stickyOffset={140} className="w-[200px]">
+                    {r.email}
+                  </DataTableCell>
+                  <DataTableCell>{r.department}</DataTableCell>
+                  <DataTableCell>{r.country}</DataTableCell>
+                  <DataTableCell>{r.city}</DataTableCell>
+                  <DataTableCell>{r.role}</DataTableCell>
+                  <DataTableCell>{r.joined}</DataTableCell>
+                  <DataTableNumberCell value={r.revenue} prefix="¥" />
+                  <DataTableNumberCell value={r.orders} />
+                  <DataTableCell>{r.lastLogin}</DataTableCell>
+                </DataTableRow>
+              ))}
+            </DataTableBody>
+          </DataTableTable>
+        </DataTable>
+      </div>
+    )
+  },
+}

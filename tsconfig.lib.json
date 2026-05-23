@@ -16,6 +16,11 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/index.ts", "src/components/**/*.tsx", "src/lib/**/*.ts"],
+  "include": [
+    "src/index.ts",
+    "src/class-names.ts",
+    "src/components/**/*.tsx",
+    "src/lib/**/*.ts"
+  ],
   "exclude": ["src/**/*.stories.tsx", "src/**/*.test.tsx"]
 }

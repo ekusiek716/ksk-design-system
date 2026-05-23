@@ -216,7 +216,7 @@
     {
       "name": "Sheet",
       "path": "src/components/ui/sheet.tsx",
-      "description": "サイドパネル・ボトムシート。フィルター・メニュー・補助入力に使用。モーダルより軽いコンテキストに。",
+      "description": "サイドパネル・ボトムシート。フィルター・メニュー・補助入力に使用。モーダルより軽いコンテキストに。snapPoints でスナップ式、swipeToClose で下スワイプ閉じを有効化。",
       "subcomponents": [
         "SheetTrigger",
         "SheetContent",
@@ -224,14 +224,22 @@
         "SheetTitle",
         "SheetDescription",
         "SheetFooter",
-        "SheetClose"
+        "SheetClose",
+        "SheetDragIndicator"
       ],
       "rules": [
-        "Side panel, not modal"
+        "Side panel, not modal",
+        "swipeToClose は side=bottom / bottom-glass のみ有効"
       ],
       "variants": {
         "side": [
-          "float"
+          "top",
+          "bottom",
+          "left",
+          "right",
+          "float",
+          "float-glass",
+          "bottom-glass"
         ]
       }
     },
@@ -350,15 +358,18 @@
     {
       "name": "Toast",
       "path": "src/components/ui/toast.tsx",
-      "description": "トースト通知。操作結果フィードバックに使用。useToastフックで呼び出す。",
+      "description": "トースト通知。操作結果フィードバックに使用。2 つの呼び出し方をサポート: (1) <Toaster> + useToast() の Provider モード、(2) sonner ライクな fire-and-forget API (`toast.success(...)` 等) — 後者は Toaster 不要で、初回呼び出し時に document.body 直下へ portal root を自動挿入する。",
       "variants": [
         "default",
         "success",
         "caution",
-        "destructive"
+        "warning",
+        "info"
       ],
       "rules": [
-        "Use useToast hook to trigger"
+        "Provider モード: <Toaster> でラップし useToast() で呼び出す",
+        "Fire-and-forget: `import { toast } from \"@ksk/design-system\"` → `toast.success(\"保存しました\")`。<Toaster> 設置不要",
+        "両 API は内部で同じ singleton store を共有するため、<Toaster> がある場合はそれを優先し auto-mounted viewport は描画しない"
       ]
     },
     {

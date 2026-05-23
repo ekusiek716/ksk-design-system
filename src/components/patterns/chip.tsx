@@ -56,7 +56,10 @@ function Chip({
         chipVariants({ variant, size, shape }),
         // 選択状態は Brand-Primary 背景 + 白文字 + bold で強調。
         // 他 CTA / PillRow と一貫した「選択 = ピンク + 白文字」表現に揃える。
-        selected && "!bg-[var(--Brand-Primary)] !text-[var(--Text-on-Inverse)] hover:!bg-[var(--Hover-Primary-Button)] !border-[var(--Brand-Primary)] font-bold",
+        // hover 時は Active-Primary-Button (Brand-800) まで踏み込んで
+        // 「選択中だが押せる」感を明示。Brand-700 では未選択 chip との
+        // 区別がつきにくいケースがあった。
+        selected && "!bg-[var(--Brand-Primary)] !text-[var(--Text-on-Inverse)] hover:!bg-[var(--Active-Primary-Button)] active:!bg-[var(--Active-Primary-Button)] !border-[var(--Brand-Primary)] font-bold shadow-sm hover:shadow",
         className
       )}
       {...props}

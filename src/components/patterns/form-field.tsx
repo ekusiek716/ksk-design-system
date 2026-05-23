@@ -1,12 +1,32 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
+/**
+ * `required` の見た目をどう出すか。
+ * - "asterisk"（既定）: `*` 1 文字。コンパクト・国際標準。
+ * - "pill"   : 「必須」/「任意」のバッジ。日本語フォーム慣習。
+ *              required=false でも「任意」を明示するため、optional 側の表示も
+ *              この prop が制御する。
+ * - "none"   : 何も出さない。required 単独で aria 属性のみ意味を持つ。
+ */
+type RequiredStyle = "asterisk" | "pill" | "none"
+
 interface FormFieldProps extends React.ComponentProps<"div"> {
   label: string
   htmlFor?: string
   required?: boolean
   error?: string
   description?: string
+  /**
+   * required の表示形式。詳細は RequiredStyle の JSDoc。
+   * 既定: "asterisk"。
+   */
+  requiredStyle?: RequiredStyle
+  /**
+   * ラベル右側に置くメタ情報（バッジ / 文字数カウンタ / ヘルプアイコン等）。
+   * 「タイトル + 字数 12/200」「タイトル + 種別バッジ」のような用途。
+   */
+  endLabel?: React.ReactNode
 }
 
 function FormField({
@@ -16,26 +36,58 @@ function FormField({
   required,
   error,
   description,
+  requiredStyle = "asterisk",
+  endLabel,
   children,
   ...props
 }: FormFieldProps) {
+  const hasLabelRow = endLabel != null
   return (
     <div
       data-slot="form-field"
       className={cn("flex flex-col gap-1.5", className)}
       {...props}
     >
-      <label
-        htmlFor={htmlFor}
-        className="typo-label-md text-[var(--Text-High-Emphasis)]"
-      >
-        {label}
-        {required && (
-          <span className="text-[var(--Text-Caution)] ml-1" aria-hidden="true">
-            *
-          </span>
+      <div
+        className={cn(
+          // endLabel が無いときは <label> 単体（既存の見た目を維持）。
+          // 在るときだけ row 化して right に寄せる。
+          hasLabelRow && "flex items-center justify-between gap-2"
         )}
-      </label>
+      >
+        <label
+          htmlFor={htmlFor}
+          className="typo-label-md text-[var(--Text-High-Emphasis)] inline-flex items-center gap-1.5"
+        >
+          {label}
+          {requiredStyle === "asterisk" && required && (
+            <span className="text-[var(--Text-Caution)]" aria-hidden="true">
+              *
+            </span>
+          )}
+          {requiredStyle === "pill" && (
+            <span
+              className={cn(
+                "typo-label-xs px-1.5 py-0.5 rounded",
+                required
+                  ? "bg-[var(--Surface-Caution-Subtle)] text-[var(--Text-Caution)]"
+                  : "bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)]"
+              )}
+              aria-hidden="true"
+            >
+              {required ? "必須" : "任意"}
+            </span>
+          )}
+        </label>
+        {endLabel && (
+          <div
+            data-slot="form-field-end-label"
+            className="typo-body-sm text-[var(--Text-Medium-Emphasis)] flex items-center"
+          >
+            {endLabel}
+          </div>
+        )}
+      </div>
       {children}
       {description && !error && (
         <p className="typo-body-sm text-[var(--Text-Low-Emphasis)]">
@@ -59,3 +111,4 @@ function FormField({
 }
 
 export { FormField }
+export type { FormFieldProps, RequiredStyle }
