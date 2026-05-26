@@ -44,9 +44,32 @@ interface DialogContentProps
    *                 既存実装の正規版。
    */
   padding?: boolean
+  /**
+   * Optional screen-reader description for the dialog.
+   * - string / ReactNode: 自動で sr-only な <DialogDescription> を
+   *   レンダリングし、`aria-describedby` に紐付ける
+   * - undefined（既定）: `aria-describedby={undefined}` を明示して
+   *   Radix の "Missing Description" 警告を抑制。description が
+   *   概念上不要なダイアログ用。
+   * 可視の description を出したい場合は、この prop を使わず子要素として
+   * `<DialogDescription>` を直接置く。
+   */
+  description?: React.ReactNode
 }
 
-function DialogContent({ className, children, padding = true, ...props }: DialogContentProps) {
+function DialogContent({
+  className,
+  children,
+  padding = true,
+  description,
+  ...props
+}: DialogContentProps) {
+  const autoDescId = React.useId()
+  const hasInternalDesc = description != null && description !== false
+  // - description 渡しあり → 生成した sr-only Description の id
+  // - description なし → 呼び出し側の aria-describedby（無ければ undefined を明示）
+  //   undefined を明示することで Radix の "Missing Description" 警告が消える。
+  const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -62,7 +85,13 @@ function DialogContent({ className, children, padding = true, ...props }: Dialog
           className
         )}
         {...props}
+        aria-describedby={ariaDescribedBy}
       >
+        {hasInternalDesc && (
+          <DialogPrimitive.Description id={autoDescId} className="sr-only">
+            {description}
+          </DialogPrimitive.Description>
+        )}
         {children}
       </DialogPrimitive.Content>
     </DialogPortal>

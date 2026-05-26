@@ -15,8 +15,19 @@ interface DialogContentProps extends React.ComponentProps<typeof DialogPrimitive
      *                 既存実装の正規版。
      */
     padding?: boolean;
+    /**
+     * Optional screen-reader description for the dialog.
+     * - string / ReactNode: 自動で sr-only な <DialogDescription> を
+     *   レンダリングし、`aria-describedby` に紐付ける
+     * - undefined（既定）: `aria-describedby={undefined}` を明示して
+     *   Radix の "Missing Description" 警告を抑制。description が
+     *   概念上不要なダイアログ用。
+     * 可視の description を出したい場合は、この prop を使わず子要素として
+     * `<DialogDescription>` を直接置く。
+     */
+    description?: React.ReactNode;
 }
-declare function DialogContent({ className, children, padding, ...props }: DialogContentProps): import("react/jsx-runtime").JSX.Element;
+declare function DialogContent({ className, children, padding, description, ...props }: DialogContentProps): import("react/jsx-runtime").JSX.Element;
 declare function DialogHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function DialogFooter({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): import("react/jsx-runtime").JSX.Element;

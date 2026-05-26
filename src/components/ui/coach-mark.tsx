@@ -78,7 +78,10 @@ function CoachMark({
                     {step} / {totalSteps}
                   </span>
                 )}
-                <p className="font-medium">{content}</p>
+                {/* div wrapper (not p) so callers can pass block-level
+                    content (<div>, <p>, <h2>, <ul> 等) without producing
+                    a HTML validity / React hydration error. */}
+                <div className="font-medium">{content}</div>
                 {(onNext || showClose) && (
                   <div className="flex items-center justify-between mt-1">
                     {showClose && (

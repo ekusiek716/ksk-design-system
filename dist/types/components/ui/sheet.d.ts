@@ -49,8 +49,19 @@ interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.
      * the parent <Sheet> uses `snapPoints` (snap mode handles its own drag).
      */
     swipeToClose?: boolean;
+    /**
+     * Optional screen-reader description.
+     * - string / ReactNode: sr-only な <SheetDescription> を自動レンダリングし
+     *   `aria-describedby` に紐付ける
+     * - undefined（既定）: `aria-describedby={undefined}` を明示して
+     *   Radix の "Missing Description" 警告を抑制。description が概念上
+     *   不要なシート（クイック追加 FAB、設定 sheet 等）用。
+     * 可視の description を出したい場合は、この prop を使わず子要素として
+     * `<SheetDescription>` を直接置く。
+     */
+    description?: React.ReactNode;
 }
-declare function SheetContent({ className, children, side, glassOverlay, container, padding, swipeToClose, ...props }: SheetContentProps): import("react/jsx-runtime").JSX.Element;
+declare function SheetContent({ className, children, side, glassOverlay, container, padding, swipeToClose, description, ...props }: SheetContentProps): import("react/jsx-runtime").JSX.Element;
 declare function SheetHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function SheetFooter({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): import("react/jsx-runtime").JSX.Element;

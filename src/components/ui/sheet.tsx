@@ -314,6 +314,17 @@ interface SheetContentProps
    * the parent <Sheet> uses `snapPoints` (snap mode handles its own drag).
    */
   swipeToClose?: boolean
+  /**
+   * Optional screen-reader description.
+   * - string / ReactNode: sr-only な <SheetDescription> を自動レンダリングし
+   *   `aria-describedby` に紐付ける
+   * - undefined（既定）: `aria-describedby={undefined}` を明示して
+   *   Radix の "Missing Description" 警告を抑制。description が概念上
+   *   不要なシート（クイック追加 FAB、設定 sheet 等）用。
+   * 可視の description を出したい場合は、この prop を使わず子要素として
+   * `<SheetDescription>` を直接置く。
+   */
+  description?: React.ReactNode
 }
 
 const swipeSides = new Set(["bottom", "bottom-glass"])
@@ -326,8 +337,12 @@ function SheetContent({
   container,
   padding = true,
   swipeToClose,
+  description,
   ...props
 }: SheetContentProps) {
+  const autoDescId = React.useId()
+  const hasInternalDesc = description != null && description !== false
+  const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
   const snapCtx = React.useContext(SheetSnapContext)
   // The drag indicator is an iOS HIG "this can be dragged" affordance.
   // Auto-rendered in two cases:
@@ -347,6 +362,7 @@ function SheetContent({
         className={className}
         glassOverlay={useGlassOverlay}
         container={container}
+        description={description}
         {...props}
       >
         {children}
@@ -362,6 +378,7 @@ function SheetContent({
         glassOverlay={useGlassOverlay}
         container={container}
         padding={padding}
+        description={description}
         {...props}
       >
         {children}
@@ -376,7 +393,13 @@ function SheetContent({
         data-slot="sheet-content"
         className={cn(sheetVariants({ side }), padding && "p-6", className)}
         {...props}
+        aria-describedby={ariaDescribedBy}
       >
+        {hasInternalDesc && (
+          <DialogPrimitive.Description id={autoDescId} className="sr-only">
+            {description}
+          </DialogPrimitive.Description>
+        )}
         {children}
       </DialogPrimitive.Content>
     </SheetPortal>
@@ -401,6 +424,7 @@ interface SwipeToCloseBottomSheetProps
   glassOverlay?: boolean
   container?: HTMLElement | null
   padding?: boolean
+  description?: React.ReactNode
   children?: React.ReactNode
 }
 
@@ -410,10 +434,14 @@ function SwipeToCloseBottomSheet({
   glassOverlay,
   container,
   padding = true,
+  description,
   children,
   style,
   ...props
 }: SwipeToCloseBottomSheetProps) {
+  const autoDescId = React.useId()
+  const hasInternalDesc = description != null && description !== false
+  const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
   const rootCtx = React.useContext(SheetRootContext)
   const [dragY, setDragY] = React.useState(0)
   const [dragging, setDragging] = React.useState(false)
@@ -467,7 +495,13 @@ function SwipeToCloseBottomSheet({
           willChange: "transform",
         }}
         {...props}
+        aria-describedby={ariaDescribedBy}
       >
+        {hasInternalDesc && (
+          <DialogPrimitive.Description id={autoDescId} className="sr-only">
+            {description}
+          </DialogPrimitive.Description>
+        )}
         <div
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -504,6 +538,7 @@ interface SnapBottomSheetContentProps
   className?: string
   glassOverlay?: boolean
   container?: HTMLElement | null
+  description?: React.ReactNode
   children?: React.ReactNode
 }
 
@@ -512,10 +547,14 @@ function SnapBottomSheetContent({
   className,
   glassOverlay,
   container,
+  description,
   children,
   style,
   ...props
 }: SnapBottomSheetContentProps) {
+  const autoDescId = React.useId()
+  const hasInternalDesc = description != null && description !== false
+  const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
   const {
     snapRatios,
     activeSnapPoint,
@@ -656,7 +695,13 @@ function SnapBottomSheetContent({
           touchAction: "none",
         }}
         {...props}
+        aria-describedby={ariaDescribedBy}
       >
+        {hasInternalDesc && (
+          <DialogPrimitive.Description id={autoDescId} className="sr-only">
+            {description}
+          </DialogPrimitive.Description>
+        )}
         {/* Drag handle row — pointer events here drive the snap drag */}
         <div
           onPointerDown={onPointerDown}
