@@ -391,6 +391,7 @@ function SheetContent({
       <SheetOverlay glass={useGlassOverlay} />
       <DialogPrimitive.Content
         data-slot="sheet-content"
+        data-side={side}
         className={cn(sheetVariants({ side }), padding && "p-6", className)}
         {...props}
         aria-describedby={ariaDescribedBy}
@@ -485,6 +486,7 @@ function SwipeToCloseBottomSheet({
       <DialogPrimitive.Content
         ref={sheetRef}
         data-slot="sheet-content"
+        data-side={side}
         className={cn(sheetVariants({ side }), padding && "p-6", className)}
         style={{
           ...style,
@@ -674,6 +676,7 @@ function SnapBottomSheetContent({
       <DialogPrimitive.Content
         ref={sheetRef}
         data-slot="sheet-content"
+        data-side="bottom"
         data-snap-active={activeSnapPoint ?? undefined}
         onKeyDown={onKeyDown}
         className={cn(

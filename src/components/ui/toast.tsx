@@ -155,7 +155,12 @@ function ToastViewport() {
       className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 w-full max-w-sm pointer-events-none"
     >
       {toasts.map((t) => (
-        <div key={t.id} className={cn(toastVariants({ variant: t.variant }))}>
+        <div
+          key={t.id}
+          data-slot="toast"
+          data-variant={t.variant ?? "default"}
+          className={cn(toastVariants({ variant: t.variant }))}
+        >
           <div className="flex-1 min-w-0">
             <p className="typo-label-md">{t.title}</p>
             {t.description && (

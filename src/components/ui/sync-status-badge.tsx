@@ -36,7 +36,7 @@ function SyncStatusBadge({
 
   if (state === "syncing") {
     return (
-      <span className={cn(base, "bg-[var(--Surface-Info)] text-[var(--Text-Info)]", className)}>
+      <span data-slot="sync-status-badge" data-state={state} className={cn(base, "bg-[var(--Surface-Info)] text-[var(--Text-Info)]", className)}>
         <span
           aria-hidden
           className="size-3 rounded-full border-[1.5px] border-current border-t-transparent animate-spin"
@@ -48,7 +48,7 @@ function SyncStatusBadge({
 
   if (state === "success") {
     return (
-      <span className={cn(base, "bg-[var(--Surface-Success)] text-[var(--Text-Success)]", className)}>
+      <span data-slot="sync-status-badge" data-state={state} className={cn(base, "bg-[var(--Surface-Success)] text-[var(--Text-Success)]", className)}>
         <span aria-hidden className="size-1.5 rounded-full bg-current" />
         {successLabel}
       </span>
@@ -57,7 +57,7 @@ function SyncStatusBadge({
 
   if (state === "error") {
     return (
-      <span className={cn(base, "bg-[var(--Surface-Caution)] text-[var(--Text-Caution)]", className)}>
+      <span data-slot="sync-status-badge" data-state={state} className={cn(base, "bg-[var(--Surface-Caution)] text-[var(--Text-Caution)]", className)}>
         <span aria-hidden className="size-1.5 rounded-full bg-current" />
         {errorLabel(errorCount)}
         {onRetry && (
@@ -75,7 +75,7 @@ function SyncStatusBadge({
 
   if (state === "offline") {
     return (
-      <span className={cn(base, "bg-[var(--Surface-Secondary)] text-[var(--Text-Low-Emphasis)]", className)}>
+      <span data-slot="sync-status-badge" data-state={state} className={cn(base, "bg-[var(--Surface-Secondary)] text-[var(--Text-Low-Emphasis)]", className)}>
         <span aria-hidden className="size-1.5 rounded-full bg-current" />
         {offlineLabel}
       </span>

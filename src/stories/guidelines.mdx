@@ -1,0 +1,183 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Foundation/Guidelines" />
+
+# KSK Design System — Guidelines
+
+このページは KSK Design System の **使い方ルール集**です。
+
+- 全コンポーネントに共通する設計思想
+- どのコンポーネントを、どんなときに、どう使うか
+- 禁止パターン（壊しやすい / Brand 一貫性を損なう書き方）
+
+ストーリー先頭に置いてあるので、新規実装の前に必ず一読してください。
+
+---
+
+## 1. 3 層トークン体系
+
+色は必ず **Semantic トークン** または **Bridge トークン** を経由して使います。
+Primitive を直接書くと、テーマ切替時に Brand 色に追従しなくなります。
+
+| Layer | 例 | 使う場面 |
+|---|---|---|
+| Primitive | `--Primitive-Brand-500` | テーマ定義ファイルのみ |
+| Semantic | `--Brand-Primary` / `--Surface-Primary` / `--Text-High-Emphasis` | **コンポーネント実装の標準** |
+| Bridge | `--primary` / `--card` / `--muted` | shadcn 由来コンポーネントの互換用 |
+
+```tsx
+// ✗ NG — primitive を直書き
+<div className="bg-[var(--Primitive-Brand-500)]" />
+
+// ✗ NG — Tailwind 標準カラー
+<div className="bg-blue-500" />
+
+// ✓ OK
+<div className="bg-[var(--Brand-Primary)]" />
+```
+
+---
+
+## 2. Typography は `typo-*` クラス必須
+
+`text-sm font-bold` 等の Tailwind ユーティリティ直書きは禁止。
+必ず `typo-*` クラスを使うことで、見出しレベルと太さの組合せを Figma と一致させます。
+
+```tsx
+// ✗ NG
+<h2 className="text-lg font-bold">タイトル</h2>
+
+// ✓ OK
+<h2 className="typo-heading-lg">タイトル</h2>
+```
+
+`typo-heading-{3xl..sm}` / `typo-body-{lg..xs}` / `typo-label-{lg..xs}` / `typo-display-{xl..lg}` / `typo-caption` が利用可能。
+
+---
+
+## 3. Button 使い分け
+
+| Variant | 用途 | 1 画面当たりの目安 |
+|---|---|---|
+| `default` | 主たる CTA | 1〜2 個 |
+| `secondary` / `tertiary` | 並列の選択肢・キャンセル | 任意 |
+| `secondary-switch` | Brand 系の切替 / トグル | 任意 |
+| `ghost` / `link` | 文字寄りの controls | 任意 |
+| `destructive` | 削除・取り消しなど不可逆操作 | 操作ごとに 1 個 |
+| `glass` / `accent` | モバイル装飾・ヒーロー強調 | 装飾箇所のみ |
+| `inverse` | 暗背景上の primary CTA | hero / CV 動線で 1 個 |
+| `ghost-inverse` | 暗背景上の secondary CTA | inverse とセット |
+
+サイズは `hero`（ピル型 56px）が hero / final-CTA 専用。アイコンのみは `icon`系（`aria-label` 必須）。
+
+---
+
+## 4. Checkbox の使い方
+
+`label` prop の有無で「素のチェックボックス」と「行レイアウト（フィルタサイドバー型）」を切替できます。
+
+```tsx
+// 素のチェックボックス（外側で Label / FormField と組み合わせる）
+<Checkbox checked={...} onCheckedChange={...} />
+
+// 行レイアウト（フィルタサイドバーの典型）
+<Checkbox
+  label="正社員"
+  description="フルタイム雇用"
+  count={1234}
+  checked={...}
+  onCheckedChange={...}
+/>
+```
+
+カード型の選択肢には `CheckboxCard`。複数チェックの管理には `CheckboxGroup`。
+
+---
+
+## 5. Alert / Banner 統合
+
+旧 Banner の用途は Alert の prop ベース API で完全カバー。
+
+```tsx
+// composable（自由度高い）
+<Alert variant="warning">
+  <AlertTitle>メンテ予定</AlertTitle>
+  <AlertDescription>1/1 0:00〜3:00</AlertDescription>
+</Alert>
+
+// prop ベース（推奨・アイコン自動）
+<Alert
+  variant="warning"
+  title="メンテ予定"
+  description="1/1 0:00〜3:00"
+  action={<Button size="sm">詳細</Button>}
+/>
+```
+
+bordered 系 (`success` / `info` / `error` / `warning`) は variant に応じてアイコンが自動表示。
+inline 系 (`inline-info` / `inline-caution` / `inline-warning`) はコンパクト表示で composable のみ。
+
+---
+
+## 6. Chip / Tag / Badge の違い
+
+| | 役割 | クリック | 形状 |
+|---|---|---|---|
+| **Badge** | ステータス / 件数表示 | × | rounded-full / 小 |
+| **Tag** | 表示専用ラベル | × | rounded-sm |
+| **Chip** | フィルタ・キーワード・削除可能 | ○ | pill / square / tile |
+
+Chip の状態:
+
+```tsx
+<Chip>キーワード</Chip>
+<Chip selected count={156}>すべて</Chip>
+<Chip removable onRemove={fn}>タグ</Chip>
+<Chip shape="square" size="tile" soldOut>5号</Chip>
+<Chip href="/q/foo">検索リンク</Chip>
+```
+
+---
+
+## 7. data-* 属性での E2E / CSS フック
+
+全コンポーネントは `data-slot="..."` を出力します。CVA バリアントを持つものはさらに `data-variant`, `data-size`, `data-side`, `data-state` を出力。
+**テスト・E2E・追加 CSS フックは className ではなく data-\* で行ってください**。
+className は内部実装の都合で変わる可能性があります。
+
+```ts
+// ✓ OK
+await page.locator('[data-slot="button"][data-variant="destructive"]').click()
+
+// ✗ NG
+await page.locator('.bg-\\[var\\(--Caution-Base\\)\\]').click()
+```
+
+---
+
+## 8. ディレクトリ階層と依存方向
+
+```
+ui/                                → 最下位（shadcn ベース）
+  ↓
+patterns/                          → 業界汎用
+  ↓
+patterns/{commerce,admin,shells}/  → 業務特化 / レイアウト
+```
+
+**逆方向の import は CI でブロック**されます（`npm run lint:deps`）。
+ui/ 配下から patterns/ を import している箇所を見つけたら、ロジックを上位層に引き上げてください。
+
+---
+
+## 9. 新規コンポーネント追加チェックリスト
+
+- [ ] `src/index.ts` に export 追加
+- [ ] `contracts/components.json` に定義追加・`meta.counts` 更新
+- [ ] `*.stories.tsx` を作成（`tags: ["autodocs"]` はグローバル設定済み）
+- [ ] JSDoc に「何のためのコンポーネントか」「使用ルール」「他コンポーネントとの違い」を記載
+- [ ] `data-slot` を必ず出力。CVA を使う場合は `data-variant`, `data-size` も
+- [ ] 色は semantic / bridge トークン。primitive 直書き・Tailwind 標準色は NG
+- [ ] テキストサイズは `typo-*` クラス
+- [ ] `npm run check` がパス
+- [ ] 後方互換に影響する変更は `__tests__/backwards-compat.test.tsx` にテスト追加

@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
+import { Warning2, InfoCircle, TickCircle, CloseCircle } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
 
 /**
@@ -8,13 +9,20 @@ import { cn } from "@/lib/utils"
  * - bordered (success / info / error / warning): 白背景 + カラー枠線 + 外側リング
  * - inline (inline-info / inline-caution / inline-warning): 色付き背景、コンパクト
  *
- * ### 使用例
- * ```tsx
- * <Alert variant="success">
- *   <AlertTitle>送信しました</AlertTitle>
- *   <AlertDescription>内容を確認してください。</AlertDescription>
- * </Alert>
- * ```
+ * ### 2 つの使い方
+ *
+ * 1. **prop ベース**（推奨・bordered variant のみ）— アイコンは variant から自動
+ *    ```tsx
+ *    <Alert variant="success" title="送信しました" description="内容を確認してください。" />
+ *    ```
+ *
+ * 2. **composable**（旧来 / 自由度高い）
+ *    ```tsx
+ *    <Alert variant="success">
+ *      <AlertTitle>送信しました</AlertTitle>
+ *      <AlertDescription>内容を確認してください。</AlertDescription>
+ *    </Alert>
+ *    ```
  */
 
 const alertVariants = cva("relative w-full", {
@@ -82,16 +90,80 @@ type AlertVariant = VariantProps<typeof alertVariants>["variant"]
 
 const AlertVariantContext = React.createContext<AlertVariant>("info")
 
-const isBorderedVariant = (v: AlertVariant) =>
+const isBorderedVariant = (
+  v: AlertVariant,
+): v is "success" | "info" | "error" | "warning" =>
   v === "success" || v === "info" || v === "error" || v === "warning"
+
+// bordered variant 用の自動アイコン・色マップ
+// (prop-based API で title / description を渡したときに使う)
+const borderedIconMap = {
+  success: { Icon: TickCircle, color: "text-[var(--Text-Success)]" },
+  info: { Icon: InfoCircle, color: "text-[var(--Text-Medium-Emphasis)]" },
+  error: { Icon: CloseCircle, color: "text-[var(--Text-Caution)]" },
+  warning: { Icon: Warning2, color: "text-[var(--Text-Warning)]" },
+} as const
+
+type AlertProps = React.ComponentProps<"div"> &
+  VariantProps<typeof alertVariants> & {
+    /**
+     * prop-based API のタイトル。children と排他（children 優先）。
+     * bordered variant でのみ有効。
+     */
+    title?: React.ReactNode
+    /** prop-based API の説明テキスト */
+    description?: React.ReactNode
+    /** カスタムアイコン（未指定時は variant に応じて自動選択） */
+    icon?: React.ReactNode
+    /** 右側アクション（Button など） */
+    action?: React.ReactNode
+  }
 
 function Alert({
   className,
   variant = "info",
   children,
+  title,
+  description,
+  icon,
+  action,
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+}: AlertProps) {
   const bordered = isBorderedVariant(variant)
+  const usePropBased = bordered && !children && (title || description)
+
+  // bordered variant かつ children なし → prop-based レンダリング
+  if (usePropBased) {
+    const { Icon, color: iconColor } = borderedIconMap[variant]
+    const titleColor = alertTitleVariants[variant] ?? ""
+    const iconNode = icon ?? <Icon size={24} className={cn("shrink-0", iconColor)} />
+
+    return (
+      <AlertVariantContext.Provider value={variant}>
+        <div
+          data-slot="alert"
+          data-variant={variant}
+          role="alert"
+          className={cn(alertVariants({ variant }), className)}
+          {...props}
+        >
+          <div className={alertInnerVariants({ variant })}>
+            {iconNode}
+            <div className="flex-1 min-w-0">
+              {title && <div className={cn("typo-label-md", titleColor)}>{title}</div>}
+              {description && (
+                <div className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1">
+                  {description}
+                </div>
+              )}
+            </div>
+            {action && <div className="shrink-0">{action}</div>}
+          </div>
+        </div>
+      </AlertVariantContext.Provider>
+    )
+  }
+
   return (
     <AlertVariantContext.Provider value={variant}>
       <div

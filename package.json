@@ -21,7 +21,12 @@
     "src/preset-standalone.css",
     "src/styles",
     "src/themes",
-    "src/components/COMPONENT_LOOKUP.md"
+    "src/components/COMPONENT_LOOKUP.md",
+    "scripts/codemod",
+    "eslint",
+    "MIGRATION.md",
+    "PUBLISHING.md",
+    "RELEASE.md"
   ],
   "exports": {
     ".": {
@@ -35,17 +40,58 @@
       "default": "./dist/class-names.js"
     },
     "./package.json": "./package.json",
-    "./preset": "./src/preset.css",
-    "./preset-standalone": "./src/preset-standalone.css",
-    "./styles": "./src/preset.css",
-    "./tokens/primitive": "./src/styles/primitive.css",
-    "./tokens/semantic": "./src/styles/semantic.css",
-    "./tokens/typography": "./src/styles/typography.css",
-    "./themes/default": "./src/themes/default.css",
-    "./themes/blue": "./src/themes/blue.css",
-    "./themes/orange": "./src/themes/orange.css",
-    "./themes/green": "./src/themes/green.css",
-    "./themes/violet": "./src/themes/violet.css"
+    "./preset": {
+      "import": "./src/preset.css",
+      "default": "./src/preset.css"
+    },
+    "./preset-standalone": {
+      "import": "./src/preset-standalone.css",
+      "default": "./src/preset-standalone.css"
+    },
+    "./styles": {
+      "import": "./src/preset.css",
+      "default": "./src/preset.css"
+    },
+    "./styles.css": {
+      "import": "./src/preset.css",
+      "default": "./src/preset.css"
+    },
+    "./tokens/primitive": {
+      "import": "./src/styles/primitive.css",
+      "default": "./src/styles/primitive.css"
+    },
+    "./tokens/semantic": {
+      "import": "./src/styles/semantic.css",
+      "default": "./src/styles/semantic.css"
+    },
+    "./tokens/typography": {
+      "import": "./src/styles/typography.css",
+      "default": "./src/styles/typography.css"
+    },
+    "./themes/default": {
+      "import": "./src/themes/default.css",
+      "default": "./src/themes/default.css"
+    },
+    "./themes/blue": {
+      "import": "./src/themes/blue.css",
+      "default": "./src/themes/blue.css"
+    },
+    "./themes/orange": {
+      "import": "./src/themes/orange.css",
+      "default": "./src/themes/orange.css"
+    },
+    "./themes/green": {
+      "import": "./src/themes/green.css",
+      "default": "./src/themes/green.css"
+    },
+    "./themes/violet": {
+      "import": "./src/themes/violet.css",
+      "default": "./src/themes/violet.css"
+    },
+    "./eslint/deprecated": {
+      "import": "./eslint/deprecated.js",
+      "default": "./eslint/deprecated.js"
+    }
   },
   "sideEffects": [
     "*.css"
@@ -60,8 +106,13 @@
     "storybook": "storybook dev -p 6010",
     "build-storybook": "storybook build",
     "lint:scratch": "bash scripts/lint-scratch.sh",
+    "lint:deps": "bash scripts/check-deps.sh",
+    "lint:responsive": "bash scripts/check-responsive.sh",
+    "lint:story-reuse": "bash scripts/check-story-reuse.sh",
     "generate:lookup": "node scripts/generate-component-lookup.mjs",
-    "check": "tsc --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-drift.sh && node scripts/generate-component-lookup.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "tsc --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && bash scripts/check-drift.sh && node scripts/generate-component-lookup.mjs",
     "postinstall": "node bin/init.js postinstall",
     "mcp:build": "cd mcp-server && npm install && npm run build",
     "mcp:start": "node mcp-server/dist/index.js"
@@ -110,6 +161,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1",
+    "vitest": "^4.1.7",
     "zod": "^4.4.2"
   }
 }

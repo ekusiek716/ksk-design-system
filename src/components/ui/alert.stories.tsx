@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { Alert, AlertTitle, AlertDescription } from "./alert"
+import { Button } from "./button"
 
 const meta = {
   title: "Components/Alert",
@@ -111,6 +112,43 @@ export const AllVariants: Story = {
       <Alert variant="inline-warning">
         <AlertDescription>インライン警告メッセージ</AlertDescription>
       </Alert>
+    </div>
+  ),
+}
+
+/**
+ * prop ベース API（推奨）。variant に応じてアイコンが自動表示。
+ * 旧 Banner の用途はこちらで完全カバー。
+ */
+export const PropBasedAPI: Story = {
+  name: "Prop-based API (auto icon)",
+  render: () => (
+    <div className="flex flex-col gap-4 max-w-md">
+      <Alert variant="success" title="送信完了" description="フォームが送信されました。" />
+      <Alert variant="info" title="お知らせ" description="新しい機能が追加されました。" />
+      <Alert variant="error" title="エラー" description="処理に失敗しました。再試行してください。" />
+      <Alert variant="warning" title="メンテ予定" description="1/1 0:00〜3:00 はサービス停止" />
+    </div>
+  ),
+}
+
+/** action prop で右側にボタン配置（旧 Banner.action 相当）。 */
+export const WithAction: Story = {
+  name: "Prop-based + action",
+  render: () => (
+    <div className="flex flex-col gap-4 max-w-2xl">
+      <Alert
+        variant="warning"
+        title="未保存の変更があります"
+        description="ページを離れる前に保存してください。"
+        action={<Button size="sm">保存</Button>}
+      />
+      <Alert
+        variant="info"
+        title="新バージョンが利用可能"
+        description="クリックで最新版に更新します。"
+        action={<Button size="sm" variant="secondary">更新</Button>}
+      />
     </div>
   ),
 }

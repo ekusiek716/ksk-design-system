@@ -1,15 +1,15 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.9.0",
+    "version": "1.16.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 47,
-      "patterns": 26,
+      "ui": 52,
+      "patterns": 29,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 95
+      "total": 103
     }
   },
   "ui": [
@@ -25,7 +25,10 @@
         "ghost",
         "link",
         "destructive",
-        "glass"
+        "glass",
+        "accent",
+        "inverse",
+        "ghost-inverse"
       ],
       "sizes": [
         "xs",
@@ -33,10 +36,12 @@
         "default",
         "lg",
         "xl",
-        "icon-sm",
+        "hero",
         "icon",
+        "icon-sm",
         "icon-lg",
-        "icon-xl"
+        "icon-xl",
+        "match"
       ],
       "accessibility": [
         "aria-label required for icon-only buttons"
@@ -44,7 +49,9 @@
       "rules": [
         "Must use <Button> not <button>",
         "Icon-only buttons require aria-label",
-        "variant=glass は背景がグラデーション/写真の場合のみ使用"
+        "variant=glass は背景がグラデーション/写真の場合のみ使用",
+        "variant=inverse / ghost-inverse は暗背景・ヒーローセクション専用",
+        "size=hero は hero / final-CTA 専用（ピル型 56px）"
       ]
     },
     {
@@ -122,10 +129,14 @@
     {
       "name": "Checkbox",
       "path": "src/components/ui/checkbox.tsx",
-      "description": "チェックボックス。複数選択・同意確認に使用。必ずLabelとセットで使う。",
+      "description": "チェックボックス。label/description/count を渡すと自動で行型レイアウトに（filter sidebar 型）。",
       "variants": [],
       "accessibility": [
         "Must pair with <Label>"
+      ],
+      "rules": [
+        "label を渡すと <label> でラップされ行全体がクリッカブルになる",
+        "カード型選択は CheckboxCard を使う"
       ]
     },
     {
@@ -509,7 +520,7 @@
     {
       "name": "Alert",
       "path": "src/components/ui/alert.tsx",
-      "description": "通知バナー。bordered (success/info/error/warning) と inline の2グループ。",
+      "description": "アラート/通知。composable と prop-based の 2 つの API を持つ。",
       "variants": [
         "info",
         "success",
@@ -524,7 +535,8 @@
       ],
       "rules": [
         "bordered は白背景+カラー枠線",
-        "inline は色付き背景・コンパクト"
+        "inline は色付き背景・コンパクト",
+        "bordered variant (success/info/error/warning) は title/description prop で自動アイコン表示可"
       ]
     },
     {
@@ -660,6 +672,73 @@
         "FormControl でラップしたコンポーネントに自動的に aria-* が付与される",
         "react-hook-form 必須 (peer dependency)"
       ]
+    },
+    {
+      "name": "Combobox",
+      "path": "src/components/ui/combobox.tsx",
+      "description": "コンボボックス。リスト + 検索の組合せ入力。Radix Combobox + cmdk ベース。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "aria-expanded",
+        "role=combobox"
+      ],
+      "rules": [
+        "select で代替できない検索付きセレクトに使う"
+      ]
+    },
+    {
+      "name": "DropdownFilter",
+      "path": "src/components/ui/dropdown-filter.tsx",
+      "description": "DataTable / 検索結果の絞り込みドロップダウン。\"すべて\" 含む単一選択。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "aria-haspopup=listbox",
+        "aria-expanded"
+      ],
+      "rules": [
+        "DataTable のフィルタ列で使う"
+      ]
+    },
+    {
+      "name": "MultiSelect",
+      "path": "src/components/ui/multi-select.tsx",
+      "description": "複数選択可能なセレクト。選択済みは Chip で表示。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "aria-multiselectable"
+      ],
+      "rules": [
+        "3 件以上選択する用途に。少数なら CheckboxGroup を優先"
+      ]
+    },
+    {
+      "name": "SyncStatusBadge",
+      "path": "src/components/ui/sync-status-badge.tsx",
+      "description": "同期状態表示。idle / syncing / success / error / offline。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "live region 想定"
+      ],
+      "rules": [
+        "管理画面のヘッダー / 編集中状態表示で使う"
+      ]
+    },
+    {
+      "name": "TimePicker",
+      "path": "src/components/ui/time-picker.tsx",
+      "description": "時刻選択。15 分刻みデフォルト。HH:mm。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "aria-label required"
+      ],
+      "rules": [
+        "timezone 非対応。タイムゾーンが要件なら別実装"
+      ]
     }
   ],
   "patterns": [
@@ -719,15 +798,16 @@
     {
       "name": "Chip",
       "path": "src/components/patterns/chip.tsx",
-      "description": "インタラクティブチップ。フィルター・キーワード選択に使用。Tagと違いクリック可能。",
+      "description": "クリック可能なフィルタ・キーワードチップ。soldOut/count/href/removable 状態を持つ。",
       "variants": [
         "default",
         "active",
         "disabled"
       ],
       "rules": [
-        "rounded-full only",
-        "For filters and keywords"
+        "Tag (表示専用) との違いは interactive 性",
+        "soldOut は斜線オーバーレイ + disabled",
+        "href を渡すと <a> でレンダリング"
       ]
     },
     {
@@ -911,6 +991,53 @@
       "name": "ShareButtons",
       "path": "src/components/patterns/share-buttons.tsx",
       "description": "シェアボタン群。LINE / Twitter / Facebook などのSNSシェアボタンをまとめて表示。"
+    },
+    {
+      "name": "FileUpload",
+      "path": "src/components/patterns/file-upload.tsx",
+      "description": "ファイルアップロード（ドラッグ&ドロップ + ボタン）。",
+      "variants": [
+        "single",
+        "multiple"
+      ],
+      "sizes": [],
+      "accessibility": [
+        "aria-label",
+        "drop zone announces"
+      ],
+      "rules": [
+        "画像専用なら ImageUploader を使う"
+      ]
+    },
+    {
+      "name": "ReviewOverlay",
+      "path": "src/components/patterns/review-overlay.tsx",
+      "description": "レビュー入力オーバーレイ。星評価 + テキスト + 投稿。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "role=dialog",
+        "aria-modal"
+      ],
+      "rules": [
+        "commerce のレビュー投稿で使う"
+      ]
+    },
+    {
+      "name": "SimplePagination",
+      "path": "src/components/patterns/simple-pagination.tsx",
+      "description": "簡易ページネーション（前後 + 現在ページのみ）。スペース節約。",
+      "variants": [],
+      "sizes": [
+        "sm",
+        "md"
+      ],
+      "accessibility": [
+        "nav role"
+      ],
+      "rules": [
+        "フル機能は Pagination (ui/) を使う"
+      ]
     }
   ],
   "commerce": [

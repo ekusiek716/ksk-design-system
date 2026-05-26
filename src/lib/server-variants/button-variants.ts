@@ -25,6 +25,14 @@ const buttonVariants = cva(
         link: "text-[var(--Text-Accent-Primary)] underline-offset-4 hover:underline",
         glass: "glass glass-specular text-[var(--Text-High-Emphasis)] active:opacity-55 rounded-full",
         accent: "bg-gradient-to-r from-[var(--Brand-Primary)] to-[var(--Brand-Action)] text-[var(--Text-on-Inverse)] border border-transparent hover:opacity-90 rounded-full",
+        // inverse — 暗背景・ヒーローセクション上に乗せる primary CTA。
+        // 白背景 + アクセント文字（Brand-Primary）。
+        inverse:
+          "bg-[var(--Surface-Primary)] text-[var(--Brand-Primary)] hover:bg-[var(--Primitive-White-Alpha-900)] active:bg-[var(--Primitive-White-Alpha-800)] disabled:bg-[var(--Primitive-White-Alpha-300)] disabled:text-[var(--Text-Disable)] rounded-full",
+        // ghost-inverse — 暗背景・ヒーローセクション上の secondary CTA。
+        // 透過背景 + 白文字 + 白枠。
+        "ghost-inverse":
+          "border border-[var(--Primitive-White-Alpha-300)] bg-transparent text-[var(--Text-on-Inverse)] hover:bg-[var(--Primitive-White-Alpha-200)] hover:border-[var(--Primitive-White-Alpha-900)] active:bg-[var(--Primitive-White-Alpha-300)] disabled:border-[var(--Primitive-White-Alpha-200)] disabled:text-[var(--Primitive-White-Alpha-300)] rounded-full",
       },
       size: {
         xs: "h-6 px-2 typo-label-xs",
@@ -32,6 +40,9 @@ const buttonVariants = cva(
         default: "h-10 px-4 typo-label-md",
         lg: "h-12 px-6 typo-label-md",
         xl: "h-14 px-8 typo-label-lg",
+        // hero — トップページの hero / final-CTA 専用のピル型特大 CTA。
+        // min-h-14 + rounded-full + typo-label-lg。xl とは異なり常に丸い。
+        hero: "min-h-14 rounded-full px-6 typo-label-lg",
         icon: "size-10",
         "icon-sm": "size-8",
         "icon-lg": "size-12",

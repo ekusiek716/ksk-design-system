@@ -3,18 +3,21 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const chipVariants = cva(
-  "inline-flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer typo-label-sm",
+  // justify-center をベースに含める：tile サイズ等の固定幅で text が左寄せになる問題を防ぐ。
+  // padding 付きサイズ (sm/md/lg) でも flex の justify-center は副作用なし。
+  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer typo-label-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
   {
     variants: {
       variant: {
-        filled: "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)]",
-        accent: "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)]",
-        outline: "border border-[var(--Border-Medium-Emphasis)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)]",
+        filled: "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)] disabled:text-[var(--Text-Disable)] disabled:hover:bg-[var(--Surface-Secondary)]",
+        accent: "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)] disabled:bg-[var(--Surface-Secondary)] disabled:text-[var(--Text-Disable)] disabled:hover:bg-[var(--Surface-Secondary)]",
+        outline: "border border-[var(--Border-Medium-Emphasis)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)] disabled:text-[var(--Text-Disable)]",
       },
       size: {
         sm: "h-7 px-2.5 typo-label-xs",
         md: "h-8 px-3 typo-label-sm",
         lg: "h-9 px-4 typo-label-sm",
+        tile: "size-12 typo-body-md",
       },
       shape: {
         pill: "rounded-full",
@@ -30,58 +33,158 @@ const chipVariants = cva(
 )
 
 interface ChipProps
-  extends React.ComponentProps<"button">,
+  extends Omit<React.ComponentProps<"button">, "children">,
     VariantProps<typeof chipVariants> {
+  /** リンクとして使う場合の URL。指定時は `<a>` でレンダリング */
+  href?: string
+  /** 選択状態。true で Brand 色 + 白文字へ強調 */
   selected?: boolean
+  /** 売り切れ状態（斜線オーバーレイ + disabled） */
+  soldOut?: boolean
+  /** 削除可能（× ボタン表示） */
   removable?: boolean
+  /** 削除時のコールバック */
   onRemove?: () => void
+  /** 件数バッジ（例: フィルタ件数） */
+  count?: number
+  children?: React.ReactNode
 }
 
+/**
+ * Chip — クリック可能なキーワード・フィルタチップ。
+ *
+ * Tag（表示専用ラベル）との違い：
+ * - Chip はインタラクティブ（クリック・選択・削除可）
+ * - Chip は pill（rounded-full）/ square / tile を持つ
+ * - Chip は count バッジ・売り切れ状態・removable を持てる
+ *
+ * ### AI 向け使用ルール
+ * - キーワード: `<Chip>キーワード</Chip>`
+ * - フィルタ選択: `<Chip selected>選択済み</Chip>`
+ * - 削除可能タグ: `<Chip removable onRemove={fn}>タグ</Chip>`
+ * - サイズタイル: `<Chip shape="square" size="tile" selected={isSelected}>3号</Chip>`
+ * - 売り切れタイル: `<Chip shape="square" size="tile" soldOut>5号</Chip>`
+ * - カウント付き: `<Chip selected count={156}>すべて</Chip>`
+ * - リンク化: `<Chip href="/search?q=foo">foo</Chip>`
+ */
 function Chip({
   className,
-  variant,
+  variant = "filled",
   size,
   shape,
+  href,
   selected,
+  soldOut = false,
   removable,
   onRemove,
+  count,
   children,
   ...props
 }: ChipProps) {
+  const isSoldOut = soldOut && !selected
+
+  const countBadge = count !== undefined && (
+    <span
+      className={cn(
+        "inline-flex items-center justify-center rounded-full px-1.5 min-w-[1.25rem] typo-label-xs transition-colors",
+        selected
+          ? "bg-[var(--Surface-Primary)] text-[var(--Text-Accent-Primary)]"
+          : "bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)]"
+      )}
+    >
+      {count}
+    </span>
+  )
+
+  const removeButton = removable && (
+    <span
+      role="button"
+      aria-label="削除"
+      tabIndex={0}
+      onClick={(e) => {
+        e.stopPropagation()
+        onRemove?.()
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          e.stopPropagation()
+          onRemove?.()
+        }
+      }}
+      className="-mr-1 ml-0.5 inline-flex size-5 items-center justify-center rounded-full hover:bg-[var(--Surface-Tertiary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
+    >
+      <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M4 4L10 10M10 4L4 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    </span>
+  )
+
+  const soldOutOverlay = isSoldOut && (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 flex items-center justify-center"
+    >
+      <span className="block h-[140%] w-px origin-center rotate-45 bg-[var(--Text-Disable)]" />
+    </span>
+  )
+
+  const content = (
+    <>
+      {children}
+      {countBadge}
+      {soldOutOverlay}
+      {removeButton}
+    </>
+  )
+
+  // 選択時は Brand-Primary を強調表示 (CTA / PillRow と一貫)
+  const selectedStyles = selected &&
+    "!bg-[var(--Brand-Primary)] !text-[var(--Text-on-Inverse)] hover:!bg-[var(--Active-Primary-Button)] active:!bg-[var(--Active-Primary-Button)] !border-[var(--Brand-Primary)] font-bold shadow-sm hover:shadow"
+
+  const soldOutStyles = isSoldOut &&
+    "border border-[var(--Text-Disable)] !bg-[var(--Surface-Secondary)] !text-[var(--Text-Disable)] cursor-not-allowed"
+
+  if (href && !isSoldOut) {
+    return (
+      <a
+        href={href}
+        data-slot="chip"
+        data-variant={variant}
+        data-selected={selected || undefined}
+        className={cn(
+          "relative",
+          chipVariants({ variant, size, shape }),
+          selectedStyles,
+          className,
+        )}
+      >
+        {content}
+      </a>
+    )
+  }
+
   return (
     <button
+      type="button"
       data-slot="chip"
+      data-variant={variant}
       data-selected={selected || undefined}
+      data-sold-out={isSoldOut || undefined}
+      disabled={isSoldOut || props.disabled}
       className={cn(
+        "relative",
         chipVariants({ variant, size, shape }),
-        // 選択状態は Brand-Primary 背景 + 白文字 + bold で強調。
-        // 他 CTA / PillRow と一貫した「選択 = ピンク + 白文字」表現に揃える。
-        // hover 時は Active-Primary-Button (Brand-800) まで踏み込んで
-        // 「選択中だが押せる」感を明示。Brand-700 では未選択 chip との
-        // 区別がつきにくいケースがあった。
-        selected && "!bg-[var(--Brand-Primary)] !text-[var(--Text-on-Inverse)] hover:!bg-[var(--Active-Primary-Button)] active:!bg-[var(--Active-Primary-Button)] !border-[var(--Brand-Primary)] font-bold shadow-sm hover:shadow",
-        className
+        selectedStyles,
+        soldOutStyles,
+        className,
       )}
       {...props}
     >
-      {children}
-      {removable && (
-        <span
-          role="button"
-          aria-label="削除"
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove?.()
-          }}
-          className="ml-0.5 hover:text-[var(--Text-Caution)]"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M4 4L10 10M10 4L4 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </span>
-      )}
+      {content}
     </button>
   )
 }
 
 export { Chip, chipVariants }
+export type { ChipProps }

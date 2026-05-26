@@ -48,7 +48,7 @@ function DropdownFilter<K extends string = string>({
   }
 
   return (
-    <div className={cn("flex-shrink-0", className)}>
+    <div data-slot="dropdown-filter" data-active={isActive || undefined} className={cn("flex-shrink-0", className)}>
       <button
         ref={btnRef}
         type="button"

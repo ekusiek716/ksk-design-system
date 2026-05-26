@@ -13,16 +13,16 @@
 |-----------|--------|----------|---------|
 | Accordion, AccordionItem, AccordionTrigger, AccordionContent | `@/components/ui/accordion` | — | ThreeItems, MultipleOpen |
 | AlertDialog, AlertDialogTrigger, AlertDialogPortal, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel | `@/components/ui/alert-dialog` | — | Default, Small |
-| Alert, AlertTitle, AlertDescription | `@/components/ui/alert` | **variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning`<br>**variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning` | Info, Success, Error, Warning, InlineInfo, InlineCaution, InlineWarning, AllVariants |
+| Alert, AlertTitle, AlertDescription | `@/components/ui/alert` | **variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning`<br>**variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning` | Info, Success, Error, Warning, InlineInfo, InlineCaution, InlineWarning, AllVariants, Prop-based API (auto icon), Prop-based + action |
 | Avatar, AvatarImage, AvatarFallback | `@/components/ui/avatar` | — | WithImage, Fallback, Sizes, Group |
 | Badge | `@/components/ui/badge` | **variant**: `default`, `secondary`, `outline`, `destructive`, `success`, `warning`, `info`, `subtle`, `ghost` | Default, Secondary, Outline, Destructive, Success, Warning, Info, Subtle, Ghost, AllVariants |
 | Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis | `@/components/ui/breadcrumb` | — | ThreeLevel, WithEllipsis |
-| Button | `@/components/ui/button` | — | Default, Secondary, SecondarySwitch, Tertiary, Ghost, Destructive, Link, AllVariants, AllSizes, Disabled, DisabledAllVariants, IconButton, Glass — Liquid Glass (iOS 26), WithIcon |
+| Button | `@/components/ui/button` | — | Default, Secondary, SecondarySwitch, Tertiary, Ghost, Destructive, Link, AllVariants, AllSizes, Inverse on Dark Background, Inverse on Dark Background, Real UI — Hero Section CTAs, Disabled, DisabledAllVariants, IconButton, Glass — Liquid Glass (iOS 26), WithIcon |
 | Calendar | `@/components/ui/calendar` | — | Single, Range |
 | Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter | `@/components/ui/card` | **variant**: `default`, `media` | FullCard, MinimalCard, HeaderOnly |
 | CheckboxCardGroup, CheckboxCardItem | `@/components/ui/checkbox-card` | — | Default, WithDescription, WithExpandedContent, Disabled |
 | CheckboxGroup, CheckboxGroupItem | `@/components/ui/checkbox-group` | — | Default, Required, WithError, SingleColumn |
-| Checkbox | `@/components/ui/checkbox` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, MultipleOptions |
+| Checkbox | `@/components/ui/checkbox` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, MultipleOptions, Row Layout (label/description/count), Real UI — Filter Sidebar |
 | CoachMark | `@/components/ui/coach-mark` | — | Default, Brand, Placements, Onboarding, Hover |
 | Collapsible, CollapsibleTrigger, CollapsibleContent | `@/components/ui/collapsible` | — | Default, FAQ |
 | Combobox | `@/components/ui/combobox` | — | Default, WithDisabledOption |
@@ -92,7 +92,7 @@
 | CategoryNav | `@/components/patterns/category-nav` | — | Default, WithSelection |
 | CategoryScroll | `@/components/patterns/category-scroll` | — | Default, CircleShape, GridLayout |
 | ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, WithMax |
-| Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `sm`, `md`, `lg`<br>**shape**: `pill`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape |
+| Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `sm`, `md`, `lg`, `tile`<br>**shape**: `pill`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape, WithCount, TileAndSoldOut, AsLink, Real UI — Filters & Status |
 | ConfirmDialog | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly |
 | ErrorState | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry |

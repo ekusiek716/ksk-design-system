@@ -76,10 +76,14 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 w-full max-w-[480px] translate-x-[-50%] translate-y-[-50%]",
+          // 中央配置: left-[50%] + translate-x-[-50%] のみで揃える。
+          // inset-x-* と組み合わせると left/right と transform が競合して
+          // SP サイズで左に大きくズレるため使わない。
+          // 幅は w-full + max-w-[calc(100%-3rem)] (= 左右 24px ずつのマージン) +
+          // 480px キャップ で SP/PC 両対応にする。
+          "fixed left-[50%] top-[50%] z-50 w-full max-w-[calc(100%-3rem)] sm:max-w-[480px] translate-x-[-50%] translate-y-[-50%]",
           "rounded-lg bg-[var(--Surface-Primary)] shadow-[var(--shadow-dialog)]",
           padding && "p-6",
-          "inset-x-6 mx-auto",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           className

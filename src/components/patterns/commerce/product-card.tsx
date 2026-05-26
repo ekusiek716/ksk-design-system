@@ -74,7 +74,26 @@ function TagBadge({ label, variant = "default" }: ProductCardTag) {
   )
 }
 
-// 汎用商品カードコンポーネント
+/**
+ * ProductCard — 商品表示カード（EC 系の中核）。
+ *
+ * orientation:
+ * - `vertical`（既定）: グリッド表示。商品一覧・カルーセル向け。
+ * - `horizontal`: リスト表示。カート・検索結果・履歴向け。
+ *
+ * stretched-link パターン:
+ *   `href` または `onCardClick` を渡すとカード全体が 1 つのクリッカブル領域に
+ *   なる（`<a class="absolute inset-0">` を内側に重ねる）。
+ *   FavoriteButton / CartButton は z-index で上に重ねつつ、
+ *   `e.stopPropagation()` で外側リンクの伝播を止めている。
+ *
+ * 機能:
+ * - `ranking`: ランキングバッジ表示（左上）
+ * - `tags`: TagBadge を画像下部に表示
+ * - `discountPercent`: `originalPrice > price` から自動算出
+ * - `isFavorite` / `onFavoriteToggle`: ハート（重ね・トグル）
+ * - `showCartButton`: カート追加 CTA（vertical のみ）
+ */
 function ProductCard({
   className,
   name,
@@ -104,15 +123,24 @@ function ProductCard({
       ? Math.round(((originalPrice - price) / originalPrice) * 100)
       : null
 
-  // カード全体のリンクまたはクリックエリア
+  // カード全体のリンクまたはクリックエリア（stretched-link パターン）
+  // - 画像・テキスト全体を 1 つのアクセシブルなリンク領域にする
+  // - 内部の interactive 要素（FavoriteButton / CartButton）は z-index で上に重ねる
+  //   (favorite z-[4] / cart z-10) → クリック時の e.stopPropagation() と併用
   const cardLink = href ? (
-    <a href={href} className="absolute inset-0 z-[1]" aria-label={name}>
+    <a
+      href={href}
+      data-slot="card-link"
+      className="absolute inset-0 z-[1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] rounded-lg"
+      aria-label={name}
+    >
       <span className="sr-only">{name}</span>
     </a>
   ) : onCardClick ? (
     <button
       type="button"
-      className="absolute inset-0 z-[1] cursor-pointer"
+      data-slot="card-link"
+      className="absolute inset-0 z-[1] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] rounded-lg"
       aria-label={name}
       onClick={onCardClick}
     >

@@ -74,6 +74,49 @@ export const AllSizes: Story = {
       <Button size="default">Default</Button>
       <Button size="lg">LG</Button>
       <Button size="xl">XL</Button>
+      <Button size="hero">Hero CTA</Button>
+    </div>
+  ),
+}
+
+/** hero: pill 型 56px の特大 CTA。トップページの主要動線・final-CTA 専用。 */
+export const Hero: Story = {
+  args: { children: "今すぐ始める", size: "hero" },
+}
+
+/**
+ * inverse / ghost-inverse: 暗背景・ヒーローセクション上に乗せる CTA。
+ * 通常背景では他バリアントを使う。
+ */
+export const InverseOnDark: Story = {
+  name: "Inverse on Dark Background",
+  parameters: {
+    backgrounds: { default: "dark" },
+  },
+  render: () => (
+    <div className="p-8 rounded-2xl bg-[var(--Surface-Inverse,#111)] flex flex-wrap items-center gap-3">
+      <Button variant="inverse">Inverse</Button>
+      <Button variant="ghost-inverse">Ghost Inverse</Button>
+      <Button variant="inverse" size="hero">Hero (Inverse)</Button>
+    </div>
+  ),
+}
+
+/** リアル UI ：ヒーローセクション上の CTA ペア */
+export const RealHeroCTAs: Story = {
+  name: "Real UI — Hero Section CTAs",
+  render: () => (
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--Brand-Primary)] to-[var(--Primitive-Brand-700,#1D4ED8)] p-12 text-center">
+      <h2 className="typo-heading-2xl text-[var(--Text-on-Inverse)] mb-3">
+        フリーランス案件、最短即日マッチ。
+      </h2>
+      <p className="typo-body-md text-[var(--Text-on-Inverse)]/90 mb-8">
+        登録 60 秒。スカウト多数。
+      </p>
+      <div className="flex items-center justify-center gap-3">
+        <Button variant="inverse" size="hero">無料で始める</Button>
+        <Button variant="ghost-inverse" size="hero">資料請求</Button>
+      </div>
     </div>
   ),
 }

@@ -75,6 +75,9 @@ function applyTheme(theme: string) {
 }
 
 const preview: Preview = {
+  // 全ストーリーで Docs タブを自動生成。
+  // 個別ストーリーで opt-out したい場合は story 側で `tags: ['!autodocs']` を指定する。
+  tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
     backgrounds: {

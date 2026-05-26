@@ -21,6 +21,22 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
   haptic?: HapticType
 }
 
+/**
+ * Button — 汎用ボタン
+ *
+ * バリアントの使い分け:
+ * - `default`: 主たる CTA（1 画面に 1〜2 個まで）。
+ * - `secondary` / `tertiary`: 並列の選択肢・キャンセル。
+ * - `ghost` / `link`: 文字寄りの controls。
+ * - `destructive`: 削除・取り消しなど不可逆操作。
+ * - `glass` / `accent`: モバイル / ヒーローセクション向け装飾系。
+ * - `inverse` / `ghost-inverse`: 暗背景・ヒーローセクション上で使う反転バリアント。
+ *
+ * サイズ:
+ * - `xs` / `sm` / `default` / `lg` / `xl`: 一般用途。
+ * - `hero`: トップ hero / final-CTA 向けのピル型特大 CTA。
+ * - `icon` / `icon-sm` / `icon-lg` / `icon-xl`: アイコンのみのボタン（aria-label 必須）。
+ */
 function Button({ className, variant, size, layout, haptic, onClick, ...props }: ButtonProps) {
   const handleClick = React.useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -35,6 +51,8 @@ function Button({ className, variant, size, layout, haptic, onClick, ...props }:
   return (
     <button
       data-slot="button"
+      data-variant={variant ?? "default"}
+      data-size={size ?? "default"}
       className={cn(buttonVariants({ variant, size, layout, className }))}
       onClick={handleClick}
       {...props}

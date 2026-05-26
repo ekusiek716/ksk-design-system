@@ -59,6 +59,8 @@ function CoachMark({
         </TooltipPrimitive.Trigger>
         <TooltipPrimitive.Portal>
           <TooltipPrimitive.Content
+            data-slot="coach-mark"
+            data-variant={variant}
             side={sideMap[placement]}
             sideOffset={8}
             className={cn(
