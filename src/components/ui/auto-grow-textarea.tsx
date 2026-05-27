@@ -29,7 +29,8 @@ import { cn } from "@/lib/utils"
  * // 最小用途（カウンタなし）
  * <AutoGrowTextarea value={v} onChange={setV} placeholder="..." />
  */
-export interface AutoGrowTextareaProps {
+export interface AutoGrowTextareaProps
+  extends Omit<React.ComponentProps<typeof Textarea>, "ref" | "value" | "onChange" | "placeholder" | "rows" | "maxLength" | "className"> {
   value: string
   onChange: (value: string) => void
   placeholder?: string
@@ -38,8 +39,6 @@ export interface AutoGrowTextareaProps {
   /** 指定すると右下に「現在 / 上限」カウンタを表示。70% 超で warning 色、上限到達で caution 色。 */
   maxLength?: number
   className?: string
-  /** Textarea root に渡すオプション (id, name, autoFocus 等)。dom-safe な属性のみ。 */
-  textareaProps?: Omit<React.ComponentProps<typeof Textarea>, "ref" | "value" | "onChange" | "placeholder" | "rows" | "maxLength" | "className">
 }
 
 export function AutoGrowTextarea({
@@ -49,7 +48,7 @@ export function AutoGrowTextarea({
   minRows = 3,
   maxLength,
   className,
-  textareaProps,
+  ...textareaProps
 }: AutoGrowTextareaProps) {
   const ref = React.useRef<HTMLTextAreaElement | null>(null)
 
