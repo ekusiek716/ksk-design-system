@@ -21,18 +21,31 @@ const toastVariants = cva(
 
 type ToastVariant = VariantProps<typeof toastVariants>["variant"]
 
+interface ToastAction {
+  /** ボタンに表示するラベル */
+  label: string
+  /** クリック時のコールバック。toast は自動で dismiss されない（必要なら自前で toast.dismiss(id) を呼ぶ）。 */
+  onClick: () => void
+}
+
 interface Toast {
   id: string
   title: string
   description?: string
   variant?: ToastVariant
   duration?: number
+  action?: ToastAction
 }
 
 interface ToastOptions {
   description?: string
   variant?: ToastVariant
   duration?: number
+  /**
+   * オプショナルなアクションボタン。指定時は toast 右側に表示。
+   * 「元に戻す」「再試行」「詳細」などの即時アクション用途。
+   */
+  action?: ToastAction
 }
 
 // =============================================================
@@ -167,6 +180,15 @@ function ToastViewport() {
               <p className="typo-body-sm mt-0.5 opacity-80">{t.description}</p>
             )}
           </div>
+          {t.action && (
+            <button
+              data-slot="toast-action"
+              onClick={() => t.action!.onClick()}
+              className="shrink-0 typo-label-sm underline underline-offset-2 hover:no-underline cursor-pointer"
+            >
+              {t.action.label}
+            </button>
+          )}
           <button
             data-slot="button"
             onClick={() => toastStore.dismiss(t.id)}
@@ -285,6 +307,7 @@ function showToast(title: string, options: ToastOptions = {}, variant?: ToastVar
     description: options.description,
     variant: variant ?? options.variant,
     duration: options.duration,
+    action: options.action,
   })
 }
 
@@ -298,4 +321,4 @@ toast.caution = (title, options) => showToast(title, options, "caution")
 toast.dismiss = (id: string) => toastStore.dismiss(id)
 
 export { Toaster, useToast, toast, toastVariants }
-export type { Toast, ToastVariant, ToastOptions, ToastFn }
+export type { Toast, ToastVariant, ToastOptions, ToastFn, ToastAction }

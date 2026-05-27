@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.17.2",
+    "version": "1.18.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 53,
@@ -380,7 +380,8 @@
       "rules": [
         "Provider モード: <Toaster> でラップし useToast() で呼び出す",
         "Fire-and-forget: `import { toast } from \"@ksk/design-system\"` → `toast.success(\"保存しました\")`。<Toaster> 設置不要",
-        "両 API は内部で同じ singleton store を共有するため、<Toaster> がある場合はそれを優先し auto-mounted viewport は描画しない"
+        "両 API は内部で同じ singleton store を共有するため、<Toaster> がある場合はそれを優先し auto-mounted viewport は描画しない",
+        "新規 action prop で右側に CTA ボタン (元に戻す / 再試行 等) を表示できる"
       ]
     },
     {

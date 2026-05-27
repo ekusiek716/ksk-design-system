@@ -6278,7 +6278,7 @@ function yf({
   minRows: a = 3,
   maxLength: o,
   className: s,
-  textareaProps: l
+  ...l
 }) {
   const i = x.useRef(null), c = x.useCallback(() => {
     const h = i.current;
