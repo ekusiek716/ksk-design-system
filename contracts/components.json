@@ -1,15 +1,15 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.19.0",
+    "version": "1.20.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 53,
+      "ui": 54,
       "patterns": 33,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 108
+      "total": 109
     }
   },
   "ui": [
@@ -760,6 +760,19 @@
       "rules": [
         "長文メモ・コメント入力で <Textarea> の代わりに使う",
         "maxLength 指定でカウンタが自動表示"
+      ]
+    },
+    {
+      "name": "ErrorBoundary",
+      "path": "src/components/ui/error-boundary.tsx",
+      "description": "React の componentDidCatch をラップした汎用フォールバック。labels prop で i18n、onError で logger 連携、onReset で再試行ボタン、fallback で完全カスタムレンダリング。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "role=alert"
+      ],
+      "rules": [
+        "onError は dev 時には自動 console.error。本番では明示指定時のみ"
       ]
     }
   ],
