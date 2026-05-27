@@ -42,3 +42,33 @@ export const WithIconOnly: Story = {
     action: <Button variant="secondary">メンバーを招待</Button>,
   },
 }
+
+/**
+ * 主アクション + 副アクションの 2 ボタン横並びパターン。
+ *
+ * ガイドライン:
+ * - action は **最大 2 つまで**。3 つ以上は EmptyState の意図 (空状態からの
+ *   起点を 1 つ示す) に反するため使わない。
+ * - **より重要なものを左**、補助的なものを右に配置する。
+ *   日本のモバイル UI では「左=メイン」が一般的。
+ * - 2 ボタンは同サイズ (size 揃え)。主は `default` バリアント、副は
+ *   `secondary` または `ghost` で階層差を付ける。
+ * - 「キャンセル」「閉じる」のような後ろ向きアクションを副に置かない
+ *   (EmptyState は何もない状態に対する案内なので「閉じる」は意味を成さない)。
+ */
+export const WithDualAction: Story = {
+  name: "With dual action (recommended layout)",
+  args: {
+    icon: (
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 8L29.5 19l12 1.5-9 8 2.5 12L24 34.5 13 40.5l2.5-12-9-8L18.5 19 24 8z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>
+    ),
+    title: "お気に入りがありません",
+    description: "気になる商品を保存して、後でまとめて確認できます。",
+    action: (
+      <div className="flex gap-2 justify-center">
+        <Button>商品を探す</Button>
+        <Button variant="secondary">使い方を見る</Button>
+      </div>
+    ),
+  },
+}

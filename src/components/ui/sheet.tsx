@@ -487,7 +487,16 @@ function SwipeToCloseBottomSheet({
         ref={sheetRef}
         data-slot="sheet-content"
         data-side={side}
-        className={cn(sheetVariants({ side }), padding && "p-6", className)}
+        className={cn(
+          sheetVariants({ side }),
+          // swipeToClose mode: 高さに制約がないと viewport より高いシートの
+          // top (タイトル / ドラッグハンドル) が画面外にはみ出すため
+          // 自動で max-h-[90dvh] + overflow-y-auto を付与。
+          // snap mode は activeSnapPoint で高さ制御するので別途。
+          "max-h-[90dvh] overflow-y-auto",
+          padding && "p-6",
+          className,
+        )}
         style={{
           ...style,
           transform: `translate3d(0, ${dragY}px, 0)`,

@@ -1,29 +1,41 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
+type Granularity = "day" | "hour" | "minute" | "second"
+
 interface CountdownTimerProps {
   /** カウントダウン先の日時 */
   targetDate: Date
-  /** 表示前テキスト（開始前） */
-  beforeLabel?: string
-  /** ラベルテキスト（カウント中） */
+  /**
+   * 表示粒度（既定 "second"）。
+   * - "day"   : 日のみ表示 (結婚式 / 旅行 / 出産予定日まで N 日)。1日1回ペースで再計算。
+   * - "hour"  : 時間まで (1分ごとに再計算)
+   * - "minute": 分まで (秒ごとに再計算)
+   * - "second": 秒まで (旧デフォルト、競技的カウントダウン)
+   */
+  granularity?: Granularity
+  /** ラベルテキスト（カウント中、既定 "残り"） */
   label?: string
-  /** 終了時テキスト */
+  /** 終了時テキスト（既定 "受付終了"） */
   endedLabel?: string
+  /** 当日 (残り 0 日) 時のテキスト。granularity="day" で使用（既定 "本日"） */
+  todayLabel?: string
   variant?: "filled" | "ghost"
-  /** 時間を非表示にして 分:秒 のみ表示 */
+  /** [hh:mm:ss モードのみ] 時間を非表示にして 分:秒 のみ表示 */
   compact?: boolean
   className?: string
   onEnd?: () => void
-  /** 時間単位ラベル。i18n 対応: 英語では "h" を渡す。@default "時間" */
+  /** 日単位ラベル。granularity="day" で使用。@default "日" */
+  dayUnit?: string
+  /** 時間単位ラベル。@default "時間" */
   hourUnit?: string
-  /** 分単位ラベル。i18n 対応: 英語では "m" を渡す。@default "分" */
+  /** 分単位ラベル。@default "分" */
   minuteUnit?: string
-  /** 秒単位ラベル。i18n 対応: 英語では "s" を渡す。@default "秒" */
+  /** 秒単位ラベル。@default "秒" */
   secondUnit?: string
 }
 
-type State = "before" | "active" | "ended"
+type State = "active" | "today" | "ended"
 
 function pad(n: number) {
   return String(n).padStart(2, "0")
@@ -38,27 +50,112 @@ function calcRemaining(target: Date) {
   return { h, m, s, totalSec }
 }
 
+/** 残日数。今日が 0、明日が 1。負の値は終了。 */
+function calcDaysLeft(target: Date): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const t = new Date(target)
+  t.setHours(0, 0, 0, 0)
+  const msPerDay = 24 * 60 * 60 * 1000
+  return Math.round((t.getTime() - today.getTime()) / msPerDay)
+}
+
 function CountdownTimer({
   targetDate,
-  beforeLabel,
+  granularity = "second",
   label = "残り",
   endedLabel = "受付終了",
+  todayLabel = "本日",
   variant = "filled",
   compact = false,
   className,
   onEnd,
+  dayUnit = "日",
   hourUnit = "時間",
   minuteUnit = "分",
   secondUnit = "秒",
 }: CountdownTimerProps) {
+  // 日単位モード — シンプルな日数計算 + 1日1回更新でも十分
+  if (granularity === "day") {
+    const [daysLeft, setDaysLeft] = React.useState(() => calcDaysLeft(targetDate))
+    React.useEffect(() => {
+      setDaysLeft(calcDaysLeft(targetDate))
+      // 翌日 0:00 で再計算 (シンプルに 1 時間ごと polling で済ませる)
+      const id = setInterval(() => setDaysLeft(calcDaysLeft(targetDate)), 60 * 60 * 1000)
+      return () => clearInterval(id)
+    }, [targetDate])
+
+    React.useEffect(() => {
+      if (daysLeft < 0) onEnd?.()
+    }, [daysLeft, onEnd])
+
+    if (daysLeft < 0) {
+      return (
+        <span
+          data-slot="countdown-timer"
+          data-granularity="day"
+          data-state="ended"
+          className={cn(
+            "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg",
+            "bg-[var(--Surface-Tertiary)] text-[var(--Text-Low-Emphasis)]",
+            "typo-label-sm",
+            className,
+          )}
+        >
+          {endedLabel}
+        </span>
+      )
+    }
+
+    if (daysLeft === 0) {
+      return (
+        <span
+          data-slot="countdown-timer"
+          data-granularity="day"
+          data-state="today"
+          className={cn(
+            "inline-flex items-center gap-1 px-3 py-2 rounded-lg font-variant-nums",
+            variant === "filled"
+              ? "bg-[var(--Brand-Primary)] text-white"
+              : "border-2 border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]",
+            className,
+          )}
+        >
+          <span className="text-[22px] font-black leading-none">{todayLabel}</span>
+        </span>
+      )
+    }
+
+    return (
+      <span
+        data-slot="countdown-timer"
+        data-granularity="day"
+        data-state="active"
+        data-variant={variant}
+        aria-label={`${label} ${daysLeft}${dayUnit}`}
+        className={cn(
+          "inline-flex items-baseline gap-1 px-3 py-2 rounded-lg font-variant-nums",
+          variant === "filled"
+            ? "bg-[var(--Brand-Primary)] text-white"
+            : "border-2 border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]",
+          className,
+        )}
+      >
+        {label && <span className="text-[11px] font-semibold opacity-80 mr-1">{label}</span>}
+        <span className="text-[28px] font-black leading-none tabular-nums">{daysLeft}</span>
+        <span className="text-[12px] font-semibold opacity-80">{dayUnit}</span>
+      </span>
+    )
+  }
+
+  // granularity: hour / minute / second モード
   const [remaining, setRemaining] = React.useState(() => calcRemaining(targetDate))
-  const [state, setState] = React.useState<State>(() => {
-    const now = Date.now()
-    const start = targetDate.getTime() - (beforeLabel ? 0 : 0)
-    if (now >= targetDate.getTime()) return "ended"
-    return "active"
-  })
+  const [state, setState] = React.useState<State>(() =>
+    Date.now() >= targetDate.getTime() ? "ended" : "active",
+  )
   const endedRef = React.useRef(false)
+
+  const tickInterval = granularity === "hour" ? 60 * 1000 : granularity === "minute" ? 1000 : 1000
 
   React.useEffect(() => {
     endedRef.current = false
@@ -72,20 +169,21 @@ function CountdownTimer({
       }
     }
     tick()
-    const id = setInterval(tick, 1000)
+    const id = setInterval(tick, tickInterval)
     return () => clearInterval(id)
-  }, [targetDate, onEnd])
+  }, [targetDate, onEnd, tickInterval])
 
   if (state === "ended") {
     return (
       <span
         data-slot="countdown-timer"
+        data-granularity={granularity}
         data-state="ended"
         className={cn(
           "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg",
           "bg-[var(--Surface-Tertiary)] text-[var(--Text-Low-Emphasis)]",
           "typo-label-sm",
-          className
+          className,
         )}
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -99,19 +197,32 @@ function CountdownTimer({
 
   const { h, m, s } = remaining
 
-  const segments = compact
-    ? [{ num: pad(m), unit: minuteUnit }, { num: pad(s), unit: secondUnit }]
-    : [
+  const segments = (() => {
+    if (granularity === "hour") {
+      return [{ num: pad(h), unit: hourUnit }, { num: pad(m), unit: minuteUnit }]
+    }
+    if (granularity === "minute") {
+      return [
         ...(h > 0 ? [{ num: pad(h), unit: hourUnit }] : []),
         { num: pad(m), unit: minuteUnit },
-        { num: pad(s), unit: secondUnit },
       ]
+    }
+    // second (default)
+    return compact
+      ? [{ num: pad(m), unit: minuteUnit }, { num: pad(s), unit: secondUnit }]
+      : [
+          ...(h > 0 ? [{ num: pad(h), unit: hourUnit }] : []),
+          { num: pad(m), unit: minuteUnit },
+          { num: pad(s), unit: secondUnit },
+        ]
+  })()
 
   const isFilled = variant === "filled"
 
   return (
     <span
       data-slot="countdown-timer"
+      data-granularity={granularity}
       data-state="active"
       data-variant={variant}
       aria-live="off"
@@ -121,7 +232,7 @@ function CountdownTimer({
         isFilled
           ? "bg-[var(--Brand-Primary)] text-white"
           : "border-2 border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]",
-        className
+        className,
       )}
     >
       {label && (

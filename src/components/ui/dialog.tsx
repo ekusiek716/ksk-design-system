@@ -55,6 +55,14 @@ interface DialogContentProps
    * `<DialogDescription>` を直接置く。
    */
   description?: React.ReactNode
+  /**
+   * 縦位置。
+   * - "center" (既定): 画面中央
+   * - "top": 上部寄せ (safe-area-inset-top + 2rem 下) — モバイルで縦長
+   *   コンテンツ (チェックリスト等) を出すときに、コンテンツが
+   *   スクロールしやすく操作しやすい
+   */
+  position?: "center" | "top"
 }
 
 function DialogContent({
@@ -62,6 +70,7 @@ function DialogContent({
   children,
   padding = true,
   description,
+  position = "center",
   ...props
 }: DialogContentProps) {
   const autoDescId = React.useId()
@@ -75,13 +84,17 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        data-position={position}
         className={cn(
-          // 中央配置: left-[50%] + translate-x-[-50%] のみで揃える。
+          // 横位置: left-[50%] + translate-x-[-50%] のみ。
           // inset-x-* と組み合わせると left/right と transform が競合して
           // SP サイズで左に大きくズレるため使わない。
-          // 幅は w-full + max-w-[calc(100%-3rem)] (= 左右 24px ずつのマージン) +
-          // 480px キャップ で SP/PC 両対応にする。
-          "fixed left-[50%] top-[50%] z-50 w-full max-w-[calc(100%-3rem)] sm:max-w-[480px] translate-x-[-50%] translate-y-[-50%]",
+          // 幅は w-full + max-w-[calc(100%-3rem)] (左右 24px) + 480px キャップ。
+          "fixed left-[50%] z-50 w-full max-w-[calc(100%-3rem)] sm:max-w-[480px] translate-x-[-50%]",
+          // 縦位置
+          position === "top"
+            ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh-max(env(safe-area-inset-top),2rem)-2rem)] overflow-y-auto"
+            : "top-[50%] translate-y-[-50%]",
           "rounded-lg bg-[var(--Surface-Primary)] shadow-[var(--shadow-dialog)]",
           padding && "p-6",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",

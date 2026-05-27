@@ -44,6 +44,8 @@ export { ListSkeleton, GridSkeleton } from "./components/patterns/list-skeletons
 export type { ListSkeletonProps, GridSkeletonProps } from "./components/patterns/list-skeletons";
 export { Slider } from "./components/ui/slider";
 export { Spinner } from "./components/ui/spinner";
+export { ErrorBoundary } from "./components/ui/error-boundary";
+export type { ErrorBoundaryProps } from "./components/ui/error-boundary";
 export type { SpinnerProps } from "./components/ui/spinner";
 export { Switch } from "./components/ui/switch";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";

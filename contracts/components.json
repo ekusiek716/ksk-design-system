@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.20.0",
+    "version": "1.21.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 54,
@@ -208,7 +208,7 @@
     {
       "name": "Dialog",
       "path": "src/components/ui/dialog.tsx",
-      "description": "モーダルダイアログ。重要な確認・フォーム入力に使用。モバイルではResponsiveDialogを推奨。",
+      "description": "モーダルダイアログ。重要な確認・フォーム入力に使用。モバイルではResponsiveDialogを推奨。 position=\"top\" でモバイル向け上部寄せ。",
       "subcomponents": [
         "DialogTrigger",
         "DialogContent",
@@ -308,7 +308,11 @@
     {
       "name": "Progress",
       "path": "src/components/ui/progress.tsx",
-      "description": "プログレスバー。処理進行状況・達成率の表示に使用。アニメーション付き。"
+      "description": "進捗バー。color variant (default/success/warning/caution) + transition duration (none/sm/md/lg) 拡張済。",
+      "rules": [
+        "値超過で variant を切替: 100% 超なら caution",
+        "達成カード等は transitionDuration=\"lg\" で緩やかに"
+      ]
     },
     {
       "name": "ScrollArea",
@@ -480,12 +484,15 @@
     {
       "name": "CountdownTimer",
       "path": "src/components/ui/countdown-timer.tsx",
-      "description": "カウントダウンタイマー。残り時間を HH:MM:SS 形式で表示。",
+      "description": "カウントダウン。granularity=\"day\"|\"hour\"|\"minute\"|\"second\" で粒度切替可。日単位は labels.todayLabel/dayUnit 等で i18n。",
       "variants": [],
       "accessibility": [
         "aria-live for screen reader updates"
       ],
-      "rules": []
+      "rules": [
+        "結婚式/旅行など \"あと N 日\" 用途は granularity=\"day\"",
+        "competition timer は \"second\" (既定)"
+      ]
     },
     {
       "name": "ImageGallery",
@@ -818,7 +825,10 @@
     {
       "name": "StatCard",
       "path": "src/components/patterns/stat-card.tsx",
-      "description": "統計値カード。数値+トレンド（増減）+ラベルを表示。ダッシュボードのKPI表示に使用。"
+      "description": "KPI / メトリクス表示カード。interactive prop で button 化、focus-ring / active:scale 自動付与。",
+      "rules": [
+        "interactive または onClick を渡せば role=button + キーボード操作対応"
+      ]
     },
     {
       "name": "ListItem",

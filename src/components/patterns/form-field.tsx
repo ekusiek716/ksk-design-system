@@ -61,7 +61,11 @@ function FormField({
         >
           {label}
           {requiredStyle === "asterisk" && required && (
-            <span className="text-[var(--Text-Caution)]" aria-hidden="true">
+            // required の * は Brand 色を使う。
+            // Caution は「誤入力アラート」と視覚的に紛らわしく
+            // フォームの「目立たせポイント」としては強すぎるため、
+            // Brand 色で「ここは記入必須」と促す方が読みやすい。
+            <span className="text-[var(--Brand-Primary)]" aria-hidden="true">
               *
             </span>
           )}
@@ -70,7 +74,7 @@ function FormField({
               className={cn(
                 "typo-label-xs px-1.5 py-0.5 rounded",
                 required
-                  ? "bg-[var(--Surface-Caution-Subtle)] text-[var(--Text-Caution)]"
+                  ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Brand-Primary)]"
                   : "bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)]"
               )}
               aria-hidden="true"
