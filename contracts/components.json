@@ -1,15 +1,15 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.16.0",
+    "version": "1.17.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 52,
-      "patterns": 29,
+      "ui": 53,
+      "patterns": 31,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 103
+      "total": 106
     }
   },
   "ui": [
@@ -739,6 +739,20 @@
       "rules": [
         "timezone 非対応。タイムゾーンが要件なら別実装"
       ]
+    },
+    {
+      "name": "AutoGrowTextarea",
+      "path": "src/components/ui/auto-grow-textarea.tsx",
+      "description": "Textarea ラッパー。入力に合わせて自動高さ調整 + 任意で文字数カウンタ。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "aria-label inherits from Textarea"
+      ],
+      "rules": [
+        "長文メモ・コメント入力で <Textarea> の代わりに使う",
+        "maxLength 指定でカウンタが自動表示"
+      ]
     }
   ],
   "patterns": [
@@ -1037,6 +1051,42 @@
       ],
       "rules": [
         "フル機能は Pagination (ui/) を使う"
+      ]
+    },
+    {
+      "name": "CoachMarkOverlay",
+      "path": "src/components/patterns/coach-mark-overlay.tsx",
+      "description": "selector ベースの多ステップ onboarding ツアー。spotlight 切り抜き + tooltip。",
+      "variants": [
+        "default",
+        "brand"
+      ],
+      "sizes": [],
+      "accessibility": [
+        "role=dialog",
+        "aria-modal",
+        "aria-label"
+      ],
+      "rules": [
+        "isCoachCompleted/markCoachCompleted で完了状態を永続化",
+        "対象要素が見つからない step は画面中央フォールバック"
+      ]
+    },
+    {
+      "name": "CookieConsent",
+      "path": "src/components/patterns/cookie-consent.tsx",
+      "description": "GDPR/APPI 準拠の汎用クッキー同意バナー。文言は labels prop で完全に上書き可能。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "role=dialog",
+        "aria-modal=false",
+        "aria-label"
+      ],
+      "rules": [
+        "isCookieDecided() で同意済か判定",
+        "onDecide コールバックで analytics に送る",
+        "storageKey/eventName でマルチアプリ衝突回避"
       ]
     }
   ],

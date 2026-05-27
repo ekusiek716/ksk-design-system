@@ -49,7 +49,7 @@ interface DataTableHeadProps extends React.ComponentProps<"th"> {
 declare function DataTableHead({ className, children, sortable, sortDirection, onSort, sticky, stickyOffset, style, ...props }: DataTableHeadProps): import("react/jsx-runtime").JSX.Element;
 declare const dataTableCellVariants: (props?: {
     align?: "center" | "left" | "right";
-    width?: "checkbox" | "auto" | "sm" | "lg" | "xl" | "md" | "action" | "narrow";
+    width?: "checkbox" | "auto" | "action" | "sm" | "lg" | "xl" | "md" | "narrow";
 } & import("class-variance-authority/types").ClassProp) => string;
 interface DataTableCellProps extends Omit<React.ComponentProps<"td">, "align" | "width">, VariantProps<typeof dataTableCellVariants> {
     /** 横スクロール時に列を貼り付け表示する */

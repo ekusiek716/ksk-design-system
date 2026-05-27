@@ -1,4 +1,4 @@
-import { b as o } from "./server-variants-CaWfB3l5.js";
+import { b as o } from "./server-variants-CVS6LB4L.js";
 export {
   o as buttonVariants
 };

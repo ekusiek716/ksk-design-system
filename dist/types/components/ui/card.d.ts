@@ -5,6 +5,18 @@ declare const cardVariants: (props?: {
 } & import("class-variance-authority/types").ClassProp) => string;
 interface CardProps extends React.ComponentProps<"div">, VariantProps<typeof cardVariants> {
 }
+/**
+ * Card — 情報をまとめる汎用カード。
+ *
+ * バリアント:
+ * - `default`: `p-6` + `gap-6`。情報を持つカード（テキスト / ボタン構成）。
+ * - `media`: padding/gap なし。サムネを端まで広げる用途。オーバーレイ配置時に。
+ *
+ * 構成パーツ: `CardHeader` / `CardTitle` / `CardDescription` / `CardAction` /
+ *   `CardContent` / `CardFooter`。`@container` クエリで内部レスポンシブ。
+ *
+ * Note: 商品の表示は `ProductCard`（patterns/commerce）を使う。
+ */
 declare function Card({ className, variant, ...props }: CardProps): import("react/jsx-runtime").JSX.Element;
 declare function CardHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function CardTitle({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
