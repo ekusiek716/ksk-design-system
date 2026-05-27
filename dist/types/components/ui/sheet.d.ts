@@ -23,7 +23,7 @@ declare function SheetClose({ ...props }: React.ComponentProps<typeof DialogPrim
 /** ドラッグインジケーター（Apple HIG: 36×5pt, gray, centered） */
 declare function SheetDragIndicator(): import("react/jsx-runtime").JSX.Element;
 declare const sheetVariants: (props?: {
-    side?: "left" | "right" | "top" | "bottom" | "float" | "float-glass" | "bottom-glass";
+    side?: "top" | "left" | "right" | "bottom" | "float" | "float-glass" | "bottom-glass";
 } & import("class-variance-authority/types").ClassProp) => string;
 interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.Content>, VariantProps<typeof sheetVariants> {
     /** オーバーレイをガラス調にする（glass系 side では自動で true） */

@@ -26,8 +26,16 @@ interface DialogContentProps extends React.ComponentProps<typeof DialogPrimitive
      * `<DialogDescription>` を直接置く。
      */
     description?: React.ReactNode;
+    /**
+     * 縦位置。
+     * - "center" (既定): 画面中央
+     * - "top": 上部寄せ (safe-area-inset-top + 2rem 下) — モバイルで縦長
+     *   コンテンツ (チェックリスト等) を出すときに、コンテンツが
+     *   スクロールしやすく操作しやすい
+     */
+    position?: "center" | "top";
 }
-declare function DialogContent({ className, children, padding, description, ...props }: DialogContentProps): import("react/jsx-runtime").JSX.Element;
+declare function DialogContent({ className, children, padding, description, position, ...props }: DialogContentProps): import("react/jsx-runtime").JSX.Element;
 declare function DialogHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function DialogFooter({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): import("react/jsx-runtime").JSX.Element;

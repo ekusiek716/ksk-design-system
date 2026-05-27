@@ -1,6 +1,6 @@
 import * as React from "react";
 type StatCardVariant = "default" | "success" | "caution" | "info" | "accent";
-interface StatCardProps extends React.ComponentProps<"div"> {
+interface StatCardProps extends Omit<React.ComponentProps<"div">, "onClick"> {
     label: string;
     value: string | number;
     unit?: string;
@@ -19,7 +19,25 @@ interface StatCardProps extends React.ComponentProps<"div"> {
      * @default "default"
      */
     variant?: StatCardVariant;
+    /**
+     * Interactive モード: true にすると card が button のように振る舞う。
+     * - `role=button` / `tabIndex=0` / focus-visible ring / active:scale を自動付与
+     * - onClick / onKeyDown (Enter/Space) を有効化
+     * - hover で軽い陰り、cursor-pointer
+     *
+     * onClick だけ渡しても interactive=true 扱いする。
+     */
+    interactive?: boolean;
+    onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
-declare function StatCard({ className, label, value, unit, trend, icon, variant, ...props }: StatCardProps): import("react/jsx-runtime").JSX.Element;
+/**
+ * StatCard — KPI / メトリクス表示用の小さなカード。
+ *
+ * - `label` + `value` (+ optional `unit`, `trend`, `icon`) でデータ部を表現
+ * - `variant` で色 (default / success / caution / info / accent)
+ * - `interactive` (または `onClick`) でボタン化 — タップでナビゲートする
+ *   ホーム画面のメトリクスタイル等に最適
+ */
+declare function StatCard({ className, label, value, unit, trend, icon, variant, interactive, onClick, ...props }: StatCardProps): import("react/jsx-runtime").JSX.Element;
 export { StatCard };
 export type { StatCardProps, StatCardVariant };

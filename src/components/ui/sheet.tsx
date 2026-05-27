@@ -240,6 +240,10 @@ const sheetVariants = cva(
         bottom: [
           "inset-x-0 bottom-0 rounded-t-[32px]",
           "bg-[var(--Surface-Primary)]",
+          // 高さ制約: viewport より高いシートで top が画面外にはみ出るのを防ぐ。
+          // snap mode は activeSnapPoint で独自に高さ制御するため、このバリアント
+          // (snap モード以外の bottom シート) にのみ適用される。
+          "max-h-[90dvh] overflow-y-auto",
         ].join(" "),
         left: [
           "inset-y-0 left-0 h-full w-3/4 max-w-sm border-r border-[var(--Border-Low-Emphasis)]",
