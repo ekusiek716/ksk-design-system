@@ -100,10 +100,12 @@
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly |
 | ErrorState | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry |
 | FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
+| FilterChip | `@/components/patterns/filter-chip` | — | — |
 | Footer | `@/components/patterns/footer` | — | Default, Minimal |
 | FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithSelect, CompleteForm |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot |
+| ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | — |
 | MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | ProgressSteps | `@/components/patterns/progress-steps` | — | Step2Active, FirstStep, ThirdStep, AllComplete, ThreeSteps |

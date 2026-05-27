@@ -14,6 +14,18 @@ export interface DropdownFilterProps<K extends string = string> {
   /** "すべて" オプションを非表示にする */
   hideAll?: boolean
   allLabel?: string
+  /**
+   * 選択 key を表示用テキストに変換する (例: enum key → 日本語ラベル)。
+   * 未指定なら options から label を引く。
+   */
+  getDisplayLabel?: (key: K) => string
+  /** 選択中は値のみ表示 (例: "カテゴリ別")。プレフィックス "ラベル: " を省略。 */
+  valueOnly?: boolean
+  /**
+   * この値と一致するときは「未絞り込み」扱いとし、active 色を当てずラベルだけ表示する。
+   * 例: "追加順" を pristine とすれば、追加順のときは「並び替え」と表示し pristine 配色に。
+   */
+  pristineValue?: K
   className?: string
 }
 
@@ -24,15 +36,22 @@ function DropdownFilter<K extends string = string>({
   onSelect,
   hideAll = false,
   allLabel = "すべて",
+  getDisplayLabel,
+  valueOnly = false,
+  pristineValue,
   className,
 }: DropdownFilterProps<K>) {
   const [open, setOpen] = React.useState(false)
   const btnRef = React.useRef<HTMLButtonElement>(null)
   const [pos, setPos] = React.useState({ top: 0, left: 0 })
 
-  const isActive = value !== "all"
+  // pristineValue が指定されている場合は、その値も "active 扱いしない"
+  const isActive = value !== "all" && value !== pristineValue
   const selectedOption = options.find((o) => o.key === value)
-  const displayLabel = isActive && selectedOption ? `${label}: ${selectedOption.label}` : label
+  const resolveLabel = (k: K): string => (getDisplayLabel ? getDisplayLabel(k) : (selectedOption?.label ?? String(k)))
+  const displayLabel = isActive
+    ? (valueOnly ? resolveLabel(value as K) : `${label}: ${resolveLabel(value as K)}`)
+    : label
 
   const handleOpen = () => {
     if (btnRef.current) {

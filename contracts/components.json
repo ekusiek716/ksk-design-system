@@ -1,15 +1,15 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.18.0",
+    "version": "1.19.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 53,
-      "patterns": 31,
+      "patterns": 33,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 106
+      "total": 108
     }
   },
   "ui": [
@@ -347,7 +347,11 @@
     {
       "name": "Skeleton",
       "path": "src/components/ui/skeleton.tsx",
-      "description": "ローディングスケルトン。データ取得中のプレースホルダー表示に使用。"
+      "description": "読み込み中プレースホルダ。width/height/rounded shorthand 対応。",
+      "rules": [
+        "数値は px、文字列は CSS 値として渡る",
+        "rounded: none/sm/md/lg/xl/2xl/full プリセット"
+      ]
     },
     {
       "name": "ResponsiveDialog",
@@ -691,7 +695,7 @@
     {
       "name": "DropdownFilter",
       "path": "src/components/ui/dropdown-filter.tsx",
-      "description": "DataTable / 検索結果の絞り込みドロップダウン。\"すべて\" 含む単一選択。",
+      "description": "DataTable / 検索結果の絞り込みドロップダウン。getDisplayLabel/valueOnly/pristineValue 拡張対応。",
       "variants": [],
       "sizes": [],
       "accessibility": [
@@ -699,7 +703,10 @@
         "aria-expanded"
       ],
       "rules": [
-        "DataTable のフィルタ列で使う"
+        "DataTable のフィルタ列で使う",
+        "getDisplayLabel で表示変換",
+        "valueOnly で \"ラベル: 値\" を省略",
+        "pristineValue を指定するとデフォルト値選択時は active 扱いしない"
       ]
     },
     {
@@ -1088,6 +1095,36 @@
         "isCookieDecided() で同意済か判定",
         "onDecide コールバックで analytics に送る",
         "storageKey/eventName でマルチアプリ衝突回避"
+      ]
+    },
+    {
+      "name": "ListSkeleton / GridSkeleton",
+      "path": "src/components/patterns/list-skeletons.tsx",
+      "description": "リスト型 (上部フィルタ + N 行) / グリッド型 (M×N カード) の汎用 Skeleton レイアウト。同一ファイルに 2 component。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "aria-busy",
+        "aria-label"
+      ],
+      "rules": [
+        "loadingLabel prop で i18n",
+        "ListSkeleton: rowHeight で 1 行高",
+        "GridSkeleton: columns 1-4 + cardHeight で調整"
+      ]
+    },
+    {
+      "name": "FilterChip",
+      "path": "src/components/patterns/filter-chip.tsx",
+      "description": "FilterBar 内で「絞り込み中かどうか」を表すトグル chip。active 時は \"ラベル: 値\" 表記、再タップで off。",
+      "variants": [
+        "active",
+        "inactive"
+      ],
+      "sizes": [],
+      "accessibility": [],
+      "rules": [
+        "isActive 切替時に key を変えて Chip を強制再マウント (selected キャッシュ残り防止)"
       ]
     }
   ],

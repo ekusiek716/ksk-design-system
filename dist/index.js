@@ -8481,6 +8481,15 @@ function Ka() {
                 /* @__PURE__ */ n("p", { className: "typo-label-md", children: t.title }),
                 t.description && /* @__PURE__ */ n("p", { className: "typo-body-sm mt-0.5 opacity-80", children: t.description })
               ] }),
+              t.action && /* @__PURE__ */ n(
+                "button",
+                {
+                  "data-slot": "toast-action",
+                  onClick: () => t.action.onClick(),
+                  className: "shrink-0 typo-label-sm underline underline-offset-2 hover:no-underline cursor-pointer",
+                  children: t.action.label
+                }
+              ),
               /* @__PURE__ */ n(
                 "button",
                 {
@@ -8536,7 +8545,8 @@ function Fe(e, t = {}, r) {
     title: e,
     description: t.description,
     variant: r ?? t.variant,
-    duration: t.duration
+    duration: t.duration,
+    action: t.action
   }));
 }
 const Ae = ((e, t) => Fe(e, t));
