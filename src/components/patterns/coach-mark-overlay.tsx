@@ -89,6 +89,14 @@ export function CoachMarkOverlay({
       const el = document.querySelector(step.selector)
       setRect(el ? el.getBoundingClientRect() : null)
     }
+    // 対象要素が画面外にあると spotlight が見えず進行不能になるため、
+    // step 切替時に画面中央へスクロールしてから測定する。
+    // behavior: "smooth" は scroll listener との競合で発火しないケースが
+    // あったため、確実に位置決めできる "instant" を使用。
+    const el = document.querySelector(step.selector)
+    if (el) {
+      el.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior })
+    }
     update()
     // 要素が遅延描画される場合に備えて 1 回追従
     const t1 = setTimeout(update, 100)

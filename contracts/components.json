@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.17.0",
+    "version": "1.17.1",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 53,
