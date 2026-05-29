@@ -1,16 +1,17 @@
 /**
- * @file BulkActionBar のストーリー
+ * @file BulkActions のストーリー
  * @description テーブル行選択時に画面下部に浮き上がるフローティング操作バー
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import { BulkActions } from "./bulk-actions"
+import { Button } from "@/components/ui/button"
 
-const meta: Meta<typeof BulkActionBar> = {
+const meta: Meta<typeof BulkActions> = {
   title: "Components/Admin/BulkActions",
   component: BulkActions,
 }
 export default meta
-type Story = StoryObj<typeof BulkActionBar>
+type Story = StoryObj<typeof BulkActions>
 
 export const Default: Story = {
   render: () => (
@@ -19,12 +20,12 @@ export const Default: Story = {
         テーブル行を選択すると下部にバーが表示されます
       </p>
       <BulkActions selectedCount={3} onClear={() => {}}>
-        <button className="h-8 px-3 rounded-full typo-label-sm text-[var(--Text-on-Inverse)] hover:bg-[var(--Text-on-Inverse)]/10 transition-colors cursor-pointer">
+        <Button variant="ghost-inverse" size="sm" className="rounded-full">
           削除する
-        </button>
-        <button className="h-8 px-3 rounded-full typo-label-sm text-[var(--Text-on-Inverse)] hover:bg-[var(--Text-on-Inverse)]/10 transition-colors cursor-pointer">
+        </Button>
+        <Button variant="ghost-inverse" size="sm" className="rounded-full">
           エクスポート
-        </button>
+        </Button>
       </BulkActions>
     </div>
   ),
@@ -34,12 +35,12 @@ export const ManySelected: Story = {
   render: () => (
     <div className="relative h-64">
       <BulkActions selectedCount={128} onClear={() => {}}>
-        <button className="h-8 px-3 rounded-full typo-label-sm text-[var(--Text-on-Inverse)] hover:bg-[var(--Text-on-Inverse)]/10 transition-colors cursor-pointer">
+        <Button variant="ghost-inverse" size="sm" className="rounded-full">
           一括ステータス変更
-        </button>
-        <button className="h-8 px-3 rounded-full typo-label-sm text-[var(--Text-Caution)] hover:bg-[var(--Text-on-Inverse)]/10 transition-colors cursor-pointer">
+        </Button>
+        <Button variant="ghost-inverse" size="sm" className="rounded-full text-[var(--Text-Caution)]">
           一括削除
-        </button>
+        </Button>
       </BulkActions>
     </div>
   ),

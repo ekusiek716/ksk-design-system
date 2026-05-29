@@ -108,7 +108,7 @@ function FileUpload({
         role="button"
         tabIndex={disabled ? -1 : 0}
         aria-label={dragLabel}
-        onDragOver={(e) => { e.preventDefault(); !disabled && setDragging(true) }}
+        onDragOver={(e) => { e.preventDefault(); if (!disabled) setDragging(true) }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         onClick={() => !disabled && inputRef.current?.click()}

@@ -16,7 +16,7 @@
 
 ```
 contracts/rules.json                     # 禁止パターン31件・AIアンチパターン9件・a11y要件
-contracts/components.json               # 全64コンポーネントの定義・バリアント・ルール
+contracts/components.json               # 全109コンポーネントの定義・バリアント・ルール
 tokens.json                             # カラー・スペーシング・シャドウトークン
 src/components/COMPONENT_LOOKUP.md      # バリアント・インポートパス一覧（自動生成）
 ```
@@ -80,10 +80,10 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | ファイル | 内容 |
 |---------|------|
 | **AGENTS.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート |
-| **contracts/components.json** | 全64コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
+| **contracts/components.json** | 全109コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
 | **contracts/rules.json** | 禁止パターン31件・AIアンチパターン9件・アクセシビリティ要件 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
-| **src/components/COMPONENT_LOOKUP.md** | 全64コンポーネントのバリアント・インポートパス（自動生成） |
+| **src/components/COMPONENT_LOOKUP.md** | 全109コンポーネントのバリアント・インポートパス（自動生成） |
 | **CAKE_COMPONENTS.md** | Cake.jp固有コンポーネント一覧（EC案件時に参照） |
 
 ---
@@ -93,12 +93,12 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 ```
 src/
 ├── components/
-│   ├── ui/           # 汎用UIコンポーネント 29個
+│   ├── ui/           # 汎用UIコンポーネント 54個
 │   ├── patterns/
-│   │   ├── commerce/ # EC系 9個
-│   │   ├── admin/    # 管理画面系 7個
+│   │   ├── commerce/ # EC系 11個
+│   │   ├── admin/    # 管理画面系 8個
 │   │   ├── shells/   # レイアウトシェル 3個
-│   │   └── ...       # 汎用パターン 16個
+│   │   └── ...       # 汎用パターン 33個
 │   └── icons/
 ├── styles/
 │   ├── primitive.css  # Layer 1: 原色パレット
@@ -106,7 +106,7 @@ src/
 │   └── typography.css # typo-* ユーティリティ 17クラス
 ├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット
-└── index.ts           # Public API（64コンポーネント）
+└── index.ts           # Public API（109コンポーネント）
 ```
 
 ---

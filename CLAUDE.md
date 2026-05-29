@@ -1,5 +1,18 @@
 # KSK Design System — 設計ルールブック
 
+## 実装前セルフチェック（AI必読・最優先）
+
+UI を書く前に必ず確認すること:
+
+- [ ] 既存コンポーネントを `src/components/COMPONENT_LOOKUP.md` で確認したか（手書き・再定義は禁止）
+- [ ] 色は semantic token（`var(--Surface-*)` / `var(--Brand-Primary)` 等）か。Tailwind標準色・生 `#hex` は禁止
+- [ ] typography は `typo-*` クラスか（`font-bold` 等の直書きは禁止）
+- [ ] アイコンは `iconsax-reactjs` か（`lucide-react` / `heroicons` は使わない）
+- [ ] 生タグ（`<button>` / `<input>` / `<a href>`）でなく DS コンポーネントを使ったか
+- [ ] `.tsx` 編集後に `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行したか
+
+---
+
 ## このDSについて
 
 **KSK Design System** は、フリーランスデザイナー / エンジニア / PdM が **複数クライアント案件を1つのDSで高速に回す** ために設計された統合デザインシステムです。
@@ -29,9 +42,9 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 
 ## 技術スタック
 
-- React 19 + TypeScript / Vite / Tailwind CSS v4
+- React 19 + TypeScript / Vite / **Tailwind CSS v4**（`@import "tailwindcss"` 構文。`@tailwind base` 等の v3 構文は使わない）
 - shadcn/ui（Radix UI ベース） / CVA（バリアント管理）
-- iconsax-reactjs（アイコン） / Storybook（ドキュメント）
+- **iconsax-reactjs**（アイコン。`lucide-react` / `heroicons` は使わない） / Storybook（ドキュメント）
 
 ---
 
@@ -41,15 +54,19 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 |---------|------|
 | **CLAUDE.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート（Claude Code用） |
 | **AGENTS.md** | 同上（Codex用。セッション開始時の読み込み指示・編集後コマンドを明記） |
-| **contracts/components.json** | 全64コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
+| **contracts/components.json** | 全109コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
 | **contracts/rules.json** | 禁止パターン31件・AIアンチパターン9件・アクセシビリティ要件 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
-| **src/components/COMPONENT_LOOKUP.md** | 全64コンポーネントのバリアント・インポートパス一覧（自動生成） |
+| **src/components/COMPONENT_LOOKUP.md** | 全109コンポーネントのバリアント・インポートパス一覧（自動生成） |
 | **CAKE_COMPONENTS.md** | Cake.jp固有コンポーネント一覧（EC案件時に参照） |
 
-**コードを書く前に:**
-1. `contracts/rules.json` の `prohibited` と `aiPatterns` を確認
-2. `src/components/COMPONENT_LOOKUP.md` で既存コンポーネントを確認（手書き防止）
+**セッション開始時 / コードを書く前に必ず読む:**
+1. `contracts/rules.json` の `prohibited` と `aiPatterns`（AIが典型的に犯すパターン集）を確認
+2. `contracts/components.json` でコンポーネント定義・バリアントを確認
+3. `src/components/COMPONENT_LOOKUP.md` で既存コンポーネントを確認（手書き・再定義の防止）
+4. `tokens.json` でカラー・余白・影・タイポのトークンを確認
+
+**`.tsx` を編集したら `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行すること。**
 
 ---
 
@@ -58,12 +75,12 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 ```
 src/
 ├── components/
-│   ├── ui/           # 汎用UIコンポーネント 29個
+│   ├── ui/           # 汎用UIコンポーネント 54個
 │   ├── patterns/
-│   │   ├── commerce/ # EC系 9個
-│   │   ├── admin/    # 管理画面系 7個
+│   │   ├── commerce/ # EC系 11個
+│   │   ├── admin/    # 管理画面系 8個
 │   │   ├── shells/   # レイアウトシェル 3個
-│   │   └── ...       # 汎用パターン 16個
+│   │   └── ...       # 汎用パターン 33個
 │   └── icons/
 ├── styles/
 │   ├── primitive.css  # Layer 1: 原色パレット
@@ -71,7 +88,7 @@ src/
 │   └── typography.css # typo-* ユーティリティ 17クラス
 ├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット
-└── index.ts           # Public API（64コンポーネント）
+└── index.ts           # Public API（109コンポーネント）
 ```
 
 ---

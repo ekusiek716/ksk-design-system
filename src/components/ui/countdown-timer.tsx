@@ -60,95 +60,100 @@ function calcDaysLeft(target: Date): number {
   return Math.round((t.getTime() - today.getTime()) / msPerDay)
 }
 
-function CountdownTimer({
+function DayCountdown({
   targetDate,
-  granularity = "second",
   label = "残り",
   endedLabel = "受付終了",
   todayLabel = "本日",
   variant = "filled",
-  compact = false,
   className,
   onEnd,
   dayUnit = "日",
-  hourUnit = "時間",
-  minuteUnit = "分",
-  secondUnit = "秒",
 }: CountdownTimerProps) {
-  // 日単位モード — シンプルな日数計算 + 1日1回更新でも十分
-  if (granularity === "day") {
-    const [daysLeft, setDaysLeft] = React.useState(() => calcDaysLeft(targetDate))
-    React.useEffect(() => {
-      setDaysLeft(calcDaysLeft(targetDate))
-      // 翌日 0:00 で再計算 (シンプルに 1 時間ごと polling で済ませる)
-      const id = setInterval(() => setDaysLeft(calcDaysLeft(targetDate)), 60 * 60 * 1000)
-      return () => clearInterval(id)
-    }, [targetDate])
+  const [daysLeft, setDaysLeft] = React.useState(() => calcDaysLeft(targetDate))
+  React.useEffect(() => {
+    setDaysLeft(calcDaysLeft(targetDate))
+    // 翌日 0:00 で再計算 (シンプルに 1 時間ごと polling で済ませる)
+    const id = setInterval(() => setDaysLeft(calcDaysLeft(targetDate)), 60 * 60 * 1000)
+    return () => clearInterval(id)
+  }, [targetDate])
 
-    React.useEffect(() => {
-      if (daysLeft < 0) onEnd?.()
-    }, [daysLeft, onEnd])
+  React.useEffect(() => {
+    if (daysLeft < 0) onEnd?.()
+  }, [daysLeft, onEnd])
 
-    if (daysLeft < 0) {
-      return (
-        <span
-          data-slot="countdown-timer"
-          data-granularity="day"
-          data-state="ended"
-          className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg",
-            "bg-[var(--Surface-Tertiary)] text-[var(--Text-Low-Emphasis)]",
-            "typo-label-sm",
-            className,
-          )}
-        >
-          {endedLabel}
-        </span>
-      )
-    }
-
-    if (daysLeft === 0) {
-      return (
-        <span
-          data-slot="countdown-timer"
-          data-granularity="day"
-          data-state="today"
-          className={cn(
-            "inline-flex items-center gap-1 px-3 py-2 rounded-lg font-variant-nums",
-            variant === "filled"
-              ? "bg-[var(--Brand-Primary)] text-white"
-              : "border-2 border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]",
-            className,
-          )}
-        >
-          <span className="text-[22px] font-black leading-none">{todayLabel}</span>
-        </span>
-      )
-    }
-
+  if (daysLeft < 0) {
     return (
       <span
         data-slot="countdown-timer"
         data-granularity="day"
-        data-state="active"
-        data-variant={variant}
-        aria-label={`${label} ${daysLeft}${dayUnit}`}
+        data-state="ended"
         className={cn(
-          "inline-flex items-baseline gap-1 px-3 py-2 rounded-lg font-variant-nums",
+          "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg",
+          "bg-[var(--Surface-Tertiary)] text-[var(--Text-Low-Emphasis)]",
+          "typo-label-sm",
+          className,
+        )}
+      >
+        {endedLabel}
+      </span>
+    )
+  }
+
+  if (daysLeft === 0) {
+    return (
+      <span
+        data-slot="countdown-timer"
+        data-granularity="day"
+        data-state="today"
+        className={cn(
+          "inline-flex items-center gap-1 px-3 py-2 rounded-lg font-variant-nums",
           variant === "filled"
             ? "bg-[var(--Brand-Primary)] text-white"
             : "border-2 border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]",
           className,
         )}
       >
-        {label && <span className="text-[11px] font-semibold opacity-80 mr-1">{label}</span>}
-        <span className="text-[28px] font-black leading-none tabular-nums">{daysLeft}</span>
-        <span className="text-[12px] font-semibold opacity-80">{dayUnit}</span>
+        <span className="text-[22px] font-black leading-none">{todayLabel}</span>
       </span>
     )
   }
 
-  // granularity: hour / minute / second モード
+  return (
+    <span
+      data-slot="countdown-timer"
+      data-granularity="day"
+      data-state="active"
+      data-variant={variant}
+      aria-label={`${label} ${daysLeft}${dayUnit}`}
+      className={cn(
+        "inline-flex items-baseline gap-1 px-3 py-2 rounded-lg font-variant-nums",
+        variant === "filled"
+          ? "bg-[var(--Brand-Primary)] text-white"
+          : "border-2 border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]",
+        className,
+      )}
+    >
+      {label && <span className="text-[11px] font-semibold opacity-80 mr-1">{label}</span>}
+      <span className="text-[28px] font-black leading-none tabular-nums">{daysLeft}</span>
+      <span className="text-[12px] font-semibold opacity-80">{dayUnit}</span>
+    </span>
+  )
+}
+
+function TimeCountdown({
+  targetDate,
+  granularity = "second",
+  label = "残り",
+  endedLabel = "受付終了",
+  variant = "filled",
+  compact = false,
+  className,
+  onEnd,
+  hourUnit = "時間",
+  minuteUnit = "分",
+  secondUnit = "秒",
+}: CountdownTimerProps) {
   const [remaining, setRemaining] = React.useState(() => calcRemaining(targetDate))
   const [state, setState] = React.useState<State>(() =>
     Date.now() >= targetDate.getTime() ? "ended" : "active",
@@ -251,6 +256,17 @@ function CountdownTimer({
       ))}
     </span>
   )
+}
+
+/**
+ * CountdownTimer — granularity に応じて day / time モードを描画。
+ * 各モードを別コンポーネントに分け、hooks を常に同じ順序で呼ぶ（Rules of Hooks 準拠）。
+ */
+function CountdownTimer(props: CountdownTimerProps) {
+  if (props.granularity === "day") {
+    return <DayCountdown {...props} />
+  }
+  return <TimeCountdown {...props} />
 }
 
 export { CountdownTimer }

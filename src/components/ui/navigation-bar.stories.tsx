@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import * as React from "react"
 import { NavigationBar } from "./navigation-bar"
 
 const meta: Meta<typeof NavigationBar> = {

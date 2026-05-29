@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import * as React from "react"
 
 const meta: Meta = {
   title: "Foundation/Spacing",
@@ -87,7 +86,7 @@ export const Shadows: Story = {
   name: "Shadow Tokens",
   render: () => (
     <div className="space-y-6">
-      {SHADOWS.map(({ name, label, desc }) => (
+      {SHADOWS.map(({ name, desc }) => (
         <div key={name} className="flex items-center gap-6">
           <div
             className="w-24 h-16 rounded-2xl bg-[var(--Surface-Primary)] flex-shrink-0"

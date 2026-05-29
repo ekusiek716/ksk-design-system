@@ -7,7 +7,7 @@ const meta = {
   component: StickyActionBar,
   tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
-} satisfies Meta<typeof BottomAction>
+} satisfies Meta<typeof StickyActionBar>
 
 export default meta
 type Story = StoryObj<typeof meta>

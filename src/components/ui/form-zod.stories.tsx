@@ -32,12 +32,14 @@ type Story = StoryObj
 const registrationSchema = z.object({
   name: z.string().min(1, "お名前を入力してください").max(50, "50文字以内で入力してください"),
   email: z.string().min(1, "メールアドレスを入力してください").email("メールアドレスの形式が正しくありません"),
-  age: z.coerce
-    .number({ invalid_type_error: "数値を入力してください" })
-    .min(18, "18歳以上のみ登録できます")
-    .max(120, "正しい年齢を入力してください"),
+  age: z
+    .string()
+    .min(1, "年齢を入力してください")
+    .regex(/^\d+$/, "数値を入力してください")
+    .refine((v) => Number(v) >= 18, "18歳以上のみ登録できます")
+    .refine((v) => Number(v) <= 120, "正しい年齢を入力してください"),
   plan: z.enum(["free", "pro", "enterprise"], {
-    required_error: "プランを選択してください",
+    error: "プランを選択してください",
   }),
 })
 
@@ -49,7 +51,7 @@ export const WithZodValidation: Story = {
   render: () => {
     const form = useForm<RegistrationForm>({
       resolver: zodResolver(registrationSchema),
-      defaultValues: { name: "", email: "", plan: undefined },
+      defaultValues: { name: "", email: "", age: "", plan: undefined },
     })
 
     const onSubmit = (data: RegistrationForm) => {

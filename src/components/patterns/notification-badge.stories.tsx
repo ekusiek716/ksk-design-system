@@ -4,6 +4,7 @@
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import { NotificationBadge } from "./notification-badge"
+import { Button } from "@/components/ui/button"
 
 const meta: Meta<typeof NotificationBadge> = {
   title: "Components/NotificationBadge",
@@ -63,9 +64,9 @@ export const VariousCounts: Story = {
 export const WithIcon: Story = {
   render: () => (
     <div className="relative inline-flex">
-      <button className="p-2 rounded-full hover:bg-[var(--Surface-Secondary)]" aria-label="通知">
+      <Button variant="ghost" size="icon" aria-label="通知">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9ZM13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-      </button>
+      </Button>
       <span className="absolute -top-1 -right-1">
         <NotificationBadge count={5} />
       </span>

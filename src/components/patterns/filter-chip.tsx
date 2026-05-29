@@ -1,4 +1,3 @@
-import * as React from "react"
 import { Chip } from "@/components/patterns/chip"
 import { cn } from "@/lib/utils"
 

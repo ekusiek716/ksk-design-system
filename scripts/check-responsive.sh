@@ -40,7 +40,8 @@ for f in "$SHELLS_DIR"/*.stories.tsx; do
   [ -f "$f" ] || continue
   basename=$(basename "$f")
 
-  responsive_count=$(grep -oE '@(sm|md|lg|xl|container)' "$f" 2>/dev/null | wc -l | tr -d ' ')
+  # grep がノーマッチ時に終了コード1 → pipefail+set -e で誤終了するため `|| true` で吸収
+  responsive_count=$(grep -oE '@(sm|md|lg|xl|container)' "$f" 2>/dev/null | wc -l | tr -d ' ' || true)
 
   if [ "$responsive_count" -lt 3 ]; then
     echo -e "  ${RED}[SP-only?]${NC} $basename — レスポンシブクラス: ${responsive_count}件"
@@ -62,7 +63,7 @@ if [ -d "$COMMERCE_DIR" ]; then
     basename=$(basename "$f")
     # Grid を含むストーリーのみ対象
     if grep -q 'grid-cols' "$f" 2>/dev/null; then
-      breakpoints=$(grep -oE '(sm:|md:|lg:|xl:|@sm:|@md:|@lg:|@xl:)' "$f" 2>/dev/null | sort -u | wc -l | tr -d ' ')
+      breakpoints=$(grep -oE '(sm:|md:|lg:|xl:|@sm:|@md:|@lg:|@xl:)' "$f" 2>/dev/null | sort -u | wc -l | tr -d ' ' || true)
       if [ "$breakpoints" -lt 2 ]; then
         echo -e "  ${RED}[GRID-rigid]${NC} $basename — grid-cols あり、breakpoints: ${breakpoints}件"
         ISSUES=$((ISSUES + 1))

@@ -82,9 +82,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    if (typeof process !== "undefined" && process.env?.NODE_ENV !== "production") {
+    const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+    if (proc && proc.env?.NODE_ENV !== "production") {
       // dev 環境では常にログ
-      // eslint-disable-next-line no-console
       console.error("[ksk-ds ErrorBoundary]", error, errorInfo)
     }
     this.props.onError?.(error, errorInfo)

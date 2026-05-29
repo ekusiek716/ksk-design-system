@@ -1,6 +1,6 @@
 export { KebabMenu } from "./kebab-menu"
 export type { KebabMenuItem } from "./kebab-menu"
-export { BulkActionBar } from "./bulk-action-bar"
+export { BulkActions } from "./bulk-actions"
 export { StatusTabs } from "./status-tabs"
 export type { StatusTabItem } from "./status-tabs"
 export { SearchPanel } from "./search-panel"

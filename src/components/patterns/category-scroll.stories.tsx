@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { CategoryScroll } from "./category-scroll"
 
-const meta = {
+const meta: Meta<typeof CategoryScroll> = {
   title: "Components/Commerce/CategoryScroll",
   component: CategoryScroll,
   tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
-} satisfies Meta<typeof CategoryScroll>
+}
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof CategoryScroll>
 
 const PLACEHOLDER_SQ = "https://placehold.co/100x100/f3f4f6/9ca3af?text=🎂"
 const PLACEHOLDER_SM = "https://placehold.co/60x60/f3f4f6/9ca3af?text=🎂"

@@ -6,6 +6,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
 import { DatePicker, DateRangePicker } from "./date-picker"
 import { Calendar } from "./calendar"
+import { type DateRange } from "react-day-picker"
 
 const meta: Meta<typeof DatePicker> = {
   title: "Components/DatePicker",
@@ -62,7 +63,6 @@ export const RangePicker: Story = {
 
 export const CalendarOnly: Story = {
   render: () => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [date, setDate] = React.useState<Date | undefined>(new Date())
     return <Calendar mode="single" selected={date} onSelect={setDate} />
   },
@@ -70,8 +70,7 @@ export const CalendarOnly: Story = {
 
 export const CalendarRange: Story = {
   render: () => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [range, setRange] = React.useState<{ from?: Date; to?: Date } | undefined>({
+    const [range, setRange] = React.useState<DateRange | undefined>({
       from: new Date(2026, 3, 5),
       to: new Date(2026, 3, 15),
     })

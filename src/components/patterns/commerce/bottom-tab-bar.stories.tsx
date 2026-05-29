@@ -1,15 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import * as React from "react"
 import { BottomTabBar } from "./bottom-tab-bar"
 
-const meta: Meta<typeof BottomNav> = {
+const meta: Meta<typeof BottomTabBar> = {
   title: "Components/Commerce/BottomTabBar",
   component: BottomTabBar,
   tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
 }
 export default meta
-type Story = StoryObj<typeof BottomNav>
+type Story = StoryObj<typeof BottomTabBar>
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 

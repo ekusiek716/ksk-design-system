@@ -59,7 +59,8 @@ function ImageGallery({
     if (touchStart.current === null) return
     const delta = e.changedTouches[0].clientX - touchStart.current
     if (Math.abs(delta) > 40) {
-      delta < 0 ? handleNext() : handlePrev()
+      if (delta < 0) handleNext()
+      else handlePrev()
     }
     touchStart.current = null
   }

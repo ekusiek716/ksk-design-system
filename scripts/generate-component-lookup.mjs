@@ -48,8 +48,8 @@ function extractExports(content) {
       .filter((n) => n && /^[A-Z]/.test(n))
     exports.push(...names)
   }
-  // export function Foo / export const Foo
-  for (const m of content.matchAll(/export\s+(?:function|const)\s+([A-Z]\w+)/g)) {
+  // export function Foo / export const Foo / export class Foo
+  for (const m of content.matchAll(/export\s+(?:function|const|class)\s+([A-Z]\w+)/g)) {
     if (!exports.includes(m[1])) exports.push(m[1])
   }
   return exports
@@ -179,7 +179,7 @@ function generateMarkdown(ui, patterns) {
     "| 数値カード | `<StatCard>` | `StatCard` |",
     "| トースト通知 | `<Toaster>` + `useToast()` | `Toaster, useToast` |",
     "| スケルトン | `<Skeleton>` | `Skeleton` |",
-    "| 下部ナビゲーション | `<BottomNav>` | `BottomNav` |",
+    "| 下部ナビゲーション | `<BottomTabBar>` | `BottomTabBar` |",
     "| プログレスバー | `<Progress>` | `Progress` |",
     "| フォームフィールド | `<FormField>` | `FormField` |",
     "| ケバブメニュー | `<KebabMenu>` | `KebabMenu` |",

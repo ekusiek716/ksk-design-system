@@ -3,14 +3,14 @@ import * as React from "react"
 import { CoachMark } from "./coach-mark"
 import { Button } from "./button"
 
-const meta: Meta<typeof Balloon> = {
+const meta: Meta<typeof CoachMark> = {
   title: "Components/CoachMark",
   component: CoachMark,
   tags: ["autodocs"],
   parameters: { layout: "centered" },
 }
 export default meta
-type Story = StoryObj<typeof Balloon>
+type Story = StoryObj<typeof CoachMark>
 
 export const Default: Story = {
   render: () => (

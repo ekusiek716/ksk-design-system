@@ -29,7 +29,7 @@ export const Default: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">メニューを開く</Button>
+        <Button variant="secondary">メニューを開く</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>アクション</DropdownMenuLabel>
@@ -50,7 +50,7 @@ export const WithCheckbox: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">表示設定</Button>
+        <Button variant="secondary">表示設定</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>表示する列</DropdownMenuLabel>
@@ -68,7 +68,7 @@ export const WithRadio: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">並び替え</Button>
+        <Button variant="secondary">並び替え</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>並び替え順</DropdownMenuLabel>
@@ -88,7 +88,7 @@ export const WithSubmenu: Story = {
   render: () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">詳細メニュー</Button>
+        <Button variant="secondary">詳細メニュー</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem>コピー</DropdownMenuItem>

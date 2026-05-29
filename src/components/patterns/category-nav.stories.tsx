@@ -2,15 +2,15 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { useState } from "react"
 import { CategoryNav } from "./category-nav"
 
-const meta = {
+const meta: Meta<typeof CategoryNav> = {
   title: "Components/Commerce/CategoryNav",
   component: CategoryNav,
   tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
-} satisfies Meta<typeof CategoryIconStrip>
+}
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof CategoryNav>
 
 const PLACEHOLDER = "https://placehold.co/40x40/f3f4f6/9ca3af?text=🎂"
 

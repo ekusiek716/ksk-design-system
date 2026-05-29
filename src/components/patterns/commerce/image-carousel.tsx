@@ -51,22 +51,22 @@ function ImageCarousel({
     return () => obs.disconnect()
   }, [total])
 
-  // 自動再生の制御
-  React.useEffect(() => {
-    if (autoPlay <= 0 || total <= 1) return
-    const id = setInterval(() => goTo((active + 1) % total), autoPlay)
-    return () => clearInterval(id)
-  }, [autoPlay, active, total])
-
   // 指定インデックスへスクロール
-  function goTo(i: number) {
+  const goTo = React.useCallback((i: number) => {
     const el = scrollRef.current?.children[i] as HTMLElement
     if (el)
       scrollRef.current!.scrollTo({
         left: el.offsetLeft,
         behavior: "smooth",
       })
-  }
+  }, [])
+
+  // 自動再生の制御
+  React.useEffect(() => {
+    if (autoPlay <= 0 || total <= 1) return
+    const id = setInterval(() => goTo((active + 1) % total), autoPlay)
+    return () => clearInterval(id)
+  }, [autoPlay, active, total, goTo])
 
   if (!total) return null
 

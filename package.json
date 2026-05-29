@@ -112,7 +112,8 @@
     "generate:lookup": "node scripts/generate-component-lookup.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "tsc --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && bash scripts/check-drift.sh && node scripts/generate-component-lookup.mjs",
+    "check": "tsc -p tsconfig.app.json --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && bash scripts/check-drift.sh && node scripts/generate-component-lookup.mjs",
+    "check:agent": "npm run lint && npm run check && npm test && npm run lint:story-reuse",
     "postinstall": "node bin/init.js postinstall",
     "mcp:build": "cd mcp-server && npm install && npm run build",
     "mcp:start": "node mcp-server/dist/index.js"

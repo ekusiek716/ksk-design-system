@@ -32,6 +32,7 @@
 | Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm |
 | DropdownFilter | `@/components/ui/dropdown-filter` | — | Default, ActiveFilter, MultipleFilters |
 | DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent | `@/components/ui/dropdown-menu` | — | Default, WithCheckbox, WithRadio, WithSubmenu |
+| ErrorBoundary | `@/components/ui/error-boundary` | — | — |
 | Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField | `@/components/ui/form` | — | BasicForm, WithSelect |
 | HoverCard, HoverCardTrigger, HoverCardContent | `@/components/ui/hover-card` | — | Default |
 | ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |
@@ -177,7 +178,7 @@
 | 数値カード | `<StatCard>` | `StatCard` |
 | トースト通知 | `<Toaster>` + `useToast()` | `Toaster, useToast` |
 | スケルトン | `<Skeleton>` | `Skeleton` |
-| 下部ナビゲーション | `<BottomNav>` | `BottomNav` |
+| 下部ナビゲーション | `<BottomTabBar>` | `BottomTabBar` |
 | プログレスバー | `<Progress>` | `Progress` |
 | フォームフィールド | `<FormField>` | `FormField` |
 | ケバブメニュー | `<KebabMenu>` | `KebabMenu` |

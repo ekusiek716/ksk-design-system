@@ -459,7 +459,9 @@ function SwipeToCloseBottomSheet({
     startYRef.current = e.clientY
     try {
       e.currentTarget.setPointerCapture(e.pointerId)
-    } catch {}
+    } catch {
+      // setPointerCapture は未対応環境で例外を投げるため無視
+    }
   }
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -614,7 +616,9 @@ function SnapBottomSheetContent({
     dragStartRatioRef.current = activeRatio
     try {
       e.currentTarget.setPointerCapture(e.pointerId)
-    } catch {}
+    } catch {
+      // setPointerCapture は未対応環境で例外を投げるため無視
+    }
   }
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
