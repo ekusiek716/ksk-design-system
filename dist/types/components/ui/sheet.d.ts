@@ -2,6 +2,11 @@ import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { type VariantProps } from "class-variance-authority";
 type SnapPoint = number | string;
+interface VisualViewportInset {
+    keyboardInset: number;
+    visibleHeight: number | null;
+}
+declare function computeVisualViewportInset(layoutHeight: number, visualHeight: number, visualOffsetTop: number): VisualViewportInset;
 interface SheetProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
     snapPoints?: SnapPoint[];
     activeSnapPoint?: SnapPoint | null;
@@ -63,8 +68,16 @@ interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.
 }
 declare function SheetContent({ className, children, side, glassOverlay, container, padding, swipeToClose, description, ...props }: SheetContentProps): import("react/jsx-runtime").JSX.Element;
 declare function SheetHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
-declare function SheetFooter({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
+declare function SheetFooter({ className, orientation, ...props }: React.ComponentProps<"div"> & {
+    /**
+     * アクションボタンの並べ方。
+     * - "split"（既定）: 均等幅で横並び（各ボタン flex-1）。2 ボタンを 50/50 で
+     *   並べる iOS のボトムシート風レイアウト。
+     * - "stacked": 旧挙動。縦積み（全幅）。
+     */
+    orientation?: "split" | "stacked";
+}): import("react/jsx-runtime").JSX.Element;
 declare function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): import("react/jsx-runtime").JSX.Element;
 declare function SheetDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>): import("react/jsx-runtime").JSX.Element;
-export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator, };
-export type { SheetProps, SheetContentProps, SnapPoint };
+export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator, computeVisualViewportInset, };
+export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset };

@@ -12,6 +12,13 @@ declare function ResponsiveDialogContent({ children, className, ...props }: Reac
 declare function ResponsiveDialogHeader({ children, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function ResponsiveDialogTitle({ children, ...props }: React.ComponentProps<typeof DialogTitle>): import("react/jsx-runtime").JSX.Element;
 declare function ResponsiveDialogDescription({ children, ...props }: React.ComponentProps<typeof DialogDescription>): import("react/jsx-runtime").JSX.Element;
-declare function ResponsiveDialogFooter({ children, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
+declare function ResponsiveDialogFooter({ children, className, orientation, ...props }: React.ComponentProps<"div"> & {
+    /**
+     * アクションボタンの並べ方。
+     * - "split"（既定）: 均等幅で横並び（各ボタン flex-1）。iOS のボトムシート風。
+     * - "stacked": 旧挙動。デスクトップは右寄せ横並び、モバイルは縦積み。
+     */
+    orientation?: "split" | "stacked";
+}): import("react/jsx-runtime").JSX.Element;
 declare function ResponsiveDialogClose({ children, ...props }: React.ComponentProps<typeof DialogClose>): import("react/jsx-runtime").JSX.Element;
 export { ResponsiveDialog, ResponsiveDialogTrigger, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter, ResponsiveDialogClose, useMediaQuery, };

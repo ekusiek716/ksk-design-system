@@ -192,9 +192,19 @@ export const BottomSheetSwipeToClose: Story = {
                 内容サイズのままバーを下にスワイプして閉じられます。
               </SheetDescription>
             </SheetHeader>
-            <p className="typo-body-md text-[var(--Text-Medium-Emphasis)] mb-6">
+            <p className="typo-body-md text-[var(--Text-Medium-Emphasis)] mb-4">
               ログイン入力や確認ダイアログのような content-sized なシートに最適。
             </p>
+            {/*
+              実機（Android Chrome / iOS Safari）で textarea にフォーカスして
+              仮想キーボードを開いても、シート上端（タイトル / ドラッグハンドル）
+              が画面外へ抜けないことを確認する。
+            */}
+            <textarea
+              className="w-full rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-3 typo-body-md text-[var(--Text-High-Emphasis)] mb-6"
+              rows={3}
+              placeholder="ここにフォーカスすると仮想キーボードが開きます"
+            />
             <SheetFooter>
               <SheetClose asChild>
                 <Button className="w-full" size="lg">確定</Button>

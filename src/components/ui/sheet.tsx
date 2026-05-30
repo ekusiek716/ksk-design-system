@@ -42,6 +42,67 @@ interface SheetRootContextValue {
 }
 const SheetRootContext = React.createContext<SheetRootContextValue | null>(null)
 
+// ============================================================================
+// Virtual keyboard handling (visualViewport)
+// ----------------------------------------------------------------------------
+// Bottom-anchored fixed sheets are positioned against the *layout* viewport,
+// which on mobile does NOT shrink when the on-screen keyboard opens (the
+// dvh/svh/lvh units don't account for the keyboard either). The keyboard then
+// overlaps the sheet from the bottom and, for a sheet taller than the visible
+// area, pushes its top edge (title / drag handle / top bar) out of view.
+//
+// We observe window.visualViewport — the region actually visible above the
+// keyboard — and report:
+//   - keyboardInset: px to lift the sheet's bottom edge above the keyboard
+//                    (offset of the keyboard top from the layout bottom)
+//   - visibleHeight: height of the visible region, to cap the sheet height so
+//                    its top edge stays on-screen
+// Both are inert (0 / null) when no keyboard is shown — on desktop, when the
+// API is unavailable, or before any input is focused — so callers fall back to
+// their default CSS (max-h-[90dvh], bottom-0). SSR-safe: the effect is a no-op
+// on the server, where window is undefined.
+// ============================================================================
+interface VisualViewportInset {
+  keyboardInset: number
+  visibleHeight: number | null
+}
+
+function computeVisualViewportInset(
+  layoutHeight: number,
+  visualHeight: number,
+  visualOffsetTop: number
+): VisualViewportInset {
+  const inset = Math.max(0, layoutHeight - visualHeight - visualOffsetTop)
+  // Treat a sub-pixel inset as "no keyboard" to avoid jitter from rounding or
+  // browser-chrome (address bar) animations being misread as a keyboard.
+  if (inset < 1) return { keyboardInset: 0, visibleHeight: null }
+  return { keyboardInset: inset, visibleHeight: visualHeight }
+}
+
+function useVisualViewportInset(): VisualViewportInset {
+  const [inset, setInset] = React.useState<VisualViewportInset>({
+    keyboardInset: 0,
+    visibleHeight: null,
+  })
+  React.useEffect(() => {
+    if (typeof window === "undefined") return
+    const vv = window.visualViewport
+    if (!vv) return
+    const update = () =>
+      setInset(
+        computeVisualViewportInset(window.innerHeight, vv.height, vv.offsetTop)
+      )
+    update()
+    vv.addEventListener("resize", update)
+    vv.addEventListener("scroll", update)
+    return () => {
+      vv.removeEventListener("resize", update)
+      vv.removeEventListener("scroll", update)
+    }
+  }, [])
+  return inset
+}
+
 function snapToRatio(snap: SnapPoint): number {
   if (typeof snap === "number") return Math.min(1, Math.max(0, snap))
   // "450px" → 450 / window.innerHeight
@@ -356,6 +417,11 @@ function SheetContent({
   // backing drag behavior is a misleading hint. Consumers can still
   // render <SheetDragIndicator /> manually if they wire their own drag.
   const useGlassOverlay = glassOverlay ?? glassSides.has(side as string)
+  // Lift bottom-anchored sheets above the on-screen keyboard (see
+  // useVisualViewportInset). The hook is inert for non-keyboard / non-bottom
+  // cases, and is called unconditionally here to keep hook order stable across
+  // the early-return branches below.
+  const { keyboardInset, visibleHeight } = useVisualViewportInset()
 
   // Snap mode kicks in only for `side="bottom"` when the parent Sheet was
   // given `snapPoints`. Other sides ignore snap entirely (per spec).
@@ -390,6 +456,16 @@ function SheetContent({
     )
   }
 
+  // Bottom-anchored sheets (`bottom` / `bottom-glass`) share the same
+  // keyboard-overlap problem as the swipeToClose path: while the keyboard is
+  // open, lift the sheet above it and cap its height to the visible region,
+  // overriding the variant's `bottom-0` / `max-h-[90dvh]`.
+  const isBottomAnchored = side === "bottom" || side === "bottom-glass"
+  const keyboardStyle =
+    isBottomAnchored && keyboardInset > 0
+      ? { bottom: keyboardInset, maxHeight: visibleHeight ?? undefined }
+      : undefined
+
   return (
     <SheetPortal container={container}>
       <SheetOverlay glass={useGlassOverlay} />
@@ -398,6 +474,7 @@ function SheetContent({
         data-side={side}
         className={cn(sheetVariants({ side }), padding && "p-6", className)}
         {...props}
+        style={keyboardStyle ? { ...props.style, ...keyboardStyle } : props.style}
         aria-describedby={ariaDescribedBy}
       >
         {hasInternalDesc && (
@@ -452,6 +529,9 @@ function SwipeToCloseBottomSheet({
   const [dragging, setDragging] = React.useState(false)
   const startYRef = React.useRef(0)
   const sheetRef = React.useRef<HTMLDivElement>(null)
+  // Keep the sheet inside the region above the on-screen keyboard so its top
+  // edge (title / drag handle) never scrolls off the top of the viewport.
+  const { keyboardInset, visibleHeight } = useVisualViewportInset()
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button != null && e.button !== 0) return
@@ -505,6 +585,13 @@ function SwipeToCloseBottomSheet({
         )}
         style={{
           ...style,
+          // While the keyboard is open, lift the sheet above it (bottom) and
+          // cap its height to the visible region (maxHeight). These inline
+          // values override the variant's `bottom-0` / `max-h-[90dvh]`. When no
+          // keyboard is present both are inert and the CSS defaults apply.
+          ...(keyboardInset > 0
+            ? { bottom: keyboardInset, maxHeight: visibleHeight ?? undefined }
+            : null),
           transform: `translate3d(0, ${dragY}px, 0)`,
           transition: dragging
             ? "none"
@@ -799,5 +886,8 @@ export {
   Sheet, SheetTrigger, SheetClose, SheetContent,
   SheetHeader, SheetFooter, SheetTitle, SheetDescription,
   SheetDragIndicator,
+  // Exported for unit testing of the on-screen-keyboard inset math. Not part of
+  // the public package API (src/index.ts re-exports a curated list only).
+  computeVisualViewportInset,
 }
-export type { SheetProps, SheetContentProps, SnapPoint }
+export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset }
