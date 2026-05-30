@@ -4,6 +4,12 @@ import { cn } from "@/lib/utils"
 export interface DropdownFilterOption<K extends string = string> {
   key: K
   label: string
+  /**
+   * label の左に表示する任意アイコン（iconsax 等）。色は currentColor を継承するため
+   * チップ active 時は自動で白抜きになる。サイズは要素側で指定すること（例: `<Element3 size={16} />`）。
+   * チップ（選択中 option）と選択肢リストの両方に表示される。未指定ならテキストのみ＝従来挙動。
+   */
+  icon?: React.ReactNode
 }
 
 export interface DropdownFilterProps<K extends string = string> {
@@ -81,6 +87,9 @@ function DropdownFilter<K extends string = string>({
             : "bg-[var(--Surface-Primary)] border border-[var(--Border-Low-Emphasis)] text-[var(--Text-Medium-Emphasis)]"
         )}
       >
+        {isActive && selectedOption?.icon && (
+          <span className="shrink-0 flex items-center">{selectedOption.icon}</span>
+        )}
         {displayLabel}
         <svg
           aria-hidden
@@ -130,12 +139,15 @@ function DropdownFilter<K extends string = string>({
                   aria-selected={value === opt.key}
                   onClick={() => handleSelect(opt.key)}
                   className={cn(
-                    "w-full flex items-center justify-between px-4 py-2.5 typo-body-sm transition-colors hover:bg-[var(--Surface-Secondary)]",
+                    "w-full flex items-center justify-between gap-2 px-4 py-2.5 typo-body-sm transition-colors hover:bg-[var(--Surface-Secondary)]",
                     value === opt.key ? "text-[var(--Brand-Primary)] font-semibold" : "text-[var(--Text-High-Emphasis)]"
                   )}
                 >
-                  <span className="truncate">{opt.label}</span>
-                  {value === opt.key && <span aria-hidden className="text-[var(--Brand-Primary)] ml-2 flex-shrink-0">✓</span>}
+                  <span className="flex items-center gap-2 min-w-0">
+                    {opt.icon && <span className="shrink-0 flex items-center">{opt.icon}</span>}
+                    <span className="truncate">{opt.label}</span>
+                  </span>
+                  {value === opt.key && <span aria-hidden className="text-[var(--Brand-Primary)] flex-shrink-0">✓</span>}
                 </button>
               </li>
             ))}

@@ -1,6 +1,13 @@
+import * as React from "react";
 export interface DropdownFilterOption<K extends string = string> {
     key: K;
     label: string;
+    /**
+     * label の左に表示する任意アイコン（iconsax 等）。色は currentColor を継承するため
+     * チップ active 時は自動で白抜きになる。サイズは要素側で指定すること（例: `<Element3 size={16} />`）。
+     * チップ（選択中 option）と選択肢リストの両方に表示される。未指定ならテキストのみ＝従来挙動。
+     */
+    icon?: React.ReactNode;
 }
 export interface DropdownFilterProps<K extends string = string> {
     label: string;

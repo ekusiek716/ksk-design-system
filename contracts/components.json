@@ -720,7 +720,7 @@
     {
       "name": "DropdownFilter",
       "path": "src/components/ui/dropdown-filter.tsx",
-      "description": "DataTable / 検索結果の絞り込みドロップダウン。getDisplayLabel/valueOnly/pristineValue 拡張対応。",
+      "description": "DataTable / 検索結果の絞り込みドロップダウン。getDisplayLabel/valueOnly/pristineValue/option.icon 拡張対応。",
       "variants": [],
       "sizes": [],
       "accessibility": [
@@ -731,7 +731,8 @@
         "DataTable のフィルタ列で使う",
         "getDisplayLabel で表示変換",
         "valueOnly で \"ラベル: 値\" を省略",
-        "pristineValue を指定するとデフォルト値選択時は active 扱いしない"
+        "pristineValue を指定するとデフォルト値選択時は active 扱いしない",
+        "option.icon でラベル左にアイコン表示（チップは選択中 option のアイコンを表示・currentColor 継承）"
       ]
     },
     {

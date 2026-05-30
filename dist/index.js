@@ -12631,6 +12631,7 @@ function gn({
           x ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]" : "bg-[var(--Surface-Primary)] border border-[var(--Border-Low-Emphasis)] text-[var(--Text-Medium-Emphasis)]"
         ),
         children: [
+          x && w?.icon && /* @__PURE__ */ r("span", { className: "shrink-0 flex items-center", children: w.icon }),
           k,
           /* @__PURE__ */ r(
             "svg",
@@ -12687,12 +12688,15 @@ function gn({
                 "aria-selected": t === M.key,
                 onClick: () => N(M.key),
                 className: h(
-                  "w-full flex items-center justify-between px-4 py-2.5 typo-body-sm transition-colors hover:bg-[var(--Surface-Secondary)]",
+                  "w-full flex items-center justify-between gap-2 px-4 py-2.5 typo-body-sm transition-colors hover:bg-[var(--Surface-Secondary)]",
                   t === M.key ? "text-[var(--Brand-Primary)] font-semibold" : "text-[var(--Text-High-Emphasis)]"
                 ),
                 children: [
-                  /* @__PURE__ */ r("span", { className: "truncate", children: M.label }),
-                  t === M.key && /* @__PURE__ */ r("span", { "aria-hidden": !0, className: "text-[var(--Brand-Primary)] ml-2 flex-shrink-0", children: "✓" })
+                  /* @__PURE__ */ c("span", { className: "flex items-center gap-2 min-w-0", children: [
+                    M.icon && /* @__PURE__ */ r("span", { className: "shrink-0 flex items-center", children: M.icon }),
+                    /* @__PURE__ */ r("span", { className: "truncate", children: M.label })
+                  ] }),
+                  t === M.key && /* @__PURE__ */ r("span", { "aria-hidden": !0, className: "text-[var(--Brand-Primary)] flex-shrink-0", children: "✓" })
                 ]
               }
             ) }, M.key))

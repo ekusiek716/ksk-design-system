@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { useState } from "react"
+import { RowVertical, Element3, Calendar } from "iconsax-reactjs"
 import { DropdownFilter } from "./dropdown-filter"
 
 const meta: Meta<typeof DropdownFilter> = {
@@ -40,6 +41,27 @@ export const ActiveFilter: Story = {
         value={value}
         options={options}
         onSelect={setValue}
+      />
+    )
+  },
+}
+
+export const WithIcons: Story = {
+  name: "WithIcons（ビュー切替・アイコン付き）",
+  render: () => {
+    const [view, setView] = useState<string | "all">("list")
+    return (
+      <DropdownFilter
+        label="表示"
+        value={view}
+        options={[
+          { key: "list", label: "リスト", icon: <RowVertical size={16} /> },
+          { key: "board", label: "ボード", icon: <Element3 size={16} /> },
+          { key: "calendar", label: "カレンダー", icon: <Calendar size={16} /> },
+        ]}
+        onSelect={setView}
+        hideAll
+        valueOnly
       />
     )
   },

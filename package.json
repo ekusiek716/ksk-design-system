@@ -1,6 +1,6 @@
 {
   "name": "@ksk/design-system",
-  "version": "1.27.2",
+  "version": "1.28.0",
   "type": "module",
   "description": "KSK Design System — フリーランス向けマルチテーマ対応デザインシステム",
   "main": "./dist/index.js",
@@ -62,6 +62,10 @@
     "./tokens/typography": {
       "import": "./src/styles/typography.css",
       "default": "./src/styles/typography.css"
+    },
+    "./tokens/categorical": {
+      "import": "./src/styles/categorical.css",
+      "default": "./src/styles/categorical.css"
     },
     "./themes/default": {
       "import": "./src/themes/default.css",
