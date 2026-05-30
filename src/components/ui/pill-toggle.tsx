@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface PillToggleOption<T extends string = string> {
   label: string
@@ -15,9 +15,18 @@ interface PillToggleProps<T extends string = string> {
   className?: string
 }
 
-const SIZE = {
-  sm: "h-8 px-3 typo-label-xs gap-1",
-  md: "h-9 px-4 typo-label-sm gap-1.5",
+/**
+ * PillToggle — ピル型セグメントコントロール（値トグル）
+ *
+ * フィルタの「すべて / 進行中 / 完了」のような **値の切り替え** に使う。
+ * 見た目・実装ともに `Tabs` の `variant="pill"` を基盤にしており、
+ * Tabs とトークン（角丸・余白・アクティブ表現）を共有する。
+ *
+ * パネルを切り替えたい（コンテンツ連動）場合は `Tabs` を直接使う。
+ */
+const TRIGGER_SIZE = {
+  sm: "h-8 px-3 typo-label-xs",
+  md: "h-9 px-4 typo-label-sm",
 } as const
 
 function PillToggle<T extends string = string>({
@@ -28,38 +37,20 @@ function PillToggle<T extends string = string>({
   className,
 }: PillToggleProps<T>) {
   return (
-    <div
+    <Tabs
       data-slot="pill-toggle"
-      role="group"
-      className={cn(
-        "inline-flex items-center rounded-full p-1",
-        "bg-[var(--Surface-Tertiary)]",
-        className
-      )}
+      value={value}
+      onValueChange={(v) => onChange(v as T)}
     >
-      {options.map((opt) => {
-        const active = opt.value === value
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            role="radio"
-            aria-checked={active}
-            onClick={() => onChange(opt.value)}
-            className={cn(
-              "inline-flex items-center justify-center rounded-full transition-all",
-              SIZE[size],
-              active
-                ? "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-sm font-medium"
-                : "text-[var(--Text-Medium-Emphasis)] hover:text-[var(--Text-High-Emphasis)]"
-            )}
-          >
+      <TabsList variant="pill" className={className}>
+        {options.map((opt) => (
+          <TabsTrigger key={opt.value} value={opt.value} className={TRIGGER_SIZE[size]}>
             {opt.icon && <span className="shrink-0">{opt.icon}</span>}
             {opt.label}
-          </button>
-        )
-      })}
-    </div>
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   )
 }
 
