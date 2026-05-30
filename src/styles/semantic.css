@@ -106,6 +106,16 @@
   --Brand-Light:             var(--Primitive-Brand-100);
   --Brand-Ultra-Light:       var(--Primitive-Brand-50);
 
+  /* ─── External Brand（外部サービスの公式色）───
+     SNS / OAuth プロバイダの公式ブランドカラー。テーマ（Brand-*）には
+     連動せず、ライト/ダーク共通で固定。SocialLoginButton 等で生 #hex を
+     直書きせずこのトークンを参照する。新規追加時は公式ガイドライン準拠。 */
+  --Brand-Line:              #06C755;
+  --Brand-Google-Border:     #DADCE0; /* Google ボタンの罫線（Google 推奨グレー） */
+  --Brand-Apple:             #000000;
+  --Brand-Amazon:            #232F3E;
+  --Brand-Amazon-Accent:     #FF9900;
+
   /* ─── Interactive States ─── */
   --Hover-Primary-Button:    var(--Primitive-Brand-700);
   --Active-Primary-Button:   var(--Primitive-Brand-800);
