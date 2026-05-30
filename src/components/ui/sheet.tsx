@@ -417,6 +417,11 @@ function SheetContent({
   // backing drag behavior is a misleading hint. Consumers can still
   // render <SheetDragIndicator /> manually if they wire their own drag.
   const useGlassOverlay = glassOverlay ?? glassSides.has(side as string)
+  // Lift bottom-anchored sheets above the on-screen keyboard (see
+  // useVisualViewportInset). The hook is inert for non-keyboard / non-bottom
+  // cases, and is called unconditionally here to keep hook order stable across
+  // the early-return branches below.
+  const { keyboardInset, visibleHeight } = useVisualViewportInset()
 
   // Snap mode kicks in only for `side="bottom"` when the parent Sheet was
   // given `snapPoints`. Other sides ignore snap entirely (per spec).
@@ -451,6 +456,16 @@ function SheetContent({
     )
   }
 
+  // Bottom-anchored sheets (`bottom` / `bottom-glass`) share the same
+  // keyboard-overlap problem as the swipeToClose path: while the keyboard is
+  // open, lift the sheet above it and cap its height to the visible region,
+  // overriding the variant's `bottom-0` / `max-h-[90dvh]`.
+  const isBottomAnchored = side === "bottom" || side === "bottom-glass"
+  const keyboardStyle =
+    isBottomAnchored && keyboardInset > 0
+      ? { bottom: keyboardInset, maxHeight: visibleHeight ?? undefined }
+      : undefined
+
   return (
     <SheetPortal container={container}>
       <SheetOverlay glass={useGlassOverlay} />
@@ -459,6 +474,7 @@ function SheetContent({
         data-side={side}
         className={cn(sheetVariants({ side }), padding && "p-6", className)}
         {...props}
+        style={keyboardStyle ? { ...props.style, ...keyboardStyle } : props.style}
         aria-describedby={ariaDescribedBy}
       >
         {hasInternalDesc && (
