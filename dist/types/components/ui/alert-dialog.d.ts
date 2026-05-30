@@ -31,7 +31,15 @@ declare function AlertDialogContent({ className, size, ...props }: React.Compone
     size?: "default" | "sm";
 }): import("react/jsx-runtime").JSX.Element;
 declare function AlertDialogHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
-declare function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
+declare function AlertDialogFooter({ className, orientation, ...props }: React.ComponentProps<"div"> & {
+    /**
+     * アクションボタンの並べ方。
+     * - "split"（既定）: 均等幅で横並び（各ボタン flex-1）。
+     * - "stacked": 旧挙動。モバイルは縦積み、sm 以上で右寄せ横並び
+     *   （size="sm" のときは 2 カラム grid）。
+     */
+    orientation?: "split" | "stacked";
+}): import("react/jsx-runtime").JSX.Element;
 declare function AlertDialogTitle({ className, ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Title>): import("react/jsx-runtime").JSX.Element;
 declare function AlertDialogDescription({ className, ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Description>): import("react/jsx-runtime").JSX.Element;
 declare function AlertDialogAction({ className, variant, size, ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Action> & Pick<ButtonProps, "variant" | "size">): import("react/jsx-runtime").JSX.Element;
