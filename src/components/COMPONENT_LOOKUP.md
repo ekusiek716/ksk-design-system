@@ -175,7 +175,7 @@
 | リンク見た目のボタン | `<Button variant="link">` | `Button` |
 | チェックボックス | `<Checkbox>` | `Checkbox` |
 | ラジオボタン | `<RadioGroup><RadioGroupItem>` | `RadioGroup, RadioGroupItem` |
-| Badge の色違い | `<Badge variant="success">` / `"caution"` / `"warning"` / `"info"` | `Badge` |
+| Badge の色違い | `<Badge variant="success">` / `"destructive"` / `"warning"` / `"info"` | `Badge` |
 | 空状態の表示 | `<EmptyState>` | `EmptyState` |
 | 数値カード | `<StatCard>` | `StatCard` |
 | トースト通知 | `<Toaster>` + `useToast()` | `Toaster, useToast` |
