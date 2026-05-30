@@ -9,7 +9,7 @@ export default meta
 type Story = StoryObj<typeof ProductCard>
 
 const sampleProduct = {
-  name: "有機抹茶ロールケーキ",
+  name: "オーガニックコットン Tシャツ",
   imageUrl: "https://picsum.photos/seed/prod1/400/400",
   price: 3980,
   rating: 4.67,

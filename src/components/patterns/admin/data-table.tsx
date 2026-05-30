@@ -258,7 +258,7 @@ function DataTableHead({
     <th
       data-slot="data-table-head"
       className={cn(
-        "px-3 py-2.5 text-left typo-label-sm text-[var(--Text-Medium-Emphasis)]",
+        "px-3 py-2.5 text-left whitespace-nowrap typo-label-sm text-[var(--Text-Medium-Emphasis)]",
         sortable && "cursor-pointer select-none",
         stickyProps?.className,
         className
@@ -696,7 +696,7 @@ function DataTableLinkCell({
         href={href}
         target={external ? "_blank" : undefined}
         rel={external ? "noopener noreferrer" : undefined}
-        className="inline-flex items-center gap-1 typo-body-md text-[var(--Text-Accent-Primary)] hover:underline"
+        className="inline-flex items-center gap-1 whitespace-nowrap typo-body-md text-[var(--Text-Accent-Primary)] hover:underline"
       >
         {children}
         {external && <ExternalLinkIcon />}

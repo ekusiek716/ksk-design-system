@@ -16,8 +16,8 @@ export const Default: Story = {
   args: {
     reviewer: "みかん様",
     rating: 5,
-    title: "見た目も味も最高でした！",
-    body: "結婚式で使いました。デザイン通りのケーキが届いて感動しました。味もとても美味しく、ゲストにも大好評でした。",
+    title: "見た目も質感も最高でした！",
+    body: "想像していた通りの品質で大満足です。梱包も丁寧で発送も早く、安心して購入できました。また利用したいと思います。",
     date: "2025年3月7日",
     helpfulCount: 12,
   },
@@ -45,7 +45,7 @@ export const LowRating: Story = {
     reviewer: "購入者",
     rating: 2,
     title: "少し残念でした",
-    body: "デザインは良かったのですが、届いた時に少し崩れていました。",
+    body: "デザインは良かったのですが、届いた時に少し傷がありました。",
     date: "2025年1月20日",
     helpfulCount: 3,
   },
@@ -63,8 +63,8 @@ export const WithSummary: Story = {
       <ReviewCard
         reviewer="みかん様"
         rating={5}
-        title="見た目も味も最高でした！"
-        body="結婚式で使いました。デザイン通りのケーキが届いて感動しました。"
+        title="見た目も質感も最高でした！"
+        body="想像通りの品質で大満足です。対応も丁寧で安心できました。"
         date="2025年3月7日"
         helpfulCount={12}
         onHelpful={() => {}}
@@ -72,7 +72,7 @@ export const WithSummary: Story = {
       <ReviewCard
         reviewer="さくら様"
         rating={4}
-        body="味は最高でした。次回もリピートします。"
+        body="品質は最高でした。次回もリピートします。"
         date="2025年2月14日"
         helpfulCount={5}
         onHelpful={() => {}}

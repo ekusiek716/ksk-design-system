@@ -39,9 +39,9 @@ function TodoItem({ title, desc, done }: { title: string; desc: string; done?: b
 export const Default: Story = {
   render: () => {
     const [items, setItems] = React.useState([
-      { id: 1, title: "結婚式場の見学予約", desc: "2026/05/15 14:00", done: false },
-      { id: 2, title: "招待状の発送", desc: "2026/06/01 までに", done: false },
-      { id: 3, title: "引き出物の選定", desc: "2026/07/01 までに", done: true },
+      { id: 1, title: "キックオフMTGの予約", desc: "2026/05/15 14:00", done: false },
+      { id: 2, title: "請求書の送付", desc: "2026/06/01 までに", done: false },
+      { id: 3, title: "見積書の作成", desc: "2026/07/01 までに", done: true },
     ])
 
     const remove = (id: number) => setItems((prev) => prev.filter((i) => i.id !== id))
