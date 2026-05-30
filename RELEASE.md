@@ -2,6 +2,29 @@
 
 `@ksk/design-system` のリリーススケジュール・運用ルール。
 
+## ⏳ 保留中の公開: v1.21.2
+
+> **publish 待ち。** `package.json` は `1.21.2` に更新済み・main にマージ済み・
+> test / check は green だが、**`v1.21.2` タグが未 push のため npm 未公開**。
+> （CI 実行環境からはタグ push が権限で拒否されるため、手動操作が必要）
+
+公開する場合は以下のいずれかを実行（`publish.yml` が起動して npm に公開される）:
+
+```bash
+# A. ローカルからタグ push
+git checkout main && git pull
+git tag -a v1.21.2 -m "v1.21.2 — Sheet (side=bottom) 仮想キーボード対応"
+git push origin v1.21.2
+```
+
+- **B. GitHub UI:** Releases → Draft a new release → Tag `v1.21.2`（target: main）→ Publish
+- **C. Actions:** "Publish to npm" → Run workflow（`workflow_dispatch`, branch: main）
+
+公開後はこのセクションを削除し、下の「ホットフィックス履歴」へ 1 行追記すること。
+
+内容: Sheet (`side="bottom"` / `swipeToClose` / `bottom-glass`) が仮想キーボード
+表示時にシート上端を画面外へ出さないよう `visualViewport` 監視で修正（PR #12）。
+
 ## 通常リリースサイクル
 
 | 種類 | 頻度 | 曜日 |
