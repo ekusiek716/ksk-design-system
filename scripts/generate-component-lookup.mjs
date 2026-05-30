@@ -20,7 +20,7 @@
  */
 import fs from "node:fs"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, "..")
@@ -406,31 +406,54 @@ function generateMarkdown(ui, patterns) {
   return lines.join("\n")
 }
 
-const checkMode = process.argv.includes("--check")
+function main() {
+  const checkMode = process.argv.includes("--check")
 
-const ui = processDirectory(UI_DIR, "ui")
-const patterns = processDirectory(PATTERNS_DIR, "patterns")
+  const ui = processDirectory(UI_DIR, "ui")
+  const patterns = processDirectory(PATTERNS_DIR, "patterns")
 
-// fail-loud: 抽出の取りこぼし・名前重複があれば、壊れた表を書き出さずに中断
-const problems = collectProblems([...ui, ...patterns])
-if (problems.length > 0) {
-  console.error("❌ COMPONENT_LOOKUP 生成中止: 不変条件違反（黙って壊れた表は出力しません）")
-  for (const p of problems) console.error("   - " + p)
-  process.exit(1)
-}
-
-const md = generateMarkdown(ui, patterns)
-
-if (checkMode) {
-  const existing = fs.existsSync(OUTPUT) ? fs.readFileSync(OUTPUT, "utf-8") : ""
-  if (existing !== md) {
-    console.error("❌ COMPONENT_LOOKUP.md がソースと乖離しています。`npm run generate:lookup` で再生成してコミットしてください。")
+  // fail-loud: 抽出の取りこぼし・名前重複があれば、壊れた表を書き出さずに中断
+  const problems = collectProblems([...ui, ...patterns])
+  if (problems.length > 0) {
+    console.error("❌ COMPONENT_LOOKUP 生成中止: 不変条件違反（黙って壊れた表は出力しません）")
+    for (const p of problems) console.error("   - " + p)
     process.exit(1)
   }
-  console.log("✅ COMPONENT_LOOKUP.md は最新です。")
-} else {
-  fs.writeFileSync(OUTPUT, md, "utf-8")
-  console.log(`✅ COMPONENT_LOOKUP.md 生成完了: ${ui.length + patterns.length} コンポーネント`)
-  console.log(`   UI: ${ui.length} / Patterns: ${patterns.length}`)
-  console.log(`   出力: ${OUTPUT}`)
+
+  const md = generateMarkdown(ui, patterns)
+
+  if (checkMode) {
+    const existing = fs.existsSync(OUTPUT) ? fs.readFileSync(OUTPUT, "utf-8") : ""
+    if (existing !== md) {
+      console.error("❌ COMPONENT_LOOKUP.md がソースと乖離しています。`npm run generate:lookup` で再生成してコミットしてください。")
+      process.exit(1)
+    }
+    console.log("✅ COMPONENT_LOOKUP.md は最新です。")
+  } else {
+    fs.writeFileSync(OUTPUT, md, "utf-8")
+    console.log(`✅ COMPONENT_LOOKUP.md 生成完了: ${ui.length + patterns.length} コンポーネント`)
+    console.log(`   UI: ${ui.length} / Patterns: ${patterns.length}`)
+    console.log(`   出力: ${OUTPUT}`)
+  }
+}
+
+// CLI として直接実行されたときのみ走らせる（テストから import しても副作用なし）
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+  main()
+}
+
+export {
+  extractExports,
+  extractBalancedBlock,
+  topLevelKeys,
+  extractVariantGroups,
+  extractCvaVariants,
+  hasVariantsBlock,
+  resolveModulePath,
+  findExternalVariantFiles,
+  extractStoryNames,
+  toImportPath,
+  processDirectory,
+  collectProblems,
+  generateMarkdown,
 }
