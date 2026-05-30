@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { SocialLoginButton } from "./social-login-button"
-import { LINE_OFFICIAL_LOGO_DATA_URI } from "./line-logo-asset"
 
 const meta: Meta<typeof SocialLoginButton> = {
   title: "Components/SocialLoginButton",
