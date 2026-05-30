@@ -115,6 +115,8 @@ export { CoachMarkOverlay, isCoachCompleted, markCoachCompleted, resetCoach } fr
 export type { CoachMarkOverlayProps, CoachStep } from "./components/patterns/coach-mark-overlay"
 export { CookieConsent, isCookieDecided } from "./components/patterns/cookie-consent"
 export type { CookieConsentProps, CookieConsentChoice } from "./components/patterns/cookie-consent"
+export { SocialIcon, SOCIAL_ICON_PLATFORMS, SOCIAL_ICON_LABELS } from "./components/ui/social-icon"
+export type { SocialIconProps, SocialIconTone } from "./components/ui/social-icon"
 export { SocialLoginButton } from "./components/ui/social-login-button"
 export type { SocialLoginButtonProps, SocialProvider } from "./components/ui/social-login-button"
 export { ImageGallery } from "./components/ui/image-gallery"
