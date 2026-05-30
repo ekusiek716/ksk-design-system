@@ -3,33 +3,8 @@ import { describe, it, expect } from "vitest"
 import {
   extractCvaVariants,
   extractStoryNames,
-  topLevelKeys,
-  extractBalancedBlock,
   extractExports,
 } from "../scripts/generate-component-lookup.mjs"
-
-describe("extractBalancedBlock", () => {
-  it("文字列内の波括弧を無視して対応する閉じ括弧を返す", () => {
-    const s = `{ a: "x{y}z", b: { c: 1 } }`
-    const r = extractBalancedBlock(s, 0)
-    expect(r).not.toBeNull()
-    expect(s[r!.end]).toBe("}")
-    expect(r!.end).toBe(s.length - 1)
-  })
-})
-
-describe("topLevelKeys", () => {
-  it("クォート付きキーと識別子キーの両方を取る", () => {
-    expect(topLevelKeys(` default: "a", "inline-info": "b", ghost: "c" `)).toEqual([
-      "default",
-      "inline-info",
-      "ghost",
-    ])
-  })
-  it("ネストや文字列内の hover: などをキーと誤認しない", () => {
-    expect(topLevelKeys(` sm: "hover:bg-x", lg: ["a","b"] `)).toEqual(["sm", "lg"])
-  })
-})
 
 describe("extractCvaVariants", () => {
   it("[回帰] cva 第1引数がインライン（4スペース）でも variant を拾う", () => {
@@ -94,6 +69,11 @@ const v = cva("base", {
 
   it("variants ブロックの無い cva は空配列", () => {
     expect(extractCvaVariants(`const v = cva("just base classes")`)).toEqual([])
+  })
+
+  it("値の文字列に : が含まれてもキーと誤認しない（AST なので構造的に安全）", () => {
+    const src = `const v = cva("x", { variants: { size: { sm: "hover:bg-x", lg: "h-12" } } })`
+    expect(extractCvaVariants(src)).toEqual([{ key: "size", values: ["sm", "lg"] }])
   })
 })
 
