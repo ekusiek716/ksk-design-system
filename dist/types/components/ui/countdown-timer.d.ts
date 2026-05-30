@@ -30,6 +30,10 @@ interface CountdownTimerProps {
     /** 秒単位ラベル。@default "秒" */
     secondUnit?: string;
 }
-declare function CountdownTimer({ targetDate, granularity, label, endedLabel, todayLabel, variant, compact, className, onEnd, dayUnit, hourUnit, minuteUnit, secondUnit, }: CountdownTimerProps): import("react/jsx-runtime").JSX.Element;
+/**
+ * CountdownTimer — granularity に応じて day / time モードを描画。
+ * 各モードを別コンポーネントに分け、hooks を常に同じ順序で呼ぶ（Rules of Hooks 準拠）。
+ */
+declare function CountdownTimer(props: CountdownTimerProps): import("react/jsx-runtime").JSX.Element;
 export { CountdownTimer };
 export type { CountdownTimerProps };
