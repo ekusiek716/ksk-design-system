@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+import { ScrollArea } from "./scroll-area"
 import { cn } from "@/lib/utils"
 
 export interface MultiSelectOption {
@@ -103,7 +104,7 @@ function MultiSelect({
                 className="flex size-5 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] hover:text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Secondary)] transition-colors"
               >
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
               </span>
             )}
@@ -136,8 +137,9 @@ function MultiSelect({
             className="flex h-10 flex-1 bg-transparent outline-none typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)]"
           />
         </div>
-        {/* List */}
-        <div role="listbox" aria-multiselectable="true" className="max-h-60 overflow-y-auto p-1">
+        {/* List — 常時表示のスクロールバー付き（type="always"） */}
+        <ScrollArea type="always" className="max-h-60">
+        <div role="listbox" aria-multiselectable="true" className="p-1">
           {filtered.length === 0 ? (
             <div className="py-6 text-center typo-body-sm text-[var(--Text-Low-Emphasis)]">{emptyLabel}</div>
           ) : (
@@ -174,6 +176,7 @@ function MultiSelect({
             })
           )}
         </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
   )

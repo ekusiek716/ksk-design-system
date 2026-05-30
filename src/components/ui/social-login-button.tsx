@@ -16,10 +16,16 @@ const PROVIDER_CONFIG: Record<
   line: {
     label: "LINEでログイン",
     icon: (
-      /* LINE: green rounded square + white speech bubble */
+      /* LINE ブランドアイコン（緑角丸 + 白い吹き出し）。提供アセット
+         LINE_APP_iOS_RGB.ai を基に手で SVG 化。ボタン上の小サイズ用に、
+         潰れて読めない "LINE" ワードマークは省き、識別性の高い
+         「緑スクエア + 白吹き出し」に簡略化している。 */
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <rect width="24" height="24" rx="6" fill="#06C755"/>
-        <path d="M12 4.5C7.86 4.5 4.5 7.3 4.5 10.75c0 3.07 2.62 5.65 6.16 6.15l.84 1.75 2.87-1.75c3.54-.4 6.13-2.88 6.13-6.15C20.5 7.3 16.14 4.5 12 4.5z" fill="white"/>
+        <rect width="24" height="24" rx="5.5" fill="#06C755" />
+        <path
+          fill="#fff"
+          d="M20 11.02c0-3.58-3.59-6.5-8-6.5s-8 2.92-8 6.5c0 3.21 2.85 5.9 6.69 6.41.26.06.62.17.71.4.08.2.05.52.03.73l-.11.69c-.03.2-.16.8.7.43 .86-.36 4.62-2.72 6.3-4.66h0C19.45 13.74 20 12.45 20 11.02z"
+        />
       </svg>
     ),
     className: "border-[#06C755] text-[var(--Text-High-Emphasis)] bg-[var(--Surface-Primary)] hover:bg-[var(--Surface-Success)]",

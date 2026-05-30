@@ -116,7 +116,9 @@ function AlertDialogFooter({
     <div
       data-slot="alert-dialog-footer"
       data-orientation={orientation}
+      // pt-4: フッターを本文から離し、アクション領域として独立させる。
       className={cn(
+        "pt-4",
         orientation === "stacked"
           ? "flex flex-col-reverse gap-2 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end"
           : "flex flex-row gap-3 [&>*]:flex-1 [&>*]:basis-0",

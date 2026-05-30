@@ -144,7 +144,10 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       data-orientation={orientation}
+      // pt-4: フッターを本文から離し、アクション領域として独立させる
+      // （DialogContent の gap-4 と合わせて本文とボタンの間に十分な余白を作る）。
       className={cn(
+        "pt-4",
         orientation === "stacked"
           ? "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"
           : "flex flex-row gap-3 [&>*]:flex-1 [&>*]:basis-0",

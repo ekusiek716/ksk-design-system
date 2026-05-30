@@ -49,17 +49,16 @@ export const FAQ: Story = {
       <div className="flex flex-col gap-2 max-w-sm">
         {items.map((item) => (
           <Collapsible key={item.q}>
-            <div className="rounded-lg border border-[var(--Border-Low-Emphasis)] px-4 py-3">
-              <div className="flex items-center justify-between">
+            <div className="rounded-lg border border-[var(--Border-Low-Emphasis)]">
+              {/* トリガーを行全体に広げ、見出し全体をクリック可能にする */}
+              <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 px-4 py-3 text-left cursor-pointer rounded-lg transition-colors hover:bg-[var(--Surface-Secondary)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50">
                 <span className="typo-body-md text-[var(--Text-High-Emphasis)]">{item.q}</span>
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="icon-sm">
-                    <span className="text-lg leading-none">+</span>
-                  </Button>
-                </CollapsibleTrigger>
-              </div>
+                <span className="text-lg leading-none text-[var(--Text-Accent-Primary)] transition-transform group-data-[state=open]:rotate-45">
+                  +
+                </span>
+              </CollapsibleTrigger>
               <CollapsibleContent>
-                <p className="mt-2 typo-body-sm text-[var(--Text-Medium-Emphasis)]">{item.a}</p>
+                <p className="px-4 pb-3 typo-body-sm text-[var(--Text-Medium-Emphasis)]">{item.a}</p>
               </CollapsibleContent>
             </div>
           </Collapsible>
