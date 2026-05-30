@@ -39,7 +39,7 @@
 | Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, DisabledState |
 | MultiSelect | `@/components/ui/multi-select` | — | Default |
-| NavigationBar, IconClose, IconBack, IconShareIos | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |
+| NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis |
 | PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small |
