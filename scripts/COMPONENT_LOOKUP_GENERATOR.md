@@ -8,7 +8,7 @@
 
 ## 抽出方式
 - **export 名**: 正規表現
-- **cva variant**: 波括弧の対応をとるブレースマッチ（インデント非依存）。`cva("base", {…})` のインライン/改行どちらの整形でも拾う。同名 variant キーは dedup
+- **cva variant**: TypeScript AST（`ts.createSourceFile`）で解析。正規表現/インデント/整形に非依存で、クォートキー・配列値・スプレッドも構造的に正確に扱う。同名 variant キーは dedup
 - **variant の外部切り出し**: `src/lib/server-variants/` への import を追跡（Button 対応）。`@/components/ui/button` 等からの `buttonVariants` 借用（alert-dialog / pagination）は自コンポーネントの variant ではないため対象外
 - **story 名**: 宣言ごとに探索窓を区切って `name:` を取得（次 story の名前を奪わない）
 - **Icon\* 補助 export**: Component 欄から除外（全 export がアイコンのファイルは行を消さないよう元のまま）
@@ -16,9 +16,9 @@
 ## fail-loud
 「variants 定義があるのに抽出 0 件」または「story 名重複」を検出したら、壊れた表を書かず `exit 1`。回帰テストは `__tests__/generate-component-lookup.test.ts`。
 
-## 既知の限界（regex / ブレースマッチゆえ）
-- TS の本物の構文解析ではないため、複雑な cva（スプレッド、変数参照で組む variant、`compoundVariants` 由来の暗黙キー等）は取りこぼし得る
-- fail-loud は「0 件」「重複」しか検知しない。**部分取りこぼし（一部 variant 値だけ欠落）は検知できない**（過去にハイフン付きクォートキー全落ちを目視で発見した実績あり）
+## 既知の限界
+- cva 抽出は TS AST 化済みで、整形・クォートキー依存の取りこぼしは解消。ただし `variant` のキーを**変数参照やスプレッドで動的に組む**ケースは静的に解決できない（リテラルのオブジェクトのみ対象）
+- fail-loud は「variants 非空なのに抽出 0 件」「story 名重複」を検知するが、**一部 variant 値だけの欠落**は自動検知できない。回帰テスト `__tests__/generate-component-lookup.test.ts` で代表ケースを固定している
 
 ## さらに堅くする選択肢（未着手）
 1. **Storybook argTypes / autodocs を source of truth に**: `.storybook/preview.ts` は autodocs 有効。argTypes や型から variant を取れば cva 解析が不要になる。ただし argTypes は手書き依存
