@@ -6,3 +6,6 @@ storybook-static
 
 # AI ツール (codex) のローカル設定
 .codex/
+
+# 使い捨て分析スクリプト
+.cat-analysis.mjs
