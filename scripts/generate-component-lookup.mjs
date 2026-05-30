@@ -266,8 +266,12 @@ function toImportPath(filePath) {
 function processDirectory(dir, category) {
   return getComponentFiles(dir).flatMap((file) => {
     const content = fs.readFileSync(file, "utf-8")
-    const exports = extractExports(content)
-    if (exports.length === 0) return []
+    const allExports = extractExports(content)
+    if (allExports.length === 0) return []
+    // 補助アイコン(Icon*)は「再利用すべきコンポーネント」ではないので Component 欄から除外。
+    // ただし全て除外されてしまうファイル（アイコンのみ）は元のまま残す（誤って行を消さない）。
+    const nonIcon = allExports.filter((e) => !/^Icon[A-Z]/.test(e))
+    const exports = nonIcon.length > 0 ? nonIcon : allExports
     const fileDir = path.dirname(file)
 
     let cvaVariants = extractCvaVariants(content)
