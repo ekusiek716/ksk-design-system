@@ -177,7 +177,7 @@ export const BottomSheetSwipeToClose: Story = {
     return (
       <div className="w-full min-h-screen flex flex-col items-center justify-center gap-3 bg-[var(--Surface-Secondary)] p-8">
         <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
-          ドラッグハンドルを下に引くと閉じます（30% 以上で dismiss）
+          シート上のどこでも下にスワイプすると閉じます（ハンドル / 本文どちらでも・30% 以上で dismiss）
         </p>
         <Button onClick={() => setOpen(true)}>シートを開く</Button>
         <Sheet open={open} onOpenChange={setOpen}>
@@ -189,7 +189,7 @@ export const BottomSheetSwipeToClose: Story = {
             <SheetHeader className="mb-4">
               <SheetTitle>確認</SheetTitle>
               <SheetDescription>
-                内容サイズのままバーを下にスワイプして閉じられます。
+                バーでも本文でも、下にスワイプすれば閉じられます。スクロール領域は先頭にいるときだけ閉じ操作になります。
               </SheetDescription>
             </SheetHeader>
             <p className="typo-body-md text-[var(--Text-Medium-Emphasis)] mb-4">

@@ -374,9 +374,16 @@ interface SheetContentProps
   padding?: boolean
   /**
    * Bottom-anchored sheets only (`side="bottom"` / `"bottom-glass"`). When true,
-   * <SheetDragIndicator /> is auto-rendered at the top and dragging it down
-   * past ~30% of the sheet height calls onOpenChange(false). Ignored when
-   * the parent <Sheet> uses `snapPoints` (snap mode handles its own drag).
+   * <SheetDragIndicator /> is auto-rendered at the top and a downward swipe
+   * dragging past ~30% of the sheet height calls onOpenChange(false).
+   *
+   * The swipe works across the whole sheet surface, not just the indicator:
+   * a downward drag dismisses when it starts on the handle, or while the
+   * touched scroll region is at its top. Mid-scroll and horizontal gestures
+   * stay with the content, so it never hijacks scrolling.
+   *
+   * Ignored when the parent <Sheet> uses `snapPoints` (snap mode handles its
+   * own drag).
    */
   swipeToClose?: boolean
   /**
@@ -499,6 +506,30 @@ function SheetContent({
 // drags are clamped at 0 (same as snap mode clamping at maxSnap).
 // ============================================================================
 
+// Nearest vertically-scrollable ancestor (inclusive of `start`), bounded by
+// `root`. Used by the full-surface swipe-to-close gesture to decide whether a
+// downward swipe belongs to the content (scroll) or should dismiss the sheet:
+// we only start a close-drag when the touched scroll region is already at its
+// top (scrollTop 0) — or there is nothing scrollable under the finger.
+function findScrollableAncestor(
+  start: EventTarget | null,
+  root: HTMLElement | null
+): HTMLElement | null {
+  let node = start instanceof HTMLElement ? start : null
+  while (node) {
+    const overflowY = getComputedStyle(node).overflowY
+    if (
+      (overflowY === "auto" || overflowY === "scroll") &&
+      node.scrollHeight > node.clientHeight + 1
+    ) {
+      return node
+    }
+    if (node === root) break
+    node = node.parentElement
+  }
+  return null
+}
+
 interface SwipeToCloseBottomSheetProps
   extends React.ComponentProps<typeof DialogPrimitive.Content> {
   side: "bottom" | "bottom-glass"
@@ -528,32 +559,87 @@ function SwipeToCloseBottomSheet({
   const [dragY, setDragY] = React.useState(0)
   const [dragging, setDragging] = React.useState(false)
   const startYRef = React.useRef(0)
+  const startXRef = React.useRef(0)
+  // Per-gesture decision: null = undecided, "drag" = closing the sheet,
+  // "scroll" = let the content scroll (we stay out of the way).
+  const decisionRef = React.useRef<null | "drag" | "scroll">(null)
+  // Mirror of `dragging` readable synchronously from the non-passive
+  // touchmove listener (state is async).
+  const draggingRef = React.useRef(false)
+  const scrollerRef = React.useRef<HTMLElement | null>(null)
+  const onHandleRef = React.useRef(false)
   const sheetRef = React.useRef<HTMLDivElement>(null)
   // Keep the sheet inside the region above the on-screen keyboard so its top
   // edge (title / drag handle) never scrolls off the top of the viewport.
   const { keyboardInset, visibleHeight } = useVisualViewportInset()
 
+  // While a close-drag is committed, block the browser's own touch scrolling so
+  // it doesn't fight our transform. Pointer-event preventDefault is unreliable
+  // for this on iOS; a non-passive touchmove listener is the robust way.
+  React.useEffect(() => {
+    const el = sheetRef.current
+    if (!el) return
+    const blockScroll = (e: TouchEvent) => {
+      if (draggingRef.current) e.preventDefault()
+    }
+    el.addEventListener("touchmove", blockScroll, { passive: false })
+    return () => el.removeEventListener("touchmove", blockScroll)
+  }, [])
+
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button != null && e.button !== 0) return
-    setDragging(true)
     startYRef.current = e.clientY
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId)
-    } catch {
-      // setPointerCapture は未対応環境で例外を投げるため無視
-    }
+    startXRef.current = e.clientX
+    decisionRef.current = null
+    draggingRef.current = false
+    // The drag indicator is always a valid grab target regardless of scroll
+    // position; elsewhere the gesture must start at the top of the content.
+    onHandleRef.current =
+      e.target instanceof HTMLElement &&
+      e.target.closest("[data-sheet-drag-handle]") != null
+    scrollerRef.current = findScrollableAncestor(e.target, sheetRef.current)
   }
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragging) return
+    if (decisionRef.current === "scroll") return
     const dy = e.clientY - startYRef.current
-    // Downward only — upward drags are clamped at 0 (matches snap-mode
-    // clamping at maxSnap; no rubber-band for consistency).
-    setDragY(Math.max(0, dy))
+    const dx = e.clientX - startXRef.current
+    if (decisionRef.current === null) {
+      // Wait until the gesture shows clear intent before claiming it.
+      if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return
+      // Start a close-drag only on a downward, vertical-dominant gesture that
+      // begins while the touched scroll region is at its top (or on the drag
+      // handle). Anything else is the content's gesture (scroll / horizontal).
+      const atTop =
+        onHandleRef.current ||
+        !scrollerRef.current ||
+        scrollerRef.current.scrollTop <= 0
+      if (dy > 0 && dy > Math.abs(dx) && atTop) {
+        decisionRef.current = "drag"
+        draggingRef.current = true
+        setDragging(true)
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId)
+        } catch {
+          // setPointerCapture は未対応環境で例外を投げるため無視
+        }
+      } else {
+        decisionRef.current = "scroll"
+        return
+      }
+    }
+    if (draggingRef.current) {
+      // Downward only — upward drags are clamped at 0 (matches snap-mode
+      // clamping at maxSnap; no rubber-band for consistency).
+      setDragY(Math.max(0, dy))
+    }
   }
 
   const finishDrag = () => {
-    if (!dragging) return
+    const wasDragging = draggingRef.current
+    draggingRef.current = false
+    decisionRef.current = null
+    if (!wasDragging) return
     setDragging(false)
     const h = sheetRef.current?.offsetHeight ?? 0
     const threshold = h > 0 ? h * 0.3 : 200
@@ -579,7 +665,9 @@ function SwipeToCloseBottomSheet({
           // top (タイトル / ドラッグハンドル) が画面外にはみ出すため
           // 自動で max-h-[90dvh] + overflow-y-auto を付与。
           // snap mode は activeSnapPoint で高さ制御するので別途。
-          "max-h-[90dvh] overflow-y-auto",
+          // overscroll-y-contain: 先頭での引き下げ時にブラウザの overscroll
+          // (ラバーバンド/スクロール連鎖) が close-drag と競合しないよう抑制。
+          "max-h-[90dvh] overflow-y-auto overscroll-y-contain",
           padding && "p-6",
           className,
         )}
@@ -599,6 +687,13 @@ function SwipeToCloseBottomSheet({
           willChange: "transform",
         }}
         {...props}
+        // Full-surface swipe-to-close: handlers live on the content root so a
+        // downward swipe anywhere can dismiss. onPointerMove gates on scroll
+        // position so it never steals the content's own scroll gesture.
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={finishDrag}
+        onPointerCancel={finishDrag}
         aria-describedby={ariaDescribedBy}
       >
         {hasInternalDesc && (
@@ -607,16 +702,16 @@ function SwipeToCloseBottomSheet({
           </DialogPrimitive.Description>
         )}
         <div
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={finishDrag}
-          onPointerCancel={finishDrag}
+          data-sheet-drag-handle
           className={cn(
             "cursor-grab active:cursor-grabbing select-none",
             // Pull the indicator row out of the sheet's own padding so it
             // sits flush against the top edge, matching the snap-mode layout.
             padding && "-mx-6 -mt-6"
           )}
+          // touch-action:none keeps the handle an always-valid grab target —
+          // touches here never scroll, and onHandleRef makes it draggable
+          // regardless of the content's scroll position.
           style={{ touchAction: "none" }}
         >
           <SheetDragIndicator />
