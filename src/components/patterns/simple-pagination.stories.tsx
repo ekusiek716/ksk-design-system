@@ -1,6 +1,11 @@
 /**
  * @file SimplePagination のストーリー
- * @description 最小ページネーション。「前 / 次 / 現在 / 総数」のみのコンパクトな構成
+ * @description 前/次ボタン + 件数カウンタ型のページネーション（`3 / 10 ページ`,
+ *   `21-40 / 689 件`）。`format` 推論・`compact`・`renderLabel` 等のラベル制御を
+ *   props で完結できる高レベルコンポーネント。
+ *
+ *   ページ番号を一覧で並べて直接ジャンプさせたい「番号リスト型」が欲しい場合は
+ *   **Pagination**（Components）を使う。
  */
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"

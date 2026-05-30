@@ -1,6 +1,11 @@
 /**
  * @file Pagination のストーリー
- * @description ページネーションコンポーネント。5ページの例で前後ナビゲーション・省略記号を表示
+ * @description ページ番号を一覧表示する「番号リスト型」ページネーション
+ *   （`1 2 3 … 10` を並べて任意ページへ直接ジャンプ）。compose 可能な低レベル
+ *   プリミティブ群。
+ *
+ *   前/次ボタン + 件数カウンタだけのシンプルな形（`3 / 10 ページ`,
+ *   `21-40 / 689 件`）が欲しい場合は **SimplePagination**（Patterns）を使う。
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from "./pagination"

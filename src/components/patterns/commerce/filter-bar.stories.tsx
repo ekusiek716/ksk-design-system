@@ -17,13 +17,13 @@ export const Default: Story = {
   render: () => (
     <FilterBar
       filters={[
-        { label: "お届け日" },
-        { label: "価格", value: "¥3,000〜¥5,000", isActive: true },
-        { label: "カテゴリ" },
-        { label: "評価" },
+        { label: "ステータス" },
+        { label: "担当者", value: "山田 太郎", isActive: true },
+        { label: "種別" },
+        { label: "優先度" },
       ]}
-      resultCount={689}
-      sortLabel="おすすめ順"
+      resultCount={128}
+      sortLabel="更新日順"
       onSortClick={() => {}}
       onMoreFilters={() => {}}
       activeFilterCount={1}
@@ -43,50 +43,50 @@ function InteractiveDemo() {
     <FilterBar
       filters={[
         {
-          label: "価格",
+          label: "ステータス",
           selectedValue: price ?? undefined,
           isActive: !!price,
           options: [
-            { label: "〜¥1,000", value: "0-1000" },
-            { label: "¥1,000〜¥3,000", value: "1000-3000" },
-            { label: "¥3,000〜¥5,000", value: "3000-5000" },
-            { label: "¥5,000〜¥10,000", value: "5000-10000" },
-            { label: "¥10,000〜", value: "10000-" },
+            { label: "未着手", value: "todo" },
+            { label: "進行中", value: "in-progress" },
+            { label: "レビュー中", value: "review" },
+            { label: "完了", value: "done" },
+            { label: "保留", value: "on-hold" },
           ],
           onSelect: (v) => setPrice(v),
         },
         {
-          label: "カテゴリ",
+          label: "種別",
           selectedValue: category ?? undefined,
           isActive: !!category,
           options: [
-            { label: "トップス", value: "tops" },
-            { label: "ボトムス", value: "bottoms" },
-            { label: "シューズ", value: "shoes" },
-            { label: "バッグ", value: "bags" },
+            { label: "バグ", value: "bug" },
+            { label: "機能要望", value: "feature" },
+            { label: "改善", value: "improvement" },
+            { label: "質問", value: "question" },
           ],
           onSelect: (v) => setCategory(v),
         },
         {
-          label: "評価",
+          label: "優先度",
           selectedValue: rating ?? undefined,
           isActive: !!rating,
           options: [
-            { label: "4.5以上", value: "4.5" },
-            { label: "4.0以上", value: "4.0" },
-            { label: "3.5以上", value: "3.5" },
+            { label: "高", value: "high" },
+            { label: "中", value: "medium" },
+            { label: "低", value: "low" },
           ],
           onSelect: (v) => setRating(v),
         },
-        { label: "お届け日", onClick: () => {} },
+        { label: "担当者", onClick: () => {} },
       ]}
-      resultCount={689}
+      resultCount={128}
       sortOptions={[
-        { label: "おすすめ順", value: "recommend" },
-        { label: "価格が安い順", value: "price-asc" },
-        { label: "価格が高い順", value: "price-desc" },
-        { label: "レビューが多い順", value: "review" },
-        { label: "新着順", value: "new" },
+        { label: "更新日順", value: "recommend" },
+        { label: "作成日が新しい順", value: "price-asc" },
+        { label: "作成日が古い順", value: "price-desc" },
+        { label: "優先度が高い順", value: "review" },
+        { label: "名前順", value: "new" },
       ]}
       selectedSort={sort}
       onSortSelect={setSort}
