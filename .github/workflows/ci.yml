@@ -1,0 +1,33 @@
+name: CI
+
+# PR と main への push で、型 / lint / 依存方向 / ドリフト / 単体テストを検証する。
+# とくに COMPONENT_LOOKUP.md の再生成忘れ（ドリフト）を `npm run check` の
+# `generate-component-lookup.mjs --check` で自動検知する。
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: tsc / lint-scratch / deps / drift / COMPONENT_LOOKUP --check
+        run: npm run check
+
+      - name: Unit tests (vitest)
+        run: npm test
