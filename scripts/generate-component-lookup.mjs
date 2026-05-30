@@ -6,8 +6,8 @@
  * バリアント情報・インポートパスを含む COMPONENT_LOOKUP.md を生成する。
  *
  * 設計メモ:
- * - cva の variant 抽出は「固定インデント前提の正規表現」をやめ、波括弧の対応を
- *   とるブレースマッチで行う（Prettier の折返し有無に依存しない）。
+ * - cva の variant 抽出は TypeScript AST（ts.createSourceFile）で行う。正規表現や
+ *   インデント・整形に依存せず、クォートキー / 配列値 / スプレッド等も正確に扱える。
  * - variant 定義を別ファイル（src/lib/server-variants/）へ切り出しているコンポーネント
  *   （Button）は import を解決して参照先も走査する。他コンポーネントの buttonVariants
  *   "借用"（alert-dialog / pagination 等）は対象外。
@@ -21,6 +21,7 @@
 import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
+import ts from "typescript"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, "..")
@@ -67,140 +68,87 @@ function extractExports(content) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  構文ヘルパー（インデント非依存）                                      */
+/*  cva variant 抽出（TypeScript AST ベース）                            */
 /* ------------------------------------------------------------------ */
 
-/**
- * content[openBraceIdx] === "{" を起点に、対応する "}" までの中身と終端 index を返す。
- * 文字列リテラル（" ' `）内の波括弧は数えない。見つからなければ null。
- */
-function extractBalancedBlock(content, openBraceIdx) {
-  let depth = 0
-  let quote = null
-  for (let i = openBraceIdx; i < content.length; i++) {
-    const c = content[i]
-    const prev = content[i - 1]
-    if (quote) {
-      if (c === quote && prev !== "\\") quote = null
-      continue
-    }
-    if (c === '"' || c === "'" || c === "`") {
-      quote = c
-      continue
-    }
-    if (c === "{") {
-      depth++
-    } else if (c === "}") {
-      depth--
-      if (depth === 0) return { inner: content.slice(openBraceIdx + 1, i), end: i }
-    }
+/** ソース文字列を TypeScript の SourceFile にパースする */
+function parseSource(content, fileName = "component.tsx") {
+  return ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, /* setParentNodes */ true, ts.ScriptKind.TSX)
+}
+
+/** プロパティ名を文字列で返す（Identifier / 文字列リテラル）。算出キー等は null。 */
+function propNameText(prop) {
+  const name = prop.name
+  if (!name) return null
+  if (ts.isIdentifier(name)) return name.text
+  if (ts.isStringLiteralLike(name)) return name.text
+  return null
+}
+
+/** cva(...) 呼び出しの設定オブジェクト（最後の ObjectLiteralExpression 引数）を返す */
+function cvaConfigObject(call) {
+  for (let i = call.arguments.length - 1; i >= 0; i--) {
+    const arg = call.arguments[i]
+    if (ts.isObjectLiteralExpression(arg)) return arg
   }
   return null
 }
 
+/** 設定オブジェクトの variants プロパティ（ObjectLiteral）を返す */
+function variantsObject(configObj) {
+  const prop = configObj.properties.find(
+    (p) => ts.isPropertyAssignment(p) && propNameText(p) === "variants",
+  )
+  return prop && ts.isObjectLiteralExpression(prop.initializer) ? prop.initializer : null
+}
+
+/** SourceFile 内の全 cva(...) 呼び出しノードを返す */
+function findCvaCalls(sourceFile) {
+  const calls = []
+  const visit = (node) => {
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "cva") {
+      calls.push(node)
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(sourceFile)
+  return calls
+}
+
 /**
- * オブジェクト本体 inner から「トップレベル（深さ0・文字列外）のキー名」を出現順に返す。
- * 例: `{ default: "...", "inline-info": "...", ghost: { ... } }` -> [default, inline-info, ghost]
+ * cva からバリアント情報を抽出（AST ベース）。同名 variant キーは先勝ちで dedup。
+ * 正規表現スクレイプと違い、クォートキー / インライン引数 / 配列値 / 整形に依存しない。
  */
-function topLevelKeys(inner) {
-  const keys = []
-  let depth = 0
-  let quote = null
-  for (let i = 0; i < inner.length; i++) {
-    const c = inner[i]
-    const prev = inner[i - 1]
-    if (quote) {
-      if (c === quote && prev !== "\\") quote = null
-      continue
-    }
-    // 深さ0では、まずキー（識別子 or "クォート付き" の直後に :）かを優先判定する。
-    // 先に文字列スキップへ入れると "inline-info" / "icon-sm" 等のクォートキーを取りこぼすため。
-    if (depth === 0) {
-      const m = inner.slice(i).match(/^(?:"([\w-]+)"|'([\w-]+)'|([A-Za-z_$][\w$]*))\s*:/)
-      if (m) {
-        keys.push(m[1] || m[2] || m[3])
-        i += m[0].length - 1
-        continue
-      }
-    }
-    if (c === '"' || c === "'" || c === "`") {
-      quote = c
-      continue
-    }
-    if (c === "{" || c === "[" || c === "(") depth++
-    else if (c === "}" || c === "]" || c === ")") depth--
-  }
-  return keys
-}
-
-/** variants ブロック本体から { key, values } 群を抽出（key=variant/size/... value=各選択肢） */
-function extractVariantGroups(variantsInner) {
-  const groups = []
-  let depth = 0
-  let quote = null
-  for (let i = 0; i < variantsInner.length; i++) {
-    const c = variantsInner[i]
-    const prev = variantsInner[i - 1]
-    if (quote) {
-      if (c === quote && prev !== "\\") quote = null
-      continue
-    }
-    if (c === '"' || c === "'" || c === "`") {
-      quote = c
-      continue
-    }
-    if (depth === 0) {
-      const m = variantsInner.slice(i).match(/^(?:"([\w-]+)"|([A-Za-z_$][\w$]*))\s*:\s*\{/)
-      if (m) {
-        const key = m[1] || m[2]
-        const braceIdx = i + m[0].length - 1
-        const blk = extractBalancedBlock(variantsInner, braceIdx)
-        if (blk) {
-          const values = topLevelKeys(blk.inner)
-          if (values.length > 0) groups.push({ key, values })
-          i = blk.end
-          continue
-        }
-      }
-    }
-    if (c === "{" || c === "[" || c === "(") depth++
-    else if (c === "}" || c === "]" || c === ")") depth--
-  }
-  return groups
-}
-
-const CVA_DECL = /(?:export\s+)?const\s+\w+\s*=\s*cva\(/g
-
-/** CVA からバリアント情報を抽出（同名 variant キーは先勝ちで dedup） */
 function extractCvaVariants(content) {
   const out = []
   const seen = new Set()
-  const cvas = [...content.matchAll(CVA_DECL)]
-  for (let ci = 0; ci < cvas.length; ci++) {
-    const start = cvas[ci].index
-    const end = ci + 1 < cvas.length ? cvas[ci + 1].index : content.length
-    const scope = content.slice(start, end)
-    const vm = scope.match(/\bvariants\s*:\s*\{/)
-    if (!vm) continue
-    const braceIdx = vm.index + vm[0].length - 1
-    const blk = extractBalancedBlock(scope, braceIdx)
-    if (!blk) continue
-    for (const g of extractVariantGroups(blk.inner)) {
-      if (seen.has(g.key)) continue
-      seen.add(g.key)
-      out.push(g)
+  for (const call of findCvaCalls(parseSource(content))) {
+    const config = cvaConfigObject(call)
+    if (!config) continue
+    const variants = variantsObject(config)
+    if (!variants) continue
+    for (const groupProp of variants.properties) {
+      if (!ts.isPropertyAssignment(groupProp)) continue
+      const key = propNameText(groupProp)
+      if (!key || seen.has(key)) continue
+      if (!ts.isObjectLiteralExpression(groupProp.initializer)) continue
+      const values = groupProp.initializer.properties.map(propNameText).filter(Boolean)
+      if (values.length > 0) {
+        seen.add(key)
+        out.push({ key, values })
+      }
     }
   }
   return out
 }
 
-/** variants ブロックを持つ cva が（少なくとも 1 つ）存在するか＝variant が出るべきファイルか */
+/** variants（非空）を持つ cva が 1 つ以上あるか＝variant が出力されるべきファイルか */
 function hasVariantsBlock(content) {
-  const cvas = [...content.matchAll(CVA_DECL)]
-  for (let ci = 0; ci < cvas.length; ci++) {
-    const start = cvas[ci].index
-    const end = ci + 1 < cvas.length ? cvas[ci + 1].index : content.length
-    if (/\bvariants\s*:\s*\{/.test(content.slice(start, end))) return true
+  for (const call of findCvaCalls(parseSource(content))) {
+    const config = cvaConfigObject(call)
+    if (!config) continue
+    const variants = variantsObject(config)
+    if (variants && variants.properties.length > 0) return true
   }
   return false
 }
@@ -447,10 +395,8 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
 }
 
 export {
+  parseSource,
   extractExports,
-  extractBalancedBlock,
-  topLevelKeys,
-  extractVariantGroups,
   extractCvaVariants,
   hasVariantsBlock,
   resolveModulePath,
