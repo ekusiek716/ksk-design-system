@@ -1,15 +1,15 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.21.1",
+    "version": "1.23.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 54,
+      "ui": 55,
       "patterns": 33,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 109
+      "total": 110
     }
   },
   "ui": [
@@ -503,6 +503,24 @@
         "alt text required for each image"
       ],
       "rules": []
+    },
+    {
+      "name": "SocialIcon",
+      "path": "src/components/ui/social-icon.tsx",
+      "description": "SNS / 外部サービスのブランドアイコン。socialicon/ の SVG を生成スクリプトで安定データ化して描画。platform / shape / tone を props で指定。",
+      "variants": [
+        "shape: original / square / rounded-square / rounded",
+        "tone: brand / mono(currentColor) / gray"
+      ],
+      "accessibility": [
+        "role=\"img\"",
+        "装飾用途では aria-hidden を付与"
+      ],
+      "rules": [
+        "platform はファイル名でなく正規化キーで指定",
+        "アイコン定義は social-icon-data.tsx（scripts/generate-social-icons.mjs で自動生成・手編集禁止）",
+        "PNG 埋め込み(<image>/base64)の SVG は生成時に除外"
+      ]
     },
     {
       "name": "SocialLoginButton",

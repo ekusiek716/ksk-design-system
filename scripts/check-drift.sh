@@ -56,12 +56,12 @@ fi
 # ─── 実ファイル数をカウント ───
 count_components() {
   local dir="$1"
-  # .stories.tsx と index.ts を除いた .tsx ファイル数
-  find "$dir" -maxdepth 1 -name "*.tsx" ! -name "*.stories.tsx" 2>/dev/null | wc -l | tr -d ' '
+  # .stories.tsx / *-data.tsx（生成データ）/ index.ts を除いた .tsx ファイル数
+  find "$dir" -maxdepth 1 -name "*.tsx" ! -name "*.stories.tsx" ! -name "*-data.tsx" 2>/dev/null | wc -l | tr -d ' '
 }
 
 ACTUAL_UI=$(count_components "$SRC/ui")
-ACTUAL_PATTERNS=$(find "$SRC/patterns" -maxdepth 1 -name "*.tsx" ! -name "*.stories.tsx" 2>/dev/null | wc -l | tr -d ' ')
+ACTUAL_PATTERNS=$(find "$SRC/patterns" -maxdepth 1 -name "*.tsx" ! -name "*.stories.tsx" ! -name "*-data.tsx" 2>/dev/null | wc -l | tr -d ' ')
 ACTUAL_COMMERCE=$(count_components "$SRC/patterns/commerce")
 ACTUAL_ADMIN=$(count_components "$SRC/patterns/admin")
 ACTUAL_SHELLS=$(count_components "$SRC/patterns/shells")
