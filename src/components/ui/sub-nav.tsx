@@ -61,7 +61,7 @@ function SubNav({
               aria-selected={isActive}
               onClick={() => onChange(item.value)}
               className={cn(
-                "flex items-center gap-1.5 shrink-0 px-3.5 py-1.5 rounded-full border typo-label-sm transition-colors",
+                "flex items-center gap-1.5 shrink-0 px-3.5 py-1.5 rounded-full border typo-label-md transition-colors",
                 isActive
                   ? "bg-[var(--Brand-Primary)] border-[var(--Brand-Primary)] text-white font-bold"
                   : "border-transparent bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Quaternary)] hover:text-[var(--Text-High-Emphasis)]"
@@ -109,7 +109,7 @@ function SubNav({
               aria-selected={isActive}
               onClick={() => onChange(item.value)}
               className={cn(
-                "flex items-center gap-1.5 shrink-0 px-4 py-3 typo-label-sm transition-colors border-b-[3px] -mb-px",
+                "flex items-center gap-1.5 shrink-0 px-4 py-3 typo-label-md transition-colors border-b-[3px] -mb-px",
                 isActive
                   ? "border-[var(--Brand-Primary)] text-[var(--Brand-Primary)] font-bold"
                   : "border-transparent text-[var(--Text-Medium-Emphasis)] hover:text-[var(--Text-High-Emphasis)]"

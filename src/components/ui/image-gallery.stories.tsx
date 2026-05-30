@@ -10,12 +10,12 @@ const meta: Meta<typeof ImageGallery> = {
 export default meta
 type Story = StoryObj<typeof ImageGallery>
 
-// Unsplash placeholder images
+// プレースホルダー画像（picsum: seed 固定で安定・中立な汎用写真）
 const IMAGES = [
-  { src: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop", alt: "ギャラリー画像 1" },
-  { src: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&h=300&fit=crop", alt: "ギャラリー画像 2" },
-  { src: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop", alt: "ギャラリー画像 3" },
-  { src: "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=400&h=300&fit=crop", alt: "ギャラリー画像 4" },
+  { src: "https://picsum.photos/seed/gallery-1/400/300", alt: "ギャラリー画像 1" },
+  { src: "https://picsum.photos/seed/gallery-2/400/300", alt: "ギャラリー画像 2" },
+  { src: "https://picsum.photos/seed/gallery-3/400/300", alt: "ギャラリー画像 3" },
+  { src: "https://picsum.photos/seed/gallery-4/400/300", alt: "ギャラリー画像 4" },
 ]
 
 export const Thumbnail: Story = {

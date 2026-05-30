@@ -32,7 +32,7 @@ function PillToggle<T extends string = string>({
       data-slot="pill-toggle"
       role="group"
       className={cn(
-        "inline-flex items-center rounded-full p-0.5",
+        "inline-flex items-center rounded-full p-1",
         "bg-[var(--Surface-Tertiary)]",
         className
       )}

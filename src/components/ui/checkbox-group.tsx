@@ -1,7 +1,7 @@
 import * as React from "react"
-import { TickSquare } from "iconsax-reactjs"
 import { Checkbox as CheckboxPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 
 /**
@@ -88,25 +88,10 @@ function CheckboxGroupItem({
       data-slot="checkbox-group-item"
       className={cn("flex items-start gap-2", className)}
     >
-      <CheckboxPrimitive.Root
-        id={id}
-        className={cn(
-          "peer flex size-5 shrink-0 items-center justify-center rounded-[5px] border-2 border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] transition-colors outline-none mt-0.5",
-          "data-[state=checked]:border-transparent data-[state=checked]:bg-transparent",
-          "focus-visible:border-[var(--Object-Accent-Primary)] focus-visible:ring-2 focus-visible:ring-[var(--Object-Accent-Primary)]/20",
-          "aria-invalid:border-[var(--Border-Caution)]",
-          "disabled:opacity-50 disabled:cursor-not-allowed"
-        )}
-        {...props}
-      >
-        <CheckboxPrimitive.Indicator className="flex items-center justify-center">
-          <TickSquare
-            size={24}
-            variant="Bold"
-            className="text-[var(--Object-Accent-Primary)]"
-          />
-        </CheckboxPrimitive.Indicator>
-      </CheckboxPrimitive.Root>
+      {/* DS の Checkbox（素モード）を利用し、塗りつぶしチェックの見た目を
+          他のチェックボックス（ui/checkbox・MultiSelect 等）と統一する。
+          ラベルの横並び + description レイアウトはこのコンポーネント側で維持。 */}
+      <Checkbox id={id} className="mt-0.5" {...props} />
       <div className="flex flex-col gap-0.5">
         <Label
           htmlFor={id}

@@ -17,18 +17,9 @@ type Story = StoryObj<typeof RadioGroup>
 export const ThreeOptions: Story = {
   render: () => (
     <RadioGroup defaultValue="option-1">
-      <div className="flex items-center gap-2">
-        <RadioGroupItem value="option-1" id="r1" />
-        <Label htmlFor="r1">メール通知</Label>
-      </div>
-      <div className="flex items-center gap-2">
-        <RadioGroupItem value="option-2" id="r2" />
-        <Label htmlFor="r2">SMS通知</Label>
-      </div>
-      <div className="flex items-center gap-2">
-        <RadioGroupItem value="option-3" id="r3" />
-        <Label htmlFor="r3">通知なし</Label>
-      </div>
+      <RadioGroupItem value="option-1">メール通知</RadioGroupItem>
+      <RadioGroupItem value="option-2">SMS通知</RadioGroupItem>
+      <RadioGroupItem value="option-3">通知なし</RadioGroupItem>
     </RadioGroup>
   ),
 }
@@ -36,18 +27,27 @@ export const ThreeOptions: Story = {
 export const WithDisabled: Story = {
   render: () => (
     <RadioGroup defaultValue="small">
-      <div className="flex items-center gap-2">
-        <RadioGroupItem value="small" id="s1" />
-        <Label htmlFor="s1">Small</Label>
-      </div>
-      <div className="flex items-center gap-2">
-        <RadioGroupItem value="medium" id="s2" />
-        <Label htmlFor="s2">Medium</Label>
-      </div>
-      <div className="flex items-center gap-2">
-        <RadioGroupItem value="large" id="s3" disabled />
-        <Label htmlFor="s3">Large（選択不可）</Label>
-      </div>
+      <RadioGroupItem value="small">Small</RadioGroupItem>
+      <RadioGroupItem value="medium">Medium</RadioGroupItem>
+      <RadioGroupItem value="large" disabled>
+        Large（選択不可）
+      </RadioGroupItem>
+    </RadioGroup>
+  ),
+}
+
+/**
+ * `description` を渡すと、ラベルの下に補足テキストを表示する。
+ */
+export const WithDescription: Story = {
+  render: () => (
+    <RadioGroup defaultValue="standard">
+      <RadioGroupItem value="standard" description="3〜5 営業日でお届け">
+        通常配送
+      </RadioGroupItem>
+      <RadioGroupItem value="express" description="翌営業日にお届け（+500円）">
+        速達配送
+      </RadioGroupItem>
     </RadioGroup>
   ),
 }
