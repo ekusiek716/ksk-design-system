@@ -30,7 +30,7 @@
 | CountdownTimer | `@/components/ui/countdown-timer` | — | Filled, Ghost, Compact, Ended, AllVariants |
 | DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, Disabled, RangePicker, CalendarOnly, CalendarRange |
 | Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, ReportShop, StackedFooter |
-| DropdownFilter | `@/components/ui/dropdown-filter` | — | Default, ActiveFilter, MultipleFilters |
+| DropdownFilter | `@/components/ui/dropdown-filter` | — | Default, ActiveFilter, WithIcons（ビュー切替・アイコン付き）, MultipleFilters |
 | DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent | `@/components/ui/dropdown-menu` | — | Default, WithCheckbox, WithRadio, WithSubmenu |
 | ErrorBoundary | `@/components/ui/error-boundary` | — | — |
 | Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField | `@/components/ui/form` | — | BasicForm, WithSelect |

@@ -16,6 +16,7 @@
 
 @import "./styles/primitive.css";
 @import "./styles/semantic.css";
+@import "./styles/categorical.css";
 @import "./styles/typography.css";
 @import "./styles/glass.css";
 

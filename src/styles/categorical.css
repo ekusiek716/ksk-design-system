@@ -1,0 +1,161 @@
+/* =============================================================
+   KSK Design System — Categorical (Qualitative) Color Tokens
+
+   「カテゴリ識別子」専用の質的カラーパレット。
+   Brand / Status とは無関係な “何番目のカテゴリか” を色で区別するための
+   16 色スケール。カレンダーの予定ドット、カテゴリ chip、ボード列の背景、
+   グラフ系列などで使う（例: belle-todo の結婚式準備カテゴリ）。
+
+   ─── 設計上の3つの約束 ──────────────────────────────────────
+   1. テーマ非依存:
+      Brand-* には一切連動しない固定値。テーマ（default/orange/green/
+      violet）を差し替えてもカテゴリの色は変わらない＝アプリ横断で
+      「カテゴリ⇄色」の対応が一貫する。External Brand（--Brand-Line 等）
+      と同じく semantic 層に固定 hex で置く方針。
+   2. 並び順は「分離度の高い順」:
+      --Categorical-1..N は CVD シミュレーション上の色差（CIEDE2000）が
+      大きい順に並べてある。K 色だけ必要なら 1..K を順に使えば、その K 色は
+      可能な範囲で最も見分けやすい組み合わせになる（colorbrewer / d3 と同じ思想）。
+   3. 3 階層（base / Subtle / Bold）:
+      --Categorical-N         … base。ドット・アイコン・小さな塗り（mark）用。
+      --Categorical-N-Subtle  … 淡いティント。行・列・カードの背景用（≒ 50/100）。
+      --Categorical-N-Bold    … 濃色。chip ラベルや見出しなど「文字」用。
+
+   ─── アクセシビリティ（WCAG / CVD） ─────────────────────────
+   • 文字には必ず -Bold を使うこと。base(≒500)は白背景で 4.5:1 に届かない
+     色が大半（黄/シアン/ライム等）。-Bold は 16 色すべてが
+       - 白背景で ≥4.9:1（AA 通常テキスト）
+       - 自分の -Subtle 上で ≥4.5:1（chip: Subtle 背景＋Bold 文字）
+     を満たす。
+   • ドット/アイコン（非テキスト, 1.4.11 = 3:1）は base でよいが、
+     warm/cyan 系（orange/amber/yellow/lime/teal/cyan/sky ≒ index 5,7,8,12,13）は
+     白背景で 3:1 未満。これらが “色だけ” で意味を伝える唯一の手段になる場合は
+     -Bold をドットに使うか、アイコン/ラベルを併記すること。
+   • CVD（色覚多様性）: 16 色のうち赤緑系 CVD でも確実に見分けられるのは
+     概ね先頭 8〜9 色まで。末尾の紫系（fuchsia/purple/violet = 14,15,16）は
+     protanopia でほぼ同色になる。色だけに依存せずアイコン・ラベル・形状を
+     併用すること（WCAG 1.4.1 Use of Color）。10 色を超えて識別が必須なら
+     カテゴリのグルーピングを検討。
+
+   ─── tint を mix で自動生成したい場合 ───────────────────────
+   本ファイルは AA 検証済みの固定値を採用しているが、base から導出するなら:
+     Subtle(light) ≈ color-mix(in srgb, var(--Categorical-N) 15%, white)        … 推奨 a = 15%
+     Subtle(dark)  =  color-mix(in srgb, var(--Categorical-N) 18%, transparent)  … 暗面に重ねる
+   ※ 15% mix だと Bold 文字とのコントラストが一部 4.48:1 と AA 境界ぎりぎりに
+     なるため、確実な AA が必要なら本ファイルの明示値（Tailwind-100 相当）を使うこと。
+
+   命名規則: --Categorical-{1..16}{,-Subtle,-Bold}
+   ============================================================= */
+
+:root {
+  /* ─── base（mark: ドット/アイコン/小塗り。Tailwind-500 相当） ─── */
+  --Categorical-1:  #EF4444; /* red      */
+  --Categorical-2:  #0EA5E9; /* sky      */
+  --Categorical-3:  #14B8A6; /* teal     */
+  --Categorical-4:  #64748B; /* slate    */
+  --Categorical-5:  #EAB308; /* yellow   */
+  --Categorical-6:  #6366F1; /* indigo   */
+  --Categorical-7:  #F97316; /* orange   */
+  --Categorical-8:  #06B6D4; /* cyan     */
+  --Categorical-9:  #EC4899; /* pink     */
+  --Categorical-10: #F43F5E; /* rose     */
+  --Categorical-11: #3B82F6; /* blue     */
+  --Categorical-12: #84CC16; /* lime     */
+  --Categorical-13: #F59E0B; /* amber    */
+  --Categorical-14: #D946EF; /* fuchsia  */
+  --Categorical-15: #A855F7; /* purple   */
+  --Categorical-16: #8B5CF6; /* violet   */
+
+  /* ─── Subtle（背景ティント。Tailwind-100 相当 ≒ base 15% on white） ─── */
+  --Categorical-1-Subtle:  #FEE2E2;
+  --Categorical-2-Subtle:  #E0F2FE;
+  --Categorical-3-Subtle:  #CCFBF1;
+  --Categorical-4-Subtle:  #F1F5F9;
+  --Categorical-5-Subtle:  #FEF9C3;
+  --Categorical-6-Subtle:  #E0E7FF;
+  --Categorical-7-Subtle:  #FFEDD5;
+  --Categorical-8-Subtle:  #CFFAFE;
+  --Categorical-9-Subtle:  #FCE7F3;
+  --Categorical-10-Subtle: #FFE4E6;
+  --Categorical-11-Subtle: #DBEAFE;
+  --Categorical-12-Subtle: #ECFCCB;
+  --Categorical-13-Subtle: #FEF3C7;
+  --Categorical-14-Subtle: #FAE8FF;
+  --Categorical-15-Subtle: #F3E8FF;
+  --Categorical-16-Subtle: #EDE9FE;
+
+  /* ─── Bold（文字/ラベル用。Tailwind-700 相当, ≥4.5:1 on white & on -Subtle） ─── */
+  --Categorical-1-Bold:  #B91C1C;
+  --Categorical-2-Bold:  #0369A1;
+  --Categorical-3-Bold:  #0F766E;
+  --Categorical-4-Bold:  #334155;
+  --Categorical-5-Bold:  #A16207;
+  --Categorical-6-Bold:  #4338CA;
+  --Categorical-7-Bold:  #C2410C;
+  --Categorical-8-Bold:  #0E7490;
+  --Categorical-9-Bold:  #BE185D;
+  --Categorical-10-Bold: #BE123C;
+  --Categorical-11-Bold: #1D4ED8;
+  --Categorical-12-Bold: #4D7C0F;
+  --Categorical-13-Bold: #B45309;
+  --Categorical-14-Bold: #A21CAF;
+  --Categorical-15-Bold: #7E22CE;
+  --Categorical-16-Bold: #6D28D9;
+}
+
+/* ─── Dark Mode ───────────────────────────────────────────────
+   色相（カテゴリ識別）は保ったまま、明度だけ暗面向けに調整。
+   base 500→400（暗面で映える）, Bold 700→300（暗面の文字）,
+   Subtle は base を 18% 透過で暗面に重ねる（semantic.css の Subtle と同方針）。 */
+.dark {
+  --Categorical-1:  #F87171;
+  --Categorical-2:  #38BDF8;
+  --Categorical-3:  #2DD4BF;
+  --Categorical-4:  #94A3B8;
+  --Categorical-5:  #FACC15;
+  --Categorical-6:  #818CF8;
+  --Categorical-7:  #FB923C;
+  --Categorical-8:  #22D3EE;
+  --Categorical-9:  #F472B6;
+  --Categorical-10: #FB7185;
+  --Categorical-11: #60A5FA;
+  --Categorical-12: #A3E635;
+  --Categorical-13: #FBBF24;
+  --Categorical-14: #E879F9;
+  --Categorical-15: #C084FC;
+  --Categorical-16: #A78BFA;
+
+  --Categorical-1-Subtle:  color-mix(in srgb, var(--Categorical-1) 18%, transparent);
+  --Categorical-2-Subtle:  color-mix(in srgb, var(--Categorical-2) 18%, transparent);
+  --Categorical-3-Subtle:  color-mix(in srgb, var(--Categorical-3) 18%, transparent);
+  --Categorical-4-Subtle:  color-mix(in srgb, var(--Categorical-4) 18%, transparent);
+  --Categorical-5-Subtle:  color-mix(in srgb, var(--Categorical-5) 18%, transparent);
+  --Categorical-6-Subtle:  color-mix(in srgb, var(--Categorical-6) 18%, transparent);
+  --Categorical-7-Subtle:  color-mix(in srgb, var(--Categorical-7) 18%, transparent);
+  --Categorical-8-Subtle:  color-mix(in srgb, var(--Categorical-8) 18%, transparent);
+  --Categorical-9-Subtle:  color-mix(in srgb, var(--Categorical-9) 18%, transparent);
+  --Categorical-10-Subtle: color-mix(in srgb, var(--Categorical-10) 18%, transparent);
+  --Categorical-11-Subtle: color-mix(in srgb, var(--Categorical-11) 18%, transparent);
+  --Categorical-12-Subtle: color-mix(in srgb, var(--Categorical-12) 18%, transparent);
+  --Categorical-13-Subtle: color-mix(in srgb, var(--Categorical-13) 18%, transparent);
+  --Categorical-14-Subtle: color-mix(in srgb, var(--Categorical-14) 18%, transparent);
+  --Categorical-15-Subtle: color-mix(in srgb, var(--Categorical-15) 18%, transparent);
+  --Categorical-16-Subtle: color-mix(in srgb, var(--Categorical-16) 18%, transparent);
+
+  --Categorical-1-Bold:  #FCA5A5;
+  --Categorical-2-Bold:  #7DD3FC;
+  --Categorical-3-Bold:  #5EEAD4;
+  --Categorical-4-Bold:  #CBD5E1;
+  --Categorical-5-Bold:  #FDE047;
+  --Categorical-6-Bold:  #A5B4FC;
+  --Categorical-7-Bold:  #FDBA74;
+  --Categorical-8-Bold:  #67E8F9;
+  --Categorical-9-Bold:  #F9A8D4;
+  --Categorical-10-Bold: #FDA4AF;
+  --Categorical-11-Bold: #93C5FD;
+  --Categorical-12-Bold: #BEF264;
+  --Categorical-13-Bold: #FCD34D;
+  --Categorical-14-Bold: #F0ABFC;
+  --Categorical-15-Bold: #D8B4FE;
+  --Categorical-16-Bold: #C4B5FD;
+}
