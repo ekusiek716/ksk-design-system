@@ -182,11 +182,11 @@
         "secondary",
         "outline",
         "destructive",
-        "caution",
         "success",
+        "warning",
         "info",
-        "pending",
-        "inactive"
+        "subtle",
+        "ghost"
       ],
       "rules": [
         "rounded-full only"
@@ -863,14 +863,21 @@
       "path": "src/components/patterns/chip.tsx",
       "description": "クリック可能なフィルタ・キーワードチップ。soldOut/count/href/removable 状態を持つ。",
       "variants": [
-        "default",
-        "active",
-        "disabled"
+        "filled",
+        "accent",
+        "outline"
+      ],
+      "sizes": [
+        "sm",
+        "md",
+        "lg",
+        "tile"
       ],
       "rules": [
         "Tag (表示専用) との違いは interactive 性",
         "soldOut は斜線オーバーレイ + disabled",
-        "href を渡すと <a> でレンダリング"
+        "href を渡すと <a> でレンダリング",
+        "shape=pill (既定) / square、size=tile は正方形タイル"
       ]
     },
     {

@@ -56,7 +56,7 @@ npm pack --dry-run | tail -50
 - `contracts/`
 - `eslint/`
 - `scripts/codemod/`
-- `src/preset.css` / `src/preset-standalone.css` / `src/styles/` / `src/themes/`
+- `src/preset.css` / `src/styles/` / `src/themes/`
 - `tokens.json`
 - `AGENTS.md` / `CLAUDE.md` / `MIGRATION.md` / `PUBLISHING.md` / `RELEASE.md`
 - `src/components/COMPONENT_LOOKUP.md`

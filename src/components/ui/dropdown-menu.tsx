@@ -150,7 +150,7 @@ function DropdownMenuItem({
         "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         "data-[inset]:pl-8",
         "data-[variant=destructive]:text-[var(--Text-Caution)]",
-        "data-[variant=destructive]:focus:bg-[var(--Surface-Caution-Light)]",
+        "data-[variant=destructive]:focus:bg-[var(--Surface-Caution)]",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}

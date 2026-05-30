@@ -88,6 +88,7 @@
   --Border-Accent-Primary:  var(--Primitive-Brand-500);
   --Border-Caution:         var(--Primitive-Red-500);
   --Border-Success:         var(--Primitive-Green-500);
+  --Border-Warning:         var(--Primitive-Orange-500);
   --Border-Info:            var(--Primitive-Blue-500);
   /* Border の Subtle 階層 — `/30` 的な薄い枠線が必要なときに。
      Tailwind の `/N` opacity modifier は CSS variable に対しては
@@ -198,6 +199,7 @@
   --Border-Accent-Primary:  var(--Primitive-Brand-400);
   --Border-Caution:         var(--Primitive-Red-400);
   --Border-Success:         var(--Primitive-Green-400);
+  --Border-Warning:         var(--Primitive-Orange-400);
   --Border-Info:            var(--Primitive-Blue-400);
   --Border-Accent-Primary-Subtle: color-mix(in srgb, var(--Primitive-Brand-400) 40%, transparent);
   --Border-Caution-Subtle:  rgba(248, 113, 113, 0.40);
