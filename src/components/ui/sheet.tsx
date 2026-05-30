@@ -759,8 +759,32 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return <div data-slot="sheet-header" className={cn("flex flex-col gap-2", className)} {...props} />
 }
 
-function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="sheet-footer" className={cn("flex flex-col gap-2 mt-auto", className)} {...props} />
+function SheetFooter({
+  className,
+  orientation = "split",
+  ...props
+}: React.ComponentProps<"div"> & {
+  /**
+   * アクションボタンの並べ方。
+   * - "split"（既定）: 均等幅で横並び（各ボタン flex-1）。2 ボタンを 50/50 で
+   *   並べる iOS のボトムシート風レイアウト。
+   * - "stacked": 旧挙動。縦積み（全幅）。
+   */
+  orientation?: "split" | "stacked"
+}) {
+  return (
+    <div
+      data-slot="sheet-footer"
+      data-orientation={orientation}
+      className={cn(
+        orientation === "stacked"
+          ? "flex flex-col gap-2 mt-auto"
+          : "flex flex-row gap-3 [&>*]:flex-1 [&>*]:basis-0 mt-auto",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
 function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {

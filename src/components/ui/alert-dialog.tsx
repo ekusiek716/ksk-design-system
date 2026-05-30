@@ -99,12 +99,27 @@ function AlertDialogHeader({ className, ...props }: React.ComponentProps<"div">)
   )
 }
 
-function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+function AlertDialogFooter({
+  className,
+  orientation = "split",
+  ...props
+}: React.ComponentProps<"div"> & {
+  /**
+   * アクションボタンの並べ方。
+   * - "split"（既定）: 均等幅で横並び（各ボタン flex-1）。
+   * - "stacked": 旧挙動。モバイルは縦積み、sm 以上で右寄せ横並び
+   *   （size="sm" のときは 2 カラム grid）。
+   */
+  orientation?: "split" | "stacked"
+}) {
   return (
     <div
       data-slot="alert-dialog-footer"
+      data-orientation={orientation}
       className={cn(
-        "flex flex-col-reverse gap-2 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end",
+        orientation === "stacked"
+          ? "flex flex-col-reverse gap-2 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end"
+          : "flex flex-row gap-3 [&>*]:flex-1 [&>*]:basis-0",
         className
       )}
       {...props}

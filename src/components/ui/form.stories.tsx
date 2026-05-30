@@ -112,7 +112,7 @@ export const WithSelect: Story = {
             rules={{ required: "サイズを選択してください" }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>ケーキのサイズ</FormLabel>
+                <FormLabel>サイズ</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -120,10 +120,10 @@ export const WithSelect: Story = {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="4">4号（2〜4人）</SelectItem>
-                    <SelectItem value="5">5号（4〜6人）</SelectItem>
-                    <SelectItem value="6">6号（6〜8人）</SelectItem>
-                    <SelectItem value="7">7号（8〜12人）</SelectItem>
+                    <SelectItem value="s">S</SelectItem>
+                    <SelectItem value="m">M</SelectItem>
+                    <SelectItem value="l">L</SelectItem>
+                    <SelectItem value="xl">XL</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

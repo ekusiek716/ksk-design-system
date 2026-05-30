@@ -69,8 +69,8 @@ function BottomSheetForm({
             {children}
           </div>
 
-          {/* フッター固定 */}
-          <div className="shrink-0 flex gap-3 px-5 py-4 border-t border-[var(--Border-Low-Emphasis)]">
+          {/* フッター固定。下端は home indicator 分の safe-area を上乗せ */}
+          <div className="shrink-0 flex gap-3 px-5 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] border-t border-[var(--Border-Low-Emphasis)]">
             <Button
               type="button"
               variant="secondary"

@@ -11,17 +11,17 @@ const meta: Meta<typeof CategoryScroll> = {
 export default meta
 type Story = StoryObj<typeof CategoryScroll>
 
-const PLACEHOLDER_SQ = "https://placehold.co/100x100/f3f4f6/9ca3af?text=🎂"
-const PLACEHOLDER_SM = "https://placehold.co/60x60/f3f4f6/9ca3af?text=🎂"
+const PLACEHOLDER_SQ = "https://placehold.co/100x100/f3f4f6/9ca3af?text=🛍"
+const PLACEHOLDER_SM = "https://placehold.co/60x60/f3f4f6/9ca3af?text=🛍"
 
 const categories = [
-  { name: "バースデーケーキ", href: "/category/birthday", imageUrl: PLACEHOLDER_SQ },
-  { name: "記念日ケーキ", href: "/category/anniversary", imageUrl: PLACEHOLDER_SQ },
-  { name: "ウェディングケーキ", href: "/category/wedding", imageUrl: PLACEHOLDER_SQ },
-  { name: "クリスマスケーキ", href: "/category/christmas", imageUrl: PLACEHOLDER_SQ },
-  { name: "母の日ケーキ", href: "/category/mothers-day", imageUrl: PLACEHOLDER_SQ },
-  { name: "父の日ケーキ", href: "/category/fathers-day", imageUrl: PLACEHOLDER_SQ },
-  { name: "卒業・入学", href: "/category/graduation", imageUrl: PLACEHOLDER_SQ },
+  { name: "トップス", href: "/category/tops", imageUrl: PLACEHOLDER_SQ },
+  { name: "アウター", href: "/category/outer", imageUrl: PLACEHOLDER_SQ },
+  { name: "ボトムス", href: "/category/bottoms", imageUrl: PLACEHOLDER_SQ },
+  { name: "シューズ", href: "/category/shoes", imageUrl: PLACEHOLDER_SQ },
+  { name: "バッグ", href: "/category/bags", imageUrl: PLACEHOLDER_SQ },
+  { name: "アクセサリー", href: "/category/accessories", imageUrl: PLACEHOLDER_SQ },
+  { name: "帽子", href: "/category/hats", imageUrl: PLACEHOLDER_SQ },
 ]
 
 const circleCategories = categories.map((c) => ({ ...c, imageUrl: PLACEHOLDER_SM }))

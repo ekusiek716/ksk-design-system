@@ -1,4 +1,5 @@
 import * as React from "react"
+import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from "./dialog"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose, SheetTrigger } from "./sheet"
 
@@ -56,10 +57,41 @@ function ResponsiveDialogDescription({ children, ...props }: React.ComponentProp
   return <SheetDescription {...props}>{children}</SheetDescription>
 }
 
-function ResponsiveDialogFooter({ children, ...props }: React.ComponentProps<"div">) {
+function ResponsiveDialogFooter({
+  children,
+  className,
+  orientation = "split",
+  ...props
+}: React.ComponentProps<"div"> & {
+  /**
+   * アクションボタンの並べ方。
+   * - "split"（既定）: 均等幅で横並び（各ボタン flex-1）。iOS のボトムシート風。
+   * - "stacked": 旧挙動。デスクトップは右寄せ横並び、モバイルは縦積み。
+   */
+  orientation?: "split" | "stacked"
+}) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
-  if (isDesktop) return <DialogFooter {...props}>{children}</DialogFooter>
-  return <div data-slot="sheet-footer" className="flex flex-col gap-2 mt-auto" {...props}>{children}</div>
+  if (isDesktop)
+    return (
+      <DialogFooter className={className} orientation={orientation} {...props}>
+        {children}
+      </DialogFooter>
+    )
+  return (
+    <div
+      data-slot="sheet-footer"
+      data-orientation={orientation}
+      className={cn(
+        orientation === "stacked"
+          ? "flex flex-col gap-2 mt-auto"
+          : "flex flex-row gap-3 [&>*]:flex-1 [&>*]:basis-0 mt-auto",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  )
 }
 
 function ResponsiveDialogClose({ children, ...props }: React.ComponentProps<typeof DialogClose>) {

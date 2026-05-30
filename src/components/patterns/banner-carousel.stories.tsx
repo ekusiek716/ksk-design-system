@@ -12,9 +12,9 @@ type Story = StoryObj<typeof BannerCarousel>
 
 const SAMPLE_ITEMS = [
   { caption: "春の早割キャンペーン", subCaption: "最大30% OFF" },
-  { caption: "新郎新婦様へ", subCaption: "特別プラン公開中" },
+  { caption: "新規会員様へ", subCaption: "特別クーポン配布中" },
   { caption: "GW限定セール", subCaption: "5/3〜5/6開催" },
-  { caption: "記念日ケーキ特集", subCaption: "全品送料無料" },
+  { caption: "週末限定セール", subCaption: "全品送料無料" },
 ]
 
 export const Default: Story = {

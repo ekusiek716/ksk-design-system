@@ -36,12 +36,13 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
 interface DialogContentProps
   extends React.ComponentProps<typeof DialogPrimitive.Content> {
   /**
-   * デフォルトの内側余白（p-6）を制御。
-   * - true（既定）: p-6 を付与（従来通り）
-   * - false       : p-0。タブ/スクロール本体/フッタの3段構成など、
-   *                 ヘッダ/本文/フッタを個別に padding 制御したい
-   *                 複雑モーダル向け。`className="p-0 gap-0"` で打ち消す
-   *                 既存実装の正規版。
+   * デフォルトの内側余白とセクション間レイアウトを制御。
+   * - true（既定）: p-6 + `flex flex-col gap-4` を付与。ヘッダ/本文/フッタが
+   *                 16px 間隔で縦に並ぶ（AlertDialog と同じ挙動）。本文セクションを
+   *                 持たない確認ダイアログでも、ヘッダとフッタが詰まらない。
+   * - false       : 余白・レイアウトを一切付与しない（素の要素）。タブ/スクロール
+   *                 本体/固定フッタの3段構成など、内側を自前でレイアウトする
+   *                 複雑モーダル向け。
    */
   padding?: boolean
   /**
@@ -96,7 +97,7 @@ function DialogContent({
             ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh-max(env(safe-area-inset-top),2rem)-2rem)] overflow-y-auto"
             : "top-[50%] translate-y-[-50%]",
           "rounded-lg bg-[var(--Surface-Primary)] shadow-[var(--shadow-dialog)]",
-          padding && "p-6",
+          padding && "flex flex-col gap-4 p-6",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           className
@@ -125,11 +126,30 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+function DialogFooter({
+  className,
+  orientation = "split",
+  ...props
+}: React.ComponentProps<"div"> & {
+  /**
+   * アクションボタンの並べ方。
+   * - "split"（既定）: 均等幅で横並び（各ボタン flex-1）。2 ボタンを 50/50 で
+   *   並べる iOS 風レイアウト。モバイルでも横並びのまま。
+   * - "stacked": 旧挙動。モバイルは縦積み、sm 以上で右寄せ横並び（hug 幅）。
+   *   3 つ以上のアクションや、右寄せにしたいフォーム系ダイアログで使う。
+   */
+  orientation?: "split" | "stacked"
+}) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
+      data-orientation={orientation}
+      className={cn(
+        orientation === "stacked"
+          ? "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"
+          : "flex flex-row gap-3 [&>*]:flex-1 [&>*]:basis-0",
+        className
+      )}
       {...props}
     />
   )
