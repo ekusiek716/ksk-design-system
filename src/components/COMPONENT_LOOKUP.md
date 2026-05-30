@@ -46,7 +46,7 @@
 | Popover, PopoverTrigger, PopoverContent, PopoverAnchor | `@/components/ui/popover` | — | ClickToShow, SimpleContent |
 | ProgressRing | `@/components/ui/progress-ring` | — | Default, Empty, Full, AllSizes, CustomLabel, Animated |
 | Progress | `@/components/ui/progress` | — | Default, Empty, Half, Full, AllStates |
-| RadioGroup, RadioGroupItem | `@/components/ui/radio-group` | — | ThreeOptions, WithDisabled, HoverState |
+| RadioGroup, RadioGroupItem | `@/components/ui/radio-group` | — | ThreeOptions, WithDisabled, WithDescription, HoverState |
 | ResponsiveDialog, ResponsiveDialogTrigger, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter, ResponsiveDialogClose | `@/components/ui/responsive-dialog` | — | Default |
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect |
