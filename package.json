@@ -18,7 +18,6 @@
     "AGENTS.md",
     "CLAUDE.md",
     "src/preset.css",
-    "src/preset-standalone.css",
     "src/styles",
     "src/themes",
     "src/components/COMPONENT_LOOKUP.md",
@@ -43,10 +42,6 @@
     "./preset": {
       "import": "./src/preset.css",
       "default": "./src/preset.css"
-    },
-    "./preset-standalone": {
-      "import": "./src/preset-standalone.css",
-      "default": "./src/preset-standalone.css"
     },
     "./styles": {
       "import": "./src/preset.css",

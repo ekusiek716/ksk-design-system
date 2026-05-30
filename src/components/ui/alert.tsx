@@ -55,7 +55,7 @@ const alertVariants = cva("relative w-full", {
       ].join(" "),
       "inline-caution": [
         "flex gap-1 items-start rounded-sm",
-        "bg-[var(--Surface-Caution-Light)]",
+        "bg-[var(--Surface-Caution)]",
         "px-3 py-2",
       ].join(" "),
       "inline-warning": [
@@ -76,7 +76,7 @@ const alertInnerVariants = cva(
         success: "border-[var(--Focus-High-Emphasis)]",
         info: "border-[var(--Border-Medium-Emphasis)]",
         error: "border-[var(--Border-Caution)]",
-        warning: "border-[var(--Primitive-Wood-800)]",
+        warning: "border-[var(--Border-Warning)]",
         "inline-info": "",
         "inline-caution": "",
         "inline-warning": "",
@@ -184,7 +184,7 @@ function Alert({
 }
 
 const alertTitleVariants: Record<string, string> = {
-  success: "text-[var(--Primitive-Forest-800)]",
+  success: "text-[var(--Text-Success)]",
   info: "text-[var(--Text-High-Emphasis)]",
   error: "text-[var(--Text-Caution)]",
   warning: "text-[var(--Text-Warning)]",

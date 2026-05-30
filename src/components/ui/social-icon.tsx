@@ -2,6 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import {
   SOCIAL_ICON_DATA,
+  SOCIAL_ICON_LABELS,
   SOCIAL_ICON_PLATFORMS,
   type SocialIconShape,
   type SocialIconTone,
@@ -9,12 +10,12 @@ import {
 
 export interface SocialIconProps
   extends Omit<React.ComponentProps<"svg">, "children"> {
-  /** プラットフォーム名（小文字）。例: "github" / "spotify" / "tiktok" */
+  /** プラットフォーム slug（小文字）。例: "github" / "spotify" / "apple-music" */
   platform: string
   /**
    * アイコンの形。
    * - "original"（既定）: ロゴそのまま
-   * - "square" / "rounded-square": 角丸四角の地に乗せた版
+   * - "square" / "rounded-square": 角丸四角の地に乗せた版（旧アセットの一部のみ）
    * - "rounded": 円形地（一部ブランドのみ）
    */
   shape?: SocialIconShape
@@ -60,11 +61,11 @@ function resolveEntry(platform: string, shape: SocialIconShape, tone: SocialIcon
  * ```tsx
  * <SocialIcon platform="github" />
  * <SocialIcon platform="spotify" tone="mono" />
- * <SocialIcon platform="tiktok" shape="rounded-square" size={32} />
+ * <SocialIcon platform="apple-music" size={32} />
  * ```
  *
- * 利用可能な platform は {@link SOCIAL_ICON_PLATFORMS}。未収録の指定は何も
- * 描画しない（null）。
+ * 利用可能な platform は {@link SOCIAL_ICON_PLATFORMS}、表示名は
+ * {@link SOCIAL_ICON_LABELS}。未収録の指定は何も描画しない（null）。
  */
 function SocialIcon({
   platform,
@@ -94,5 +95,5 @@ function SocialIcon({
   )
 }
 
-export { SocialIcon, SOCIAL_ICON_PLATFORMS }
+export { SocialIcon, SOCIAL_ICON_PLATFORMS, SOCIAL_ICON_LABELS }
 export type { SocialIconShape, SocialIconTone }
