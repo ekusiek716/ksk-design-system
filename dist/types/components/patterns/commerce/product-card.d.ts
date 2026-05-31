@@ -18,7 +18,6 @@ interface ProductCardProps extends React.ComponentProps<"div"> {
     href?: string;
     onCardClick?: () => void;
     ranking?: number;
-    deliveryLabel?: string;
     orientation?: "vertical" | "horizontal";
     showCartButton?: boolean;
     onCartAdd?: () => void;
@@ -44,6 +43,6 @@ interface ProductCardProps extends React.ComponentProps<"div"> {
  * - `isFavorite` / `onFavoriteToggle`: ハート（重ね・トグル）
  * - `showCartButton`: カート追加 CTA（vertical のみ）
  */
-declare function ProductCard({ className, name, imageUrl, imageAlt, price, originalPrice, rating, reviewCount, shopName, tags, isFavorite, onFavoriteToggle, href, onCardClick, ranking, deliveryLabel, orientation, showCartButton, onCartAdd, cartButtonLabel, ...props }: ProductCardProps): import("react/jsx-runtime").JSX.Element;
+declare function ProductCard({ className, name, imageUrl, imageAlt, price, originalPrice, rating, reviewCount, shopName, tags, isFavorite, onFavoriteToggle, href, onCardClick, ranking, orientation, showCartButton, onCartAdd, cartButtonLabel, ...props }: ProductCardProps): import("react/jsx-runtime").JSX.Element;
 export { ProductCard };
 export type { ProductCardProps, ProductCardTag };
