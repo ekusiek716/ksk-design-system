@@ -208,7 +208,7 @@
     {
       "name": "Dialog",
       "path": "src/components/ui/dialog.tsx",
-      "description": "モーダルダイアログ。重要な確認・フォーム入力に使用。モバイルではResponsiveDialogを推奨。 position=\"top\" でモバイル向け上部寄せ。",
+      "description": "タスク面用の中央モーダル(role=dialog)。フォーム入力・絞り込み等の「作業する」面に使う。削除/送信等の割り込み確認は ConfirmDialog / AlertDialog(role=alertdialog) を使い分ける。モバイルは ResponsiveDialog 推奨。position=\"top\" でモバイル向け上部寄せ。",
       "subcomponents": [
         "DialogTrigger",
         "DialogContent",
@@ -572,7 +572,7 @@
     {
       "name": "AlertDialog",
       "path": "src/components/ui/alert-dialog.tsx",
-      "description": "確認ダイアログ。破壊的アクションの二段階確認に使用。",
+      "description": "「アクションを止める」割り込み確認の基盤(role=alertdialog)。破壊的アクションの二段階確認に使用。中央表示・オーバーレイ外クリックでは閉じない（明示的に選ばせる）。タスク面の中央モーダルは Dialog を使う。",
       "variants": [
         "default",
         "sm"
@@ -967,7 +967,7 @@
     {
       "name": "ConfirmDialog",
       "path": "src/components/patterns/confirm-dialog.tsx",
-      "description": "確認ダイアログ。削除・送信等の重要操作前の確認に使用。非同期onConfirm対応・ローディング状態あり。",
+      "description": "確認ダイアログ。AlertDialog(role=alertdialog)基盤の割り込み確認。削除・送信等の重要操作前に PC/SP とも中央アラートで確認。外クリックでは閉じない・非同期onConfirm対応・ローディング状態あり。",
       "variants": [
         "default",
         "destructive"
