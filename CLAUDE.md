@@ -58,6 +58,7 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **contracts/rules.json** | 禁止パターン31件・AIアンチパターン9件・アクセシビリティ要件 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
 | **src/components/COMPONENT_LOOKUP.md** | 全109コンポーネントのバリアント・インポートパス一覧（自動生成） |
+| **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
 
 **セッション開始時 / コードを書く前に必ず読む:**
 1. `contracts/rules.json` の `prohibited` と `aiPatterns`（AIが典型的に犯すパターン集）を確認
