@@ -51,7 +51,7 @@
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
-| Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass` | BottomSheet, FloatSheet, RightSheet, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout) |
+| Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass` | BottomSheet, FloatSheet, RightSheet, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout) |
 | Skeleton | `@/components/ui/skeleton` | — | CardSkeleton, TextSkeleton, AvatarWithText |
 | Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Disabled |
 | SOCIAL_ICON_LABELS, SOCIAL_ICON_DATA, SOCIAL_ICON_PLATFORMS | `@/components/ui/social-icon-data` | — | — |
