@@ -33,10 +33,22 @@ function ResponsiveDialogTrigger({ children, ...props }: React.ComponentProps<ty
   return <SheetTrigger {...props}>{children}</SheetTrigger>
 }
 
-function ResponsiveDialogContent({ children, className, ...props }: React.ComponentProps<typeof DialogContent>) {
+function ResponsiveDialogContent({
+  children,
+  className,
+  swipeToClose,
+  ...props
+}: React.ComponentProps<typeof DialogContent> & {
+  /**
+   * SP（Sheet）側で下スワイプ閉じ（全面 scroll-aware）を有効化。
+   * PC（Dialog）は中央モーダルなので無視される。絞り込みモーダル等で
+   * 「SP は下スワイプで閉じたい」ときに付ける。
+   */
+  swipeToClose?: boolean
+}) {
   const isDesktop = useMediaQuery("(min-width: 768px)")
   if (isDesktop) return <DialogContent className={className} {...props}>{children}</DialogContent>
-  return <SheetContent side="bottom" className={className}>{children}</SheetContent>
+  return <SheetContent side="bottom" swipeToClose={swipeToClose} className={className}>{children}</SheetContent>
 }
 
 function ResponsiveDialogHeader({ children, ...props }: React.ComponentProps<"div">) {
