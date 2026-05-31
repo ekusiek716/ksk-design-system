@@ -38,9 +38,9 @@ function RatingDisplay({ className, rating, reviewCount, size = "sm", showCount 
   return (
     <div data-slot="rating-display" className={cn("inline-flex items-center gap-0.5", className)} role="img" aria-label={`評価 ${clamped.toFixed(1)} / 5${reviewCount != null ? ` (${reviewCount}件)` : ""}`} {...props}>
       {/* 星アイコン */}
-      <StarIcon size={icon} className="text-[var(--Brand-Primary)]" />
+      <StarIcon size={icon} className="text-[var(--Object-High-Emphasis)]" />
       {/* 評価値 */}
-      {showValue && <span className={cn("text-[var(--Brand-Primary)]", val)}>{clamped.toFixed(2)}</span>}
+      {showValue && <span className={cn("text-[var(--Text-High-Emphasis)]", val)}>{clamped.toFixed(2)}</span>}
       {/* レビュー件数 */}
       {showCount && reviewCount != null && <span className={cn("text-[var(--Text-Low-Emphasis)]", cnt)}>({reviewCount.toLocaleString("ja-JP")})</span>}
     </div>

@@ -118,6 +118,7 @@ function CategoryScroll({
   return (
     <section data-slot="category-scroll" className={cn("py-4", className)}>
       <SectionHeader
+        className="px-4"
         title={title}
         action={
           moreHref ? (

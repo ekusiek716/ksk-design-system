@@ -110,10 +110,10 @@ export const WithCount: Story = {
 export const TileAndSoldOut: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
-      <Chip shape="square" size="tile" selected>4号</Chip>
-      <Chip shape="square" size="tile">5号</Chip>
-      <Chip shape="square" size="tile" soldOut>6号</Chip>
-      <Chip shape="square" size="tile" soldOut>7号</Chip>
+      <Chip shape="square" size="tile" selected>S</Chip>
+      <Chip shape="square" size="tile">M</Chip>
+      <Chip shape="square" size="tile" soldOut>L</Chip>
+      <Chip shape="square" size="tile" soldOut>XL</Chip>
     </div>
   ),
 }
@@ -165,10 +165,10 @@ export const RealWorldFilters: Story = {
             サイズ
           </div>
           <div className="flex flex-wrap gap-2">
-            <Chip shape="square" size="tile" selected>4号</Chip>
-            <Chip shape="square" size="tile">5号</Chip>
-            <Chip shape="square" size="tile" soldOut>6号</Chip>
-            <Chip shape="square" size="tile" soldOut>7号</Chip>
+            <Chip shape="square" size="tile" selected>S</Chip>
+            <Chip shape="square" size="tile">M</Chip>
+            <Chip shape="square" size="tile" soldOut>L</Chip>
+            <Chip shape="square" size="tile" soldOut>XL</Chip>
           </div>
         </div>
       </div>
