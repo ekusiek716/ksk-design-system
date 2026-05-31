@@ -1,13 +1,14 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import {
-  ResponsiveDialog,
-  ResponsiveDialogContent,
-  ResponsiveDialogHeader,
-  ResponsiveDialogTitle,
-  ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-} from "@/components/ui/responsive-dialog"
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog"
 
 interface ConfirmDialogProps {
   open: boolean
@@ -28,6 +29,17 @@ interface ConfirmDialogProps {
   loading?: boolean
 }
 
+/**
+ * ConfirmDialog — 「アクションを止める」割り込み確認（破壊操作の二段階確認）。
+ *
+ * `role="alertdialog"`（AlertDialog 基盤）。タスク面の絞り込み・フォーム等とは
+ * 別カテゴリで、支援技術には緊急の確認として通知され、**オーバーレイの外側クリックでは
+ * 閉じない**（明示的に確認/キャンセルを選ばせる）。PC/SP とも中央表示の
+ * アラート（iOS/Android の確認アラート慣習に準拠）。
+ *
+ * タスク用の中央モーダル（絞り込み等）が要るときは `Dialog` / `Sheet` /
+ * `ResponsiveDialog` を使う。
+ */
 function ConfirmDialog({
   open,
   onOpenChange,
@@ -54,22 +66,21 @@ function ConfirmDialog({
   }, [onConfirm, onOpenChange])
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent>
-        <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>{title}</ResponsiveDialogTitle>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
           {description && (
-            <ResponsiveDialogDescription>{description}</ResponsiveDialogDescription>
+            <AlertDialogDescription>{description}</AlertDialogDescription>
           )}
-        </ResponsiveDialogHeader>
-        <ResponsiveDialogFooter className="mt-4">
-          <Button
-            variant="secondary"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-          >
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          {/* Cancel は Radix 管理（Esc → キャンセル / 自動クローズ）。見た目は従来踏襲で secondary。 */}
+          <AlertDialogCancel variant="secondary" disabled={isLoading}>
             {cancelLabel}
-          </Button>
+          </AlertDialogCancel>
+          {/* 確認は非同期/ローディングを自前管理するため、AlertDialogAction の
+              即時自動クローズは使わず Button。onConfirm 完了後に閉じる。 */}
           <Button
             variant={variant === "destructive" ? "destructive" : "default"}
             onClick={handleConfirm}
@@ -77,9 +88,9 @@ function ConfirmDialog({
           >
             {isLoading ? loadingLabel : confirmLabel}
           </Button>
-        </ResponsiveDialogFooter>
-      </ResponsiveDialogContent>
-    </ResponsiveDialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 
