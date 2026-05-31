@@ -32,8 +32,8 @@ interface ChipProps extends Omit<React.ComponentProps<"button">, "children">, Va
  * - キーワード: `<Chip>キーワード</Chip>`
  * - フィルタ選択: `<Chip selected>選択済み</Chip>`
  * - 削除可能タグ: `<Chip removable onRemove={fn}>タグ</Chip>`
- * - サイズタイル: `<Chip shape="square" size="tile" selected={isSelected}>3号</Chip>`
- * - 売り切れタイル: `<Chip shape="square" size="tile" soldOut>5号</Chip>`
+ * - サイズタイル: `<Chip shape="square" size="tile" selected={isSelected}>M</Chip>`
+ * - 売り切れタイル: `<Chip shape="square" size="tile" soldOut>L</Chip>`
  * - カウント付き: `<Chip selected count={156}>すべて</Chip>`
  * - リンク化: `<Chip href="/search?q=foo">foo</Chip>`
  */
