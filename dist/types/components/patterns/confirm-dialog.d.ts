@@ -16,6 +16,17 @@ interface ConfirmDialogProps {
     onConfirm: () => void | Promise<void>;
     loading?: boolean;
 }
+/**
+ * ConfirmDialog — 「アクションを止める」割り込み確認（破壊操作の二段階確認）。
+ *
+ * `role="alertdialog"`（AlertDialog 基盤）。タスク面の絞り込み・フォーム等とは
+ * 別カテゴリで、支援技術には緊急の確認として通知され、**オーバーレイの外側クリックでは
+ * 閉じない**（明示的に確認/キャンセルを選ばせる）。PC/SP とも中央表示の
+ * アラート（iOS/Android の確認アラート慣習に準拠）。
+ *
+ * タスク用の中央モーダル（絞り込み等）が要るときは `Dialog` / `Sheet` /
+ * `ResponsiveDialog` を使う。
+ */
 declare function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, cancelLabel, loadingLabel, variant, onConfirm, loading, }: ConfirmDialogProps): import("react/jsx-runtime").JSX.Element;
 export { ConfirmDialog };
 export type { ConfirmDialogProps };
