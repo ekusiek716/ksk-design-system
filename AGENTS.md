@@ -4,9 +4,9 @@
 
 **KSK Design System** は、フリーランスデザイナー / エンジニア / PdM が **複数クライアント案件を1つのDSで高速に回す** ために設計された統合デザインシステムです。
 
-2つのプロダクションDSの設計思想を統合:
-- **助太刀 inc.** のCore UI DS（BtoB / SaaS / リクルート向け）
-- **Cake.jp** のCake DS（EC / BtoC / コマース向け）
+2つのドメインの設計思想を統合:
+- BtoB / SaaS / リクルート系（信頼感・業務効率を重視）
+- EC / BtoC / コマース系（購買体験・温かみを重視）
 
 ---
 
@@ -84,7 +84,6 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **contracts/rules.json** | 禁止パターン31件・AIアンチパターン9件・アクセシビリティ要件 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
 | **src/components/COMPONENT_LOOKUP.md** | 全109コンポーネントのバリアント・インポートパス（自動生成） |
-| **CAKE_COMPONENTS.md** | Cake.jp固有コンポーネント一覧（EC案件時に参照） |
 
 ---
 
