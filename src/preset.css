@@ -84,6 +84,17 @@
   --ring: var(--Focus-High-Emphasis);
 }
 
+/* ─── Radius Tokens ───
+   角丸の意味別トークン。コンポーネントは rounded-[var(--Radius-*)] で参照し、
+   rounded-lg / rounded-[32px] のベタ書き（＝ドリフトの元）を避ける。
+   テーマ非依存（Brand / Light-Dark で変わらない固定値）。
+   面 < モーダル < シート の順に丸くなる階層。 */
+:root {
+  --Radius-Surface: 0.5rem;  /* 8px  — Card / Popover パネル / 面の既定。丸くしたいならここを上げる */
+  --Radius-Modal:   1.5rem;  /* 24px — 中央モーダル（Dialog / AlertDialog）。ピル/シートの丸い言語に合わせる */
+  --Radius-Sheet:   2rem;    /* 32px — 端寄せ Sheet（bottom / float） */
+}
+
 /* ─── Shadow Tokens ─── */
 :root {
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
