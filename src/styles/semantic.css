@@ -101,7 +101,7 @@
   --Border-Info-Subtle:     rgba(59, 130, 246, 0.30);
 
   /* ─── Brand ─── */
-  --Brand-Primary:           var(--Primitive-Brand-500);
+  --Brand-Primary:           var(--Primitive-Brand-600);
   --Brand-Action:            var(--Primitive-Brand-700);
   --Brand-Light:             var(--Primitive-Brand-100);
   --Brand-Ultra-Light:       var(--Primitive-Brand-50);

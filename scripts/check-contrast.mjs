@@ -51,10 +51,8 @@ pairs.push([resolve(text["medium-emphasis"]), surface, "Text-Medium / Surface-Pr
 pairs.push([resolve(text["low-emphasis"]), surface, "Text-Low / Surface-Primary", 4.5])
 pairs.push([resolve(text["accent-primary"]), surface, "Text-Accent / Surface-Primary", 4.5])
 pairs.push([resolve(text["high-emphasis"]), surfaceSecondary, "Text-High / Surface-Secondary", 4.5])
-// ボタン等の UI ラベルは大文字テキスト扱い（3:1）。白×Brand-500 は ~3.7 で
-// normal text 4.5 には届かないが、これは青系プライマリボタンの一般的な水準。
-// 4.5 を厳守したい場合は Brand を 600/700 系へ。
-pairs.push([resolve(text["on-inverse"]), brand, "Text-on-Inverse / Brand-Primary (UI 3:1)", 3.0])
+// プライマリボタン等のラベル。Brand-Primary=Brand-600 にしたことで白文字が AA(4.5) を満たす。
+pairs.push([resolve(text["on-inverse"]), brand, "Text-on-Inverse / Brand-Primary", 4.5])
 
 // Categorical: Bold は文字用 → 白背景 & 自分の Subtle 背景で AA
 const cat = sem.categorical || {}
