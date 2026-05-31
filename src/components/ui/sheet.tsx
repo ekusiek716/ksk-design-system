@@ -299,7 +299,7 @@ const sheetVariants = cva(
           "data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=closed]:duration-150",
         ].join(" "),
         bottom: [
-          "inset-x-0 bottom-0 rounded-t-[32px]",
+          "inset-x-0 bottom-0 rounded-t-[var(--Radius-Sheet)]",
           "bg-[var(--Surface-Primary)]",
           // 高さ制約: viewport より高いシートで top が画面外にはみ出るのを防ぐ。
           // snap mode は activeSnapPoint で独自に高さ制御するため、このバリアント
@@ -323,7 +323,7 @@ const sheetVariants = cva(
          * 左右・下に余白を持つカード型。モバイルの入力シートに最適。
          */
         float: [
-          "inset-x-3 bottom-3 rounded-[32px] max-w-lg mx-auto",
+          "inset-x-3 bottom-3 rounded-[var(--Radius-Sheet)] max-w-lg mx-auto",
           "bg-[var(--Surface-Primary)]",
         ].join(" "),
         /**
@@ -332,7 +332,7 @@ const sheetVariants = cva(
          * アクション確認シートに最適。
          */
         "float-glass": [
-          "inset-x-3 bottom-3 rounded-[32px] max-w-lg mx-auto",
+          "inset-x-3 bottom-3 rounded-[var(--Radius-Sheet)] max-w-lg mx-auto",
           "glass glass-specular",
         ].join(" "),
         /**
@@ -340,7 +340,7 @@ const sheetVariants = cva(
          * 下から全幅で出るガラス素材シート。
          */
         "bottom-glass": [
-          "inset-x-0 bottom-0 rounded-t-[32px]",
+          "inset-x-0 bottom-0 rounded-t-[var(--Radius-Sheet)]",
           "glass-strong",
         ].join(" "),
       },
@@ -880,7 +880,7 @@ function SnapBottomSheetContent({
         onKeyDown={onKeyDown}
         className={cn(
           "fixed inset-x-0 bottom-0 z-50 flex flex-col",
-          "bg-[var(--Surface-Primary)] rounded-t-[32px] shadow-[var(--shadow-dialog)]",
+          "bg-[var(--Surface-Primary)] rounded-t-[var(--Radius-Sheet)] shadow-[var(--shadow-dialog)]",
           // Suppress Radix open/close fade — we manage transform ourselves
           "data-[state=open]:animate-none data-[state=closed]:animate-none",
           "outline-none",
