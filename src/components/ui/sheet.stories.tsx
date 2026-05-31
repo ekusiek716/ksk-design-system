@@ -217,6 +217,44 @@ export const BottomSheetSwipeToClose: Story = {
   },
 }
 
+// 全画面 + スクロールありの swipeToClose。実機（SP）で全面スワイプ閉じと
+// スクロール保護（途中は閉じない／先頭で下スワイプ→閉じる）を確認する用。
+export const BottomSheetSwipeFullHeight: Story = {
+  name: "BottomSheet — swipeToClose (full height / scrollable)",
+  parameters: { layout: "fullscreen" },
+  render: () => {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <div className="w-full min-h-screen flex flex-col items-center justify-center gap-3 bg-[var(--Surface-Secondary)] p-8">
+        <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] text-center max-w-xs">
+          SP 確認用。本文どこでも下スワイプで閉じる（スクロールが先頭のとき）。スクロール途中は閉じずスクロール優先。
+        </p>
+        <Button onClick={() => setOpen(true)}>全画面シートを開く</Button>
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetContent side="bottom" swipeToClose className="h-[90dvh]">
+            <SheetHeader className="mb-4">
+              <SheetTitle>タスク詳細</SheetTitle>
+              <SheetDescription>
+                バー・本文どちらでも下スワイプで閉じます。下までスクロール→先頭に戻すと再び閉じられます。
+              </SheetDescription>
+            </SheetHeader>
+            <div className="flex flex-col gap-3">
+              {Array.from({ length: 30 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4 typo-body-md text-[var(--Text-High-Emphasis)]"
+                >
+                  行 {i + 1} — ここを下スワイプしても（先頭なら）閉じる。スクロール中は閉じない。
+                </div>
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    )
+  },
+}
+
 // ─── Snap points ──────────────────────────────────────────────────────────────
 
 export const BottomSheetSnap: Story = {
