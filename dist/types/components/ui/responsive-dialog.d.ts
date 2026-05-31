@@ -8,7 +8,14 @@ interface ResponsiveDialogProps {
 }
 declare function ResponsiveDialog({ children, ...props }: ResponsiveDialogProps): import("react/jsx-runtime").JSX.Element;
 declare function ResponsiveDialogTrigger({ children, ...props }: React.ComponentProps<typeof DialogTrigger>): import("react/jsx-runtime").JSX.Element;
-declare function ResponsiveDialogContent({ children, className, ...props }: React.ComponentProps<typeof DialogContent>): import("react/jsx-runtime").JSX.Element;
+declare function ResponsiveDialogContent({ children, className, swipeToClose, ...props }: React.ComponentProps<typeof DialogContent> & {
+    /**
+     * SP（Sheet）側で下スワイプ閉じ（全面 scroll-aware）を有効化。
+     * PC（Dialog）は中央モーダルなので無視される。絞り込みモーダル等で
+     * 「SP は下スワイプで閉じたい」ときに付ける。
+     */
+    swipeToClose?: boolean;
+}): import("react/jsx-runtime").JSX.Element;
 declare function ResponsiveDialogHeader({ children, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function ResponsiveDialogTitle({ children, ...props }: React.ComponentProps<typeof DialogTitle>): import("react/jsx-runtime").JSX.Element;
 declare function ResponsiveDialogDescription({ children, ...props }: React.ComponentProps<typeof DialogDescription>): import("react/jsx-runtime").JSX.Element;

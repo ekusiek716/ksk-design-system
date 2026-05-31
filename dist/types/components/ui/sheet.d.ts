@@ -49,9 +49,16 @@ interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.
     padding?: boolean;
     /**
      * Bottom-anchored sheets only (`side="bottom"` / `"bottom-glass"`). When true,
-     * <SheetDragIndicator /> is auto-rendered at the top and dragging it down
-     * past ~30% of the sheet height calls onOpenChange(false). Ignored when
-     * the parent <Sheet> uses `snapPoints` (snap mode handles its own drag).
+     * <SheetDragIndicator /> is auto-rendered at the top and a downward swipe
+     * dragging past ~30% of the sheet height calls onOpenChange(false).
+     *
+     * The swipe works across the whole sheet surface, not just the indicator:
+     * a downward drag dismisses when it starts on the handle, or while the
+     * touched scroll region is at its top. Mid-scroll and horizontal gestures
+     * stay with the content, so it never hijacks scrolling.
+     *
+     * Ignored when the parent <Sheet> uses `snapPoints` (snap mode handles its
+     * own drag).
      */
     swipeToClose?: boolean;
     /**
