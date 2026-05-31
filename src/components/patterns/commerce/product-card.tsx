@@ -25,7 +25,6 @@ interface ProductCardProps extends React.ComponentProps<"div"> {
   href?: string
   onCardClick?: () => void
   ranking?: number
-  deliveryLabel?: string
   orientation?: "vertical" | "horizontal"
   showCartButton?: boolean
   onCartAdd?: () => void
@@ -110,7 +109,6 @@ function ProductCard({
   href,
   onCardClick,
   ranking,
-  deliveryLabel,
   orientation = "vertical",
   showCartButton = false,
   onCartAdd,
@@ -171,7 +169,7 @@ function ProductCard({
           />
           {/* お気に入りボタン */}
           {onFavoriteToggle && (
-            <div className="absolute bottom-1 right-1 z-10">
+            <div className="absolute top-1 right-1 z-10">
               <button
                 type="button"
                 className="flex size-8 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)]/80 backdrop-blur-sm"
@@ -209,11 +207,6 @@ function ProductCard({
                   reviewCount={reviewCount}
                   size="sm"
                 />
-              )}
-              {deliveryLabel && (
-                <p className="typo-body-xs text-[var(--Text-Medium-Emphasis)]">
-                  {deliveryLabel}
-                </p>
               )}
             </div>
             <PriceDisplay
@@ -267,7 +260,7 @@ function ProductCard({
         </div>
         {/* お気に入りボタン */}
         {onFavoriteToggle && (
-          <div className="absolute bottom-1.5 right-1.5 z-[4]">
+          <div className="absolute top-1.5 right-1.5 z-[4]">
             <button
               type="button"
               className="flex size-9 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)]/80 backdrop-blur-sm transition-colors hover:bg-[var(--Surface-Tertiary)]"
@@ -295,21 +288,12 @@ function ProductCard({
         <h3 className="line-clamp-2 typo-body-md text-[var(--Text-High-Emphasis)]">
           {name}
         </h3>
-        {(rating != null || deliveryLabel) && (
-          <div className="flex flex-wrap items-center gap-2">
-            {rating != null && (
-              <RatingDisplay
-                rating={rating}
-                reviewCount={reviewCount}
-                size="sm"
-              />
-            )}
-            {deliveryLabel && (
-              <p className="typo-body-xs text-[var(--Text-Medium-Emphasis)]">
-                {deliveryLabel}
-              </p>
-            )}
-          </div>
+        {rating != null && (
+          <RatingDisplay
+            rating={rating}
+            reviewCount={reviewCount}
+            size="sm"
+          />
         )}
         <PriceDisplay
           price={price}

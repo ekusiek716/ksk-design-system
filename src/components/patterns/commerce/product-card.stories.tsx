@@ -15,7 +15,6 @@ const sampleProduct = {
   rating: 4.67,
   reviewCount: 345,
   shopName: "サンプルショップ",
-  deliveryLabel: "最短 4/10",
 }
 
 export const Vertical: Story = {

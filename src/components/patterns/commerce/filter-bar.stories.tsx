@@ -17,10 +17,31 @@ export const Default: Story = {
   render: () => (
     <FilterBar
       filters={[
-        { label: "ステータス" },
+        {
+          label: "ステータス",
+          options: [
+            { label: "未着手", value: "todo" },
+            { label: "進行中", value: "in-progress" },
+            { label: "完了", value: "done" },
+          ],
+        },
         { label: "担当者", value: "山田 太郎", isActive: true },
-        { label: "種別" },
-        { label: "優先度" },
+        {
+          label: "種別",
+          options: [
+            { label: "バグ", value: "bug" },
+            { label: "機能", value: "feature" },
+            { label: "改善", value: "improvement" },
+          ],
+        },
+        {
+          label: "優先度",
+          options: [
+            { label: "高", value: "high" },
+            { label: "中", value: "mid" },
+            { label: "低", value: "low" },
+          ],
+        },
       ]}
       resultCount={128}
       sortLabel="更新日順"
