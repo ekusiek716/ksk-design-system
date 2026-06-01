@@ -281,7 +281,7 @@ function SheetOverlay({
 /** ドラッグインジケーター（Apple HIG: 36×5pt, gray, centered） */
 function SheetDragIndicator() {
   return (
-    <div className="flex justify-center pt-2.5 pb-1 flex-shrink-0">
+    <div className="flex justify-center pt-4 pb-1 flex-shrink-0">
       <div className="w-9 h-[5px] rounded-full bg-[var(--Object-Disable)] opacity-50" />
     </div>
   )
@@ -558,6 +558,11 @@ function SwipeToCloseBottomSheet({
   const rootCtx = React.useContext(SheetRootContext)
   const [dragY, setDragY] = React.useState(0)
   const [dragging, setDragging] = React.useState(false)
+  // transform transition は「ドラッグのスプリングバック」専用。マウント直後は
+  // 無効のままにする（bottom variant は open アニメを持たないため、開いた瞬間に
+  // transition が走ると「下へズレてから戻る」ちらつきになる）。最初のドラッグ
+  // 開始で有効化＝必要な時だけ効く（RAF / タブ可視状態に依存しない）。
+  const [everDragged, setEverDragged] = React.useState(false)
   const startYRef = React.useRef(0)
   const startXRef = React.useRef(0)
   // Per-gesture decision: null = undecided, "drag" = closing the sheet,
@@ -617,6 +622,7 @@ function SwipeToCloseBottomSheet({
       if (dy > 0 && dy > Math.abs(dx) && atTop) {
         decisionRef.current = "drag"
         draggingRef.current = true
+        setEverDragged(true)
         setDragging(true)
         try {
           e.currentTarget.setPointerCapture(e.pointerId)
@@ -681,7 +687,7 @@ function SwipeToCloseBottomSheet({
             ? { bottom: keyboardInset, maxHeight: visibleHeight ?? undefined }
             : null),
           transform: `translate3d(0, ${dragY}px, 0)`,
-          transition: dragging
+          transition: dragging || !everDragged
             ? "none"
             : "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
           willChange: "transform",
