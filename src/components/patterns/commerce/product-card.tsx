@@ -25,6 +25,8 @@ interface ProductCardProps extends React.ComponentProps<"div"> {
   href?: string
   onCardClick?: () => void
   ranking?: number
+  /** @deprecated v1.30.0 以降は表示しません。既存 consumer の型互換のために残しています。 */
+  deliveryLabel?: string
   orientation?: "vertical" | "horizontal"
   showCartButton?: boolean
   onCartAdd?: () => void
@@ -109,6 +111,7 @@ function ProductCard({
   href,
   onCardClick,
   ranking,
+  deliveryLabel: _deliveryLabel,
   orientation = "vertical",
   showCartButton = false,
   onCartAdd,

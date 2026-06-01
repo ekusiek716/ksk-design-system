@@ -39,6 +39,13 @@ function contrast(a, b) {
   return (hi + 0.05) / (lo + 0.05)
 }
 
+function readThemeBrandShade(theme, shade) {
+  if (theme === "default") return prim.brand[shade]
+  const css = readFileSync(join(root, "src/themes", `${theme}.css`), "utf8")
+  const match = css.match(new RegExp(`--Primitive-Brand-${shade}:\\s*(#[0-9A-Fa-f]{6})`))
+  return match?.[1] ?? null
+}
+
 const surface = resolve(sem.surface.primary)        // 白
 const surfaceSecondary = resolve(sem.surface.secondary) // 薄灰
 const brand = resolve(sem.brand.primary)
@@ -53,6 +60,17 @@ pairs.push([resolve(text["accent-primary"]), surface, "Text-Accent / Surface-Pri
 pairs.push([resolve(text["high-emphasis"]), surfaceSecondary, "Text-High / Surface-Secondary", 4.5])
 // プライマリボタン等のラベル。Brand-Primary=Brand-600 にしたことで白文字が AA(4.5) を満たす。
 pairs.push([resolve(text["on-inverse"]), brand, "Text-on-Inverse / Brand-Primary", 4.5])
+
+// テーマごとの Brand-600 も確認する。tokens.json の default 値だけでは、
+// orange/green/violet の theme override による CTA コントラスト低下を検出できない。
+for (const theme of ["blue", "orange", "green", "violet"]) {
+  pairs.push([
+    resolve(text["on-inverse"]),
+    readThemeBrandShade(theme, "600"),
+    `Text-on-Inverse / ${theme} Brand-Primary`,
+    4.5,
+  ])
+}
 
 // Categorical: Bold は文字用 → 白背景 & 自分の Subtle 背景で AA
 const cat = sem.categorical || {}
