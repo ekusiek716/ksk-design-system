@@ -43,7 +43,7 @@ interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.
      * シートのデフォルト内側余白（p-6）を制御。
      * - true（既定）: p-6 を付与（従来通り）
      * - false       : p-0。スクロール領域＋固定フッタなど自前で内側レイアウトを
-     *                 組むときに使用。これまで `className="!p-0"` で潰していた
+     *                 組むときに使用。これまで padding を強制上書きしていた
      *                 ケースを正規化する。
      */
     padding?: boolean;
