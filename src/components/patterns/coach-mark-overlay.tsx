@@ -190,7 +190,7 @@ export function CoachMarkOverlay({
         onNext={handleNext}
         showClose={!!onSkip}
         onClose={onSkip}
-        className="!py-4 !px-4"
+        className="py-4! px-4!"
       >
         <span
           className="fixed pointer-events-none"

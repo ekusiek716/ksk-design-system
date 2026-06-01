@@ -113,7 +113,7 @@ export const FloatGlass: Story = {
           // (which has `position: relative`) instead of the iframe viewport.
           // This is a Storybook-specific override — in real apps the
           // `float-glass` variant still floats relative to the viewport.
-          className="!absolute px-5 pt-5 pb-5"
+          className="absolute! px-5 pt-5 pb-5"
         >
           <SheetHeader className="mb-4">
             <SheetTitle>Liquid Glass Sheet</SheetTitle>

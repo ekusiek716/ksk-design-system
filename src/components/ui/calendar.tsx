@@ -50,7 +50,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
           "bg-gradient-to-l from-transparent from-50% to-[var(--Brand-Ultra-Light)] to-50%",
         // range の中間: 全幅を帯で塗り、ボタンの円を消す
         range_middle:
-          "bg-[var(--Brand-Ultra-Light)] [&>button]:!bg-transparent [&>button]:!text-[var(--Text-High-Emphasis)] [&>button]:rounded-none [&>button]:hover:!bg-[var(--Brand-Ultra-Light)]",
+          "bg-[var(--Brand-Ultra-Light)] [&>button]:bg-transparent! [&>button]:text-[var(--Text-High-Emphasis)]! [&>button]:rounded-none [&>button]:hover:bg-[var(--Brand-Ultra-Light)]!",
         today: "[&>button]:font-semibold [&>button]:text-[var(--Brand-Primary)]",
         outside: "opacity-30",
         disabled: "text-[var(--Text-Low-Emphasis)] opacity-50",
