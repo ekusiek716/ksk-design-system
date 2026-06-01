@@ -7,7 +7,7 @@ description: >-
   切り替わる。デフォルトは信頼感のある Blue。
 colors:
   # --- Brand（テーマ差し替え対象。下記は default=Blue） ---
-  primary: "#3B82F6"          # Brand-Primary / var(--Brand-Primary)
+  primary: "#2563EB"          # Brand-Primary / var(--Brand-Primary)
   primaryAction: "#1D4ED8"    # Brand-Action（hover/active）
   onPrimary: "#FFFFFF"
   # --- Neutral scale ---
@@ -99,7 +99,7 @@ EC/BtoC 系）を回すのが狙い。
 
 | 用途 | トークン | 既定値(Blue) |
 |---|---|---|
-| ブランド | `var(--Brand-Primary)` | `#3B82F6` |
+| ブランド | `var(--Brand-Primary)` | `#2563EB` |
 | 背景(白/薄灰) | `var(--Surface-Primary)` / `-Secondary` | `#FFFFFF` / `#F9FAFB` |
 | 文字(強/中/弱) | `var(--Text-High/Medium/Low-Emphasis)` | `#111827` / `#374151` / `#6B7280` |
 | 罫線 | `var(--Border-Low-Emphasis)` | `#E5E7EB` |
