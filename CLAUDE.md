@@ -34,7 +34,7 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | テーマ | Brand-500 | 想定業種 |
 |--------|-----------|---------|
 | Default (Blue) | `#3B82F6` | 汎用・SaaS・BtoB |
-| Orange | `#E04B00` | EC・フード・エンタメ |
+| Orange | `#F97316` | EC・フード・エンタメ |
 | Green | `#16A34A` | ヘルスケア・サステナ・金融 |
 | Violet | `#7C3AED` | プレミアム・クリエイティブ・教育 |
 
