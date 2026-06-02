@@ -58,66 +58,73 @@ function MultiSelect({
 
   const displayChips = selectedLabels.slice(0, maxDisplay)
   const overflowCount = selectedLabels.length - displayChips.length
+  const showClearButton = clearable && value.length > 0 && !disabled
 
   return (
     <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setQuery("") }}>
-      <PopoverTrigger asChild>
-        <button
-          data-slot="multi-select-trigger"
-          disabled={disabled}
-          aria-expanded={open}
-          className={cn(
-            "flex min-h-12 w-full flex-wrap items-center gap-1.5 rounded-lg border bg-[var(--Surface-Primary)] px-3 py-2 typo-body-md transition-colors outline-none text-left",
-            open
-              ? "border-[var(--Border-Accent-Primary)] ring-[3px] ring-[var(--Focus-High-Emphasis)]/50"
-              : "border-[var(--Border-Medium-Emphasis)] hover:border-[var(--Border-High-Emphasis)]",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            className
-          )}
-        >
-          {value.length === 0 ? (
-            <span className="text-[var(--Text-Low-Emphasis)] flex-1">{placeholder}</span>
-          ) : (
-            <>
-              {displayChips.map((label) => (
-                <span
-                  key={label}
-                  className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] typo-label-xs"
-                >
-                  {label}
-                </span>
-              ))}
-              {overflowCount > 0 && (
-                <span className="inline-flex items-center h-6 px-2 rounded-full bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)] typo-label-xs">
-                  +{overflowCount}
-                </span>
-              )}
-              <span className="flex-1" />
-            </>
-          )}
-          <span className="flex items-center gap-1 ml-auto shrink-0">
-            {clearable && value.length > 0 && (
-              <span
-                role="button"
-                aria-label="クリア"
-                onClick={(e) => { e.stopPropagation(); onChange?.([]) }}
-                className="flex size-5 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] hover:text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Secondary)] transition-colors"
-              >
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                </svg>
-              </span>
+      <div className="relative w-full">
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            data-slot="multi-select-trigger"
+            disabled={disabled}
+            aria-expanded={open}
+            aria-haspopup="listbox"
+            className={cn(
+              "relative flex min-h-12 w-full flex-wrap items-center gap-1.5 rounded-lg border bg-[var(--Surface-Primary)] px-3 py-2 pr-10 typo-body-md transition-colors outline-none text-left",
+              showClearButton && "pr-16",
+              open
+                ? "border-[var(--Border-Accent-Primary)] ring-[3px] ring-[var(--Focus-High-Emphasis)]/50"
+                : "border-[var(--Border-Medium-Emphasis)] hover:border-[var(--Border-High-Emphasis)]",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              className
             )}
-            <svg
-              width="16" height="16" viewBox="0 0 16 16" fill="none"
-              className={cn("text-[var(--Object-Medium-Emphasis)] transition-transform", open && "rotate-180")}
-              aria-hidden
-            >
-              <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          >
+            {value.length === 0 ? (
+              <span className="text-[var(--Text-Low-Emphasis)] flex-1">{placeholder}</span>
+            ) : (
+              <>
+                {displayChips.map((label) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] typo-label-xs"
+                  >
+                    {label}
+                  </span>
+                ))}
+                {overflowCount > 0 && (
+                  <span className="inline-flex items-center h-6 px-2 rounded-full bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)] typo-label-xs">
+                    +{overflowCount}
+                  </span>
+                )}
+                <span className="flex-1" />
+              </>
+            )}
+            <span className="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center">
+              <svg
+                width="16" height="16" viewBox="0 0 16 16" fill="none"
+                className={cn("text-[var(--Object-Medium-Emphasis)] transition-transform", open && "rotate-180")}
+                aria-hidden
+              >
+                <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </button>
+        </PopoverTrigger>
+        {showClearButton && (
+          <button
+            type="button"
+            data-slot="multi-select-clear"
+            aria-label="選択をクリア"
+            onClick={() => onChange?.([])}
+            className="absolute right-9 top-1/2 z-[1] flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] transition-colors hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Object-High-Emphasis)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
+              <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
-          </span>
-        </button>
-      </PopoverTrigger>
+          </button>
+        )}
+      </div>
       <PopoverContent
         className="w-[var(--radix-popover-trigger-width)] p-0"
         align="start"
@@ -161,7 +168,7 @@ function MultiSelect({
                   <span className={cn(
                     "flex size-4 shrink-0 items-center justify-center rounded border transition-colors",
                     checked
-                      ? "bg-[var(--Brand-Primary)] border-[var(--Brand-Primary)] text-white"
+                      ? "bg-[var(--Brand-Primary)] border-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
                       : "border-[var(--Border-Medium-Emphasis)]"
                   )}>
                     {checked && (

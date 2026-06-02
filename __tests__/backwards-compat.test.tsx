@@ -23,6 +23,7 @@ import {
   Badge,
   Card,
   Chip,
+  MultiSelect,
 } from "../src/index"
 
 const html = (el: React.ReactElement) => renderToStaticMarkup(el)
@@ -126,6 +127,8 @@ describe("Chip — backwards-compat", () => {
     const out = html(<Chip variant="filled" removable>tag</Chip>)
     expect(out).toContain('data-slot="chip"')
     expect(out).toContain('data-variant="filled"')
+    expect(out).toContain('data-slot="chip-remove"')
+    expect(out).not.toContain('role="button"')
     expect(out).toContain("tag")
   })
 
@@ -151,6 +154,21 @@ describe("Chip — backwards-compat", () => {
   it("soldOut + href は href を無視して button + disabled", () => {
     const out = html(<Chip soldOut href="/q/foo">5号</Chip>)
     expect(out).toMatch(/^<button /)
+  })
+})
+
+describe("MultiSelect — accessibility structure", () => {
+  it("clear action は trigger button の外側に独立した button として出る", () => {
+    const out = html(
+      <MultiSelect
+        options={[{ value: "tokyo", label: "東京" }]}
+        value={["tokyo"]}
+        onChange={() => {}}
+      />
+    )
+    expect(out).toContain('data-slot="multi-select-trigger"')
+    expect(out).toContain('data-slot="multi-select-clear"')
+    expect(out).not.toContain('role="button"')
   })
 })
 
