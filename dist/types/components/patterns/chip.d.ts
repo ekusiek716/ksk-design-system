@@ -37,6 +37,6 @@ interface ChipProps extends Omit<React.ComponentProps<"button">, "children">, Va
  * - カウント付き: `<Chip selected count={156}>すべて</Chip>`
  * - リンク化: `<Chip href="/search?q=foo">foo</Chip>`
  */
-declare function Chip({ className, variant, size, shape, href, selected, soldOut, removable, onRemove, count, children, ...props }: ChipProps): import("react/jsx-runtime").JSX.Element;
+declare function Chip({ className, variant, size, shape, href, selected, soldOut, removable, onRemove, count, children, disabled: disabledProp, ...props }: ChipProps): import("react/jsx-runtime").JSX.Element;
 export { Chip, chipVariants };
 export type { ChipProps };
