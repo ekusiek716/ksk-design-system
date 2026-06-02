@@ -27,35 +27,48 @@ function roleToCssSegment(role: string) {
     .join("-")
 }
 
-function flattenSemanticTokenNames() {
+function flattenSemanticTokenMap() {
   const tokens = JSON.parse(readFileSync("tokens.json", "utf8"))
   const semantic = tokens.colors.semantic as Record<string, unknown>
-  const names = new Set<string>()
+  const tokenMap = new Map<string, string>()
 
   for (const [category, value] of Object.entries(semantic)) {
     const cssCategory = CATEGORY_NAMES[category]
     if (!cssCategory || !value || typeof value !== "object" || Array.isArray(value)) continue
 
-    for (const key of Object.keys(value)) {
+    for (const [key, tokenValue] of Object.entries(value)) {
       if (key.startsWith("_")) continue
-      names.add(`${cssCategory}-${roleToCssSegment(key)}`)
+      if (typeof tokenValue !== "string") continue
+      tokenMap.set(`${cssCategory}-${roleToCssSegment(key)}`, tokenValue)
     }
   }
 
-  return names
+  return tokenMap
 }
 
-function extractLightSemanticCssVariables() {
+function extractLightSemanticCssVariableMap() {
   const css = readFileSync("src/styles/semantic.css", "utf8")
   const rootBlock = css.match(/:root\s*{([\s\S]*?)\n}\n\n\/\* ─── Dark Mode ─── \*\//)?.[1] ?? ""
-  return [...rootBlock.matchAll(/--([A-Za-z][A-Za-z0-9-]+)\s*:/g)].map((match) => match[1])
+  return new Map(
+    [...rootBlock.matchAll(/--([A-Za-z][A-Za-z0-9-]+)\s*:\s*([^;]+);/g)]
+      .map((match) => [match[1], match[2].trim()])
+  )
 }
 
 describe("tokens.json — semantic token contract", () => {
   it("semantic.css の light mode semantic tokens を機械可読 tokens.json にも持つ", () => {
-    const tokenNames = flattenSemanticTokenNames()
-    const missing = extractLightSemanticCssVariables().filter((name) => !tokenNames.has(name))
+    const tokenMap = flattenSemanticTokenMap()
+    const cssMap = extractLightSemanticCssVariableMap()
+    const missing = [...cssMap.keys()].filter((name) => !tokenMap.has(name))
+    const mismatched = [...cssMap.entries()].flatMap(([name, cssValue]) => {
+      const tokenValue = tokenMap.get(name)
+      return tokenValue !== undefined && tokenValue !== cssValue
+        ? [{ name, cssValue, tokenValue }]
+        : []
+    })
 
+    expect(cssMap.size).toBeGreaterThan(50)
     expect(missing).toEqual([])
+    expect(mismatched).toEqual([])
   })
 })
