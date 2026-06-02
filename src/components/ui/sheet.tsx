@@ -103,6 +103,26 @@ function useVisualViewportInset(): VisualViewportInset {
   return inset
 }
 
+/**
+ * Pure decision for the full-surface swipe-to-close gesture, shared by the
+ * touch and pointer paths in {@link SwipeToCloseBottomSheet}.
+ *
+ * Given the cumulative offset from the gesture's start (`dy`/`dx`) and whether
+ * the touched scroll region is at its top (`atTop`), classify the gesture:
+ *   - `null`   — below the 6px slop; intent is still ambiguous, keep waiting.
+ *   - `"drag"` — a downward, vertical-dominant gesture starting at the top;
+ *                drives the close-drag.
+ *   - `"scroll"` — anything else (upward, horizontal, or not at the top); the
+ *                content keeps its own scroll gesture.
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+function decideSwipeGesture(dy: number, dx: number, atTop: boolean): "drag" | "scroll" | null {
+  if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return null
+  if (dy > 0 && dy > Math.abs(dx) && atTop) return "drag"
+  return "scroll"
+}
+
 function snapToRatio(snap: SnapPoint): number {
   if (typeof snap === "number") return Math.min(1, Math.max(0, snap))
   // "450px" → 450 / window.innerHeight
@@ -571,77 +591,88 @@ function SwipeToCloseBottomSheet({
   // Mirror of `dragging` readable synchronously from the non-passive
   // touchmove listener (state is async).
   const draggingRef = React.useRef(false)
+  // Synchronous mirror of `dragY` so the touch listeners (bound once, with a
+  // stale render closure) can read the live drag distance at release time.
+  const dragYRef = React.useRef(0)
   const scrollerRef = React.useRef<HTMLElement | null>(null)
   const onHandleRef = React.useRef(false)
   const sheetRef = React.useRef<HTMLDivElement>(null)
+  // `close()` lives on a context value whose identity can change; mirror it in
+  // a ref so the once-bound touch listeners always call the current one.
+  const rootCtxRef = React.useRef(rootCtx)
+  rootCtxRef.current = rootCtx
   // Keep the sheet inside the region above the on-screen keyboard so its top
   // edge (title / drag handle) never scrolls off the top of the viewport.
   const { keyboardInset, visibleHeight } = useVisualViewportInset()
 
-  // While a close-drag is committed, block the browser's own touch scrolling so
-  // it doesn't fight our transform. Pointer-event preventDefault is unreliable
-  // for this on iOS; a non-passive touchmove listener is the robust way.
-  React.useEffect(() => {
-    const el = sheetRef.current
-    if (!el) return
-    const blockScroll = (e: TouchEvent) => {
-      if (draggingRef.current) e.preventDefault()
-    }
-    el.addEventListener("touchmove", blockScroll, { passive: false })
-    return () => el.removeEventListener("touchmove", blockScroll)
+  const setDrag = React.useCallback((v: number) => {
+    dragYRef.current = v
+    setDragY(v)
   }, [])
 
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button != null && e.button !== 0) return
-    startYRef.current = e.clientY
-    startXRef.current = e.clientX
-    decisionRef.current = null
-    draggingRef.current = false
-    // The drag indicator is always a valid grab target regardless of scroll
-    // position; elsewhere the gesture must start at the top of the content.
-    onHandleRef.current =
-      e.target instanceof HTMLElement &&
-      e.target.closest("[data-sheet-drag-handle]") != null
-    scrollerRef.current = findScrollableAncestor(e.target, sheetRef.current)
-  }
+  // ── Unified pointer/touch gesture ──────────────────────────────────────────
+  // The close-drag must work anywhere on the sheet, not just the handle. On
+  // touch devices the scrollable body has an effective `touch-action: pan-y`,
+  // so the browser claims a vertical drag as a scroll/overscroll and fires
+  // `pointercancel` before our pointer-based drag commits — the sheet only
+  // "twitches" and springs back. The robust fix is to drive the gesture from a
+  // non-passive `touchmove` listener and `preventDefault()` once we decide it's
+  // a close-drag: that both blocks native scrolling and keeps touch events
+  // flowing. Pointer handlers stay for mouse only (no cancellation problem).
+  const beginGesture = React.useCallback(
+    (clientX: number, clientY: number, target: EventTarget | null) => {
+      startYRef.current = clientY
+      startXRef.current = clientX
+      decisionRef.current = null
+      draggingRef.current = false
+      // The drag indicator is always a valid grab target regardless of scroll
+      // position; elsewhere the gesture must start at the top of the content.
+      onHandleRef.current =
+        target instanceof HTMLElement &&
+        target.closest("[data-sheet-drag-handle]") != null
+      scrollerRef.current = findScrollableAncestor(target, sheetRef.current)
+    },
+    []
+  )
 
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (decisionRef.current === "scroll") return
-    const dy = e.clientY - startYRef.current
-    const dx = e.clientX - startXRef.current
-    if (decisionRef.current === null) {
-      // Wait until the gesture shows clear intent before claiming it.
-      if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return
-      // Start a close-drag only on a downward, vertical-dominant gesture that
-      // begins while the touched scroll region is at its top (or on the drag
-      // handle). Anything else is the content's gesture (scroll / horizontal).
-      const atTop =
-        onHandleRef.current ||
-        !scrollerRef.current ||
-        scrollerRef.current.scrollTop <= 0
-      if (dy > 0 && dy > Math.abs(dx) && atTop) {
-        decisionRef.current = "drag"
-        draggingRef.current = true
-        setEverDragged(true)
-        setDragging(true)
-        try {
-          e.currentTarget.setPointerCapture(e.pointerId)
-        } catch {
-          // setPointerCapture は未対応環境で例外を投げるため無視
+  // Returns true once the gesture is claimed as a close-drag (caller should
+  // `preventDefault()` for touch so the browser stops scrolling).
+  const moveGesture = React.useCallback(
+    (clientX: number, clientY: number): boolean => {
+      if (decisionRef.current === "scroll") return false
+      const dy = clientY - startYRef.current
+      const dx = clientX - startXRef.current
+      if (decisionRef.current === null) {
+        // A close-drag may begin on the drag handle regardless of scroll
+        // position; elsewhere it must start while the touched scroll region is
+        // at its top (otherwise the gesture belongs to the content's scroll).
+        const atTop =
+          onHandleRef.current ||
+          !scrollerRef.current ||
+          scrollerRef.current.scrollTop <= 0
+        const decision = decideSwipeGesture(dy, dx, atTop)
+        if (decision === null) return false // below slop — keep waiting
+        decisionRef.current = decision
+        if (decision === "drag") {
+          draggingRef.current = true
+          setEverDragged(true)
+          setDragging(true)
+        } else {
+          return false
         }
-      } else {
-        decisionRef.current = "scroll"
-        return
       }
-    }
-    if (draggingRef.current) {
-      // Downward only — upward drags are clamped at 0 (matches snap-mode
-      // clamping at maxSnap; no rubber-band for consistency).
-      setDragY(Math.max(0, dy))
-    }
-  }
+      if (draggingRef.current) {
+        // Downward only — upward drags are clamped at 0 (matches snap-mode
+        // clamping at maxSnap; no rubber-band for consistency).
+        setDrag(Math.max(0, dy))
+        return true
+      }
+      return false
+    },
+    [setDrag]
+  )
 
-  const finishDrag = () => {
+  const endGesture = React.useCallback(() => {
     const wasDragging = draggingRef.current
     draggingRef.current = false
     decisionRef.current = null
@@ -649,13 +680,66 @@ function SwipeToCloseBottomSheet({
     setDragging(false)
     const h = sheetRef.current?.offsetHeight ?? 0
     const threshold = h > 0 ? h * 0.3 : 200
-    if (dragY > threshold) {
-      rootCtx?.close()
+    if (dragYRef.current > threshold) {
+      rootCtxRef.current?.close()
     }
     // Always spring back. If close succeeded the sheet unmounts and this
     // is a no-op visually; if it didn't (controlled parent kept open) the
     // sheet returns to its rest position.
-    setDragY(0)
+    setDrag(0)
+  }, [setDrag])
+
+  // Touch path: non-passive so `preventDefault()` actually suppresses native
+  // scroll. Bound imperatively because React's synthetic touch listeners are
+  // passive and cannot preventDefault.
+  React.useEffect(() => {
+    const el = sheetRef.current
+    if (!el) return
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return
+      const t = e.touches[0]
+      beginGesture(t.clientX, t.clientY, e.target)
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return
+      const t = e.touches[0]
+      if (moveGesture(t.clientX, t.clientY)) e.preventDefault()
+    }
+    const onTouchEnd = () => endGesture()
+    el.addEventListener("touchstart", onTouchStart, { passive: true })
+    el.addEventListener("touchmove", onTouchMove, { passive: false })
+    el.addEventListener("touchend", onTouchEnd, { passive: true })
+    el.addEventListener("touchcancel", onTouchEnd, { passive: true })
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart)
+      el.removeEventListener("touchmove", onTouchMove)
+      el.removeEventListener("touchend", onTouchEnd)
+      el.removeEventListener("touchcancel", onTouchEnd)
+    }
+  }, [beginGesture, moveGesture, endGesture])
+
+  // Pointer path: mouse only. Touch is handled by the non-passive listeners
+  // above; double-handling here would re-introduce the cancellation race.
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return
+    if (e.button != null && e.button !== 0) return
+    beginGesture(e.clientX, e.clientY, e.target)
+  }
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return
+    if (moveGesture(e.clientX, e.clientY)) {
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId)
+      } catch {
+        // setPointerCapture は未対応環境で例外を投げるため無視
+      }
+    }
+  }
+
+  const finishDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return
+    endGesture()
   }
 
   return (
@@ -987,8 +1071,9 @@ export {
   Sheet, SheetTrigger, SheetClose, SheetContent,
   SheetHeader, SheetFooter, SheetTitle, SheetDescription,
   SheetDragIndicator,
-  // Exported for unit testing of the on-screen-keyboard inset math. Not part of
-  // the public package API (src/index.ts re-exports a curated list only).
+  // Exported for unit testing only — not part of the public package API
+  // (src/index.ts re-exports a curated list only).
   computeVisualViewportInset,
+  decideSwipeGesture,
 }
 export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset }
