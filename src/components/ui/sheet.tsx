@@ -598,9 +598,13 @@ function SwipeToCloseBottomSheet({
   const onHandleRef = React.useRef(false)
   const sheetRef = React.useRef<HTMLDivElement>(null)
   // `close()` lives on a context value whose identity can change; mirror it in
-  // a ref so the once-bound touch listeners always call the current one.
+  // a ref so the once-bound touch listeners always call the current one. Synced
+  // in an effect (not during render) to respect React's no-ref-writes-in-render
+  // rule — the listeners only read it at gesture-end, long after commit.
   const rootCtxRef = React.useRef(rootCtx)
-  rootCtxRef.current = rootCtx
+  React.useEffect(() => {
+    rootCtxRef.current = rootCtx
+  }, [rootCtx])
   // Keep the sheet inside the region above the on-screen keyboard so its top
   // edge (title / drag handle) never scrolls off the top of the viewport.
   const { keyboardInset, visibleHeight } = useVisualViewportInset()
