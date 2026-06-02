@@ -69,6 +69,9 @@ interface ChipProps
  */
 function Chip({
   className,
+  id,
+  style,
+  title,
   variant = "filled",
   size,
   shape,
@@ -154,18 +157,21 @@ function Chip({
       "relative",
       chipVariants({ variant, size, shape }),
       "rounded-r-none",
+      variant === "outline" && "border-r-0",
       selectedStyles,
       soldOutStyles,
-      className,
     )
 
     return (
       <span
+        id={id}
+        style={style}
+        title={title}
         data-slot="chip"
         data-variant={variant}
         data-selected={selected || undefined}
         data-sold-out={isSoldOut || undefined}
-        className="inline-flex items-center"
+        className={cn("inline-flex items-center", className)}
       >
         {href && !isSoldOut ? (
           <a href={href} className={actionClassName}>
@@ -191,7 +197,10 @@ function Chip({
             onRemove?.()
           }}
           className={cn(
-            "inline-flex shrink-0 items-center justify-center border-l border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)] transition-colors hover:bg-[var(--Surface-Tertiary)] hover:text-[var(--Text-High-Emphasis)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
+            "inline-flex shrink-0 items-center justify-center bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)] transition-colors hover:bg-[var(--Surface-Tertiary)] hover:text-[var(--Text-High-Emphasis)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
+            variant === "outline"
+              ? "border border-l-0 border-[var(--Border-Medium-Emphasis)] bg-transparent"
+              : "border-l border-[var(--Border-Low-Emphasis)]",
             selected && "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Active-Primary-Button)] hover:text-[var(--Text-on-Inverse)]",
             removeButtonSize,
             removeButtonShape,
@@ -207,6 +216,9 @@ function Chip({
     return (
       <a
         href={href}
+        id={id}
+        style={style}
+        title={title}
         data-slot="chip"
         data-variant={variant}
         data-selected={selected || undefined}
@@ -225,6 +237,9 @@ function Chip({
   return (
     <button
       type="button"
+      id={id}
+      style={style}
+      title={title}
       data-slot="chip"
       data-variant={variant}
       data-selected={selected || undefined}
