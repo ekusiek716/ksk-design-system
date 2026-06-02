@@ -69,6 +69,9 @@ interface ChipProps
  */
 function Chip({
   className,
+  id,
+  style,
+  title,
   variant = "filled",
   size,
   shape,
@@ -79,9 +82,17 @@ function Chip({
   onRemove,
   count,
   children,
+  disabled: disabledProp,
   ...props
 }: ChipProps) {
   const isSoldOut = soldOut && !selected
+  const disabled = isSoldOut || disabledProp
+  const actualSize = size ?? "md"
+  const actualShape = shape ?? "pill"
+  const removeLabel =
+    typeof children === "string" || typeof children === "number"
+      ? `削除: ${children}`
+      : "削除"
 
   const countBadge = count !== undefined && (
     <span
@@ -96,23 +107,10 @@ function Chip({
     </span>
   )
 
-  const removeButton = removable && (
+  const removeIcon = (
     <span
-      role="button"
-      aria-label="削除"
-      tabIndex={0}
-      onClick={(e) => {
-        e.stopPropagation()
-        onRemove?.()
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault()
-          e.stopPropagation()
-          onRemove?.()
-        }
-      }}
-      className="-mr-1 ml-0.5 inline-flex size-5 items-center justify-center rounded-full hover:bg-[var(--Surface-Tertiary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
+      aria-hidden="true"
+      className="inline-flex size-5 items-center justify-center rounded-full"
     >
       <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
         <path d="M4 4L10 10M10 4L4 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -134,7 +132,6 @@ function Chip({
       {children}
       {countBadge}
       {soldOutOverlay}
-      {removeButton}
     </>
   )
 
@@ -145,10 +142,83 @@ function Chip({
   const soldOutStyles = isSoldOut &&
     "border border-[var(--Text-Disable)] bg-[var(--Surface-Secondary)]! text-[var(--Text-Disable)]! cursor-not-allowed"
 
+  const removeButtonSize = {
+    sm: "h-7 w-7",
+    md: "h-8 w-8",
+    lg: "h-9 w-9",
+    tile: "h-12 w-8",
+  }[actualSize]
+
+  const removeButtonShape =
+    actualShape === "square" || actualSize === "tile" ? "rounded-r-sm" : "rounded-r-full"
+
+  if (removable) {
+    const actionClassName = cn(
+      "relative",
+      chipVariants({ variant, size, shape }),
+      "rounded-r-none",
+      variant === "outline" && "border-r-0",
+      selectedStyles,
+      soldOutStyles,
+    )
+
+    return (
+      <span
+        id={id}
+        style={style}
+        title={title}
+        data-slot="chip"
+        data-variant={variant}
+        data-selected={selected || undefined}
+        data-sold-out={isSoldOut || undefined}
+        className={cn("inline-flex items-center", className)}
+      >
+        {href && !isSoldOut ? (
+          <a href={href} className={actionClassName}>
+            {content}
+          </a>
+        ) : (
+          <button
+            type="button"
+            disabled={disabled}
+            className={actionClassName}
+            {...props}
+          >
+            {content}
+          </button>
+        )}
+        <button
+          type="button"
+          data-slot="chip-remove"
+          aria-label={removeLabel}
+          disabled={disabled}
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove?.()
+          }}
+          className={cn(
+            "inline-flex shrink-0 items-center justify-center bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)] transition-colors hover:bg-[var(--Surface-Tertiary)] hover:text-[var(--Text-High-Emphasis)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
+            variant === "outline"
+              ? "border border-l-0 border-[var(--Border-Medium-Emphasis)] bg-transparent"
+              : "border-l border-[var(--Border-Low-Emphasis)]",
+            selected && "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Active-Primary-Button)] hover:text-[var(--Text-on-Inverse)]",
+            removeButtonSize,
+            removeButtonShape,
+          )}
+        >
+          {removeIcon}
+        </button>
+      </span>
+    )
+  }
+
   if (href && !isSoldOut) {
     return (
       <a
         href={href}
+        id={id}
+        style={style}
+        title={title}
         data-slot="chip"
         data-variant={variant}
         data-selected={selected || undefined}
@@ -167,11 +237,14 @@ function Chip({
   return (
     <button
       type="button"
+      id={id}
+      style={style}
+      title={title}
       data-slot="chip"
       data-variant={variant}
       data-selected={selected || undefined}
       data-sold-out={isSoldOut || undefined}
-      disabled={isSoldOut || props.disabled}
+      disabled={disabled}
       className={cn(
         "relative",
         chipVariants({ variant, size, shape }),
