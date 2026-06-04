@@ -12,7 +12,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { SimplePagination } from "./simple-pagination"
 
 const meta: Meta<typeof SimplePagination> = {
-  title: "Patterns/SimplePagination",
+  title: "Components/SimplePagination",
   component: SimplePagination,
 }
 export default meta

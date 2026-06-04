@@ -95,7 +95,7 @@ const preview: Preview = {
     },
     options: {
       storySort: {
-        order: ["UI", "Patterns", "Pages"],
+        order: ["Foundation", "Components", "Shells", "*"],
       },
     },
   },

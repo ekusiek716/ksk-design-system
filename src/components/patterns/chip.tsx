@@ -142,10 +142,11 @@ function Chip({
   const soldOutStyles = isSoldOut &&
     "border border-[var(--Text-Disable)] bg-[var(--Surface-Secondary)]! text-[var(--Text-Disable)]! cursor-not-allowed"
 
+  // × は本体ラベルに寄せる（独立した w-8 の正方形セルにしない）。tile のみ従来の固定幅。
   const removeButtonSize = {
-    sm: "h-7 w-7",
-    md: "h-8 w-8",
-    lg: "h-9 w-9",
+    sm: "h-7 pl-0.5 pr-2",
+    md: "h-8 pl-0.5 pr-2.5",
+    lg: "h-9 pl-1 pr-3",
     tile: "h-12 w-8",
   }[actualSize]
 
@@ -157,6 +158,8 @@ function Chip({
       "relative",
       chipVariants({ variant, size, shape }),
       "rounded-r-none",
+      // × を本体ラベル直後に寄せるため右パディングを詰める
+      actualSize !== "tile" && "pr-1.5",
       variant === "outline" && "border-r-0",
       selectedStyles,
       soldOutStyles,
@@ -197,10 +200,11 @@ function Chip({
             onRemove?.()
           }}
           className={cn(
-            "inline-flex shrink-0 items-center justify-center bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)] transition-colors hover:bg-[var(--Surface-Tertiary)] hover:text-[var(--Text-High-Emphasis)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
-            variant === "outline"
-              ? "border border-l-0 border-[var(--Border-Medium-Emphasis)] bg-transparent"
-              : "border-l border-[var(--Border-Low-Emphasis)]",
+            "inline-flex shrink-0 items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
+            // 仕切り線なし・本体と同じ面色を継ぎ目なく延長。ホバー時のみ × 側を強調。
+            !selected && variant === "filled" && "bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Tertiary)] hover:text-[var(--Text-High-Emphasis)]",
+            !selected && variant === "accent" && "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)]",
+            !selected && variant === "outline" && "border border-l-0 border-[var(--Border-Medium-Emphasis)] bg-transparent text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]",
             selected && "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Active-Primary-Button)] hover:text-[var(--Text-on-Inverse)]",
             removeButtonSize,
             removeButtonShape,
