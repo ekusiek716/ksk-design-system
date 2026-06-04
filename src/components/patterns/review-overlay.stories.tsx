@@ -3,7 +3,7 @@ import { useState } from "react"
 import { ReviewOverlay, ReviewPin } from "./review-overlay"
 
 const meta: Meta<typeof ReviewOverlay> = {
-  title: "Patterns/ReviewOverlay",
+  title: "Components/ReviewOverlay",
   component: ReviewOverlay,
   parameters: { layout: "centered" },
 }

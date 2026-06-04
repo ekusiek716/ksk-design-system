@@ -10,6 +10,22 @@ import {
   SelectContent,
   SelectItem,
 } from "../../ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../ui/dropdown-menu"
+import {
+  ArrowUp2,
+  ArrowDown2,
+  ArrowSwapVertical,
+  More,
+  Add,
+  ExportSquare,
+  HamburgerMenu,
+  ArrowRight2,
+} from "iconsax-reactjs"
 
 // ─── Types ───
 
@@ -42,10 +58,12 @@ function getStickyCellProps(
   return {
     className: cn(
       "sticky z-[1]",
-      // 影で「貼り付き」の境界を視覚化（軽め）
+      // 横スクロールで列の下に行が潜り込む境界を、ドロップシャドウで明示。
+      // 同じ側に複数固定列があっても、外側の列の不透明背景が内側の影を覆うため
+      // 実質スクロール領域に面した端の列だけ影が見える。
       side === "left"
-        ? "shadow-[1px_0_0_var(--Border-Low-Emphasis)]"
-        : "shadow-[-1px_0_0_var(--Border-Low-Emphasis)]"
+        ? "shadow-[8px_0_12px_-3px_rgba(0,0,0,0.3)]"
+        : "shadow-[-8px_0_12px_-3px_rgba(0,0,0,0.3)]"
     ),
     style: {
       [side]: offset,
@@ -57,86 +75,33 @@ function getStickyCellProps(
 // ─── Inline SVG Icons ───
 
 function SortIcon({ direction }: { direction: SortDirection }) {
-  if (direction === "asc") {
-    return (
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
-        <path d="M7 3L10.5 7.5H3.5L7 3Z" fill="currentColor" />
-        <path d="M7 11L3.5 6.5H10.5L7 11Z" fill="currentColor" opacity="0.25" />
-      </svg>
-    )
-  }
-  if (direction === "desc") {
-    return (
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
-        <path d="M7 3L10.5 7.5H3.5L7 3Z" fill="currentColor" opacity="0.25" />
-        <path d="M7 11L3.5 6.5H10.5L7 11Z" fill="currentColor" />
-      </svg>
-    )
-  }
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 opacity-40">
-      <path d="M7 3L10.5 7.5H3.5L7 3Z" fill="currentColor" />
-      <path d="M7 11L3.5 6.5H10.5L7 11Z" fill="currentColor" />
-    </svg>
-  )
+  if (direction === "asc") return <ArrowUp2 size={16} className="shrink-0" />
+  if (direction === "desc") return <ArrowDown2 size={16} className="shrink-0" />
+  return <ArrowSwapVertical size={16} className="shrink-0 opacity-40" />
 }
 
 function MoreDotsIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-      <circle cx="8" cy="3" r="1.5" />
-      <circle cx="8" cy="8" r="1.5" />
-      <circle cx="8" cy="13" r="1.5" />
-    </svg>
-  )
+  return <More size={16} className="shrink-0" />
 }
 
 function PlusIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M8 3V13M3 8H13" />
-    </svg>
-  )
+  return <Add size={16} className="shrink-0" />
 }
 
 function ExternalLinkIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-      <path d="M10.5 7.5V11.5C10.5 12.05 10.05 12.5 9.5 12.5H2.5C1.95 12.5 1.5 12.05 1.5 11.5V4.5C1.5 3.95 1.95 3.5 2.5 3.5H6.5" />
-      <path d="M8.5 1.5H12.5V5.5" />
-      <path d="M5.5 8.5L12.5 1.5" />
-    </svg>
-  )
+  return <ExportSquare size={14} className="shrink-0" />
 }
 
 function DragHandleIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" className="shrink-0">
-      <circle cx="5" cy="3" r="1.2" />
-      <circle cx="9" cy="3" r="1.2" />
-      <circle cx="5" cy="7" r="1.2" />
-      <circle cx="9" cy="7" r="1.2" />
-      <circle cx="5" cy="11" r="1.2" />
-      <circle cx="9" cy="11" r="1.2" />
-    </svg>
-  )
+  return <HamburgerMenu size={16} className="shrink-0" />
 }
 
 function ChevronIcon({ open }: { open: boolean }) {
   return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <ArrowRight2
+      size={16}
       className={cn("shrink-0 transition-transform duration-200", open && "rotate-90")}
-    >
-      <path d="M6 4L10 8L6 12" />
-    </svg>
+    />
   )
 }
 
@@ -183,7 +148,7 @@ function DataTableHeader({ className, children, ...props }: DataTableHeaderProps
   return (
     <thead
       data-slot="data-table-header"
-      className={cn("bg-[var(--Surface-Secondary)]", className)}
+      className={cn("bg-[var(--Surface-Secondary)] [&>tr]:border-b [&>tr]:border-[var(--Border-Low-Emphasis)]", className)}
       {...props}
     >
       {children}
@@ -199,7 +164,7 @@ function DataTableBody({ className, children, ...props }: DataTableBodyProps) {
   return (
     <tbody
       data-slot="data-table-body"
-      className={cn("[&>tr:not(:last-child)]:border-b [&>tr:not(:last-child)]:border-[var(--Border-Low-Emphasis)]", className)}
+      className={cn("[&>tr:not(:last-child)]:border-b [&>tr:not(:last-child)]:border-b-[var(--Border-Low-Emphasis)]", className)}
       {...props}
     >
       {children}
@@ -219,8 +184,8 @@ function DataTableRow({ className, selected, children, ...props }: DataTableRowP
       data-slot="data-table-row"
       data-selected={selected || undefined}
       className={cn(
-        "transition-colors hover:bg-[var(--Surface-Secondary)]/50",
-        selected && "bg-[var(--Surface-Accent-Primary-Light)] border-l-2 border-l-[var(--Brand-Primary)]",
+        "border-l-2 border-l-transparent transition-colors hover:bg-[var(--Surface-Secondary)]/50",
+        selected && "bg-[var(--Surface-Accent-Primary-Light)] border-l-[var(--Brand-Primary)]",
         className
       )}
       {...props}
@@ -491,58 +456,36 @@ interface DataTableActionCellProps extends React.ComponentProps<"td"> {
 }
 
 function DataTableActionCell({ className, items, ...props }: DataTableActionCellProps) {
-  const [open, setOpen] = React.useState(false)
-  const ref = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => {
-    if (!open) return
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener("mousedown", handler)
-    return () => document.removeEventListener("mousedown", handler)
-  }, [open])
-
   return (
     <td
       data-slot="data-table-action-cell"
       className={cn("w-[48px] px-3 py-2.5", className)}
       {...props}
     >
-      <div ref={ref} className="relative">
-        <button
-          type="button"
-          className="flex size-8 items-center justify-center rounded-lg hover:bg-[var(--Surface-Secondary)] transition-colors"
-          onClick={() => setOpen(!open)}
-          aria-label="行メニュー"
-          aria-expanded={open}
-        >
-          <MoreDotsIcon />
-        </button>
-        {open && (
-          <div className="absolute right-0 top-full z-50 mt-1 min-w-[160px] rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] py-1 shadow-[var(--shadow-lg)] animate-fade-in">
-            {items.map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                className={cn(
-                  "flex w-full items-center gap-2 px-3 py-2 typo-body-md text-left transition-colors hover:bg-[var(--Surface-Secondary)]",
-                  item.destructive
-                    ? "text-[var(--Text-Caution)]"
-                    : "text-[var(--Text-High-Emphasis)]"
-                )}
-                onClick={() => {
-                  item.onClick?.()
-                  setOpen(false)
-                }}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="flex size-8 items-center justify-center rounded-full hover:bg-[var(--Surface-Secondary)] transition-colors"
+            aria-label="行メニュー"
+          >
+            <MoreDotsIcon />
+          </button>
+        </DropdownMenuTrigger>
+        {/* Radix が body へ Portal するため、テーブルの overflow-x-auto にクリップされない */}
+        <DropdownMenuContent align="end" className="min-w-[160px]">
+          {items.map((item) => (
+            <DropdownMenuItem
+              key={item.label}
+              variant={item.destructive ? "destructive" : "default"}
+              onSelect={() => item.onClick?.()}
+            >
+              {item.icon}
+              {item.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </td>
   )
 }
@@ -759,20 +702,20 @@ function DataTableSectionRow({
   return (
     <tr
       data-slot="data-table-section-row"
-      className={cn("bg-[var(--Surface-Secondary)] border-b border-[var(--Border-Low-Emphasis)]", className)}
+      className={cn("bg-[var(--Surface-Tertiary)] border-y border-[var(--Border-Low-Emphasis)]", className)}
       {...props}
     >
       <td colSpan={colSpan} className="px-3 py-2">
         <button
           type="button"
-          className="inline-flex items-center gap-2 typo-label-md text-[var(--Text-High-Emphasis)]"
+          className="inline-flex items-center gap-2 typo-label-lg text-[var(--Text-High-Emphasis)]"
           onClick={onToggle}
           aria-expanded={open}
         >
           <ChevronIcon open={open} />
           {label}
           {count !== undefined && (
-            <span className="typo-body-sm text-[var(--Text-Low-Emphasis)]">({count})</span>
+            <span className="typo-body-md text-[var(--Text-Low-Emphasis)]">({count})</span>
           )}
         </button>
       </td>

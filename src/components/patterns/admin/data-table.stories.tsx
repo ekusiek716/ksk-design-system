@@ -11,7 +11,6 @@ import {
   DataTableAvatarCell,
   DataTableCheckboxCell,
   DataTableActionCell,
-  DataTableBulkActions,
   DataTableEmptyState,
   DataTableAddRow,
   DataTableSectionRow,
@@ -24,6 +23,9 @@ import {
 } from "./data-table"
 import type { SortDirection } from "./data-table"
 import { Badge } from "../../ui/badge"
+import { Button } from "../../ui/button"
+import { BulkActions } from "./bulk-actions"
+import { cn } from "@/lib/utils"
 
 const meta: Meta = {
   title: "Components/Admin/DataTable",
@@ -132,21 +134,6 @@ export const Default: StoryObj = {
 
     return (
       <div className="space-y-4 p-6">
-        <DataTableBulkActions selectedCount={selected.size}>
-          <button
-            type="button"
-            className="typo-label-sm text-[var(--Text-Caution)] hover:underline"
-          >
-            削除する
-          </button>
-          <button
-            type="button"
-            className="typo-label-sm text-[var(--Text-Accent-Primary)] hover:underline"
-          >
-            エクスポート
-          </button>
-        </DataTableBulkActions>
-
         <DataTable>
           <DataTableTable>
             <DataTableHeader>
@@ -211,6 +198,15 @@ export const Default: StoryObj = {
             </DataTableBody>
           </DataTableTable>
         </DataTable>
+
+        <BulkActions selectedCount={selected.size} onClear={() => setSelected(new Set())}>
+          <Button variant="ghost-inverse" size="sm" className="rounded-full">
+            削除する
+          </Button>
+          <Button variant="ghost-inverse" size="sm" className="rounded-full">
+            エクスポート
+          </Button>
+        </BulkActions>
       </div>
     )
   },
@@ -456,6 +452,97 @@ export const StickyColumns: StoryObj = {
                   <DataTableNumberCell value={r.revenue} prefix="¥" />
                   <DataTableNumberCell value={r.orders} />
                   <DataTableCell>{r.lastLogin}</DataTableCell>
+                </DataTableRow>
+              ))}
+            </DataTableBody>
+          </DataTableTable>
+        </DataTable>
+      </div>
+    )
+  },
+}
+
+// ─── Drag & Drop 並べ替え ───
+
+export const DragAndDrop: StoryObj = {
+  name: "Drag & Drop (行の並べ替え)",
+  render: function DragAndDropStory() {
+    const [rows, setRows] = React.useState(sampleUsers)
+    const [dragIndex, setDragIndex] = React.useState<number | null>(null)
+    // ドロップ先を「行と行の間」= 挿入位置(0..rows.length)で持つ。
+    // 行インデックスだと最下行の“下”を指せず「一番下に移動できない」が起きるため。
+    const [overPos, setOverPos] = React.useState<number | null>(null)
+
+    const reset = () => {
+      setDragIndex(null)
+      setOverPos(null)
+    }
+
+    const handleDrop = () => {
+      if (dragIndex !== null && overPos !== null) {
+        setRows((prev) => {
+          const next = [...prev]
+          const [moved] = next.splice(dragIndex, 1)
+          // dragIndex を抜いた分、挿入位置が後ろなら 1 つ詰める
+          const insertAt = dragIndex < overPos ? overPos - 1 : overPos
+          next.splice(insertAt, 0, moved)
+          return next
+        })
+      }
+      reset()
+    }
+
+    return (
+      <div className="p-6">
+        <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mb-3">
+          行頭のハンドルを掴んでドラッグすると並べ替えできます。
+        </p>
+        <DataTable>
+          <DataTableTable>
+            <DataTableHeader>
+              <tr>
+                <DataTableHead className="w-[36px]" />
+                <DataTableHead>名前</DataTableHead>
+                <DataTableHead>メールアドレス</DataTableHead>
+                <DataTableHead>ステータス</DataTableHead>
+              </tr>
+            </DataTableHeader>
+            <DataTableBody>
+              {rows.map((user, index) => (
+                <DataTableRow
+                  key={user.id}
+                  draggable
+                  onDragStart={() => setDragIndex(index)}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    // カーソルが行の上半分なら「この行の前」、下半分なら「この行の後」に挿入
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    const after = e.clientY - rect.top > rect.height / 2
+                    const pos = after ? index + 1 : index
+                    if (pos !== overPos) setOverPos(pos)
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    handleDrop()
+                  }}
+                  onDragEnd={reset}
+                  className={cn(
+                    dragIndex === index && "opacity-40",
+                    // 挿入位置インジケータ（行間の線）。最下行の“下”も表示できる。
+                    dragIndex !== null && overPos === index &&
+                      "shadow-[inset_0_2px_0_var(--Brand-Primary)]",
+                    dragIndex !== null && index === rows.length - 1 && overPos === rows.length &&
+                      "shadow-[inset_0_-2px_0_var(--Brand-Primary)]"
+                  )}
+                >
+                  <DataTableDragHandleCell />
+                  <DataTableAvatarCell src={user.avatar} title={user.name} />
+                  <DataTableCell>{user.email}</DataTableCell>
+                  <DataTableCell>
+                    <Badge variant={statusBadgeVariant[user.status]}>
+                      {statusLabel[user.status]}
+                    </Badge>
+                  </DataTableCell>
                 </DataTableRow>
               ))}
             </DataTableBody>

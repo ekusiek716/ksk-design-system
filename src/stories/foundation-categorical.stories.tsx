@@ -127,7 +127,7 @@ export const Usage: Story = {
             <div
               key={n}
               className="flex items-center gap-2 rounded-lg px-3 py-2"
-              style={{ background: `var(--Categorical-${n}-Subtle)`, borderLeft: `3px solid var(--Categorical-${n})` }}
+              style={{ background: `var(--Categorical-${n}-Subtle)` }}
             >
               <span className="typo-label-sm font-semibold" style={{ color: `var(--Categorical-${n}-Bold)` }}>{cat}</span>
               <span className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">の打ち合わせ 14:00</span>
