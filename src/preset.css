@@ -142,3 +142,23 @@
     display: none;
   }
 }
+
+/* ─── Base Layer: ボーダー / アウトライン色のセーフティネット ───
+   Tailwind CSS v4 の破壊的変更で、border / outline の既定色は
+   gray-200 ではなく `currentColor`（＝要素の文字色）になった。
+   そのため `border` `border-b` のように「幅だけで色を指定しない」
+   クラスは、消費側が親に濃い文字色（例: --Text-High-Emphasis = #1C1A1A）
+   を敷くと枠線が黒ずむ。これを防ぐため、shadcn / 多くの DS と同じく
+   全要素のフォールバック色をテーマ追従の --border / --ring に固定する。
+
+   ※ これは「保険」。コンポーネント側は引き続き
+     border-[var(--Border-Low-Emphasis)] のように明示色を指定すること
+     （明示色を持つ要素は utilities レイヤが base を上書きするため不変）。 */
+@layer base {
+  *,
+  ::after,
+  ::before {
+    border-color: var(--border);
+    outline-color: var(--ring);
+  }
+}
