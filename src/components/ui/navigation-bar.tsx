@@ -122,8 +122,8 @@ function NavigationBar({
 
       {/* Center title — absolute, always visually centered */}
       {title && (
-        <div className="absolute inset-x-0 flex justify-center items-center pointer-events-none">
-          <span className="typo-heading-sm text-[var(--Text-High-Emphasis)] px-16 truncate">
+        <div className="absolute inset-0 flex justify-center items-center px-16 pointer-events-none">
+          <span className="typo-heading-sm text-[var(--Text-High-Emphasis)] min-w-0 truncate">
             {title}
           </span>
         </div>

@@ -30,6 +30,7 @@ patch / minor は破壊変更なし、自動アップグレード可。
 - **scripts/check-deps.sh** で ui → patterns 階層の逆依存を CI でブロック
 - **Vitest** 最小導入 + backwards-compat スイート
 - 全コンポーネントに `data-slot` / `data-variant` / `data-size` を徹底
+- **preset.css**: Tailwind v4 の `currentColor` 既定対策として、border-color / outline-color のベースレイヤ保険を追加。`@import "@ksk/design-system/preset"` するだけで有効。破壊変更なし — 明示色を持つ枠線は不変で、色未指定の枠線のフォールバックのみ `--border` / `--ring` に固定される（消費側で枠線が黒ずむ不具合を防止）
 
 何もしなくても既存コードはそのまま動く。
 

@@ -281,6 +281,15 @@
       "excludes": [".stories."],
       "message": "固定デバイス幅指定禁止（375px等）",
       "fix": "w-full + max-w-* でレスポンシブに対応"
+    },
+    {
+      "id": "P032",
+      "severity": "warning",
+      "category": "token",
+      "pattern": "\\bborder(-[tblrxy])?\\b(?![^\"']*(border-(\\[|transparent)|:border-))",
+      "excludes": [".stories.", "border-0", "border-2", "border-4", "border-collapse", "border-separate", "border-spacing", "border-solid", "border-dashed", "border-dotted", "border-none"],
+      "message": "色を併記しないボーダー幅クラス（border / border-b 等）は避ける。Tailwind v4 では border-color の既定が currentColor になったため、色を書かないと要素の文字色が透けて出て、消費側が濃色テキストを敷くと枠線が黒ずむ（job board で実際に発生）。preset.css の base layer が --border にフォールバックする保険を張るが、コンポーネントは明示が原則。",
+      "fix": "border-[var(--Border-Low-Emphasis)]（区切り線・淡いカード）/ border-[var(--Border-Medium-Emphasis)]（入力・強調）を併記する。状態で出し分けるタブ/バッジ/チップは border-transparent を初期色に置き、data-[state=active]:border-[var(--Brand-Primary)] 等のペア状態クラスで色を上書きする。"
     }
   ],
   "aiPatterns": {
