@@ -33,9 +33,15 @@ function SyncStatusBadge({
   const base =
     "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full typo-label-xs font-medium select-none"
 
+  // 状態変化を SR に通知（error は割り込み、他は穏やかに）
+  const liveProps =
+    state === "error"
+      ? ({ role: "alert", "aria-live": "assertive", "aria-atomic": true } as const)
+      : ({ role: "status", "aria-live": "polite", "aria-atomic": true } as const)
+
   if (state === "syncing") {
     return (
-      <span data-slot="sync-status-badge" data-state={state} className={cn(base, "bg-[var(--Surface-Info)] text-[var(--Text-Info)]", className)}>
+      <span data-slot="sync-status-badge" data-state={state} {...liveProps} className={cn(base, "bg-[var(--Surface-Info)] text-[var(--Text-Info)]", className)}>
         <span
           aria-hidden
           className="size-3 rounded-full border-[1.5px] border-current border-t-transparent animate-spin"
@@ -47,7 +53,7 @@ function SyncStatusBadge({
 
   if (state === "success") {
     return (
-      <span data-slot="sync-status-badge" data-state={state} className={cn(base, "bg-[var(--Surface-Success)] text-[var(--Text-Success)]", className)}>
+      <span data-slot="sync-status-badge" data-state={state} {...liveProps} className={cn(base, "bg-[var(--Surface-Success)] text-[var(--Text-Success)]", className)}>
         <span aria-hidden className="size-1.5 rounded-full bg-current" />
         {successLabel}
       </span>
@@ -56,7 +62,7 @@ function SyncStatusBadge({
 
   if (state === "error") {
     return (
-      <span data-slot="sync-status-badge" data-state={state} className={cn(base, "bg-[var(--Surface-Caution)] text-[var(--Text-Caution)]", className)}>
+      <span data-slot="sync-status-badge" data-state={state} {...liveProps} className={cn(base, "bg-[var(--Surface-Caution)] text-[var(--Text-Caution)]", className)}>
         <span aria-hidden className="size-1.5 rounded-full bg-current" />
         {errorLabel(errorCount)}
         {onRetry && (
@@ -74,7 +80,7 @@ function SyncStatusBadge({
 
   if (state === "offline") {
     return (
-      <span data-slot="sync-status-badge" data-state={state} className={cn(base, "bg-[var(--Surface-Secondary)] text-[var(--Text-Low-Emphasis)]", className)}>
+      <span data-slot="sync-status-badge" data-state={state} {...liveProps} className={cn(base, "bg-[var(--Surface-Secondary)] text-[var(--Text-Low-Emphasis)]", className)}>
         <span aria-hidden className="size-1.5 rounded-full bg-current" />
         {offlineLabel}
       </span>
