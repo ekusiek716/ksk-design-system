@@ -466,7 +466,7 @@ function DataTableActionCell({ className, items, ...props }: DataTableActionCell
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            className="flex size-8 items-center justify-center rounded-full hover:bg-[var(--Surface-Secondary)] transition-colors"
+            className="flex size-8 items-center justify-center rounded-full text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] transition-colors"
             aria-label="行メニュー"
           >
             <MoreDotsIcon />

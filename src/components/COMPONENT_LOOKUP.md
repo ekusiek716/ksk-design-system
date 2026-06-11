@@ -78,7 +78,7 @@
 |-----------|--------|----------|---------|
 | BulkActions | `@/components/patterns/admin/bulk-actions` | — | Default, ManySelected |
 | ChartControls | `@/components/patterns/admin/chart-controls` | — | Default, PeriodOnly |
-| DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState | `@/components/patterns/admin/data-table` | **align**: `left`, `center`, `right`<br>**width**: `auto`, `narrow`, `checkbox`, `action`, `sm`, `md`, `lg`, `xl` | Default, Empty, WithSections, CellVariants, Sticky Columns (左端固定) |
+| DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState | `@/components/patterns/admin/data-table` | **align**: `left`, `center`, `right`<br>**width**: `auto`, `narrow`, `checkbox`, `action`, `sm`, `md`, `lg`, `xl` | Default, Empty, WithSections, CellVariants, Sticky Columns (左端固定), Drag & Drop (行の並べ替え) |
 | ImageUploader | `@/components/patterns/admin/image-uploader` | — | Default, Empty |
 | KebabMenu | `@/components/patterns/admin/kebab-menu` | — | Default |
 | NotificationList | `@/components/patterns/admin/notification-list` | — | Vertical, Horizontal, Empty |

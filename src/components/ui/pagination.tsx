@@ -82,7 +82,7 @@ type PaginationEllipsisProps = React.ComponentProps<"span"> & {
 
 function PaginationEllipsis({ className, label = "その他のページ", ...props }: PaginationEllipsisProps) {
   return (
-    <span aria-hidden data-slot="pagination-ellipsis" className={cn("flex size-10 items-center justify-center", className)} {...props}>
+    <span aria-hidden data-slot="pagination-ellipsis" className={cn("flex size-10 items-center justify-center text-[var(--Text-Medium-Emphasis)]", className)} {...props}>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="3" cy="8" r="1" fill="currentColor" /><circle cx="8" cy="8" r="1" fill="currentColor" /><circle cx="13" cy="8" r="1" fill="currentColor" /></svg>
       <span className="sr-only">{label}</span>
     </span>
