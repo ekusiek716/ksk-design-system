@@ -158,12 +158,21 @@ function Sheet({
   overlay = true,
   onOpenChange,
   open,
+  defaultOpen,
   ...props
 }: SheetProps) {
   const snapRatios = React.useMemo(
     () => (snapPoints ?? []).map(snapToRatio),
     [snapPoints]
   )
+
+  // open は controlled / uncontrolled 両対応。未指定時は内部 state を持つことで、
+  // 自前の close()（スワイプ dismiss / snap 下スワイプ）が Trigger 開きでも機能する。
+  // defaultOpen は Radix に渡さず内部 state の初期値として引き継ぐ
+  // （Root には常に open を渡す＝制御モードになるため）。
+  const isControlledOpen = open !== undefined
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false)
+  const actualOpen = isControlledOpen ? open : internalOpen
 
   const isControlledSnap = activeSnapPointProp !== undefined
   // Uncontrolled default = the *lowest* snap (peek). Callers who want
@@ -184,12 +193,12 @@ function Sheet({
   // Controlled callers own the initial value via `activeSnapPoint` so we
   // never override their choice.
   React.useEffect(() => {
-    if (open && !isControlledSnap && snapPoints && snapPoints.length > 0) {
+    if (actualOpen && !isControlledSnap && snapPoints && snapPoints.length > 0) {
       setInternalSnap(snapPoints[0])
     }
-    // We intentionally only react to `open` flipping true here.
+    // We intentionally only react to `actualOpen` flipping true here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+  }, [actualOpen])
 
   const handleOpenChange = React.useCallback(
     (next: boolean) => {
@@ -197,9 +206,10 @@ function Sheet({
       if (!next && !isControlledSnap && snapPoints && snapPoints.length > 0) {
         setInternalSnap(snapPoints[0])
       }
+      if (!isControlledOpen) setInternalOpen(next)
       onOpenChange?.(next)
     },
-    [onOpenChange, snapPoints, isControlledSnap]
+    [onOpenChange, snapPoints, isControlledSnap, isControlledOpen]
   )
 
   const ctx = React.useMemo<SheetSnapContextValue | null>(() => {
@@ -235,7 +245,7 @@ function Sheet({
       <SheetSnapContext.Provider value={ctx}>
         <DialogPrimitive.Root
           data-slot="sheet"
-          open={open}
+          open={actualOpen}
           onOpenChange={handleOpenChange}
           {...props}
         />
