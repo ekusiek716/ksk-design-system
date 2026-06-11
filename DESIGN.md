@@ -170,9 +170,11 @@ EC/BtoC 系）を回すのが狙い。
 - 色は Semantic トークン `var(--Surface-*)` / `var(--Brand-Primary)` を使う。
 - タイポは `typo-*` クラス。角丸は `var(--Radius-*)`。
 - アイコンは `iconsax-reactjs`。UI は DS コンポーネント（`<Button>`/`<Input>` 等）。
+- **文脈非依存に保つ**: 見た目を自前で固定する。テキストを描く要素は `text-[var(--Text-*)]`、サーフェス（カード/ポップオーバー/シート/ダイアログ等）は `bg-[var(--Surface-*)]`、枠線は `border-[var(--Border-*)]` を明示。親の継承や Tailwind v4 既定（`border`/`ring`/`outline` = currentColor）に依存しない。
 
 **Don't**
 - 生 `#hex` / Tailwind 標準色（`bg-blue-500` 等）を直書きしない。
 - `font-bold` / `text-sm` / `rounded-lg` / `rounded-[24px]` 等のベタ書きをしない（トークン経由）。
 - `lucide-react` / `heroicons` を使わない。生の `<button>`/`<input>`/`<a>` を使わない。
 - 確認ダイアログを `Dialog`（タスク面）で作らない（割り込みは `AlertDialog`/`ConfirmDialog`）。
+- 色なし `border` / 色未指定の text・bg を親の継承や currentColor 任せにしない。漏れは Storybook の **Hostile ctx** トグルで検出できる。

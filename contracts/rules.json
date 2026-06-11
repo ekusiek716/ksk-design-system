@@ -281,6 +281,15 @@
       "excludes": [".stories."],
       "message": "固定デバイス幅指定禁止（375px等）",
       "fix": "w-full + max-w-* でレスポンシブに対応"
+    },
+    {
+      "id": "P032",
+      "severity": "warning",
+      "category": "token",
+      "pattern": "\\bborder(-[tblrxy])?\\b(?![^\"']*(border-(\\[|transparent)|:border-))",
+      "excludes": [".stories.", "border-0", "border-2", "border-4", "border-collapse", "border-separate", "border-spacing", "border-solid", "border-dashed", "border-dotted", "border-none"],
+      "message": "色を併記しないボーダー幅クラス（border / border-b 等）は避ける。Tailwind v4 では border-color の既定が currentColor になったため、色を書かないと要素の文字色が透けて出て、消費側が濃色テキストを敷くと枠線が黒ずむ（job board で実際に発生）。preset.css の base layer が --border にフォールバックする保険を張るが、コンポーネントは明示が原則。",
+      "fix": "border-[var(--Border-Low-Emphasis)]（区切り線・淡いカード）/ border-[var(--Border-Medium-Emphasis)]（入力・強調）を併記する。状態で出し分けるタブ/バッジ/チップは border-transparent を初期色に置き、data-[state=active]:border-[var(--Brand-Primary)] 等のペア状態クラスで色を上書きする。"
     }
   ],
   "aiPatterns": {
@@ -348,6 +357,13 @@
         "pattern": "animate-spin|animate-bounce|animate-pulse",
         "description": "ローディング以外の場所に常時動くアニメーションを付ける",
         "fix": "アニメーションはローディング状態限定。静的 UI には使わない"
+      },
+      {
+        "id": "AI10",
+        "name": "継承・既定への依存（文脈非依存違反）",
+        "pattern": "",
+        "description": "text色・背景・border色を明示せず、親からの継承や Tailwind v4 の既定（border / ring / outline = currentColor）に委ねる。消費側が濃色テキストや色付き背景を敷くと、枠線・アイコン・文字色がその色に化ける（job board で実際に発生）。サーフェス（カード/ポップオーバー/シート/ダイアログ等）が bg 未指定だと親の背景が透ける。",
+        "fix": "コンポーネントは見た目を自前で固定する＝文脈非依存に保つ: テキストを描く要素に text-[var(--Text-*)]、サーフェスに bg-[var(--Surface-*)] と border-[var(--Border-*)] を明示。Content/オーバーレイ系ラッパは既定 text色を pin して子を隔離する。Storybook ツールバーの『Hostile ctx』を loud にして漏れ（マゼンタ化・背景透け）を目視確認する。"
       }
     ]
   },

@@ -102,10 +102,10 @@ function BannerCarousel({
               {(item.caption || item.subCaption) && (
                 <div className="relative z-10">
                   {item.caption && (
-                    <p className="typo-label-xs font-bold leading-snug">{item.caption}</p>
+                    <p className="typo-label-xs font-bold leading-snug text-[var(--Text-High-Emphasis)]">{item.caption}</p>
                   )}
                   {item.subCaption && (
-                    <p className="text-[10px] opacity-75 mt-0.5">{item.subCaption}</p>
+                    <p className="text-[10px] opacity-75 mt-0.5 text-[var(--Text-Medium-Emphasis)]">{item.subCaption}</p>
                   )}
                 </div>
               )}

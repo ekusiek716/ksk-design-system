@@ -22,7 +22,7 @@ function AccordionTrigger({ className, children, ...props }: React.ComponentProp
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "flex flex-1 items-center justify-between py-4 typo-label-md transition-all cursor-pointer",
+          "flex flex-1 items-center justify-between py-4 typo-label-md text-[var(--Text-High-Emphasis)] transition-all cursor-pointer",
           "hover:underline [&[data-state=open]>svg]:rotate-180",
           className
         )}
@@ -41,7 +41,7 @@ function AccordionContent({ className, children, ...props }: React.ComponentProp
   return (
     <AccordionPrimitive.Content
       data-slot="accordion-content"
-      className="overflow-hidden typo-body-md data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up"
+      className="overflow-hidden typo-body-md text-[var(--Text-High-Emphasis)] data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up"
       {...props}
     >
       <div className={cn("pb-4 pt-0", className)}>{children}</div>

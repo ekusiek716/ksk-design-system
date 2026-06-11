@@ -308,7 +308,7 @@ function SheetDragIndicator() {
 }
 
 const sheetVariants = cva(
-  "fixed z-50 shadow-[var(--shadow-dialog)] transition ease-in-out",
+  "fixed z-50 text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)] transition ease-in-out",
   {
     variants: {
       side: {

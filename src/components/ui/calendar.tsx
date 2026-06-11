@@ -33,9 +33,9 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         weekdays: "flex",
         weekday: "text-[var(--Text-Low-Emphasis)] typo-label-xs w-9 font-normal text-center",
         week: "flex w-full mt-2",
-        day: "h-9 w-9 text-center relative p-0 focus-within:relative focus-within:z-20",
+        day: "h-9 w-9 text-center relative p-0 focus-within:relative focus-within:z-20 text-[var(--Text-High-Emphasis)]",
         day_button: cn(
-          "h-9 w-9 typo-body-sm rounded-full transition-colors",
+          "h-9 w-9 typo-body-sm rounded-full transition-colors text-[var(--Text-High-Emphasis)]",
           "hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
         ),

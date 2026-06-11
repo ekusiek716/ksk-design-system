@@ -40,14 +40,14 @@ function ChipGroup<T extends string>({
   onChange: (v: T) => void
 }) {
   return (
-    <div className="flex gap-1" role="group">
+    <div className="flex flex-wrap gap-1" role="group">
       {options.map((opt) => (
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
           aria-pressed={opt.value === value}
           className={cn(
-            "px-3 py-1 rounded-full typo-label-xs border transition-colors",
+            "px-3 py-1 rounded-full typo-label-xs border transition-colors whitespace-nowrap shrink-0",
             opt.value === value
               ? "bg-[var(--Brand-Primary)] text-white border-[var(--Brand-Primary)] font-bold"
               : "border-[var(--Border-Medium-Emphasis)] text-[var(--Text-Medium-Emphasis)] bg-[var(--Surface-Primary)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"
@@ -85,8 +85,8 @@ function ChartControls({
     >
       {/* Granularity */}
       {onGranularityChange && (
-        <div className="flex items-center gap-3">
-          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] font-bold w-10 shrink-0">粒度</span>
+        <div className="flex items-start gap-3">
+          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] font-bold w-10 shrink-0 pt-1.5">粒度</span>
           <ChipGroup
             options={GRANULARITY_OPTIONS}
             value={granularity}
@@ -97,8 +97,8 @@ function ChartControls({
 
       {/* Period */}
       {onPeriodChange && (
-        <div className="flex items-center gap-3">
-          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] font-bold w-10 shrink-0">期間</span>
+        <div className="flex items-start gap-3">
+          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] font-bold w-10 shrink-0 pt-1.5">期間</span>
           <ChipGroup
             options={PERIOD_OPTIONS}
             value={period}
@@ -109,8 +109,8 @@ function ChartControls({
 
       {/* Comparison toggle */}
       {onComparisonChange && (
-        <div className="flex items-center gap-3">
-          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] font-bold w-10 shrink-0">比較</span>
+        <div className="flex items-start gap-3">
+          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] font-bold w-10 shrink-0 pt-1.5">比較</span>
           <button
             onClick={() => onComparisonChange(!showComparison)}
             aria-pressed={showComparison}

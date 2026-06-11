@@ -6,6 +6,8 @@ UI を書く前に必ず確認すること:
 
 - [ ] 既存コンポーネントを `src/components/COMPONENT_LOOKUP.md` で確認したか（手書き・再定義は禁止）
 - [ ] 色は semantic token（`var(--Surface-*)` / `var(--Brand-Primary)` 等）か。Tailwind標準色・生 `#hex` は禁止
+- [ ] `border` は色を併記したか（`border-[var(--Border-Low-Emphasis)]` 等）。Tailwind v4 では無色 border は currentColor になり、消費側の濃色テキストで黒ずむ（preset.css の base layer が保険だが明示が原則）
+- [ ] **文脈非依存**か（テキスト要素に `text-[var(--Text-*)]`、サーフェス/オーバーレイに `bg-[var(--Surface-*)]` を明示）。親の継承や currentColor に頼ると消費側の色文脈で崩れる。Storybook ツールバーの **Hostile ctx** を loud にして、文字/アイコンがマゼンタ化・背景が透けないか確認する
 - [ ] typography は `typo-*` クラスか（`font-bold` 等の直書きは禁止）
 - [ ] アイコンは `iconsax-reactjs` か（`lucide-react` / `heroicons` は使わない）
 - [ ] 生タグ（`<button>` / `<input>` / `<a href>`）でなく DS コンポーネントを使ったか
@@ -55,7 +57,7 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **CLAUDE.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート（Claude Code用） |
 | **AGENTS.md** | 同上（Codex用。セッション開始時の読み込み指示・編集後コマンドを明記） |
 | **contracts/components.json** | 全109コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
-| **contracts/rules.json** | 禁止パターン31件・AIアンチパターン9件・アクセシビリティ要件 |
+| **contracts/rules.json** | 禁止パターン32件・AIアンチパターン10件・アクセシビリティ要件 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
 | **src/components/COMPONENT_LOOKUP.md** | 全109コンポーネントのバリアント・インポートパス一覧（自動生成） |
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
