@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.27.2",
+    "version": "1.30.2",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 55,
@@ -1285,6 +1285,32 @@
         "sort",
         "count"
       ]
+    },
+    {
+      "name": "ReviewCard",
+      "path": "src/components/patterns/commerce/review-card.tsx",
+      "description": "レビューカード。投稿者アバター・星評価・本文・投稿日を表示。商品詳細のレビュー一覧に使用。",
+      "features": [
+        "avatar",
+        "star-rating",
+        "date"
+      ],
+      "rules": [
+        "Object-Rating token for star fill"
+      ]
+    },
+    {
+      "name": "ReviewSummary",
+      "path": "src/components/patterns/commerce/review-summary.tsx",
+      "description": "レビュー集計。平均評価・星分布バー・総件数を表示。商品詳細のレビューセクション見出しに使用。",
+      "features": [
+        "average",
+        "distribution-bars",
+        "count"
+      ],
+      "rules": [
+        "Object-Rating token for distribution bars"
+      ]
     }
   ],
   "admin": [
@@ -1357,6 +1383,19 @@
       "layouts": [
         "vertical",
         "horizontal"
+      ]
+    },
+    {
+      "name": "ChartControls",
+      "path": "src/components/patterns/admin/chart-controls.tsx",
+      "description": "グラフ操作コントロール。粒度（時間/日/週/月）・期間（7日〜カスタム）・前期比トグルのチップ群。ダッシュボードのグラフ上部に配置。",
+      "features": [
+        "granularity",
+        "period",
+        "comparison"
+      ],
+      "rules": [
+        "Chips wrap on narrow widths (flex-wrap)"
       ]
     }
   ],
