@@ -4,8 +4,11 @@
 #
 # 禁止パターンをgrepで検出し、違反があればCI失敗させる。
 # 実行: bash scripts/lint-scratch.sh [ファイルパス...]
-# 引数なしの場合は src/components/ui/ patterns/ icons/ を対象
-# ※ ui/ patterns/ のコンポーネント定義は検査対象外（自分自身を検査しない）
+# 引数なしの場合は src 配下の全 .tsx を対象（components 本体も含む）
+# ※ 生タグ系の構造チェック(1-6)のみ DS 本体(ui/patterns/icons)では
+#    スキップする（プリミティブ実装は <button>/<input> 等を正当に使うため）。
+#    色・typo・spacing 系チェック(7-12)は DS 本体にも適用（段階導入のため警告扱い）。
+#    W1-W11 の警告系は従来どおり全ファイルに適用する。
 # =============================================================
 
 set -euo pipefail
@@ -17,6 +20,21 @@ NC='\033[0m'
 ERRORS=0
 WARNINGS=0
 
+# 色・typo 系の検出を severity 付きで報告する。
+# DS 本体(ui/patterns/icons)は段階導入として WARNING（CI は落とさない）、
+# 消費側スクラッチ等は ERROR。$1=severity(err|warn) $2=メッセージ $3=該当行
+report() {
+  if [ "$1" = "err" ]; then
+    echo -e "${RED}❌ $2${NC}"
+    echo "$3" | head -3
+    ERRORS=$((ERRORS + 1))
+  else
+    echo -e "${YELLOW}⚠️  $2${NC}"
+    echo "$3" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+}
+
 # 検査対象: 引数があればそれを使う、なければ全 .tsx
 if [ $# -gt 0 ]; then
   FILES="$@"
@@ -24,9 +42,7 @@ else
   FILES=$(find src -name '*.tsx' \
     -not -path '*/node_modules/*' \
     -not -name '*.stories.tsx' \
-    -not -path '*/components/ui/*' \
-    -not -path '*/components/patterns/*' \
-    -not -path '*/components/icons/*' \
+    -not -name '*-data.tsx' \
     2>/dev/null)
 fi
 
@@ -36,9 +52,18 @@ echo "======================================="
 for FILE in $FILES; do
   echo "$FILE" | grep -qE '\.(css|json|js|mjs)$' && continue
 
+  # DS 本体（プリミティブ実装）か判定。
+  # true の場合は生タグ系の構造チェックをスキップ（色・typo 系は適用）。
+  IS_DS=false
+  echo "$FILE" | grep -qE '/components/(ui|patterns|icons)/' && IS_DS=true
+  # 色・typo 系の severity（DS 本体は段階導入のため warn）
+  SEV=err
+  [ "$IS_DS" = true ] && SEV=warn
+
   # ──────────────────────────────────────────
-  # エラー（修正必須）
+  # 構造チェック（生タグ）: DS 本体ではスキップ
   # ──────────────────────────────────────────
+  if [ "$IS_DS" = false ]; then
 
   # 1. 生の <button>
   MATCHES=$(grep -n '<button ' "$FILE" 2>/dev/null \
@@ -102,59 +127,41 @@ for FILE in $FILES; do
     ERRORS=$((ERRORS + 1))
   fi
 
+  fi  # ← 構造チェック（生タグ）ここまで
+
+  # ──────────────────────────────────────────
+  # 色・typo・spacing チェック: DS 本体にも適用
+  # ──────────────────────────────────────────
+
   # 7. HEX ハードコード
   MATCHES=$(grep -n '#[0-9a-fA-F]\{6\}' "$FILE" 2>/dev/null \
     | grep -v 'var(\|// \|/\*\|fill="\|stroke="\|src=' || true)
-  if [ -n "$MATCHES" ]; then
-    echo -e "${RED}❌ $FILE: HEXハードコード → var(--Token-Name)を使う${NC}"
-    echo "$MATCHES" | head -3
-    ERRORS=$((ERRORS + 1))
-  fi
+  [ -n "$MATCHES" ] && report "$SEV" "$FILE: HEXハードコード → var(--Token-Name)を使う" "$MATCHES"
 
   # 8. Tailwind 標準色クラス
   MATCHES=$(grep -noE '\b(text|bg|border)-(gray|slate|zinc|neutral|stone|red|orange|amber|yellow|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]+' \
     "$FILE" 2>/dev/null | grep -v '// \|/\*' || true)
-  if [ -n "$MATCHES" ]; then
-    echo -e "${RED}❌ $FILE: Tailwind標準色 → セマンティックトークン var(--)を使う${NC}"
-    echo "$MATCHES" | head -3
-    ERRORS=$((ERRORS + 1))
-  fi
+  [ -n "$MATCHES" ] && report "$SEV" "$FILE: Tailwind標準色 → セマンティックトークン var(--)を使う" "$MATCHES"
 
   # 9. text-white / bg-white
   MATCHES=$(grep -n '\btext-white\b\|\bbg-white\b' "$FILE" 2>/dev/null \
     | grep -v '// \|/\*' || true)
-  if [ -n "$MATCHES" ]; then
-    echo -e "${RED}❌ $FILE: text-white/bg-white → セマンティックトークンを使う${NC}"
-    echo "$MATCHES" | head -3
-    ERRORS=$((ERRORS + 1))
-  fi
+  [ -n "$MATCHES" ] && report "$SEV" "$FILE: text-white/bg-white → セマンティックトークンを使う" "$MATCHES"
 
   # 10. フォントサイズ直書き text-[14px]
   MATCHES=$(grep -noE 'text-\[[0-9]+px\]' "$FILE" 2>/dev/null \
     | grep -v '// \|/\*' || true)
-  if [ -n "$MATCHES" ]; then
-    echo -e "${RED}❌ $FILE: フォントサイズ直書き → typo-*クラスを使う${NC}"
-    echo "$MATCHES" | head -3
-    ERRORS=$((ERRORS + 1))
-  fi
+  [ -n "$MATCHES" ] && report "$SEV" "$FILE: フォントサイズ直書き → typo-*クラスを使う" "$MATCHES"
 
   # 11. 任意値スペーシング px-[17px] 等
   MATCHES=$(grep -noE '(p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|space-x|space-y)-\[[0-9]+px\]' \
     "$FILE" 2>/dev/null | grep -v '// \|/\*' || true)
-  if [ -n "$MATCHES" ]; then
-    echo -e "${RED}❌ $FILE: 任意値スペーシング → spacingトークン（4の倍数）を使う${NC}"
-    echo "$MATCHES" | head -3
-    ERRORS=$((ERRORS + 1))
-  fi
+  [ -n "$MATCHES" ] && report "$SEV" "$FILE: 任意値スペーシング → spacingトークン（4の倍数）を使う" "$MATCHES"
 
   # 12. AI 生成パターン: カラーバー border-l-4 等
   MATCHES=$(grep -n 'border-l-4\|border-t-4\|border-r-4\|border-b-4' "$FILE" 2>/dev/null \
     | grep -v '// \|/\*' || true)
-  if [ -n "$MATCHES" ]; then
-    echo -e "${RED}❌ $FILE: カラーバー（AI生成パターン禁止）→ 全周ボーダーを使う${NC}"
-    echo "$MATCHES" | head -3
-    ERRORS=$((ERRORS + 1))
-  fi
+  [ -n "$MATCHES" ] && report "$SEV" "$FILE: カラーバー（AI生成パターン禁止）→ 全周ボーダーを使う" "$MATCHES"
 
   # 13. pravatar.cc（ダミー画像サービス禁止）
   MATCHES=$(grep -n 'pravatar\.cc' "$FILE" 2>/dev/null || true)
