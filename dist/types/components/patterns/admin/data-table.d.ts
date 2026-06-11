@@ -81,12 +81,18 @@ interface DataTableCheckboxCellProps extends React.ComponentProps<"td"> {
     checked?: boolean;
     onCheckedChange?: (checked: boolean) => void;
     indeterminate?: boolean;
+    /**
+     * 描画する要素。ヘッダー行（`<tr>` in `<thead>`）では `"th"` を指定して
+     * `<th>` の中に `<td>` がネストされる HTML 妥当性 / hydration エラーを避ける。
+     * @default "td"
+     */
+    as?: "td" | "th";
     /** 横スクロール時に列を貼り付け表示する */
     sticky?: StickyPosition;
     /** 同じ側に複数の固定列がある場合のオフセット(px) */
     stickyOffset?: number;
 }
-declare function DataTableCheckboxCell({ className, checked, onCheckedChange, indeterminate, sticky, stickyOffset, style, ...props }: DataTableCheckboxCellProps): import("react/jsx-runtime").JSX.Element;
+declare function DataTableCheckboxCell({ className, checked, onCheckedChange, indeterminate, as: Element, sticky, stickyOffset, style, ...props }: DataTableCheckboxCellProps): import("react/jsx-runtime").JSX.Element;
 interface DataTableActionMenuItem {
     label: string;
     icon?: React.ReactNode;

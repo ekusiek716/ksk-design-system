@@ -123,6 +123,73 @@ function decideSwipeGesture(dy: number, dx: number, atTop: boolean): "drag" | "s
   return "scroll"
 }
 
+/**
+ * A single drag sample: vertical position (`y`, px) at a moment in time
+ * (`t`, ms — any monotonic clock; `event.timeStamp` in practice).
+ */
+interface DragSample {
+  y: number
+  t: number
+}
+
+/** Trailing window (ms) used to measure the release "flick" velocity. */
+const FLICK_VELOCITY_WINDOW_MS = 100
+/**
+ * Downward velocity (px/ms) at release that dismisses regardless of distance.
+ * 0.5px/ms ≈ a brisk iOS flick; tuned to fire on intentional flicks while
+ * ignoring slow drags that stop short of the distance threshold.
+ */
+const FLICK_VELOCITY_THRESHOLD = 0.5
+
+/**
+ * Velocity of the drag (px/ms, positive = downward) over the trailing
+ * {@link FLICK_VELOCITY_WINDOW_MS} ending at `releaseT`.
+ *
+ * Only samples within the window *before release* count, so a flick followed
+ * by a pause-then-release reads ~0 (the finger was still at release) and does
+ * not register as a flick. Returns 0 when there are fewer than two qualifying
+ * samples or the time delta is non-positive.
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+function computeFlickVelocity(
+  samples: DragSample[],
+  releaseT: number,
+  windowMs: number = FLICK_VELOCITY_WINDOW_MS
+): number {
+  const recent = samples.filter((s) => releaseT - s.t <= windowMs)
+  if (recent.length < 2) return 0
+  const first = recent[0]
+  const last = recent[recent.length - 1]
+  const dt = last.t - first.t
+  if (dt <= 0) return 0
+  return (last.y - first.y) / dt
+}
+
+/**
+ * Pure release decision for the swipe-to-close gesture: dismiss the sheet when
+ * either the drag passed the distance threshold (>30% of the sheet height,
+ * falling back to 200px when the height is unknown) OR the release was a fast
+ * downward flick ({@link FLICK_VELOCITY_THRESHOLD}) — mirroring iOS sheets,
+ * which close on a short fast flick even below the distance threshold.
+ *
+ * `velocity` is downward-positive px/ms (see {@link computeFlickVelocity}); the
+ * flick branch also requires a net downward drag so an upward flick never
+ * dismisses.
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+function decideSwipeDismiss(
+  dragY: number,
+  sheetHeight: number,
+  velocity: number
+): boolean {
+  const distanceThreshold = sheetHeight > 0 ? sheetHeight * 0.3 : 200
+  if (dragY > distanceThreshold) return true
+  if (dragY > 0 && velocity > FLICK_VELOCITY_THRESHOLD) return true
+  return false
+}
+
 function snapToRatio(snap: SnapPoint): number {
   if (typeof snap === "number") return Math.min(1, Math.max(0, snap))
   // "450px" → 450 / window.innerHeight
@@ -604,6 +671,10 @@ function SwipeToCloseBottomSheet({
   // Synchronous mirror of `dragY` so the touch listeners (bound once, with a
   // stale render closure) can read the live drag distance at release time.
   const dragYRef = React.useRef(0)
+  // Trailing (y, t) samples of the active drag, used to measure release
+  // velocity for the flick-to-dismiss path. Reset on each gesture start and
+  // trimmed so it never grows unbounded across a long drag.
+  const samplesRef = React.useRef<DragSample[]>([])
   const scrollerRef = React.useRef<HTMLElement | null>(null)
   const onHandleRef = React.useRef(false)
   const sheetRef = React.useRef<HTMLDivElement>(null)
@@ -634,11 +705,12 @@ function SwipeToCloseBottomSheet({
   // a close-drag: that both blocks native scrolling and keeps touch events
   // flowing. Pointer handlers stay for mouse only (no cancellation problem).
   const beginGesture = React.useCallback(
-    (clientX: number, clientY: number, target: EventTarget | null) => {
+    (clientX: number, clientY: number, target: EventTarget | null, t: number) => {
       startYRef.current = clientY
       startXRef.current = clientX
       decisionRef.current = null
       draggingRef.current = false
+      samplesRef.current = [{ y: clientY, t }]
       // The drag indicator is always a valid grab target regardless of scroll
       // position; elsewhere the gesture must start at the top of the content.
       onHandleRef.current =
@@ -652,7 +724,7 @@ function SwipeToCloseBottomSheet({
   // Returns true once the gesture is claimed as a close-drag (caller should
   // `preventDefault()` for touch so the browser stops scrolling).
   const moveGesture = React.useCallback(
-    (clientX: number, clientY: number): boolean => {
+    (clientX: number, clientY: number, t: number): boolean => {
       if (decisionRef.current === "scroll") return false
       const dy = clientY - startYRef.current
       const dx = clientX - startXRef.current
@@ -676,6 +748,10 @@ function SwipeToCloseBottomSheet({
         }
       }
       if (draggingRef.current) {
+        // Track the trailing samples for release-velocity (flick) detection.
+        const s = samplesRef.current
+        s.push({ y: clientY, t })
+        if (s.length > 12) s.shift()
         // Downward only — upward drags are clamped at 0 (matches snap-mode
         // clamping at maxSnap; no rubber-band for consistency).
         setDrag(Math.max(0, dy))
@@ -686,15 +762,18 @@ function SwipeToCloseBottomSheet({
     [setDrag]
   )
 
-  const endGesture = React.useCallback(() => {
+  const endGesture = React.useCallback((t: number) => {
     const wasDragging = draggingRef.current
     draggingRef.current = false
     decisionRef.current = null
     if (!wasDragging) return
     setDragging(false)
     const h = sheetRef.current?.offsetHeight ?? 0
-    const threshold = h > 0 ? h * 0.3 : 200
-    if (dragYRef.current > threshold) {
+    // Dismiss on either a long-enough drag OR a fast downward flick at release
+    // (iOS-style). Velocity is measured over the trailing window ending now.
+    const velocity = computeFlickVelocity(samplesRef.current, t)
+    samplesRef.current = []
+    if (decideSwipeDismiss(dragYRef.current, h, velocity)) {
       rootCtxRef.current?.close()
     }
     // Always spring back. If close succeeded the sheet unmounts and this
@@ -726,14 +805,14 @@ function SwipeToCloseBottomSheet({
       const onTouchStart = (e: TouchEvent) => {
         if (e.touches.length !== 1) return
         const t = e.touches[0]
-        beginGesture(t.clientX, t.clientY, e.target)
+        beginGesture(t.clientX, t.clientY, e.target, e.timeStamp)
       }
       const onTouchMove = (e: TouchEvent) => {
         if (e.touches.length !== 1) return
         const t = e.touches[0]
-        if (moveGesture(t.clientX, t.clientY)) e.preventDefault()
+        if (moveGesture(t.clientX, t.clientY, e.timeStamp)) e.preventDefault()
       }
-      const onTouchEnd = () => endGesture()
+      const onTouchEnd = (e: TouchEvent) => endGesture(e.timeStamp)
       el.addEventListener("touchstart", onTouchStart, { passive: true })
       el.addEventListener("touchmove", onTouchMove, { passive: false })
       el.addEventListener("touchend", onTouchEnd, { passive: true })
@@ -753,12 +832,12 @@ function SwipeToCloseBottomSheet({
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
     if (e.button != null && e.button !== 0) return
-    beginGesture(e.clientX, e.clientY, e.target)
+    beginGesture(e.clientX, e.clientY, e.target, e.timeStamp)
   }
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
-    if (moveGesture(e.clientX, e.clientY)) {
+    if (moveGesture(e.clientX, e.clientY, e.timeStamp)) {
       try {
         e.currentTarget.setPointerCapture(e.pointerId)
       } catch {
@@ -769,7 +848,7 @@ function SwipeToCloseBottomSheet({
 
   const finishDrag = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
-    endGesture()
+    endGesture(e.timeStamp)
   }
 
   return (
@@ -1106,5 +1185,7 @@ export {
   // (src/index.ts re-exports a curated list only).
   computeVisualViewportInset,
   decideSwipeGesture,
+  computeFlickVelocity,
+  decideSwipeDismiss,
 }
 export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset }
