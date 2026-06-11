@@ -22,7 +22,7 @@ function ImageUploader({ images = [], onAdd, onRemove, maxImages = 10, columns =
         <div key={i} className="relative aspect-square rounded-lg bg-[var(--Surface-Tertiary)] border border-[var(--Border-Low-Emphasis)] overflow-hidden group">
           <img src={img.src} alt={img.alt} className="absolute inset-0 size-full object-cover" />
           {/* ホバー時の削除オーバーレイ */}
-          <div className="absolute inset-0 bg-[var(--Overlay-Medium)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <div className="absolute inset-0 bg-[var(--Overlay-Medium)] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-center justify-center">
             <button type="button" className="size-8 rounded-full bg-[var(--Surface-Primary)]/80 flex items-center justify-center" aria-label={`${img.alt}を削除`} onClick={() => onRemove?.(i)}>
               {/* ゴミ箱アイコン */}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4" stroke="var(--Caution-Base)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
