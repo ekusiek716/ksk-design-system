@@ -52,7 +52,7 @@ function ReviewSummary({
               </span>
               <div className="flex-1 h-1.5 bg-[var(--Surface-Tertiary)] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#F59E0B] rounded-full transition-all"
+                  className="h-full bg-[var(--Object-Rating)] rounded-full transition-all"
                   style={{ width: `${pct}%` }}
                 />
               </div>

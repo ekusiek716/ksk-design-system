@@ -26,6 +26,7 @@ const PROVIDER_META: Record<
         <path d="M11 2C6.6 2 3 5 3 8.8c0 3.3 2.7 6.1 6.5 6.7l.9 1.9 3.1-1.9c3.8-.4 6.5-3.1 6.5-6.7C20 5 16.4 2 11 2z" fill="currentColor" />
       </svg>
     ),
+    // SNS 公式色は固定値のため、文字も静的白（--Text-on-Inverse はダークで反転するため不可）
     circleClass: "bg-[#06C755] text-white",
     inlineClass: "border-[#06C755] text-[#06C755] hover:bg-[#F0FFF4]",
   },
