@@ -67,13 +67,14 @@ function SwipeRow({ children, actions = [], side = "right", className }: SwipeRo
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
-      {/* Action buttons */}
+      {/* Action buttons — 閉じている間はフォーカス・読み上げ対象から外す */}
       <div
         className={cn(
           "absolute inset-y-0 flex",
           side === "right" ? "right-0" : "left-0"
         )}
         style={{ width: maxOffset }}
+        inert={!isOpen ? true : undefined}
       >
         {actions.map((action, i) => (
           <button

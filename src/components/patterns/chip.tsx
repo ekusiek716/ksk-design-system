@@ -248,6 +248,8 @@ function Chip({
       data-variant={variant}
       data-selected={selected || undefined}
       data-sold-out={isSoldOut || undefined}
+      // selected が制御されている場合はトグル状態を SR に通知
+      aria-pressed={selected !== undefined ? selected : undefined}
       disabled={disabled}
       className={cn(
         "relative",
