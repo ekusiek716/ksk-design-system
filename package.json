@@ -1,6 +1,6 @@
 {
   "name": "@ksk/design-system",
-  "version": "1.30.4",
+  "version": "1.30.5",
   "type": "module",
   "description": "KSK Design System — フリーランス向けマルチテーマ対応デザインシステム",
   "main": "./dist/index.js",
