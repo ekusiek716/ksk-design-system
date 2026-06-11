@@ -98,6 +98,25 @@ if [ "$SKIP_JSON" = false ]; then
   check_count "Admin"    "$ACTUAL_ADMIN"     "$CONTRACT_ADMIN"
   check_count "Shells"   "$ACTUAL_SHELLS"    "$CONTRACT_SHELLS"
   check_count "Total"    "$ACTUAL_TOTAL"     "$CONTRACT_TOTAL"
+
+  # ─── meta.counts と実際の定義配列長の突合 ───
+  # （counts だけ更新して配列にエントリを足し忘れる「片手落ち」を検出）
+  echo ""
+  check_array() {
+    local label="$1"
+    local arr_len="$2"
+    local declared="$3"
+    if [ "$arr_len" -ne "$declared" ]; then
+      error "$label: 定義配列 $arr_len 件 ≠ meta.counts $declared 件 → 配列へのエントリ追加漏れ、または counts の誤りです"
+    else
+      ok "$label 配列: $arr_len 件 = counts ✓"
+    fi
+  }
+  check_array "UI"       "$(jq '.ui       | length' "$CONTRACTS")" "$CONTRACT_UI"
+  check_array "Patterns" "$(jq '.patterns | length' "$CONTRACTS")" "$CONTRACT_PATTERNS"
+  check_array "Commerce" "$(jq '.commerce | length' "$CONTRACTS")" "$CONTRACT_COMMERCE"
+  check_array "Admin"    "$(jq '.admin    | length' "$CONTRACTS")" "$CONTRACT_ADMIN"
+  check_array "Shells"   "$(jq '.shells   | length' "$CONTRACTS")" "$CONTRACT_SHELLS"
 fi
 
 # ─── index.ts との整合性チェック ───
