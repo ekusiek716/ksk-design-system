@@ -109,7 +109,7 @@ function DayCountdown({
         className={cn(
           "inline-flex items-center gap-1 px-3 py-2 rounded-lg font-variant-nums",
           variant === "filled"
-            ? "bg-[var(--Brand-Primary)] text-white"
+            ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
             : "border-2 border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]",
           className,
         )}
@@ -129,7 +129,7 @@ function DayCountdown({
       className={cn(
         "inline-flex items-baseline gap-1 px-3 py-2 rounded-lg font-variant-nums",
         variant === "filled"
-          ? "bg-[var(--Brand-Primary)] text-white"
+          ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
           : "border-2 border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]",
         className,
       )}
@@ -235,7 +235,7 @@ function TimeCountdown({
       className={cn(
         "inline-flex items-center gap-1 px-3 py-2 rounded-lg font-variant-nums",
         isFilled
-          ? "bg-[var(--Brand-Primary)] text-white"
+          ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
           : "border-2 border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]",
         className,
       )}

@@ -49,7 +49,7 @@ function ChipGroup<T extends string>({
           className={cn(
             "px-3 py-1 rounded-full typo-label-xs border transition-colors whitespace-nowrap shrink-0",
             opt.value === value
-              ? "bg-[var(--Brand-Primary)] text-white border-[var(--Brand-Primary)] font-bold"
+              ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] border-[var(--Brand-Primary)] font-bold"
               : "border-[var(--Border-Medium-Emphasis)] text-[var(--Text-Medium-Emphasis)] bg-[var(--Surface-Primary)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"
           )}
         >

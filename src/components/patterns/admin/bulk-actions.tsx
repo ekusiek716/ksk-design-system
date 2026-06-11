@@ -39,8 +39,8 @@ function BulkActions({ selectedCount, onClear, children, className, ...props }: 
       {/* 区切り線 */}
       <div className="h-5 w-px bg-[var(--Text-on-Inverse)]/20 shrink-0" />
 
-      {/* アクション群 */}
-      <div className="flex items-center gap-2">
+      {/* アクション群（狭幅では横スクロール。件数/解除ボタンは常時可視を維持） */}
+      <div className="flex items-center gap-2 min-w-0 overflow-x-auto">
         {children}
       </div>
 

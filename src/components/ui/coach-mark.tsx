@@ -68,8 +68,8 @@ function CoachMark({
               "data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0",
               "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
               variant === "brand"
-                ? "bg-[var(--Brand-Primary)] text-white"
-                : "bg-[var(--Surface-Inverse)] text-white",
+                ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
+                : "bg-[var(--Surface-Inverse)] text-[var(--Text-on-Inverse)]",
               className
             )}
           >
@@ -97,7 +97,7 @@ function CoachMark({
                     {onNext && (
                       <button
                         onClick={onNext}
-                        className="text-[11px] font-bold bg-white/20 hover:bg-white/30 px-2.5 py-0.5 rounded-md transition-colors ml-auto"
+                        className="text-[11px] font-bold bg-[var(--Object-on-Inverse)]/20 hover:bg-[var(--Object-on-Inverse)]/30 px-2.5 py-0.5 rounded-md transition-colors ml-auto"
                       >
                         次へ →
                       </button>

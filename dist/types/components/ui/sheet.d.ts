@@ -7,6 +7,21 @@ interface VisualViewportInset {
     visibleHeight: number | null;
 }
 declare function computeVisualViewportInset(layoutHeight: number, visualHeight: number, visualOffsetTop: number): VisualViewportInset;
+/**
+ * Pure decision for the full-surface swipe-to-close gesture, shared by the
+ * touch and pointer paths in {@link SwipeToCloseBottomSheet}.
+ *
+ * Given the cumulative offset from the gesture's start (`dy`/`dx`) and whether
+ * the touched scroll region is at its top (`atTop`), classify the gesture:
+ *   - `null`   — below the 6px slop; intent is still ambiguous, keep waiting.
+ *   - `"drag"` — a downward, vertical-dominant gesture starting at the top;
+ *                drives the close-drag.
+ *   - `"scroll"` — anything else (upward, horizontal, or not at the top); the
+ *                content keeps its own scroll gesture.
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+declare function decideSwipeGesture(dy: number, dx: number, atTop: boolean): "drag" | "scroll" | null;
 interface SheetProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
     snapPoints?: SnapPoint[];
     activeSnapPoint?: SnapPoint | null;
@@ -22,7 +37,7 @@ interface SheetProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
      */
     overlay?: boolean;
 }
-declare function Sheet({ snapPoints, activeSnapPoint: activeSnapPointProp, setActiveSnapPoint: setActiveSnapPointProp, fadeFromIndex, dismissible, overlay, onOpenChange, open, ...props }: SheetProps): import("react/jsx-runtime").JSX.Element;
+declare function Sheet({ snapPoints, activeSnapPoint: activeSnapPointProp, setActiveSnapPoint: setActiveSnapPointProp, fadeFromIndex, dismissible, overlay, onOpenChange, open, defaultOpen, ...props }: SheetProps): import("react/jsx-runtime").JSX.Element;
 declare function SheetTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>): import("react/jsx-runtime").JSX.Element;
 declare function SheetClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>): import("react/jsx-runtime").JSX.Element;
 /** ドラッグインジケーター（Apple HIG: 36×5pt, gray, centered） */
@@ -86,5 +101,5 @@ declare function SheetFooter({ className, orientation, ...props }: React.Compone
 }): import("react/jsx-runtime").JSX.Element;
 declare function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): import("react/jsx-runtime").JSX.Element;
 declare function SheetDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>): import("react/jsx-runtime").JSX.Element;
-export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator, computeVisualViewportInset, };
+export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator, computeVisualViewportInset, decideSwipeGesture, };
 export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset };

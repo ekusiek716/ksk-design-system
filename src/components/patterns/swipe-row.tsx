@@ -43,8 +43,12 @@ function SwipeRow({ children, actions = [], side = "right", className }: SwipeRo
     if (!isDragging) return
     const delta = e.clientX - startX.current
     const raw = startOffset.current + delta
-    const sign = side === "right" ? -1 : 1
-    const clamped = Math.min(0, Math.max(sign * maxOffset, raw))
+    // side="right": 左方向(負)に開く → [-maxOffset, 0] にクランプ
+    // side="left" : 右方向(正)に開く → [0, maxOffset] にクランプ
+    const clamped =
+      side === "right"
+        ? Math.max(-maxOffset, Math.min(0, raw))
+        : Math.min(maxOffset, Math.max(0, raw))
     setOffset(clamped)
   }
 
