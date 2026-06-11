@@ -61,7 +61,7 @@ function TimePickerColumn({
           className={cn(
             "shrink-0 h-10 flex items-center justify-center rounded-lg typo-body-md transition-colors snap-center",
             v === selected
-              ? "bg-[var(--Brand-Primary)] text-white font-bold"
+              ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] font-bold"
               : "text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)]"
           )}
         >
