@@ -22,6 +22,40 @@ declare function computeVisualViewportInset(layoutHeight: number, visualHeight: 
  * Exported for unit testing only — not part of the public package API.
  */
 declare function decideSwipeGesture(dy: number, dx: number, atTop: boolean): "drag" | "scroll" | null;
+/**
+ * A single drag sample: vertical position (`y`, px) at a moment in time
+ * (`t`, ms — any monotonic clock; `event.timeStamp` in practice).
+ */
+interface DragSample {
+    y: number;
+    t: number;
+}
+/**
+ * Velocity of the drag (px/ms, positive = downward) over the trailing
+ * {@link FLICK_VELOCITY_WINDOW_MS} ending at `releaseT`.
+ *
+ * Only samples within the window *before release* count, so a flick followed
+ * by a pause-then-release reads ~0 (the finger was still at release) and does
+ * not register as a flick. Returns 0 when there are fewer than two qualifying
+ * samples or the time delta is non-positive.
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+declare function computeFlickVelocity(samples: DragSample[], releaseT: number, windowMs?: number): number;
+/**
+ * Pure release decision for the swipe-to-close gesture: dismiss the sheet when
+ * either the drag passed the distance threshold (>30% of the sheet height,
+ * falling back to 200px when the height is unknown) OR the release was a fast
+ * downward flick ({@link FLICK_VELOCITY_THRESHOLD}) — mirroring iOS sheets,
+ * which close on a short fast flick even below the distance threshold.
+ *
+ * `velocity` is downward-positive px/ms (see {@link computeFlickVelocity}); the
+ * flick branch also requires a net downward drag so an upward flick never
+ * dismisses.
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+declare function decideSwipeDismiss(dragY: number, sheetHeight: number, velocity: number): boolean;
 interface SheetProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
     snapPoints?: SnapPoint[];
     activeSnapPoint?: SnapPoint | null;
@@ -101,5 +135,5 @@ declare function SheetFooter({ className, orientation, ...props }: React.Compone
 }): import("react/jsx-runtime").JSX.Element;
 declare function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): import("react/jsx-runtime").JSX.Element;
 declare function SheetDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>): import("react/jsx-runtime").JSX.Element;
-export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator, computeVisualViewportInset, decideSwipeGesture, };
+export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator, computeVisualViewportInset, decideSwipeGesture, computeFlickVelocity, decideSwipeDismiss, };
 export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset };
