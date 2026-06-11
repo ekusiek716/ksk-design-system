@@ -410,6 +410,12 @@ interface DataTableCheckboxCellProps extends React.ComponentProps<"td"> {
   checked?: boolean
   onCheckedChange?: (checked: boolean) => void
   indeterminate?: boolean
+  /**
+   * 描画する要素。ヘッダー行（`<tr>` in `<thead>`）では `"th"` を指定して
+   * `<th>` の中に `<td>` がネストされる HTML 妥当性 / hydration エラーを避ける。
+   * @default "td"
+   */
+  as?: "td" | "th"
   /** 横スクロール時に列を貼り付け表示する */
   sticky?: StickyPosition
   /** 同じ側に複数の固定列がある場合のオフセット(px) */
@@ -421,14 +427,15 @@ function DataTableCheckboxCell({
   checked,
   onCheckedChange,
   indeterminate,
+  as: Element = "td",
   sticky,
   stickyOffset,
   style,
   ...props
 }: DataTableCheckboxCellProps) {
-  const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
+  const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset, Element === "th") : null
   return (
-    <td
+    <Element
       data-slot="data-table-checkbox-cell"
       className={cn("w-[40px] px-3 py-2.5", stickyProps?.className, className)}
       style={stickyProps ? { ...stickyProps.style, ...style } : style}
@@ -438,7 +445,7 @@ function DataTableCheckboxCell({
         checked={indeterminate ? "indeterminate" : checked}
         onCheckedChange={(v) => onCheckedChange?.(v === true)}
       />
-    </td>
+    </Element>
   )
 }
 
