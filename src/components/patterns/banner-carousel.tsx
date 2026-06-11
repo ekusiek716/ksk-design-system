@@ -71,12 +71,14 @@ function BannerCarousel({
         {items.map((item, i) => {
           const gradient = item.gradient ?? DEFAULT_GRADIENTS[i % DEFAULT_GRADIENTS.length]
           const isLight = gradient.includes("FDE68A") // warn if text should be dark
-          const Tag = item.href ? "a" : "div"
+          // href があれば a、onClick だけなら button（キーボード操作可）、どちらも無ければ div
+          const Tag = item.href ? "a" : item.onClick ? "button" : "div"
 
           return (
             <Tag
               key={i}
               href={item.href}
+              type={Tag === "button" ? "button" : undefined}
               onClick={item.onClick}
               style={{
                 width: itemWidth,
@@ -84,7 +86,8 @@ function BannerCarousel({
                 background: item.imageSrc ? undefined : gradient,
               }}
               className={cn(
-                "rounded-xl overflow-hidden flex flex-col justify-end p-3 cursor-pointer",
+                "rounded-xl overflow-hidden flex flex-col justify-end p-3 text-left",
+                (item.href || item.onClick) && "cursor-pointer",
                 "hover:opacity-95 active:scale-[.98] transition-transform",
                 ASPECT[itemAspectRatio] ?? "aspect-[2/1]",
                 item.href && "block",
