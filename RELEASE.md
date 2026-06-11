@@ -19,9 +19,9 @@
 ```
 T-4w  破壊変更内容の確定 → MIGRATION.md 草案作成
 T-3w  scripts/codemod/vX-to-vY.mjs を実装、利用側で dry-run 検証
-T-2w  RC 版を npm に push (--tag next)、利用側で動作確認
+T-2w  RC 版の tgz を 1〜2 の消費リポへ先行配布、動作確認
 T-1w  feedback 反映、ESLint 旧 API ルールを "error" に昇格
-T-0   latest tag を切替、リリースノート公開、社内告知
+T-0   全消費リポへ配布 (bump-consumers.sh)、リリースノート公開、社内告知
 T+1w  次の patch で旧 API を完全削除
 ```
 
@@ -31,7 +31,7 @@ T+1w  次の patch で旧 API を完全削除
 
 1. main で直接修正（or hotfix ブランチ）
 2. `npm version patch`
-3. `npm publish --access public`
+3. `npm pack` → `bash scripts/bump-consumers.sh <version> <影響リポ...>`
 4. 影響範囲・原因・修正内容を「ホットフィックス履歴」に記録
 5. ポストモーテムを Issue / wiki に書く
 
@@ -62,7 +62,7 @@ GitHub Releases にコピペできるテンプレ:
 - ...
 
 ### Migration
-- 破壊変更なし。そのまま `npm update` で OK。
+- 破壊変更なし。vendor tgz の差し替え PR（bump-consumers.sh が自動作成）をマージするだけで OK。
 ```
 
 破壊変更がある場合は必ず:
