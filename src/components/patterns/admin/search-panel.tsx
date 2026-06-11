@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Button } from "../../ui/button"
 
 interface SearchPanelProps extends React.ComponentProps<"div"> {
   onSearch?: () => void
@@ -26,15 +27,15 @@ function SearchPanel({ children, onSearch, onReset, columns = 4, layout = "grid"
       {/* アクションボタン */}
       <div className="flex items-center justify-end gap-2 mt-3">
         {onReset && (
-          <button type="button" data-slot="button" className="inline-flex items-center justify-center h-8 px-3 rounded-full border border-[var(--Border-Medium-Emphasis)] typo-label-sm text-[var(--Text-High-Emphasis)] hover:bg-[var(--Hover-Tertiary-Button)] transition-colors cursor-pointer" onClick={onReset}>
+          <Button variant="tertiary" size="sm" onClick={onReset}>
             リセット
-          </button>
+          </Button>
         )}
-        <button type="button" data-slot="button" className="inline-flex items-center justify-center gap-1 h-8 px-3 rounded-full bg-[var(--Brand-Primary)] typo-label-sm text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Primary-Button)] transition-colors cursor-pointer" onClick={onSearch}>
+        <Button size="sm" onClick={onSearch}>
           {/* 検索アイコン */}
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" /><path d="M10.5 10.5L13.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
           検索
-        </button>
+        </Button>
       </div>
     </div>
   )

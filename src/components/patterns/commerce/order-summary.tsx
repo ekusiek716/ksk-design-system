@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Button } from "../../ui/button"
 
 /** 注文サマリーの明細行 */
 interface OrderSummaryLineItem {
@@ -44,9 +45,9 @@ function OrderSummary({ className, lineItems, totalLabel = "合計（税込）",
         <span className="typo-heading-lg text-[var(--Text-High-Emphasis)]">{totalValue}</span>
       </div>
       {/* CTAボタン */}
-      <button data-slot="button" type="button" className={cn("flex h-14 w-full items-center justify-center rounded-full bg-[var(--Brand-Primary)] typo-label-lg text-[var(--Text-on-Inverse)] transition-colors hover:bg-[var(--Hover-Primary-Button)] cursor-pointer", ctaDisabled && "opacity-50 cursor-not-allowed")} onClick={onCTAClick} disabled={ctaDisabled}>
+      <Button size="xl" className="w-full" onClick={onCTAClick} disabled={ctaDisabled}>
         {ctaLabel}
-      </button>
+      </Button>
     </div>
   )
 

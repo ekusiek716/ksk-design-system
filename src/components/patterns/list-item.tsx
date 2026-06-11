@@ -49,6 +49,19 @@ function ListItem({
         className
       )}
       {...props}
+      {...(interactive
+        ? {
+            role: "button" as const,
+            tabIndex: 0,
+            // キーボードでもクリックを発火（Enter / Space）
+            onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                e.currentTarget.click()
+              }
+            },
+          }
+        : {})}
     >
       {leftSlot && <div className="shrink-0">{leftSlot}</div>}
       <div className="flex-1 min-w-0">

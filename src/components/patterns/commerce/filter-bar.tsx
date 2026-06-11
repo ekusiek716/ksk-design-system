@@ -133,17 +133,6 @@ function FilterBar({
   className,
   ...props
 }: FilterBarProps) {
-  const [sortOpen, setSortOpen] = React.useState(false)
-  const sortRef = React.useRef<HTMLDivElement>(null)
-
-  React.useEffect(() => {
-    if (!sortOpen) return
-    const handler = (e: MouseEvent) => {
-      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setSortOpen(false)
-    }
-    document.addEventListener("mousedown", handler)
-    return () => document.removeEventListener("mousedown", handler)
-  }, [sortOpen])
 
   return (
     <nav
@@ -188,40 +177,31 @@ function FilterBar({
 
           {/* 並べ替え（ドロップダウン or ボタン） */}
           {sortOptions ? (
-            <div ref={sortRef} className="relative">
-              <button
-                type="button"
-                onClick={() => setSortOpen(!sortOpen)}
-                className="flex h-9 shrink-0 items-center gap-0.5 rounded-full bg-[var(--Surface-Tertiary)] px-3 typo-body-md text-[var(--Text-High-Emphasis)] hover:opacity-80"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 4h7M3 8h5M3 12h3M13 5v8M11 11l2 2 2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                {sortOptions.find(o => o.value === selectedSort)?.label ?? sortLabel ?? "並べ替え"}
-              </button>
-              {sortOpen && (
-                <div className="absolute right-0 top-full z-50 mt-1 min-w-[160px] rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] py-1 shadow-[var(--shadow-lg)] animate-fade-in">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex h-9 shrink-0 items-center gap-0.5 rounded-full bg-[var(--Surface-Tertiary)] px-3 typo-body-md text-[var(--Text-High-Emphasis)] hover:opacity-80"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 4h7M3 8h5M3 12h3M13 5v8M11 11l2 2 2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {sortOptions.find(o => o.value === selectedSort)?.label ?? sortLabel ?? "並べ替え"}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[160px]">
+                <DropdownMenuRadioGroup
+                  value={selectedSort}
+                  onValueChange={(v) => onSortSelect?.(v)}
+                >
                   {sortOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      className={cn(
-                        "flex w-full items-center gap-2 px-3 py-2 typo-body-md text-left transition-colors hover:bg-[var(--Surface-Secondary)]",
-                        selectedSort === opt.value ? "text-[var(--Text-Accent-Primary)]" : "text-[var(--Text-High-Emphasis)]"
-                      )}
-                      onClick={() => { onSortSelect?.(opt.value); setSortOpen(false) }}
-                    >
-                      {selectedSort === opt.value && (
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
-                          <path d="M11 4L5.5 9.5L3 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
+                    <DropdownMenuRadioItem key={opt.value} value={opt.value}>
                       {opt.label}
-                    </button>
+                    </DropdownMenuRadioItem>
                   ))}
-                </div>
-              )}
-            </div>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : onSortClick && (
             <button
               type="button"
