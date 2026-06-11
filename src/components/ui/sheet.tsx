@@ -706,31 +706,47 @@ function SwipeToCloseBottomSheet({
   // Touch path: non-passive so `preventDefault()` actually suppresses native
   // scroll. Bound imperatively because React's synthetic touch listeners are
   // passive and cannot preventDefault.
-  React.useEffect(() => {
-    const el = sheetRef.current
-    if (!el) return
-    const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length !== 1) return
-      const t = e.touches[0]
-      beginGesture(t.clientX, t.clientY, e.target)
-    }
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length !== 1) return
-      const t = e.touches[0]
-      if (moveGesture(t.clientX, t.clientY)) e.preventDefault()
-    }
-    const onTouchEnd = () => endGesture()
-    el.addEventListener("touchstart", onTouchStart, { passive: true })
-    el.addEventListener("touchmove", onTouchMove, { passive: false })
-    el.addEventListener("touchend", onTouchEnd, { passive: true })
-    el.addEventListener("touchcancel", onTouchEnd, { passive: true })
-    return () => {
-      el.removeEventListener("touchstart", onTouchStart)
-      el.removeEventListener("touchmove", onTouchMove)
-      el.removeEventListener("touchend", onTouchEnd)
-      el.removeEventListener("touchcancel", onTouchEnd)
-    }
-  }, [beginGesture, moveGesture, endGesture])
+  //
+  // Attached from a CALLBACK REF, not a mount effect. This component mounts
+  // while the dialog is still closed — DialogPrimitive.Content renders null
+  // until open — so a mount-time effect saw `sheetRef.current === null`,
+  // returned early, and (its deps being stable callbacks) never ran again:
+  // the listeners never attached and swipe-to-close silently no-oped on
+  // every touch device. The mouse pointer path (React props, bound whenever
+  // the node exists) kept working, which masked the bug on desktop. The
+  // callback ref fires exactly when the node appears/disappears, so the
+  // listeners' lifecycle tracks the DOM node instead of this component.
+  const detachTouchRef = React.useRef<(() => void) | null>(null)
+  const attachTouchListeners = React.useCallback(
+    (el: HTMLDivElement | null) => {
+      sheetRef.current = el
+      detachTouchRef.current?.()
+      detachTouchRef.current = null
+      if (!el) return
+      const onTouchStart = (e: TouchEvent) => {
+        if (e.touches.length !== 1) return
+        const t = e.touches[0]
+        beginGesture(t.clientX, t.clientY, e.target)
+      }
+      const onTouchMove = (e: TouchEvent) => {
+        if (e.touches.length !== 1) return
+        const t = e.touches[0]
+        if (moveGesture(t.clientX, t.clientY)) e.preventDefault()
+      }
+      const onTouchEnd = () => endGesture()
+      el.addEventListener("touchstart", onTouchStart, { passive: true })
+      el.addEventListener("touchmove", onTouchMove, { passive: false })
+      el.addEventListener("touchend", onTouchEnd, { passive: true })
+      el.addEventListener("touchcancel", onTouchEnd, { passive: true })
+      detachTouchRef.current = () => {
+        el.removeEventListener("touchstart", onTouchStart)
+        el.removeEventListener("touchmove", onTouchMove)
+        el.removeEventListener("touchend", onTouchEnd)
+        el.removeEventListener("touchcancel", onTouchEnd)
+      }
+    },
+    [beginGesture, moveGesture, endGesture]
+  )
 
   // Pointer path: mouse only. Touch is handled by the non-passive listeners
   // above; double-handling here would re-introduce the cancellation race.
@@ -760,7 +776,7 @@ function SwipeToCloseBottomSheet({
     <SheetPortal container={container}>
       <SheetOverlay glass={glassOverlay} />
       <DialogPrimitive.Content
-        ref={sheetRef}
+        ref={attachTouchListeners}
         data-slot="sheet-content"
         data-side={side}
         className={cn(
@@ -769,9 +785,10 @@ function SwipeToCloseBottomSheet({
           // top (タイトル / ドラッグハンドル) が画面外にはみ出すため
           // 自動で max-h-[90dvh] + overflow-y-auto を付与。
           // snap mode は activeSnapPoint で高さ制御するので別途。
-          // overscroll-y-contain: 先頭での引き下げ時にブラウザの overscroll
-          // (ラバーバンド/スクロール連鎖) が close-drag と競合しないよう抑制。
-          "max-h-[90dvh] overflow-y-auto overscroll-y-contain",
+          // overscroll-y-none: 先頭での引き下げ時に iOS のラバーバンドが
+          // ジェスチャを先取りすると preventDefault が効かず close-drag が
+          // 始められないため、contain ではなく none（ローカルバウンスも禁止）。
+          "max-h-[90dvh] overflow-y-auto overscroll-y-none",
           padding && "p-6",
           className,
         )}
