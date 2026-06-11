@@ -1,12 +1,16 @@
 # Publishing — `@ksk/design-system`
 
-`@ksk/design-system` の npm 公開手順。
+`@ksk/design-system` のリリース・配布手順。
+
+> **配布方式**: このパッケージは npm レジストリには公開しない。
+> `npm pack` で生成した tgz を各消費リポジトリの `vendor/` に置き、
+> `package.json` から `file:vendor/ksk-design-system-X.Y.Z.tgz` で参照する **vendoring 方式**。
+> 消費リポ: belle-todo / trip_todo / ninshin-todo / yokoku-app / pawly（いずれも `~/LocalDev/` 直下）。
 
 ## 前提
 
-- npm のログイン: `npm whoami` で `ksk` 系アカウントが返ること
-- 公開権限: `npm access list packages ksk-design-system` で確認
 - main ブランチが clean (`git status` で何もない)、リモートと一致
+- 消費リポが `~/LocalDev/<name>` に clone 済みで、`gh` CLI が使えること（PR 自動作成に使用）
 
 ## リリースフロー
 
@@ -34,16 +38,18 @@ npm version major
 ```
 
 `npm version` が自動で `package.json` を更新し、`v1.16.0` タグを切る。
+`dist/` の再ビルド・コミットはこの version bump のタイミングでのみ行う。
 
-### 3. ビルド
+### 3. tgz 生成
 
 ```bash
-npm run build:lib
+npm pack
 ```
 
-`dist/` に ESM + 型定義が出力される。
+`prepack` フックで `npm run build:lib` が自動実行され、リポ直下に
+`ksk-design-system-X.Y.Z.tgz` が生成される。
 
-### 4. 内容確認
+中身を確認したい場合:
 
 ```bash
 npm pack --dry-run | tail -50
@@ -61,27 +67,32 @@ npm pack --dry-run | tail -50
 - `AGENTS.md` / `CLAUDE.md` / `MIGRATION.md` / `PUBLISHING.md` / `RELEASE.md`
 - `src/components/COMPONENT_LOOKUP.md`
 
-### 5. 公開
-
-```bash
-npm publish --access public
-```
-
-破壊変更を含む場合は `--tag next` で先に dist-tag を切ってから周知:
-
-```bash
-npm publish --tag next --access public
-# 利用側で動作確認後...
-npm dist-tag add @ksk/design-system@2.0.0 latest
-```
-
-### 6. push
+### 4. push
 
 ```bash
 git push origin main --tags
 ```
 
-GitHub の Releases ページが自動で更新される（CI が走っていれば）。
+### 5. 消費リポへ配布
+
+```bash
+# 全リポ一括
+bash scripts/bump-consumers.sh 1.16.0
+
+# 特定リポのみ
+bash scripts/bump-consumers.sh 1.16.0 belle-todo pawly
+```
+
+各消費リポで `chore/bump-ds-<version>` ブランチを切り、tgz の `vendor/` 配置・
+`package.json` の参照書換・`npm install`・commit・push・PR 作成まで自動で行う。
+失敗したリポはスキップされ最後にまとめて報告されるので、個別にリトライする。
+
+過去版の tgz は `vendor/` に残す運用（ロールバックを git revert だけで済ませるため）。
+
+### 6. PR マージ
+
+各消費リポの PR で CI が green なことを確認してマージ。
+破壊変更を含む場合は、全リポ一括でなく 1〜2 リポで先に動作確認してから残りを配布する。
 
 ## 緊急ホットフィックス
 
@@ -93,9 +104,9 @@ GitHub の Releases ページが自動で更新される（CI が走っていれ
 git commit -m "fix: 重大なバグの説明"
 
 npm version patch
-npm run build:lib
-npm publish --access public
+npm pack
 git push origin main --tags
+bash scripts/bump-consumers.sh <version> <影響リポ...>
 ```
 
 修正コミットの背景・影響範囲を `RELEASE.md` の「ホットフィックス履歴」セクションに必ず追記。
@@ -115,7 +126,14 @@ git push origin main --tags
 
 ## 注意
 
-- `npm publish` 前に必ず `npm pack --dry-run` で中身確認
+- 配布前に必ず `npm pack --dry-run` で中身確認
 - `package.json#exports` を変更したら必ず利用側プロジェクトでの import を試す
 - 金曜午後のリリースは厳禁（週末に障害対応できない）
 - メジャーリリースは月初の月曜が望ましい（フィードバック収集期間が取れる）
+
+## npm 公開について
+
+過去にタグ push で npm publish する GitHub Actions（`publish.yml`）が存在したが、
+実際の配布が vendoring 方式であり NPM_TOKEN も未設定で失敗し続けていたため削除した。
+将来 npm レジストリ公開に切り替える場合は、NPM_TOKEN の Secrets 登録と
+workflow の再作成をセットで行うこと。
