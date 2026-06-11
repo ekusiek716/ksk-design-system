@@ -138,14 +138,12 @@ export const Default: StoryObj = {
           <DataTableTable>
             <DataTableHeader>
               <tr>
-                <DataTableHead>
-                  <DataTableCheckboxCell
-                    checked={selected.size === sampleUsers.length}
-                    indeterminate={selected.size > 0 && selected.size < sampleUsers.length}
-                    onCheckedChange={toggleAll}
-                    className="border-none bg-transparent p-0 w-auto"
-                  />
-                </DataTableHead>
+                <DataTableCheckboxCell
+                  as="th"
+                  checked={selected.size === sampleUsers.length}
+                  indeterminate={selected.size > 0 && selected.size < sampleUsers.length}
+                  onCheckedChange={toggleAll}
+                />
                 <DataTableHead
                   sortable
                   sortDirection={sortCol === "name" ? sortDir : null}
