@@ -42,6 +42,31 @@ function FormField({
   ...props
 }: FormFieldProps) {
   const hasLabelRow = endLabel != null
+
+  // error / description を子フィールドへ aria で紐付ける。
+  const reactId = React.useId()
+  const descId = `${reactId}-desc`
+  const errId = `${reactId}-err`
+  const showDesc = description != null && !error
+  const describedBy =
+    [error ? errId : null, showDesc ? descId : null].filter(Boolean).join(" ") || undefined
+
+  // 単一の要素 children のときだけ aria を注入（複数 / テキストはそのまま）。
+  const field = React.isValidElement(children)
+    ? React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+        "aria-invalid": error
+          ? true
+          : (children as React.ReactElement<Record<string, unknown>>).props["aria-invalid"],
+        "aria-describedby":
+          [
+            (children as React.ReactElement<Record<string, unknown>>).props["aria-describedby"],
+            describedBy,
+          ]
+            .filter(Boolean)
+            .join(" ") || undefined,
+      })
+    : children
+
   return (
     <div
       data-slot="form-field"
@@ -92,14 +117,15 @@ function FormField({
           </div>
         )}
       </div>
-      {children}
+      {field}
       {description && !error && (
-        <p className="typo-body-sm text-[var(--Text-Low-Emphasis)]">
+        <p id={descId} className="typo-body-sm text-[var(--Text-Low-Emphasis)]">
           {description}
         </p>
       )}
       {error && (
         <p
+          id={errId}
           className="typo-body-sm text-[var(--Text-Caution)] flex items-center gap-1"
           role="alert"
         >

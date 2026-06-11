@@ -224,22 +224,25 @@ function DataTableHead({
       data-slot="data-table-head"
       className={cn(
         "px-3 py-2.5 text-left whitespace-nowrap typo-label-sm text-[var(--Text-Medium-Emphasis)]",
-        sortable && "cursor-pointer select-none",
         stickyProps?.className,
         className
       )}
       style={stickyProps ? { ...stickyProps.style, ...style } : style}
-      onClick={sortable ? onSort : undefined}
       aria-sort={
         sortDirection === "asc" ? "ascending" : sortDirection === "desc" ? "descending" : undefined
       }
       {...props}
     >
       {sortable ? (
-        <span className="inline-flex items-center gap-1">
+        // ソートはキーボード到達可能な button に。aria-sort は th 側に置く。
+        <button
+          type="button"
+          onClick={onSort}
+          className="inline-flex items-center gap-1 cursor-pointer select-none rounded-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 hover:text-[var(--Text-High-Emphasis)] transition-colors"
+        >
           {children}
           <SortIcon direction={sortDirection ?? null} />
-        </span>
+        </button>
       ) : (
         children
       )}
