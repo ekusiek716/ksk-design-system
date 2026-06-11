@@ -15,7 +15,7 @@ function ProgressSteps({
   return (
     <div
       data-slot="progress-steps"
-      className={cn("flex items-start", className)}
+      className={cn("flex items-start overflow-x-auto", className)}
       role="progressbar"
       aria-valuenow={currentStep + 1}
       aria-valuemin={1}
@@ -64,7 +64,7 @@ function ProgressSteps({
             {!isLast && (
               <div
                 className={cn(
-                  "flex-1 h-0.5 mt-4 mx-1",
+                  "flex-1 min-w-6 h-0.5 mt-4 mx-1",
                   isCompleted
                     ? "bg-[var(--Brand-Primary)]"
                     : "bg-[var(--Border-Low-Emphasis)]"
