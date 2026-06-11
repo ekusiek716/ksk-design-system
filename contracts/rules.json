@@ -357,6 +357,13 @@
         "pattern": "animate-spin|animate-bounce|animate-pulse",
         "description": "ローディング以外の場所に常時動くアニメーションを付ける",
         "fix": "アニメーションはローディング状態限定。静的 UI には使わない"
+      },
+      {
+        "id": "AI10",
+        "name": "継承・既定への依存（文脈非依存違反）",
+        "pattern": "",
+        "description": "text色・背景・border色を明示せず、親からの継承や Tailwind v4 の既定（border / ring / outline = currentColor）に委ねる。消費側が濃色テキストや色付き背景を敷くと、枠線・アイコン・文字色がその色に化ける（job board で実際に発生）。サーフェス（カード/ポップオーバー/シート/ダイアログ等）が bg 未指定だと親の背景が透ける。",
+        "fix": "コンポーネントは見た目を自前で固定する＝文脈非依存に保つ: テキストを描く要素に text-[var(--Text-*)]、サーフェスに bg-[var(--Surface-*)] と border-[var(--Border-*)] を明示。Content/オーバーレイ系ラッパは既定 text色を pin して子を隔離する。Storybook ツールバーの『Hostile ctx』を loud にして漏れ（マゼンタ化・背景透け）を目視確認する。"
       }
     ]
   },
