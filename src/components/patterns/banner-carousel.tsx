@@ -88,6 +88,7 @@ function BannerCarousel({
                 "hover:opacity-95 active:scale-[.98] transition-transform",
                 ASPECT[itemAspectRatio] ?? "aspect-[2/1]",
                 item.href && "block",
+                // 固定グラデーション背景のため静的色（--Text-on-Inverse はダークで反転するため不可）
                 !item.imageSrc && (isLight ? "text-[#111]" : "text-white")
               )}
             >

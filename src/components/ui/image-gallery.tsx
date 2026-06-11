@@ -88,7 +88,7 @@ function ImageGallery({
           />
         )}
 
-        {/* Count badge */}
+        {/* Count badge — 写真上の固定黒オーバーレイのため静的白（--Text-on-Inverse はダークで反転するため不可） */}
         {images.length > 1 && (
           <span className="absolute bottom-2 right-2 bg-black/50 text-white typo-label-xs px-2 py-0.5 rounded-full">
             {active + 1} / {images.length}

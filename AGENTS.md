@@ -15,8 +15,8 @@
 コードを書く前に、以下を必ず読み込むこと:
 
 ```
-contracts/rules.json                     # 禁止パターン31件・AIアンチパターン9件・a11y要件
-contracts/components.json               # 全109コンポーネントの定義・バリアント・ルール
+contracts/rules.json                     # 禁止パターン32件・AIアンチパターン10件・a11y要件
+contracts/components.json               # 全110コンポーネントの定義・バリアント・ルール
 tokens.json                             # カラー・スペーシング・シャドウトークン
 src/components/COMPONENT_LOOKUP.md      # バリアント・インポートパス一覧（自動生成）
 ```
@@ -80,10 +80,10 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | ファイル | 内容 |
 |---------|------|
 | **AGENTS.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート |
-| **contracts/components.json** | 全109コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
-| **contracts/rules.json** | 禁止パターン31件・AIアンチパターン9件・アクセシビリティ要件 |
+| **contracts/components.json** | 全110コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
+| **contracts/rules.json** | 禁止パターン32件・AIアンチパターン10件・アクセシビリティ要件 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
-| **src/components/COMPONENT_LOOKUP.md** | 全109コンポーネントのバリアント・インポートパス（自動生成） |
+| **src/components/COMPONENT_LOOKUP.md** | 全110コンポーネントのバリアント・インポートパス（自動生成） |
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
 
 ---
@@ -93,7 +93,7 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 ```
 src/
 ├── components/
-│   ├── ui/           # 汎用UIコンポーネント 54個
+│   ├── ui/           # 汎用UIコンポーネント 55個
 │   ├── patterns/
 │   │   ├── commerce/ # EC系 11個
 │   │   ├── admin/    # 管理画面系 8個
@@ -106,7 +106,7 @@ src/
 │   └── typography.css # typo-* ユーティリティ 17クラス
 ├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット
-└── index.ts           # Public API（109コンポーネント）
+└── index.ts           # Public API（110コンポーネント）
 ```
 
 ---

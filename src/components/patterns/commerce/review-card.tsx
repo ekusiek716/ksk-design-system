@@ -23,7 +23,7 @@ function StarRow({ rating, size = 14 }: { rating: number; size?: number }) {
         <svg key={i} width={size} height={size} viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path
             d="M7 1l1.6 3.3 3.6.5-2.6 2.5.6 3.6L7 9.2 3.8 11l.6-3.6L2 4.9l3.6-.5L7 1z"
-            fill={i <= rating ? "#F59E0B" : "var(--Border-Medium-Emphasis)"}
+            fill={i <= rating ? "var(--Object-Rating)" : "var(--Border-Medium-Emphasis)"}
           />
         </svg>
       ))}
@@ -60,7 +60,7 @@ function ReviewCard({
           {avatarSrc ? (
             <img src={avatarSrc} alt={reviewer} className="w-full h-full object-cover" />
           ) : (
-            <span className="text-white text-sm font-bold">{initials}</span>
+            <span className="text-[var(--Text-on-Inverse)] text-sm font-bold">{initials}</span>
           )}
         </div>
         <div className="flex-1 min-w-0">

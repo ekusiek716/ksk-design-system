@@ -78,7 +78,7 @@ function MenuDrawer({
                     )}
                     <span className="flex-1">{item.label}</span>
                     {item.badge !== undefined && (
-                      <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--Brand-Primary)] text-white text-[10px] font-bold flex items-center justify-center">
+                      <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] text-[10px] font-bold flex items-center justify-center">
                         {item.badge}
                       </span>
                     )}

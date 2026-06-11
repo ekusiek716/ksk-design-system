@@ -30,7 +30,7 @@ function TabsList({
         data-slot="tabs-list"
         data-variant={variant}
         className={cn(
-          "inline-flex w-fit items-center gap-1 bg-[var(--Surface-Tertiary)] p-1 text-[var(--Text-Medium-Emphasis)]",
+          "inline-flex w-fit max-w-full overflow-x-auto items-center gap-1 bg-[var(--Surface-Tertiary)] p-1 text-[var(--Text-Medium-Emphasis)]",
           variant === "pill" ? "h-11 rounded-full" : "h-10 rounded-lg",
           className
         )}

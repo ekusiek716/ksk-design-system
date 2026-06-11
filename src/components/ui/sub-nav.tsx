@@ -63,7 +63,7 @@ function SubNav({
               className={cn(
                 "flex items-center gap-1.5 shrink-0 px-3.5 py-1.5 rounded-full border typo-label-md transition-colors",
                 isActive
-                  ? "bg-[var(--Brand-Primary)] border-[var(--Brand-Primary)] text-white font-bold"
+                  ? "bg-[var(--Brand-Primary)] border-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] font-bold"
                   : "border-transparent bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Quaternary)] hover:text-[var(--Text-High-Emphasis)]"
               )}
             >
@@ -71,7 +71,7 @@ function SubNav({
               {item.badge !== undefined && (
                 <span className={cn(
                   "inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold",
-                  isActive ? "bg-white/30 text-white" : "bg-[var(--Brand-Primary)] text-white"
+                  isActive ? "bg-[var(--Object-on-Inverse)]/30 text-[var(--Text-on-Inverse)]" : "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
                 )}>
                   {item.badge}
                 </span>
@@ -117,7 +117,7 @@ function SubNav({
             >
               {item.label}
               {item.badge !== undefined && (
-                <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold bg-[var(--Brand-Primary)] text-white">
+                <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]">
                   {item.badge}
                 </span>
               )}

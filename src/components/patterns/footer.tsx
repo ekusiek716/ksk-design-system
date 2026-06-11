@@ -29,7 +29,7 @@ function Footer({
     <footer
       data-slot="footer"
       className={cn(
-        "bg-[var(--Surface-Inverse)] text-white w-full",
+        "bg-[var(--Surface-Inverse)] text-[var(--Text-on-Inverse)] w-full",
         className
       )}
     >
@@ -45,7 +45,7 @@ function Footer({
           >
             {linkGroups.map((group, i) => (
               <div key={i}>
-                <h4 className="typo-label-xs font-bold uppercase tracking-wider text-white/50 mb-3">
+                <h4 className="typo-label-xs font-bold uppercase tracking-wider text-[var(--Text-on-Inverse)]/50 mb-3">
                   {group.title}
                 </h4>
                 <ul className="flex flex-col gap-2">
@@ -56,7 +56,7 @@ function Footer({
                         <Tag
                           href={link.href}
                           onClick={link.onClick}
-                          className="typo-body-sm text-white/70 hover:text-white transition-colors"
+                          className="typo-body-sm text-[var(--Text-on-Inverse)]/70 hover:text-[var(--Text-on-Inverse)] transition-colors"
                         >
                           {link.label}
                         </Tag>
@@ -79,7 +79,7 @@ function Footer({
                   key={i}
                   href={s.href}
                   aria-label={s.label}
-                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  className="w-9 h-9 rounded-full bg-[var(--Object-on-Inverse)]/10 hover:bg-[var(--Object-on-Inverse)]/20 flex items-center justify-center transition-colors"
                 >
                   {s.icon}
                 </Tag>
@@ -94,7 +94,7 @@ function Footer({
             {paymentIcons.map((p, i) => (
               <span
                 key={i}
-                className="px-2 py-1 rounded bg-white/10 text-white/60 text-[10px] font-bold"
+                className="px-2 py-1 rounded bg-[var(--Object-on-Inverse)]/10 text-[var(--Text-on-Inverse)]/60 text-[10px] font-bold"
               >
                 {p}
               </span>
@@ -104,7 +104,7 @@ function Footer({
 
         {/* Copyright */}
         {copyright && (
-          <p className="typo-body-xs text-white/30 border-t border-white/10 pt-4">
+          <p className="typo-body-xs text-[var(--Text-on-Inverse)]/30 border-t border-[var(--Object-on-Inverse)]/10 pt-4">
             {copyright}
           </p>
         )}

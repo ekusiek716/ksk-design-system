@@ -665,7 +665,7 @@ function DataTableBulkActions({
     <div
       data-slot="data-table-bulk-actions"
       className={cn(
-        "flex items-center gap-3 rounded-lg bg-[var(--Surface-Accent-Primary-Light)] px-4 py-3",
+        "flex flex-wrap items-center gap-3 rounded-lg bg-[var(--Surface-Accent-Primary-Light)] px-4 py-3",
         className
       )}
       role="toolbar"

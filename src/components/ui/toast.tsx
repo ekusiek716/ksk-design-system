@@ -165,13 +165,20 @@ function ToastViewport() {
   return createPortal(
     <div
       data-slot="toast-viewport"
-      className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 w-full max-w-sm pointer-events-none"
+      role="region"
+      aria-label="通知"
+      // 常設コンテナを live region にする（トースト要素自身への role="status" 付与は
+      // 挿入時に読み上げられない SR があるため、追加を polite で通知する構成）
+      aria-live="polite"
+      className="fixed bottom-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 sm:w-full sm:max-w-sm pointer-events-none"
     >
       {toasts.map((t) => (
         <div
           key={t.id}
           data-slot="toast"
           data-variant={t.variant ?? "default"}
+          // caution は割り込みで即時通知
+          role={t.variant === "caution" ? "alert" : undefined}
           className={cn(toastVariants({ variant: t.variant }))}
         >
           <div className="flex-1 min-w-0">
