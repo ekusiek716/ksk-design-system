@@ -40,6 +40,7 @@ T+1w  次の patch で旧 API を完全削除
 | 日付 | バージョン | 内容 | 影響 |
 |---|---|---|---|
 | 2026-05-30 | v1.21.2 | Sheet (`side="bottom"` / `swipeToClose` / `bottom-glass`) が仮想キーボード表示時にシート上端を画面外へ出さないよう `visualViewport` 監視で修正（PR #12） | モバイルの入力付きボトムシートでタイトル/ドラッグハンドルが隠れる不具合を解消 |
+| 2026-06-13 | v1.31.1 | `.glass-specular > *` が**絶対配置の子要素**の `position`/`z-index` を踏み潰す問題を `:not(.absolute):not(.fixed):not(.sticky)` 除外で修正 | glass 面に重ねた絶対配置オーバーレイ（閉じる × 等）が consumer 側の `absolute`/`z-*` を奪われ角からはみ出す不具合を解消 |
 
 新しいホットフィックスがあれば追記する。
 

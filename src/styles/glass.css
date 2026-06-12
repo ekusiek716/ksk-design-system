@@ -298,7 +298,19 @@
   -webkit-backdrop-filter: blur(4px) saturate(1.6) brightness(1.25);
   backdrop-filter: blur(4px) saturate(1.6) brightness(1.25);
 }
-.glass-specular > * {
+/*
+ * フロー内の子をレンズ層の間（::before z0 の上 / ::after z2 の下）へ持ち上げる。
+ * 絶対配置の子（オーバーレイの × 閉じるボタン等）は consumer 側の position /
+ * z-index を尊重して除外する — コンテナ自身の :not(.fixed):not(.absolute)
+ * :not(.sticky) と同じパターン。
+ *
+ * 除外しないと回帰が起きる: glass.css は consumer 側で「非レイヤー CSS」として
+ * 読まれ、@layer utilities 内の Tailwind `absolute` / `z-*` をカスケードで
+ * 踏み潰す（unlayered > layered）。すると絶対配置オーバーレイが relative 化して
+ * `right-*` が相対オフセットになり、要素が角からはみ出す（yokoku-app の詳細
+ * ドロワー × ボタンが PC で左上角の外へ流れた実害、2026-06）。
+ */
+.glass-specular > *:not(.absolute):not(.fixed):not(.sticky) {
   position: relative;
   z-index: 1;
 }
