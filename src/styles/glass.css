@@ -17,10 +17,12 @@
 
 /* ─── Liquid Glass トークン ─── */
 :root {
-  /* Blur */
-  --glass-blur-sm:  blur(16px) saturate(1.6);
-  --glass-blur:     blur(40px) saturate(1.8);
-  --glass-blur-lg:  blur(60px) saturate(2.0);
+  /* Blur — Liquid Glass は旧来のすりガラスより透明度が高い。blur を抑えめに
+     して背景の形を残し、saturate + brightness で「ガラス越しに光を集めた」
+     濃縮感を出す（brightness はライトで明るく、ダークで暗く倒す） */
+  --glass-blur-sm:  blur(14px) saturate(1.7) brightness(1.05);
+  --glass-blur:     blur(28px) saturate(1.9) brightness(1.06);
+  --glass-blur-lg:  blur(56px) saturate(2.0) brightness(1.05);
 
   /* Background */
   --glass-bg:         rgba(255, 255, 255, 0.18);
@@ -32,6 +34,26 @@
   /* Border — 上端の光の屈折を模した細い輪郭 */
   --glass-border:      rgba(255, 255, 255, 0.42);
   --glass-border-dark: rgba(255, 255, 255, 0.15);
+
+  /* Edge rim — レンズ縁での光の屈折リング（.glass-specular の ::after）。
+     0deg=上端に主光源のグリント、180deg=下端に内部反射のカウンターグリント、
+     左右(90/270deg 付近)は減衰させて「光がエッジを回り込む」見え方にする。
+     グリントの肩に寒色（青系）、カウンターグリントの肩に暖色を僅かに乗せ、
+     強い曲率で起きる色分散（chromatic aberration）を擬似する */
+  --glass-rim-width: 1.5px;
+  --glass-rim: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.80) 0deg,
+    rgba(186, 224, 255, 0.45) 40deg,
+    rgba(255, 255, 255, 0.20) 75deg,
+    rgba(255, 255, 255, 0.06) 120deg,
+    rgba(255, 226, 200, 0.30) 162deg,
+    rgba(255, 255, 255, 0.50) 180deg,
+    rgba(255, 226, 200, 0.30) 198deg,
+    rgba(255, 255, 255, 0.06) 240deg,
+    rgba(186, 224, 255, 0.45) 320deg,
+    rgba(255, 255, 255, 0.80) 360deg
+  );
 
   /* Inner specular highlight — レンズ上端の白い光 */
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.60),
@@ -52,6 +74,9 @@
 
 /* ─── Dark mode overrides ─── */
 .dark {
+  --glass-blur-sm:  blur(14px) saturate(1.5) brightness(0.95);
+  --glass-blur:     blur(28px) saturate(1.6) brightness(0.92);
+  --glass-blur-lg:  blur(56px) saturate(1.7) brightness(0.90);
   --glass-bg:         rgba(20, 20, 30, 0.35);
   --glass-bg-subtle:  rgba(20, 20, 30, 0.20);
   --glass-bg-medium:  rgba(20, 20, 30, 0.50);
@@ -61,6 +86,19 @@
   --glass-border-dark: rgba(255, 255, 255, 0.08);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.20),
                      inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  --glass-rim: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.38) 0deg,
+    rgba(170, 210, 255, 0.18) 40deg,
+    rgba(255, 255, 255, 0.08) 75deg,
+    rgba(255, 255, 255, 0.03) 120deg,
+    rgba(255, 215, 185, 0.12) 162deg,
+    rgba(255, 255, 255, 0.20) 180deg,
+    rgba(255, 215, 185, 0.12) 198deg,
+    rgba(255, 255, 255, 0.03) 240deg,
+    rgba(170, 210, 255, 0.18) 320deg,
+    rgba(255, 255, 255, 0.38) 360deg
+  );
   --glass-overlay-bg:   rgba(0, 0, 0, 0.40);
 }
 
@@ -128,6 +166,28 @@
 }
 
 /**
+ * .glass-clear
+ * Apple HIG のもう一つの素材バリアント「Clear」。フロストを最小限にして
+ * 背景のメディアを最大限透過させる。写真・動画・カラフルなアートワーク上の
+ * フローティングコントロール向け。
+ * - 可読性のため薄い暗色ディミングを内蔵（白文字前提で使う）
+ * - レンズ感はリム頼みなので .glass-specular 併用を推奨
+ */
+.glass-clear {
+  background: rgba(15, 15, 20, 0.14);
+  -webkit-backdrop-filter: blur(6px) saturate(1.6) brightness(1.05);
+  backdrop-filter: blur(6px) saturate(1.6) brightness(1.05);
+  border: 0.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.30),
+              var(--glass-shadow-sm);
+}
+
+.dark .glass-clear {
+  background: rgba(5, 5, 10, 0.25);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/**
  * .glass-overlay
  * モーダル背景。真っ暗なスクリムの代わりに軽くすりガラス風にぼかす。
  */
@@ -156,11 +216,15 @@
   border: 0.5px solid color-mix(in srgb, var(--Brand-Primary) 25%, rgba(255, 255, 255, 0.15));
 }
 
-/* ─── Specular layer (::before) ─── */
+/* ─── Specular + rim layer (::before / ::after) ─── */
 /**
  * .glass-specular
- * 上-左方向への反射グラデーションをレンズ上面に追加するヘルパー。
- * position: relative が必要。
+ * Liquid Glass の「レンズ感」を追加するヘルパー。2 層で構成:
+ *   ::before — レンズ上面のスペキュラ（上部の楕円シーン + 下部の淡い
+ *              内部反射 + 縁内側の拡散光）。コンテンツの下に敷く。
+ *   ::after  — エッジの屈折リム（--glass-rim の conic リング、太さ
+ *              --glass-rim-width）。光はガラス表面で反射するため
+ *              コンテンツより上に重ねる（1px なので操作は阻害しない）。
  */
 .glass-specular {
   /*
@@ -187,14 +251,52 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(
-    150deg,
-    rgba(255, 255, 255, 0.32) 0%,
-    rgba(255, 255, 255, 0.10) 35%,
-    transparent 65%
-  );
+  background:
+    radial-gradient(
+      140% 95% at 25% -20%,
+      rgba(255, 255, 255, 0.36) 0%,
+      rgba(255, 255, 255, 0.07) 45%,
+      transparent 70%
+    ),
+    radial-gradient(
+      120% 65% at 75% 115%,
+      rgba(255, 255, 255, 0.16) 0%,
+      transparent 55%
+    );
+  /* 縁の内側に光が拡散して溜まる表現（屈折の擬似） */
+  box-shadow:
+    inset 0 0 14px rgba(255, 255, 255, 0.09),
+    inset 0 -10px 22px -14px rgba(255, 255, 255, 0.45);
   pointer-events: none;
   z-index: 0;
+}
+.dark .glass-specular::before {
+  opacity: 0.55;
+}
+.glass-specular::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--glass-rim-width);
+  background: var(--glass-rim);
+  /* padding 部分だけ残すリング状マスク（gradient border の定石） */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  /* リング部分だけ背景を増光サンプリングし、縁が背景色を拾って光る
+     「光を導くガラスの切断面」を作る（マスクが backdrop-filter の適用域も
+     リングに限定する = progressive blur と同じ原理）。非対応環境では
+     conic リムだけが残るので安全に劣化する */
+  -webkit-backdrop-filter: blur(4px) saturate(1.8) brightness(1.55);
+  backdrop-filter: blur(4px) saturate(1.8) brightness(1.55);
+  pointer-events: none;
+  z-index: 2;
+}
+.dark .glass-specular::after {
+  -webkit-backdrop-filter: blur(4px) saturate(1.6) brightness(1.25);
+  backdrop-filter: blur(4px) saturate(1.6) brightness(1.25);
 }
 .glass-specular > * {
   position: relative;
@@ -212,6 +314,7 @@
   .glass-medium,
   .glass-strong,
   .glass-dark,
+  .glass-clear,
   .glass-accent {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -219,13 +322,27 @@
     border-color: var(--Border-Low-Emphasis);
   }
 
+  /* 白文字前提のガラスは白背景に落とすとコントラストが消えるため、
+     不透明の暗色サーフェスにフォールバックする */
+  .glass-dark,
+  .glass-clear {
+    background: var(--Surface-Inverse);
+  }
+
   .dark .glass,
   .dark .glass-subtle,
   .dark .glass-medium,
   .dark .glass-strong,
   .dark .glass-dark,
+  .dark .glass-clear,
   .dark .glass-accent {
     background: var(--Surface-Inverse);
+  }
+
+  /* スペキュラ・リムの装飾層も透明表現の一部なので無効化 */
+  .glass-specular::before,
+  .glass-specular::after {
+    display: none;
   }
 
   .glass-overlay {
