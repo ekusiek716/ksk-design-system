@@ -154,6 +154,7 @@ export const GlassTokens: Story = {
           { cls: "glass-medium", label: ".glass-medium", desc: "中程度" },
           { cls: "glass-strong", label: ".glass-strong", desc: "濃いガラス" },
           { cls: "glass-dark", label: ".glass-dark", desc: "ダーク用" },
+          { cls: "glass-clear glass-specular", label: ".glass-clear", desc: "Clear（写真・動画上）" },
           { cls: "glass-overlay", label: ".glass-overlay", desc: "オーバーレイ" },
         ].map(({ cls, label, desc }) => (
           <div key={cls} className={`${cls} rounded-2xl p-4`}>
