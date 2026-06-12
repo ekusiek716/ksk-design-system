@@ -23,7 +23,10 @@ const buttonVariants = cva(
         ghost: "text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Ghost-Button)] rounded-full",
         destructive: "bg-[var(--Caution-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Destructive-Button)] active:bg-[var(--Active-Destructive-Button)] rounded-full",
         link: "text-[var(--Text-Accent-Primary)] underline-offset-4 hover:underline",
-        glass: "glass glass-specular text-[var(--Text-High-Emphasis)] active:opacity-55 rounded-full",
+        // glass の押下は不透明度を落とさず「わずかに縮んで増光」させる
+        // （iOS の Liquid Glass はタップでガラスがハイライトする挙動）。
+        // リリース時はオーバーシュートする bezier で液体的に弾ませる。
+        glass: "glass glass-specular text-[var(--Text-High-Emphasis)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:brightness-[1.06] active:scale-[0.96] active:brightness-110 rounded-full",
         accent: "bg-gradient-to-r from-[var(--Brand-Primary)] to-[var(--Brand-Action)] text-[var(--Text-on-Inverse)] border border-transparent hover:opacity-90 rounded-full",
         // inverse — 暗背景・ヒーローセクション上に乗せる primary CTA。
         // 白背景 + アクセント文字（Brand-Primary）。
