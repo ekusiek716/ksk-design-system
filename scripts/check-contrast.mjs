@@ -23,7 +23,9 @@ function resolve(val) {
   if (val.startsWith("#")) return val
   const m = val.match(/^var\(--Primitive-([A-Za-z]+)(?:-(\d+))?\)$/)
   if (!m) return null // rgba / color-mix 等は対象外
-  const fam = prim[m[1].toLowerCase()]
+  // brand は primitive ではなく alias レイヤー。default テーマでは Blue を指すため
+  // --Primitive-Brand-* は Blue ランプに解決する。
+  const fam = prim[m[1].toLowerCase()] ?? (m[1].toLowerCase() === "brand" ? prim.blue : null)
   if (fam == null) return null
   return typeof fam === "string" ? fam : (m[2] ? fam[m[2]] : null)
 }
@@ -40,7 +42,8 @@ function contrast(a, b) {
 }
 
 function readThemeBrandShade(theme, shade) {
-  if (theme === "default") return prim.brand[shade]
+  // default テーマの Brand は Blue ランプ（colors.brand alias の参照先）。
+  if (theme === "default") return prim.blue[shade]
   const css = readFileSync(join(root, "src/themes", `${theme}.css`), "utf8")
   const match = css.match(new RegExp(`--Primitive-Brand-${shade}:\\s*(#[0-9A-Fa-f]{6})`))
   return match?.[1] ?? null
