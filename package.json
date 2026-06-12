@@ -68,6 +68,10 @@
       "import": "./src/styles/categorical.css",
       "default": "./src/styles/categorical.css"
     },
+    "./glass": {
+      "import": "./src/styles/glass.css",
+      "default": "./src/styles/glass.css"
+    },
     "./themes/default": {
       "import": "./src/themes/default.css",
       "default": "./src/themes/default.css"
@@ -111,10 +115,11 @@
     "lint:story-reuse": "bash scripts/check-story-reuse.sh",
     "lint:contrast": "node scripts/check-contrast.mjs",
     "lint:tailwind": "node scripts/check-tailwind-v4.mjs",
+    "lint:prefix-order": "node scripts/check-prefix-order.mjs",
     "generate:lookup": "node scripts/generate-component-lookup.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "tsc -p tsconfig.app.json --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && bash scripts/check-drift.sh && node scripts/check-contrast.mjs && node scripts/check-tailwind-v4.mjs && node scripts/generate-component-lookup.mjs --check",
+    "check": "tsc -p tsconfig.app.json --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && bash scripts/check-drift.sh && node scripts/check-contrast.mjs && node scripts/check-tailwind-v4.mjs && node scripts/check-prefix-order.mjs && node scripts/generate-component-lookup.mjs --check",
     "check:agent": "npm run lint && npm run check && npm test && npm run lint:story-reuse",
     "postinstall": "node bin/init.js postinstall",
     "mcp:build": "cd mcp-server && npm install && npm run build",
