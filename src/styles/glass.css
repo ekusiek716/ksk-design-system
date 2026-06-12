@@ -5,6 +5,14 @@
    使い方:
      クラスを直接付与: <div class="glass">...</div>
      または CSS 変数を参照: backdrop-filter: var(--glass-blur);
+
+   ⚠️ 宣言順の不変条件: `-webkit-backdrop-filter` を先、標準の
+   `backdrop-filter` を後に書くこと（Tailwind の出力順と同じ）。
+   消費側の本番ビルド（Next.js 等の CSS minifier）は両者を同一
+   プロパティとして dedupe し「後に書いた方」だけを残すため、標準形を
+   先に書くと minify 後に -webkit- だけが残り、エイリアス非対応の
+   Firefox で blur が完全に無効になる（yokoku-app 本番で実害、
+   2026-06-12 修正）。dev は未 minify なので手元では再現しない。
    ============================================================= */
 
 /* ─── Liquid Glass トークン ─── */
@@ -64,8 +72,8 @@
  */
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 0.5px solid var(--glass-border);
   box-shadow: var(--glass-highlight), var(--glass-shadow);
 }
@@ -76,8 +84,8 @@
  */
 .glass-subtle {
   background: var(--glass-bg-subtle);
-  backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
+  backdrop-filter: var(--glass-blur-sm);
   border: 0.5px solid rgba(255, 255, 255, 0.22);
   box-shadow: var(--glass-shadow-sm);
 }
@@ -88,8 +96,8 @@
  */
 .glass-medium {
   background: var(--glass-bg-medium);
-  backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 0.5px solid var(--glass-border);
   box-shadow: var(--glass-highlight), var(--glass-shadow);
 }
@@ -100,8 +108,8 @@
  */
 .glass-strong {
   background: var(--glass-bg-strong);
-  backdrop-filter: var(--glass-blur-lg);
   -webkit-backdrop-filter: var(--glass-blur-lg);
+  backdrop-filter: var(--glass-blur-lg);
   border: 0.5px solid var(--glass-border);
   box-shadow: var(--glass-highlight), var(--glass-shadow-lg);
 }
@@ -112,8 +120,8 @@
  */
 .glass-dark {
   background: var(--glass-bg-dark);
-  backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 0.5px solid var(--glass-border-dark);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12),
               0 8px 32px rgba(0, 0, 0, 0.28);
@@ -125,8 +133,8 @@
  */
 .glass-overlay {
   background: var(--glass-overlay-bg);
-  backdrop-filter: var(--glass-overlay-blur);
   -webkit-backdrop-filter: var(--glass-overlay-blur);
+  backdrop-filter: var(--glass-overlay-blur);
 }
 
 /**
@@ -136,8 +144,8 @@
  */
 .glass-accent {
   background: color-mix(in srgb, var(--Brand-Primary) 15%, rgba(255, 255, 255, 0.12));
-  backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
   border: 0.5px solid color-mix(in srgb, var(--Brand-Primary) 30%, rgba(255, 255, 255, 0.30));
   box-shadow: var(--glass-highlight), var(--glass-shadow),
               inset 0 0 0 0.5px color-mix(in srgb, var(--Brand-Primary) 20%, transparent);
@@ -205,8 +213,8 @@
   .glass-strong,
   .glass-dark,
   .glass-accent {
-    backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     background: var(--Surface-Primary);
     border-color: var(--Border-Low-Emphasis);
   }
@@ -221,8 +229,8 @@
   }
 
   .glass-overlay {
-    backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     background: rgba(0, 0, 0, 0.6);
   }
 }
