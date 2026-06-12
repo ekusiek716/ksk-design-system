@@ -27,9 +27,9 @@ function roleToCssSegment(role: string) {
     .join("-")
 }
 
-function flattenSemanticTokenMap() {
+function flattenSemanticTokenMap(group: "semantic" | "semanticDark" = "semantic") {
   const tokens = JSON.parse(readFileSync("tokens.json", "utf8"))
-  const semantic = tokens.colors.semantic as Record<string, unknown>
+  const semantic = tokens.colors[group] as Record<string, unknown>
   const tokenMap = new Map<string, string>()
 
   for (const [category, value] of Object.entries(semantic)) {
@@ -55,10 +55,35 @@ function extractLightSemanticCssVariableMap() {
   )
 }
 
+function extractDarkSemanticCssVariableMap() {
+  const css = readFileSync("src/styles/semantic.css", "utf8")
+  const darkBlock = css.match(/\.dark\s*{([\s\S]*?)\n}/)?.[1] ?? ""
+  return new Map(
+    [...darkBlock.matchAll(/--([A-Za-z][A-Za-z0-9-]+)\s*:\s*([^;]+);/g)]
+      .map((match) => [match[1], match[2].trim()])
+  )
+}
+
 describe("tokens.json — semantic token contract", () => {
   it("semantic.css の light mode semantic tokens を機械可読 tokens.json にも持つ", () => {
     const tokenMap = flattenSemanticTokenMap()
     const cssMap = extractLightSemanticCssVariableMap()
+    const missing = [...cssMap.keys()].filter((name) => !tokenMap.has(name))
+    const mismatched = [...cssMap.entries()].flatMap(([name, cssValue]) => {
+      const tokenValue = tokenMap.get(name)
+      return tokenValue !== undefined && tokenValue !== cssValue
+        ? [{ name, cssValue, tokenValue }]
+        : []
+    })
+
+    expect(cssMap.size).toBeGreaterThan(50)
+    expect(missing).toEqual([])
+    expect(mismatched).toEqual([])
+  })
+
+  it("semantic.css の dark mode semantic tokens を機械可読 tokens.json (semanticDark) にも持つ", () => {
+    const tokenMap = flattenSemanticTokenMap("semanticDark")
+    const cssMap = extractDarkSemanticCssVariableMap()
     const missing = [...cssMap.keys()].filter((name) => !tokenMap.has(name))
     const mismatched = [...cssMap.entries()].flatMap(([name, cssValue]) => {
       const tokenValue = tokenMap.get(name)

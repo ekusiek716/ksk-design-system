@@ -77,6 +77,9 @@
   font-weight: 400;
 }
 
+/* body-xs(10px) は本文禁止 — 補助ラベル/メタ情報専用。
+   本文の最小は typo-body-sm(12px)。10px を本文に使うとモバイル可読性の
+   下限（iOS HIG ~11pt / WCAG 観点）を割る。 */
 @utility typo-body-xs {
   font-size: 10px;
   line-height: 1.5;
@@ -127,7 +130,8 @@
   letter-spacing: -0.01em;
 }
 
-/* ─── Caption（注釈・法律表記） ─── */
+/* ─── Caption（注釈・法律表記） ───
+   caption(11px) は非必須の注釈・法的表記のみ。本文には使わない（本文下限は body-sm=12px）。 */
 
 @utility typo-caption {
   font-size: 11px;

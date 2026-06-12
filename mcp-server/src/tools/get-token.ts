@@ -17,6 +17,8 @@ interface TokenResult {
 interface TokensJson {
   colors: {
     primitive: Record<string, Record<string, string>>;
+    /** テーマ差し替え対象の alias レイヤー（default=Blue 参照）。CSS では --Primitive-Brand-* スロット。 */
+    brand?: Record<string, string>;
     semantic: Record<string, Record<string, string>>;
   };
   typography: {
@@ -47,11 +49,22 @@ function loadTokensJson(): TokensJson {
 function flattenColors(obj: Record<string, Record<string, string>>, prefix: string): TokenEntry[] {
   const result: TokenEntry[] = [];
   for (const [group, values] of Object.entries(obj)) {
+    if (group.startsWith("_")) continue;
     for (const [shade, value] of Object.entries(values)) {
+      if (shade.startsWith("_")) continue;
       result.push({ name: `--${prefix}-${group}-${shade}`, value });
     }
   }
   return result;
+}
+
+// brand は primitive ではなく alias レイヤー（colors.brand）。CSS 上のスロット名は
+// --Primitive-Brand-* なので、その名前で出力して従来の一覧と互換を保つ。
+function flattenBrandAlias(brand?: Record<string, string>): TokenEntry[] {
+  if (!brand) return [];
+  return Object.entries(brand)
+    .filter(([shade]) => !shade.startsWith("_"))
+    .map(([shade, value]) => ({ name: `--Primitive-Brand-${shade}`, value }));
 }
 
 function flattenSemanticColors(semantic: Record<string, Record<string, string>>): TokenEntry[] {
@@ -95,17 +108,21 @@ function spacingTokens(tokens: TokensJson): TokenEntry[] {
 }
 
 function radiusTokens(tokens: TokensJson): TokenEntry[] {
-  return Object.entries(tokens.borderRadius).map(([key, value]) => ({
-    name: `rounded-${key}`,
-    value,
-  }));
+  return Object.entries(tokens.borderRadius)
+    .filter(([key]) => !key.startsWith("_"))
+    .map(([key, value]) => ({
+      name: `rounded-${key}`,
+      value,
+    }));
 }
 
 function shadowTokens(tokens: TokensJson): TokenEntry[] {
-  return Object.entries(tokens.shadows).map(([key, value]) => ({
-    name: `shadow-[var(--shadow-${key})]`,
-    value,
-  }));
+  return Object.entries(tokens.shadows)
+    .filter(([key]) => !key.startsWith("_"))
+    .map(([key, value]) => ({
+      name: `shadow-[var(--shadow-${key})]`,
+      value,
+    }));
 }
 
 // --- Public API ---
@@ -119,7 +136,10 @@ export function getToken(category: string): TokenResult {
     case "colors":
     case "colour": {
       const semantic = flattenSemanticColors(tokens.colors.semantic);
-      const primitive = flattenColors(tokens.colors.primitive, "Primitive");
+      const primitive = [
+        ...flattenColors(tokens.colors.primitive, "Primitive"),
+        ...flattenBrandAlias(tokens.colors.brand),
+      ];
       return { category: "color", tokens: [...semantic, ...primitive], count: semantic.length + primitive.length };
     }
 
@@ -131,7 +151,10 @@ export function getToken(category: string): TokenResult {
 
     case "primitive":
     case "primitive-color": {
-      const t = flattenColors(tokens.colors.primitive, "Primitive");
+      const t = [
+        ...flattenColors(tokens.colors.primitive, "Primitive"),
+        ...flattenBrandAlias(tokens.colors.brand),
+      ];
       return { category: "primitive", tokens: t, count: t.length };
     }
 
@@ -169,10 +192,12 @@ export function getToken(category: string): TokenResult {
     case "size":
     case "touch":
     case "target": {
-      const t = Object.entries(tokens.touchTargets).map(([k, v]) => ({
-        name: k,
-        value: JSON.stringify(v),
-      }));
+      const t = Object.entries(tokens.touchTargets)
+        .filter(([k]) => !k.startsWith("_"))
+        .map(([k, v]) => ({
+          name: k,
+          value: JSON.stringify(v),
+        }));
       return { category: "touchTargets", tokens: t, count: t.length };
     }
 
@@ -180,6 +205,7 @@ export function getToken(category: string): TokenResult {
       const allTokens = [
         ...flattenSemanticColors(tokens.colors.semantic),
         ...flattenColors(tokens.colors.primitive, "Primitive"),
+        ...flattenBrandAlias(tokens.colors.brand),
         ...typographyTokens(tokens),
         ...spacingTokens(tokens),
         ...radiusTokens(tokens),
