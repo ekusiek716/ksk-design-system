@@ -36,7 +36,7 @@ typography:
   heading:  { fontSize: "18px", lineHeight: "1.5",  fontWeight: 700 }   # typo-heading-lg（基準）
   body:     { fontSize: "14px", lineHeight: "1.75", fontWeight: 400 }   # typo-body-md（基準）
   label:    { fontSize: "12px", lineHeight: "1.5",  fontWeight: 500 }   # typo-label-sm
-  caption:  { fontSize: "10px", lineHeight: "1.5",  fontWeight: 400 }   # typo-body-xs
+  caption:  { fontSize: "11px", lineHeight: "1.5",  fontWeight: 400 }   # typo-caption（注釈/法的表記専用。本文の下限は body=12px。10px の typo-body-xs は補助ラベル専用で本文禁止）
 rounded:
   sm: "4px"
   surface: "8px"   # Card / Input / Popover  → var(--Radius-Surface)
@@ -46,11 +46,11 @@ rounded:
 spacing:
   unit: "4px"      # 4px グリッド（scale: 0,4,8,12,16,20,24,28,32,36,40,44,48,...）
   page: "16px"     # 画面端マージン var(--page-px)
-elevation:
+elevation:                                          # 影色は neutral（Gray-900 ベース rgba(17,24,39,…)）でテーマ非依存
   sm: "0 1px 2px rgba(0,0,0,0.05)"
   md: "0 0 8px rgba(20,20,20,0.08)"
-  lg: "0 12px 32px -4px rgba(24,39,75,0.12), 0 8px 16px -6px rgba(24,39,75,0.12)"
-  dialog: "0 12px 32px -4px rgba(24,39,75,0.12), 0 8px 16px -6px rgba(24,39,75,0.12), 0 1px 4px 1px rgba(0,0,0,0.2)"
+  lg: "0 12px 32px -4px rgba(17,24,39,0.12), 0 8px 16px -6px rgba(17,24,39,0.12)"
+  dialog: "0 12px 32px -4px rgba(17,24,39,0.12), 0 8px 16px -6px rgba(17,24,39,0.12), 0 1px 4px 1px rgba(0,0,0,0.2)"
 motion:
   microIn: "150ms ease-out"                       # fade-in / scale-in
   enter: "200ms ease-out"                          # fade-in-up / slide-in
@@ -105,7 +105,11 @@ EC/BtoC 系）を回すのが狙い。
 | 罫線 | `var(--Border-Low-Emphasis)` | `#E5E7EB` |
 | 状態 | `--Success/Warning/Caution/Info-Base` | `#16A34A` / `#EA580C` / `#DC2626` / `#2563EB` |
 
-- **Dark mode**: `.dark` で Semantic 層が自動反転（コンポーネント側の変更不要）。
+- **状態色の正本**: 上記は `*-Base`（テキスト/アイコン基準＝Primitive **600**）。`tokens.json` を正本とし、本表はその要約。
+  バッジ/ピル等の強調 **fill** は別ロール `--Surface-*-Strong`（Primitive **500**）で、わざと一段明るい。役割が違うだけで矛盾ではない。
+- **Dark mode**: `.dark` で Semantic 層が自動反転（コンポーネント側の変更不要）。テーマ差し替え（Brand）と
+  light/dark は**直交2軸**。dark の semantic 値は `src/styles/semantic.css` の `.dark` が実装で、`tokens.json` の
+  `colors.semanticDark` に機械可読ミラーを持つ（契約テストで同期を保証）。
 - **Categorical（質的）**: `var(--Categorical-{1..16})` ＋ `-Subtle`(背景) / `-Bold`(文字)。
   カテゴリの色分け専用でテーマ非依存。WCAG/色覚多様性を検証済み。文字には必ず `-Bold`。
 
@@ -122,7 +126,9 @@ EC/BtoC 系）を回すのが狙い。
 
 - **4px グリッド**。余白・サイズは 4 の倍数（scale 0–60）。
 - 画面端マージン: `var(--page-px)`（既定 16px）。
-- **タッチターゲット**（モバイル）: ボタン 48px / アイコンボタン 44px / 入力 48px / チップ 36px 以上。
+- **タッチターゲット**（モバイル）: WCAG 2.5.5 / Apple HIG に従い主要操作（ボタン/アイコンボタン/入力/ナビ）の
+  **min は 44px** 以上、推奨 48px。44 未満が避けられない **チップ（min 32px）は hitSlop**（不可視の拡張タップ領域）で
+  実効 44px を確保する。値の正本は `tokens.json` の `touchTargets`。
 
 ## Elevation & Depth
 
@@ -139,6 +145,10 @@ EC/BtoC 系）を回すのが狙い。
 | 中央 Dialog / AlertDialog | `var(--Radius-Modal)` | 24px |
 | Sheet（下/フロート） | `var(--Radius-Sheet)` | 32px |
 | Button / Chip | `rounded-full` | 9999px |
+
+> 素の `rounded-*` を使う場合、キーは **Tailwind v4 のユーティリティ名**と一致し値もその実描画 px と同じ
+> （`tokens.json` の `borderRadius`: none→sm(4)→md(6)→lg(8)→xl(12)→2xl(16)→full の連続スケール）。
+> 独自の `--radius-*` 上書きはしていないため、`rounded-md`/`rounded-xl` は Tailwind v4 既定の 6px/12px を描画する。
 
 ## Motion
 

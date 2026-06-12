@@ -95,13 +95,17 @@
   --Radius-Sheet:   2rem;    /* 32px — 端寄せ Sheet（bottom / float） */
 }
 
-/* ─── Shadow Tokens ─── */
+/* ─── Shadow Tokens ───
+   影色はテーマ非依存の neutral（Gray-900 ベース rgba(17,24,39,…)）。
+   旧来の青寄り rgba(24,39,75) は default=Blue 前提で、violet/orange/green
+   テーマや地の色とわずかにケンカするため neutral に統一。
+   ダークモードでは黒影が機能しない（glow 方向が必要）ため、.dark 側は別途調整する。 */
 :root {
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 0 8px rgba(20, 20, 20, 0.08);
-  --shadow-lg: 0px 12px 32px -4px rgba(24, 39, 75, 0.12), 0px 8px 16px -6px rgba(24, 39, 75, 0.12);
-  --shadow-dialog: 0px 12px 32px -4px rgba(24, 39, 75, 0.12), 0px 8px 16px -6px rgba(24, 39, 75, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2);
-  --shadow-tooltip: 0px 8px 8px -4px rgba(24, 39, 75, 0.08), 0px 4px 6px -4px rgba(24, 39, 75, 0.12);
+  --shadow-lg: 0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12);
+  --shadow-dialog: 0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2);
+  --shadow-tooltip: 0px 8px 8px -4px rgba(17, 24, 39, 0.08), 0px 4px 6px -4px rgba(17, 24, 39, 0.12);
 }
 
 /* ─── Animation ─── */
