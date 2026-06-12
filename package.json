@@ -68,6 +68,10 @@
       "import": "./src/styles/categorical.css",
       "default": "./src/styles/categorical.css"
     },
+    "./glass": {
+      "import": "./src/styles/glass.css",
+      "default": "./src/styles/glass.css"
+    },
     "./themes/default": {
       "import": "./src/themes/default.css",
       "default": "./src/themes/default.css"
