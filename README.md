@@ -37,12 +37,12 @@ React 19 + TypeScript / Vite / **Tailwind CSS v4** / shadcn/ui（Radix UI）/ CV
 
 ```css
 /* プロジェクトの CSS */
-@import "@ksk/design-system/preset";
+@import "ksk-design-system/preset";
 @import "./themes/my-client.css"; /* Brand 色を差し替えたテーマ */
 ```
 
 ```tsx
-import { Button, Card, Input, FormField } from "@ksk/design-system"
+import { Button, Card, Input, FormField } from "ksk-design-system"
 ```
 
 新規クライアント案件では、テーマファイルで `--Primitive-Brand-500` などブランドカラーの 10 行を定義するだけで、全コンポーネントがそのブランドカラーで動作します。

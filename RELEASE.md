@@ -1,6 +1,6 @@
-# Release Cadence — `@ksk/design-system`
+# Release Cadence — `ksk-design-system`
 
-`@ksk/design-system` のリリーススケジュール・運用ルール。
+`ksk-design-system` のリリーススケジュール・運用ルール。
 
 ## 通常リリースサイクル
 
@@ -71,7 +71,7 @@ GitHub Releases にコピペできるテンプレ:
 ```md
 ### Breaking Changes
 - `OldComponent` を削除。`NewComponent` を使ってください。
-  自動移行: `npx @ksk/design-system codemod v1-to-v2 ./src`
+  自動移行: `npx ksk-design-system codemod v1-to-v2 ./src`
 - 詳細: [MIGRATION.md](./MIGRATION.md)
 ```
 

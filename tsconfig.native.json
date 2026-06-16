@@ -1,0 +1,16 @@
+{
+  "//": "RN 専用エントリ（src/native）の型検証用。react-native 型を解決し、DOM lib は読み込まない。",
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": [],
+    "baseUrl": "."
+  },
+  "include": ["src/native", "src/tokens/native"]
+}

@@ -1,5 +1,5 @@
 /**
- * ESLint プラグイン: @ksk/design-system 非推奨 API 検出
+ * ESLint プラグイン: ksk-design-system 非推奨 API 検出
  *
  * 段階的廃止のために、特定の identifier / import パスを警告する。
  * codemod (scripts/codemod/*.mjs) と組み合わせて使う:
@@ -9,7 +9,7 @@
  *   4. 完全削除: ここから削除
  *
  * 使い方 (利用側の eslint.config.js):
- *   import kskDeprecated from "@ksk/design-system/eslint/deprecated"
+ *   import kskDeprecated from "ksk-design-system/eslint/deprecated"
  *   export default [
  *     {
  *       plugins: { "ksk-deprecated": kskDeprecated },
@@ -21,7 +21,7 @@
 /**
  * 非推奨エントリ:
  * - identifier: そのままの名前で使われたら警告
- * - kind: "import" だと from @ksk/design-system からの import のみ警告
+ * - kind: "import" だと from ksk-design-system からの import のみ警告
  * - replacement: 置換先（codemod 名と一致させると親切）
  * - removeIn: 削除予定バージョン
  *
@@ -43,7 +43,7 @@ const noDeprecated = {
   meta: {
     type: "suggestion",
     docs: {
-      description: "Warn on deprecated @ksk/design-system APIs",
+      description: "Warn on deprecated ksk-design-system APIs",
     },
     schema: [],
     messages: {
@@ -56,7 +56,7 @@ const noDeprecated = {
 
     return {
       ImportDeclaration(node) {
-        if (node.source.value !== "@ksk/design-system") return
+        if (node.source.value !== "ksk-design-system") return
         for (const spec of node.specifiers) {
           if (spec.type !== "ImportSpecifier") continue
           const name = spec.imported.name

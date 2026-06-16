@@ -10,7 +10,7 @@
  * 使い方:
  * ```tsx
  * // app/some-rsc/page.tsx — Server Component
- * import { buttonVariants } from "@ksk/design-system/class-names"
+ * import { buttonVariants } from "ksk-design-system/class-names"
  *
  * export default function Page() {
  *   return (
@@ -21,7 +21,7 @@
  * }
  * ```
  *
- * 既存の `import { buttonVariants } from "@ksk/design-system"` も引き続き
+ * 既存の `import { buttonVariants } from "ksk-design-system"` も引き続き
  * 動作するが、Server Component から呼ぶ場合はこちら経由が必須。
  */
 export { buttonVariants, type ButtonVariantsProps, } from "@/lib/server-variants/button-variants";

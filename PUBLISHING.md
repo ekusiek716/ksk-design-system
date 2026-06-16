@@ -1,6 +1,6 @@
-# Publishing — `@ksk/design-system`
+# Publishing — `ksk-design-system`
 
-`@ksk/design-system` のリリース・配布手順。
+`ksk-design-system` のリリース・配布手順。
 
 > **配布方式**: このパッケージは npm レジストリには公開しない。
 > `npm pack` で生成した tgz を各消費リポジトリの `vendor/` に置き、
@@ -113,7 +113,7 @@ bash scripts/bump-consumers.sh <version> <影響リポ...>
 
 ## バージョニング規約
 
-`@ksk/design-system` は [Semantic Versioning](https://semver.org/lang/ja/) に従う:
+`ksk-design-system` は [Semantic Versioning](https://semver.org/lang/ja/) に従う:
 
 | 種類 | 内容 | 例 |
 |---|---|---|

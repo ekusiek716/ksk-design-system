@@ -17,13 +17,13 @@ export function getComponent(id) {
         // Exact name match
         const exact = items.find((c) => c.name.toLowerCase() === normalized);
         if (exact)
-            return { ...exact, importPath: "@ksk/design-system", group: key };
+            return { ...exact, importPath: "ksk-design-system", group: key };
         // Path or partial name match
         const partial = items.find((c) => c.path.toLowerCase().endsWith(normalized) ||
             c.name.toLowerCase().includes(normalized) ||
             c.path.toLowerCase().includes(normalized));
         if (partial)
-            return { ...partial, importPath: "@ksk/design-system", group: key };
+            return { ...partial, importPath: "ksk-design-system", group: key };
     }
     return null;
 }
