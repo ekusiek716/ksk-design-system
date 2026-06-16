@@ -21,5 +21,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "comment": "src/native は RN 専用（react-native 依存）。web の app チェックからは除外し tsconfig.native.json で型検証する。",
+  "exclude": ["src/native"]
 }

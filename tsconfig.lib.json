@@ -20,7 +20,10 @@
     "src/index.ts",
     "src/class-names.ts",
     "src/components/**/*.tsx",
-    "src/lib/**/*.ts"
+    "src/lib/**/*.ts",
+    "src/tokens/native/**/*.ts",
+    "src/native/**/*.ts",
+    "src/native/**/*.tsx"
   ],
   "exclude": ["src/**/*.stories.tsx", "src/**/*.test.tsx"]
 }
