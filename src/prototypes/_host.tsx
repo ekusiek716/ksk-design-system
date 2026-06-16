@@ -101,30 +101,36 @@ function DetailView({ slug }: { slug: string }) {
 
   return (
     <div className="min-h-dvh">
-      {/* ツールバー */}
-      <div className="sticky top-0 z-50 flex items-center gap-3 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-4 py-2.5">
+      {/* ツールバー（プレビュー用クローム。モックの「サービスのヘッダー」と
+          誤読されないよう、ダークな dev バー + PREVIEW ラベルで明確に区別する） */}
+      <div className="sticky top-0 z-50 flex items-center gap-3 bg-[var(--Surface-Inverse)] px-4 py-2.5">
         <Button
           variant="ghost"
           size="icon-sm"
           aria-label="一覧へ戻る"
+          className="text-[var(--Text-on-Inverse)]"
           onClick={() => (window.location.hash = "#/")}
         >
           <ArrowLeft2 size={20} />
         </Button>
+        <span className="typo-label-xs shrink-0 rounded bg-[var(--Brand-Primary)] px-1.5 py-0.5 text-[var(--Text-on-Inverse)]">
+          PREVIEW
+        </span>
         <div className="min-w-0 flex-1">
-          <p className="typo-label-md text-[var(--Text-High-Emphasis)] truncate">{meta.title}</p>
+          <p className="typo-label-md text-[var(--Text-on-Inverse)] truncate">{meta.title}</p>
         </div>
         {meta.notionUrl && (
           <Button
             variant="ghost"
             size="icon-sm"
             aria-label="元の仕様を開く"
+            className="text-[var(--Text-on-Inverse)]"
             onClick={() => window.open(meta.notionUrl, "_blank", "noreferrer")}
           >
             <DocumentText size={18} />
           </Button>
         )}
-        <div className="flex items-center gap-1 rounded-full bg-[var(--Surface-Secondary)] p-1">
+        <div className="flex items-center gap-1 rounded-full bg-[var(--Surface-Primary)] p-1">
           <Button
             variant={frame === "SP" ? "secondary" : "ghost"}
             size="icon-sm"
