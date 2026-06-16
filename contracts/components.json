@@ -4,12 +4,12 @@
     "version": "1.32.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 55,
+      "ui": 56,
       "patterns": 33,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 110
+      "total": 111
     }
   },
   "ui": [
@@ -387,7 +387,7 @@
       ],
       "rules": [
         "Provider モード: <Toaster> でラップし useToast() で呼び出す",
-        "Fire-and-forget: `import { toast } from \"@ksk/design-system\"` → `toast.success(\"保存しました\")`。<Toaster> 設置不要",
+        "Fire-and-forget: `import { toast } from \"ksk-design-system\"` → `toast.success(\"保存しました\")`。<Toaster> 設置不要",
         "両 API は内部で同じ singleton store を共有するため、<Toaster> がある場合はそれを優先し auto-mounted viewport は描画しない",
         "新規 action prop で右側に CTA ボタン (元に戻す / 再試行 等) を表示できる"
       ]
@@ -660,6 +660,21 @@
         "columns で 1〜3 カラム対応（デフォルト 2）",
         "required で必須バッジ",
         "error でエラーメッセージ"
+      ]
+    },
+    {
+      "name": "CheckboxField",
+      "path": "src/components/ui/checkbox-field.tsx",
+      "description": "フォーム内の単体チェックボックス（同意・確認用）。インラインラベル + 任意の説明 / エラー。チェックと文字の縦整列を正準化し、画面側で手組みするズレを防ぐ。filter 行用の <Checkbox label> とは役割が別。",
+      "accessibility": [
+        "Label が htmlFor/id で Checkbox と自動紐付け",
+        "error 指定時に aria-invalid + aria-describedby",
+        "items-start で複数行ラベルも先頭行に整列"
+      ],
+      "rules": [
+        "フォームの同意 / 確認チェックに使う（checkbox + label の手組みを禁止）",
+        "filter サイドバー等の行クリック型は <Checkbox label> を使う",
+        "description で補足、error でエラーメッセージ"
       ]
     },
     {
