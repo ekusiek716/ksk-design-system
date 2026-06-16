@@ -84,7 +84,7 @@ export default function CoffeeProductDetail() {
                   aria-label={`画像 ${i + 1} を表示`}
                   aria-pressed={activeImg === i}
                   onClick={() => setActiveImg(i)}
-                  className={`!size-16 shrink-0 overflow-hidden !rounded-lg !p-0 ${
+                  className={`size-16! shrink-0 overflow-hidden rounded-lg! p-0! ${
                     activeImg === i
                       ? "border-2 border-[var(--Brand-Primary)]"
                       : "border border-[var(--Border-Low-Emphasis)]"
