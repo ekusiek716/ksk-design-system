@@ -37,7 +37,7 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
  * - `hero`: トップ hero / final-CTA 向けのピル型特大 CTA。
  * - `icon` / `icon-sm` / `icon-lg` / `icon-xl`: アイコンのみのボタン（aria-label 必須）。
  */
-function Button({ className, variant, size, layout, haptic, onClick, ...props }: ButtonProps) {
+function Button({ className, variant, size, layout, haptic, onClick, type, ...props }: ButtonProps) {
   const handleClick = React.useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       if (haptic && typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -53,6 +53,10 @@ function Button({ className, variant, size, layout, haptic, onClick, ...props }:
       data-slot="button"
       data-variant={variant ?? "default"}
       data-size={size ?? "default"}
+      // 既定を type="button" にする。生 <button> の既定 "submit" は <form> 内で
+      // 意図せぬ送信/リロードを起こす footgun（消費側は皆 type="submit" を明示済みで
+      // 暗黙依存ゼロ＝非破壊）。明示された type="submit"/"reset" はそのまま尊重。
+      type={type ?? "button"}
       className={cn(buttonVariants({ variant, size, layout, className }))}
       onClick={handleClick}
       {...props}
