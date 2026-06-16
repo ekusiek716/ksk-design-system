@@ -1,7 +1,7 @@
 // 受注管理ダッシュボード（管理画面）。
 // シェル骨格は @container で内製（AdminShell は viewport+h-screen 依存=枠非追従, issue #40）。
 // 中身は実 DS: StatCard / StatusTabs / DataTable / BulkActions / Badge / Input。
-import { useMemo, useState } from "react"
+import { memo, useCallback, useMemo, useState } from "react"
 import { Element3, ShoppingCart, Box, Profile2User, Setting2, SearchNormal1, Wallet3, ReceiptText, TruckFast } from "iconsax-reactjs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,6 +55,44 @@ const tabs: Array<{ label: string; value: Status | "all" }> = [
 
 const yen = (n: number) => "¥" + n.toLocaleString("ja-JP")
 
+// 行アクションは全行共通・不変参照（毎レンダーで配列を作らない）
+const ROW_ACTIONS = [
+  { label: "詳細を見る", onClick: () => {} },
+  { label: "出荷登録", onClick: () => {} },
+  { label: "キャンセル", destructive: true, onClick: () => {} },
+]
+
+// 行を memo 化。チェック1つで親が再レンダーしても、selected(boolean) が変わった行
+// だけ再レンダーする。各行は Radix の DropdownMenu(DataTableActionCell) を持つため、
+// 全行を毎回再レンダーすると「テーブル全体がカクつく」原因になる。
+const OrderRow = memo(function OrderRow({
+  order,
+  selected,
+  onToggle,
+}: {
+  order: Order
+  selected: boolean
+  onToggle: (id: string) => void
+}) {
+  return (
+    <DataTableRow selected={selected}>
+      <DataTableCheckboxCell checked={selected} onCheckedChange={() => onToggle(order.id)} />
+      <DataTableCell>
+        <span className="typo-label-sm text-[var(--Text-High-Emphasis)]">{order.id}</span>
+      </DataTableCell>
+      <DataTableCell>{order.customer}</DataTableCell>
+      <DataTableCell align="right">{yen(order.amount)}</DataTableCell>
+      <DataTableCell>
+        <Badge variant={statusVariant[order.status]}>{order.status}</Badge>
+      </DataTableCell>
+      <DataTableCell>
+        <span className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">{order.date}</span>
+      </DataTableCell>
+      <DataTableActionCell items={ROW_ACTIONS} />
+    </DataTableRow>
+  )
+})
+
 export default function AdminOrderDashboard() {
   const [tabIndex, setTabIndex] = useState(0)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -83,12 +121,13 @@ export default function AdminOrderDashboard() {
       else rows.forEach((o) => next.add(o.id))
       return next
     })
-  const toggleOne = (id: string) =>
+  // memo 行が再レンダーされないよう、参照を固定する
+  const toggleOne = useCallback((id: string) =>
     setSelected((prev) => {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
       return next
-    })
+    }), [])
 
   return (
     <div className="@container min-h-dvh bg-[var(--Surface-Secondary)]">
@@ -175,30 +214,7 @@ export default function AdminOrderDashboard() {
                     </DataTableHeader>
                     <DataTableBody>
                       {rows.map((o) => (
-                        <DataTableRow key={o.id} selected={selected.has(o.id)}>
-                          <DataTableCheckboxCell
-                            checked={selected.has(o.id)}
-                            onCheckedChange={() => toggleOne(o.id)}
-                          />
-                          <DataTableCell>
-                            <span className="typo-label-sm text-[var(--Text-High-Emphasis)]">{o.id}</span>
-                          </DataTableCell>
-                          <DataTableCell>{o.customer}</DataTableCell>
-                          <DataTableCell align="right">{yen(o.amount)}</DataTableCell>
-                          <DataTableCell>
-                            <Badge variant={statusVariant[o.status]}>{o.status}</Badge>
-                          </DataTableCell>
-                          <DataTableCell>
-                            <span className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">{o.date}</span>
-                          </DataTableCell>
-                          <DataTableActionCell
-                            items={[
-                              { label: "詳細を見る", onClick: () => {} },
-                              { label: "出荷登録", onClick: () => {} },
-                              { label: "キャンセル", destructive: true, onClick: () => {} },
-                            ]}
-                          />
-                        </DataTableRow>
+                        <OrderRow key={o.id} order={o} selected={selected.has(o.id)} onToggle={toggleOne} />
                       ))}
                     </DataTableBody>
                   </DataTableTable>
