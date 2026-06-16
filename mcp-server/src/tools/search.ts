@@ -49,7 +49,7 @@ export function search(query: string): SearchResult[] {
           type: "component",
           id: comp.path,
           name: comp.name,
-          data: { group: key, importPath: "@ksk/design-system", ...comp },
+          data: { group: key, importPath: "ksk-design-system", ...comp },
         });
       }
     }

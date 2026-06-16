@@ -33,7 +33,7 @@ export function search(query) {
                     type: "component",
                     id: comp.path,
                     name: comp.name,
-                    data: { group: key, importPath: "@ksk/design-system", ...comp },
+                    data: { group: key, importPath: "ksk-design-system", ...comp },
                 });
             }
         }

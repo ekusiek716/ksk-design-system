@@ -5,7 +5,7 @@
    このファイルをコピーして新しいクライアントテーマを作成できる。
 
    使い方:
-   @import "@ksk/design-system/themes/default";
+   @import "ksk-design-system/themes/default";
    ============================================================= */
 
 /* デフォルトは primitive.css の初期値をそのまま使用するため空 */

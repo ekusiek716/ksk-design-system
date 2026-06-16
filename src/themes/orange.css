@@ -4,7 +4,7 @@
    EC・フード・エンタメ系向けのウォームテーマ。
 
    使い方:
-   @import "@ksk/design-system/themes/orange";
+   @import "ksk-design-system/themes/orange";
    ============================================================= */
 
 @theme {
