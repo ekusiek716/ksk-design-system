@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// @ksk/design-system init
+// ksk-design-system init
 // Consumer プロジェクトに AI (Claude / Codex) 向けルールファイルを設置する。
 // AI エージェントは node_modules 配下のファイルを自動で読まないため、
 // プロジェクトルートに AGENTS.md / CLAUDE.md（node_modules 内の DS ルールを
@@ -23,7 +23,7 @@ const cmd = args[0] || "init"
 const force = args.includes("--force")
 
 if (cmd === "help" || cmd === "--help" || cmd === "-h") {
-  console.log(`@ksk/design-system CLI
+  console.log(`ksk-design-system CLI
 
 使い方:
   npx ksk-ds init          AI ルールファイルを設置
@@ -61,7 +61,7 @@ const files = [
 ]
 
 if (!isPostinstall) {
-  console.log("@ksk/design-system init")
+  console.log("ksk-design-system init")
   console.log("AI (Claude / Codex) 向けルールファイルを設置します。\n")
 }
 
@@ -89,7 +89,7 @@ for (const { src, dest, label } of files) {
 
   copyFileSync(srcPath, destPath)
   if (isPostinstall) {
-    console.log(`[@ksk/design-system] ${dest} をプロジェクトルートに設置しました`)
+    console.log(`[ksk-design-system] ${dest} をプロジェクトルートに設置しました`)
   } else {
     console.log(`  ✓ ${dest} を設置しました（${label}）`)
   }
@@ -106,7 +106,7 @@ if (created > 0) {
   console.log(`
 次のステップ:
   1. AI (Claude Code / Codex) を再起動してルールを読み込ませる
-  2. UI を作る前に必ず node_modules/@ksk/design-system/{AGENTS.md,CLAUDE.md,contracts/*,tokens.json} を AI に読ませる
+  2. UI を作る前に必ず node_modules/ksk-design-system/{AGENTS.md,CLAUDE.md,contracts/*,tokens.json} を AI に読ませる
   3. スクラッチコード（ハードコードカラー・余白・角丸等）を書かない運用を徹底する
 `)
 }

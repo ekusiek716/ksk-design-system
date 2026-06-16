@@ -1,5 +1,5 @@
 /**
- * ESLint プラグイン: @ksk/design-system 無色ボーダー検出 (P032)
+ * ESLint プラグイン: ksk-design-system 無色ボーダー検出 (P032)
  *
  * Tailwind v4 で border-color の既定が currentColor に変わったため、
  * `border` / `border-b` 等を色なしで書くと要素の文字色が枠線に透けて出る

@@ -42,7 +42,7 @@ export declare function isCookieDecided(storageKey?: string): boolean;
  *
  * ### 使用例
  * ```tsx
- * import { CookieConsent, isCookieDecided } from "@ksk/design-system"
+ * import { CookieConsent, isCookieDecided } from "ksk-design-system"
  * import { t } from "./i18n"
  *
  * <CookieConsent

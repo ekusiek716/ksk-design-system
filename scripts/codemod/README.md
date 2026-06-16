@@ -1,15 +1,15 @@
 # Codemod
 
-`@ksk/design-system` で破壊変更を入れる際の自動移行スクリプト置き場。
+`ksk-design-system` で破壊変更を入れる際の自動移行スクリプト置き場。
 
 ## 使い方（利用側プロジェクトで）
 
 ```bash
 # 事前確認（変更を書き込まない）
-npx @ksk/design-system codemod v1-to-v2 ./src --dry
+npx ksk-design-system codemod v1-to-v2 ./src --dry
 
 # 実行
-npx @ksk/design-system codemod v1-to-v2 ./src
+npx ksk-design-system codemod v1-to-v2 ./src
 ```
 
 ## 新しい codemod の作り方（メンテナ向け）

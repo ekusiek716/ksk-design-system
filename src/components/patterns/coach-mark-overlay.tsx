@@ -46,7 +46,7 @@ const COACH_VERSION_DEFAULT = "v1"
  *
  * 完了状態の永続化は `isCoachCompleted` / `markCoachCompleted` を使う:
  * ```tsx
- * import { CoachMarkOverlay, isCoachCompleted, markCoachCompleted } from "@ksk/design-system"
+ * import { CoachMarkOverlay, isCoachCompleted, markCoachCompleted } from "ksk-design-system"
  *
  * const [open, setOpen] = useState(false)
  * useEffect(() => {
