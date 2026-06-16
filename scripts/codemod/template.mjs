@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Codemod テンプレート — @ksk/design-system 破壊変更時に複製して使う
+ * Codemod テンプレート — ksk-design-system 破壊変更時に複製して使う
  *
  * 使い方:
  *   cp scripts/codemod/template.mjs scripts/codemod/v1-to-v2.mjs
@@ -9,9 +9,9 @@
  *   node scripts/codemod/v1-to-v2.mjs       ../my-app/src   # 実行
  *
  * 利用側プロジェクトへの公開:
- *   npx @ksk/design-system codemod v1-to-v2 ./src
+ *   npx ksk-design-system codemod v1-to-v2 ./src
  *   または
- *   node node_modules/@ksk/design-system/scripts/codemod/v1-to-v2.mjs ./src
+ *   node node_modules/ksk-design-system/scripts/codemod/v1-to-v2.mjs ./src
  *
  * 注意:
  *   - 正規表現ベースなので 100% 正確ではない（複雑なケースは手動確認推奨）
@@ -60,7 +60,7 @@ if (!fs.existsSync(targetDir)) {
   process.exit(1)
 }
 
-console.log(`\n🔧 @ksk/design-system codemod`)
+console.log(`\n🔧 ksk-design-system codemod`)
 console.log(`   Target: ${path.resolve(targetDir)}`)
 console.log(`   Mode:   ${dry ? "DRY RUN (no changes written)" : "APPLY"}`)
 console.log("")

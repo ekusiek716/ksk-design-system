@@ -89,7 +89,7 @@ for name in "${REPOS[@]}"; do
   fi
 
   git add "vendor/ksk-design-system-$VERSION.tgz" package.json package-lock.json
-  git commit -m "chore: @ksk/design-system を v$VERSION に更新" >/dev/null
+  git commit -m "chore: ksk-design-system を v$VERSION に更新" >/dev/null
 
   if ! git push -u origin "chore/bump-ds-$VERSION" >/dev/null 2>&1; then
     echo -e "${RED}FAIL: push${NC}"
@@ -99,7 +99,7 @@ for name in "${REPOS[@]}"; do
   fi
 
   pr_url="$(gh pr create \
-    --title "chore: @ksk/design-system v$VERSION" \
+    --title "chore: ksk-design-system v$VERSION" \
     --body "DS を v$VERSION に更新（vendor tgz 差し替え + npm install）。変更内容は DS 側リリースノート参照。" \
     2>/dev/null | tail -1)"
 

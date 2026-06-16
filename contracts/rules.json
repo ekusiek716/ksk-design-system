@@ -170,10 +170,10 @@
       "id": "P019",
       "severity": "warning",
       "category": "layout",
-      "pattern": "rounded-md\\b|rounded-xl\\b|rounded-3xl\\b",
+      "pattern": "rounded-3xl\\b",
       "excludes": [".stories."],
       "message": "DS 定義外の角丸禁止",
-      "fix": "rounded-none / rounded-sm / rounded-lg / rounded-2xl / rounded-full のみ使用"
+      "fix": "rounded-none / rounded-sm / rounded-md / rounded-lg / rounded-xl / rounded-2xl / rounded-full のみ使用"
     },
     {
       "id": "P020",
@@ -312,9 +312,9 @@
       {
         "id": "AI3",
         "name": "DS 定義外の角丸",
-        "pattern": "rounded-md|rounded-xl|rounded-3xl",
-        "description": "rounded-xl / rounded-2xl / rounded-3xl を場当たり的に使う",
-        "fix": "rounded-none / rounded-sm / rounded-lg / rounded-2xl / rounded-full の5値のみ"
+        "pattern": "rounded-3xl",
+        "description": "rounded-3xl 等、許可セット外の角丸を場当たり的に使う",
+        "fix": "rounded-none / rounded-sm / rounded-md / rounded-lg / rounded-xl / rounded-2xl / rounded-full の7値のみ"
       },
       {
         "id": "AI4",
@@ -412,11 +412,13 @@
       "allowed": ["gap-1 (4px)", "gap-2 (8px)", "gap-3 (12px)", "gap-4 (16px)", "gap-6 (24px)"]
     },
     "borderRadius": {
-      "rule": "5値のみ。rounded-md / rounded-xl / rounded-3xl 等は禁止。",
+      "rule": "7値のみ。rounded-3xl 等は禁止。",
       "allowed": [
         { "class": "rounded-none", "value": "0",   "use": "角丸なし" },
         { "class": "rounded-sm",   "value": "4px",  "use": "Tag・小要素" },
+        { "class": "rounded-md",   "value": "6px",  "use": "中間スケール（sm–lg）" },
         { "class": "rounded-lg",   "value": "8px",  "use": "Input・Card・Dialog" },
+        { "class": "rounded-xl",   "value": "12px", "use": "中間スケール（lg–2xl）" },
         { "class": "rounded-2xl",  "value": "16px", "use": "Modal・大Card" },
         { "class": "rounded-full", "value": "50%",  "use": "Button・Avatar・Badge・Chip" }
       ]

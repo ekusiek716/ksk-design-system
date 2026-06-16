@@ -1,0 +1,21 @@
+{
+  "name": "ksk-ds-native-sandbox",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "KSK DS のトークンを RN(ThemeProvider) で消費する検証サンドボックス。react-native-web で localhost に立ち Chrome で整える。App コードは素の RN primitives なので実 Expo にそのまま載る。",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-native-web": "^0.19.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
+  }
+}

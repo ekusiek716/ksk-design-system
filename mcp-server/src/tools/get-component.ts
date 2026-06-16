@@ -25,7 +25,7 @@ export function getComponent(id: string): ComponentResult | null {
   for (const { key, items } of groups) {
     // Exact name match
     const exact = items.find((c) => c.name.toLowerCase() === normalized);
-    if (exact) return { ...exact, importPath: "@ksk/design-system", group: key };
+    if (exact) return { ...exact, importPath: "ksk-design-system", group: key };
 
     // Path or partial name match
     const partial = items.find(
@@ -34,7 +34,7 @@ export function getComponent(id: string): ComponentResult | null {
         c.name.toLowerCase().includes(normalized) ||
         c.path.toLowerCase().includes(normalized)
     );
-    if (partial) return { ...partial, importPath: "@ksk/design-system", group: key };
+    if (partial) return { ...partial, importPath: "ksk-design-system", group: key };
   }
 
   return null;
