@@ -3,6 +3,12 @@
   "version": "1.32.0",
   "type": "module",
   "description": "KSK Design System — フリーランス向けマルチテーマ対応デザインシステム",
+  "license": "MIT",
+  "homepage": "https://ksk-design-system.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ekusiek716/ksk-design-system.git"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
