@@ -9,3 +9,4 @@ storybook-static
 
 # 使い捨て分析スクリプト
 .cat-analysis.mjs
+.vercel
