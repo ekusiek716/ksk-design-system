@@ -21,6 +21,10 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, "src/index.ts"),
         "class-names": path.resolve(__dirname, "src/class-names.ts"),
+        // native → RN/Expo 向け解決済みトークン（React/DOM 非依存の純データ）。
+        native: path.resolve(__dirname, "src/tokens/native/index.ts"),
+        // native/ui → RN コンポーネント + ThemeProvider（react / react-native は external）。
+        "native/ui": path.resolve(__dirname, "src/native/index.ts"),
       },
       formats: ["es"],
       fileName: (_format, entryName) => `${entryName}.js`,
@@ -32,6 +36,7 @@ export default defineConfig({
         "react-dom",
         "react-dom/client",
         "react/jsx-runtime",
+        "react-native",
         "iconsax-reactjs",
         "lucide-react",
         "class-variance-authority",
@@ -73,7 +78,12 @@ export default defineConfig({
         // class-names / server-variants は React に依存しないので banner を
         // 付けず、RSC から import 可能にする。
         banner: (chunk) => {
-          if (chunk.name === "class-names" || chunk.name === "server-variants") {
+          if (
+            chunk.name === "class-names" ||
+            chunk.name === "server-variants" ||
+            chunk.name === "native" ||
+            chunk.name === "native/ui"
+          ) {
             return ""
           }
           return '"use client";'
