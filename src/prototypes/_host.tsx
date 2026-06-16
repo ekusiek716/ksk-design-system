@@ -1,0 +1,172 @@
+// =============================================================
+// KSK Design System — Prototype Host（localhost プレビュー）
+//
+// `npm run dev`（http://localhost:5173）で開く。ハッシュルーティングで
+//   #/            → プロトタイプ一覧
+//   #/<slug>      → 単一プロトタイプ（SP/PC フレーム切替つき）
+// react-router は使わず location.hash のみで完結（依存を増やさない）。
+// =============================================================
+import { useEffect, useState } from "react"
+import { ArrowLeft2, Mobile, Monitor, DocumentText } from "iconsax-reactjs"
+import { Button } from "@/components/ui/button"
+import { prototypes, findPrototype } from "./_registry"
+
+type Frame = "SP" | "PC"
+
+function useHashSlug(): string {
+  const [hash, setHash] = useState(() => window.location.hash)
+  useEffect(() => {
+    const on = () => setHash(window.location.hash)
+    window.addEventListener("hashchange", on)
+    return () => window.removeEventListener("hashchange", on)
+  }, [])
+  return hash.replace(/^#\/?/, "")
+}
+
+function EmptyState() {
+  return (
+    <div className="mx-auto max-w-xl px-6 py-24 text-center">
+      <h2 className="typo-heading-lg text-[var(--Text-High-Emphasis)]">モックがまだありません</h2>
+      <p className="typo-body-md text-[var(--Text-Medium-Emphasis)] mt-3">
+        Claude に Notion の仕様リンクを貼って <code className="typo-label-sm bg-[var(--Surface-Tertiary)] px-1.5 py-0.5 rounded-sm">/mock &lt;Notion URL&gt;</code> を実行すると、
+        ここに DS 準拠のモックが生成されます。
+      </p>
+    </div>
+  )
+}
+
+function IndexView() {
+  return (
+    <div className="mx-auto max-w-5xl px-6 py-10">
+      <div className="mb-8">
+        <h1 className="typo-heading-xl text-[var(--Text-High-Emphasis)]">モックプレビュー</h1>
+        <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1">
+          KSK Design System — Notion 仕様から生成したモック一覧
+        </p>
+      </div>
+
+      {prototypes.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <div className="grid grid-cols-1 gap-4 @md:grid-cols-2 lg:grid-cols-3">
+          {prototypes.map((p) => (
+            <a
+              key={p.slug}
+              href={`#/${p.slug}`}
+              className="block rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-5 shadow-[var(--shadow-sm)] transition-shadow hover:shadow-[var(--shadow-md)]"
+            >
+              <div className="flex items-center gap-2">
+                <span className="typo-label-xs rounded-full bg-[var(--Surface-Secondary)] px-2 py-0.5 text-[var(--Text-Medium-Emphasis)]">
+                  {p.meta.device ?? "SP"}
+                </span>
+                {p.meta.createdAt && (
+                  <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">{p.meta.createdAt}</span>
+                )}
+              </div>
+              <h3 className="typo-heading-sm text-[var(--Text-High-Emphasis)] mt-3">{p.meta.title}</h3>
+              {p.meta.description && (
+                <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1 line-clamp-2">
+                  {p.meta.description}
+                </p>
+              )}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DetailView({ slug }: { slug: string }) {
+  const entry = findPrototype(slug)
+  const [frame, setFrame] = useState<Frame>(
+    entry?.meta.device === "PC" ? "PC" : "SP",
+  )
+
+  if (!entry) {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-24 text-center">
+        <h2 className="typo-heading-lg text-[var(--Text-High-Emphasis)]">見つかりません</h2>
+        <p className="typo-body-md text-[var(--Text-Medium-Emphasis)] mt-3">
+          <code className="typo-label-sm">{slug}</code> というモックはありません。
+        </p>
+        <Button variant="secondary" className="mt-6" onClick={() => (window.location.hash = "#/")}>
+          一覧へ戻る
+        </Button>
+      </div>
+    )
+  }
+
+  const { Component, meta } = entry
+
+  return (
+    <div className="min-h-dvh">
+      {/* ツールバー */}
+      <div className="sticky top-0 z-50 flex items-center gap-3 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-4 py-2.5">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="一覧へ戻る"
+          onClick={() => (window.location.hash = "#/")}
+        >
+          <ArrowLeft2 size={20} />
+        </Button>
+        <div className="min-w-0 flex-1">
+          <p className="typo-label-md text-[var(--Text-High-Emphasis)] truncate">{meta.title}</p>
+        </div>
+        {meta.notionUrl && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="元の仕様を開く"
+            onClick={() => window.open(meta.notionUrl, "_blank", "noreferrer")}
+          >
+            <DocumentText size={18} />
+          </Button>
+        )}
+        <div className="flex items-center gap-1 rounded-full bg-[var(--Surface-Secondary)] p-1">
+          <Button
+            variant={frame === "SP" ? "secondary" : "ghost"}
+            size="icon-sm"
+            aria-label="SP 表示"
+            aria-pressed={frame === "SP"}
+            onClick={() => setFrame("SP")}
+          >
+            <Mobile size={18} />
+          </Button>
+          <Button
+            variant={frame === "PC" ? "secondary" : "ghost"}
+            size="icon-sm"
+            aria-label="PC 表示"
+            aria-pressed={frame === "PC"}
+            onClick={() => setFrame("PC")}
+          >
+            <Monitor size={18} />
+          </Button>
+        </div>
+      </div>
+
+      {/* プレビュー領域 */}
+      <div className="bg-[var(--Surface-Secondary)] p-4 @container">
+        {frame === "SP" ? (
+          <div className="mx-auto w-full max-w-[390px] overflow-hidden rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] shadow-[var(--shadow-lg)]">
+            <Component />
+          </div>
+        ) : (
+          <div className="mx-auto w-full overflow-hidden rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] shadow-[var(--shadow-md)]">
+            <Component />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function PrototypeHost() {
+  const slug = useHashSlug()
+  return (
+    <div className="min-h-dvh bg-[var(--Surface-Secondary)]">
+      {slug ? <DetailView slug={slug} /> : <IndexView />}
+    </div>
+  )
+}
