@@ -194,11 +194,11 @@ for FILE in $FILES; do
     WARNINGS=$((WARNINGS + 1))
   fi
 
-  # W3. DS 外の角丸
-  MATCHES=$(grep -noE '\brounded-(md|xl|3xl)\b' "$FILE" 2>/dev/null \
+  # W3. DS 外の角丸（tokens.json borderRadius キー none/sm/md/lg/xl/2xl/full が許可セット。3xl 等は非トークン）
+  MATCHES=$(grep -noE '\brounded-3xl\b' "$FILE" 2>/dev/null \
     | grep -v '// \|/\*' || true)
   if [ -n "$MATCHES" ]; then
-    echo -e "${YELLOW}⚠️  $FILE: DS外の角丸 → rounded-none/sm/lg/2xl/full のみ${NC}"
+    echo -e "${YELLOW}⚠️  $FILE: DS外の角丸 → rounded-none/sm/md/lg/xl/2xl/full のみ${NC}"
     echo "$MATCHES" | head -3
     WARNINGS=$((WARNINGS + 1))
   fi
