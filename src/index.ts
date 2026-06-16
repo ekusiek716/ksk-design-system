@@ -28,6 +28,8 @@ export { Checkbox } from "./components/ui/checkbox"
 export { CheckboxCardGroup, CheckboxCardItem } from "./components/ui/checkbox-card"
 export { CheckboxGroup, CheckboxGroupItem } from "./components/ui/checkbox-group"
 export type { CheckboxGroupProps } from "./components/ui/checkbox-group"
+export { CheckboxField } from "./components/ui/checkbox-field"
+export type { CheckboxFieldProps } from "./components/ui/checkbox-field"
 export { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./components/ui/collapsible"
 export { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger } from "./components/ui/dialog"
 export {
