@@ -212,10 +212,10 @@ const h0 = {
   heavy: 50,
   warning: [30, 50, 30]
 };
-function l1({ className: e, variant: t, size: a, layout: n, haptic: o, onClick: i, ...d }) {
-  const s = v.useCallback(
-    (l) => {
-      o && typeof navigator < "u" && "vibrate" in navigator && navigator.vibrate(h0[o]), i?.(l);
+function l1({ className: e, variant: t, size: a, layout: n, haptic: o, onClick: i, type: d, ...s }) {
+  const l = v.useCallback(
+    (u) => {
+      o && typeof navigator < "u" && "vibrate" in navigator && navigator.vibrate(h0[o]), i?.(u);
     },
     [o, i]
   );
@@ -225,9 +225,10 @@ function l1({ className: e, variant: t, size: a, layout: n, haptic: o, onClick: 
       "data-slot": "button",
       "data-variant": t ?? "default",
       "data-size": a ?? "default",
+      type: d ?? "button",
       className: h(y2({ variant: t, size: a, layout: n, className: e })),
-      onClick: s,
-      ...d
+      onClick: l,
+      ...s
     }
   );
 }
