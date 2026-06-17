@@ -162,6 +162,16 @@ export declare const scales: {
             readonly recommended: 48;
         };
     };
+    readonly elevation: {
+        readonly flat: {
+            readonly offset: 0;
+            readonly bottomBorderWidth: 0;
+        };
+        readonly raised: {
+            readonly offset: 4;
+            readonly bottomBorderWidth: 4;
+        };
+    };
     readonly categorical: {
         readonly "1": {
             readonly hue: "red";
