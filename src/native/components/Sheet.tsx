@@ -39,6 +39,11 @@ export interface SheetProps {
    * 追従しない。snap mode（bottom + snapPoints）でのみ有効。
    */
   footer?: React.ReactNode
+  /**
+   * scrim タップや下方向スワイプで閉じれるか。default true。
+   * false の場合、スワイプダウンは最小 snap まで戻る（rubber-band）。
+   */
+  dismissible?: boolean
 }
 
 export function Sheet(props: SheetProps) {
@@ -139,6 +144,7 @@ function SnapBottomSheet({
   snapPoints,
   initialSnap,
   footer,
+  dismissible = true,
 }: SheetProps) {
   const { theme, scales } = useTheme()
   const points = useMemo(() => {
@@ -158,47 +164,45 @@ function SnapBottomSheet({
     (globalThis as unknown as { window?: { innerHeight?: number } }).window
       ?.innerHeight
   const H = dimsH > 0 ? dimsH : winH && winH > 0 ? winH : 700
-  const fullH = Math.round(H * maxSnap)
-  const minH = Math.round(H * minSnap)
-  // ラバーバンド上限（フル状態で上に引いた時の許容オーバーシュート）
+  const panelH = Math.round(H * maxSnap)
+  // ラバーバンド上限
   const RUBBER_MAX = 4
-  // close 判定：HALF から CLOSE_DRAG_RATIO × minH 引いたら閉じる
-  const CLOSE_DRAG_RATIO = 0.32
+  // close 判定：minSnap から CLOSE_DRAG_RATIO × panelH 以上引いたら閉じる
+  const CLOSE_DRAG_RATIO = 0.18
 
   // active snap ratio
   const initialActive = clamp(initialSnap ?? minSnap, minSnap, maxSnap)
   const activeRef = useRef(initialActive)
-  // sheetH：panel の高さ（0=閉、minH=ハーフ、fullH=フル）。
-  // 高さを直接アニメするため useNativeDriver は false。
-  const sheetH = useRef(new Animated.Value(0)).current
+  // translateY: 0=フル、(maxSnap-active)*H で snap 位置、panelH で完全閉
+  // useNativeDriver: true でカクつき無し。
+  const translateY = useRef(new Animated.Value(panelH)).current
 
   const moveTo = (targetActive: number, duration = SNAP_DUR) => {
     activeRef.current = targetActive
-    Animated.timing(sheetH, {
-      toValue: Math.round(targetActive * H),
+    Animated.timing(translateY, {
+      toValue: (maxSnap - targetActive) * H,
       duration,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start()
   }
 
   useEffect(() => {
     if (open) {
-      sheetH.setValue(0)
+      translateY.setValue(panelH)
       moveTo(initialActive, SNAP_DUR)
     } else {
-      Animated.timing(sheetH, {
-        toValue: 0,
+      Animated.timing(translateY, {
+        toValue: panelH,
         duration: SNAP_DUR,
         easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
+        useNativeDriver: true,
       }).start()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  // PanResponder：FULL + scrollTop=0 で下スワイプ、HALF で全方向、を受ける
-  const startHRef = useRef(0)
+  const startTYRef = useRef(0)
   const startActiveRef = useRef(initialActive)
   const scrollTopRef = useRef(0)
   const pan = useRef(
@@ -216,26 +220,27 @@ function SnapBottomSheet({
         return true
       },
       onPanResponderGrant: () => {
-        startHRef.current = (sheetH as unknown as { _value: number })._value
+        startTYRef.current = (translateY as unknown as { _value: number })._value
         startActiveRef.current = activeRef.current
       },
       onPanResponderMove: (_, g) => {
-        // drag up（dy<0）で高さ増、drag down（dy>0）で高さ減。
-        let next = startHRef.current - g.dy
-        // フル超えは RUBBER_MAX だけ伸ばす（重く）
-        if (next > fullH) {
-          const over = next - fullH
-          next = fullH + Math.min(RUBBER_MAX, over / 4)
+        let next = startTYRef.current + g.dy
+        // フル超え（上方向overshoot）はラバーバンド
+        if (next < 0) next = Math.max(-RUBBER_MAX, next / 4)
+        // 非 dismissible は minSnap より下にスワイプさせない（rubber-band）
+        const minTY = dismissible ? panelH : (maxSnap - minSnap) * H
+        if (next > minTY) {
+          const over = next - minTY
+          next = minTY + Math.min(RUBBER_MAX, over / 4)
         }
-        if (next < 0) next = 0
-        sheetH.setValue(next)
+        translateY.setValue(next)
       },
       onPanResponderRelease: (_, g) => {
-        const released = clamp(startHRef.current - g.dy, 0, fullH + RUBBER_MAX)
+        const released = clamp(startTYRef.current + g.dy, 0, panelH)
         const dy = g.dy
         const startActive = startActiveRef.current
 
-        // 1) FULL からさらに上方向 → ラバーバンドで戻る
+        // 1) FULL からさらに上 → ラバーバンドで戻る
         if (startActive === maxSnap && dy < 0) {
           moveTo(maxSnap)
           return
@@ -249,25 +254,25 @@ function SnapBottomSheet({
           return
         }
 
-        // 3) 下方向：close vs HALF 戻り を距離別に判定
+        // 3) 下方向：dismissible 時のみ close 判定
         if (dy > 0) {
-          if (startActive === minSnap && dy > minH * CLOSE_DRAG_RATIO) {
-            Animated.timing(sheetH, {
-              toValue: 0,
+          if (dismissible && startActive === minSnap && dy > panelH * CLOSE_DRAG_RATIO) {
+            Animated.timing(translateY, {
+              toValue: panelH,
               duration: SNAP_DUR,
               easing: Easing.out(Easing.cubic),
-              useNativeDriver: false,
+              useNativeDriver: true,
             }).start(() => onClose())
             return
           }
           if (startActive === maxSnap) {
             const collapseDelta = (maxSnap - minSnap) * H
-            if (dy > collapseDelta + minH * CLOSE_DRAG_RATIO) {
-              Animated.timing(sheetH, {
-                toValue: 0,
+            if (dismissible && dy > collapseDelta + panelH * CLOSE_DRAG_RATIO) {
+              Animated.timing(translateY, {
+                toValue: panelH,
                 duration: SNAP_DUR,
                 easing: Easing.out(Easing.cubic),
-                useNativeDriver: false,
+                useNativeDriver: true,
               }).start(() => onClose())
               return
             }
@@ -279,7 +284,7 @@ function SnapBottomSheet({
         }
 
         // 4) その他は最近接 snap に戻す
-        const releasedActive = released / H
+        const releasedActive = maxSnap - released / H
         let best = points[0]
         let bestD = Math.abs(points[0] - releasedActive)
         for (let i = 1; i < points.length; i++) {
@@ -294,10 +299,10 @@ function SnapBottomSheet({
     }),
   ).current
 
-  // overlay opacity：高さに追従（0=透明、minH 以上でフル）
-  const overlayOpacity = sheetH.interpolate({
-    inputRange: [0, minH],
-    outputRange: [0, 0.4],
+  // overlay opacity：translateY に追従（フル=濃く、閉=透明）
+  const overlayOpacity = translateY.interpolate({
+    inputRange: [0, panelH],
+    outputRange: [0.4, 0],
     extrapolate: "clamp",
   })
 
@@ -316,10 +321,11 @@ function SnapBottomSheet({
           opacity: overlayOpacity,
         }}
       >
-        <Pressable onPress={onClose} style={{ flex: 1 }} />
+        <Pressable onPress={dismissible ? onClose : () => {}} style={{ flex: 1 }} />
       </Animated.View>
 
-      {/* panel：bottom anchor + height アニメ。footer はパネル下端＝viewport 下端 */}
+      {/* panel：bottom anchor + 高さ固定 + transform で snap 位置。
+          footer は外側にレイヤしてパネル translation の影響を受けない */}
       <Animated.View
         {...pan.panHandlers}
         style={{
@@ -327,14 +333,13 @@ function SnapBottomSheet({
           left: 0,
           right: 0,
           bottom: 0,
-          height: sheetH,
+          height: panelH,
           backgroundColor: theme.surface.primary,
           borderTopLeftRadius: scales.borderRadius["2xl"],
           borderTopRightRadius: scales.borderRadius["2xl"],
-          overflow: "hidden",
+          transform: [{ translateY }],
         }}
       >
-        {/* ドラッグハンドル＋タイトル */}
         <View style={{ paddingHorizontal: scales.spacing.scale[4], paddingTop: scales.spacing.scale[3] }}>
           <View
             style={{
@@ -359,7 +364,10 @@ function SnapBottomSheet({
         </View>
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: scales.spacing.scale[4], paddingBottom: scales.spacing.scale[4] }}
+          contentContainerStyle={{
+            paddingHorizontal: scales.spacing.scale[4],
+            paddingBottom: scales.spacing.scale[4],
+          }}
           onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
             scrollTopRef.current = e.nativeEvent.contentOffset.y
           }}
@@ -368,21 +376,29 @@ function SnapBottomSheet({
         >
           {children}
         </ScrollView>
-        {footer && (
-          <View
-            style={{
-              paddingHorizontal: scales.spacing.scale[4],
-              paddingTop: scales.spacing.scale[3],
-              paddingBottom: scales.spacing.scale[4],
-              borderTopWidth: 1,
-              borderTopColor: theme.border["low-emphasis"],
-              backgroundColor: theme.surface.primary,
-            }}
-          >
-            {footer}
-          </View>
-        )}
       </Animated.View>
+
+      {/* footer：パネルの translation 影響を受けない独立レイヤ。
+          常に viewport 下端に固定 */}
+      {footer && (
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingHorizontal: scales.spacing.scale[4],
+            paddingTop: scales.spacing.scale[3],
+            paddingBottom: scales.spacing.scale[4],
+            borderTopWidth: 1,
+            borderTopColor: theme.border["low-emphasis"],
+            backgroundColor: theme.surface.primary,
+          }}
+        >
+          {footer}
+        </View>
+      )}
     </Modal>
   )
 }
