@@ -6,5 +6,15 @@ export interface SheetProps {
     side?: SheetSide;
     title?: string;
     children?: React.ReactNode;
+    /**
+     * Bottom-sheet snap points (0..1 of viewport height).
+     * Provide e.g. `[0.55, 0.92]` to enable snap mode:
+     * シートはドラッグハンドル経由でハーフ／フル相当に切替可能、
+     * 下方向に minSnap × 0.5 を下回ると close する。
+     * `side="bottom"` でのみ有効。未指定なら従来の単純スライドアニメ。
+     */
+    snapPoints?: number[];
+    /** Initial snap (must match one of `snapPoints`). Default = first entry. */
+    initialSnap?: number;
 }
-export declare function Sheet({ open, onClose, side, title, children }: SheetProps): import("react/jsx-runtime").JSX.Element;
+export declare function Sheet(props: SheetProps): import("react/jsx-runtime").JSX.Element;
