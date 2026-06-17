@@ -149,6 +149,10 @@ function SnapBottomSheet({
     return () => sub.remove()
   }, [])
   const panelH = Math.round(H * maxSnap)
+  // ラバーバンド上限（フル状態で上方向に引いた時の許容オーバーシュート）
+  const RUBBER_MAX = 4
+  // close 判定：HALF 状態から下に panelH × 0.18 以上引いたら close
+  const CLOSE_DRAG_RATIO = 0.18
 
   // active snap ratio（0..1）。初期は initialSnap or minSnap。
   const initialActive = clamp(initialSnap ?? minSnap, minSnap, maxSnap)
@@ -179,37 +183,81 @@ function SnapBottomSheet({
         useNativeDriver: true,
       }).start()
     }
+    // H の変動（端末回転）でアニメをリセットするとカクつくため、依存は open のみ。
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, H])
+  }, [open])
 
-  // PanResponder（ハンドル＋上部行）
+  // PanResponder：シート全面（背景の問題は出ない＝ScrollView 化していないため
+  // 中身の細かいスクロールは現状ない／必要なら子側で対応）
   const startTYRef = useRef(0)
+  const startActiveRef = useRef(initialActive)
   const pan = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 2,
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 4,
       onPanResponderGrant: () => {
         startTYRef.current = (translateY as unknown as { _value: number })._value
+        startActiveRef.current = activeRef.current
       },
       onPanResponderMove: (_, g) => {
-        // translateY を直接更新（0 = フル, panelH = 閉）
-        const next = clamp(startTYRef.current + g.dy, 0, panelH)
+        let next = startTYRef.current + g.dy
+        // 上端（フル超え）はラバーバンドで重く・最大 RUBBER_MAX のみ越える
+        if (next < 0) next = Math.max(-RUBBER_MAX, next / 4)
+        // 下端は閉状態を超えない
+        if (next > panelH) next = panelH
         translateY.setValue(next)
       },
       onPanResponderRelease: (_, g) => {
-        const next = clamp(startTYRef.current + g.dy, 0, panelH)
-        // active ratio へ逆算
-        const releasedActive = maxSnap - next / H
-        // 下に大きく引いたら close
-        if (releasedActive < minSnap * 0.5) {
-          Animated.timing(translateY, {
-            toValue: panelH,
-            duration: SNAP_DUR,
-            useNativeDriver: true,
-          }).start(() => onClose())
+        const released = clamp(startTYRef.current + g.dy, 0, panelH)
+        const dy = g.dy
+        const startActive = startActiveRef.current
+
+        // 1) FULL 状態でさらに上にスワイプ → ラバーバンドで戻す
+        if (startActive === maxSnap && dy < 0) {
+          moveTo(maxSnap)
           return
         }
-        // 最近接 snap にスナップ
+
+        // 2) 上方向スワイプ → 1段階上の snap へ
+        if (dy < -20) {
+          const idx = points.indexOf(startActive)
+          const nextSnap = idx >= 0 && idx < points.length - 1 ? points[idx + 1] : maxSnap
+          moveTo(nextSnap)
+          return
+        }
+
+        // 3) 下方向スワイプ：距離で close vs ハーフ戻り を判定
+        if (dy > 0) {
+          // HALF 状態から閾値以上引いたら close
+          if (startActive === minSnap && dy > panelH * CLOSE_DRAG_RATIO) {
+            Animated.timing(translateY, {
+              toValue: panelH,
+              duration: SNAP_DUR,
+              useNativeDriver: true,
+            }).start(() => onClose())
+            return
+          }
+          // FULL 状態からは：軽く引けば HALF、深く引けば close
+          if (startActive === maxSnap) {
+            const halfPosY = (maxSnap - minSnap) * H
+            if (dy > halfPosY + panelH * CLOSE_DRAG_RATIO) {
+              Animated.timing(translateY, {
+                toValue: panelH,
+                duration: SNAP_DUR,
+                useNativeDriver: true,
+              }).start(() => onClose())
+              return
+            }
+            // ハーフへ戻る
+            if (dy > 40) {
+              moveTo(minSnap)
+              return
+            }
+          }
+        }
+
+        // 4) その他は元の snap に戻す（最近接判定）
+        const releasedActive = maxSnap - released / H
         let best = points[0]
         let bestD = Math.abs(points[0] - releasedActive)
         for (let i = 1; i < points.length; i++) {
@@ -251,7 +299,7 @@ function SnapBottomSheet({
 
       {/* panel：bottom anchor + 高さ固定 + transform で snap 位置 */}
       <Animated.View
-        pointerEvents="box-none"
+        {...pan.panHandlers}
         style={{
           position: "absolute",
           left: 0,
@@ -264,8 +312,8 @@ function SnapBottomSheet({
           transform: [{ translateY }],
         }}
       >
-        {/* ドラッグハンドル＋タイトル行：PanResponder の hot zone */}
-        <View {...pan.panHandlers} style={{ paddingHorizontal: scales.spacing.scale[4], paddingTop: scales.spacing.scale[3] }}>
+        {/* ドラッグハンドル＋タイトル */}
+        <View style={{ paddingHorizontal: scales.spacing.scale[4], paddingTop: scales.spacing.scale[3] }}>
           <View
             style={{
               width: 40,
