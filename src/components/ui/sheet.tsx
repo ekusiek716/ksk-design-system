@@ -214,6 +214,7 @@ interface SheetProps
    * Default: true.
    */
   overlay?: boolean
+  children?: React.ReactNode
 }
 
 function Sheet({
@@ -494,6 +495,7 @@ interface SheetContentProps
    * `<SheetDescription>` を直接置く。
    */
   description?: React.ReactNode
+  children?: React.ReactNode
 }
 
 const swipeSides = new Set(["bottom", "bottom-glass"])
