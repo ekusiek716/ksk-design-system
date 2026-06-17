@@ -52,73 +52,29 @@ npm version "$LEVEL_OR_VERSION"
 VERSION="$(node -p "require('./package.json').version")"
 echo -e "${GREEN}✓ new version: $VERSION${NC}"
 
-# 失敗時に package.json の name を確実に元に戻す
-ORIG_NAME="$(node -p "require('./package.json').name")"
-cleanup_name() {
-  CURRENT_NAME="$(node -p "require('./package.json').name")"
-  if [ "$CURRENT_NAME" != "$ORIG_NAME" ]; then
-    echo -e "${YELLOW}→ restoring package.json name to $ORIG_NAME${NC}"
-    node -e "
-      const fs = require('fs');
-      const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-      p.name = '$ORIG_NAME';
-      fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
-    "
-  fi
-}
-trap cleanup_name EXIT
-
-# ── 旧名 (legacy) tgz を先に作る ─────────────────────────
-# scope付きでもファイル名は ksk-design-system-<version>.tgz になるため、
-# 先に legacy を作って rename → そのあとに新名を pack する順序。
-echo -e "${CYAN}→ legacy (@ksk/design-system) tgz${NC}"
-node -e "
-  const fs = require('fs');
-  const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-  p.name = '@ksk/design-system';
-  fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
-"
-npm pack
-LEGACY_GEN="ksk-design-system-${VERSION}.tgz"
-LEGACY_DST="ksk-design-system-legacy-${VERSION}.tgz"
-if [ ! -f "$LEGACY_GEN" ]; then
-  echo -e "${RED}✗ legacy tgz が生成されませんでした${NC}"
-  exit 1
-fi
-mv "$LEGACY_GEN" "$LEGACY_DST"
-echo -e "${GREEN}✓ $LEGACY_DST${NC}"
-
-# name を元に戻して新名 tgz を作る
-cleanup_name
-
-echo -e "${CYAN}→ new-name tgz${NC}"
+# ── tgz 生成 ─────────────────────────
+# v1.35.0 で消費リポすべて新名 (ksk-design-system) に移行済のため、
+# 旧名 (@ksk/design-system) 互換 tgz の生成は廃止。
+# 旧名復活が必要になった場合は git history で v1.35.0 期の release.sh を参照。
+echo -e "${CYAN}→ npm pack${NC}"
 npm pack
 NEW_TGZ="ksk-design-system-${VERSION}.tgz"
 if [ ! -f "$NEW_TGZ" ]; then
-  echo -e "${RED}✗ new-name tgz が生成されませんでした${NC}"
+  echo -e "${RED}✗ tgz が生成されませんでした${NC}"
   exit 1
 fi
 echo -e "${GREEN}✓ $NEW_TGZ${NC}"
 
-# 中身が両方とも正しい name で作られたか検証
+# 中身検証
 EXTRACT_DIR="$(mktemp -d)"
 tar xzf "$NEW_TGZ" -C "$EXTRACT_DIR" package/package.json
 ACTUAL_NEW="$(node -p "require('$EXTRACT_DIR/package/package.json').name")"
 rm -rf "$EXTRACT_DIR"
 [ "$ACTUAL_NEW" = "ksk-design-system" ] || {
-  echo -e "${RED}✗ new tgz の name が想定外: $ACTUAL_NEW${NC}"
+  echo -e "${RED}✗ tgz の name が想定外: $ACTUAL_NEW${NC}"
   exit 1
 }
-
-EXTRACT_DIR="$(mktemp -d)"
-tar xzf "$LEGACY_DST" -C "$EXTRACT_DIR" package/package.json
-ACTUAL_LEGACY="$(node -p "require('$EXTRACT_DIR/package/package.json').name")"
-rm -rf "$EXTRACT_DIR"
-[ "$ACTUAL_LEGACY" = "@ksk/design-system" ] || {
-  echo -e "${RED}✗ legacy tgz の name が想定外: $ACTUAL_LEGACY${NC}"
-  exit 1
-}
-echo -e "${GREEN}✓ dual tgz の中身検証 OK${NC}"
+echo -e "${GREEN}✓ 中身検証 OK${NC}"
 
 # ── push ─────────────────────────
 echo -e "${CYAN}→ git push origin main --tags${NC}"

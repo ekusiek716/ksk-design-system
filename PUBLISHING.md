@@ -23,11 +23,14 @@ bash scripts/release.sh minor   # patch / minor / major / x.y.z
 1. `git diff --quiet` & main ブランチチェック（曜日チェック）
 2. `npm run check`
 3. `npm version <level>`（tag 切り）
-4. **dual tgz 生成**（新名 + 旧名互換）
+4. `npm pack`（新名 tgz 生成）
 5. `git push origin main --tags`
 6. `bash scripts/bump-consumers.sh <version>`（5 リポへ PR 自動作成）
 
-失敗時は package.json の name 書換が確実に元に戻る（trap）。
+> v1.35.0 で旧名 `@ksk/design-system` 互換 tgz の生成は廃止。
+> 消費5リポ + todo-shared が新名 `ksk-design-system` に移行済。
+> 旧名復活が必要になった場合は git history で v1.35.0 期の release.sh を参照。
+
 個別に手作業したい場合は以下の手動フローを参照。
 
 ## リリースフロー（手動）
