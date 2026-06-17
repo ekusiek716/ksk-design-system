@@ -22,5 +22,10 @@ export interface SheetProps {
      * 追従しない。snap mode（bottom + snapPoints）でのみ有効。
      */
     footer?: React.ReactNode;
+    /**
+     * scrim タップや下方向スワイプで閉じれるか。default true。
+     * false の場合、スワイプダウンは最小 snap まで戻る（rubber-band）。
+     */
+    dismissible?: boolean;
 }
 export declare function Sheet(props: SheetProps): import("react/jsx-runtime").JSX.Element;
