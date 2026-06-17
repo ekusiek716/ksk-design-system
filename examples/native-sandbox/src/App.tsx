@@ -973,6 +973,15 @@ function Showcase() {
             <Button variant="tertiary">Tertiary</Button>
             <Button variant="destructive">Delete</Button>
           </Stack>
+          <Text variant="caption" color={theme.text['low-emphasis']}>
+            ↓ elevation="raised"（3D 風・押下で沈む）。下辺色は variant の active-* トークンから自動取得。
+          </Text>
+          <Stack direction="row" wrap gap={3} align="center">
+            <Button variant="primary" elevation="raised">Primary</Button>
+            <Button variant="secondary" elevation="raised">Secondary</Button>
+            <Button variant="tertiary" elevation="raised">Tertiary</Button>
+            <Button variant="destructive" elevation="raised">Delete</Button>
+          </Stack>
           <GlassDemoSection />
           <Text variant="caption" color={theme.text['low-emphasis']}>
             ※ glass variant: iOS 26 Liquid Glass。RN実機+expo-blurで本物 / Webはbackdrop-filter / Androidは半透明フォールバック
