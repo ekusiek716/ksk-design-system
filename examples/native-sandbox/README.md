@@ -25,4 +25,18 @@ DS ルートで `npm run generate:tokens` を実行 → `src/tokens/native/` が
 ## 実 Expo に持っていくとき
 
 - DS を `ksk-design-system/native`（トークン）/ `ksk-design-system/native/ui`（コンポーネント）から import する。
-- shadow は web では `boxShadow`、native では `shadow*` / `elevation`（`scales.shadows.*.elevation`）に出し分ける。
+- Expo SDK 56 / RN 0.85 の Metro では package exports の `./native` / `./native/ui` subpath は追加設定なしで解決できる。
+- 古い Expo / Metro で `Unable to resolve "ksk-design-system/native/ui"` が出る場合は、アプリ側の `metro.config.js` で package exports を有効化する。
+
+```js
+const { getDefaultConfig } = require("expo/metro-config")
+
+const config = getDefaultConfig(__dirname)
+
+config.resolver.unstable_enablePackageExports = true
+
+module.exports = config
+```
+
+- Expo Web はアプリ側に `react-dom` と `react-native-web` が必要。未導入なら `npx expo install react-dom react-native-web` を実行する。
+- shadow は web では `boxShadow`、iOS では `shadowColor` / `shadowOffset` / `shadowOpacity` / `shadowRadius`、Android では `elevation`（`scales.shadows.*.elevation`）に出し分ける。

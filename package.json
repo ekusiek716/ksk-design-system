@@ -161,7 +161,13 @@
     "tailwindcss": "^4.0.0"
   },
   "peerDependenciesMeta": {
+    "@radix-ui/react-slot": {
+      "optional": true
+    },
     "iconsax-reactjs": {
+      "optional": true
+    },
+    "radix-ui": {
       "optional": true
     },
     "react-dom": {
