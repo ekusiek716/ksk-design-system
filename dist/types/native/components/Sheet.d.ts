@@ -16,5 +16,11 @@ export interface SheetProps {
     snapPoints?: number[];
     /** Initial snap (must match one of `snapPoints`). Default = first entry. */
     initialSnap?: number;
+    /**
+     * シート下端に固定で表示する要素（例：「つづける」ボタン）。
+     * children の ScrollView と分離されるためコンテンツのスクロールに
+     * 追従しない。snap mode（bottom + snapPoints）でのみ有効。
+     */
+    footer?: React.ReactNode;
 }
 export declare function Sheet(props: SheetProps): import("react/jsx-runtime").JSX.Element;
