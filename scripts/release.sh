@@ -76,15 +76,67 @@ rm -rf "$EXTRACT_DIR"
 }
 echo -e "${GREEN}✓ 中身検証 OK${NC}"
 
+# ── npm publish ─────────────────────────
+# v1.36.0 以降は npm registry 経由配布。dual tgz は廃止済み。
+# 2FA OTP が必要。手元で完結させたい場合は別途 NPM_TOKEN を使う手もある。
+echo -e "${CYAN}→ npm whoami${NC}"
+WHOAMI="$(npm whoami 2>&1)"
+if [[ "$WHOAMI" == *"401"* ]] || [[ "$WHOAMI" == *"error"* ]]; then
+  echo -e "${RED}✗ npm にログインしていません。'npm login' で認証してください${NC}"
+  exit 1
+fi
+echo -e "${GREEN}✓ logged in as: $WHOAMI${NC}"
+
+echo -e "${CYAN}→ npm publish --access public${NC}"
+# script コマンドで TTY エミュレートして 2FA URL をキャプチャしつつログ保存
+script -q /tmp/npm-publish-$VERSION.log npm publish --access public < /dev/null &
+PUBLISH_PID=$!
+
+# 認証 URL が出るのを待つ
+for i in {1..30}; do
+  sleep 2
+  if grep -q "Authenticate your account at:" /tmp/npm-publish-$VERSION.log 2>/dev/null; then
+    AUTH_URL="$(grep -oE 'https://www.npmjs.com/auth/cli/[a-f0-9-]+' /tmp/npm-publish-$VERSION.log | head -1)"
+    if [ -n "$AUTH_URL" ]; then
+      echo ""
+      echo -e "${YELLOW}🔑 2FA 認証 URL（ブラウザで開いて承認）:${NC}"
+      echo "    $AUTH_URL"
+      echo ""
+      break
+    fi
+  fi
+  if grep -q "^+ ksk-design-system@" /tmp/npm-publish-$VERSION.log 2>/dev/null; then
+    break  # OTP 不要で完了したケース
+  fi
+done
+
+# publish 完了を待つ
+wait $PUBLISH_PID 2>/dev/null
+sleep 2
+if grep -q "^+ ksk-design-system@$VERSION" /tmp/npm-publish-$VERSION.log 2>/dev/null; then
+  echo -e "${GREEN}✓ npm publish 成功${NC}"
+else
+  echo -e "${RED}✗ npm publish 失敗。ログ: /tmp/npm-publish-$VERSION.log${NC}"
+  exit 1
+fi
+
+# レジストリ到達確認
+sleep 3
+REG_VER="$(npm view ksk-design-system version 2>/dev/null)"
+[ "$REG_VER" = "$VERSION" ] || {
+  echo -e "${YELLOW}⚠️  npm registry の最新が $REG_VER（期待: $VERSION）。CDN 反映遅延の可能性${NC}"
+}
+
 # ── push ─────────────────────────
 echo -e "${CYAN}→ git push origin main --tags${NC}"
 git push origin main --tags
 
 # ── 消費リポへ配布 ─────────────────────────
-echo -e "${CYAN}→ bump-consumers.sh $VERSION${NC}"
-bash scripts/bump-consumers.sh "$VERSION"
+echo -e "${CYAN}→ update-consumers.sh $VERSION（npm registry 経由）${NC}"
+bash scripts/update-consumers.sh "$VERSION"
 
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════${NC}"
 echo -e "${GREEN}✓ release v$VERSION 完了${NC}"
+echo -e "${GREEN}  npm: https://www.npmjs.com/package/ksk-design-system/v/$VERSION${NC}"
 echo -e "${GREEN}═══════════════════════════════════════${NC}"
