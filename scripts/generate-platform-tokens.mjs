@@ -227,6 +227,20 @@ const scales = {
   typography: convertTypography(tokens.typography),
   shadows: convertShadows(tokens.shadows),
   touchTargets: convertTouchTargets(tokens.touchTargets),
+  // elevation: Button などに触感を持たせる立体感トークン（offset / bottomBorderWidth）
+  elevation: tokens.elevation
+    ? Object.fromEntries(
+        Object.entries(tokens.elevation)
+          .filter(([k]) => k !== '_doc')
+          .map(([k, v]) => [
+            k,
+            {
+              offset: pxNum(v.offset),
+              bottomBorderWidth: pxNum(v.bottomBorderWidth),
+            },
+          ])
+      )
+    : {},
   categorical: convertCategorical(tokens.colors.semantic.categorical),
   brandExternal: { ...tokens.colors.semantic.brandExternal },
 };

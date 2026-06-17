@@ -186,6 +186,16 @@ export const scales = {
       "recommended": 48
     }
   },
+  "elevation": {
+    "flat": {
+      "offset": 0,
+      "bottomBorderWidth": 0
+    },
+    "raised": {
+      "offset": 4,
+      "bottomBorderWidth": 4
+    }
+  },
   "categorical": {
     "1": {
       "hue": "red",
