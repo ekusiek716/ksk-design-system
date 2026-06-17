@@ -65,6 +65,9 @@ interface DialogContentProps
    */
   position?: "center" | "top"
   children?: React.ReactNode
+  className?: string
+  style?: React.CSSProperties
+  id?: string
 }
 
 function DialogContent({
