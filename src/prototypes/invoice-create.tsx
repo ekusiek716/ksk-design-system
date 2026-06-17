@@ -50,7 +50,7 @@ const lineAmount = (it: LineItem) => num(it.qty) * num(it.price)
 const seedItems: LineItem[] = [
   { id: "l1", name: "Webサイト保守費（月額）", qty: "1", price: "80000" }, // 正常
   { id: "l2", name: "サーバー利用料", qty: "", price: "12000" }, // 数量エラー
-  { id: "l3", name: "追加開発：問い合わせフォームのスパム対策と自動返信メール文面の調整作業一式", qty: "2", price: "0" }, // 品目40字超 + 単価エラー
+  { id: "l3", name: "追加開発：問い合わせフォームのスパム対策と自動返信メールの文面調整、および管理画面の権限まわりの見直し対応一式", qty: "2", price: "0" }, // 品目40字超 + 単価エラー
 ]
 
 const ROW_HEAD = "px-3 py-2.5 typo-label-sm text-[var(--Text-Medium-Emphasis)]"
