@@ -7,11 +7,17 @@
 // react-router は使わず location.hash のみで完結（依存を増やさない）。
 // =============================================================
 import { useEffect, useState } from "react"
-import { ArrowLeft2, Mobile, Monitor, DocumentText } from "iconsax-reactjs"
+import { ArrowLeft2, Mobile, Monitor, DocumentText, Element4, RowVertical } from "iconsax-reactjs"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import {
+  DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow,
+  DataTableHead, DataTableCell,
+} from "@/components/patterns/admin/data-table"
 import { prototypes, findPrototype } from "./_registry"
 
 type Frame = "SP" | "PC"
+type ListView = "card" | "table"
 
 function useHashSlug(): string {
   const [hash, setHash] = useState(() => window.location.hash)
@@ -35,44 +41,126 @@ function EmptyState() {
   )
 }
 
+function CardGrid() {
+  return (
+    <div className="grid grid-cols-1 gap-4 @md:grid-cols-2 lg:grid-cols-3">
+      {prototypes.map((p) => (
+        <a
+          key={p.slug}
+          href={`#/${p.slug}`}
+          className="block rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-5 shadow-[var(--shadow-sm)] transition-shadow hover:shadow-[var(--shadow-md)]"
+        >
+          <div className="flex items-center gap-2">
+            <span className="typo-label-xs rounded-full bg-[var(--Surface-Secondary)] px-2 py-0.5 text-[var(--Text-Medium-Emphasis)]">
+              {p.meta.device ?? "SP"}
+            </span>
+            {p.meta.createdAt && (
+              <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">{p.meta.createdAt}</span>
+            )}
+          </div>
+          <h3 className="typo-heading-sm text-[var(--Text-High-Emphasis)] mt-3">{p.meta.title}</h3>
+          {p.meta.description && (
+            <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1 line-clamp-2">
+              {p.meta.description}
+            </p>
+          )}
+        </a>
+      ))}
+    </div>
+  )
+}
+
+function TableList() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]">
+      <DataTable>
+        <DataTableTable>
+          <DataTableHeader>
+            <tr>
+              <DataTableHead>タイトル</DataTableHead>
+              <DataTableHead>デバイス</DataTableHead>
+              <DataTableHead>作成日</DataTableHead>
+              <DataTableHead>説明</DataTableHead>
+            </tr>
+          </DataTableHeader>
+          <DataTableBody>
+            {prototypes.map((p) => (
+              <DataTableRow
+                key={p.slug}
+                className="cursor-pointer"
+                onClick={() => (window.location.hash = `#/${p.slug}`)}
+              >
+                <DataTableCell>
+                  <span className="typo-label-sm text-[var(--Text-High-Emphasis)]">{p.meta.title}</span>
+                </DataTableCell>
+                <DataTableCell>
+                  <Badge variant="subtle">{p.meta.device ?? "SP"}</Badge>
+                </DataTableCell>
+                <DataTableCell>
+                  <span className="typo-body-sm text-[var(--Text-Low-Emphasis)]">{p.meta.createdAt ?? "—"}</span>
+                </DataTableCell>
+                <DataTableCell>
+                  <span className="typo-body-sm text-[var(--Text-Medium-Emphasis)] line-clamp-1">
+                    {p.meta.description ?? ""}
+                  </span>
+                </DataTableCell>
+              </DataTableRow>
+            ))}
+          </DataTableBody>
+        </DataTableTable>
+      </DataTable>
+    </div>
+  )
+}
+
 function IndexView() {
+  const [view, setView] = useState<ListView>(() => {
+    const v = typeof localStorage !== "undefined" ? localStorage.getItem("mock-list-view") : null
+    return v === "table" ? "table" : "card"
+  })
+  const changeView = (v: ListView) => {
+    setView(v)
+    try {
+      localStorage.setItem("mock-list-view", v)
+    } catch {
+      /* localStorage 不可環境は無視 */
+    }
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="mb-8">
-        <h1 className="typo-heading-xl text-[var(--Text-High-Emphasis)]">モックプレビュー</h1>
-        <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1">
-          KSK Design System — Notion 仕様から生成したモック一覧
-        </p>
+      <div className="mb-6 flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="typo-heading-xl text-[var(--Text-High-Emphasis)]">モックプレビュー</h1>
+          <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1">
+            KSK Design System — Notion 仕様から生成したモック一覧
+          </p>
+        </div>
+        {prototypes.length > 0 && (
+          <div className="flex shrink-0 items-center gap-1 rounded-full border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-1">
+            <Button
+              variant={view === "card" ? "secondary" : "ghost"}
+              size="icon-sm"
+              aria-label="カード表示"
+              aria-pressed={view === "card"}
+              onClick={() => changeView("card")}
+            >
+              <Element4 size={18} />
+            </Button>
+            <Button
+              variant={view === "table" ? "secondary" : "ghost"}
+              size="icon-sm"
+              aria-label="テーブル表示"
+              aria-pressed={view === "table"}
+              onClick={() => changeView("table")}
+            >
+              <RowVertical size={18} />
+            </Button>
+          </div>
+        )}
       </div>
 
-      {prototypes.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className="grid grid-cols-1 gap-4 @md:grid-cols-2 lg:grid-cols-3">
-          {prototypes.map((p) => (
-            <a
-              key={p.slug}
-              href={`#/${p.slug}`}
-              className="block rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-5 shadow-[var(--shadow-sm)] transition-shadow hover:shadow-[var(--shadow-md)]"
-            >
-              <div className="flex items-center gap-2">
-                <span className="typo-label-xs rounded-full bg-[var(--Surface-Secondary)] px-2 py-0.5 text-[var(--Text-Medium-Emphasis)]">
-                  {p.meta.device ?? "SP"}
-                </span>
-                {p.meta.createdAt && (
-                  <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">{p.meta.createdAt}</span>
-                )}
-              </div>
-              <h3 className="typo-heading-sm text-[var(--Text-High-Emphasis)] mt-3">{p.meta.title}</h3>
-              {p.meta.description && (
-                <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1 line-clamp-2">
-                  {p.meta.description}
-                </p>
-              )}
-            </a>
-          ))}
-        </div>
-      )}
+      {prototypes.length === 0 ? <EmptyState /> : view === "card" ? <CardGrid /> : <TableList />}
     </div>
   )
 }
