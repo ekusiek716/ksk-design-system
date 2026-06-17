@@ -28,11 +28,21 @@ REPOS=("$@")
 [ ${#REPOS[@]} -eq 0 ] && REPOS=(belle-todo trip_todo ninshin-todo yokoku-app pawly)
 
 DS_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-TGZ="$DS_ROOT/ksk-design-system-$VERSION.tgz"
-if [ ! -f "$TGZ" ]; then
-  echo "ERROR: $TGZ がありません。先に npm pack を実行してください。"
+TGZ_NEW="$DS_ROOT/ksk-design-system-$VERSION.tgz"
+TGZ_LEGACY="$DS_ROOT/ksk-design-system-legacy-$VERSION.tgz"
+if [ ! -f "$TGZ_NEW" ]; then
+  echo "ERROR: $TGZ_NEW がありません。先に npm pack または scripts/release.sh を実行してください。"
   exit 1
 fi
+if [ ! -f "$TGZ_LEGACY" ]; then
+  echo "ERROR: $TGZ_LEGACY がありません。release.sh で legacy 互換 tgz も生成してください。"
+  exit 1
+fi
+
+# 消費リポ別の依存形態:
+#   belle-todo: 新名 + 旧名キーの両方を持つ → 両方の tgz を vendor に置く
+#   その他    : 旧名キーのみ → legacy tgz を ksk-design-system-X.Y.Z.tgz のファイル名で配置
+is_dual_repo() { [ "$1" = "belle-todo" ]; }
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; CYAN='\033[0;36m'; NC='\033[0m'
 RESULTS=()
@@ -70,10 +80,19 @@ for name in "${REPOS[@]}"; do
   git checkout -B "chore/bump-ds-$VERSION" >/dev/null 2>&1
 
   mkdir -p vendor
-  cp "$TGZ" vendor/
+  if is_dual_repo "$name"; then
+    # belle-todo: 新名 + legacy 両方を vendor に置く
+    cp "$TGZ_NEW" vendor/
+    cp "$TGZ_LEGACY" vendor/
+  else
+    # 旧名のみのリポ: legacy tgz を「新名形式のファイル名」で配置（中身は @ksk/design-system）
+    cp "$TGZ_LEGACY" "vendor/ksk-design-system-${VERSION}.tgz"
+  fi
 
-  # package.json の tgz 参照だけを書換（ファイル全体は再フォーマットしない）
-  sed -i '' -E "s|(ksk-design-system-)[0-9]+\.[0-9]+\.[0-9]+(\.tgz)|\1${VERSION}\2|" package.json
+  # package.json の tgz 参照を書換（ファイル全体は再フォーマットしない）
+  # パターン: /ksk-design-system-<x.y.z>.tgz と /ksk-design-system-legacy-<x.y.z>.tgz の両方
+  sed -i '' -E "s|/ksk-design-system-legacy-[0-9]+\.[0-9]+\.[0-9]+\.tgz|/ksk-design-system-legacy-${VERSION}.tgz|g" package.json
+  sed -i '' -E "s|/ksk-design-system-[0-9]+\.[0-9]+\.[0-9]+\.tgz|/ksk-design-system-${VERSION}.tgz|g" package.json
   if ! grep -q "ksk-design-system-$VERSION.tgz" package.json; then
     echo -e "${RED}FAIL: package.json の参照書換${NC}"
     restore
@@ -88,7 +107,12 @@ for name in "${REPOS[@]}"; do
     continue
   fi
 
-  git add "vendor/ksk-design-system-$VERSION.tgz" package.json package-lock.json
+  # 追加された新規 vendor tgz と書換済 package.json/lock を add
+  if is_dual_repo "$name"; then
+    git add "vendor/ksk-design-system-$VERSION.tgz" "vendor/ksk-design-system-legacy-$VERSION.tgz" package.json package-lock.json
+  else
+    git add "vendor/ksk-design-system-$VERSION.tgz" package.json package-lock.json
+  fi
   git commit -m "chore: ksk-design-system を v$VERSION に更新" >/dev/null
 
   if ! git push -u origin "chore/bump-ds-$VERSION" >/dev/null 2>&1; then
