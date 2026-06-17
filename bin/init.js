@@ -1,19 +1,21 @@
 #!/usr/bin/env node
 
-// ksk-design-system init
+// ksk-design-system CLI
 // Consumer プロジェクトに AI (Claude / Codex) 向けルールファイルを設置する。
 // AI エージェントは node_modules 配下のファイルを自動で読まないため、
 // プロジェクトルートに AGENTS.md / CLAUDE.md（node_modules 内の DS ルールを
 // 参照する薄いポインタ）を置く必要がある。
 //
 // Usage:
-//   npx ksk-ds init          # AGENTS.md + CLAUDE.md を設置
-//   npx ksk-ds init --force  # 既存ファイルを上書き
-//   npx ksk-ds postinstall   # npm postinstall から呼ばれる silent モード
+//   npx ksk-design-system init          # AGENTS.md + CLAUDE.md を設置
+//   npx ksk-design-system init --force  # 既存ファイルを上書き
+//   npx ksk-design-system demo [dir]    # DS リポを clone + setup（お試し用）
+//   npx ksk-design-system postinstall   # npm postinstall から呼ばれる silent モード
 
 import { copyFileSync, existsSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+import { spawnSync } from "node:child_process"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkgRoot = resolve(__dirname, "..")
@@ -26,16 +28,76 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   console.log(`ksk-design-system CLI
 
 使い方:
-  npx ksk-ds init          AI ルールファイルを設置
-  npx ksk-ds init --force  既存ファイルを上書き
+  npx ksk-design-system init          AI ルールファイルを設置
+  npx ksk-design-system init --force  既存ファイルを上書き
+  npx ksk-design-system demo [dir]    DS リポを clone + npm install（お試し）
+                                      dir 省略時は ./ksk-ds-demo
 `)
+  process.exit(0)
+}
+
+if (cmd === "demo") {
+  runDemo(args.slice(1))
   process.exit(0)
 }
 
 if (cmd !== "init" && cmd !== "postinstall") {
   console.error(`未知のコマンド: ${cmd}`)
-  console.error(`npx ksk-ds help を参照してください`)
+  console.error(`npx ksk-design-system help を参照してください`)
   process.exit(1)
+}
+
+function runDemo(rest) {
+  const consumerCwd = process.cwd()
+  const targetDir = rest.find((a) => !a.startsWith("--")) || "ksk-ds-demo"
+  const absDir = resolve(consumerCwd, targetDir)
+
+  if (existsSync(absDir)) {
+    console.error(`\n✗ ${absDir} は既に存在します`)
+    console.error(`  別名を指定するか、既存フォルダを削除してください`)
+    process.exit(1)
+  }
+
+  console.log(`\n📦 KSK Design System Demo を ${targetDir}/ に展開します\n`)
+
+  // git clone --depth=1
+  const cloneRes = spawnSync(
+    "git",
+    [
+      "clone",
+      "--depth=1",
+      "https://github.com/ekusiek716/ksk-design-system.git",
+      targetDir,
+    ],
+    { stdio: "inherit", cwd: consumerCwd },
+  )
+  if (cloneRes.status !== 0) {
+    console.error("\n✗ git clone に失敗しました")
+    process.exit(1)
+  }
+
+  // npm install
+  console.log(`\n→ npm install を実行中（数分かかります）...\n`)
+  const instRes = spawnSync("npm", ["install"], {
+    stdio: "inherit",
+    cwd: absDir,
+  })
+  if (instRes.status !== 0) {
+    console.error("\n✗ npm install に失敗しました")
+    process.exit(1)
+  }
+
+  console.log(`\n✓ セットアップ完了\n`)
+  console.log(`次のステップ:\n`)
+  console.log(`  cd ${targetDir}`)
+  console.log(`  npm run dev          # → http://localhost:5173 で全プロトタイプが触れる`)
+  console.log(`  npm run storybook    # → http://localhost:6010 で全コンポーネントカタログ`)
+  console.log(``)
+  console.log(`💡 Claude Code をこのディレクトリで開くと /mock コマンドが使えます:`)
+  console.log(`   /mock https://notion.so/your-spec`)
+  console.log(`   /mock 「ECサイトの商品詳細画面」`)
+  console.log(`   → DS 準拠のモックが src/prototypes/ に自動生成`)
+  console.log(``)
 }
 
 // ─── postinstall モードのガード ─────────────────────────────
