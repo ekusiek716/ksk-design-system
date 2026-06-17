@@ -71,6 +71,10 @@ interface SheetProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
      */
     overlay?: boolean;
     children?: React.ReactNode;
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    modal?: boolean;
 }
 declare function Sheet({ snapPoints, activeSnapPoint: activeSnapPointProp, setActiveSnapPoint: setActiveSnapPointProp, fadeFromIndex, dismissible, overlay, onOpenChange, open, defaultOpen, ...props }: SheetProps): import("react/jsx-runtime").JSX.Element;
 declare function SheetTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>): import("react/jsx-runtime").JSX.Element;
@@ -123,6 +127,9 @@ interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.
      */
     description?: React.ReactNode;
     children?: React.ReactNode;
+    className?: string;
+    style?: React.CSSProperties;
+    id?: string;
 }
 declare function SheetContent({ className, children, side, glassOverlay, container, padding, swipeToClose, description, ...props }: SheetContentProps): import("react/jsx-runtime").JSX.Element;
 declare function SheetHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
