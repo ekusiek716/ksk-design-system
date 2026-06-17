@@ -7,9 +7,10 @@
 // react-router は使わず location.hash のみで完結（依存を増やさない）。
 // =============================================================
 import { type ComponentType, useEffect, useLayoutEffect, useRef, useState } from "react"
-import { ArrowLeft2, Mobile, Monitor, DocumentText, Element4, RowVertical, ExportSquare } from "iconsax-reactjs"
+import { ArrowLeft2, Mobile, Monitor, DocumentText, Element4, RowVertical, ExportSquare, HamburgerMenu } from "iconsax-reactjs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import {
   DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow,
   DataTableHead, DataTableCell,
@@ -310,6 +311,11 @@ function DetailView({ slug }: { slug: string }) {
   const [frame, setFrame] = useState<Frame>(
     entry?.meta.device === "PC" ? "PC" : "SP",
   )
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const changeFrame = (f: Frame) => {
+    setFrame(f)
+    if (f === "PC") setSheetOpen(false)
+  }
 
   if (!entry) {
     return (
@@ -328,6 +334,10 @@ function DetailView({ slug }: { slug: string }) {
   const { Component, meta } = entry
   const siblings = findGroupSiblings(slug)
   const hasSidebar = Boolean(meta.notionUrl || entry.specSource || siblings.length > 0 || meta.description)
+  // SP プレビューのときはサイドバーを Sheet に隠してモックを全画面で見せる。
+  // PC プレビューのときは従来通り左に固定サイドバーを置く（広幅で grid 分割）。
+  const showInlineSidebar = hasSidebar && frame === "PC"
+  const showSheetTrigger = hasSidebar && frame === "SP"
 
   return (
     <div className="min-h-dvh">
@@ -343,13 +353,24 @@ function DetailView({ slug }: { slug: string }) {
         >
           <ArrowLeft2 size={20} />
         </Button>
+        {showSheetTrigger && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="モック情報を開く"
+            className="text-[var(--Text-on-Inverse)]"
+            onClick={() => setSheetOpen(true)}
+          >
+            <HamburgerMenu size={20} />
+          </Button>
+        )}
         <span className="typo-label-xs shrink-0 rounded bg-[var(--Brand-Primary)] px-1.5 py-0.5 text-[var(--Text-on-Inverse)]">
           PREVIEW
         </span>
         <div className="min-w-0 flex-1">
           <p className="typo-label-md text-[var(--Text-on-Inverse)] truncate">{meta.title}</p>
         </div>
-        {meta.notionUrl && (
+        {meta.notionUrl && frame === "PC" && (
           <Button
             variant="ghost"
             size="icon-sm"
@@ -366,7 +387,7 @@ function DetailView({ slug }: { slug: string }) {
             size="icon-sm"
             aria-label="SP 表示"
             aria-pressed={frame === "SP"}
-            onClick={() => setFrame("SP")}
+            onClick={() => changeFrame("SP")}
           >
             <Mobile size={18} />
           </Button>
@@ -375,18 +396,17 @@ function DetailView({ slug }: { slug: string }) {
             size="icon-sm"
             aria-label="PC 表示"
             aria-pressed={frame === "PC"}
-            onClick={() => setFrame("PC")}
+            onClick={() => changeFrame("PC")}
           >
             <Monitor size={18} />
           </Button>
         </div>
       </div>
 
-      {/* 本体: 左サイドバー（説明）+ 右プレビュー。
-          狭幅では縦積みになるよう @container クエリを使う */}
-      <div className={hasSidebar ? "@container" : ""}>
-        <div className={hasSidebar ? "@4xl:grid @4xl:grid-cols-[320px_1fr]" : ""}>
-          {hasSidebar && <DetailSidebar entry={entry} siblings={siblings} />}
+      {/* 本体: PC 表示のときだけ左に固定サイドバー、SP 表示のときは全幅でモックを中央寄せ。 */}
+      <div className={showInlineSidebar ? "@container" : ""}>
+        <div className={showInlineSidebar ? "@4xl:grid @4xl:grid-cols-[320px_1fr]" : ""}>
+          {showInlineSidebar && <DetailSidebar entry={entry} siblings={siblings} />}
 
           {/* プレビュー領域 */}
           <div className="bg-[var(--Surface-Secondary)] p-4 @container">
@@ -402,6 +422,18 @@ function DetailView({ slug }: { slug: string }) {
           </div>
         </div>
       </div>
+
+      {/* SP 表示時に hamburger から開く情報シート。サイドバーと同じ内容を中で表示。 */}
+      {hasSidebar && (
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetContent side="left" className="w-[320px] max-w-[88vw] p-0">
+            <SheetTitle className="sr-only">モック情報</SheetTitle>
+            <div className="h-full overflow-y-auto">
+              <DetailSidebar entry={entry} siblings={siblings} />
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
     </div>
   )
 }
