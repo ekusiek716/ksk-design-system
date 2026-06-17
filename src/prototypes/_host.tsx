@@ -77,6 +77,17 @@ function EmptyState() {
   )
 }
 
+/** デバイスを "/" で分割して個別のタグで表示（"SP/PC" → [SP][PC]） */
+function DeviceTags({ device }: { device?: string }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      {(device ?? "SP").split("/").map((d) => (
+        <Badge key={d} variant="subtle">{d}</Badge>
+      ))}
+    </span>
+  )
+}
+
 function CardGrid() {
   return (
     <div className="grid grid-cols-1 gap-4 @md:grid-cols-2 lg:grid-cols-3">
@@ -92,9 +103,7 @@ function CardGrid() {
           </div>
           <div className="p-5">
             <div className="flex items-center gap-2">
-              <span className="typo-label-xs rounded-full bg-[var(--Surface-Secondary)] px-2 py-0.5 text-[var(--Text-Medium-Emphasis)]">
-                {p.meta.device ?? "SP"}
-              </span>
+              <DeviceTags device={p.meta.device} />
               {p.meta.createdAt && (
                 <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">{p.meta.createdAt}</span>
               )}
@@ -142,7 +151,7 @@ function TableList() {
                   <span className="typo-label-sm text-[var(--Text-High-Emphasis)]">{p.meta.title}</span>
                 </DataTableCell>
                 <DataTableCell>
-                  <Badge variant="subtle">{p.meta.device ?? "SP"}</Badge>
+                  <DeviceTags device={p.meta.device} />
                 </DataTableCell>
                 <DataTableCell>
                   <span className="typo-body-sm text-[var(--Text-Low-Emphasis)]">{p.meta.createdAt ?? "—"}</span>
