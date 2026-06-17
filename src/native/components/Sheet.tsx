@@ -170,6 +170,11 @@ function SnapBottomSheet({
   // close 判定：minSnap から CLOSE_DRAG_RATIO × panelH 以上引いたら閉じる
   const CLOSE_DRAG_RATIO = 0.18
 
+  // footer の実測高。onLayout で取得し ScrollView の paddingBottom に反映する。
+  const [footerH, setFooterH] = useState(0)
+  // footer 下に取る追加マージン（コンテンツ末尾と footer の物理的距離）
+  const FOOTER_GAP = 60
+
   // active snap ratio
   const initialActive = clamp(initialSnap ?? minSnap, minSnap, maxSnap)
   const activeRef = useRef(initialActive)
@@ -366,7 +371,9 @@ function SnapBottomSheet({
           style={{ flex: 1 }}
           contentContainerStyle={{
             paddingHorizontal: scales.spacing.scale[4],
-            paddingBottom: scales.spacing.scale[4],
+            // footer 実測高 + 60px の余白を空け、コンテンツ末尾が footer に
+            // 重ならない・ぶつからないようにする。
+            paddingBottom: footer ? footerH + FOOTER_GAP : scales.spacing.scale[4],
           }}
           onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
             scrollTopRef.current = e.nativeEvent.contentOffset.y
@@ -379,10 +386,11 @@ function SnapBottomSheet({
       </Animated.View>
 
       {/* footer：パネルの translation 影響を受けない独立レイヤ。
-          常に viewport 下端に固定 */}
+          常に viewport 下端に固定。高さを onLayout で測って ScrollView に伝える */}
       {footer && (
         <View
           pointerEvents="box-none"
+          onLayout={(e) => setFooterH(e.nativeEvent.layout.height)}
           style={{
             position: "absolute",
             left: 0,
