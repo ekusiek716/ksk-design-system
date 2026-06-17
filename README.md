@@ -69,17 +69,22 @@ npx expo install expo-blur
 
 Web は backdrop-filter で擬似、Android は半透明 surface でフォールバックします。
 
-## 🧪 試してみる（クローン→起動）
+## 🧪 試してみる（1コマンドお試し）
 
-ローカルで全プロトタイプ・全コンポーネントを動かしながら触りたい場合:
+```bash
+npx ksk-design-system demo
+cd ksk-ds-demo
+npm run dev               # → http://localhost:5173 で全プロトタイプ
+# or
+npm run storybook         # → http://localhost:6010 で全コンポーネントカタログ
+```
+
+`npx ksk-design-system demo my-trial` のように引数で名前指定もできます。
+中身は git clone + npm install を自動でやるだけなので、もちろん手動でもOK:
 
 ```bash
 git clone https://github.com/ekusiek716/ksk-design-system.git
-cd ksk-design-system
-npm install
-npm run dev               # → http://localhost:5173
-# or
-npm run storybook         # → http://localhost:6010 (Storybook)
+cd ksk-design-system && npm install
 ```
 
 ### Notion 仕様からモック自動生成（オプション）

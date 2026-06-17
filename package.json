@@ -13,6 +13,7 @@
   "module": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
   "bin": {
+    "ksk-design-system": "./bin/init.js",
     "ksk-ds": "./bin/init.js"
   },
   "files": [
