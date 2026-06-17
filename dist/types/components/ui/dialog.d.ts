@@ -35,6 +35,7 @@ interface DialogContentProps extends React.ComponentProps<typeof DialogPrimitive
      *   スクロールしやすく操作しやすい
      */
     position?: "center" | "top";
+    children?: React.ReactNode;
 }
 declare function DialogContent({ className, children, padding, description, position, ...props }: DialogContentProps): import("react/jsx-runtime").JSX.Element;
 declare function DialogHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
