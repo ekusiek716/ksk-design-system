@@ -215,6 +215,10 @@ interface SheetProps
    */
   overlay?: boolean
   children?: React.ReactNode
+  open?: boolean
+  defaultOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+  modal?: boolean
 }
 
 function Sheet({
@@ -496,6 +500,9 @@ interface SheetContentProps
    */
   description?: React.ReactNode
   children?: React.ReactNode
+  className?: string
+  style?: React.CSSProperties
+  id?: string
 }
 
 const swipeSides = new Set(["bottom", "bottom-glass"])
