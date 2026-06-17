@@ -14,7 +14,8 @@
 - **アクセシブル** — shadcn/ui（Radix UI ベース）+ `@storybook/addon-a11y` で a11y を担保
 - **Tailwind CSS v4 ネイティブ** — `@theme` ベースのトークン設計
 - **型安全** — React 19 + TypeScript、CVA によるバリアント管理
-- **110 コンポーネント** — 汎用 UI 55 / EC 系 11 / 管理画面系 8 / レイアウトシェル 3 / 汎用パターン 33
+- **110 + 91 コンポーネント** — Web 110（UI 55 / EC 11 / 管理 8 / シェル 3 / パターン 33）+ React Native 91
+- **iOS 26 Liquid Glass 対応** — RN 側 `GlassView` + `Button variant="glass"`、Web 側 `.glass` CSS マテリアル
 
 ## 🎨 テーマ
 
@@ -35,6 +36,12 @@ React 19 + TypeScript / Vite / **Tailwind CSS v4** / shadcn/ui（Radix UI）/ CV
 
 ## 🚀 使い方
 
+### Web (Next.js / Vite / 任意の React 環境)
+
+```bash
+npm install ksk-design-system
+```
+
 ```css
 /* プロジェクトの CSS */
 @import "ksk-design-system/preset";
@@ -47,11 +54,50 @@ import { Button, Card, Input, FormField } from "ksk-design-system"
 
 新規クライアント案件では、テーマファイルで `--Primitive-Brand-500` などブランドカラーの 10 行を定義するだけで、全コンポーネントがそのブランドカラーで動作します。
 
-> **インストールについて**: 現在は npm 未公開です。まずは上のライブ Storybook でコンポーネントと挙動をご確認ください。npm パッケージとしての配布を準備中です。
+### React Native / Expo
+
+`ksk-design-system/native/ui` から直接 RN 用コンポーネント（91 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
+
+```tsx
+import { ThemeProvider, Button, Card, GlassView } from "ksk-design-system/native/ui"
+```
+
+```bash
+# Liquid Glass を本物の UIVisualEffectView で出したい場合
+npx expo install expo-blur
+```
+
+Web は backdrop-filter で擬似、Android は半透明 surface でフォールバックします。
+
+## 🧪 試してみる（クローン→起動）
+
+ローカルで全プロトタイプ・全コンポーネントを動かしながら触りたい場合:
+
+```bash
+git clone https://github.com/ekusiek716/ksk-design-system.git
+cd ksk-design-system
+npm install
+npm run dev               # → http://localhost:5173
+# or
+npm run storybook         # → http://localhost:6010 (Storybook)
+```
+
+### Notion 仕様からモック自動生成（オプション）
+
+Claude Code をこのリポで開いて:
+
+```
+/mock https://notion.so/your-spec
+# or
+/mock 「ECサイトの商品詳細画面、カート追加と画像ギャラリー付き」
+```
+
+DS コンポーネントを最大限活用したモックが `src/prototypes/` に生成され、`http://localhost:5173` のプレビューに即反映されます。スクラッチで UI を組まず、既存コンポーネントを組み合わせて作るのでブレません。
 
 ## 📖 ドキュメント
 
 - **ライブ Storybook**: https://ksk-design-system.vercel.app — 全コンポーネントのバリアント・テーマ切り替えを操作可能
+- **npm**: https://www.npmjs.com/package/ksk-design-system
 - 設計思想・トークン体系の詳細は `CLAUDE.md` / `DESIGN.md` を参照
 
 ## 📄 ライセンス
