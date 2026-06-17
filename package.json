@@ -121,6 +121,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:preview": "tsc -b && vite build --config vite.config.preview.ts",
+    "build:vercel": "npm run build-storybook && npm run build:preview && rm -rf storybook-static/preview && cp -r dist-preview storybook-static/preview",
     "build:lib": "vite build --config vite.config.lib.ts && tsc --project tsconfig.lib.json || true",
     "prepack": "npm run build:lib",
     "lint": "eslint .",
