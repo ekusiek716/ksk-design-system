@@ -9,6 +9,10 @@ import tailwindcss from "@tailwindcss/vite"
 import path from "path"
 
 export default defineConfig({
+  // Storybook と同一 Vercel プロジェクトのサブパスで配信するため `/preview/` を base に。
+  // Storybook = `/`、モック一覧 = `/preview/` で並列公開する設計（vercel.json の build:vercel が
+  // dist-preview/ を storybook-static/preview/ にコピーして出力を統合する）。
+  base: "/preview/",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
