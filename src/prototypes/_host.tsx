@@ -6,7 +6,7 @@
 //   #/<slug>      → 単一プロトタイプ（SP/PC フレーム切替つき）
 // react-router は使わず location.hash のみで完結（依存を増やさない）。
 // =============================================================
-import { useEffect, useState } from "react"
+import { type ComponentType, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { ArrowLeft2, Mobile, Monitor, DocumentText, Element4, RowVertical } from "iconsax-reactjs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -18,6 +18,42 @@ import { prototypes, findPrototype } from "./_registry"
 
 type Frame = "SP" | "PC"
 type ListView = "card" | "table"
+
+/**
+ * MockThumb — プロトタイプを縮小描画する「ライブサムネ」。
+ * 画像ファイルを貯めず、常に最新の見た目を出す。390px 幅でレンダーし、
+ * 親要素の実幅に合わせて transform: scale する。transform は position:fixed の
+ * 含みブロックになるため、モック内の固定バー等もサムネ内に収まる。
+ * 親は position:relative + サイズ（aspect-[4/3] や size-12）を与えること。
+ */
+const THUMB_BASE = 390
+
+function MockThumb({ Component }: { Component: ComponentType }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(0)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const update = () => setScale(el.clientWidth / THUMB_BASE)
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <div ref={ref} aria-hidden className="absolute inset-0 overflow-hidden bg-[var(--Surface-Secondary)]">
+      {scale > 0 && (
+        <div
+          className="pointer-events-none origin-top-left select-none"
+          style={{ width: THUMB_BASE, transform: `scale(${scale})` }}
+          inert
+        >
+          <Component />
+        </div>
+      )}
+    </div>
+  )
+}
 
 function useHashSlug(): string {
   const [hash, setHash] = useState(() => window.location.hash)
@@ -48,22 +84,28 @@ function CardGrid() {
         <a
           key={p.slug}
           href={`#/${p.slug}`}
-          className="block rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-5 shadow-[var(--shadow-sm)] transition-shadow hover:shadow-[var(--shadow-md)]"
+          className="block overflow-hidden rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] shadow-[var(--shadow-sm)] transition-shadow hover:shadow-[var(--shadow-md)]"
         >
-          <div className="flex items-center gap-2">
-            <span className="typo-label-xs rounded-full bg-[var(--Surface-Secondary)] px-2 py-0.5 text-[var(--Text-Medium-Emphasis)]">
-              {p.meta.device ?? "SP"}
-            </span>
-            {p.meta.createdAt && (
-              <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">{p.meta.createdAt}</span>
+          {/* 4:3 プレビュー */}
+          <div className="relative aspect-[4/3] w-full border-b border-[var(--Border-Low-Emphasis)]">
+            <MockThumb Component={p.Component} />
+          </div>
+          <div className="p-5">
+            <div className="flex items-center gap-2">
+              <span className="typo-label-xs rounded-full bg-[var(--Surface-Secondary)] px-2 py-0.5 text-[var(--Text-Medium-Emphasis)]">
+                {p.meta.device ?? "SP"}
+              </span>
+              {p.meta.createdAt && (
+                <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">{p.meta.createdAt}</span>
+              )}
+            </div>
+            <h3 className="typo-heading-sm text-[var(--Text-High-Emphasis)] mt-3">{p.meta.title}</h3>
+            {p.meta.description && (
+              <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1 line-clamp-2">
+                {p.meta.description}
+              </p>
             )}
           </div>
-          <h3 className="typo-heading-sm text-[var(--Text-High-Emphasis)] mt-3">{p.meta.title}</h3>
-          {p.meta.description && (
-            <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1 line-clamp-2">
-              {p.meta.description}
-            </p>
-          )}
         </a>
       ))}
     </div>
@@ -77,6 +119,7 @@ function TableList() {
         <DataTableTable>
           <DataTableHeader>
             <tr>
+              <DataTableHead />
               <DataTableHead>タイトル</DataTableHead>
               <DataTableHead>デバイス</DataTableHead>
               <DataTableHead>作成日</DataTableHead>
@@ -90,6 +133,11 @@ function TableList() {
                 className="cursor-pointer"
                 onClick={() => (window.location.hash = `#/${p.slug}`)}
               >
+                <DataTableCell className="w-[64px]">
+                  <div className="relative size-12 overflow-hidden rounded-md border border-[var(--Border-Low-Emphasis)]">
+                    <MockThumb Component={p.Component} />
+                  </div>
+                </DataTableCell>
                 <DataTableCell>
                   <span className="typo-label-sm text-[var(--Text-High-Emphasis)]">{p.meta.title}</span>
                 </DataTableCell>
