@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 import {
   Animated,
   Dimensions,
+  Easing,
   Modal,
   PanResponder,
   Pressable,
@@ -32,6 +33,12 @@ export interface SheetProps {
   snapPoints?: number[]
   /** Initial snap (must match one of `snapPoints`). Default = first entry. */
   initialSnap?: number
+  /**
+   * シート下端に固定で表示する要素（例：「つづける」ボタン）。
+   * children の ScrollView と分離されるためコンテンツのスクロールに
+   * 追従しない。snap mode（bottom + snapPoints）でのみ有効。
+   */
+  footer?: React.ReactNode
 }
 
 export function Sheet(props: SheetProps) {
@@ -131,6 +138,7 @@ function SnapBottomSheet({
   children,
   snapPoints,
   initialSnap,
+  footer,
 }: SheetProps) {
   const { theme, scales } = useTheme()
   const points = useMemo(() => {
@@ -142,57 +150,55 @@ function SnapBottomSheet({
   const minSnap = points[0]
   const maxSnap = points[points.length - 1]
 
-  // 画面高は open 中だけ計測。RN-web の Modal portal 初期描画では
-  // Dimensions が 0 を返す瞬間があるため、ResizeEvent でも更新する。
-  const [H, setH] = useState(() => Dimensions.get("window").height || 700)
-  useEffect(() => {
-    const sub = Dimensions.addEventListener("change", ({ window }) => {
-      if (window.height > 0) setH(window.height)
-    })
-    return () => sub.remove()
-  }, [])
-  const panelH = Math.round(H * maxSnap)
-  // ラバーバンド上限（フル状態で上方向に引いた時の許容オーバーシュート）
+  // 画面高。RN-web の Modal portal 初期描画では Dimensions が 0 を返す瞬間が
+  // あるため window.innerHeight にフォールバック。回転には未対応（初期値固定）。
+  const dimsH = Dimensions.get("window").height
+  const winH =
+    typeof globalThis !== "undefined" &&
+    (globalThis as unknown as { window?: { innerHeight?: number } }).window
+      ?.innerHeight
+  const H = dimsH > 0 ? dimsH : winH && winH > 0 ? winH : 700
+  const fullH = Math.round(H * maxSnap)
+  const minH = Math.round(H * minSnap)
+  // ラバーバンド上限（フル状態で上に引いた時の許容オーバーシュート）
   const RUBBER_MAX = 4
-  // close 判定：HALF 状態から下に panelH × 0.18 以上引いたら close
-  const CLOSE_DRAG_RATIO = 0.18
+  // close 判定：HALF から CLOSE_DRAG_RATIO × minH 引いたら閉じる
+  const CLOSE_DRAG_RATIO = 0.32
 
-  // active snap ratio（0..1）。初期は initialSnap or minSnap。
+  // active snap ratio
   const initialActive = clamp(initialSnap ?? minSnap, minSnap, maxSnap)
   const activeRef = useRef(initialActive)
-  // translateY: (maxSnap - active) * H px。0 = フル、上限 = panelH（閉）。
-  const translateY = useRef(new Animated.Value(panelH)).current
+  // sheetH：panel の高さ（0=閉、minH=ハーフ、fullH=フル）。
+  // 高さを直接アニメするため useNativeDriver は false。
+  const sheetH = useRef(new Animated.Value(0)).current
 
-  // open / close、active 切替時のターゲット位置を再計算
   const moveTo = (targetActive: number, duration = SNAP_DUR) => {
     activeRef.current = targetActive
-    Animated.timing(translateY, {
-      toValue: (maxSnap - targetActive) * H,
+    Animated.timing(sheetH, {
+      toValue: Math.round(targetActive * H),
       duration,
-      useNativeDriver: true,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
     }).start()
   }
 
   useEffect(() => {
     if (open) {
-      // open: 初期 snap へスライドイン
-      translateY.setValue(panelH) // 閉位置にセットしてから
+      sheetH.setValue(0)
       moveTo(initialActive, SNAP_DUR)
     } else {
-      // close: 完全に押し下げて非表示
-      Animated.timing(translateY, {
-        toValue: panelH,
+      Animated.timing(sheetH, {
+        toValue: 0,
         duration: SNAP_DUR,
-        useNativeDriver: true,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
       }).start()
     }
-    // H の変動（端末回転）でアニメをリセットするとカクつくため、依存は open のみ。
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  // PanResponder：シート全面。ただし FULL でコンテンツに余地がある場合は
-  // ScrollView へ譲る（FULL + 上スワイプ or FULL + scrollTop>0 の下スワイプ）。
-  const startTYRef = useRef(0)
+  // PanResponder：FULL + scrollTop=0 で下スワイプ、HALF で全方向、を受ける
+  const startHRef = useRef(0)
   const startActiveRef = useRef(initialActive)
   const scrollTopRef = useRef(0)
   const pan = useRef(
@@ -204,38 +210,38 @@ function SnapBottomSheet({
         const atFull = activeRef.current === maxSnap
         const atTop = scrollTopRef.current <= 0
         if (atFull) {
-          // FULL: 下スワイプは scrollTop=0 のときだけシート操作。上は常に
-          // ScrollView 側に任せる（rubber-band 風の挙動はブラウザ任せ）。
           if (dy > 0 && atTop) return true
           return false
         }
-        // FULL 未満（HALF）: 縦方向は常にシート操作。
         return true
       },
       onPanResponderGrant: () => {
-        startTYRef.current = (translateY as unknown as { _value: number })._value
+        startHRef.current = (sheetH as unknown as { _value: number })._value
         startActiveRef.current = activeRef.current
       },
       onPanResponderMove: (_, g) => {
-        let next = startTYRef.current + g.dy
-        // 上端（フル超え）はラバーバンドで重く・最大 RUBBER_MAX のみ越える
-        if (next < 0) next = Math.max(-RUBBER_MAX, next / 4)
-        // 下端は閉状態を超えない
-        if (next > panelH) next = panelH
-        translateY.setValue(next)
+        // drag up（dy<0）で高さ増、drag down（dy>0）で高さ減。
+        let next = startHRef.current - g.dy
+        // フル超えは RUBBER_MAX だけ伸ばす（重く）
+        if (next > fullH) {
+          const over = next - fullH
+          next = fullH + Math.min(RUBBER_MAX, over / 4)
+        }
+        if (next < 0) next = 0
+        sheetH.setValue(next)
       },
       onPanResponderRelease: (_, g) => {
-        const released = clamp(startTYRef.current + g.dy, 0, panelH)
+        const released = clamp(startHRef.current - g.dy, 0, fullH + RUBBER_MAX)
         const dy = g.dy
         const startActive = startActiveRef.current
 
-        // 1) FULL 状態でさらに上にスワイプ → ラバーバンドで戻す
+        // 1) FULL からさらに上方向 → ラバーバンドで戻る
         if (startActive === maxSnap && dy < 0) {
           moveTo(maxSnap)
           return
         }
 
-        // 2) 上方向スワイプ → 1段階上の snap へ
+        // 2) 上方向 → 1段階上の snap
         if (dy < -20) {
           const idx = points.indexOf(startActive)
           const nextSnap = idx >= 0 && idx < points.length - 1 ? points[idx + 1] : maxSnap
@@ -243,29 +249,28 @@ function SnapBottomSheet({
           return
         }
 
-        // 3) 下方向スワイプ：距離で close vs ハーフ戻り を判定
+        // 3) 下方向：close vs HALF 戻り を距離別に判定
         if (dy > 0) {
-          // HALF 状態から閾値以上引いたら close
-          if (startActive === minSnap && dy > panelH * CLOSE_DRAG_RATIO) {
-            Animated.timing(translateY, {
-              toValue: panelH,
+          if (startActive === minSnap && dy > minH * CLOSE_DRAG_RATIO) {
+            Animated.timing(sheetH, {
+              toValue: 0,
               duration: SNAP_DUR,
-              useNativeDriver: true,
+              easing: Easing.out(Easing.cubic),
+              useNativeDriver: false,
             }).start(() => onClose())
             return
           }
-          // FULL 状態からは：軽く引けば HALF、深く引けば close
           if (startActive === maxSnap) {
-            const halfPosY = (maxSnap - minSnap) * H
-            if (dy > halfPosY + panelH * CLOSE_DRAG_RATIO) {
-              Animated.timing(translateY, {
-                toValue: panelH,
+            const collapseDelta = (maxSnap - minSnap) * H
+            if (dy > collapseDelta + minH * CLOSE_DRAG_RATIO) {
+              Animated.timing(sheetH, {
+                toValue: 0,
                 duration: SNAP_DUR,
-                useNativeDriver: true,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false,
               }).start(() => onClose())
               return
             }
-            // ハーフへ戻る
             if (dy > 40) {
               moveTo(minSnap)
               return
@@ -273,8 +278,8 @@ function SnapBottomSheet({
           }
         }
 
-        // 4) その他は元の snap に戻す（最近接判定）
-        const releasedActive = maxSnap - released / H
+        // 4) その他は最近接 snap に戻す
+        const releasedActive = released / H
         let best = points[0]
         let bestD = Math.abs(points[0] - releasedActive)
         for (let i = 1; i < points.length; i++) {
@@ -289,10 +294,10 @@ function SnapBottomSheet({
     }),
   ).current
 
-  // overlay opacity：active 比率に追従（min で 0、max でフル）
-  const overlayOpacity = translateY.interpolate({
-    inputRange: [0, (maxSnap - minSnap) * H, panelH],
-    outputRange: [1, 0.4, 0],
+  // overlay opacity：高さに追従（0=透明、minH 以上でフル）
+  const overlayOpacity = sheetH.interpolate({
+    inputRange: [0, minH],
+    outputRange: [0, 0.4],
     extrapolate: "clamp",
   })
 
@@ -314,7 +319,7 @@ function SnapBottomSheet({
         <Pressable onPress={onClose} style={{ flex: 1 }} />
       </Animated.View>
 
-      {/* panel：bottom anchor + 高さ固定 + transform で snap 位置 */}
+      {/* panel：bottom anchor + height アニメ。footer はパネル下端＝viewport 下端 */}
       <Animated.View
         {...pan.panHandlers}
         style={{
@@ -322,11 +327,11 @@ function SnapBottomSheet({
           left: 0,
           right: 0,
           bottom: 0,
-          height: panelH,
+          height: sheetH,
           backgroundColor: theme.surface.primary,
           borderTopLeftRadius: scales.borderRadius["2xl"],
           borderTopRightRadius: scales.borderRadius["2xl"],
-          transform: [{ translateY }],
+          overflow: "hidden",
         }}
       >
         {/* ドラッグハンドル＋タイトル */}
@@ -363,6 +368,20 @@ function SnapBottomSheet({
         >
           {children}
         </ScrollView>
+        {footer && (
+          <View
+            style={{
+              paddingHorizontal: scales.spacing.scale[4],
+              paddingTop: scales.spacing.scale[3],
+              paddingBottom: scales.spacing.scale[4],
+              borderTopWidth: 1,
+              borderTopColor: theme.border["low-emphasis"],
+              backgroundColor: theme.surface.primary,
+            }}
+          >
+            {footer}
+          </View>
+        )}
       </Animated.View>
     </Modal>
   )
