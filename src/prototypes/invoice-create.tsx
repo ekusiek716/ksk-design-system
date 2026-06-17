@@ -22,6 +22,8 @@ export const meta = {
   device: "PC" as const,
   createdAt: "2026/06/17",
   description: "BtoB 会計。明細編集 + 自動計算 + 発行時バリデーション（必須/日付整合/行エラー/文字数）。",
+  group: "invoice-create",
+  variantLabel: "通常（インタラクティブ）",
 }
 
 const nav = [

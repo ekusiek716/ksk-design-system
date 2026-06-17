@@ -2,6 +2,7 @@ node_modules
 *.local
 .DS_Store
 storybook-static
+dist-preview
 *.tgz
 
 # AI ツール (codex) のローカル設定

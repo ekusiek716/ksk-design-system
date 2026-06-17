@@ -7,14 +7,15 @@
 // react-router は使わず location.hash のみで完結（依存を増やさない）。
 // =============================================================
 import { type ComponentType, useEffect, useLayoutEffect, useRef, useState } from "react"
-import { ArrowLeft2, Mobile, Monitor, DocumentText, Element4, RowVertical } from "iconsax-reactjs"
+import { ArrowLeft2, Mobile, Monitor, DocumentText, Element4, RowVertical, ExportSquare } from "iconsax-reactjs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow,
   DataTableHead, DataTableCell,
 } from "@/components/patterns/admin/data-table"
-import { prototypes, findPrototype } from "./_registry"
+import { prototypes, findPrototype, findGroupSiblings, type PrototypeEntry } from "./_registry"
+import { Markdown } from "./_markdown"
 
 type Frame = "SP" | "PC"
 type ListView = "card" | "table"
@@ -222,6 +223,88 @@ function IndexView() {
   )
 }
 
+/**
+ * DetailSidebar — 詳細画面の左カラム。
+ * meta の情報・Notion 仕様リンク・spec.md 全文・同 group の関連モック導線をまとめる。
+ */
+function DetailSidebar({ entry, siblings }: { entry: PrototypeEntry; siblings: PrototypeEntry[] }) {
+  const { meta, specSource } = entry
+  return (
+    <aside className="flex flex-col gap-6 border-r border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-5">
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <DeviceTags device={meta.device} />
+          {meta.createdAt && (
+            <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">{meta.createdAt}</span>
+          )}
+        </div>
+        <h2 className="typo-heading-md text-[var(--Text-High-Emphasis)] mt-3">{meta.title}</h2>
+        {meta.variantLabel && (
+          <p className="typo-label-sm text-[var(--Text-Accent-Primary)] mt-1">{meta.variantLabel}</p>
+        )}
+        {meta.description && (
+          <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-2">{meta.description}</p>
+        )}
+      </div>
+
+      {meta.notionUrl && (
+        <Button
+          variant="secondary"
+          className="w-full justify-center gap-2"
+          onClick={() => window.open(meta.notionUrl, "_blank", "noreferrer")}
+        >
+          <DocumentText size={16} />
+          Notion 仕様を開く
+          <ExportSquare size={14} />
+        </Button>
+      )}
+
+      {siblings.length > 0 && (
+        <section>
+          <h3 className="typo-label-md text-[var(--Text-High-Emphasis)] mb-2">関連モック</h3>
+          <p className="typo-label-xs text-[var(--Text-Low-Emphasis)] mb-3">
+            同じグループの分岐パターン
+          </p>
+          <ul className="flex flex-col gap-2">
+            {siblings.map((s) => (
+              <li key={s.slug}>
+                <a
+                  href={`#/${s.slug}`}
+                  className="flex items-center gap-3 rounded-lg border border-[var(--Border-Low-Emphasis)] p-2 transition-colors hover:bg-[var(--Surface-Secondary)]"
+                >
+                  <div className="relative size-12 shrink-0 overflow-hidden rounded-md border border-[var(--Border-Low-Emphasis)]">
+                    <MockThumb Component={s.Component} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="typo-label-sm text-[var(--Text-High-Emphasis)] truncate">
+                      {s.meta.variantLabel ?? s.meta.title}
+                    </p>
+                    {s.meta.description && (
+                      <p className="typo-label-xs text-[var(--Text-Medium-Emphasis)] line-clamp-1">
+                        {s.meta.description}
+                      </p>
+                    )}
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {specSource && (
+        <section>
+          <h3 className="typo-label-md text-[var(--Text-High-Emphasis)] mb-2">仕様メモ</h3>
+          <p className="typo-label-xs text-[var(--Text-Low-Emphasis)] mb-3">
+            <code className="typo-label-xs">{entry.slug}.spec.md</code> の内容
+          </p>
+          <Markdown source={specSource} />
+        </section>
+      )}
+    </aside>
+  )
+}
+
 function DetailView({ slug }: { slug: string }) {
   const entry = findPrototype(slug)
   const [frame, setFrame] = useState<Frame>(
@@ -243,6 +326,8 @@ function DetailView({ slug }: { slug: string }) {
   }
 
   const { Component, meta } = entry
+  const siblings = findGroupSiblings(slug)
+  const hasSidebar = Boolean(meta.notionUrl || entry.specSource || siblings.length > 0 || meta.description)
 
   return (
     <div className="min-h-dvh">
@@ -297,17 +382,25 @@ function DetailView({ slug }: { slug: string }) {
         </div>
       </div>
 
-      {/* プレビュー領域 */}
-      <div className="bg-[var(--Surface-Secondary)] p-4 @container">
-        {frame === "SP" ? (
-          <div className="mx-auto w-full max-w-[390px] overflow-hidden rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] shadow-[var(--shadow-lg)]">
-            <Component />
+      {/* 本体: 左サイドバー（説明）+ 右プレビュー。
+          狭幅では縦積みになるよう @container クエリを使う */}
+      <div className={hasSidebar ? "@container" : ""}>
+        <div className={hasSidebar ? "@4xl:grid @4xl:grid-cols-[320px_1fr]" : ""}>
+          {hasSidebar && <DetailSidebar entry={entry} siblings={siblings} />}
+
+          {/* プレビュー領域 */}
+          <div className="bg-[var(--Surface-Secondary)] p-4 @container">
+            {frame === "SP" ? (
+              <div className="mx-auto w-full max-w-[390px] overflow-hidden rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] shadow-[var(--shadow-lg)]">
+                <Component />
+              </div>
+            ) : (
+              <div className="mx-auto w-full overflow-hidden rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] shadow-[var(--shadow-md)]">
+                <Component />
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="mx-auto w-full overflow-hidden rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] shadow-[var(--shadow-md)]">
-            <Component />
-          </div>
-        )}
+        </div>
       </div>
     </div>
   )

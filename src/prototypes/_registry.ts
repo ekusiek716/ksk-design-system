@@ -22,18 +22,40 @@ export interface PrototypeMeta {
   createdAt?: string
   /** 一覧カードに出す一行説明 */
   description?: string
+  /**
+   * 同じモックの分岐をまとめるキー。同じ group の他プロトタイプは
+   * 詳細画面の左カラムに「関連モック」として並ぶ（例: "admin-order"）。
+   */
+  group?: string
+  /** 詳細画面の左カラムでバリアントを区別するためのラベル（例: "通常" / "未処理だけ"） */
+  variantLabel?: string
 }
 
 export interface PrototypeEntry {
   slug: string
   meta: PrototypeMeta
   Component: ComponentType
+  /** `<slug>.spec.md` の中身（任意。Markdown としてレンダーされる） */
+  specSource?: string
 }
 
 const modules = import.meta.glob("./*.tsx", { eager: true }) as Record<
   string,
   { default?: ComponentType; meta?: PrototypeMeta }
 >
+
+const specs = import.meta.glob("./*.spec.md", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+}) as Record<string, string>
+
+const specBySlug: Record<string, string> = Object.fromEntries(
+  Object.entries(specs).map(([path, source]) => [
+    path.replace(/^\.\//, "").replace(/\.spec\.md$/, ""),
+    source,
+  ]),
+)
 
 export const prototypes: PrototypeEntry[] = Object.entries(modules)
   .filter(([path]) => {
@@ -46,6 +68,7 @@ export const prototypes: PrototypeEntry[] = Object.entries(modules)
       slug,
       meta: mod.meta ?? { title: slug },
       Component: mod.default ?? (() => null),
+      specSource: specBySlug[slug],
     }
   })
   .filter((e) => typeof e.Component === "function")
@@ -58,4 +81,11 @@ export const prototypes: PrototypeEntry[] = Object.entries(modules)
 
 export function findPrototype(slug: string): PrototypeEntry | undefined {
   return prototypes.find((p) => p.slug === slug)
+}
+
+/** 同じ group に属する他のプロトタイプを返す（自分自身は除外） */
+export function findGroupSiblings(slug: string): PrototypeEntry[] {
+  const me = findPrototype(slug)
+  if (!me?.meta.group) return []
+  return prototypes.filter((p) => p.slug !== slug && p.meta.group === me.meta.group)
 }
