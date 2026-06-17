@@ -1,6 +1,6 @@
 import React from "react";
 import { type PressableProps } from "react-native";
-export type ButtonVariant = "primary" | "secondary" | "tertiary" | "destructive";
+export type ButtonVariant = "primary" | "secondary" | "tertiary" | "destructive" | "glass";
 export interface ButtonProps extends Omit<PressableProps, "children" | "style"> {
     variant?: ButtonVariant;
     children: React.ReactNode;

@@ -3,7 +3,7 @@ import { type ViewProps } from "react-native";
 export interface CardProps extends ViewProps {
     /** spacing.scale のインデックス。既定 4 = 16px */
     padding?: number;
-    /** shadow トークン名。web は boxShadow、native は elevation(Android) を適用 */
+    /** shadow トークン名。web は boxShadow、iOS は shadow*、Android は elevation を適用 */
     elevation?: "sm" | "md" | "lg";
     children: React.ReactNode;
 }
