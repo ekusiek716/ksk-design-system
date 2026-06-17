@@ -34,6 +34,8 @@ export interface ProgressProps extends React.ComponentProps<typeof ProgressPrimi
    * @default "sm"
    */
   transitionDuration?: ProgressDuration
+  /** 進捗値（0〜100）。Radix v2 系で `React.ComponentProps` 経由だと型に出てこないため明示。 */
+  value?: number | null
 }
 
 /**

@@ -35,7 +35,9 @@ function SelectValue({ ...props }: React.ComponentProps<typeof SelectPrimitive.V
 
 interface SelectTriggerProps
   extends React.ComponentProps<typeof SelectPrimitive.Trigger>,
-    VariantProps<typeof selectTriggerVariants> {}
+    VariantProps<typeof selectTriggerVariants> {
+  children?: React.ReactNode
+}
 
 function SelectTrigger({ className, children, size, ...props }: SelectTriggerProps) {
   return (

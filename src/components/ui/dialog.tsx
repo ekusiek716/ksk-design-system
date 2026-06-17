@@ -64,6 +64,7 @@ interface DialogContentProps
    *   スクロールしやすく操作しやすい
    */
   position?: "center" | "top"
+  children?: React.ReactNode
 }
 
 function DialogContent({
