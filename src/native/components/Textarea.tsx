@@ -1,7 +1,9 @@
 import React, { useState } from "react"
-import { TextInput, type TextInputProps } from "react-native"
+import { Platform, TextInput, type TextInputProps } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
+
+const WEB_INPUT_RESET = Platform.OS === "web" ? { outlineStyle: "none" } : null
 
 export interface TextareaProps extends Omit<TextInputProps, "style" | "multiline"> {
   invalid?: boolean
@@ -45,6 +47,7 @@ export function Textarea({ invalid, disabled, minHeight = 96, ...rest }: Textare
           color: theme.text["high-emphasis"],
           opacity: disabled ? 0.6 : 1,
         },
+        WEB_INPUT_RESET as TextInputProps["style"],
       ]}
       {...rest}
     />

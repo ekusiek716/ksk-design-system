@@ -41,8 +41,17 @@ export function SectionHeader({ title, description, action, variant = "default" 
         )}
       </View>
       {action && (
-        <Pressable onPress={action.onPress} hitSlop={8}>
-          <RNText style={[resolveTypo("label.sm"), { color: theme.text["accent-primary"] }]}>
+        <Pressable
+          onPress={action.onPress}
+          hitSlop={8}
+          style={({ pressed }) => ({
+            paddingVertical: scales.spacing.scale[1],
+            paddingHorizontal: scales.spacing.scale[2],
+            borderRadius: scales.borderRadius.md,
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <RNText style={[resolveTypo("label.md"), { color: theme.text["accent-primary"] }]}>
             {action.label} ›
           </RNText>
         </Pressable>
