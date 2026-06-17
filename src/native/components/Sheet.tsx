@@ -5,8 +5,11 @@ import {
   Modal,
   PanResponder,
   Pressable,
+  ScrollView,
   Text as RNText,
   View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
@@ -116,7 +119,7 @@ function PlainSheet({ open, onClose, side = "bottom", title, children }: SheetPr
 
 /* ───────────────────────────────────────────── snap mode（web版踏襲） */
 
-const SNAP_DUR = 260
+const SNAP_DUR = 180
 function clamp(v: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, v))
 }
@@ -187,14 +190,28 @@ function SnapBottomSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  // PanResponder：シート全面（背景の問題は出ない＝ScrollView 化していないため
-  // 中身の細かいスクロールは現状ない／必要なら子側で対応）
+  // PanResponder：シート全面。ただし FULL でコンテンツに余地がある場合は
+  // ScrollView へ譲る（FULL + 上スワイプ or FULL + scrollTop>0 の下スワイプ）。
   const startTYRef = useRef(0)
   const startActiveRef = useRef(initialActive)
+  const scrollTopRef = useRef(0)
   const pan = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 4,
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, g) => {
+        if (Math.abs(g.dy) < 6) return false
+        const dy = g.dy
+        const atFull = activeRef.current === maxSnap
+        const atTop = scrollTopRef.current <= 0
+        if (atFull) {
+          // FULL: 下スワイプは scrollTop=0 のときだけシート操作。上は常に
+          // ScrollView 側に任せる（rubber-band 風の挙動はブラウザ任せ）。
+          if (dy > 0 && atTop) return true
+          return false
+        }
+        // FULL 未満（HALF）: 縦方向は常にシート操作。
+        return true
+      },
       onPanResponderGrant: () => {
         startTYRef.current = (translateY as unknown as { _value: number })._value
         startActiveRef.current = activeRef.current
@@ -335,9 +352,17 @@ function SnapBottomSheet({
             </RNText>
           )}
         </View>
-        <View style={{ flex: 1, paddingHorizontal: scales.spacing.scale[4], paddingBottom: scales.spacing.scale[4] }}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingHorizontal: scales.spacing.scale[4], paddingBottom: scales.spacing.scale[4] }}
+          onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
+            scrollTopRef.current = e.nativeEvent.contentOffset.y
+          }}
+          scrollEventThrottle={16}
+          keyboardShouldPersistTaps="handled"
+        >
           {children}
-        </View>
+        </ScrollView>
       </Animated.View>
     </Modal>
   )
