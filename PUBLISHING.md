@@ -12,7 +12,25 @@
 - main ブランチが clean (`git status` で何もない)、リモートと一致
 - 消費リポが `~/LocalDev/<name>` に clone 済みで、`gh` CLI が使えること（PR 自動作成に使用）
 
-## リリースフロー
+## 最短手順（推奨）
+
+```bash
+bash scripts/release.sh minor   # patch / minor / major / x.y.z
+```
+
+これだけ。中で以下を全部やる:
+
+1. `git diff --quiet` & main ブランチチェック（曜日チェック）
+2. `npm run check`
+3. `npm version <level>`（tag 切り）
+4. **dual tgz 生成**（新名 + 旧名互換）
+5. `git push origin main --tags`
+6. `bash scripts/bump-consumers.sh <version>`（5 リポへ PR 自動作成）
+
+失敗時は package.json の name 書換が確実に元に戻る（trap）。
+個別に手作業したい場合は以下の手動フローを参照。
+
+## リリースフロー（手動）
 
 ### 1. ローカルで動作確認
 
