@@ -64,14 +64,21 @@ for name in "${REPOS[@]}"; do
   git checkout -B "chore/bump-ds-$VERSION" >/dev/null 2>&1
 
   # ── package.json の "ksk-design-system" を npm registry 参照に切替 ──
-  # 旧: "ksk-design-system": "file:./vendor/ksk-design-system-1.35.0.tgz"
-  # 新: "ksk-design-system": "^1.36.0"
+  # 旧キー: "@ksk/design-system" or "ksk-design-system" (file:./vendor/...)
+  # 新:    "ksk-design-system": "^<version>"
+  # 旧名 @ksk/design-system が残ってたら同時に rename する
   node -e "
     const fs = require('fs');
     const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
     let changed = false;
     for (const k of ['dependencies', 'devDependencies', 'peerDependencies']) {
-      if (pkg[k] && pkg[k]['ksk-design-system']) {
+      if (!pkg[k]) continue;
+      // 旧名キー (@ksk/design-system) は削除して新名キーに統合
+      if (pkg[k]['@ksk/design-system']) {
+        delete pkg[k]['@ksk/design-system'];
+        pkg[k]['ksk-design-system'] = '^${VERSION}';
+        changed = true;
+      } else if (pkg[k]['ksk-design-system']) {
         pkg[k]['ksk-design-system'] = '^${VERSION}';
         changed = true;
       }
