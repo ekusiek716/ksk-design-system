@@ -31,6 +31,12 @@ export default defineConfig({
     },
     cssFileName: "styles",
     rollupOptions: {
+      // external: ソース内で実際に直接 import している peer のみを列挙。
+      // 個別 @radix-ui/react-* パッケージは radix-ui namespace package 経由で
+      // 参照する方針に統一済み（v1.37.4 以降）。例外は @radix-ui/react-slot
+      // のみで、これは webpack の静的解析が radix-ui の `export * as Slot`
+      // 名前空間 re-export を辿れない既知問題を回避するため direct import
+      // を維持している（src/components/ui/form.tsx）。
       external: [
         "react",
         "react-dom",
@@ -43,22 +49,7 @@ export default defineConfig({
         "clsx",
         "tailwind-merge",
         "radix-ui",
-        "@radix-ui/react-accordion",
-        "@radix-ui/react-avatar",
-        "@radix-ui/react-checkbox",
-        "@radix-ui/react-dialog",
-        "@radix-ui/react-label",
-        "@radix-ui/react-popover",
-        "@radix-ui/react-progress",
-        "@radix-ui/react-radio-group",
-        "@radix-ui/react-scroll-area",
-        "@radix-ui/react-select",
-        "@radix-ui/react-separator",
         "@radix-ui/react-slot",
-        "@radix-ui/react-switch",
-        "@radix-ui/react-tabs",
-        "@radix-ui/react-toast",
-        "@radix-ui/react-tooltip",
       ],
       output: {
         // src/lib/server-variants/* に置いた pure cva 定義を独立チャンクに
