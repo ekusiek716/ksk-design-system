@@ -37,6 +37,8 @@ interface SelectTriggerProps
   extends React.ComponentProps<typeof SelectPrimitive.Trigger>,
     VariantProps<typeof selectTriggerVariants> {
   children?: React.ReactNode
+  className?: string
+  id?: string
 }
 
 function SelectTrigger({ className, children, size, ...props }: SelectTriggerProps) {
