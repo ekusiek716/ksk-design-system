@@ -83,6 +83,37 @@ export function findPrototype(slug: string): PrototypeEntry | undefined {
   return prototypes.find((p) => p.slug === slug)
 }
 
+/**
+ * 一覧表示用のリスト。同じ `group` のバリアントは **代表 1 件に集約** する
+ * （代表は `slug === group` を優先、無ければソート順の先頭）。残りのバリアントは
+ * 詳細画面の「関連モック」に出るので、トップの一覧が分岐で埋まらない。
+ * group を持たないプロトタイプはそのまま全件表示。
+ */
+export const listPrototypes: PrototypeEntry[] = (() => {
+  const seen = new Set<string>()
+  const result: PrototypeEntry[] = []
+  for (const p of prototypes) {
+    const g = p.meta.group
+    if (!g) {
+      result.push(p)
+      continue
+    }
+    if (seen.has(g)) continue
+    seen.add(g)
+    const rep =
+      prototypes.find((x) => x.meta.group === g && x.slug === g) ?? p
+    result.push(rep)
+  }
+  return result
+})()
+
+/** 同じ group のバリアント数（代表自身を含む）。1 ならバリアントなし。 */
+export function groupVariantCount(slug: string): number {
+  const me = findPrototype(slug)
+  if (!me?.meta.group) return 1
+  return prototypes.filter((p) => p.meta.group === me.meta.group).length
+}
+
 /** 同じ group に属する他のプロトタイプを返す（自分自身は除外） */
 export function findGroupSiblings(slug: string): PrototypeEntry[] {
   const me = findPrototype(slug)
