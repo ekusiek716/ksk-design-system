@@ -114,7 +114,7 @@ const preview: Preview = {
     },
     options: {
       storySort: {
-        order: ["Foundation", ["Guidelines", "Gallery", "*"], "Components", "Shells", "*"],
+        order: ["Foundation", ["Guidelines", "Showcase", "Gallery", "*"], "Components", "Shells", "*"],
       },
     },
   },
