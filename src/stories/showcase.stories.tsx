@@ -68,6 +68,37 @@ import { SectionHeader } from "@/components/patterns/section-header"
 import { CountdownTimer } from "@/components/ui/countdown-timer"
 import { SocialLoginButton } from "@/components/ui/social-login-button"
 import { SocialIcon } from "@/components/ui/social-icon"
+import { AvatarImage } from "@/components/ui/avatar"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog"
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
+import { KebabMenu } from "@/components/patterns/admin/kebab-menu"
+import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
+import { Calendar } from "@/components/ui/calendar"
+import { DateRangePicker } from "@/components/ui/date-picker"
+import { Banner } from "@/components/patterns/banner"
+import { ErrorState } from "@/components/patterns/error-state"
+import { ReviewCard } from "@/components/patterns/commerce/review-card"
+import { CategoryNav } from "@/components/patterns/category-nav"
+import { CategoryScroll } from "@/components/patterns/category-scroll"
+import { TagInput } from "@/components/patterns/tag-input"
+import { CheckboxGroup, CheckboxGroupItem } from "@/components/ui/checkbox-group"
+import { CheckboxCardGroup, CheckboxCardItem } from "@/components/ui/checkbox-card"
+import { CheckboxField } from "@/components/ui/checkbox-field"
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationLink, PaginationNext, PaginationEllipsis } from "@/components/ui/pagination"
+import { ShareButtons } from "@/components/patterns/share-buttons"
+import { BottomTabBar } from "@/components/patterns/commerce/bottom-tab-bar"
+import { ProductCarousel } from "@/components/patterns/commerce/product-carousel"
+import { ImageCarousel } from "@/components/patterns/commerce/image-carousel"
+import { ImageGallery } from "@/components/ui/image-gallery"
+import { FileUpload } from "@/components/patterns/file-upload"
+import { ChartControls } from "@/components/patterns/admin/chart-controls"
+import { Footer } from "@/components/patterns/footer"
+import { NavigationBar } from "@/components/ui/navigation-bar"
 
 /* ─────────────────────────────────────────────
  * 骨組み（poster scaffolding）— 背景色・枠線なし
@@ -400,6 +431,87 @@ function CommercePanel() {
       </div>
     </Panel>
   )
+}
+
+function ConfirmDialogPanel() {
+  const [open, setOpen] = React.useState(false)
+  return (
+    <Panel no="28" title="Confirm Dialog">
+      <Row>
+        <Button variant="destructive" onClick={() => setOpen(true)}>削除する</Button>
+      </Row>
+      <ConfirmDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="本当に削除しますか？"
+        description="この操作は元に戻せません。"
+        confirmLabel="削除"
+        variant="destructive"
+        onConfirm={() => setOpen(false)}
+      />
+    </Panel>
+  )
+}
+
+function CollapsiblePanel() {
+  const [open, setOpen] = React.useState(false)
+  return (
+    <Panel no="29" title="Collapsible">
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm">{open ? "閉じる" : "詳細を開く"}</Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <p className="typo-body-sm" style={{ color: "var(--Text-Medium-Emphasis)", marginTop: 8 }}>
+            折りたたみ可能な領域。開閉アニメーション付き。
+          </p>
+        </CollapsibleContent>
+      </Collapsible>
+    </Panel>
+  )
+}
+
+function CalendarPanel() {
+  const [date, setDate] = React.useState<Date | undefined>(new Date())
+  const [range, setRange] = React.useState<{ from?: Date; to?: Date }>({})
+  return (
+    <Panel no="30" title="Calendar & Range">
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 24, alignItems: "flex-start" }}>
+        <Calendar mode="single" selected={date} onSelect={setDate} />
+        <div>
+          <GroupLabel>Date Range Picker</GroupLabel>
+          <DateRangePicker value={range} onChange={(r) => setRange(r ?? {})} />
+        </div>
+      </div>
+    </Panel>
+  )
+}
+
+function TagInputPanel() {
+  const [tags, setTags] = React.useState<string[]>(["React", "TypeScript"])
+  return (
+    <Panel no="35" title="Tag Input">
+      <TagInput value={tags} onChange={setTags} />
+    </Panel>
+  )
+}
+
+function ChartControlsPanel() {
+  const [g, setG] = React.useState<"hour" | "day" | "week" | "month">("day")
+  const [p, setP] = React.useState<"7d" | "30d" | "90d" | "1y" | "custom">("30d")
+  return (
+    <Panel no="42" title="Chart Controls">
+      <ChartControls granularity={g} onGranularityChange={setG} period={p} onPeriodChange={setP} />
+    </Panel>
+  )
+}
+
+const DEMO_PRODUCT = {
+  name: "サンプル商品",
+  imageUrl: "https://picsum.photos/seed/ksk-p/300/300",
+  price: 2980,
+  rating: 4.4,
+  reviewCount: 52,
 }
 
 /* ─────────────────────────────────────────────
@@ -780,6 +892,312 @@ function Showcase() {
 
         {/* 24 Filter Chips & Misc */}
         <FiltersChipPanel />
+
+        {/* 25 Overlays — Dialog / AlertDialog / Sheet */}
+        <Panel no="25" title="Overlays（モーダル）">
+          <Row>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="secondary">Dialog</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>確認</DialogTitle>
+                  <DialogDescription>この内容で保存しますか？</DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="secondary">キャンセル</Button>
+                  </DialogClose>
+                  <Button>保存</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">AlertDialog</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>本当に削除しますか？</AlertDialogTitle>
+                  <AlertDialogDescription>この操作は元に戻せません。</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                  <AlertDialogAction variant="destructive">削除する</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="secondary">Sheet</Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="px-5 pt-5 pb-6">
+                <SheetHeader className="mb-4">
+                  <SheetTitle>ボトムシート</SheetTitle>
+                  <SheetDescription>下からスライドインします。</SheetDescription>
+                </SheetHeader>
+                <SheetFooter>
+                  <SheetClose asChild>
+                    <Button className="w-full" size="lg">閉じる</Button>
+                  </SheetClose>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
+          </Row>
+        </Panel>
+
+        {/* 26 Menus — Popover / HoverCard / DropdownMenu / Kebab */}
+        <Panel no="26" title="Menus & Popovers">
+          <Row>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="secondary">Popover</Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <div className="typo-body-sm" style={{ color: "var(--Text-High-Emphasis)" }}>
+                  ポップオーバーの内容です。
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Button variant="link">@ksk_ds</Button>
+              </HoverCardTrigger>
+              <HoverCardContent>
+                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                  <Avatar><AvatarFallback>KS</AvatarFallback></Avatar>
+                  <span className="typo-body-sm">KSK Design System</span>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary">Dropdown</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>アクション</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>編集</DropdownMenuItem>
+                <DropdownMenuItem>複製</DropdownMenuItem>
+                <DropdownMenuItem variant="destructive">削除</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <KebabMenu items={[{ label: "編集" }, { label: "複製" }, { label: "削除", destructive: true }]} />
+          </Row>
+        </Panel>
+
+        {/* 27 Confirm Dialog */}
+        <ConfirmDialogPanel />
+
+        {/* 28 Collapsible */}
+        <CollapsiblePanel />
+
+        {/* 29 Calendar & Range */}
+        <CalendarPanel />
+
+        {/* 30 Banner & Error State */}
+        <Panel no="31" title="Banner & Error State">
+          <Banner variant="info" title="お知らせ" description="新機能がリリースされました。" />
+          <Banner variant="success" title="完了" description="設定を保存しました。" />
+          <Banner variant="warning" title="注意" description="まもなくメンテナンスを行います。" />
+          <ErrorState
+            title="読み込みに失敗しました"
+            description="通信環境を確認してください。"
+            onRetry={() => {}}
+          />
+        </Panel>
+
+        {/* 32 Review Card */}
+        <Panel no="32" title="Review Card">
+          <ReviewCard
+            reviewer="山田 太郎"
+            rating={5}
+            title="期待以上でした"
+            body="作りがしっかりしていて、毎日使っています。リピート確定です。"
+            date="2026-06-10"
+          />
+        </Panel>
+
+        {/* 33 Category Nav & Scroll */}
+        <Panel no="33" title="Category Nav & Scroll" span={2}>
+          <div>
+            <GroupLabel>Category Nav</GroupLabel>
+            <CategoryNav
+              items={[
+                { name: "ファッション", imageUrl: "https://picsum.photos/seed/c1/80", isSelected: true },
+                { name: "家電", imageUrl: "https://picsum.photos/seed/c2/80" },
+                { name: "食品", imageUrl: "https://picsum.photos/seed/c3/80" },
+                { name: "本", imageUrl: "https://picsum.photos/seed/c4/80" },
+                { name: "スポーツ", imageUrl: "https://picsum.photos/seed/c5/80" },
+              ]}
+            />
+          </div>
+          <div>
+            <GroupLabel>Category Scroll</GroupLabel>
+            <CategoryScroll
+              title="カテゴリ"
+              items={[
+                { name: "新着", href: "#", imageUrl: "https://picsum.photos/seed/s1/80" },
+                { name: "セール", href: "#", imageUrl: "https://picsum.photos/seed/s2/80" },
+                { name: "人気", href: "#", imageUrl: "https://picsum.photos/seed/s3/80" },
+                { name: "限定", href: "#", imageUrl: "https://picsum.photos/seed/s4/80" },
+              ]}
+            />
+          </div>
+        </Panel>
+
+        {/* 34 Tag Input */}
+        <TagInputPanel />
+
+        {/* 36 Checkbox family */}
+        <Panel no="36" title="Checkbox Variants">
+          <div>
+            <GroupLabel>Checkbox Group</GroupLabel>
+            <CheckboxGroup label="配送方法">
+              <CheckboxGroupItem defaultChecked>通常配送</CheckboxGroupItem>
+              <CheckboxGroupItem>速達配送</CheckboxGroupItem>
+              <CheckboxGroupItem>置き配</CheckboxGroupItem>
+            </CheckboxGroup>
+          </div>
+          <div>
+            <GroupLabel>Checkbox Card</GroupLabel>
+            <CheckboxCardGroup>
+              <CheckboxCardItem description="月額 ¥500">ライト</CheckboxCardItem>
+              <CheckboxCardItem description="月額 ¥1,000" badge={<Badge>人気</Badge>} defaultChecked>スタンダード</CheckboxCardItem>
+            </CheckboxCardGroup>
+          </div>
+          <div>
+            <GroupLabel>Checkbox Field</GroupLabel>
+            <CheckboxField label="利用規約に同意する" description="続行するには同意が必要です。" />
+          </div>
+        </Panel>
+
+        {/* 37 Pagination (full) */}
+        <Panel no="37" title="Pagination">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem><PaginationPrevious href="#" /></PaginationItem>
+              <PaginationItem><PaginationLink href="#">1</PaginationLink></PaginationItem>
+              <PaginationItem><PaginationLink href="#" isActive>2</PaginationLink></PaginationItem>
+              <PaginationItem><PaginationLink href="#">3</PaginationLink></PaginationItem>
+              <PaginationItem><PaginationEllipsis /></PaginationItem>
+              <PaginationItem><PaginationNext href="#" /></PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </Panel>
+
+        {/* 38 Share Buttons */}
+        <Panel no="38" title="Share Buttons">
+          <ShareButtons url="https://example.com" title="KSK Design System" />
+        </Panel>
+
+        {/* 39 Bottom Tab Bar */}
+        <Panel no="39" title="Bottom Tab Bar">
+          <div
+            style={{
+              position: "relative",
+              height: 72,
+              overflow: "hidden",
+              borderRadius: 12,
+              transform: "translateZ(0)",
+            }}
+          >
+            <BottomTabBar
+              items={[
+                { label: "ホーム", icon: <Home2 size={22} /> },
+                { label: "検索", icon: <SearchNormal1 size={22} /> },
+                { label: "お気に入り", icon: <Heart size={22} /> },
+                { label: "マイページ", icon: <User size={22} /> },
+              ]}
+            />
+          </div>
+        </Panel>
+
+        {/* 40 Carousels & Gallery */}
+        <Panel no="40" title="Carousels & Gallery" span={2}>
+          <ProductCarousel
+            title="おすすめ商品"
+            products={[
+              { ...DEMO_PRODUCT, name: "商品 A", imageUrl: "https://picsum.photos/seed/pa/300/300" },
+              { ...DEMO_PRODUCT, name: "商品 B", imageUrl: "https://picsum.photos/seed/pb/300/300", price: 5400 },
+              { ...DEMO_PRODUCT, name: "商品 C", imageUrl: "https://picsum.photos/seed/pc/300/300", price: 1980 },
+              { ...DEMO_PRODUCT, name: "商品 D", imageUrl: "https://picsum.photos/seed/pd/300/300", price: 8800 },
+            ]}
+          />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 8 }}>
+            <div>
+              <GroupLabel>Image Carousel</GroupLabel>
+              <ImageCarousel
+                images={[
+                  { src: "https://picsum.photos/seed/ic1/600/300", alt: "1" },
+                  { src: "https://picsum.photos/seed/ic2/600/300", alt: "2" },
+                  { src: "https://picsum.photos/seed/ic3/600/300", alt: "3" },
+                ]}
+              />
+            </div>
+            <div>
+              <GroupLabel>Image Gallery</GroupLabel>
+              <ImageGallery
+                images={[
+                  { src: "https://picsum.photos/seed/ig1/600/600", alt: "1" },
+                  { src: "https://picsum.photos/seed/ig2/600/600", alt: "2" },
+                  { src: "https://picsum.photos/seed/ig3/600/600", alt: "3" },
+                ]}
+              />
+            </div>
+          </div>
+        </Panel>
+
+        {/* 41 File Upload */}
+        <Panel no="41" title="File Upload">
+          <FileUpload multiple />
+        </Panel>
+
+        {/* 42 Chart Controls */}
+        <ChartControlsPanel />
+
+        {/* 43 Navigation Bar */}
+        <Panel no="43" title="Navigation Bar">
+          <div style={{ border: "1px solid var(--Border-Low-Emphasis)", borderRadius: 12, overflow: "hidden" }}>
+            <NavigationBar title="設定" leftIcon="back" onLeft={() => {}} onShare={() => {}} />
+          </div>
+        </Panel>
+
+        {/* 44 Footer */}
+        <Panel no="44" title="Footer" span={2}>
+          <Footer
+            linkGroups={[
+              { title: "サービス", links: [{ label: "機能", href: "#" }, { label: "料金", href: "#" }] },
+              { title: "会社情報", links: [{ label: "会社概要", href: "#" }, { label: "採用", href: "#" }] },
+              { title: "サポート", links: [{ label: "ヘルプ", href: "#" }, { label: "お問い合わせ", href: "#" }] },
+            ]}
+            copyright="© 2026 KSK Design System"
+          />
+        </Panel>
+
+        {/* 45 Avatar with image */}
+        <Panel no="45" title="Avatar (image)">
+          <Row>
+            <Avatar className="size-12">
+              <AvatarImage src="https://picsum.photos/seed/av1/80" alt="user" />
+              <AvatarFallback>KS</AvatarFallback>
+            </Avatar>
+            <Avatar className="size-12">
+              <AvatarImage src="https://picsum.photos/seed/av2/80" alt="user" />
+              <AvatarFallback>YT</AvatarFallback>
+            </Avatar>
+            <Avatar className="size-12">
+              <AvatarImage src="https://picsum.photos/seed/av3/80" alt="user" />
+              <AvatarFallback>AM</AvatarFallback>
+            </Avatar>
+          </Row>
+        </Panel>
       </div>
 
       {/* フッター */}
