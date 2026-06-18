@@ -15,7 +15,7 @@ import {
   DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow,
   DataTableHead, DataTableCell,
 } from "@/components/patterns/admin/data-table"
-import { prototypes, findPrototype, findGroupSiblings, type PrototypeEntry } from "./_registry"
+import { listPrototypes, findPrototype, findGroupSiblings, groupVariantCount, type PrototypeEntry } from "./_registry"
 import { Markdown } from "./_markdown"
 
 type Frame = "SP" | "PC"
@@ -93,7 +93,9 @@ function DeviceTags({ device }: { device?: string }) {
 function CardGrid() {
   return (
     <div className="grid grid-cols-1 gap-4 @md:grid-cols-2 lg:grid-cols-3">
-      {prototypes.map((p) => (
+      {listPrototypes.map((p) => {
+        const variants = groupVariantCount(p.slug)
+        return (
         <a
           key={p.slug}
           href={`#/${p.slug}`}
@@ -106,6 +108,9 @@ function CardGrid() {
           <div className="p-5">
             <div className="flex items-center gap-2">
               <DeviceTags device={p.meta.device} />
+              {variants > 1 && (
+                <Badge variant="secondary">{variants} バリアント</Badge>
+              )}
               {p.meta.createdAt && (
                 <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">{p.meta.createdAt}</span>
               )}
@@ -118,7 +123,8 @@ function CardGrid() {
             )}
           </div>
         </a>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -138,7 +144,9 @@ function TableList() {
             </tr>
           </DataTableHeader>
           <DataTableBody>
-            {prototypes.map((p) => (
+            {listPrototypes.map((p) => {
+              const variants = groupVariantCount(p.slug)
+              return (
               <DataTableRow
                 key={p.slug}
                 className="cursor-pointer"
@@ -150,7 +158,12 @@ function TableList() {
                   </div>
                 </DataTableCell>
                 <DataTableCell>
-                  <span className="typo-label-sm text-[var(--Text-High-Emphasis)]">{p.meta.title}</span>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="typo-label-sm text-[var(--Text-High-Emphasis)]">{p.meta.title}</span>
+                    {variants > 1 && (
+                      <Badge variant="secondary">{variants} バリアント</Badge>
+                    )}
+                  </span>
                 </DataTableCell>
                 <DataTableCell>
                   <DeviceTags device={p.meta.device} />
@@ -164,7 +177,8 @@ function TableList() {
                   </span>
                 </DataTableCell>
               </DataTableRow>
-            ))}
+              )
+            })}
           </DataTableBody>
         </DataTableTable>
       </DataTable>
@@ -195,7 +209,7 @@ function IndexView() {
             KSK Design System — Notion 仕様から生成したモック一覧
           </p>
         </div>
-        {prototypes.length > 0 && (
+        {listPrototypes.length > 0 && (
           <div className="flex shrink-0 items-center gap-1 rounded-full border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-1">
             <Button
               variant={view === "card" ? "secondary" : "ghost"}
@@ -219,7 +233,7 @@ function IndexView() {
         )}
       </div>
 
-      {prototypes.length === 0 ? <EmptyState /> : view === "card" ? <CardGrid /> : <TableList />}
+      {listPrototypes.length === 0 ? <EmptyState /> : view === "card" ? <CardGrid /> : <TableList />}
     </div>
   )
 }
