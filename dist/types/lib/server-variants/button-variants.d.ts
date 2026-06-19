@@ -11,7 +11,7 @@ import { type VariantProps } from "class-variance-authority";
  * 変更時は button.tsx の Button コンポーネントの見た目に直接影響する。
  */
 declare const buttonVariants: (props?: {
-    variant?: "link" | "default" | "secondary" | "secondary-switch" | "tertiary" | "ghost" | "destructive" | "glass" | "accent" | "inverse" | "ghost-inverse";
+    variant?: "link" | "default" | "secondary" | "secondary-switch" | "tertiary" | "ghost" | "destructive" | "glass" | "glass-inverse" | "accent" | "inverse" | "ghost-inverse";
     size?: "match" | "default" | "icon" | "xs" | "sm" | "lg" | "xl" | "hero" | "icon-sm" | "icon-lg" | "icon-xl";
     layout?: "horizontal" | "vertical";
 } & import("class-variance-authority/types").ClassProp) => string;

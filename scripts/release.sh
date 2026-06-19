@@ -11,9 +11,10 @@
 # やること:
 #   1. clean & main 確認、npm run check
 #   2. npm version <level>
-#   3. dual tgz 生成（新名 + 旧名互換）
-#   4. git push origin main --tags
-#   5. bash scripts/bump-consumers.sh <version>（5 リポ自動 PR）
+#   3. npm pack で公開物を検証
+#   4. npm publish --access public
+#   5. git push origin main --tags
+#   6. bash scripts/update-consumers.sh <version>（5 リポ自動 PR）
 #
 # 失敗時は package.json の name 書換を確実に元に戻す（trap）。
 # =============================================================

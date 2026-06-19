@@ -15,6 +15,7 @@ const t = e(
         // （iOS の Liquid Glass はタップでガラスがハイライトする挙動）。
         // リリース時はオーバーシュートする bezier で液体的に弾ませる。
         glass: "glass glass-specular text-[var(--Text-High-Emphasis)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:brightness-[1.06] active:scale-[0.96] active:brightness-110 rounded-full",
+        "glass-inverse": "glass glass-specular glass-inverse [--glass-button-text:var(--Text-on-Inverse)] text-[var(--glass-button-text)] [text-shadow:0_1px_3px_rgba(0,0,0,0.4)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:brightness-[1.06] active:scale-[0.96] active:brightness-110 rounded-full",
         accent: "bg-gradient-to-r from-[var(--Brand-Primary)] to-[var(--Brand-Action)] text-[var(--Text-on-Inverse)] border border-transparent hover:opacity-90 rounded-full",
         // inverse — 暗背景・ヒーローセクション上に乗せる primary CTA。
         // 白背景 + アクセント文字（Brand-Primary）。

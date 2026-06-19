@@ -1,10 +1,18 @@
 import * as React from "react";
-interface KebabMenuItem {
+interface KebabMenuActionItem {
+    type?: "item";
     label: string;
     icon?: React.ReactNode;
+    description?: string;
+    shortcut?: string;
+    disabled?: boolean;
     onClick?: () => void;
     destructive?: boolean;
 }
+interface KebabMenuSeparatorItem {
+    type: "separator";
+}
+type KebabMenuItem = KebabMenuActionItem | KebabMenuSeparatorItem;
 interface KebabMenuProps extends React.ComponentProps<"button"> {
     items: KebabMenuItem[];
 }
@@ -14,4 +22,4 @@ interface KebabMenuProps extends React.ComponentProps<"button"> {
  */
 declare function KebabMenu({ items, className, ...props }: KebabMenuProps): import("react/jsx-runtime").JSX.Element;
 export { KebabMenu };
-export type { KebabMenuItem };
+export type { KebabMenuItem, KebabMenuActionItem, KebabMenuSeparatorItem };

@@ -135,12 +135,9 @@ function getColumnSortValue<TRow>(
 ): string | number | Date | null | undefined {
   if (column.sortValue) return column.sortValue(row, index)
   const value = column.value ? column.value(row, index) : getColumnFallbackValue(row, column.key)
-  if (
-    typeof value === "string" ||
-    typeof value === "number" ||
-    value instanceof Date ||
-    value == null
-  ) {
+  if (value === null) return null
+  if (value === undefined) return undefined
+  if (typeof value === "string" || typeof value === "number" || value instanceof Date) {
     return value
   }
   return String(value)

@@ -1,11 +1,12 @@
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
+type LayerAutoFocusTarget = "first-input" | "title" | React.RefObject<HTMLElement | null> | false;
 declare function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>): import("react/jsx-runtime").JSX.Element;
 declare function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>): import("react/jsx-runtime").JSX.Element;
 declare function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>): import("react/jsx-runtime").JSX.Element;
 declare function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>): import("react/jsx-runtime").JSX.Element;
 declare function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>): import("react/jsx-runtime").JSX.Element;
-interface DialogContentProps extends React.ComponentProps<typeof DialogPrimitive.Content> {
+interface DialogContentProps extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus"> {
     /**
      * デフォルトの内側余白とセクション間レイアウトを制御。
      * - true（既定）: p-6 + `flex flex-col gap-4` を付与。ヘッダ/本文/フッタが
@@ -35,12 +36,22 @@ interface DialogContentProps extends React.ComponentProps<typeof DialogPrimitive
      *   スクロールしやすく操作しやすい
      */
     position?: "center" | "top";
-    children?: React.ReactNode;
-    className?: string;
-    style?: React.CSSProperties;
-    id?: string;
+    /**
+     * open 時の初期フォーカス。未指定時は Radix の既定挙動。
+     * - "first-input": 最初の入力/操作可能要素
+     * - "title": DialogTitle
+     * - ref: 任意要素
+     * - false: 自動フォーカスを抑制
+     */
+    autoFocus?: LayerAutoFocusTarget;
+    /** close 後に open 前の要素へ focus を戻す。既定 true。 */
+    restoreFocusOnClose?: boolean;
+    /** Esc キーで閉じる。既定 true。 */
+    closeOnEsc?: boolean;
+    /** Dialog 表示中に body scroll を抑止する。既定 true。 */
+    bodyScrollLock?: boolean;
 }
-declare function DialogContent({ className, children, padding, description, position, ...props }: DialogContentProps): import("react/jsx-runtime").JSX.Element;
+declare function DialogContent({ className, children, padding, description, position, autoFocus, restoreFocusOnClose, closeOnEsc, bodyScrollLock, ...props }: DialogContentProps): import("react/jsx-runtime").JSX.Element;
 declare function DialogHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function DialogFooter({ className, orientation, ...props }: React.ComponentProps<"div"> & {
     /**
