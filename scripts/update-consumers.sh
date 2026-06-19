@@ -143,9 +143,9 @@ vendor/*.tgz 方式から npm install 方式へ移行。
     continue
   fi
 
-  pr_url="$(gh pr create \
-    --title "chore: ksk-design-system v$VERSION（npm registry へ移行）" \
-    --body "DS を v$VERSION に更新し、vendor tgz 方式から npm registry 経由に切替。
+  pr_body_file="$(mktemp)"
+  cat > "$pr_body_file" <<EOF
+DS を v$VERSION に更新し、vendor tgz 方式から npm registry 経由に切替。
 
 ## 変更
 - \`package.json\`: \`file:./vendor/ksk-design-system-X.Y.Z.tgz\` → \`^$VERSION\`
@@ -157,8 +157,14 @@ vendor/*.tgz 方式から npm install 方式へ移行。
 - リポサイズが軽くなる
 - ロールバックは \`npm install ksk-design-system@<旧バージョン>\` で可能
 
-詳細は DS リポのリリースノート参照。" \
+詳細は DS リポのリリースノート参照。
+EOF
+
+  pr_url="$(gh pr create \
+    --title "chore: ksk-design-system v$VERSION（npm registry へ移行）" \
+    --body-file "$pr_body_file" \
     2>/dev/null | tail -1)"
+  rm -f "$pr_body_file"
 
   restore
   RESULTS+=("$name: OK ${pr_url:-（PR作成失敗・branch は push 済）}")
