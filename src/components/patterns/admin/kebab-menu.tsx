@@ -5,17 +5,33 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
 } from "../../ui/dropdown-menu"
 
-interface KebabMenuItem {
+interface KebabMenuActionItem {
+  type?: "item"
   label: string
   icon?: React.ReactNode
+  description?: string
+  shortcut?: string
+  disabled?: boolean
   onClick?: () => void
   destructive?: boolean
 }
 
+interface KebabMenuSeparatorItem {
+  type: "separator"
+}
+
+type KebabMenuItem = KebabMenuActionItem | KebabMenuSeparatorItem
+
 interface KebabMenuProps extends React.ComponentProps<"button"> {
   items: KebabMenuItem[]
+}
+
+function isSeparator(item: KebabMenuItem): item is KebabMenuSeparatorItem {
+  return item.type === "separator"
 }
 
 /**
@@ -36,26 +52,50 @@ function KebabMenu({ items, className, ...props }: KebabMenuProps) {
           aria-label="メニュー"
           {...props}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className="text-[var(--Text-Low-Emphasis)]">
-            <circle cx="8" cy="3" r="1.5" /><circle cx="8" cy="8" r="1.5" /><circle cx="8" cy="13" r="1.5" />
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            className="text-[var(--Text-Low-Emphasis)]"
+          >
+            <circle cx="8" cy="3" r="1.5" />
+            <circle cx="8" cy="8" r="1.5" />
+            <circle cx="8" cy="13" r="1.5" />
           </svg>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[160px]">
-        {items.map((item) => (
-          <DropdownMenuItem
-            key={item.label}
-            variant={item.destructive ? "destructive" : "default"}
-            onSelect={() => item.onClick?.()}
-          >
-            {item.icon}
-            {item.label}
-          </DropdownMenuItem>
-        ))}
+      <DropdownMenuContent align="end" className="min-w-[200px]">
+        {items.map((item, index) =>
+          isSeparator(item) ? (
+            <DropdownMenuSeparator key={`separator-${index}`} />
+          ) : (
+            <DropdownMenuItem
+              key={`${item.label}-${index}`}
+              variant={item.destructive ? "destructive" : "default"}
+              disabled={item.disabled}
+              onSelect={() => item.onClick?.()}
+              className="items-start justify-between gap-4"
+            >
+              <span className="flex min-w-0 items-start gap-2">
+                {item.icon && <span className="mt-0.5 shrink-0">{item.icon}</span>}
+                <span className="min-w-0">
+                  <span className="block typo-body-md">{item.label}</span>
+                  {item.description && (
+                    <span className="block typo-body-sm text-[var(--Text-Low-Emphasis)]">
+                      {item.description}
+                    </span>
+                  )}
+                </span>
+              </span>
+              {item.shortcut && <DropdownMenuShortcut>{item.shortcut}</DropdownMenuShortcut>}
+            </DropdownMenuItem>
+          )
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
 export { KebabMenu }
-export type { KebabMenuItem }
+export type { KebabMenuItem, KebabMenuActionItem, KebabMenuSeparatorItem }

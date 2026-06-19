@@ -75,6 +75,37 @@ export const WithForm: Story = {
   ),
 }
 
+export const FocusOptions: Story = {
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>フォーカス制御を開く</Button>
+      </DialogTrigger>
+      <DialogContent
+        autoFocus="first-input"
+        closeOnEsc={false}
+        restoreFocusOnClose
+        bodyScrollLock
+        description="初期フォーカスと閉じた後のフォーカス復帰を指定したダイアログです。"
+      >
+        <DialogHeader>
+          <DialogTitle>招待メールを送信</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="invite-email">メールアドレス</Label>
+          <Input id="invite-email" type="email" placeholder="name@example.com" />
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="secondary">キャンセル</Button>
+          </DialogClose>
+          <Button>送信する</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  ),
+}
+
 /**
  * 既定の `orientation="split"`。2 アクションを均等幅（各 flex-1）で横並びにする。
  * モバイルのボトムシートやアプリ風 UI 向け。左=セカンダリ / 右=プライマリ。

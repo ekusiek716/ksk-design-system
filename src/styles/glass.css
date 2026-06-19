@@ -117,6 +117,14 @@
 }
 
 /**
+ * .glass-inverse
+ * 暗い写真・動画・濃色面上で glass ボタンの文字色を白系に保つ。
+ */
+.dark .glass-inverse {
+  --glass-button-text: var(--Text-High-Emphasis);
+}
+
+/**
  * .glass-subtle
  * 薄いガラス素材。フローティング要素の背景に軽く使う。
  */

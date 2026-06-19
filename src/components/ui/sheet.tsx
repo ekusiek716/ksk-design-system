@@ -3,6 +3,54 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
+type LayerAutoFocusTarget = "first-input" | "title" | React.RefObject<HTMLElement | null> | false
+
+function getFocusableTarget(container: HTMLElement, target: LayerAutoFocusTarget, titleSlot: string) {
+  if (target === false) return null
+  if (target === "title") {
+    return container.querySelector<HTMLElement>(`[data-slot="${titleSlot}"]`)
+  }
+  if (target === "first-input") {
+    return container.querySelector<HTMLElement>(
+      [
+        "input:not([disabled])",
+        "textarea:not([disabled])",
+        "select:not([disabled])",
+        "button:not([disabled])",
+        "[href]",
+        "[tabindex]:not([tabindex='-1'])",
+      ].join(", ")
+    )
+  }
+  return target.current
+}
+
+function focusLayerTarget(container: HTMLElement | null, target: LayerAutoFocusTarget | undefined, titleSlot: string) {
+  if (!container || target == null) return
+  const el = getFocusableTarget(container, target, titleSlot)
+  if (!el) return
+  if (el.tabIndex < 0 && target === "title") {
+    el.tabIndex = -1
+  }
+  el.focus()
+}
+
+function useBodyScrollLock(enabled: boolean) {
+  React.useEffect(() => {
+    if (!enabled || typeof document === "undefined") return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [enabled])
+}
+
+function captureRestoreFocus(ref: React.RefObject<HTMLElement | null> | undefined) {
+  if (!ref || ref.current != null || typeof document === "undefined") return
+  ref.current = document.activeElement as HTMLElement | null
+}
+
 // ============================================================================
 // Snap points context
 // ----------------------------------------------------------------------------
@@ -456,7 +504,7 @@ const sheetVariants = cva(
 const glassSides = new Set(["float-glass", "bottom-glass"])
 
 interface SheetContentProps
-  extends React.ComponentProps<typeof DialogPrimitive.Content>,
+  extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus">,
     VariantProps<typeof sheetVariants> {
   /** オーバーレイをガラス調にする（glass系 side では自動で true） */
   glassOverlay?: boolean
@@ -499,10 +547,20 @@ interface SheetContentProps
    * `<SheetDescription>` を直接置く。
    */
   description?: React.ReactNode
-  children?: React.ReactNode
-  className?: string
-  style?: React.CSSProperties
-  id?: string
+  /**
+   * open 時の初期フォーカス。未指定時は Radix の既定挙動。
+   * - "first-input": 最初の入力/操作可能要素
+   * - "title": SheetTitle
+   * - ref: 任意要素
+   * - false: 自動フォーカスを抑制
+   */
+  autoFocus?: LayerAutoFocusTarget
+  /** close 後に open 前の要素へ focus を戻す。既定 true。 */
+  restoreFocusOnClose?: boolean
+  /** Esc キーで閉じる。既定 true。 */
+  closeOnEsc?: boolean
+  /** Sheet 表示中に body scroll を抑止する。既定 true。 */
+  bodyScrollLock?: boolean
 }
 
 const swipeSides = new Set(["bottom", "bottom-glass"])
@@ -516,9 +574,16 @@ function SheetContent({
   padding = true,
   swipeToClose,
   description,
+  autoFocus,
+  restoreFocusOnClose = true,
+  closeOnEsc = true,
+  bodyScrollLock = true,
   ...props
 }: SheetContentProps) {
   const autoDescId = React.useId()
+  const contentRef = React.useRef<HTMLDivElement>(null)
+  const restoreFocusRef = React.useRef<HTMLElement | null>(null)
+  useBodyScrollLock(bodyScrollLock)
   const hasInternalDesc = description != null && description !== false
   const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
   const snapCtx = React.useContext(SheetSnapContext)
@@ -535,6 +600,32 @@ function SheetContent({
   // cases, and is called unconditionally here to keep hook order stable across
   // the early-return branches below.
   const { keyboardInset, visibleHeight } = useVisualViewportInset()
+  const handleOpenAutoFocus = (event: Event) => {
+    captureRestoreFocus(restoreFocusRef)
+    props.onOpenAutoFocus?.(event)
+    if (event.defaultPrevented || autoFocus == null) return
+    event.preventDefault()
+    if (autoFocus === false) return
+    window.requestAnimationFrame(() => {
+      focusLayerTarget(contentRef.current, autoFocus, "sheet-title")
+    })
+  }
+  const handleCloseAutoFocus = (event: Event) => {
+    props.onCloseAutoFocus?.(event)
+    if (event.defaultPrevented) return
+    if (!restoreFocusOnClose) {
+      event.preventDefault()
+      return
+    }
+    if (restoreFocusRef.current) {
+      event.preventDefault()
+      restoreFocusRef.current.focus()
+    }
+  }
+  const handleEscapeKeyDown = (event: KeyboardEvent) => {
+    props.onEscapeKeyDown?.(event)
+    if (!closeOnEsc) event.preventDefault()
+  }
 
   // Snap mode kicks in only for `side="bottom"` when the parent Sheet was
   // given `snapPoints`. Other sides ignore snap entirely (per spec).
@@ -546,6 +637,10 @@ function SheetContent({
         glassOverlay={useGlassOverlay}
         container={container}
         description={description}
+        autoFocus={autoFocus}
+        restoreFocusOnClose={restoreFocusOnClose}
+        closeOnEsc={closeOnEsc}
+        restoreFocusRef={restoreFocusRef}
         {...props}
       >
         {children}
@@ -562,6 +657,10 @@ function SheetContent({
         container={container}
         padding={padding}
         description={description}
+        autoFocus={autoFocus}
+        restoreFocusOnClose={restoreFocusOnClose}
+        closeOnEsc={closeOnEsc}
+        restoreFocusRef={restoreFocusRef}
         {...props}
       >
         {children}
@@ -583,12 +682,16 @@ function SheetContent({
     <SheetPortal container={container}>
       <SheetOverlay glass={useGlassOverlay} />
       <DialogPrimitive.Content
+        ref={contentRef}
         data-slot="sheet-content"
         data-side={side}
         className={cn(sheetVariants({ side }), padding && "p-6", className)}
         {...props}
         style={keyboardStyle ? { ...props.style, ...keyboardStyle } : props.style}
         aria-describedby={ariaDescribedBy}
+        onOpenAutoFocus={handleOpenAutoFocus}
+        onCloseAutoFocus={handleCloseAutoFocus}
+        onEscapeKeyDown={handleEscapeKeyDown}
       >
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">
@@ -637,13 +740,17 @@ function findScrollableAncestor(
 }
 
 interface SwipeToCloseBottomSheetProps
-  extends React.ComponentProps<typeof DialogPrimitive.Content> {
+  extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus"> {
   side: "bottom" | "bottom-glass"
   className?: string
   glassOverlay?: boolean
   container?: HTMLElement | null
   padding?: boolean
   description?: React.ReactNode
+  autoFocus?: LayerAutoFocusTarget
+  restoreFocusOnClose?: boolean
+  closeOnEsc?: boolean
+  restoreFocusRef?: React.RefObject<HTMLElement | null>
   children?: React.ReactNode
 }
 
@@ -654,6 +761,10 @@ function SwipeToCloseBottomSheet({
   container,
   padding = true,
   description,
+  autoFocus,
+  restoreFocusOnClose = true,
+  closeOnEsc = true,
+  restoreFocusRef,
   children,
   style,
   ...props
@@ -698,6 +809,32 @@ function SwipeToCloseBottomSheet({
   // Keep the sheet inside the region above the on-screen keyboard so its top
   // edge (title / drag handle) never scrolls off the top of the viewport.
   const { keyboardInset, visibleHeight } = useVisualViewportInset()
+  const handleOpenAutoFocus = (event: Event) => {
+    captureRestoreFocus(restoreFocusRef)
+    props.onOpenAutoFocus?.(event)
+    if (event.defaultPrevented || autoFocus == null) return
+    event.preventDefault()
+    if (autoFocus === false) return
+    window.requestAnimationFrame(() => {
+      focusLayerTarget(sheetRef.current, autoFocus, "sheet-title")
+    })
+  }
+  const handleCloseAutoFocus = (event: Event) => {
+    props.onCloseAutoFocus?.(event)
+    if (event.defaultPrevented) return
+    if (!restoreFocusOnClose) {
+      event.preventDefault()
+      return
+    }
+    if (restoreFocusRef?.current) {
+      event.preventDefault()
+      restoreFocusRef.current.focus()
+    }
+  }
+  const handleEscapeKeyDown = (event: KeyboardEvent) => {
+    props.onEscapeKeyDown?.(event)
+    if (!closeOnEsc) event.preventDefault()
+  }
 
   const setDrag = React.useCallback((v: number) => {
     dragYRef.current = v
@@ -904,6 +1041,9 @@ function SwipeToCloseBottomSheet({
         onPointerUp={finishDrag}
         onPointerCancel={finishDrag}
         aria-describedby={ariaDescribedBy}
+        onOpenAutoFocus={handleOpenAutoFocus}
+        onCloseAutoFocus={handleCloseAutoFocus}
+        onEscapeKeyDown={handleEscapeKeyDown}
       >
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">
@@ -941,12 +1081,16 @@ function SwipeToCloseBottomSheet({
 // ============================================================================
 
 interface SnapBottomSheetContentProps
-  extends React.ComponentProps<typeof DialogPrimitive.Content> {
+  extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus"> {
   snapCtx: SheetSnapContextValue
   className?: string
   glassOverlay?: boolean
   container?: HTMLElement | null
   description?: React.ReactNode
+  autoFocus?: LayerAutoFocusTarget
+  restoreFocusOnClose?: boolean
+  closeOnEsc?: boolean
+  restoreFocusRef?: React.RefObject<HTMLElement | null>
   children?: React.ReactNode
 }
 
@@ -956,6 +1100,10 @@ function SnapBottomSheetContent({
   glassOverlay,
   container,
   description,
+  autoFocus,
+  restoreFocusOnClose = true,
+  closeOnEsc = true,
+  restoreFocusRef,
   children,
   style,
   ...props
@@ -994,6 +1142,32 @@ function SnapBottomSheetContent({
   const dragStartYRef = React.useRef(0)
   const dragStartRatioRef = React.useRef(activeRatio)
   const sheetRef = React.useRef<HTMLDivElement>(null)
+  const handleOpenAutoFocus = (event: Event) => {
+    captureRestoreFocus(restoreFocusRef)
+    props.onOpenAutoFocus?.(event)
+    if (event.defaultPrevented || autoFocus == null) return
+    event.preventDefault()
+    if (autoFocus === false) return
+    window.requestAnimationFrame(() => {
+      focusLayerTarget(sheetRef.current, autoFocus, "sheet-title")
+    })
+  }
+  const handleCloseAutoFocus = (event: Event) => {
+    props.onCloseAutoFocus?.(event)
+    if (event.defaultPrevented) return
+    if (!restoreFocusOnClose) {
+      event.preventDefault()
+      return
+    }
+    if (restoreFocusRef?.current) {
+      event.preventDefault()
+      restoreFocusRef.current.focus()
+    }
+  }
+  const handleEscapeKeyDown = (event: KeyboardEvent) => {
+    props.onEscapeKeyDown?.(event)
+    if (!closeOnEsc) event.preventDefault()
+  }
 
   // translateY is purely a function of activeRatio, so during drag we just
   // push activeSnapPoint and let the render pipeline place the sheet.
@@ -1107,6 +1281,9 @@ function SnapBottomSheetContent({
         }}
         {...props}
         aria-describedby={ariaDescribedBy}
+        onOpenAutoFocus={handleOpenAutoFocus}
+        onCloseAutoFocus={handleCloseAutoFocus}
+        onEscapeKeyDown={handleEscapeKeyDown}
       >
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">
