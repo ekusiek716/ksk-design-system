@@ -60,3 +60,21 @@ export const WithBadge: Story = {
     )
   },
 }
+
+export const WithDescriptions: Story = {
+  render: () => {
+    const [value, setValue] = React.useState("list")
+    const items = [
+      { label: "リスト", value: "list", description: "期限順にタスクを一覧表示します" },
+      { label: "タイムライン", value: "timeline", description: "日付ごとの流れで確認します" },
+      { label: "ボード", value: "board", description: "ステータスごとにカードを並べます" },
+      { label: "カレンダー", value: "calendar", description: "予定日を月表示で確認します" },
+    ]
+    return (
+      <div className="w-96">
+        <SubNav items={items} value={value} onChange={setValue} variant="chip" />
+        <div className="px-2 typo-body-sm text-[var(--Text-Medium-Emphasis)]">選択中: {value}</div>
+      </div>
+    )
+  },
+}

@@ -135,6 +135,8 @@ export { SwipeRow } from "./components/patterns/swipe-row"
 export type { SwipeRowProps, SwipeAction } from "./components/patterns/swipe-row"
 export { ConfirmDialog } from "./components/patterns/confirm-dialog"
 export type { ConfirmDialogProps } from "./components/patterns/confirm-dialog"
+export { Celebration } from "./components/patterns/celebration"
+export type { CelebrationProps, CelebrationTrigger, CelebrationPlacement } from "./components/patterns/celebration"
 export { BottomSheetForm } from "./components/patterns/bottom-sheet-form"
 export type { BottomSheetFormProps } from "./components/patterns/bottom-sheet-form"
 export { ChipSelector } from "./components/patterns/chip-selector"
@@ -142,6 +144,7 @@ export type { ChipSelectorProps, ChipSelectorOption } from "./components/pattern
 export { Banner, bannerVariants } from "./components/patterns/banner"
 export { Chip, chipVariants } from "./components/patterns/chip"
 export { EmptyState } from "./components/patterns/empty-state"
+export type { EmptyStateProps } from "./components/patterns/empty-state"
 export { ErrorState } from "./components/patterns/error-state"
 export { FormField } from "./components/patterns/form-field"
 export { ListItem } from "./components/patterns/list-item"
@@ -179,7 +182,7 @@ export type { ReviewSummaryProps } from "./components/patterns/commerce/review-s
 
 // ─── Admin Components ───
 export { KebabMenu } from "./components/patterns/admin/kebab-menu"
-export type { KebabMenuItem } from "./components/patterns/admin/kebab-menu"
+export type { KebabMenuItem, KebabMenuActionItem, KebabMenuSeparatorItem } from "./components/patterns/admin/kebab-menu"
 export { BulkActions } from "./components/patterns/admin/bulk-actions"
 export type { BulkActionsProps } from "./components/patterns/admin/bulk-actions"
 export { StatusTabs } from "./components/patterns/admin/status-tabs"
@@ -215,7 +218,18 @@ export {
   DataTableEmptyState,
 } from "./components/patterns/admin/data-table"
 export { getStickyCellProps } from "./components/patterns/admin/data-table"
-export type { SortDirection, DataTableActionMenuItem, StickyPosition } from "./components/patterns/admin/data-table"
+export type {
+  SortDirection,
+  DataTableActionMenuItem,
+  StickyPosition,
+  DataTableRowId,
+  DataTableSelectionMode,
+  DataTableSortState,
+  DataTableColumn,
+  DataTableSelectionState,
+  DataTableSection,
+  DataTableProps,
+} from "./components/patterns/admin/data-table"
 
 export { SimplePagination } from "./components/patterns/simple-pagination"
 export type { SimplePaginationProps, SimplePaginationFormat } from "./components/patterns/simple-pagination"
@@ -225,7 +239,7 @@ export type { MenuDrawerProps, MenuDrawerSection, MenuDrawerItem } from "./compo
 export { Footer } from "./components/patterns/footer"
 export type { FooterProps, FooterLinkGroup } from "./components/patterns/footer"
 export { ShareButtons } from "./components/patterns/share-buttons"
-export type { ShareButtonsProps, ShareProvider, ShareLayout } from "./components/patterns/share-buttons"
+export type { ShareButtonsProps, ShareProvider, ShareLayout, ShareRegion } from "./components/patterns/share-buttons"
 export { BannerCarousel } from "./components/patterns/banner-carousel"
 export type { BannerCarouselProps, BannerItem } from "./components/patterns/banner-carousel"
 export { StickyActionBar } from "./components/patterns/sticky-action-bar"

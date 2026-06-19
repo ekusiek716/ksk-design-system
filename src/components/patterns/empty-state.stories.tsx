@@ -72,3 +72,23 @@ export const WithDualAction: Story = {
     ),
   },
 }
+
+export const Compact: Story = {
+  args: {
+    title: "まだタスクがありません",
+    description: "条件を変えるか、新しいタスクを追加してください。",
+    size: "compact",
+    action: <Button size="sm">タスクを追加</Button>,
+  },
+}
+
+export const Inline: Story = {
+  args: {
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" /><path d="M8 12h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+    ),
+    title: "この条件の項目はありません",
+    description: "リスト内に置ける省スペース表示です。",
+    size: "inline",
+  },
+}

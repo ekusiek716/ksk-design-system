@@ -83,6 +83,36 @@ export const RightSheet: Story = {
   ),
 }
 
+export const A11yOptions: Story = {
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="secondary">アクセシビリティ設定付きシート</Button>
+      </SheetTrigger>
+      <SheetContent
+        side="right"
+        autoFocus="title"
+        closeOnEsc={false}
+        restoreFocusOnClose
+        bodyScrollLock
+        description="初期フォーカス、Escキー、フォーカス復帰、スクロールロックを明示したシートです。"
+      >
+        <SheetHeader className="mb-4">
+          <SheetTitle>通知設定</SheetTitle>
+        </SheetHeader>
+        <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+          通知の受信方法と配信頻度を確認します。
+        </p>
+        <SheetFooter className="mt-6">
+          <SheetClose asChild>
+            <Button className="w-full">完了</Button>
+          </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  ),
+}
+
 // ─── Liquid Glass variants ────────────────────────────────────────────────────
 
 export const FloatGlass: Story = {

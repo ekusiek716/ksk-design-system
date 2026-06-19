@@ -16,3 +16,17 @@ export const Default: Story = {
     </div>
   ),
 }
+
+export const WithMetadata: Story = {
+  render: () => (
+    <div className="flex justify-end p-8">
+      <KebabMenu items={[
+        { label: "編集", description: "詳細を開いて内容を変更", shortcut: "E" },
+        { label: "複製", shortcut: "D" },
+        { type: "separator" },
+        { label: "アーカイブ", description: "一覧から非表示にする", disabled: true },
+        { label: "削除", destructive: true, shortcut: "Del" },
+      ]} />
+    </div>
+  ),
+}

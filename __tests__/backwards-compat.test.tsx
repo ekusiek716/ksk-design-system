@@ -22,9 +22,16 @@ import {
   AlertDescription,
   Badge,
   Card,
+  Celebration,
   Chip,
+  DataTable,
+  EmptyState,
+  KebabMenu,
   MultiSelect,
+  ShareButtons,
+  SubNav,
 } from "../src/index"
+import type { DataTableColumn } from "../src/index"
 
 const html = (el: React.ReactElement) => renderToStaticMarkup(el)
 
@@ -51,9 +58,13 @@ describe("Button — backwards-compat", () => {
     }
   })
 
-  it("新規 variant: inverse / ghost-inverse がレンダリング可能", () => {
+  it("新規 variant: inverse / ghost-inverse / glass-inverse がレンダリング可能", () => {
     expect(html(<Button variant="inverse">x</Button>)).toContain('data-variant="inverse"')
     expect(html(<Button variant="ghost-inverse">x</Button>)).toContain('data-variant="ghost-inverse"')
+    const glassInverse = html(<Button variant="glass-inverse">x</Button>)
+    expect(glassInverse).toContain('data-variant="glass-inverse"')
+    expect(glassInverse).toContain("glass-specular")
+    expect(glassInverse).toContain("glass-inverse")
   })
 
   it("新規 size: hero がレンダリング可能", () => {
@@ -169,6 +180,100 @@ describe("MultiSelect — accessibility structure", () => {
     expect(out).toContain('data-slot="multi-select-trigger"')
     expect(out).toContain('data-slot="multi-select-clear"')
     expect(out).not.toContain('role="button"')
+  })
+})
+
+describe("ShareButtons / KebabMenu / Celebration — backwards-compat", () => {
+  it("ShareButtons の既存 default と拡張 providers がレンダリング可能", () => {
+    expect(html(<ShareButtons url="https://example.com" />)).toContain("Facebook")
+    const out = html(
+      <ShareButtons
+        url="https://example.com"
+        providers={["instagram", "email", "whatsapp", "telegram", "copy"]}
+        layout="inline"
+      />
+    )
+    expect(out).toContain("Instagram")
+    expect(out).toContain("メール")
+    expect(out).toContain("WhatsApp")
+    expect(out).toContain("Telegram")
+  })
+
+  it("KebabMenu の拡張 item 型が既存 trigger と共存する", () => {
+    const out = html(
+      <KebabMenu
+        items={[
+          { label: "編集", description: "説明", shortcut: "E", disabled: true },
+          { type: "separator" },
+          { label: "削除", destructive: true },
+        ]}
+      />
+    )
+    expect(out).toContain('data-slot="kebab-menu"')
+    expect(out).toContain("メニュー")
+  })
+
+  it("Celebration が overlay としてレンダリング可能", () => {
+    const out = html(<Celebration title="達成しました" description="完了です" />)
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain("達成しました")
+    expect(out).toContain("完了です")
+  })
+})
+
+describe("SubNav / EmptyState / DataTable — improvement APIs", () => {
+  it("SubNav item description/title が title と aria-describedby に反映される", () => {
+    const out = html(
+      <SubNav
+        value="list"
+        onChange={() => undefined}
+        items={[
+          { label: "一覧", value: "list", description: "未完了を含む一覧" },
+          { label: "完了", value: "done", title: "完了済みだけを表示" },
+        ]}
+      />
+    )
+    expect(out).toContain('title="未完了を含む一覧"')
+    expect(out).toContain("aria-describedby=")
+    expect(out).toContain("完了済みだけを表示")
+  })
+
+  it("EmptyState size が compact / inline でレンダリング可能", () => {
+    expect(html(<EmptyState size="compact" title="空です" description="説明" />)).toContain(
+      'data-size="compact"'
+    )
+    expect(html(<EmptyState size="inline" title="空です" description="説明" />)).toContain(
+      'data-size="inline"'
+    )
+  })
+
+  it("DataTable rows/columns API が既存ラッパー API と共存する", () => {
+    interface Row {
+      id: string
+      name: string
+      score: number
+    }
+    const columns: DataTableColumn<Row>[] = [
+      { key: "name", header: "名前", sortable: true },
+      { key: "score", header: "点数", align: "right", sortable: true },
+    ]
+    const out = html(
+      <DataTable
+        rows={[
+          { id: "a", name: "佐藤", score: 10 },
+          { id: "b", name: "田中", score: 20 },
+        ]}
+        columns={columns}
+        getRowId={(row) => row.id}
+        selection={{ mode: "multi", selectedRowIds: ["a"] }}
+        defaultSort={{ key: "score", direction: "desc" }}
+      />
+    )
+    expect(out).toContain('data-slot="data-table"')
+    expect(out).toContain('data-slot="data-table-table"')
+    expect(out).toContain("佐藤")
+    expect(out).toContain("田中")
+    expect(out).toContain('data-selected="true"')
   })
 })
 

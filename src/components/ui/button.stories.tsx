@@ -1,6 +1,6 @@
 /**
  * @file Button のストーリー
- * @description 7つのバリアント（default / secondary / secondary-switch / tertiary / ghost / destructive / link）と8つのサイズを網羅するボタンコンポーネント
+ * @description Button variants and sizes.
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import { Button } from "./button"
@@ -11,7 +11,20 @@ const meta: Meta<typeof Button> = {
   argTypes: {
     variant: {
       control: "select",
-      options: ["default", "secondary", "secondary-switch", "tertiary", "ghost", "destructive", "link", "glass"],
+      options: [
+        "default",
+        "secondary",
+        "secondary-switch",
+        "tertiary",
+        "ghost",
+        "destructive",
+        "link",
+        "glass",
+        "glass-inverse",
+        "accent",
+        "inverse",
+        "ghost-inverse",
+      ],
     },
     size: {
       control: "select",
@@ -189,6 +202,23 @@ export const Glass: Story = {
         <Button variant="glass" size="sm">キャンセル</Button>
         <Button variant="glass" size="default">アクション</Button>
         <Button variant="glass" size="lg">実行する</Button>
+      </div>
+    </div>
+  ),
+}
+
+export const GlassInverseOnDark: Story = {
+  name: "Glass Inverse on Dark Background",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--Surface-Inverse)] p-8">
+      <div className="absolute inset-0 bg-[var(--Surface-VideoOverlay-Strong)]" />
+      <div className="absolute inset-0 bg-[var(--Overlay-Dark)]" />
+      <div className="relative flex flex-wrap items-center justify-center gap-3">
+        <Button variant="glass-inverse" size="sm">キャンセル</Button>
+        <Button variant="glass-inverse" size="default">サンプルデータで試す</Button>
+        <Button variant="glass-inverse" size="lg">今すぐ始める</Button>
+        <Button variant="glass-inverse" size="icon-xl" aria-label="シェア"><ShareIcon /></Button>
       </div>
     </div>
   ),

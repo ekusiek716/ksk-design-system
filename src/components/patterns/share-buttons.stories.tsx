@@ -33,3 +33,21 @@ export const SelectiveProviders: Story = {
     layout: "inline",
   },
 }
+
+export const JapanDefault: Story = {
+  args: {
+    url: "https://example.com/product/1",
+    title: "この記事をシェアする",
+    region: "jp",
+    layout: "inline",
+  },
+}
+
+export const ExtendedProviders: Story = {
+  args: {
+    url: "https://example.com/product/1",
+    title: "この記事をシェアする",
+    providers: ["instagram", "email", "whatsapp", "telegram", "copy"],
+    layout: "inline",
+  },
+}
