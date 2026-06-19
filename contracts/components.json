@@ -1326,13 +1326,23 @@
     {
       "name": "BottomTabBar",
       "path": "src/components/patterns/commerce/bottom-tab-bar.tsx",
-      "description": "SP 下部固定タブナビゲーション。default と pill（iOS 26 Liquid Glass）バリアント。",
+      "description": "SP 下部固定タブナビゲーション。default と pill（iOS 26 Liquid Glass）バリアント。pill は centerAction・ラベル表示・inverse tone・mobile shell max-width に対応。",
       "features": [
         "badge",
-        "safe-area"
+        "centerAction",
+        "labels",
+        "safe-area",
+        "fixed-or-absolute",
+        "maxWidth",
+        "inverse-tone"
       ],
       "rules": [
-        "Mobile only. Use safe-area-inset-bottom."
+        "Mobile only. Use safe-area-inset-bottom.",
+        "Use variant='pill' with centerAction for Liquid Glass global navigation CTA.",
+        "Use showLabels when tab recognition matters; touch targets must remain at least 44px.",
+        "Use tone='inverse' over dark photo/video/gradient backgrounds.",
+        "Use pillPosition='absolute' only inside controlled shells or Storybook demos; fixed is the app default.",
+        "Set maxWidth to the mobile web shell width when the app is centered in a desktop viewport."
       ]
     },
     {

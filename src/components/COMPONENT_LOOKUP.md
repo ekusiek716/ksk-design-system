@@ -129,7 +129,7 @@
 
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
-| BottomTabBar | `@/components/patterns/commerce/bottom-tab-bar` | — | Default, Pill — iOS 26 Liquid Glass, Pill — on light background |
+| BottomTabBar | `@/components/patterns/commerce/bottom-tab-bar` | — | Default, Pill — iOS 26 Liquid Glass, Pill — on light background, Liquid Glass — center action, Liquid Glass — labels visible, Liquid Glass — 5 items, Liquid Glass — over dark photo/gradient, Liquid Glass — light fallback |
 | FilterBar | `@/components/patterns/commerce/filter-bar` | — | Default, Interactive |
 | ImageCarousel | `@/components/patterns/commerce/image-carousel` | — | Banner, Square, Video, AutoPlay |
 | OrderSummary | `@/components/patterns/commerce/order-summary` | — | Default, Simple |

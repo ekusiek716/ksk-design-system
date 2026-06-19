@@ -54,6 +54,27 @@ import { Button, Card, Input, FormField } from "ksk-design-system"
 
 新規クライアント案件では、テーマファイルで `--Primitive-Brand-500` などブランドカラーの 10 行を定義するだけで、全コンポーネントがそのブランドカラーで動作します。
 
+### Liquid Glass bottom navigation
+
+Web のグローバルナビで iOS 26 風の Liquid Glass を使う場合は、`BottomTabBar variant="pill"` を使います。実アプリの中央 CTA は `centerAction`、ラベル付き構成は `showLabels`、暗い写真・動画・gradient 上では `tone="inverse"` を指定します。
+
+```tsx
+import { BottomTabBar } from "ksk-design-system"
+
+<BottomTabBar
+  variant="pill"
+  items={[
+    { label: "トーク", icon: <TalkIcon />, href: "/talk", isActive: true },
+    { label: "ギャラリー", icon: <GalleryIcon />, href: "/gallery" },
+  ]}
+  centerAction={{ label: "作成", icon: <PlusIcon />, href: "/create" }}
+  tone="inverse"
+  maxWidth={430}
+/>
+```
+
+`pillPosition` は実アプリでは既定の `fixed`、Storybook や mobile shell 内のデモでは `absolute` を使います。safe-area は内部で `env(safe-area-inset-bottom)` を見ます。入力フォーム画面では keyboard 表示時に被らないよう、画面側で nav を隠すか bottom action に切り替えてください。
+
 ### React Native / Expo
 
 `ksk-design-system/native/ui` から直接 RN 用コンポーネント（91 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
