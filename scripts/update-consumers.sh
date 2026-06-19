@@ -144,21 +144,26 @@ vendor/*.tgz 方式から npm install 方式へ移行。
   fi
 
   pr_body_file="$(mktemp)"
-  cat > "$pr_body_file" <<EOF
-DS を v$VERSION に更新し、vendor tgz 方式から npm registry 経由に切替。
+  cat > "$pr_body_file" <<'EOF'
+DS を v__VERSION__ に更新し、vendor tgz 方式から npm registry 経由に切替。
 
 ## 変更
-- \`package.json\`: \`file:./vendor/ksk-design-system-X.Y.Z.tgz\` → \`^$VERSION\`
-- \`vendor/ksk-design-system-*.tgz\` を削除（過去版は git history で復元可能）
-- \`package-lock.json\` は npm registry のメタ情報で更新
+- `package.json`: `file:./vendor/ksk-design-system-X.Y.Z.tgz` → `^__VERSION__`
+- `vendor/ksk-design-system-*.tgz` を削除（過去版は git history で復元可能）
+- `package-lock.json` は npm registry のメタ情報で更新
 
 ## メリット
 - 配布が npm 標準フローに統一（dependabot / renovate も使える）
 - リポサイズが軽くなる
-- ロールバックは \`npm install ksk-design-system@<旧バージョン>\` で可能
+- ロールバックは `npm install ksk-design-system@<旧バージョン>` で可能
 
 詳細は DS リポのリリースノート参照。
 EOF
+  node -e "
+    const fs = require('fs');
+    const [file, version] = process.argv.slice(1);
+    fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replaceAll('__VERSION__', version));
+  " "$pr_body_file" "$VERSION"
 
   pr_url="$(gh pr create \
     --title "chore: ksk-design-system v$VERSION（npm registry へ移行）" \
