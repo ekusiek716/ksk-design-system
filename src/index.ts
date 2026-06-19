@@ -216,6 +216,9 @@ export {
   DataTableSectionRow,
   DataTableAddRow,
   DataTableEmptyState,
+  createDataTableDateColumn,
+  createDataTableChipColumn,
+  createDataTableSelectColumn,
 } from "./components/patterns/admin/data-table"
 export { getStickyCellProps } from "./components/patterns/admin/data-table"
 export type {
@@ -225,10 +228,20 @@ export type {
   DataTableRowId,
   DataTableSelectionMode,
   DataTableSortState,
+  DataTableEditTrigger,
+  DataTableCommitOptions,
+  DataTableCellContext,
+  DataTableColumnEditOptions,
+  DataTableColumnOption,
+  DataTableRowCommitHandler,
   DataTableColumn,
   DataTableSelectionState,
   DataTableSection,
   DataTableProps,
+  DataTableDateColumnConfig,
+  DataTableChipColumnValue,
+  DataTableChipColumnConfig,
+  DataTableSelectColumnConfig,
 } from "./components/patterns/admin/data-table"
 
 export { SimplePagination } from "./components/patterns/simple-pagination"
