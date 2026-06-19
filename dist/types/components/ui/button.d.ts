@@ -16,7 +16,7 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
  * - `secondary` / `tertiary`: 並列の選択肢・キャンセル。
  * - `ghost` / `link`: 文字寄りの controls。
  * - `destructive`: 削除・取り消しなど不可逆操作。
- * - `glass` / `accent`: モバイル / ヒーローセクション向け装飾系。
+ * - `glass` / `glass-inverse` / `accent`: モバイル / ヒーローセクション向け装飾系。
  * - `inverse` / `ghost-inverse`: 暗背景・ヒーローセクション上で使う反転バリアント。
  *
  * サイズ:

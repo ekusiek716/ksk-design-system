@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { type VariantProps } from "class-variance-authority";
+type LayerAutoFocusTarget = "first-input" | "title" | React.RefObject<HTMLElement | null> | false;
 type SnapPoint = number | string;
 interface VisualViewportInset {
     keyboardInset: number;
@@ -84,7 +85,7 @@ declare function SheetDragIndicator(): import("react/jsx-runtime").JSX.Element;
 declare const sheetVariants: (props?: {
     side?: "top" | "left" | "right" | "bottom" | "float" | "float-glass" | "bottom-glass";
 } & import("class-variance-authority/types").ClassProp) => string;
-interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.Content>, VariantProps<typeof sheetVariants> {
+interface SheetContentProps extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus">, VariantProps<typeof sheetVariants> {
     /** オーバーレイをガラス調にする（glass系 side では自動で true） */
     glassOverlay?: boolean;
     /**
@@ -126,12 +127,22 @@ interface SheetContentProps extends React.ComponentProps<typeof DialogPrimitive.
      * `<SheetDescription>` を直接置く。
      */
     description?: React.ReactNode;
-    children?: React.ReactNode;
-    className?: string;
-    style?: React.CSSProperties;
-    id?: string;
+    /**
+     * open 時の初期フォーカス。未指定時は Radix の既定挙動。
+     * - "first-input": 最初の入力/操作可能要素
+     * - "title": SheetTitle
+     * - ref: 任意要素
+     * - false: 自動フォーカスを抑制
+     */
+    autoFocus?: LayerAutoFocusTarget;
+    /** close 後に open 前の要素へ focus を戻す。既定 true。 */
+    restoreFocusOnClose?: boolean;
+    /** Esc キーで閉じる。既定 true。 */
+    closeOnEsc?: boolean;
+    /** Sheet 表示中に body scroll を抑止する。既定 true。 */
+    bodyScrollLock?: boolean;
 }
-declare function SheetContent({ className, children, side, glassOverlay, container, padding, swipeToClose, description, ...props }: SheetContentProps): import("react/jsx-runtime").JSX.Element;
+declare function SheetContent({ className, children, side, glassOverlay, container, padding, swipeToClose, description, autoFocus, restoreFocusOnClose, closeOnEsc, bodyScrollLock, ...props }: SheetContentProps): import("react/jsx-runtime").JSX.Element;
 declare function SheetHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
 declare function SheetFooter({ className, orientation, ...props }: React.ComponentProps<"div"> & {
     /**

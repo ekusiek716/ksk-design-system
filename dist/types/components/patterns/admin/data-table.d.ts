@@ -3,6 +3,48 @@ import { type VariantProps } from "class-variance-authority";
 type SortDirection = "asc" | "desc" | null;
 /** 列の sticky 位置。`true` は `"left"` のエイリアス。 */
 type StickyPosition = "left" | "right" | true;
+type DataTableRowId = string | number;
+type DataTableSelectionMode = "none" | "single" | "multi";
+type DataTableColumnAlign = "left" | "center" | "right";
+type DataTableColumnWidth = "auto" | "narrow" | "checkbox" | "action" | "sm" | "md" | "lg" | "xl";
+interface DataTableSortState {
+    key: string;
+    direction: Exclude<SortDirection, null>;
+}
+interface DataTableColumn<TRow> {
+    key: string;
+    header: React.ReactNode;
+    render?: (row: TRow, index: number) => React.ReactNode;
+    value?: (row: TRow, index: number) => React.ReactNode;
+    sortValue?: (row: TRow, index: number) => string | number | Date | null | undefined;
+    sortable?: boolean;
+    align?: DataTableColumnAlign;
+    width?: DataTableColumnWidth;
+    className?: string;
+    headerClassName?: string;
+    sticky?: StickyPosition;
+    stickyOffset?: number;
+    editable?: boolean;
+    editValue?: (row: TRow, index: number) => string;
+    onEditChange?: (row: TRow, value: string, index: number) => void;
+    editOptions?: {
+        label: string;
+        value: string;
+    }[];
+}
+interface DataTableSelectionState {
+    mode?: DataTableSelectionMode;
+    selectedRowIds?: DataTableRowId[];
+    defaultSelectedRowIds?: DataTableRowId[];
+    onSelectionChange?: (rowIds: DataTableRowId[]) => void;
+}
+interface DataTableSection {
+    key: string;
+    label: string;
+    count?: number;
+    open?: boolean;
+    onToggle?: () => void;
+}
 /**
  * 横スクロール時に列を「貼り付け」表示するためのスタイル/クラスを生成するヘルパ。
  *
@@ -21,9 +63,22 @@ declare function getStickyCellProps(position: StickyPosition, offset?: number, i
     className: string;
     style: React.CSSProperties;
 };
-interface DataTableProps extends React.ComponentProps<"div"> {
+interface DataTableProps<TRow = unknown> extends React.ComponentProps<"div"> {
+    rows?: readonly TRow[];
+    columns?: readonly DataTableColumn<TRow>[];
+    getRowId?: (row: TRow, index: number) => DataTableRowId;
+    sort?: DataTableSortState | null;
+    defaultSort?: DataTableSortState | null;
+    onSortChange?: (sort: DataTableSortState | null) => void;
+    selection?: DataTableSelectionState;
+    emptyMessage?: string;
+    emptyDescription?: string;
+    emptyAction?: React.ReactNode;
+    sectionRow?: (row: TRow, index: number) => DataTableSection | null | undefined;
+    tableClassName?: string;
+    rowClassName?: string | ((row: TRow, index: number) => string | undefined);
 }
-declare function DataTable({ className, children, ...props }: DataTableProps): import("react/jsx-runtime").JSX.Element;
+declare function DataTable<TRow = unknown>({ className, children, rows, columns, getRowId, sort, defaultSort, onSortChange, selection, emptyMessage, emptyDescription, emptyAction, sectionRow, tableClassName, rowClassName, ...props }: DataTableProps<TRow>): import("react/jsx-runtime").JSX.Element;
 interface DataTableTableProps extends React.ComponentProps<"table"> {
 }
 declare function DataTableTable({ className, children, ...props }: DataTableTableProps): import("react/jsx-runtime").JSX.Element;
@@ -162,4 +217,4 @@ interface DataTableEmptyStateProps extends React.ComponentProps<"tr"> {
 declare function DataTableEmptyState({ className, icon, message, description, action, colSpan, ...props }: DataTableEmptyStateProps): import("react/jsx-runtime").JSX.Element;
 export { DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState, };
 export { getStickyCellProps };
-export type { SortDirection, DataTableActionMenuItem, StickyPosition };
+export type { SortDirection, DataTableActionMenuItem, StickyPosition, DataTableRowId, DataTableSelectionMode, DataTableSortState, DataTableColumn, DataTableSelectionState, DataTableSection, DataTableProps, };

@@ -2,9 +2,9 @@
 
 `ksk-design-system` のリリース・配布手順。
 
-> **配布方式**: このパッケージは npm レジストリには公開しない。
-> `npm pack` で生成した tgz を各消費リポジトリの `vendor/` に置き、
-> `package.json` から `file:vendor/ksk-design-system-X.Y.Z.tgz` で参照する **vendoring 方式**。
+> **配布方式**: v1.36.0 以降は npm レジストリ経由で配布する。
+> `npm publish --access public` で公開し、各消費リポジトリの
+> `package.json` は `ksk-design-system@X.Y.Z` を参照する。
 > 消費リポ: belle-todo / trip_todo / ninshin-todo / yokoku-app / pawly（いずれも `~/LocalDev/` 直下）。
 
 ## 前提
@@ -23,9 +23,10 @@ bash scripts/release.sh minor   # patch / minor / major / x.y.z
 1. `git diff --quiet` & main ブランチチェック（曜日チェック）
 2. `npm run check`
 3. `npm version <level>`（tag 切り）
-4. `npm pack`（新名 tgz 生成）
-5. `git push origin main --tags`
-6. `bash scripts/bump-consumers.sh <version>`（5 リポへ PR 自動作成）
+4. `npm pack`（prepack で `dist/` を生成し、中身を検証）
+5. `npm publish --access public`
+6. `git push origin main --tags`
+7. `bash scripts/update-consumers.sh <version>`（5 リポへ PR 自動作成）
 
 > v1.35.0 で旧名 `@ksk/design-system` 互換 tgz の生成は廃止。
 > 消費5リポ + todo-shared が新名 `ksk-design-system` に移行済。
@@ -61,14 +62,15 @@ npm version major
 `npm version` が自動で `package.json` を更新し、`v1.16.0` タグを切る。
 `dist/` の再ビルド・コミットはこの version bump のタイミングでのみ行う。
 
-### 3. tgz 生成
+### 3. pack / publish
 
 ```bash
-npm pack
+npm pack --dry-run
+npm publish --access public
 ```
 
-`prepack` フックで `npm run build:lib` が自動実行され、リポ直下に
-`ksk-design-system-X.Y.Z.tgz` が生成される。
+`prepack` フックで `npm run build:lib` が自動実行され、公開パッケージに入る
+`dist/` / `contracts/` / `tokens.json` / docs の中身が更新される。
 
 中身を確認したい場合:
 
@@ -98,17 +100,15 @@ git push origin main --tags
 
 ```bash
 # 全リポ一括
-bash scripts/bump-consumers.sh 1.16.0
+bash scripts/update-consumers.sh 1.16.0
 
 # 特定リポのみ
-bash scripts/bump-consumers.sh 1.16.0 belle-todo pawly
+bash scripts/update-consumers.sh 1.16.0 belle-todo pawly
 ```
 
-各消費リポで `chore/bump-ds-<version>` ブランチを切り、tgz の `vendor/` 配置・
-`package.json` の参照書換・`npm install`・commit・push・PR 作成まで自動で行う。
+各消費リポで `chore/bump-ds-<version>` ブランチを切り、`package.json` の
+`ksk-design-system` 参照書換・`npm install`・commit・push・PR 作成まで自動で行う。
 失敗したリポはスキップされ最後にまとめて報告されるので、個別にリトライする。
-
-過去版の tgz は `vendor/` に残す運用（ロールバックを git revert だけで済ませるため）。
 
 ### 6. PR マージ
 
@@ -125,9 +125,9 @@ bash scripts/bump-consumers.sh 1.16.0 belle-todo pawly
 git commit -m "fix: 重大なバグの説明"
 
 npm version patch
-npm pack
+npm publish --access public
 git push origin main --tags
-bash scripts/bump-consumers.sh <version> <影響リポ...>
+bash scripts/update-consumers.sh <version> <影響リポ...>
 ```
 
 修正コミットの背景・影響範囲を `RELEASE.md` の「ホットフィックス履歴」セクションに必ず追記。
@@ -148,13 +148,13 @@ bash scripts/bump-consumers.sh <version> <影響リポ...>
 ## 注意
 
 - 配布前に必ず `npm pack --dry-run` で中身確認
+- npm registry 公開には `npm login` 済みであること
 - `package.json#exports` を変更したら必ず利用側プロジェクトでの import を試す
 - 金曜午後のリリースは厳禁（週末に障害対応できない）
 - メジャーリリースは月初の月曜が望ましい（フィードバック収集期間が取れる）
 
 ## npm 公開について
 
-過去にタグ push で npm publish する GitHub Actions（`publish.yml`）が存在したが、
-実際の配布が vendoring 方式であり NPM_TOKEN も未設定で失敗し続けていたため削除した。
-将来 npm レジストリ公開に切り替える場合は、NPM_TOKEN の Secrets 登録と
-workflow の再作成をセットで行うこと。
+v1.36.0 以降は npm registry 経由配布。GitHub Actions による自動 publish はなく、
+ローカルの `npm login` 済み環境から `scripts/release.sh` で公開する。
+CI/CD に戻す場合は、NPM_TOKEN の Secrets 登録と workflow の再作成をセットで行うこと。
