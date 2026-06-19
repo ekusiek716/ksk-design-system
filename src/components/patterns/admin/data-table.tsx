@@ -34,6 +34,136 @@ type SortDirection = "asc" | "desc" | null
 /** 列の sticky 位置。`true` は `"left"` のエイリアス。 */
 type StickyPosition = "left" | "right" | true
 
+type DataTableRowId = string | number
+type DataTableSelectionMode = "none" | "single" | "multi"
+type DataTableColumnAlign = "left" | "center" | "right"
+type DataTableColumnWidth =
+  | "auto"
+  | "narrow"
+  | "checkbox"
+  | "action"
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl"
+
+interface DataTableSortState {
+  key: string
+  direction: Exclude<SortDirection, null>
+}
+
+interface DataTableColumn<TRow> {
+  key: string
+  header: React.ReactNode
+  render?: (row: TRow, index: number) => React.ReactNode
+  value?: (row: TRow, index: number) => React.ReactNode
+  sortValue?: (row: TRow, index: number) => string | number | Date | null | undefined
+  sortable?: boolean
+  align?: DataTableColumnAlign
+  width?: DataTableColumnWidth
+  className?: string
+  headerClassName?: string
+  sticky?: StickyPosition
+  stickyOffset?: number
+  editable?: boolean
+  editValue?: (row: TRow, index: number) => string
+  onEditChange?: (row: TRow, value: string, index: number) => void
+  editOptions?: { label: string; value: string }[]
+}
+
+interface DataTableSelectionState {
+  mode?: DataTableSelectionMode
+  selectedRowIds?: DataTableRowId[]
+  defaultSelectedRowIds?: DataTableRowId[]
+  onSelectionChange?: (rowIds: DataTableRowId[]) => void
+}
+
+interface DataTableSection {
+  key: string
+  label: string
+  count?: number
+  open?: boolean
+  onToggle?: () => void
+}
+
+interface IndexedRow<TRow> {
+  row: TRow
+  index: number
+}
+
+interface SectionedRow<TRow> extends IndexedRow<TRow> {
+  section?: DataTableSection | null
+  renderSection: boolean
+  sectionOpen: boolean
+}
+
+const EMPTY_ROWS: readonly unknown[] = []
+const EMPTY_COLUMNS: readonly DataTableColumn<unknown>[] = []
+
+function resolveRowId<TRow>(
+  row: TRow,
+  index: number,
+  getRowId?: (row: TRow, index: number) => DataTableRowId
+): DataTableRowId {
+  if (getRowId) return getRowId(row, index)
+  if (row && typeof row === "object" && "id" in row) {
+    const id = (row as { id?: unknown }).id
+    if (typeof id === "string" || typeof id === "number") return id
+  }
+  return index
+}
+
+function getColumnFallbackValue<TRow>(row: TRow, key: string): React.ReactNode {
+  if (!row || typeof row !== "object" || !(key in row)) return null
+  return (row as Record<string, React.ReactNode>)[key]
+}
+
+function getColumnValue<TRow>(
+  row: TRow,
+  index: number,
+  column: DataTableColumn<TRow>
+): React.ReactNode {
+  if (column.render) return column.render(row, index)
+  if (column.value) return column.value(row, index)
+  return getColumnFallbackValue(row, column.key)
+}
+
+function getColumnSortValue<TRow>(
+  row: TRow,
+  index: number,
+  column: DataTableColumn<TRow>
+): string | number | Date | null | undefined {
+  if (column.sortValue) return column.sortValue(row, index)
+  const value = column.value ? column.value(row, index) : getColumnFallbackValue(row, column.key)
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    value instanceof Date ||
+    value == null
+  ) {
+    return value
+  }
+  return String(value)
+}
+
+function compareDataTableValues(
+  a: string | number | Date | null | undefined,
+  b: string | number | Date | null | undefined
+) {
+  if (a == null && b == null) return 0
+  if (a == null) return 1
+  if (b == null) return -1
+  const normalizedA = a instanceof Date ? a.getTime() : a
+  const normalizedB = b instanceof Date ? b.getTime() : b
+  if (typeof normalizedA === "number" && typeof normalizedB === "number") {
+    return normalizedA - normalizedB
+  }
+  return String(normalizedA).localeCompare(String(normalizedB), "ja", {
+    numeric: true,
+    sensitivity: "base",
+  })
+}
+
 /**
  * 横スクロール時に列を「貼り付け」表示するためのスタイル/クラスを生成するヘルパ。
  *
@@ -107,9 +237,177 @@ function ChevronIcon({ open }: { open: boolean }) {
 
 // ─── 1. DataTable ───
 
-interface DataTableProps extends React.ComponentProps<"div"> {}
+interface DataTableProps<TRow = unknown> extends React.ComponentProps<"div"> {
+  rows?: readonly TRow[]
+  columns?: readonly DataTableColumn<TRow>[]
+  getRowId?: (row: TRow, index: number) => DataTableRowId
+  sort?: DataTableSortState | null
+  defaultSort?: DataTableSortState | null
+  onSortChange?: (sort: DataTableSortState | null) => void
+  selection?: DataTableSelectionState
+  emptyMessage?: string
+  emptyDescription?: string
+  emptyAction?: React.ReactNode
+  sectionRow?: (row: TRow, index: number) => DataTableSection | null | undefined
+  tableClassName?: string
+  rowClassName?: string | ((row: TRow, index: number) => string | undefined)
+}
 
-function DataTable({ className, children, ...props }: DataTableProps) {
+function DataTable<TRow = unknown>({
+  className,
+  children,
+  rows,
+  columns,
+  getRowId,
+  sort,
+  defaultSort = null,
+  onSortChange,
+  selection,
+  emptyMessage,
+  emptyDescription,
+  emptyAction,
+  sectionRow,
+  tableClassName,
+  rowClassName,
+  ...props
+}: DataTableProps<TRow>) {
+  const [internalSort, setInternalSort] = React.useState<DataTableSortState | null>(defaultSort)
+  const [internalSelectedIds, setInternalSelectedIds] = React.useState<DataTableRowId[]>(
+    selection?.defaultSelectedRowIds ?? []
+  )
+  const isHighLevel = rows != null && columns != null
+  const activeSort = sort !== undefined ? sort : internalSort
+  const activeRows = (rows ?? EMPTY_ROWS) as readonly TRow[]
+  const activeColumns = (columns ?? EMPTY_COLUMNS) as readonly DataTableColumn<TRow>[]
+  const selectionMode: DataTableSelectionMode = selection?.mode ?? (selection ? "multi" : "none")
+  const selectedRowIds = selection?.selectedRowIds ?? internalSelectedIds
+  const selectedRowIdSet = React.useMemo(() => new Set(selectedRowIds), [selectedRowIds])
+
+  const indexedRows = React.useMemo<IndexedRow<TRow>[]>(
+    () => activeRows.map((row, index) => ({ row, index })),
+    [activeRows]
+  )
+
+  const sortedRows = React.useMemo<IndexedRow<TRow>[]>(() => {
+    if (!activeSort) return indexedRows
+    const column = activeColumns.find((item) => item.key === activeSort.key)
+    if (!column || !column.sortable) return indexedRows
+    const direction = activeSort.direction === "asc" ? 1 : -1
+    return [...indexedRows].sort((a, b) => {
+      const aValue = getColumnSortValue(a.row, a.index, column)
+      const bValue = getColumnSortValue(b.row, b.index, column)
+      return compareDataTableValues(aValue, bValue) * direction
+    })
+  }, [activeColumns, activeSort, indexedRows])
+
+  const sortedRowIds = React.useMemo(
+    () => sortedRows.map(({ row, index }) => resolveRowId(row, index, getRowId)),
+    [getRowId, sortedRows]
+  )
+
+  const selectedVisibleCount = React.useMemo(
+    () => sortedRowIds.filter((id) => selectedRowIdSet.has(id)).length,
+    [selectedRowIdSet, sortedRowIds]
+  )
+
+  const sectionedRows = React.useMemo<SectionedRow<TRow>[]>(() => {
+    const result = sortedRows.reduce<{
+      previousSectionKey: string | null
+      rows: SectionedRow<TRow>[]
+    }>(
+      (acc, item) => {
+        const section = sectionRow?.(item.row, item.index)
+        return {
+          previousSectionKey: section?.key ?? acc.previousSectionKey,
+          rows: [
+            ...acc.rows,
+            {
+              ...item,
+              section,
+              renderSection: Boolean(section && section.key !== acc.previousSectionKey),
+              sectionOpen: section?.open !== false,
+            },
+          ],
+        }
+      },
+      { previousSectionKey: null, rows: [] }
+    )
+    return result.rows
+  }, [sectionRow, sortedRows])
+
+  const updateSelectedRowIds = React.useCallback(
+    (next: DataTableRowId[]) => {
+      if (selection?.selectedRowIds === undefined) setInternalSelectedIds(next)
+      selection?.onSelectionChange?.(next)
+    },
+    [selection]
+  )
+
+  const toggleAllRows = React.useCallback(() => {
+    if (selectionMode !== "multi") return
+    const visibleIdSet = new Set(sortedRowIds)
+    const hiddenSelected = selectedRowIds.filter((id) => !visibleIdSet.has(id))
+    if (selectedVisibleCount === sortedRowIds.length) {
+      updateSelectedRowIds(hiddenSelected)
+      return
+    }
+    updateSelectedRowIds([...hiddenSelected, ...sortedRowIds])
+  }, [
+    selectedRowIds,
+    selectedVisibleCount,
+    selectionMode,
+    sortedRowIds,
+    updateSelectedRowIds,
+  ])
+
+  const toggleRow = React.useCallback(
+    (id: DataTableRowId) => {
+      if (selectionMode === "none") return
+      if (selectionMode === "single") {
+        updateSelectedRowIds(selectedRowIdSet.has(id) ? [] : [id])
+        return
+      }
+      const next = selectedRowIdSet.has(id)
+        ? selectedRowIds.filter((selectedId) => selectedId !== id)
+        : [...selectedRowIds, id]
+      updateSelectedRowIds(next)
+    },
+    [selectedRowIdSet, selectedRowIds, selectionMode, updateSelectedRowIds]
+  )
+
+  const handleSort = React.useCallback(
+    (column: DataTableColumn<TRow>) => {
+      if (!column.sortable) return
+      const next =
+        activeSort?.key !== column.key
+          ? { key: column.key, direction: "asc" as const }
+          : activeSort.direction === "asc"
+            ? { key: column.key, direction: "desc" as const }
+            : null
+      if (sort === undefined) setInternalSort(next)
+      onSortChange?.(next)
+    },
+    [activeSort, onSortChange, sort]
+  )
+
+  const selectionColSpan = selectionMode === "none" ? 0 : 1
+  const colSpan = activeColumns.length + selectionColSpan
+
+  if (!isHighLevel) {
+    return (
+      <div
+        data-slot="data-table"
+        className={cn(
+          "overflow-x-auto rounded-lg border border-[var(--Border-Low-Emphasis)]",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    )
+  }
+
   return (
     <div
       data-slot="data-table"
@@ -119,7 +417,127 @@ function DataTable({ className, children, ...props }: DataTableProps) {
       )}
       {...props}
     >
-      {children}
+      <DataTableTable className={tableClassName}>
+        <DataTableHeader>
+          <tr>
+            {selectionMode !== "none" && (
+              <DataTableHead className="w-[40px]" aria-label="行選択">
+                {selectionMode === "multi" && (
+                  <Checkbox
+                    checked={
+                      sortedRowIds.length > 0 && selectedVisibleCount === sortedRowIds.length
+                        ? true
+                        : selectedVisibleCount > 0
+                          ? "indeterminate"
+                          : false
+                    }
+                    onCheckedChange={toggleAllRows}
+                    aria-label="すべて選択"
+                  />
+                )}
+              </DataTableHead>
+            )}
+            {activeColumns.map((column) => (
+              <DataTableHead
+                key={column.key}
+                sortable={column.sortable}
+                sortDirection={activeSort?.key === column.key ? activeSort.direction : null}
+                onSort={() => handleSort(column)}
+                sticky={column.sticky}
+                stickyOffset={column.stickyOffset}
+                className={cn(
+                  column.align === "center" && "text-center",
+                  column.align === "right" && "text-right",
+                  column.headerClassName
+                )}
+              >
+                {column.header}
+              </DataTableHead>
+            ))}
+          </tr>
+        </DataTableHeader>
+        <DataTableBody>
+          {sortedRows.length === 0 && (
+            <DataTableEmptyState
+              colSpan={colSpan}
+              message={emptyMessage}
+              description={emptyDescription}
+              action={emptyAction}
+            />
+          )}
+          {sectionedRows.map(({ row, index, section, renderSection, sectionOpen }) => {
+            const rowId = resolveRowId(row, index, getRowId)
+            const selected = selectedRowIdSet.has(rowId)
+            return (
+              <React.Fragment key={rowId}>
+                {renderSection && section && (
+                  <DataTableSectionRow
+                    label={section.label}
+                    count={section.count}
+                    open={section.open}
+                    onToggle={section.onToggle}
+                    colSpan={colSpan}
+                  />
+                )}
+                {sectionOpen && (
+                  <DataTableRow
+                    selected={selected}
+                    className={
+                      typeof rowClassName === "function" ? rowClassName(row, index) : rowClassName
+                    }
+                  >
+                    {selectionMode !== "none" && (
+                      <DataTableCheckboxCell
+                        checked={selected}
+                        onCheckedChange={() => toggleRow(rowId)}
+                        aria-label={`${String(rowId)} を選択`}
+                      />
+                    )}
+                    {activeColumns.map((column) => {
+                      if (column.editable) {
+                        const value =
+                          column.editValue?.(row, index) ??
+                          String(getColumnSortValue(row, index, column) ?? "")
+                        if (column.editOptions) {
+                          return (
+                            <DataTableSelectCell
+                              key={column.key}
+                              value={value}
+                              options={column.editOptions}
+                              onValueChange={(next) => column.onEditChange?.(row, next, index)}
+                              className={column.className}
+                            />
+                          )
+                        }
+                        return (
+                          <DataTableInputCell
+                            key={column.key}
+                            value={value}
+                            onChange={(next) => column.onEditChange?.(row, next, index)}
+                            className={column.className}
+                          />
+                        )
+                      }
+                      return (
+                        <DataTableCell
+                          key={column.key}
+                          align={column.align}
+                          width={column.width}
+                          sticky={column.sticky}
+                          stickyOffset={column.stickyOffset}
+                          className={column.className}
+                        >
+                          {getColumnValue(row, index, column)}
+                        </DataTableCell>
+                      )
+                    })}
+                  </DataTableRow>
+                )}
+              </React.Fragment>
+            )
+          })}
+        </DataTableBody>
+      </DataTableTable>
     </div>
   )
 }
@@ -835,4 +1253,15 @@ export {
 }
 
 export { getStickyCellProps }
-export type { SortDirection, DataTableActionMenuItem, StickyPosition }
+export type {
+  SortDirection,
+  DataTableActionMenuItem,
+  StickyPosition,
+  DataTableRowId,
+  DataTableSelectionMode,
+  DataTableSortState,
+  DataTableColumn,
+  DataTableSelectionState,
+  DataTableSection,
+  DataTableProps,
+}

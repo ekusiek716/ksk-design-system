@@ -57,10 +57,10 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 |---------|------|
 | **CLAUDE.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート（Claude Code用） |
 | **AGENTS.md** | 同上（Codex用。セッション開始時の読み込み指示・編集後コマンドを明記） |
-| **contracts/components.json** | 全110コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
+| **contracts/components.json** | 全112コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
 | **contracts/rules.json** | 禁止パターン32件・AIアンチパターン10件・アクセシビリティ要件 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
-| **src/components/COMPONENT_LOOKUP.md** | 全110コンポーネントのバリアント・インポートパス一覧（自動生成） |
+| **src/components/COMPONENT_LOOKUP.md** | 全112コンポーネントのバリアント・インポートパス一覧（自動生成） |
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
 
 **セッション開始時 / コードを書く前に必ず読む:**
@@ -78,12 +78,12 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 ```
 src/
 ├── components/
-│   ├── ui/           # 汎用UIコンポーネント 55個
+│   ├── ui/           # 汎用UIコンポーネント 56個
 │   ├── patterns/
 │   │   ├── commerce/ # EC系 11個
 │   │   ├── admin/    # 管理画面系 8個
 │   │   ├── shells/   # レイアウトシェル 3個
-│   │   └── ...       # 汎用パターン 33個
+│   │   └── ...       # 汎用パターン 34個
 │   └── icons/
 ├── styles/
 │   ├── primitive.css  # Layer 1: 原色パレット
@@ -91,7 +91,7 @@ src/
 │   └── typography.css # typo-* ユーティリティ 17クラス
 ├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット
-└── index.ts           # Public API（110コンポーネント）
+└── index.ts           # Public API（112コンポーネント）
 ```
 
 ---

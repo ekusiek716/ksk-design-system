@@ -129,6 +129,20 @@
   from { opacity: 0; transform: scale(0.95); }
   to   { opacity: 1; transform: scale(1); }
 }
+@keyframes celebration-confetti-fall {
+  from {
+    opacity: 1;
+    transform: translate3d(0, -16px, 0) rotate(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(var(--celebration-drift, 0), 110vh, 0) rotate(var(--celebration-rotate, 360deg));
+  }
+}
+@keyframes celebration-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 @theme inline {
   --animate-slide-in-right: slide-in-right 200ms ease-out;

@@ -21,7 +21,7 @@ import {
   DataTableSelectCell,
   DataTableImageCell,
 } from "./data-table"
-import type { SortDirection } from "./data-table"
+import type { DataTableColumn, DataTableRowId, DataTableSortState, SortDirection } from "./data-table"
 import { Badge } from "../../ui/badge"
 import { Button } from "../../ui/button"
 import { BulkActions } from "./bulk-actions"
@@ -86,6 +86,13 @@ const statusLabel: Record<User["status"], string> = {
   pending: "保留中",
   suspended: "停止",
 }
+
+const statusOptions = [
+  { label: "有効", value: "active" },
+  { label: "無効", value: "inactive" },
+  { label: "保留中", value: "pending" },
+  { label: "停止", value: "suspended" },
+]
 
 // ─── Default Story ───
 
@@ -205,6 +212,90 @@ export const Default: StoryObj = {
             エクスポート
           </Button>
         </BulkActions>
+      </div>
+    )
+  },
+}
+
+// ─── Rows / Columns API ───
+
+export const RowsAndColumns: StoryObj = {
+  name: "Rows / Columns API",
+  render: function RowsAndColumnsStory() {
+    const [users, setUsers] = React.useState<User[]>(sampleUsers)
+    const [selectedIds, setSelectedIds] = React.useState<DataTableRowId[]>(["1"])
+    const [sort, setSort] = React.useState<DataTableSortState | null>({
+      key: "name",
+      direction: "asc",
+    })
+
+    const columns = React.useMemo<DataTableColumn<User>[]>(
+      () => [
+        {
+          key: "name",
+          header: "名前",
+          sortable: true,
+          sortValue: (user) => user.name,
+          render: (user) => (
+            <div className="flex flex-col min-w-0">
+              <span className="typo-label-md text-[var(--Text-High-Emphasis)] truncate">
+                {user.name}
+              </span>
+              <span className="typo-body-sm text-[var(--Text-Low-Emphasis)] truncate">
+                {user.email}
+              </span>
+            </div>
+          ),
+        },
+        {
+          key: "email",
+          header: "メールアドレス",
+          sortable: true,
+        },
+        {
+          key: "status",
+          header: "ステータス",
+          sortable: true,
+          editable: true,
+          editValue: (user) => user.status,
+          editOptions: statusOptions,
+          onEditChange: (user, value) => {
+            setUsers((current) =>
+              current.map((item) =>
+                item.id === user.id ? { ...item, status: value as User["status"] } : item
+              )
+            )
+          },
+        },
+      ],
+      []
+    )
+
+    return (
+      <div className="space-y-4 p-6">
+        <BulkActions selectedCount={selectedIds.length} onClear={() => setSelectedIds([])}>
+          <Button variant="ghost-inverse" size="sm" className="rounded-full">
+            選択中のユーザーを更新
+          </Button>
+        </BulkActions>
+        <DataTable
+          rows={users}
+          columns={columns}
+          getRowId={(user) => user.id}
+          sort={sort}
+          onSortChange={setSort}
+          selection={{
+            mode: "multi",
+            selectedRowIds: selectedIds,
+            onSelectionChange: setSelectedIds,
+          }}
+          sectionRow={(user) => ({
+            key: user.status === "active" ? "active" : "other",
+            label: user.status === "active" ? "有効なユーザー" : "その他のユーザー",
+          })}
+          emptyMessage="ユーザーが見つかりません"
+          emptyDescription="rows と columns だけで空状態まで表示できます。"
+        />
       </div>
     )
   },

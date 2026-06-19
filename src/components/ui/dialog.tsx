@@ -2,6 +2,54 @@ import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 
+type LayerAutoFocusTarget = "first-input" | "title" | React.RefObject<HTMLElement | null> | false
+
+function getFocusableTarget(container: HTMLElement, target: LayerAutoFocusTarget, titleSlot: string) {
+  if (target === false) return null
+  if (target === "title") {
+    return container.querySelector<HTMLElement>(`[data-slot="${titleSlot}"]`)
+  }
+  if (target === "first-input") {
+    return container.querySelector<HTMLElement>(
+      [
+        "input:not([disabled])",
+        "textarea:not([disabled])",
+        "select:not([disabled])",
+        "button:not([disabled])",
+        "[href]",
+        "[tabindex]:not([tabindex='-1'])",
+      ].join(", ")
+    )
+  }
+  return target.current
+}
+
+function focusLayerTarget(container: HTMLElement | null, target: LayerAutoFocusTarget | undefined, titleSlot: string) {
+  if (!container || target == null) return
+  const el = getFocusableTarget(container, target, titleSlot)
+  if (!el) return
+  if (el.tabIndex < 0 && target === "title") {
+    el.tabIndex = -1
+  }
+  el.focus()
+}
+
+function useBodyScrollLock(enabled: boolean) {
+  React.useEffect(() => {
+    if (!enabled || typeof document === "undefined") return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [enabled])
+}
+
+function captureRestoreFocus(ref: React.RefObject<HTMLElement | null>) {
+  if (ref.current != null || typeof document === "undefined") return
+  ref.current = document.activeElement as HTMLElement | null
+}
+
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
@@ -34,7 +82,7 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
 }
 
 interface DialogContentProps
-  extends React.ComponentProps<typeof DialogPrimitive.Content> {
+  extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus"> {
   /**
    * デフォルトの内側余白とセクション間レイアウトを制御。
    * - true（既定）: p-6 + `flex flex-col gap-4` を付与。ヘッダ/本文/フッタが
@@ -64,10 +112,20 @@ interface DialogContentProps
    *   スクロールしやすく操作しやすい
    */
   position?: "center" | "top"
-  children?: React.ReactNode
-  className?: string
-  style?: React.CSSProperties
-  id?: string
+  /**
+   * open 時の初期フォーカス。未指定時は Radix の既定挙動。
+   * - "first-input": 最初の入力/操作可能要素
+   * - "title": DialogTitle
+   * - ref: 任意要素
+   * - false: 自動フォーカスを抑制
+   */
+  autoFocus?: LayerAutoFocusTarget
+  /** close 後に open 前の要素へ focus を戻す。既定 true。 */
+  restoreFocusOnClose?: boolean
+  /** Esc キーで閉じる。既定 true。 */
+  closeOnEsc?: boolean
+  /** Dialog 表示中に body scroll を抑止する。既定 true。 */
+  bodyScrollLock?: boolean
 }
 
 function DialogContent({
@@ -76,18 +134,52 @@ function DialogContent({
   padding = true,
   description,
   position = "center",
+  autoFocus,
+  restoreFocusOnClose = true,
+  closeOnEsc = true,
+  bodyScrollLock = true,
   ...props
 }: DialogContentProps) {
   const autoDescId = React.useId()
+  const contentRef = React.useRef<HTMLDivElement>(null)
+  const restoreFocusRef = React.useRef<HTMLElement | null>(null)
+  useBodyScrollLock(bodyScrollLock)
   const hasInternalDesc = description != null && description !== false
   // - description 渡しあり → 生成した sr-only Description の id
   // - description なし → 呼び出し側の aria-describedby（無ければ undefined を明示）
   //   undefined を明示することで Radix の "Missing Description" 警告が消える。
   const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
+  const handleOpenAutoFocus = (event: Event) => {
+    captureRestoreFocus(restoreFocusRef)
+    props.onOpenAutoFocus?.(event)
+    if (event.defaultPrevented || autoFocus == null) return
+    event.preventDefault()
+    if (autoFocus === false) return
+    window.requestAnimationFrame(() => {
+      focusLayerTarget(contentRef.current, autoFocus, "dialog-title")
+    })
+  }
+  const handleCloseAutoFocus = (event: Event) => {
+    props.onCloseAutoFocus?.(event)
+    if (event.defaultPrevented) return
+    if (!restoreFocusOnClose) {
+      event.preventDefault()
+      return
+    }
+    if (restoreFocusRef.current) {
+      event.preventDefault()
+      restoreFocusRef.current.focus()
+    }
+  }
+  const handleEscapeKeyDown = (event: KeyboardEvent) => {
+    props.onEscapeKeyDown?.(event)
+    if (!closeOnEsc) event.preventDefault()
+  }
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
+        ref={contentRef}
         data-slot="dialog-content"
         data-position={position}
         className={cn(
@@ -108,6 +200,9 @@ function DialogContent({
         )}
         {...props}
         aria-describedby={ariaDescribedBy}
+        onOpenAutoFocus={handleOpenAutoFocus}
+        onCloseAutoFocus={handleCloseAutoFocus}
+        onEscapeKeyDown={handleEscapeKeyDown}
       >
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">

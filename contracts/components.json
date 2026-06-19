@@ -5,18 +5,18 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 56,
-      "patterns": 33,
+      "patterns": 34,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 111
+      "total": 112
     }
   },
   "ui": [
     {
       "name": "Button",
       "path": "src/components/ui/button.tsx",
-      "description": "アクションボタン。最重要CTAにはdefault、Liquid Glass背景にはglass。アイコン単独はiconサイズ群。",
+      "description": "アクションボタン。最重要CTAにはdefault、Liquid Glass背景にはglass、暗背景上のLiquid Glassにはglass-inverse。アイコン単独はiconサイズ群。",
       "variants": [
         "default",
         "secondary",
@@ -26,6 +26,7 @@
         "link",
         "destructive",
         "glass",
+        "glass-inverse",
         "accent",
         "inverse",
         "ghost-inverse"
@@ -50,6 +51,7 @@
         "Must use <Button> not <button>",
         "Icon-only buttons require aria-label",
         "variant=glass は背景がグラデーション/写真の場合のみ使用",
+        "variant=glass-inverse は暗い写真・動画・濃色面上の Liquid Glass CTA 専用",
         "variant=inverse / ghost-inverse は暗背景・ヒーローセクション専用",
         "size=hero は hero / final-CTA 専用（ピル型 56px）"
       ]
@@ -208,7 +210,7 @@
     {
       "name": "Dialog",
       "path": "src/components/ui/dialog.tsx",
-      "description": "タスク面用の中央モーダル(role=dialog)。フォーム入力・絞り込み等の「作業する」面に使う。削除/送信等の割り込み確認は ConfirmDialog / AlertDialog(role=alertdialog) を使い分ける。モバイルは ResponsiveDialog 推奨。position=\"top\" でモバイル向け上部寄せ。",
+      "description": "タスク面用の中央モーダル(role=dialog)。フォーム入力・絞り込み等の「作業する」面に使う。削除/送信等の割り込み確認は ConfirmDialog / AlertDialog(role=alertdialog) を使い分ける。モバイルは ResponsiveDialog 推奨。position=\"top\" でモバイル向け上部寄せ。autoFocus / restoreFocusOnClose / closeOnEsc / bodyScrollLock でフォーカス・スクロール挙動を制御可能。",
       "subcomponents": [
         "DialogTrigger",
         "DialogContent",
@@ -221,13 +223,15 @@
       "rules": [
         "rounded-2xl (16px)",
         "shadow-[var(--shadow-dialog)]",
-        "p-6 padding"
+        "p-6 padding",
+        "autoFocus は first-input / title / ref / false を指定可能",
+        "description prop は sr-only description を自動生成する"
       ]
     },
     {
       "name": "Sheet",
       "path": "src/components/ui/sheet.tsx",
-      "description": "サイドパネル・ボトムシート。フィルター・メニュー・補助入力に使用。モーダルより軽いコンテキストに。snapPoints でスナップ式、swipeToClose で下スワイプ閉じを有効化。",
+      "description": "サイドパネル・ボトムシート。フィルター・メニュー・補助入力に使用。モーダルより軽いコンテキストに。snapPoints でスナップ式、swipeToClose で下スワイプ閉じを有効化。autoFocus / restoreFocusOnClose / closeOnEsc / bodyScrollLock でフォーカス・スクロール挙動を制御可能。",
       "subcomponents": [
         "SheetTrigger",
         "SheetContent",
@@ -240,7 +244,10 @@
       ],
       "rules": [
         "Side panel, not modal",
-        "swipeToClose は side=bottom / bottom-glass のみ有効"
+        "swipeToClose は side=bottom / bottom-glass のみ有効",
+        "swipeToClose mode は max-h-[90dvh] を自動付与し、viewport 外にはみ出さない",
+        "autoFocus は first-input / title / ref / false を指定可能",
+        "description prop は sr-only description を自動生成する"
       ],
       "variants": {
         "side": [
@@ -539,11 +546,12 @@
     {
       "name": "SubNav",
       "path": "src/components/ui/sub-nav.tsx",
-      "description": "横スクロール サブナビゲーション。underline / chip バリアント。アクティブ項目の自動スクロール対応。",
+      "description": "横スクロール サブナビゲーション。underline / chip バリアント。アクティブ項目の自動スクロール、item description/title の補足説明対応。",
       "variants": [],
       "accessibility": [
         "role=\"tablist\"",
-        "aria-selected on active tab"
+        "aria-selected on active tab",
+        "description/title は title と aria-describedby に反映"
       ],
       "rules": []
     },
@@ -835,7 +843,12 @@
     {
       "name": "EmptyState",
       "path": "src/components/patterns/empty-state.tsx",
-      "description": "空状態プレースホルダー。データゼロ時のUX向上に使用。アクションまたは説明文を必ず含める。",
+      "description": "空状態プレースホルダー。データゼロ時のUX向上に使用。アクションまたは説明文を必ず含める。size=default / compact / inline に対応。",
+      "sizes": [
+        "default",
+        "compact",
+        "inline"
+      ],
       "rules": [
         "Always include an action or explanation"
       ]
@@ -924,7 +937,8 @@
       "path": "src/components/patterns/form-field.tsx",
       "description": "フォームフィールドラッパー。Label+Input+エラーメッセージをセットで管理。バリデーション表示付き。",
       "rules": [
-        "Label + Input + error message as unit"
+        "Label + Input + error message as unit",
+        "required asterisk は Brand 色。Caution 色は入力エラーとの混同を避ける"
       ]
     },
     {
@@ -990,6 +1004,26 @@
       "rules": [
         "Use destructive variant for delete/irreversible actions",
         "Use ConfirmDialog not custom Dialog for confirmation flows"
+      ]
+    },
+    {
+      "name": "Celebration",
+      "path": "src/components/patterns/celebration.tsx",
+      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、prefers-reduced-motion 対応。",
+      "variants": [
+        "confetti",
+        "emoji",
+        "both",
+        "none"
+      ],
+      "accessibility": [
+        "role=status",
+        "aria-live=polite",
+        "prefers-reduced-motion で confetti を抑制"
+      ],
+      "rules": [
+        "一時的な達成演出に使用",
+        "ローディングや常時表示の装飾用途には使わない"
       ]
     },
     {
@@ -1076,7 +1110,17 @@
     {
       "name": "ShareButtons",
       "path": "src/components/patterns/share-buttons.tsx",
-      "description": "シェアボタン群。LINE / Twitter / Facebook などのSNSシェアボタンをまとめて表示。"
+      "description": "シェアボタン群。LINE / X / Facebook / Instagram / Email / WhatsApp / Telegram / Copy に対応し、region で既定 providers を切替可能。",
+      "features": [
+        "providers",
+        "region defaults",
+        "copy fallback",
+        "circle / inline layout"
+      ],
+      "rules": [
+        "providers を渡すと明示順で表示",
+        "region=jp は line/x/copy、region=us は whatsapp/x/copy を既定にする"
+      ]
     },
     {
       "name": "FileUpload",
@@ -1332,24 +1376,29 @@
     {
       "name": "DataTable",
       "path": "src/components/patterns/admin/data-table.tsx",
-      "description": "管理画面データテーブル。ソート・チェックボックス・行アクション・インライン編集・ドラッグ並び替え対応。",
+      "description": "管理画面データテーブル。rows/columns の高水準 API と、既存サブコンポーネントによる手組み API の両方に対応。ソート・チェックボックス・行アクション・インライン編集・ドラッグ並び替え・セクション行対応。",
       "features": [
+        "rows-columns-api",
         "sort",
         "checkbox",
         "actions",
         "inline-edit",
-        "drag"
+        "drag",
+        "section-row"
       ],
       "rules": [
-        "20+ sub-components. Use DataTableHead, DataTableRow, DataTableCell."
+        "rows/columns API は最短実装向け",
+        "複雑なセル構成は DataTableHead, DataTableRow, DataTableCell などのサブコンポーネントを使う"
       ]
     },
     {
       "name": "KebabMenu",
       "path": "src/components/patterns/admin/kebab-menu.tsx",
-      "description": "テーブル行アクションメニュー（⋮ボタン）。編集・削除・複製等の行単位操作に使用。",
+      "description": "テーブル行アクションメニュー（⋮ボタン）。description / shortcut / disabled / separator / destructive item に対応。",
       "rules": [
-        "For table row actions only"
+        "For table row actions only",
+        "description は補足説明、shortcut は右側表示",
+        "{ type: \"separator\" } で区切り線を挿入"
       ]
     },
     {
