@@ -166,7 +166,7 @@ EOF
   " "$pr_body_file" "$VERSION"
 
   pr_url="$(gh pr create \
-    --title "chore: ksk-design-system v$VERSION（npm registry へ移行）" \
+    --title "chore: ksk-design-system v${VERSION}（npm registry へ移行）" \
     --body-file "$pr_body_file" \
     2>/dev/null | tail -1)"
   rm -f "$pr_body_file"
