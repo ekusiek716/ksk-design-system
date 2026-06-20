@@ -138,3 +138,9 @@
   line-height: 1.5;
   font-weight: 400;
 }
+
+/* ─── On Image ─── */
+
+@utility typo-on-image {
+  text-shadow: var(--Text-Shadow-on-Image);
+}

@@ -12,6 +12,7 @@ interface ShareButtonsProps {
   region?: ShareRegion
   layout?: ShareLayout
   className?: string
+  onShare?: (provider: ShareProvider) => void
   onCopy?: () => void
 }
 
@@ -144,6 +145,7 @@ function ShareButtons({
   region = "global",
   layout = "circle",
   className,
+  onShare,
   onCopy,
 }: ShareButtonsProps) {
   const [copiedProvider, setCopiedProvider] = React.useState<ShareProvider | null>(null)
@@ -161,6 +163,8 @@ function ShareButtons({
   }
 
   const handleClick = async (provider: ShareProvider) => {
+    onShare?.(provider)
+
     if (provider === "copy") {
       await copyUrl(provider)
       return
