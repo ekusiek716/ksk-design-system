@@ -8,8 +8,9 @@ interface ShareButtonsProps {
     region?: ShareRegion;
     layout?: ShareLayout;
     className?: string;
+    onShare?: (provider: ShareProvider) => void;
     onCopy?: () => void;
 }
-declare function ShareButtons({ url, title, providers, region, layout, className, onCopy, }: ShareButtonsProps): import("react/jsx-runtime").JSX.Element;
+declare function ShareButtons({ url, title, providers, region, layout, className, onShare, onCopy, }: ShareButtonsProps): import("react/jsx-runtime").JSX.Element;
 export { ShareButtons };
 export type { ShareButtonsProps, ShareProvider, ShareLayout, ShareRegion };
