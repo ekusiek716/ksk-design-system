@@ -4,7 +4,7 @@
 
 **🔗 ライブ Storybook → https://ksk-design-system.vercel.app**
 
-110 コンポーネントを実際に操作・確認できます。
+115 コンポーネントを実際に操作・確認できます。
 
 ---
 
@@ -14,7 +14,7 @@
 - **アクセシブル** — shadcn/ui（Radix UI ベース）+ `@storybook/addon-a11y` で a11y を担保
 - **Tailwind CSS v4 ネイティブ** — `@theme` ベースのトークン設計
 - **型安全** — React 19 + TypeScript、CVA によるバリアント管理
-- **110 + 91 コンポーネント** — Web 110（UI 55 / EC 11 / 管理 8 / シェル 3 / パターン 33）+ React Native 91
+- **115 + 91 コンポーネント** — Web 115（UI 56 / EC 11 / 管理 8 / シェル 3 / パターン 37）+ React Native 91
 - **iOS 26 Liquid Glass 対応** — RN 側 `GlassView` + `Button variant="glass"`、Web 側 `.glass` CSS マテリアル
 
 ## 🎨 テーマ
@@ -53,6 +53,44 @@ import { Button, Card, Input, FormField } from "ksk-design-system"
 ```
 
 新規クライアント案件では、テーマファイルで `--Primitive-Brand-500` などブランドカラーの 10 行を定義するだけで、全コンポーネントがそのブランドカラーで動作します。
+
+### Media overlay utilities
+
+動画・写真の上に文字や操作を置く場合は、`--Text-on-Media` と `.text-on-media` / `.text-on-media-secondary`、上下の `.media-scrim-top` / `.media-scrim-bottom` を使います。TikTok / Reels 型の操作群は `MediaActionCluster` が glass ボタン、ラベル、safe-area anchor、idle auto-hide をまとめて扱います。
+
+```tsx
+import { MediaActionCluster } from "ksk-design-system"
+
+<div className="relative">
+  <div className="absolute inset-x-0 top-0 h-32 media-scrim-top" />
+  <h1 className="text-on-media">メディア上のタイトル</h1>
+  <MediaActionCluster
+    anchor="bottom-right"
+    items={[
+      { label: "いいね", icon: <HeartIcon />, active: true },
+      { label: "シェア", icon: <ShareIcon /> },
+    ]}
+  />
+</div>
+```
+
+### Fullscreen screen primitives
+
+フルスクリーン画面は `Screen` で固定高 root、本文の内部スクロール、下部 CTA の safe-area 余白をまとめて扱います。写真背景の入口画面やオンボーディングスライドは `PhotoHero` と `typo-on-image` を組み合わせます。
+
+```tsx
+import { Screen, PhotoHero, Button } from "ksk-design-system"
+
+<Screen scroll={false} padding="none">
+  <PhotoHero src="/onboarding/slide-1.jpg" overlay="dark">
+    <PhotoHero.Eyebrow>さあ、始めよう</PhotoHero.Eyebrow>
+    <PhotoHero.Title>ふたりの準備、ここから。</PhotoHero.Title>
+    <PhotoHero.Actions>
+      <Button variant="glass-inverse" className="w-full">はじめる</Button>
+    </PhotoHero.Actions>
+  </PhotoHero>
+</Screen>
+```
 
 ### Liquid Glass bottom navigation
 

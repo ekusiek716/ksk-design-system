@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 56,
-      "patterns": 34,
+      "patterns": 37,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 112
+      "total": 115
     }
   },
   "ui": [
@@ -1009,12 +1009,19 @@
     {
       "name": "Celebration",
       "path": "src/components/patterns/celebration.tsx",
-      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、prefers-reduced-motion 対応。",
+      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、actions slot、interactive card tap、cardless モード、tap dismiss、prefers-reduced-motion 対応。",
       "variants": [
         "confetti",
         "emoji",
         "both",
         "none"
+      ],
+      "features": [
+        "actions-slot",
+        "interactive",
+        "cardless",
+        "tap-dismiss",
+        "duration-control"
       ],
       "accessibility": [
         "role=status",
@@ -1023,7 +1030,9 @@
       ],
       "rules": [
         "一時的な達成演出に使用",
-        "ローディングや常時表示の装飾用途には使わない"
+        "ローディングや常時表示の装飾用途には使わない",
+        "CTA を含む達成 UI は actions slot を使い、カード tap で任意 dismiss したい場合は interactive または onTapDismiss を使う",
+        "カード不要の演出は cardless を使う"
       ]
     },
     {
@@ -1115,11 +1124,89 @@
         "providers",
         "region defaults",
         "copy fallback",
-        "circle / inline layout"
+        "circle / inline layout",
+        "onShare tracking"
       ],
       "rules": [
         "providers を渡すと明示順で表示",
-        "region=jp は line/x/copy、region=us は whatsapp/x/copy を既定にする"
+        "region=jp は line/x/copy、region=us は whatsapp/x/copy を既定にする",
+        "provider 別の計測には onShare(provider) を使う。copy 完了時だけ必要なら onCopy も併用する"
+      ]
+    },
+    {
+      "name": "MediaActionCluster",
+      "path": "src/components/patterns/media-action-cluster.tsx",
+      "description": "動画・写真などのメディア上に重ねる icon + label のアクションクラスタ。TikTok/Reels 型の縦・横操作群、safe-area anchor、idle auto-hide に対応。",
+      "features": [
+        "media overlay",
+        "icon + label actions",
+        "vertical / horizontal / auto orientation",
+        "safe-area anchor",
+        "idle auto-hide",
+        "glass buttons",
+        "text-on-media"
+      ],
+      "accessibility": [
+        "role=group",
+        "aria-label",
+        "aria-pressed for active button items",
+        "44px touch target"
+      ],
+      "rules": [
+        "メディア上の操作群に使用する。通常画面の下部 CTA には StickyActionBar を使う",
+        "items[].label は必須。アイコン単独にしない",
+        "暗い写真・動画・濃色面上では glass-inverse / text-on-media を維持する",
+        "autoHideMs=null で idle fade を無効化できる"
+      ]
+    },
+    {
+      "name": "Screen",
+      "path": "src/components/patterns/screen.tsx",
+      "description": "固定高ビューポート、本文だけの内部スクロール、下部固定 CTA の safe-area 余白を内包するフルスクリーン画面骨組み。",
+      "features": [
+        "100dvh fixed viewport",
+        "internal scroll body",
+        "min-h-0 guard",
+        "fixed header slot",
+        "fixed footer slot",
+        "safe-area bottom"
+      ],
+      "accessibility": [
+        "main landmark",
+        "footer landmark when footer is present"
+      ],
+      "rules": [
+        "body スクロールを使わないアプリのフルスクリーン画面に使う",
+        "本文が長い画面では scroll=true のまま使う",
+        "写真ヒーローなど 1 画面固定では scroll=false と padding=none を組み合わせる",
+        "footer には主要 CTA を置き、safe-area 余白を消費側で再実装しない"
+      ]
+    },
+    {
+      "name": "PhotoHero",
+      "path": "src/components/patterns/photo-hero.tsx",
+      "description": "写真背景、暗化オーバーレイ、下詰め/中央寄せコンテンツ、写真上の可読性 typography をまとめるフルスクリーンヒーロー。",
+      "features": [
+        "photo background",
+        "medium / dark overlay",
+        "bottom / center align",
+        "on-image typography",
+        "compound slots"
+      ],
+      "subcomponents": [
+        "PhotoHero.Eyebrow",
+        "PhotoHero.Title",
+        "PhotoHero.Body",
+        "PhotoHero.Actions"
+      ],
+      "accessibility": [
+        "decorative image defaults to alt empty",
+        "alt can be provided when the image is meaningful"
+      ],
+      "rules": [
+        "オンボーディング入口・写真スライド・メディア上 CTA に使う",
+        "写真上の CTA には Button variant=glass-inverse / ghost-inverse を使う",
+        "本文が長い場合は Screen scroll=true 側で内部スクロールを確保する"
       ]
     },
     {
@@ -1386,9 +1473,15 @@
     {
       "name": "DataTable",
       "path": "src/components/patterns/admin/data-table.tsx",
-      "description": "管理画面データテーブル。rows/columns の高水準 API と、既存サブコンポーネントによる手組み API の両方に対応。ソート・チェックボックス・行アクション・インライン編集・ドラッグ並び替え・セクション行対応。",
+      "description": "管理画面データテーブル。rows/columns の高水準 API と、既存サブコンポーネントによる手組み API の両方に対応。CellContext API（isEditing / startEdit / commitEdit / cancelEdit）/ Date・Chip・Select 列ヘルパー、ソート・チェックボックス・行アクション・インライン編集・ドラッグ並び替え・セクション行対応。",
       "features": [
         "rows-columns-api",
+        "cell-context-api",
+        "edit-trigger",
+        "rich-column-helpers",
+        "date-column",
+        "chip-column",
+        "select-column",
         "sort",
         "checkbox",
         "actions",
@@ -1398,7 +1491,8 @@
       ],
       "rules": [
         "rows/columns API は最短実装向け",
-        "複雑なセル構成は DataTableHead, DataTableRow, DataTableCell などのサブコンポーネントを使う"
+        "DateField / Chip cluster / typed Select などのリッチ列は cell と edit.trigger、または createDataTableDateColumn / createDataTableChipColumn / createDataTableSelectColumn を使う",
+        "複雑なテーブル全体構成は DataTableHead, DataTableRow, DataTableCell などのサブコンポーネントを使う"
       ]
     },
     {

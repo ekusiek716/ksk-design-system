@@ -20,10 +20,14 @@ import {
   DataTableInputCell,
   DataTableSelectCell,
   DataTableImageCell,
+  createDataTableDateColumn,
+  createDataTableChipColumn,
+  createDataTableSelectColumn,
 } from "./data-table"
 import type { DataTableColumn, DataTableRowId, DataTableSortState, SortDirection } from "./data-table"
 import { Badge } from "../../ui/badge"
 import { Button } from "../../ui/button"
+import { Input } from "../../ui/input"
 import { BulkActions } from "./bulk-actions"
 import { cn } from "@/lib/utils"
 
@@ -295,6 +299,154 @@ export const RowsAndColumns: StoryObj = {
           })}
           emptyMessage="ユーザーが見つかりません"
           emptyDescription="rows と columns だけで空状態まで表示できます。"
+        />
+      </div>
+    )
+  },
+}
+
+// ─── Rich Columns / CellContext API ───
+
+type TaskStatus = "todo" | "doing" | "done"
+type TaskTag = "guest" | "date" | "plus" | "blocked"
+
+interface PlanningTask {
+  id: string
+  title: string
+  owner: string
+  dueDate?: Date
+  tags: TaskTag[]
+  status: TaskStatus
+}
+
+const taskStatusOptions = [
+  { label: "未着手", value: "todo" },
+  { label: "進行中", value: "doing" },
+  { label: "完了", value: "done" },
+] as const
+
+const taskTagOptions = [
+  { label: "ゲスト", value: "guest" },
+  { label: "日程", value: "date" },
+  { label: "Plus", value: "plus" },
+  { label: "要確認", value: "blocked" },
+] as const
+
+export const RichColumns: StoryObj = {
+  name: "Rich Columns (CellContext API)",
+  render: function RichColumnsStory() {
+    const [tasks, setTasks] = React.useState<PlanningTask[]>([
+      {
+        id: "task-1",
+        title: "招待ゲストの確定",
+        owner: "田中",
+        dueDate: new Date(2026, 5, 26),
+        tags: ["guest", "blocked"],
+        status: "doing",
+      },
+      {
+        id: "task-2",
+        title: "オンボーディング CTA の文言調整",
+        owner: "鈴木",
+        dueDate: new Date(2026, 5, 30),
+        tags: ["plus"],
+        status: "todo",
+      },
+      {
+        id: "task-3",
+        title: "サンプル日程の入力",
+        owner: "佐藤",
+        tags: ["date"],
+        status: "done",
+      },
+    ])
+
+    const updateTask = React.useCallback(
+      (id: string, patch: Partial<PlanningTask>) => {
+        setTasks((current) =>
+          current.map((task) => (task.id === id ? { ...task, ...patch } : task))
+        )
+      },
+      []
+    )
+
+    const columns = React.useMemo<DataTableColumn<PlanningTask>[]>(
+      () => [
+        {
+          key: "title",
+          header: "タスク",
+          sortable: true,
+          edit: { trigger: "doubleClick" },
+          sortValue: (task) => task.title,
+          onRowCommit: (task) => updateTask(task.id, task),
+          cell: ({ row, isEditing, commitEdit, cancelEdit }) =>
+            isEditing ? (
+              <Input
+                autoFocus
+                defaultValue={row.title}
+                className="h-9"
+                onBlur={(event) =>
+                  commitEdit({ ...row, title: event.currentTarget.value })
+                }
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    commitEdit({ ...row, title: event.currentTarget.value })
+                  }
+                  if (event.key === "Escape") {
+                    event.stopPropagation()
+                    cancelEdit()
+                  }
+                }}
+              />
+            ) : (
+              <div className="flex flex-col min-w-0">
+                <span className="typo-label-md text-[var(--Text-High-Emphasis)] truncate">
+                  {row.title}
+                </span>
+                <span className="typo-body-sm text-[var(--Text-Low-Emphasis)] truncate">
+                  担当: {row.owner}
+                </span>
+              </div>
+            ),
+        },
+        createDataTableDateColumn<PlanningTask>({
+          key: "dueDate",
+          header: "期限",
+          sortable: true,
+          width: "sm",
+          value: (task) => task.dueDate,
+          onCommit: (task, dueDate) => updateTask(task.id, { dueDate }),
+        }),
+        createDataTableChipColumn<PlanningTask, TaskTag>({
+          key: "tags",
+          header: "タグ",
+          width: "md",
+          multiple: true,
+          value: (task) => task.tags,
+          options: taskTagOptions,
+          onCommit: (task, tags) =>
+            updateTask(task.id, { tags: Array.isArray(tags) ? [...tags] : [] }),
+        }),
+        createDataTableSelectColumn<PlanningTask, TaskStatus>({
+          key: "status",
+          header: "状態",
+          width: "sm",
+          sortable: true,
+          value: (task) => task.status,
+          options: taskStatusOptions,
+          onCommit: (task, status) => updateTask(task.id, { status }),
+        }),
+      ],
+      [updateTask]
+    )
+
+    return (
+      <div className="p-6">
+        <DataTable
+          rows={tasks}
+          columns={columns}
+          getRowId={(task) => task.id}
+          emptyMessage="タスクがありません"
         />
       </div>
     )

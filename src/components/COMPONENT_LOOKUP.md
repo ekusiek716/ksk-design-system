@@ -79,7 +79,7 @@
 |-----------|--------|----------|---------|
 | BulkActions | `@/components/patterns/admin/bulk-actions` | — | Default, ManySelected |
 | ChartControls | `@/components/patterns/admin/chart-controls` | — | Default, PeriodOnly |
-| DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState | `@/components/patterns/admin/data-table` | **align**: `left`, `center`, `right`<br>**width**: `auto`, `narrow`, `checkbox`, `action`, `sm`, `md`, `lg`, `xl` | Default, Rows / Columns API, Empty, WithSections, CellVariants, Sticky Columns (左端固定), Drag & Drop (行の並べ替え) |
+| DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState | `@/components/patterns/admin/data-table` | **align**: `left`, `center`, `right`<br>**width**: `auto`, `narrow`, `checkbox`, `action`, `sm`, `md`, `lg`, `xl` | Default, Rows / Columns API, Rich Columns (CellContext API), Empty, WithSections, CellVariants, Sticky Columns (左端固定), Drag & Drop (行の並べ替え) |
 | ImageUploader | `@/components/patterns/admin/image-uploader` | — | Default, Empty |
 | KebabMenu | `@/components/patterns/admin/kebab-menu` | — | Default, WithMetadata |
 | NotificationList | `@/components/patterns/admin/notification-list` | — | Vertical, Horizontal, Empty |
@@ -96,7 +96,7 @@
 | BottomSheetForm | `@/components/patterns/bottom-sheet-form` | — | Default, WithLoading |
 | CategoryNav | `@/components/patterns/category-nav` | — | Default, WithSelection |
 | CategoryScroll | `@/components/patterns/category-scroll` | — | Default, CircleShape, GridLayout |
-| Celebration | `@/components/patterns/celebration` | — | Confetti, InlineEmoji |
+| Celebration | `@/components/patterns/celebration` | — | Confetti, InlineEmoji, Actions Slot / Interactive, Cardless / Tap Dismiss |
 | ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, WithMax |
 | Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `sm`, `md`, `lg`, `tile`<br>**shape**: `pill`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape, WithCount, TileAndSoldOut, AsLink, Real UI — Filters & Status |
 | CoachMarkOverlay | `@/components/patterns/coach-mark-overlay` | — | — |
@@ -111,13 +111,16 @@
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot |
 | ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | — |
+| MediaActionCluster | `@/components/patterns/media-action-cluster` | — | Vertical, Horizontal, Auto orientation, No auto-hide |
 | MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
+| PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
 | ProgressSteps | `@/components/patterns/progress-steps` | — | Step2Active, FirstStep, ThirdStep, AllComplete, ThreeSteps |
 | ReviewOverlay | `@/components/patterns/review-overlay` | — | Default, WithPins |
+| Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero |
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch |
 | SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
-| ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders |
+| ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders, With onShare tracking |
 | SimplePagination | `@/components/patterns/simple-pagination` | — | アイテム数指定 (items), ページ数指定 (pages), compact (モバイル省略表示), 境界での disabled, 0 件 |
 | StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, Variants, MultipleCards |
 | StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |

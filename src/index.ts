@@ -216,6 +216,9 @@ export {
   DataTableSectionRow,
   DataTableAddRow,
   DataTableEmptyState,
+  createDataTableDateColumn,
+  createDataTableChipColumn,
+  createDataTableSelectColumn,
 } from "./components/patterns/admin/data-table"
 export { getStickyCellProps } from "./components/patterns/admin/data-table"
 export type {
@@ -225,10 +228,20 @@ export type {
   DataTableRowId,
   DataTableSelectionMode,
   DataTableSortState,
+  DataTableEditTrigger,
+  DataTableCommitOptions,
+  DataTableCellContext,
+  DataTableColumnEditOptions,
+  DataTableColumnOption,
+  DataTableRowCommitHandler,
   DataTableColumn,
   DataTableSelectionState,
   DataTableSection,
   DataTableProps,
+  DataTableDateColumnConfig,
+  DataTableChipColumnValue,
+  DataTableChipColumnConfig,
+  DataTableSelectColumnConfig,
 } from "./components/patterns/admin/data-table"
 
 export { SimplePagination } from "./components/patterns/simple-pagination"
@@ -236,6 +249,19 @@ export type { SimplePaginationProps, SimplePaginationFormat } from "./components
 
 export { MenuDrawer } from "./components/patterns/menu-drawer"
 export type { MenuDrawerProps, MenuDrawerSection, MenuDrawerItem } from "./components/patterns/menu-drawer"
+export { MediaActionCluster } from "./components/patterns/media-action-cluster"
+export type {
+  MediaActionClusterAnchor,
+  MediaActionClusterItem,
+  MediaActionClusterLabelPosition,
+  MediaActionClusterOrientation,
+  MediaActionClusterPosition,
+  MediaActionClusterProps,
+} from "./components/patterns/media-action-cluster"
+export { PhotoHero } from "./components/patterns/photo-hero"
+export type { PhotoHeroAlign, PhotoHeroOverlay, PhotoHeroProps } from "./components/patterns/photo-hero"
+export { Screen } from "./components/patterns/screen"
+export type { ScreenPadding, ScreenProps } from "./components/patterns/screen"
 export { Footer } from "./components/patterns/footer"
 export type { FooterProps, FooterLinkGroup } from "./components/patterns/footer"
 export { ShareButtons } from "./components/patterns/share-buttons"
