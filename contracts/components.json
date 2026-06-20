@@ -1009,12 +1009,19 @@
     {
       "name": "Celebration",
       "path": "src/components/patterns/celebration.tsx",
-      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、prefers-reduced-motion 対応。",
+      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、actions slot、interactive card tap、cardless モード、tap dismiss、prefers-reduced-motion 対応。",
       "variants": [
         "confetti",
         "emoji",
         "both",
         "none"
+      ],
+      "features": [
+        "actions-slot",
+        "interactive",
+        "cardless",
+        "tap-dismiss",
+        "duration-control"
       ],
       "accessibility": [
         "role=status",
@@ -1023,7 +1030,9 @@
       ],
       "rules": [
         "一時的な達成演出に使用",
-        "ローディングや常時表示の装飾用途には使わない"
+        "ローディングや常時表示の装飾用途には使わない",
+        "CTA を含む達成 UI は actions slot を使い、カード tap で任意 dismiss したい場合は interactive または onTapDismiss を使う",
+        "カード不要の演出は cardless を使う"
       ]
     },
     {
@@ -1454,9 +1463,15 @@
     {
       "name": "DataTable",
       "path": "src/components/patterns/admin/data-table.tsx",
-      "description": "管理画面データテーブル。rows/columns の高水準 API と、既存サブコンポーネントによる手組み API の両方に対応。ソート・チェックボックス・行アクション・インライン編集・ドラッグ並び替え・セクション行対応。",
+      "description": "管理画面データテーブル。rows/columns の高水準 API と、既存サブコンポーネントによる手組み API の両方に対応。CellContext API（isEditing / startEdit / commitEdit / cancelEdit）/ Date・Chip・Select 列ヘルパー、ソート・チェックボックス・行アクション・インライン編集・ドラッグ並び替え・セクション行対応。",
       "features": [
         "rows-columns-api",
+        "cell-context-api",
+        "edit-trigger",
+        "rich-column-helpers",
+        "date-column",
+        "chip-column",
+        "select-column",
         "sort",
         "checkbox",
         "actions",
@@ -1466,7 +1481,8 @@
       ],
       "rules": [
         "rows/columns API は最短実装向け",
-        "複雑なセル構成は DataTableHead, DataTableRow, DataTableCell などのサブコンポーネントを使う"
+        "DateField / Chip cluster / typed Select などのリッチ列は cell と edit.trigger、または createDataTableDateColumn / createDataTableChipColumn / createDataTableSelectColumn を使う",
+        "複雑なテーブル全体構成は DataTableHead, DataTableRow, DataTableCell などのサブコンポーネントを使う"
       ]
     },
     {

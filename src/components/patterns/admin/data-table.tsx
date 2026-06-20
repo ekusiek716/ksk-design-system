@@ -10,6 +10,8 @@ import {
   SelectContent,
   SelectItem,
 } from "../../ui/select"
+import { DatePicker } from "../../ui/date-picker"
+import { Chip } from "../chip"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -37,6 +39,7 @@ type StickyPosition = "left" | "right" | true
 type DataTableRowId = string | number
 type DataTableSelectionMode = "none" | "single" | "multi"
 type DataTableColumnAlign = "left" | "center" | "right"
+type DataTableEditTrigger = "click" | "doubleClick" | "focus" | "manual"
 type DataTableColumnWidth =
   | "auto"
   | "narrow"
@@ -52,13 +55,58 @@ interface DataTableSortState {
   direction: Exclude<SortDirection, null>
 }
 
-interface DataTableColumn<TRow> {
+interface DataTableCommitOptions {
+  close?: boolean
+}
+
+interface DataTableCellContext<TRow, TValue = unknown> {
+  row: TRow
+  index: number
+  rowIndex: number
+  rowId: DataTableRowId
+  column: DataTableColumn<TRow>
+  value: TValue
+  isEditing: boolean
+  startEdit: () => void
+  commitEdit: (row: TRow, options?: DataTableCommitOptions) => void
+  commitValue: (value: TValue, options?: DataTableCommitOptions) => void
+  cancelEdit: () => void
+}
+
+interface DataTableColumnEditOptions {
+  trigger?: DataTableEditTrigger
+}
+
+interface DataTableColumnOption<TValue extends string = string> {
+  label: string
+  value: TValue
+  icon?: React.ReactNode
+}
+
+type DataTableCellRenderer<TRow, TValue> = {
+  bivarianceHack(context: DataTableCellContext<TRow, TValue>): React.ReactNode
+}["bivarianceHack"]
+
+type DataTableCellCommitHandler<TRow, TValue> = {
+  bivarianceHack(row: TRow, value: TValue, index: number): void
+}["bivarianceHack"]
+
+type DataTableRowCommitHandler<TRow> = {
+  bivarianceHack(row: TRow, previousRow: TRow, index: number): void
+}["bivarianceHack"]
+
+// DataTable の columns 配列は列ごとに Date / string[] / string など別の value 型を混在させる。
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface DataTableColumn<TRow, TValue = any> {
   key: string
   header: React.ReactNode
   render?: (row: TRow, index: number) => React.ReactNode
-  value?: (row: TRow, index: number) => React.ReactNode
+  value?: (row: TRow, index: number) => TValue
+  cell?: DataTableCellRenderer<TRow, TValue>
+  editCell?: DataTableCellRenderer<TRow, TValue>
   sortValue?: (row: TRow, index: number) => string | number | Date | null | undefined
   sortable?: boolean
+  edit?: DataTableColumnEditOptions
   align?: DataTableColumnAlign
   width?: DataTableColumnWidth
   className?: string
@@ -68,7 +116,10 @@ interface DataTableColumn<TRow> {
   editable?: boolean
   editValue?: (row: TRow, index: number) => string
   onEditChange?: (row: TRow, value: string, index: number) => void
-  editOptions?: { label: string; value: string }[]
+  onCellCommit?: DataTableCellCommitHandler<TRow, TValue>
+  onRowCommit?: DataTableRowCommitHandler<TRow>
+  onEditCancel?: (row: TRow, index: number) => void
+  editOptions?: DataTableColumnOption<string>[]
 }
 
 interface DataTableSelectionState {
@@ -113,28 +164,117 @@ function resolveRowId<TRow>(
   return index
 }
 
-function getColumnFallbackValue<TRow>(row: TRow, key: string): React.ReactNode {
+function getColumnFallbackValue<TRow>(row: TRow, key: string): unknown {
   if (!row || typeof row !== "object" || !(key in row)) return null
-  return (row as Record<string, React.ReactNode>)[key]
+  return (row as Record<string, unknown>)[key]
 }
 
-function getColumnValue<TRow>(
+function getColumnRawValue<TRow, TValue>(
   row: TRow,
   index: number,
-  column: DataTableColumn<TRow>
-): React.ReactNode {
-  if (column.render) return column.render(row, index)
+  column: DataTableColumn<TRow, TValue>
+): TValue {
   if (column.value) return column.value(row, index)
-  return getColumnFallbackValue(row, column.key)
+  return getColumnFallbackValue(row, column.key) as TValue
 }
 
-function getColumnSortValue<TRow>(
+function createDataTableCellContext<TRow, TValue>(
   row: TRow,
   index: number,
-  column: DataTableColumn<TRow>
+  rowId: DataTableRowId,
+  column: DataTableColumn<TRow, TValue>,
+  value: TValue,
+  isEditing: boolean,
+  startEdit: () => void,
+  closeEdit: () => void,
+  onRowCommit?: DataTableRowCommitHandler<TRow>
+): DataTableCellContext<TRow, TValue> {
+  const shouldClose = (options?: DataTableCommitOptions) => options?.close !== false
+  return {
+    row,
+    index,
+    rowIndex: index,
+    rowId,
+    column: column as DataTableColumn<TRow>,
+    value,
+    isEditing,
+    startEdit,
+    commitEdit: (nextRow, options) => {
+      column.onRowCommit?.(nextRow, row, index)
+      onRowCommit?.(nextRow, row, index)
+      if (shouldClose(options)) closeEdit()
+    },
+    commitValue: (nextValue, options) => {
+      column.onCellCommit?.(row, nextValue, index)
+      if (typeof nextValue === "string") {
+        column.onEditChange?.(row, nextValue, index)
+      }
+      if (shouldClose(options)) closeEdit()
+    },
+    cancelEdit: () => {
+      column.onEditCancel?.(row, index)
+      closeEdit()
+    },
+  }
+}
+
+function getColumnValue<TRow, TValue>(
+  row: TRow,
+  index: number,
+  column: DataTableColumn<TRow, TValue>,
+  context: DataTableCellContext<TRow, TValue>
+): React.ReactNode {
+  if (column.cell) return column.cell(context)
+  if (column.render) return column.render(row, index)
+  return getColumnRawValue(row, index, column) as React.ReactNode
+}
+
+function getCellEditTriggerProps<TRow, TValue>(
+  column: DataTableColumn<TRow, TValue>,
+  context: DataTableCellContext<TRow, TValue>
+): React.ComponentProps<"td"> {
+  const trigger = column.edit?.trigger ?? "doubleClick"
+  if (trigger === "manual") return {}
+
+  const keyProps: React.ComponentProps<"td"> = {
+    onKeyDown: (event) => {
+      if (event.key === "Escape" && context.isEditing) {
+        event.stopPropagation()
+        context.cancelEdit()
+      }
+      if (event.key === "Enter" && !context.isEditing) {
+        event.preventDefault()
+        context.startEdit()
+      }
+    },
+  }
+
+  if (trigger === "click") {
+    return {
+      ...keyProps,
+      onClick: () => context.startEdit(),
+    }
+  }
+  if (trigger === "focus") {
+    return {
+      ...keyProps,
+      tabIndex: 0,
+      onFocus: () => context.startEdit(),
+    }
+  }
+  return {
+    ...keyProps,
+    onDoubleClick: () => context.startEdit(),
+  }
+}
+
+function getColumnSortValue<TRow, TValue>(
+  row: TRow,
+  index: number,
+  column: DataTableColumn<TRow, TValue>
 ): string | number | Date | null | undefined {
   if (column.sortValue) return column.sortValue(row, index)
-  const value = column.value ? column.value(row, index) : getColumnFallbackValue(row, column.key)
+  const value = getColumnRawValue(row, index, column)
   if (value === null) return null
   if (value === undefined) return undefined
   if (typeof value === "string" || typeof value === "number" || value instanceof Date) {
@@ -238,6 +378,7 @@ interface DataTableProps<TRow = unknown> extends React.ComponentProps<"div"> {
   rows?: readonly TRow[]
   columns?: readonly DataTableColumn<TRow>[]
   getRowId?: (row: TRow, index: number) => DataTableRowId
+  onRowCommit?: DataTableRowCommitHandler<TRow>
   sort?: DataTableSortState | null
   defaultSort?: DataTableSortState | null
   onSortChange?: (sort: DataTableSortState | null) => void
@@ -256,6 +397,7 @@ function DataTable<TRow = unknown>({
   rows,
   columns,
   getRowId,
+  onRowCommit,
   sort,
   defaultSort = null,
   onSortChange,
@@ -272,6 +414,10 @@ function DataTable<TRow = unknown>({
   const [internalSelectedIds, setInternalSelectedIds] = React.useState<DataTableRowId[]>(
     selection?.defaultSelectedRowIds ?? []
   )
+  const [editingCell, setEditingCell] = React.useState<{
+    rowId: DataTableRowId
+    columnKey: string
+  } | null>(null)
   const isHighLevel = rows != null && columns != null
   const activeSort = sort !== undefined ? sort : internalSort
   const activeRows = (rows ?? EMPTY_ROWS) as readonly TRow[]
@@ -491,6 +637,45 @@ function DataTable<TRow = unknown>({
                       />
                     )}
                     {activeColumns.map((column) => {
+                      const rawValue = getColumnRawValue(row, index, column)
+                      const isEditing =
+                        editingCell?.rowId === rowId && editingCell.columnKey === column.key
+                      const startEdit = () => setEditingCell({ rowId, columnKey: column.key })
+                      const closeEdit = () =>
+                        setEditingCell((current) =>
+                          current?.rowId === rowId && current.columnKey === column.key
+                            ? null
+                            : current
+                        )
+                      const context = createDataTableCellContext(
+                        row,
+                        index,
+                        rowId,
+                        column,
+                        rawValue,
+                        isEditing,
+                        startEdit,
+                        closeEdit,
+                        onRowCommit
+                      )
+                      if (column.cell || column.editCell) {
+                        const editTriggerProps = getCellEditTriggerProps(column, context)
+                        return (
+                          <DataTableCell
+                            key={column.key}
+                            {...editTriggerProps}
+                            align={column.align}
+                            width={column.width}
+                            sticky={column.sticky}
+                            stickyOffset={column.stickyOffset}
+                            className={column.className}
+                          >
+                            {isEditing && column.editCell
+                              ? column.editCell(context)
+                              : getColumnValue(row, index, column, context)}
+                          </DataTableCell>
+                        )
+                      }
                       if (column.editable) {
                         const value =
                           column.editValue?.(row, index) ??
@@ -524,7 +709,7 @@ function DataTable<TRow = unknown>({
                           stickyOffset={column.stickyOffset}
                           className={column.className}
                         >
-                          {getColumnValue(row, index, column)}
+                          {getColumnValue(row, index, column, context)}
                         </DataTableCell>
                       )
                     })}
@@ -1224,6 +1409,222 @@ function DataTableEmptyState({
   )
 }
 
+// ─── 21. Rows / Columns Helpers ───
+
+type DataTableHelperColumnBase<TRow, TValue> = Pick<
+  DataTableColumn<TRow, TValue>,
+  | "key"
+  | "header"
+  | "sortable"
+  | "align"
+  | "width"
+  | "className"
+  | "headerClassName"
+  | "sticky"
+  | "stickyOffset"
+  | "edit"
+>
+
+interface DataTableDateColumnConfig<TRow>
+  extends DataTableHelperColumnBase<TRow, Date | undefined> {
+  value: (row: TRow, index: number) => Date | undefined
+  onCommit?: (row: TRow, value: Date | undefined, index: number) => void
+  placeholder?: string
+  emptyLabel?: string
+  format?: (value: Date, row: TRow, index: number) => React.ReactNode
+}
+
+type DataTableChipColumnValue<TValue extends string = string> =
+  | TValue
+  | readonly TValue[]
+  | undefined
+
+interface DataTableChipColumnConfig<TRow, TValue extends string = string>
+  extends DataTableHelperColumnBase<TRow, DataTableChipColumnValue<TValue>> {
+  value: (row: TRow, index: number) => DataTableChipColumnValue<TValue>
+  options: readonly DataTableColumnOption<TValue>[]
+  onCommit?: (row: TRow, value: DataTableChipColumnValue<TValue>, index: number) => void
+  multiple?: boolean
+  emptyLabel?: string
+}
+
+interface DataTableSelectColumnConfig<TRow, TValue extends string = string>
+  extends DataTableHelperColumnBase<TRow, TValue | undefined> {
+  value: (row: TRow, index: number) => TValue | undefined
+  options: readonly DataTableColumnOption<TValue>[]
+  onCommit?: (row: TRow, value: TValue, index: number) => void
+  placeholder?: string
+  emptyLabel?: string
+}
+
+function formatDataTableDate(value: Date) {
+  return value.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+}
+
+function getSelectedOptions<TValue extends string>(
+  options: readonly DataTableColumnOption<TValue>[],
+  value: DataTableChipColumnValue<TValue>
+) {
+  const values = new Set(Array.isArray(value) ? value : value ? [value] : [])
+  return options.filter((option) => values.has(option.value))
+}
+
+function createDataTableDateColumn<TRow>({
+  value,
+  onCommit,
+  placeholder = "日付を選択",
+  emptyLabel = "未設定",
+  format,
+  ...column
+}: DataTableDateColumnConfig<TRow>): DataTableColumn<TRow, Date | undefined> {
+  return {
+    ...column,
+    edit: { trigger: "click", ...column.edit },
+    value,
+    onCellCommit: onCommit,
+    sortValue: (row, index) => value(row, index),
+    cell: ({ row, rowIndex, value: cellValue }) =>
+      cellValue ? (
+        format ? (
+          format(cellValue, row, rowIndex)
+        ) : (
+          formatDataTableDate(cellValue)
+        )
+      ) : (
+        <span className="text-[var(--Text-Low-Emphasis)]">{emptyLabel}</span>
+      ),
+    editCell: ({ value: cellValue, commitValue }) => (
+      <DatePicker
+        value={cellValue}
+        onChange={commitValue}
+        placeholder={placeholder}
+        className="h-9 min-w-[150px]"
+      />
+    ),
+  }
+}
+
+function createDataTableChipColumn<TRow, TValue extends string = string>({
+  value,
+  options,
+  onCommit,
+  multiple = false,
+  emptyLabel = "未設定",
+  ...column
+}: DataTableChipColumnConfig<TRow, TValue>): DataTableColumn<
+  TRow,
+  DataTableChipColumnValue<TValue>
+> {
+  return {
+    ...column,
+    edit: { trigger: "click", ...column.edit },
+    value,
+    onCellCommit: onCommit,
+    sortValue: (row, index) => {
+      const currentValue = value(row, index)
+      if (currentValue === undefined || typeof currentValue === "string") return currentValue
+      return Array.from(currentValue).join(",")
+    },
+    cell: ({ value: cellValue }) => {
+      const selectedOptions = getSelectedOptions(options, cellValue)
+      if (selectedOptions.length === 0) {
+        return <span className="text-[var(--Text-Low-Emphasis)]">{emptyLabel}</span>
+      }
+      return (
+        <div className="flex flex-wrap gap-1.5">
+          {selectedOptions.map((option) => (
+            <span
+              key={option.value}
+              className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[var(--Surface-Accent-Primary-Light)] px-2.5 typo-label-xs text-[var(--Text-Accent-Primary)]"
+            >
+              {option.icon}
+              {option.label}
+            </span>
+          ))}
+        </div>
+      )
+    },
+    editCell: ({ value: cellValue, commitValue }) => {
+      const currentValues = new Set(Array.isArray(cellValue) ? cellValue : cellValue ? [cellValue] : [])
+      return (
+        <div className="flex flex-wrap gap-1.5">
+          {options.map((option) => {
+            const selected = currentValues.has(option.value)
+            const nextValue = multiple
+              ? selected
+                ? Array.from(currentValues).filter((item) => item !== option.value)
+                : [...Array.from(currentValues), option.value]
+              : option.value
+            return (
+              <Chip
+                key={option.value}
+                size="sm"
+                variant="accent"
+                selected={selected}
+                onClick={() =>
+                  commitValue(nextValue as DataTableChipColumnValue<TValue>, {
+                    close: !multiple,
+                  })
+                }
+              >
+                {option.icon}
+                {option.label}
+              </Chip>
+            )
+          })}
+        </div>
+      )
+    },
+  }
+}
+
+function createDataTableSelectColumn<TRow, TValue extends string = string>({
+  value,
+  options,
+  onCommit,
+  placeholder = "選択",
+  emptyLabel = "未設定",
+  ...column
+}: DataTableSelectColumnConfig<TRow, TValue>): DataTableColumn<TRow, TValue | undefined> {
+  return {
+    ...column,
+    edit: { trigger: "click", ...column.edit },
+    value,
+    onCellCommit: onCommit,
+    sortValue: (row, index) => value(row, index),
+    cell: ({ value: cellValue }) => {
+      const option = options.find((item) => item.value === cellValue)
+      return option ? (
+        <span className="inline-flex items-center gap-1.5">
+          {option.icon}
+          {option.label}
+        </span>
+      ) : (
+        <span className="text-[var(--Text-Low-Emphasis)]">{emptyLabel}</span>
+      )
+    },
+    editCell: ({ value: cellValue, commitValue }) => (
+      <Select value={cellValue} onValueChange={(next) => commitValue(next as TValue)}>
+        <SelectTrigger className="h-8 min-w-[120px] typo-body-md border-transparent hover:border-[var(--Border-Low-Emphasis)]">
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.icon}
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    ),
+  }
+}
+
 // ─── Exports ───
 
 export {
@@ -1247,6 +1648,9 @@ export {
   DataTableSectionRow,
   DataTableAddRow,
   DataTableEmptyState,
+  createDataTableDateColumn,
+  createDataTableChipColumn,
+  createDataTableSelectColumn,
 }
 
 export { getStickyCellProps }
@@ -1257,8 +1661,18 @@ export type {
   DataTableRowId,
   DataTableSelectionMode,
   DataTableSortState,
+  DataTableEditTrigger,
+  DataTableCommitOptions,
+  DataTableCellContext,
+  DataTableColumnEditOptions,
+  DataTableColumnOption,
+  DataTableRowCommitHandler,
   DataTableColumn,
   DataTableSelectionState,
   DataTableSection,
   DataTableProps,
+  DataTableDateColumnConfig,
+  DataTableChipColumnValue,
+  DataTableChipColumnConfig,
+  DataTableSelectColumnConfig,
 }

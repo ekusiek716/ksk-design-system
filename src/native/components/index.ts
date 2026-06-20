@@ -20,6 +20,12 @@ export { NotificationBadge, type NotificationBadgeProps } from "./NotificationBa
 export { StatCard, type StatCardProps } from "./StatCard"
 export { SyncStatusBadge, type SyncStatusBadgeProps, type SyncStatus } from "./SyncStatusBadge"
 export { CountdownTimer, type CountdownTimerProps } from "./CountdownTimer"
+export {
+  Celebration,
+  type CelebrationProps,
+  type CelebrationTrigger,
+  type CelebrationPlacement,
+} from "./Celebration"
 
 // Phase 2: Basic Form
 export { Label, type LabelProps } from "./Label"

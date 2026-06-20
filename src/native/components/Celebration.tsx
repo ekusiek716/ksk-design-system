@@ -1,0 +1,326 @@
+import React, { useEffect, useMemo, useState } from "react"
+import {
+  Animated,
+  Easing,
+  Modal,
+  Pressable,
+  Text as RNText,
+  View,
+  type ViewStyle,
+} from "react-native"
+import { useTheme } from "../theme/ThemeProvider"
+import { resolveTypo } from "../typography"
+
+export type CelebrationTrigger = "confetti" | "emoji" | "both" | "none"
+export type CelebrationPlacement = "overlay" | "inline"
+
+export interface CelebrationProps {
+  active?: boolean
+  trigger?: CelebrationTrigger
+  placement?: CelebrationPlacement
+  emoji?: string
+  title?: string
+  description?: string
+  actions?: React.ReactNode
+  interactive?: boolean
+  cardless?: boolean
+  particleCount?: number
+  durationMs?: number
+  autoDismissMs?: number
+  onTapDismiss?: () => void
+  onDone?: () => void
+  style?: ViewStyle
+  cardStyle?: ViewStyle
+  testID?: string
+}
+
+const CONFETTI_COLORS = [
+  "brand",
+  "success",
+  "warning",
+  "caution",
+  "info",
+] as const
+
+function seededRatio(seed: number) {
+  const x = Math.sin(seed * 999) * 10000
+  return x - Math.floor(x)
+}
+
+function useAnimatedValue(initialValue: number) {
+  const [value] = useState(() => new Animated.Value(initialValue))
+  return value
+}
+
+function Celebration({
+  active = true,
+  trigger = "confetti",
+  placement = "overlay",
+  emoji = "🎉",
+  title,
+  description,
+  actions,
+  interactive = false,
+  cardless = false,
+  particleCount = 36,
+  durationMs = 2600,
+  autoDismissMs,
+  onTapDismiss,
+  onDone,
+  style,
+  cardStyle,
+  testID,
+}: CelebrationProps) {
+  const { theme, scales } = useTheme()
+  const resolvedDurationMs = autoDismissMs ?? durationMs
+  const showConfetti = trigger === "confetti" || trigger === "both"
+  const showMessage = !cardless && (trigger === "confetti" || trigger === "emoji" || trigger === "both")
+  const canTapDismiss = Boolean(onTapDismiss || interactive)
+  const overlay = placement === "overlay"
+  const pop = useAnimatedValue(0.94)
+  const opacity = useAnimatedValue(0)
+
+  const particles = useMemo(
+    () =>
+      Array.from({ length: particleCount }, (_, index) => ({
+        id: index,
+        left: Math.round(seededRatio(index + 1) * 100),
+        delay: Math.round(seededRatio(index + 11) * 420),
+        duration: Math.round(resolvedDurationMs * (0.78 + seededRatio(index + 21) * 0.44)),
+        drift: Math.round((seededRatio(index + 31) - 0.5) * 160),
+        rotate: Math.round(seededRatio(index + 41) * 720),
+        size: 6 + Math.round(seededRatio(index + 51) * 6),
+        color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
+      })),
+    [particleCount, resolvedDurationMs],
+  )
+
+  useEffect(() => {
+    if (!active) return
+    pop.setValue(0.94)
+    opacity.setValue(0)
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 160,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.spring(pop, {
+        toValue: 1,
+        friction: 7,
+        tension: 110,
+        useNativeDriver: true,
+      }),
+    ]).start()
+  }, [active, opacity, pop])
+
+  useEffect(() => {
+    if (!active || !onDone) return
+    const id = setTimeout(onDone, resolvedDurationMs)
+    return () => clearTimeout(id)
+  }, [active, onDone, resolvedDurationMs])
+
+  if (!active || trigger === "none") return null
+
+  const handleTapDismiss = () => {
+    if (onTapDismiss) {
+      onTapDismiss()
+      return
+    }
+    if (interactive) onDone?.()
+  }
+
+  const content = (
+    <View
+      pointerEvents="box-none"
+      testID={testID}
+      accessibilityRole="alert"
+      accessibilityLiveRegion="polite"
+      style={[
+        overlay
+          ? {
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+            }
+          : {
+              position: "relative",
+              minHeight: showMessage ? 180 : 80,
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+            },
+        style,
+      ]}
+    >
+      {showConfetti && (
+        <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+          {particles.map((piece) => (
+            <ConfettiPiece
+              key={piece.id}
+              color={resolveConfettiColor(theme, piece.color)}
+              delay={piece.delay}
+              duration={piece.duration}
+              drift={piece.drift}
+              left={`${piece.left}%`}
+              rotate={piece.rotate}
+              size={piece.size}
+            />
+          ))}
+        </View>
+      )}
+
+      {canTapDismiss && (
+        <Pressable
+          accessibilityLabel="閉じる"
+          onPress={handleTapDismiss}
+          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+        />
+      )}
+
+      {showMessage && (
+        <Animated.View style={{ opacity, transform: [{ scale: pop }] }}>
+          <Pressable
+            onPress={canTapDismiss ? handleTapDismiss : undefined}
+            style={[
+              {
+                width: "100%",
+                maxWidth: 360,
+                marginHorizontal: scales.spacing.scale[4],
+                alignItems: "center",
+                borderRadius: scales.borderRadius["2xl"],
+                borderWidth: 1,
+                borderColor: theme.border["low-emphasis"],
+                backgroundColor: theme.surface.primary,
+                paddingHorizontal: scales.spacing.scale[6],
+                paddingVertical: scales.spacing.scale[5],
+                shadowColor: theme.overlay.dark,
+                shadowOffset: { width: 0, height: 12 },
+                shadowOpacity: 0.14,
+                shadowRadius: 24,
+                elevation: 10,
+              },
+              cardStyle,
+            ]}
+          >
+            {emoji && (
+              <RNText style={[resolveTypo("display.lg"), { marginBottom: scales.spacing.scale[3] }]}>
+                {emoji}
+              </RNText>
+            )}
+            {title && (
+              <RNText
+                style={[
+                  resolveTypo("heading.md"),
+                  { color: theme.text["high-emphasis"], textAlign: "center" },
+                ]}
+              >
+                {title}
+              </RNText>
+            )}
+            {description && (
+              <RNText
+                style={[
+                  resolveTypo("body.sm"),
+                  {
+                    color: theme.text["medium-emphasis"],
+                    marginTop: scales.spacing.scale[1],
+                    textAlign: "center",
+                  },
+                ]}
+              >
+                {description}
+              </RNText>
+            )}
+            {actions && (
+              <Pressable onPress={() => {}} style={{ marginTop: scales.spacing.scale[4], width: "100%" }}>
+                {actions}
+              </Pressable>
+            )}
+          </Pressable>
+        </Animated.View>
+      )}
+    </View>
+  )
+
+  if (!overlay) return content
+
+  return (
+    <Modal visible transparent animationType="none" onRequestClose={handleTapDismiss}>
+      <View style={{ flex: 1, backgroundColor: "transparent" }}>{content}</View>
+    </Modal>
+  )
+}
+
+function resolveConfettiColor(
+  theme: ReturnType<typeof useTheme>["theme"],
+  color: (typeof CONFETTI_COLORS)[number],
+) {
+  if (color === "brand") return theme.brand.primary
+  if (color === "success") return theme.success.base
+  if (color === "warning") return theme.warning.base
+  if (color === "caution") return theme.caution.base
+  return theme.info.base
+}
+
+function ConfettiPiece({
+  color,
+  delay,
+  duration,
+  drift,
+  left,
+  rotate,
+  size,
+}: {
+  color: string
+  delay: number
+  duration: number
+  drift: number
+  left: `${number}%`
+  rotate: number
+  size: number
+}) {
+  const progress = useAnimatedValue(0)
+
+  useEffect(() => {
+    progress.setValue(0)
+    const animation = Animated.timing(progress, {
+      toValue: 1,
+      duration,
+      delay,
+      easing: Easing.in(Easing.quad),
+      useNativeDriver: true,
+    })
+    animation.start()
+    return () => animation.stop()
+  }, [delay, duration, progress])
+
+  return (
+    <Animated.View
+      style={{
+        position: "absolute",
+        top: -12,
+        left,
+        width: size,
+        height: Math.max(4, size - 2),
+        borderRadius: 2,
+        backgroundColor: color,
+        opacity: progress.interpolate({ inputRange: [0, 0.08, 0.92, 1], outputRange: [0, 1, 1, 0] }),
+        transform: [
+          {
+            translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [0, 760] }),
+          },
+          {
+            translateX: progress.interpolate({ inputRange: [0, 1], outputRange: [0, drift] }),
+          },
+          {
+            rotate: progress.interpolate({ inputRange: [0, 1], outputRange: ["0deg", `${rotate}deg`] }),
+          },
+        ],
+      }}
+    />
+  )
+}
+
+export { Celebration }
