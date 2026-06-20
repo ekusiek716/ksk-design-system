@@ -4,7 +4,7 @@
 
 **🔗 ライブ Storybook → https://ksk-design-system.vercel.app**
 
-113 コンポーネントを実際に操作・確認できます。
+115 コンポーネントを実際に操作・確認できます。
 
 ---
 
@@ -14,7 +14,7 @@
 - **アクセシブル** — shadcn/ui（Radix UI ベース）+ `@storybook/addon-a11y` で a11y を担保
 - **Tailwind CSS v4 ネイティブ** — `@theme` ベースのトークン設計
 - **型安全** — React 19 + TypeScript、CVA によるバリアント管理
-- **113 + 91 コンポーネント** — Web 113（UI 56 / EC 11 / 管理 8 / シェル 3 / パターン 35）+ React Native 91
+- **115 + 91 コンポーネント** — Web 115（UI 56 / EC 11 / 管理 8 / シェル 3 / パターン 37）+ React Native 91
 - **iOS 26 Liquid Glass 対応** — RN 側 `GlassView` + `Button variant="glass"`、Web 側 `.glass` CSS マテリアル
 
 ## 🎨 テーマ
@@ -72,6 +72,24 @@ import { MediaActionCluster } from "ksk-design-system"
     ]}
   />
 </div>
+```
+
+### Fullscreen screen primitives
+
+フルスクリーン画面は `Screen` で固定高 root、本文の内部スクロール、下部 CTA の safe-area 余白をまとめて扱います。写真背景の入口画面やオンボーディングスライドは `PhotoHero` と `typo-on-image` を組み合わせます。
+
+```tsx
+import { Screen, PhotoHero, Button } from "ksk-design-system"
+
+<Screen scroll={false} padding="none">
+  <PhotoHero src="/onboarding/slide-1.jpg" overlay="dark">
+    <PhotoHero.Eyebrow>さあ、始めよう</PhotoHero.Eyebrow>
+    <PhotoHero.Title>ふたりの準備、ここから。</PhotoHero.Title>
+    <PhotoHero.Actions>
+      <Button variant="glass-inverse" className="w-full">はじめる</Button>
+    </PhotoHero.Actions>
+  </PhotoHero>
+</Screen>
 ```
 
 ### React Native / Expo

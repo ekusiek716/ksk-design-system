@@ -61,6 +61,7 @@
   --Text-on-Media:         var(--Primitive-White);
   --Text-on-Media-Secondary: var(--Primitive-White-Alpha-800);
   --Text-on-Media-Shadow:  0 1px 3px rgba(0, 0, 0, 0.85);
+  --Text-Shadow-on-Image:  0 2px 8px rgba(0, 0, 0, 0.45);
   --Text-Accent-Primary:   var(--Primitive-Brand-600);
   --Text-Success:          var(--Primitive-Green-700);
   --Text-Caution:          var(--Primitive-Red-600);
@@ -189,6 +190,7 @@
   --Text-on-Media:         var(--Primitive-White);
   --Text-on-Media-Secondary: var(--Primitive-White-Alpha-800);
   --Text-on-Media-Shadow:  0 1px 3px rgba(0, 0, 0, 0.85);
+  --Text-Shadow-on-Image:  0 2px 8px rgba(0, 0, 0, 0.45);
   --Text-Accent-Primary:   var(--Primitive-Brand-400);
   --Text-Success:          var(--Primitive-Green-400);
   --Text-Caution:          var(--Primitive-Red-400);
