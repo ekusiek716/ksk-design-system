@@ -236,6 +236,15 @@ export type { SimplePaginationProps, SimplePaginationFormat } from "./components
 
 export { MenuDrawer } from "./components/patterns/menu-drawer"
 export type { MenuDrawerProps, MenuDrawerSection, MenuDrawerItem } from "./components/patterns/menu-drawer"
+export { MediaActionCluster } from "./components/patterns/media-action-cluster"
+export type {
+  MediaActionClusterAnchor,
+  MediaActionClusterItem,
+  MediaActionClusterLabelPosition,
+  MediaActionClusterOrientation,
+  MediaActionClusterPosition,
+  MediaActionClusterProps,
+} from "./components/patterns/media-action-cluster"
 export { Footer } from "./components/patterns/footer"
 export type { FooterProps, FooterLinkGroup } from "./components/patterns/footer"
 export { ShareButtons } from "./components/patterns/share-buttons"

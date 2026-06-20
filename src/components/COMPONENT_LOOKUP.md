@@ -111,13 +111,14 @@
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot |
 | ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | — |
+| MediaActionCluster | `@/components/patterns/media-action-cluster` | — | Vertical, Horizontal, Auto orientation, No auto-hide |
 | MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | ProgressSteps | `@/components/patterns/progress-steps` | — | Step2Active, FirstStep, ThirdStep, AllComplete, ThreeSteps |
 | ReviewOverlay | `@/components/patterns/review-overlay` | — | Default, WithPins |
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch |
 | SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
-| ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders |
+| ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders, With onShare tracking |
 | SimplePagination | `@/components/patterns/simple-pagination` | — | アイテム数指定 (items), ページ数指定 (pages), compact (モバイル省略表示), 境界での disabled, 0 件 |
 | StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, Variants, MultipleCards |
 | StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |

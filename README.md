@@ -4,7 +4,7 @@
 
 **🔗 ライブ Storybook → https://ksk-design-system.vercel.app**
 
-110 コンポーネントを実際に操作・確認できます。
+113 コンポーネントを実際に操作・確認できます。
 
 ---
 
@@ -14,7 +14,7 @@
 - **アクセシブル** — shadcn/ui（Radix UI ベース）+ `@storybook/addon-a11y` で a11y を担保
 - **Tailwind CSS v4 ネイティブ** — `@theme` ベースのトークン設計
 - **型安全** — React 19 + TypeScript、CVA によるバリアント管理
-- **110 + 91 コンポーネント** — Web 110（UI 55 / EC 11 / 管理 8 / シェル 3 / パターン 33）+ React Native 91
+- **113 + 91 コンポーネント** — Web 113（UI 56 / EC 11 / 管理 8 / シェル 3 / パターン 35）+ React Native 91
 - **iOS 26 Liquid Glass 対応** — RN 側 `GlassView` + `Button variant="glass"`、Web 側 `.glass` CSS マテリアル
 
 ## 🎨 テーマ
@@ -53,6 +53,26 @@ import { Button, Card, Input, FormField } from "ksk-design-system"
 ```
 
 新規クライアント案件では、テーマファイルで `--Primitive-Brand-500` などブランドカラーの 10 行を定義するだけで、全コンポーネントがそのブランドカラーで動作します。
+
+### Media overlay utilities
+
+動画・写真の上に文字や操作を置く場合は、`--Text-on-Media` と `.text-on-media` / `.text-on-media-secondary`、上下の `.media-scrim-top` / `.media-scrim-bottom` を使います。TikTok / Reels 型の操作群は `MediaActionCluster` が glass ボタン、ラベル、safe-area anchor、idle auto-hide をまとめて扱います。
+
+```tsx
+import { MediaActionCluster } from "ksk-design-system"
+
+<div className="relative">
+  <div className="absolute inset-x-0 top-0 h-32 media-scrim-top" />
+  <h1 className="text-on-media">メディア上のタイトル</h1>
+  <MediaActionCluster
+    anchor="bottom-right"
+    items={[
+      { label: "いいね", icon: <HeartIcon />, active: true },
+      { label: "シェア", icon: <ShareIcon /> },
+    ]}
+  />
+</div>
+```
 
 ### React Native / Expo
 

@@ -119,9 +119,13 @@
 /**
  * .glass-inverse
  * 暗い写真・動画・濃色面上で glass ボタンの文字色を白系に保つ。
+ * アプリの .dark テーマではなく、背後の面が暗いことを宣言する utility。
  */
-.dark .glass-inverse {
-  --glass-button-text: var(--Text-High-Emphasis);
+.glass-inverse,
+.glass-on-media {
+  --glass-button-text: var(--Text-on-Media);
+  color: var(--glass-button-text);
+  text-shadow: var(--Text-on-Media-Shadow);
 }
 
 /**
@@ -347,6 +351,13 @@
   .glass-dark,
   .glass-clear {
     background: var(--Surface-Inverse);
+  }
+
+  .glass.glass-inverse,
+  .glass.glass-on-media {
+    background: var(--Surface-VideoOverlay-Strong);
+    border-color: rgba(255, 255, 255, 0.20);
+    color: var(--Text-on-Media);
   }
 
   .dark .glass,

@@ -58,6 +58,9 @@
   --Text-Disable:          var(--Primitive-Gray-400);
   --Text-on-Inverse:       var(--Primitive-White);
   --Text-on-Inverse-Secondary: var(--Primitive-White-Alpha-800);
+  --Text-on-Media:         var(--Primitive-White);
+  --Text-on-Media-Secondary: var(--Primitive-White-Alpha-800);
+  --Text-on-Media-Shadow:  0 1px 3px rgba(0, 0, 0, 0.85);
   --Text-Accent-Primary:   var(--Primitive-Brand-600);
   --Text-Success:          var(--Primitive-Green-700);
   --Text-Caution:          var(--Primitive-Red-600);
@@ -183,6 +186,9 @@
   --Text-Disable:          var(--Primitive-White-Alpha-400);
   --Text-on-Inverse:       var(--Primitive-Gray-900);
   --Text-on-Inverse-Secondary: var(--Primitive-Gray-700);
+  --Text-on-Media:         var(--Primitive-White);
+  --Text-on-Media-Secondary: var(--Primitive-White-Alpha-800);
+  --Text-on-Media-Shadow:  0 1px 3px rgba(0, 0, 0, 0.85);
   --Text-Accent-Primary:   var(--Primitive-Brand-400);
   --Text-Success:          var(--Primitive-Green-400);
   --Text-Caution:          var(--Primitive-Red-400);
@@ -244,4 +250,38 @@
   --Success-Base:    var(--Primitive-Green-400);
   --Warning-Base:    var(--Primitive-Orange-400);
   --Info-Base:       var(--Primitive-Blue-400);
+}
+
+/* ─── Media Legibility Utilities ─── */
+.text-on-media {
+  color: var(--Text-on-Media);
+  text-shadow: var(--Text-on-Media-Shadow);
+}
+
+.text-on-media-secondary {
+  color: var(--Text-on-Media-Secondary);
+  text-shadow: var(--Text-on-Media-Shadow);
+}
+
+.media-scrim-top,
+.media-scrim-bottom {
+  pointer-events: none;
+}
+
+.media-scrim-top {
+  background: linear-gradient(
+    to bottom,
+    var(--Surface-VideoOverlay-Strong) 0%,
+    var(--Surface-VideoOverlay-Light) 56%,
+    transparent 100%
+  );
+}
+
+.media-scrim-bottom {
+  background: linear-gradient(
+    to top,
+    var(--Surface-VideoOverlay-Strong) 0%,
+    var(--Surface-VideoOverlay-Light) 56%,
+    transparent 100%
+  );
 }
