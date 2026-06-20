@@ -125,7 +125,7 @@ fi
 sleep 3
 REG_VER="$(npm view ksk-design-system version 2>/dev/null)"
 [ "$REG_VER" = "$VERSION" ] || {
-  echo -e "${YELLOW}⚠️  npm registry の最新が $REG_VER（期待: $VERSION）。CDN 反映遅延の可能性${NC}"
+  echo -e "${YELLOW}⚠️  npm registry の最新が ${REG_VER}（期待: ${VERSION}）。CDN 反映遅延の可能性${NC}"
 }
 
 # ── push ─────────────────────────
