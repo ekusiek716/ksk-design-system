@@ -11,8 +11,13 @@ interface CelebrationProps extends React.ComponentProps<"div"> {
   emoji?: string
   title?: string
   description?: string
+  actions?: React.ReactNode
+  interactive?: boolean
+  cardless?: boolean
   particleCount?: number
   durationMs?: number
+  autoDismissMs?: number
+  onTapDismiss?: () => void
   onDone?: () => void
 }
 
@@ -51,37 +56,52 @@ function Celebration({
   emoji = "🎉",
   title,
   description,
+  actions,
+  interactive = false,
+  cardless = false,
   particleCount = 36,
   durationMs = 2600,
+  autoDismissMs,
+  onTapDismiss,
   onDone,
   className,
   ...props
 }: CelebrationProps) {
   const reducedMotion = usePrefersReducedMotion()
+  const resolvedDurationMs = autoDismissMs ?? durationMs
   const particles = React.useMemo(
     () => Array.from({ length: particleCount }, (_, index) => ({
       id: index,
       left: Math.round(seededRatio(index + 1) * 100),
       delay: Math.round(seededRatio(index + 11) * 420),
-      duration: Math.round(durationMs * (0.78 + seededRatio(index + 21) * 0.44)),
+      duration: Math.round(resolvedDurationMs * (0.78 + seededRatio(index + 21) * 0.44)),
       drift: Math.round((seededRatio(index + 31) - 0.5) * 160),
       rotate: Math.round(seededRatio(index + 41) * 720),
       size: 6 + Math.round(seededRatio(index + 51) * 6),
       color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
     })),
-    [durationMs, particleCount],
+    [particleCount, resolvedDurationMs],
   )
 
   React.useEffect(() => {
     if (!active || !onDone) return
-    const id = window.setTimeout(onDone, durationMs)
+    const id = window.setTimeout(onDone, resolvedDurationMs)
     return () => window.clearTimeout(id)
-  }, [active, durationMs, onDone])
+  }, [active, onDone, resolvedDurationMs])
 
   if (!active || trigger === "none") return null
 
   const showConfetti = !reducedMotion && (trigger === "confetti" || trigger === "both")
-  const showMessage = trigger === "confetti" || trigger === "emoji" || trigger === "both"
+  const showMessage = !cardless && (trigger === "confetti" || trigger === "emoji" || trigger === "both")
+  const canTapDismiss = Boolean(onTapDismiss || interactive)
+  const accessibleText = [title ?? "達成しました", description].filter(Boolean).join(" ")
+  const handleTapDismiss = () => {
+    if (onTapDismiss) {
+      onTapDismiss()
+      return
+    }
+    if (interactive) onDone?.()
+  }
 
   return (
     <div
@@ -89,9 +109,10 @@ function Celebration({
       data-trigger={trigger}
       data-placement={placement}
       data-reduced-motion={reducedMotion || undefined}
+      data-cardless={cardless || undefined}
       role="status"
       aria-live="polite"
-      aria-label={title ?? "達成しました"}
+      aria-label={accessibleText}
       className={cn(
         placement === "overlay"
           ? "pointer-events-none fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
@@ -100,8 +121,17 @@ function Celebration({
       )}
       {...props}
     >
+      {canTapDismiss && (
+        <button
+          type="button"
+          aria-label="閉じる"
+          className="pointer-events-auto absolute inset-0 cursor-pointer"
+          onClick={handleTapDismiss}
+        />
+      )}
+
       {showConfetti && (
-        <div className="absolute inset-0" aria-hidden="true">
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
           {particles.map((piece) => (
             <span
               key={piece.id}
@@ -122,13 +152,15 @@ function Celebration({
 
       {showMessage && (
         <div
+          onClick={canTapDismiss ? handleTapDismiss : undefined}
           className={cn(
-            "pointer-events-auto mx-4 flex max-w-sm flex-col items-center rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-6 py-5 text-center shadow-[var(--shadow-dialog)]",
+            "pointer-events-auto relative z-[1] mx-4 flex max-w-sm flex-col items-center rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-6 py-5 text-center shadow-[var(--shadow-dialog)]",
             !reducedMotion && "animate-[celebration-pop_360ms_cubic-bezier(0.34,1.56,0.64,1)_both]",
+            canTapDismiss && "cursor-pointer",
           )}
         >
           {emoji && (
-            <span className="mb-3 text-[32px] leading-none" aria-hidden="true">
+            <span className="typo-display-lg mb-3 leading-none" aria-hidden="true">
               {emoji}
             </span>
           )}
@@ -142,8 +174,17 @@ function Celebration({
               {description}
             </p>
           )}
+          {actions && (
+            <div
+              className="mt-4 flex flex-wrap justify-center gap-2"
+              onClick={(event) => event.stopPropagation()}
+            >
+              {actions}
+            </div>
+          )}
         </div>
       )}
+      {cardless && <span className="sr-only">{accessibleText}</span>}
     </div>
   )
 }
