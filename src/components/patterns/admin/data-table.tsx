@@ -1526,8 +1526,8 @@ function createDataTableChipColumn<TRow, TValue extends string = string>({
     onCellCommit: onCommit,
     sortValue: (row, index) => {
       const currentValue = value(row, index)
-      if (currentValue === undefined || typeof currentValue === "string") return currentValue
-      return Array.from(currentValue).join(",")
+      if (Array.isArray(currentValue)) return currentValue.join(",")
+      return typeof currentValue === "string" ? currentValue : undefined
     },
     cell: ({ value: cellValue }) => {
       const selectedOptions = getSelectedOptions(options, cellValue)

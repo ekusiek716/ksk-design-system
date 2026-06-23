@@ -1,11 +1,17 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Button, type ButtonProps } from "@/components/ui/button"
 
 interface EmptyStateProps extends React.ComponentProps<"div"> {
   icon?: React.ReactNode
   title: string
   description?: string
   action?: React.ReactNode
+  actionLabel?: string
+  actionIcon?: React.ReactNode
+  actionLayout?: "compact" | "content" | "full"
+  actionButtonProps?: Omit<ButtonProps, "children">
+  onAction?: () => void
   /** 表示密度。リスト内では compact / inline を使う。 */
   size?: "default" | "compact" | "inline"
   /**
@@ -22,15 +28,37 @@ function EmptyState({
   title,
   description,
   action,
+  actionLabel,
+  actionIcon,
+  actionLayout = "content",
+  actionButtonProps,
+  onAction,
   size = "default",
   iconClassName,
   ...props
 }: EmptyStateProps) {
   const isInline = size === "inline"
+  const renderedAction = action ?? (actionLabel ? (
+    <Button
+      {...actionButtonProps}
+      onClick={actionButtonProps?.onClick ?? (onAction ? () => onAction() : undefined)}
+      className={cn(
+        actionLayout === "compact" && "w-auto",
+        actionLayout === "content" && "min-w-40 max-w-full",
+        actionLayout === "full" && "w-full max-w-sm",
+        actionButtonProps?.className
+      )}
+    >
+      {actionIcon}
+      {actionLabel}
+    </Button>
+  ) : null)
+
   return (
     <div
       data-slot="empty-state"
       data-size={size}
+      data-action-layout={renderedAction ? actionLayout : undefined}
       className={cn(
         "flex justify-center",
         size === "default" && "flex-col items-center py-16 px-4 text-center",
@@ -62,7 +90,17 @@ function EmptyState({
             {description}
           </p>
         )}
-        {action && <div className={cn(isInline ? "mt-3" : "mt-6")}>{action}</div>}
+        {renderedAction && (
+          <div
+            data-slot="empty-state-action"
+            className={cn(
+              isInline ? "mt-3" : "mt-6",
+              actionLayout === "full" && "w-full",
+            )}
+          >
+            {renderedAction}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -47,6 +47,19 @@ export { Alert, type AlertProps, type AlertTone } from "./Alert"
 export { Dialog, type DialogProps } from "./Dialog"
 export { AlertDialog, type AlertDialogProps } from "./AlertDialog"
 export { Sheet, type SheetProps, type SheetSide } from "./Sheet"
+export {
+  DetailSheetScaffold,
+  DetailSheetHeader,
+  DetailSheetBody,
+  type DetailSheetScaffoldProps,
+  type DetailSheetHeaderProps,
+  type DetailSheetBodyProps,
+} from "./DetailSheetScaffold"
+export {
+  KeyboardAwareSheetFooter,
+  type KeyboardAwareSheetFooterBehavior,
+  type KeyboardAwareSheetFooterProps,
+} from "./KeyboardAwareSheetFooter"
 export { ResponsiveDialog, type ResponsiveDialogProps } from "./ResponsiveDialog"
 export { Popover, type PopoverProps } from "./Popover"
 export { DropdownMenu, type DropdownMenuProps, type DropdownMenuItem } from "./DropdownMenu"
@@ -90,6 +103,20 @@ export { Breadcrumb, type BreadcrumbProps } from "./Breadcrumb"
 
 // Phase 6: Patterns (汎用)
 export { AppHeader, type AppHeaderProps } from "./AppHeader"
+export { MobileAppHeader, type MobileAppHeaderProps } from "./MobileAppHeader"
+export {
+  MobileFloatingActionButton,
+  type MobileFloatingActionButtonBottomOffset,
+  type MobileFloatingActionButtonKeyboardBehavior,
+  type MobileFloatingActionButtonPlacement,
+  type MobileFloatingActionButtonProps,
+} from "./MobileFloatingActionButton"
+export {
+  StatusActionBadge,
+  SyncStatusButton,
+  type StatusActionBadgeProps,
+  type StatusActionBadgeState,
+} from "./StatusActionBadge"
 export { Banner, type BannerProps } from "./Banner"
 export { BannerCarousel, type BannerCarouselProps } from "./BannerCarousel"
 export { SearchBar, type SearchBarProps } from "./SearchBar"

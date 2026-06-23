@@ -56,6 +56,8 @@ for FILE in $FILES; do
   # true の場合は生タグ系の構造チェックをスキップ（色・typo 系は適用）。
   IS_DS=false
   echo "$FILE" | grep -qE '/components/(ui|patterns|icons)/' && IS_DS=true
+  HAS_DS_ESCAPE=false
+  grep -q 'ksk-ds-allow-custom-ui' "$FILE" 2>/dev/null && HAS_DS_ESCAPE=true
   # 色・typo 系の severity（DS 本体は段階導入のため warn）
   SEV=err
   [ "$IS_DS" = true ] && SEV=warn
@@ -272,6 +274,55 @@ for FILE in $FILES; do
     echo -e "${YELLOW}⚠️  $FILE: 生の<header>/<footer> → AppShell等のDSシェルを検討${NC}"
     echo "$MATCHES" | head -3
     WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # ──────────────────────────────────────────
+  # DS-first recipe guardrails（consumer 側のみ）
+  # ──────────────────────────────────────────
+  if [ "$IS_DS" = false ] && [ "$HAS_DS_ESCAPE" = false ]; then
+    # G1. Button を aria-pressed toggle として手組みしない
+    MATCHES=$(grep -n '<Button[^>]*aria-pressed\|aria-pressed[^>]*<Button' "$FILE" 2>/dev/null \
+      | grep -v '// \|/\*' || true)
+    if [ -n "$MATCHES" ]; then
+      echo -e "${RED}❌ $FILE: Button toggle の手組み → PillToggle / RadioGroup / Tabs を使う（例外は ksk-ds-allow-custom-ui コメント）${NC}"
+      echo "$MATCHES" | head -3
+      ERRORS=$((ERRORS + 1))
+    fi
+
+    # G2. 一時的な成功/同期通知を page Banner にしない
+    MATCHES=$(grep -n '<Banner[^>]*variant=["'\'']success["'\''][^>]*\(保存\|復旧\|接続\|同期\|削除\|完了\)' "$FILE" 2>/dev/null \
+      | grep -v '// \|/\*' || true)
+    if [ -n "$MATCHES" ]; then
+      echo -e "${RED}❌ $FILE: transient notice を Banner 化しない → toast.success / toast.connectionRestored を使う${NC}"
+      echo "$MATCHES" | head -3
+      ERRORS=$((ERRORS + 1))
+    fi
+
+    # G3. raw icon utility class を作らない
+    MATCHES=$(grep -n 'btn-icon\|icon-only-button\|className=.*icon-button' "$FILE" 2>/dev/null \
+      | grep -v '// \|/\*' || true)
+    if [ -n "$MATCHES" ]; then
+      echo -e "${RED}❌ $FILE: icon button の独自 class → Button size=\"icon\" / \"icon-sm\" / \"icon-lg\" を使う${NC}"
+      echo "$MATCHES" | head -3
+      ERRORS=$((ERRORS + 1))
+    fi
+
+    # G4. EmptyState CTA サイズを画面ごとに className で組まない
+    MATCHES=$(grep -n '<EmptyState[^>]*action={[[:space:]]*<Button[^}]*className=' "$FILE" 2>/dev/null \
+      | grep -v '// \|/\*' || true)
+    if [ -n "$MATCHES" ]; then
+      echo -e "${RED}❌ $FILE: EmptyState CTA の手組み → actionLabel + actionLayout=\"content|full|compact\" を使う${NC}"
+      echo "$MATCHES" | head -3
+      ERRORS=$((ERRORS + 1))
+    fi
+
+    # G5. SheetHeader + KebabMenu は DetailSheetHeader recipe を使う
+    if grep -q 'SheetHeader' "$FILE" 2>/dev/null && grep -q 'KebabMenu' "$FILE" 2>/dev/null && ! grep -q 'DetailSheetHeader' "$FILE" 2>/dev/null; then
+      MATCHES=$(grep -n 'SheetHeader\|KebabMenu' "$FILE" 2>/dev/null | head -3 || true)
+      echo -e "${RED}❌ $FILE: SheetHeader + KebabMenu の手配置 → DetailSheetHeader trailing={<KebabMenu ... />} を使う${NC}"
+      echo "$MATCHES"
+      ERRORS=$((ERRORS + 1))
+    fi
   fi
 
 done

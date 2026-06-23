@@ -2,6 +2,19 @@ export { Banner, bannerVariants } from "./banner"
 export { Chip, chipVariants } from "./chip"
 export { EmptyState } from "./empty-state"
 export { ErrorState } from "./error-state"
+export { DetailSheetScaffold, DetailSheetHeader, DetailSheetBody } from "./detail-sheet-scaffold"
+export type { DetailSheetScaffoldProps, DetailSheetHeaderProps } from "./detail-sheet-scaffold"
+export { KeyboardAwareSheetFooter, useFocusedInputComfortScroll } from "./keyboard-aware-sheet-footer"
+export type { FocusComfortScrollOptions, KeyboardAwareSheetFooterBehavior, KeyboardAwareSheetFooterProps } from "./keyboard-aware-sheet-footer"
+export { MobileFloatingActionButton } from "./mobile-floating-action-button"
+export type {
+  MobileFloatingActionButtonBottomOffset,
+  MobileFloatingActionButtonKeyboardBehavior,
+  MobileFloatingActionButtonPlacement,
+  MobileFloatingActionButtonProps,
+} from "./mobile-floating-action-button"
+export { MobileAppHeader } from "./mobile-app-header"
+export type { MobileAppHeaderProps } from "./mobile-app-header"
 export { FormField } from "./form-field"
 export { ListItem } from "./list-item"
 export { PhotoHero } from "./photo-hero"

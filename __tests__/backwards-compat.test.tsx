@@ -25,11 +25,18 @@ import {
   Celebration,
   Chip,
   DataTable,
+  DetailSheetHeader,
+  DetailSheetScaffold,
   EmptyState,
   KebabMenu,
+  KeyboardAwareSheetFooter,
+  MobileAppHeader,
+  MobileFloatingActionButton,
   MultiSelect,
   ShareButtons,
+  StatusActionBadge,
   SubNav,
+  toast,
 } from "../src/index"
 import type { DataTableColumn } from "../src/index"
 
@@ -247,6 +254,20 @@ describe("SubNav / EmptyState / DataTable — improvement APIs", () => {
     )
   })
 
+  it("EmptyState actionLabel/actionLayout が画面別 Button className なしで CTA を出せる", () => {
+    const out = html(
+      <EmptyState
+        title="まだありません"
+        description="最初の項目を追加できます。"
+        actionLabel="追加する"
+        actionLayout="content"
+      />
+    )
+    expect(out).toContain('data-action-layout="content"')
+    expect(out).toContain('data-slot="empty-state-action"')
+    expect(out).toContain("追加する")
+  })
+
   it("DataTable rows/columns API が既存ラッパー API と共存する", () => {
     interface Row {
       id: string
@@ -274,6 +295,74 @@ describe("SubNav / EmptyState / DataTable — improvement APIs", () => {
     expect(out).toContain("佐藤")
     expect(out).toContain("田中")
     expect(out).toContain('data-selected="true"')
+  })
+})
+
+describe("Mobile DS recipes — render contracts", () => {
+  it("DetailSheetScaffold + DetailSheetHeader が KebabMenu trailing を保持する", () => {
+    const out = html(
+      <DetailSheetScaffold
+        header={
+          <DetailSheetHeader
+            title="詳細"
+            trailing={<KebabMenu items={[{ label: "編集" }]} />}
+          />
+        }
+        footer={<KeyboardAwareSheetFooter><Button>保存する</Button></KeyboardAwareSheetFooter>}
+      >
+        body
+      </DetailSheetScaffold>
+    )
+    expect(out).toContain('data-slot="detail-sheet-scaffold"')
+    expect(out).toContain('data-slot="detail-sheet-header-trailing"')
+    expect(out).toContain('data-slot="keyboard-aware-sheet-footer"')
+  })
+
+  it("MobileFloatingActionButton は label を aria-label にする", () => {
+    const out = html(<MobileFloatingActionButton label="追加する" />)
+    expect(out).toContain('data-slot="mobile-floating-action-button"')
+    expect(out).toContain('aria-label="追加する"')
+  })
+
+  it("MobileFloatingActionButton は JS 側から variant/size が渡っても recipe 固定値を維持する", () => {
+    const UnsafeMobileFab = MobileFloatingActionButton as React.ComponentType<Record<string, unknown>>
+    const out = html(<UnsafeMobileFab label="追加する" variant="destructive" size="xl" />)
+    expect(out).toContain('data-variant="default"')
+    expect(out).toContain('data-size="icon-lg"')
+  })
+
+  it("MobileAppHeader は brand と compact status を分離して描画する", () => {
+    const out = html(
+      <MobileAppHeader
+        sticky={false}
+        brand={<span>Brand</span>}
+        compactStatus={<StatusActionBadge state="pending" label="未同期" compact count={3} />}
+      />
+    )
+    expect(out).toContain('data-slot="mobile-app-header-brand"')
+    expect(out).toContain('data-slot="status-action-badge"')
+  })
+
+  it("StatusActionBadge は onClick ありなら button として描画する", () => {
+    const out = html(<StatusActionBadge state="pending" label="同期する" onClick={() => undefined} />)
+    expect(out).toMatch(/^<button /)
+    expect(out).toContain('data-slot="status-action-badge"')
+  })
+
+  it("StatusActionBadge は passive status のとき button 専用 props を DOM に漏らさない", () => {
+    const UnsafeStatusBadge = StatusActionBadge as React.ComponentType<Record<string, unknown>>
+    const out = html(<UnsafeStatusBadge label="同期済み" form="todo-form" name="sync" value="1" />)
+    expect(out).toMatch(/^<span /)
+    expect(out).not.toContain("form=")
+    expect(out).not.toContain("name=")
+    expect(out).not.toContain("value=")
+  })
+
+  it("toast transient helper は SSR で no-op id を返す", () => {
+    expect(toast.connectionRestored()).toBe("")
+    expect(toast.saveComplete()).toBe("")
+    expect(toast.retryStarted()).toBe("")
+    expect(toast.retryFailed()).toBe("")
   })
 })
 
