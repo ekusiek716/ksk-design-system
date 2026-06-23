@@ -60,6 +60,7 @@
 | SocialLoginButton | `@/components/ui/social-login-button` | — | Line, Google, Apple, Amazon, AllProviders, Loading |
 | Spinner | `@/components/ui/spinner` | — | Default, AllSizes |
 | StarRating | `@/components/ui/star-rating` | — | Interactive, ReadOnly, Sizes |
+| StatusActionBadge, SyncStatusButton | `@/components/ui/status-action-badge` | — | AllStates, Actionable, Compact |
 | SubNav | `@/components/ui/sub-nav` | — | Underline, Chip, WithBadge, WithDescriptions |
 | Switch | `@/components/ui/switch` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, SettingsList |
 | SyncStatusBadge | `@/components/ui/sync-status-badge` | — | Syncing, Success, Error, Offline, AllStates |
@@ -102,6 +103,7 @@
 | CoachMarkOverlay | `@/components/patterns/coach-mark-overlay` | — | — |
 | ConfirmDialog | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading |
 | CookieConsent | `@/components/patterns/cookie-consent` | — | — |
+| DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
 | ErrorState | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry |
 | FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
@@ -109,10 +111,13 @@
 | Footer | `@/components/patterns/footer` | — | Default, Minimal |
 | FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithSelect, CompleteForm |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
+| KeyboardAwareSheetFooter | `@/components/patterns/keyboard-aware-sheet-footer` | — | Fixed, HideWhenKeyboardOpen |
 | ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot |
 | ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | — |
 | MediaActionCluster | `@/components/patterns/media-action-cluster` | — | Vertical, Horizontal, Auto orientation, No auto-hide |
 | MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
+| MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount |
+| MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
 | ProgressSteps | `@/components/patterns/progress-steps` | — | Step2Active, FirstStep, ThirdStep, AllComplete, ThreeSteps |
@@ -182,13 +187,35 @@
 | ラジオボタン | `<RadioGroup><RadioGroupItem>` | `RadioGroup, RadioGroupItem` |
 | Badge の色違い | `<Badge variant="success">` / `"destructive"` / `"warning"` / `"info"` | `Badge` |
 | 空状態の表示 | `<EmptyState>` | `EmptyState` |
+| 空状態の primary CTA | `<EmptyState actionLabel="追加する" actionLayout="content" />` | `EmptyState` |
 | 数値カード | `<StatCard>` | `StatCard` |
-| トースト通知 | `<Toaster>` + `useToast()` | `Toaster, useToast` |
+| トースト通知 | `<Toaster>` + `useToast()` / `toast.success(...)` | `Toaster, useToast, toast` |
 | スケルトン | `<Skeleton>` | `Skeleton` |
 | 下部ナビゲーション | `<BottomTabBar>` | `BottomTabBar` |
+| モバイル FAB | `<MobileFloatingActionButton label="追加する" />` | `MobileFloatingActionButton` |
 | プログレスバー | `<Progress>` | `Progress` |
 | フォームフィールド | `<FormField>` | `FormField` |
 | ケバブメニュー | `<KebabMenu>` | `KebabMenu` |
+| detail/edit sheet のヘッダー | `<DetailSheetHeader trailing={<KebabMenu ... />} />` | `DetailSheetHeader` |
+| Sheet footer の keyboard 対応 | `<KeyboardAwareSheetFooter behavior="hide">...` | `KeyboardAwareSheetFooter` |
+| actionable な同期/未同期表示 | `<StatusActionBadge onClick={sync} ... />` | `StatusActionBadge` |
+| モバイルヘッダーの status slot | `<MobileAppHeader status={...} compactStatus={...} />` | `MobileAppHeader` |
 | モーダル（PC） | `<Dialog>` | `Dialog, DialogContent, ...` |
 | ドロワー（モバイル） | `<Sheet side="bottom">` | `Sheet, SheetContent, ...` |
 | PC/モバイル自動切替モーダル | `<ResponsiveDialog>` | `ResponsiveDialog, ...` |
+
+---
+
+## DS-first recipes（consumer 向け）
+
+| 場面 | 使うもの | 避けるもの |
+|---|---|---|
+| 保存完了・接続復旧・同期開始など一時的な結果通知 | `toast.success(...)` / `toast.connectionRestored()` / `toast.retryStarted()` | page-level `<Banner variant="success">` |
+| 2〜4択の状態切替 | `<PillToggle>` | `<Button>` を複数並べた独自 toggle |
+| アイコンだけの操作 | `<Button size="icon" aria-label="...">` | `btn-icon` class / raw icon button |
+| 空状態から作成へ誘導 | `<EmptyState actionLabel="追加する" actionLayout="content" />` | `action={<Button className="...">...` の画面別組み立て |
+| detail/edit sheet の title + KebabMenu | `<DetailSheetHeader trailing={<KebabMenu ... />} />` | `<SheetHeader>` 内で negative margin / 独自 grid |
+| Sheet 内の固定 CTA とキーボード | `<KeyboardAwareSheetFooter behavior="fixed|hide|scroll">` | `data-task-detail-actions` 等の画面別 CSS |
+| header 内の同期状態を押せる UI にする | `<StatusActionBadge onClick={...} compact />` | clickable `<Badge>` wrapper |
+
+やむを得ず DS primitive を使わない場合は、consumer 側に `ksk-ds-allow-custom-ui` コメントで理由を残すこと。

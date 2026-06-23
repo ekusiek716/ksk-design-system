@@ -2,7 +2,7 @@
   "meta": {
     "name": "KSK Design System — Rules Contracts",
     "version": "1.1.0",
-    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。"
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン37件・AIアンチパターン10件。"
   },
   "prohibited": [
     {
@@ -290,6 +290,51 @@
       "excludes": [".stories.", "border-0", "border-2", "border-4", "border-collapse", "border-separate", "border-spacing", "border-solid", "border-dashed", "border-dotted", "border-none"],
       "message": "色を併記しないボーダー幅クラス（border / border-b 等）は避ける。Tailwind v4 では border-color の既定が currentColor になったため、色を書かないと要素の文字色が透けて出て、消費側が濃色テキストを敷くと枠線が黒ずむ（job board で実際に発生）。preset.css の base layer が --border にフォールバックする保険を張るが、コンポーネントは明示が原則。",
       "fix": "border-[var(--Border-Low-Emphasis)]（区切り線・淡いカード）/ border-[var(--Border-Medium-Emphasis)]（入力・強調）を併記する。状態で出し分けるタブ/バッジ/チップは border-transparent を初期色に置き、data-[state=active]:border-[var(--Brand-Primary)] 等のペア状態クラスで色を上書きする。"
+    },
+    {
+      "id": "P033",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "<Button[^>]*aria-pressed|aria-pressed[^>]*<Button",
+      "excludes": [".stories.", "ksk-ds-allow-custom-ui"],
+      "message": "Button を複数並べた独自 toggle 禁止",
+      "fix": "PillToggle / RadioGroup / Tabs を使用。例外は ksk-ds-allow-custom-ui コメントで理由を残す"
+    },
+    {
+      "id": "P034",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "<Banner[^>]*variant=[\"']success[\"'][^>]*(保存|復旧|接続|同期|削除|完了)",
+      "excludes": [".stories.", "ksk-ds-allow-custom-ui"],
+      "message": "一時的な操作結果通知を Banner にしない",
+      "fix": "toast.success / toast.connectionRestored / toast.retryStarted / toast.retryFailed を使用"
+    },
+    {
+      "id": "P035",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "btn-icon|icon-only-button|className=.*icon-button",
+      "excludes": [".stories.", "ksk-ds-allow-custom-ui"],
+      "message": "icon button の独自 utility class 禁止",
+      "fix": "<Button size=\"icon|icon-sm|icon-lg\" aria-label=\"...\"> を使用"
+    },
+    {
+      "id": "P036",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "<EmptyState[^>]*action=\\{\\s*<Button[^}]*className=",
+      "excludes": [".stories.", "ksk-ds-allow-custom-ui"],
+      "message": "EmptyState CTA の画面別 className 手組み禁止",
+      "fix": "<EmptyState actionLabel=\"追加する\" actionLayout=\"content|full|compact\" /> を使用"
+    },
+    {
+      "id": "P037",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "SheetHeader[\\s\\S]*KebabMenu|KebabMenu[\\s\\S]*SheetHeader",
+      "excludes": [".stories.", "DetailSheetHeader", "ksk-ds-allow-custom-ui"],
+      "message": "SheetHeader + KebabMenu の手配置禁止",
+      "fix": "<DetailSheetHeader trailing={<KebabMenu ... />} /> を使用"
     }
   ],
   "aiPatterns": {

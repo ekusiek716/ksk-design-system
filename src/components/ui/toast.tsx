@@ -301,6 +301,10 @@ interface ToastFn {
   info: (title: string, options?: ToastOptions) => string
   warning: (title: string, options?: ToastOptions) => string
   caution: (title: string, options?: ToastOptions) => string
+  connectionRestored: (options?: ToastOptions) => string
+  saveComplete: (options?: ToastOptions) => string
+  retryStarted: (options?: ToastOptions) => string
+  retryFailed: (options?: ToastOptions) => string
   dismiss: (id: string) => void
 }
 
@@ -325,6 +329,14 @@ toast.error = (title, options) => showToast(title, options, "caution")
 toast.info = (title, options) => showToast(title, options, "info")
 toast.warning = (title, options) => showToast(title, options, "warning")
 toast.caution = (title, options) => showToast(title, options, "caution")
+toast.connectionRestored = (options) =>
+  showToast("接続が復旧しました", options, "success")
+toast.saveComplete = (options) =>
+  showToast("保存しました", options, "success")
+toast.retryStarted = (options) =>
+  showToast("再試行を開始しました", options, "info")
+toast.retryFailed = (options) =>
+  showToast("再試行できませんでした", options, "caution")
 toast.dismiss = (id: string) => toastStore.dismiss(id)
 
 export { Toaster, useToast, toast, toastVariants }
