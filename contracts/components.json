@@ -1,15 +1,15 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.33.0",
+    "version": "1.34.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 56,
-      "patterns": 37,
+      "ui": 57,
+      "patterns": 41,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 115
+      "total": 120
     }
   },
   "ui": [
@@ -396,7 +396,9 @@
         "Provider モード: <Toaster> でラップし useToast() で呼び出す",
         "Fire-and-forget: `import { toast } from \"ksk-design-system\"` → `toast.success(\"保存しました\")`。<Toaster> 設置不要",
         "両 API は内部で同じ singleton store を共有するため、<Toaster> がある場合はそれを優先し auto-mounted viewport は描画しない",
-        "新規 action prop で右側に CTA ボタン (元に戻す / 再試行 等) を表示できる"
+        "新規 action prop で右側に CTA ボタン (元に戻す / 再試行 等) を表示できる",
+        "保存完了・接続復旧・同期開始など一時的な操作結果は Banner ではなく toast.* helper を使う",
+        "connectionRestored / saveComplete / retryStarted / retryFailed helper を提供"
       ]
     },
     {
@@ -785,6 +787,30 @@
       ]
     },
     {
+      "name": "StatusActionBadge",
+      "path": "src/components/ui/status-action-badge.tsx",
+      "description": "押せるステータス表示。同期/未同期/オフライン/エラーなど、ユーザー操作で再試行・同期開始できる状態に使う。SyncStatusButton は同一 primitive の別名。",
+      "variants": [
+        "idle",
+        "pending",
+        "syncing",
+        "success",
+        "warning",
+        "error",
+        "offline"
+      ],
+      "accessibility": [
+        "interactive mode renders <button>",
+        "compact mode keeps aria-label",
+        "status mode uses role=status/alert"
+      ],
+      "rules": [
+        "Interactive status は Badge wrapper ではなく StatusActionBadge / SyncStatusButton を使う",
+        "compact=true でも label は必須（aria-label / sr-only 用）",
+        "ヘッダー内の同期ボタン、inline toolbar の再試行に使う"
+      ]
+    },
+    {
       "name": "TimePicker",
       "path": "src/components/ui/time-picker.tsx",
       "description": "時刻選択。15 分刻みデフォルト。HH:mm。",
@@ -843,14 +869,20 @@
     {
       "name": "EmptyState",
       "path": "src/components/patterns/empty-state.tsx",
-      "description": "空状態プレースホルダー。データゼロ時のUX向上に使用。アクションまたは説明文を必ず含める。size=default / compact / inline に対応。",
+      "description": "空状態プレースホルダー。データゼロ時のUX向上に使用。アクションまたは説明文を必ず含める。size=default / compact / inline と actionLayout=compact / content / full に対応。",
       "sizes": [
         "default",
         "compact",
         "inline"
       ],
       "rules": [
-        "Always include an action or explanation"
+        "Always include an action or explanation",
+        "primary create CTA は actionLabel + actionLayout=\"content\" を優先し、Button className を画面別に組まない"
+      ],
+      "features": [
+        "actionLabel",
+        "actionLayout",
+        "actionButtonProps"
       ]
     },
     {
@@ -1047,6 +1079,85 @@
       ],
       "rules": [
         "Use for mobile form inputs. Sheet side is always bottom."
+      ]
+    },
+    {
+      "name": "DetailSheetScaffold",
+      "path": "src/components/patterns/detail-sheet-scaffold.tsx",
+      "description": "detail/edit sheet の標準骨組み。DetailSheetHeader は leading + title minmax(0,1fr) + trailing action の安定 grid を持ち、KebabMenu や editable title のズレを防ぐ。",
+      "subcomponents": [
+        "DetailSheetHeader",
+        "DetailSheetBody"
+      ],
+      "features": [
+        "stable-header-grid",
+        "title-editor-slot",
+        "leading-slot",
+        "trailing-action-slot",
+        "scroll-body-slot",
+        "footer-slot"
+      ],
+      "rules": [
+        "SheetContent 内で使い、Sheet の autoFocus=false と組み合わせる",
+        "KebabMenu は DetailSheetHeader trailing に置く",
+        "editable title は titleEditor slot に置く"
+      ]
+    },
+    {
+      "name": "KeyboardAwareSheetFooter",
+      "path": "src/components/patterns/keyboard-aware-sheet-footer.tsx",
+      "description": "Sheet 内 CTA footer の keyboard / safe-area 対応。fixed / hide / scroll の挙動を宣言し、visualViewport の keyboard inset を消費する。useFocusedInputComfortScroll helper も同梱。",
+      "variants": [
+        "fixed",
+        "hide",
+        "scroll"
+      ],
+      "features": [
+        "visualViewport keyboard inset",
+        "safe-area bottom",
+        "hide-while-keyboard",
+        "scroll-content mode",
+        "focused-input comfort scroll helper"
+      ],
+      "rules": [
+        "Sheet 内の footer CTA は画面別 CSS ではなく KeyboardAwareSheetFooter を使う",
+        "入力にフォーカスさせたくない detail/edit sheet は SheetContent autoFocus={false} を使う",
+        "composer には useFocusedInputComfortScroll を使い、入力欄が keyboard に近づきすぎないようにする"
+      ]
+    },
+    {
+      "name": "MobileFloatingActionButton",
+      "path": "src/components/patterns/mobile-floating-action-button.tsx",
+      "description": "モバイル固定 FAB。BottomTabBar と safe-area を考慮した bottom offset、start/end/center placement、keyboard hide/lift/stay を内包する。",
+      "variants": [
+        "placement: start / end / center",
+        "bottomOffset: none / bottom-nav / bottom-nav-pill",
+        "keyboardBehavior: hide / lift / stay"
+      ],
+      "accessibility": [
+        "label prop is required and used as aria-label"
+      ],
+      "rules": [
+        "画面側で fixed bottom/right と Button size=icon-lg を手組みしない",
+        "BottomTabBar 併用時は bottomOffset=bottom-nav を使う",
+        "keyboard 表示中に入力を邪魔する場合は keyboardBehavior=hide を使う"
+      ]
+    },
+    {
+      "name": "MobileAppHeader",
+      "path": "src/components/patterns/mobile-app-header.tsx",
+      "description": "モバイルアプリ用 header。brand/logo の intrinsic 幅を守りつつ、status / compactStatus / actions を右側に収める。長い状態ラベルでロゴが潰れるのを防ぐ。",
+      "slots": [
+        "leading",
+        "brand",
+        "status",
+        "compactStatus",
+        "actions"
+      ],
+      "rules": [
+        "ブランド/ロゴは brand slot に置く",
+        "長い同期状態は status と compactStatus の両方を渡す",
+        "右側 actions のために brand に flex-shrink をかけない"
       ]
     },
     {

@@ -139,6 +139,19 @@ export { Celebration } from "./components/patterns/celebration"
 export type { CelebrationProps, CelebrationTrigger, CelebrationPlacement } from "./components/patterns/celebration"
 export { BottomSheetForm } from "./components/patterns/bottom-sheet-form"
 export type { BottomSheetFormProps } from "./components/patterns/bottom-sheet-form"
+export { DetailSheetScaffold, DetailSheetHeader, DetailSheetBody } from "./components/patterns/detail-sheet-scaffold"
+export type { DetailSheetScaffoldProps, DetailSheetHeaderProps } from "./components/patterns/detail-sheet-scaffold"
+export { KeyboardAwareSheetFooter, useFocusedInputComfortScroll } from "./components/patterns/keyboard-aware-sheet-footer"
+export type { FocusComfortScrollOptions, KeyboardAwareSheetFooterBehavior, KeyboardAwareSheetFooterProps } from "./components/patterns/keyboard-aware-sheet-footer"
+export { MobileFloatingActionButton } from "./components/patterns/mobile-floating-action-button"
+export type {
+  MobileFloatingActionButtonBottomOffset,
+  MobileFloatingActionButtonKeyboardBehavior,
+  MobileFloatingActionButtonPlacement,
+  MobileFloatingActionButtonProps,
+} from "./components/patterns/mobile-floating-action-button"
+export { MobileAppHeader } from "./components/patterns/mobile-app-header"
+export type { MobileAppHeaderProps } from "./components/patterns/mobile-app-header"
 export { ChipSelector } from "./components/patterns/chip-selector"
 export type { ChipSelectorProps, ChipSelectorOption } from "./components/patterns/chip-selector"
 export { Banner, bannerVariants } from "./components/patterns/banner"
@@ -277,6 +290,8 @@ export type { CategoryScrollItem, CategoryScrollProps } from "./components/patte
 
 export { SyncStatusBadge } from "./components/ui/sync-status-badge"
 export type { SyncStatusBadgeProps, SyncState } from "./components/ui/sync-status-badge"
+export { StatusActionBadge, SyncStatusButton } from "./components/ui/status-action-badge"
+export type { StatusActionBadgeProps, StatusActionBadgeState } from "./components/ui/status-action-badge"
 export { DropdownFilter } from "./components/ui/dropdown-filter"
 export type { DropdownFilterProps, DropdownFilterOption } from "./components/ui/dropdown-filter"
 export { FilterChip } from "./components/patterns/filter-chip"
