@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import * as React from "react"
 import { More } from "iconsax-reactjs"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { AutoGrowTextarea } from "@/components/ui/auto-grow-textarea"
 import { KebabMenu } from "@/components/patterns/admin/kebab-menu"
 import { DetailSheetBody, DetailSheetHeader, DetailSheetScaffold } from "./detail-sheet-scaffold"
 import { KeyboardAwareSheetFooter } from "./keyboard-aware-sheet-footer"
@@ -42,23 +43,36 @@ export const ReadOnlyTitle: Story = {
 }
 
 export const EditableTitle: Story = {
-  render: () => (
-    <div className="max-w-md rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]">
-      <DetailSheetScaffold
-        header={
-          <DetailSheetHeader
-            leading={<Button variant="ghost" size="icon" aria-label="戻る">‹</Button>}
-            titleEditor={<Input aria-label="タイトル" defaultValue="新郎側 友人リスト" />}
-            trailing={<Button variant="ghost" size="icon" aria-label="メニュー"><More size={18} /></Button>}
-          />
-        }
-      >
-        <DetailSheetBody className="px-0 py-0">
-          <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
-            title editor は minmax(0, 1fr) 内に収まり、trailing action を押し出しません。
-          </p>
-        </DetailSheetBody>
-      </DetailSheetScaffold>
-    </div>
-  ),
+  render: () => {
+    const [title, setTitle] = React.useState("新郎側 友人リスト")
+
+    return (
+      <div className="max-w-md rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]">
+        <DetailSheetScaffold
+          header={
+            <DetailSheetHeader
+              leading={<Button variant="ghost" size="icon" aria-label="戻る">‹</Button>}
+              titleEditor={
+                <AutoGrowTextarea
+                  aria-label="タイトル"
+                  value={title}
+                  onChange={setTitle}
+                  minRows={1}
+                  density="compact"
+                  className="typo-heading-md"
+                />
+              }
+              trailing={<Button variant="ghost" size="icon" aria-label="メニュー"><More size={18} /></Button>}
+            />
+          }
+        >
+          <DetailSheetBody className="px-0 py-0">
+            <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+              title editor は minmax(0, 1fr) 内に収まり、trailing action を押し出しません。
+            </p>
+          </DetailSheetBody>
+        </DetailSheetScaffold>
+      </div>
+    )
+  },
 }

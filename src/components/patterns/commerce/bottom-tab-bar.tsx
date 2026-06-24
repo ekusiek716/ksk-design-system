@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -15,6 +16,7 @@ interface BottomTabBarItem {
 }
 
 type BottomTabBarTone = "default" | "inverse"
+type BottomTabBarKeyboardBehavior = "hide" | "lift" | "stay"
 
 interface BottomTabBarAction extends BottomTabBarItem {
   badgeCount?: never
@@ -52,6 +54,31 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
    * - "absolute" : 親要素内に配置（Storybook 等のデモ用）
    */
   pillPosition?: "fixed" | "absolute"
+  /**
+   * ソフトキーボード表示中の挙動。
+   * - "stay" : 従来通り下部に固定
+   * - "hide" : 入力中は非表示
+   * - "lift" : keyboard inset 分だけ上へ逃がす
+   */
+  keyboardBehavior?: BottomTabBarKeyboardBehavior
+}
+
+interface BottomTabBarKeyboardState {
+  keyboardBehavior: BottomTabBarKeyboardBehavior
+  isKeyboardOpen: boolean
+  shouldHide: boolean
+  liftInset: number
+}
+
+function useBottomTabBarKeyboardState(keyboardBehavior: BottomTabBarKeyboardBehavior): BottomTabBarKeyboardState {
+  const { keyboardInset, isKeyboardOpen } = useVisualViewportKeyboardInset()
+
+  return {
+    keyboardBehavior,
+    isKeyboardOpen,
+    shouldHide: keyboardBehavior === "hide" && isKeyboardOpen,
+    liftInset: keyboardBehavior === "lift" ? keyboardInset : 0,
+  }
 }
 
 // ─── BottomNav ────────────────────────────────────────────────────────────────
@@ -65,8 +92,11 @@ function BottomTabBar({
   maxWidth,
   variant = "default",
   pillPosition = "fixed",
+  keyboardBehavior = "stay",
   ...props
 }: BottomTabBarProps) {
+  const keyboardState = useBottomTabBarKeyboardState(keyboardBehavior)
+
   if (variant === "pill") {
     return (
       <BottomTabBarPill
@@ -77,26 +107,43 @@ function BottomTabBar({
         tone={tone}
         maxWidth={maxWidth}
         pillPosition={pillPosition}
+        keyboardState={keyboardState}
         {...props}
       />
     )
   }
-  return <BottomTabBarDefault className={className} items={items} {...props} />
+  return <BottomTabBarDefault className={className} items={items} keyboardState={keyboardState} {...props} />
 }
 
 // ─── Default variant (従来型) ─────────────────────────────────────────────────
 
-function BottomTabBarDefault({ className, items, ...props }: Omit<BottomTabBarProps, "variant">) {
+function BottomTabBarDefault({
+  className,
+  items,
+  keyboardState,
+  style,
+  ...props
+}: Omit<BottomTabBarProps, "variant" | "keyboardBehavior"> & { keyboardState: BottomTabBarKeyboardState }) {
   return (
     <nav
       data-slot="bottom-tab-bar"
+      data-keyboard-behavior={keyboardState.keyboardBehavior}
+      data-keyboard-open={keyboardState.isKeyboardOpen || undefined}
       aria-label="メインナビゲーション"
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50",
+        "fixed inset-x-0 z-50 transition-all duration-200",
+        keyboardState.keyboardBehavior === "lift"
+          ? "bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]"
+          : "bottom-0",
         "border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
         "pb-[env(safe-area-inset-bottom)] lg:hidden",
+        keyboardState.shouldHide && "translate-y-2 opacity-0 pointer-events-none invisible",
         className
       )}
+      style={{
+        "--ksk-bottom-tab-bar-keyboard-inset": `${keyboardState.liftInset}px`,
+        ...style,
+      } as React.CSSProperties}
       {...props}
     >
       <div className="flex h-14 items-center justify-around px-1">
@@ -116,31 +163,39 @@ function BottomTabBarPill({
   tone = "default",
   maxWidth = 430,
   pillPosition = "fixed",
+  keyboardState,
   style,
   ...props
-}: Omit<BottomTabBarProps, "variant">) {
+}: Omit<BottomTabBarProps, "variant" | "keyboardBehavior"> & { keyboardState: BottomTabBarKeyboardState }) {
   const hasProminentLayout = Boolean(centerAction) || showLabels === true
   const shouldShowLabels = showLabels ?? Boolean(centerAction)
   const splitIndex = centerAction ? Math.ceil(items.length / 2) : items.length
   const leadingItems = items.slice(0, splitIndex)
   const trailingItems = items.slice(splitIndex)
-  const pillStyle: React.CSSProperties = {
+  const pillStyle = {
+    "--ksk-bottom-tab-bar-keyboard-inset": `${keyboardState.liftInset}px`,
     ...(hasProminentLayout ? { width: "calc(100vw - 24px)", maxWidth } : {}),
     ...style,
-  }
+  } as React.CSSProperties
 
   return (
     <nav
       data-slot="bottom-nav-pill"
+      data-keyboard-behavior={keyboardState.keyboardBehavior}
+      data-keyboard-open={keyboardState.isKeyboardOpen || undefined}
       aria-label="メインナビゲーション"
       className={cn(
-        "z-50 lg:hidden",
+        "z-50 lg:hidden transition-all duration-200",
         pillPosition === "fixed" ? "fixed" : "absolute",
         // 位置: 画面下部に余白を持ってフロート
-        "bottom-[calc(env(safe-area-inset-bottom)+12px)] left-1/2 -translate-x-1/2",
+        keyboardState.keyboardBehavior === "lift"
+          ? "bottom-[calc(env(safe-area-inset-bottom)+12px+var(--ksk-bottom-tab-bar-keyboard-inset))]"
+          : "bottom-[calc(env(safe-area-inset-bottom)+12px)]",
+        "left-1/2 -translate-x-1/2",
         // ピル形状 + Liquid Glass
         "flex items-center rounded-full glass glass-specular",
         hasProminentLayout ? "min-h-[66px] gap-1 px-2 py-2" : "h-[58px] gap-0 px-3",
+        keyboardState.shouldHide && "translate-y-2 opacity-0 pointer-events-none invisible",
         className
       )}
       style={pillStyle}
@@ -255,4 +310,4 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
 }
 
 export { BottomTabBar }
-export type { BottomTabBarAction, BottomTabBarItem, BottomTabBarProps }
+export type { BottomTabBarAction, BottomTabBarItem, BottomTabBarKeyboardBehavior, BottomTabBarProps }
