@@ -29,6 +29,8 @@ describe("native package contract", () => {
   it("web-only peers stay optional for native-only Expo installs", () => {
     for (const peer of [
       "@radix-ui/react-slot",
+      "expo-blur",
+      "expo-glass-effect",
       "iconsax-reactjs",
       "radix-ui",
       "react-dom",

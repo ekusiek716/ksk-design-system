@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 57,
-      "patterns": 41,
+      "patterns": 46,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 120
+      "total": 125
     }
   },
   "ui": [
@@ -45,11 +45,13 @@
         "match"
       ],
       "accessibility": [
-        "aria-label required for icon-only buttons"
+        "aria-label required for icon-only buttons",
+        "Native loading state sets accessibility busy"
       ],
       "rules": [
         "Must use <Button> not <button>",
         "Icon-only buttons require aria-label",
+        "Native Button supports loading/loadingLabel and leadingIcon/trailingIcon; do not wrap ActivityIndicator in Text",
         "variant=glass は背景がグラデーション/写真の場合のみ使用",
         "variant=glass-inverse は暗い写真・動画・濃色面上の Liquid Glass CTA 専用",
         "variant=inverse / ghost-inverse は暗背景・ヒーローセクション専用",
@@ -1440,6 +1442,127 @@
       "rules": [
         "isActive 切替時に key を変えて Chip を強制再マウント (selected キャッシュ残り防止)"
       ]
+    },
+    {
+      "name": "BottomSheetFrame",
+      "path": "src/components/patterns/bottom-sheet-frame.tsx",
+      "description": "SheetContent の responsive outer frame preset。mobile-full / mobile-form / desktop-floating を宣言し、DetailSheetScaffold と KeyboardAwareSheetFooter を内側で合成する。",
+      "variants": [
+        "mobile-full",
+        "mobile-form",
+        "desktop-floating"
+      ],
+      "features": [
+        "safe-area-aware max height",
+        "scroll-container composition",
+        "desktop floating width"
+      ],
+      "rules": [
+        "長い SheetContent className recipe を consumer 側に重複させず BottomSheetFrame preset を使う",
+        "フォーム/詳細の中身は DetailSheetScaffold と KeyboardAwareSheetFooter を使う"
+      ]
+    },
+    {
+      "name": "SettingsSection / SettingsListRow",
+      "path": "src/components/patterns/settings-section.tsx",
+      "description": "設定画面の group/card/danger section と row。title / description / action / leading / rightSlot を持ち、switch / badge / button を安定配置する。",
+      "variants": [
+        "group",
+        "card",
+        "danger"
+      ],
+      "slots": [
+        "title",
+        "description",
+        "action",
+        "leading",
+        "rightSlot",
+        "children"
+      ],
+      "accessibility": [
+        "interactive rows render button semantics",
+        "minimum touch height 56px"
+      ],
+      "rules": [
+        "設定画面で SectionHeader + Card + ListItem の wrapper を consumer 側に作らない",
+        "設定一覧で ad-hoc flex row を作らず SettingsListRow を使う",
+        "switch / badge / button は rightSlot に置く",
+        "danger variant は削除・ログアウトなど不可逆操作のグループに限定する"
+      ]
+    },
+    {
+      "name": "MobileAppShell",
+      "path": "src/components/patterns/mobile-app-shell.tsx",
+      "description": "モバイル/PWA app shell。header / main / bottomNav / fab / desktopSidebar slots と bottom nav/FAB 用 main padding を標準化する。",
+      "slots": [
+        "header",
+        "main",
+        "bottomNav",
+        "fab",
+        "desktopSidebar"
+      ],
+      "features": [
+        "bottomNavMode fixed/external/inline",
+        "bottomPadding",
+        "centered mobile preview",
+        "desktop sidebar handoff"
+      ],
+      "rules": [
+        "BottomTabBar + MobileFloatingActionButton の geometry を consumer CSS で手組みしない",
+        "既に fixed な nav を渡す場合は bottomNavMode=external を使う"
+      ]
+    },
+    {
+      "name": "CompactFilePicker / ImageAttachmentPicker",
+      "path": "src/components/patterns/compact-file-picker.tsx",
+      "description": "mobile sheet 内で使う compact file/image picker。hidden input trigger、preview、remove affordance、label、description、disabled/loading state を DS 化する。",
+      "features": [
+        "hidden file input",
+        "accept/multiple/capture",
+        "loading state",
+        "a11y label pairing",
+        "preview-grid",
+        "preview-list",
+        "remove-action"
+      ],
+      "variants": [
+        "grid",
+        "list"
+      ],
+      "accessibility": [
+        "img alt",
+        "remove button aria-label"
+      ],
+      "rules": [
+        "consumer 側で hidden input + Button trigger を重複実装しない",
+        "Native では DocumentPicker/ImagePicker を起動する onPress trigger として使う",
+        "object URL の生成/破棄は consumer state 側で管理し、DS には src と id を渡す",
+        "画像 preview/delete の row/grid boilerplate を consumer に置かない"
+      ]
+    },
+    {
+      "name": "QuickActionGrid / ActionTile",
+      "path": "src/components/patterns/quick-action-grid.tsx",
+      "description": "ショートカット/絵文字 action の button tile と grid。icon/emoji、label、description、meta、selected/disabled/loading state、2/3/4 column または auto-fit を持つ。",
+      "variants": [
+        "neutral",
+        "selected",
+        "success",
+        "info",
+        "caution",
+        "columns: 2 / 3 / 4 / auto",
+        "gap: sm / md"
+      ],
+      "accessibility": [
+        "button semantics",
+        "aria-pressed when selected"
+      ],
+      "rules": [
+        "card + button の hybrid を consumer 側で手組みしない",
+        "shortcut row/grid の columns/gap を consumer 側で決め打ちしない",
+        "children には ActionTile を使う",
+        "選択状態は selected prop を使う"
+      ]
     }
   ],
   "commerce": [
@@ -1541,7 +1664,9 @@
         "keyboardBehavior",
         "fixed-or-absolute",
         "maxWidth",
-        "inverse-tone"
+        "inverse-tone",
+        "native Expo Router tabBar adapter",
+        "native hidden routes"
       ],
       "rules": [
         "Mobile only. Use safe-area-inset-bottom.",
@@ -1551,7 +1676,8 @@
         "Use keyboardBehavior='lift' only when the nav remains actionable while editing.",
         "Use tone='inverse' over dark photo/video/gradient backgrounds.",
         "Use pillPosition='absolute' only inside controlled shells or Storybook demos; fixed is the app default.",
-        "Set maxWidth to the mobile web shell width when the app is centered in a desktop viewport."
+        "Set maxWidth to the mobile web shell width when the app is centered in a desktop viewport.",
+        "Native Expo Router / React Navigation consumers should use createExpoRouterTabBar instead of local floating tab bars."
       ]
     },
     {

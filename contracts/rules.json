@@ -2,7 +2,7 @@
   "meta": {
     "name": "KSK Design System — Rules Contracts",
     "version": "1.1.0",
-    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン37件・AIアンチパターン10件。"
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン43件・AIアンチパターン10件。"
   },
   "prohibited": [
     {
@@ -335,6 +335,60 @@
       "excludes": [".stories.", "DetailSheetHeader", "ksk-ds-allow-custom-ui"],
       "message": "SheetHeader + KebabMenu の手配置禁止",
       "fix": "<DetailSheetHeader trailing={<KebabMenu ... />} /> を使用"
+    },
+    {
+      "id": "P038",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "(function|const)\\s+Settings(Section|ListRow)\\b|SettingsSections\\.tsx|SettingsInline\\.tsx",
+      "excludes": [".stories.", "components/patterns/", "src/native/components/", "ksk-ds-allow-custom-ui"],
+      "message": "設定画面 wrapper のローカル再実装禁止",
+      "fix": "<SettingsSection> / <SettingsListRow> を使用"
+    },
+    {
+      "id": "P039",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "<input[^>]*type=[\"']file[\"']|type=[\"']file[\"'][^>]*<input",
+      "excludes": [".stories.", "components/patterns/", "src/native/components/", "CompactFilePicker", "ImageAttachmentPicker", "ksk-ds-allow-custom-ui"],
+      "message": "hidden file input + trigger のローカル再実装禁止",
+      "fix": "<CompactFilePicker> / <ImageAttachmentPicker> を使用"
+    },
+    {
+      "id": "P040",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "(function|const)\\s+(ActionTile|QuickActionGrid)\\b|aria-pressed[\\s\\S]*(emoji|絵文字|mood|shortcut)",
+      "excludes": [".stories.", "components/patterns/", "src/native/components/", "ksk-ds-allow-custom-ui"],
+      "message": "shortcut / emoji action tile のローカル再実装禁止",
+      "fix": "<QuickActionGrid><ActionTile ... /></QuickActionGrid> を使用"
+    },
+    {
+      "id": "P041",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "floating-bottom|glass-fab|fixed[^\"']*bottom-0[^\"']*(nav|tab|fab)|bottom-\\[calc\\([^\"']*safe-area-inset-bottom",
+      "excludes": [".stories.", "components/patterns/", "src/native/components/", "BottomTabBar", "MobileFloatingActionButton", "MobileAppShell", "ksk-ds-allow-custom-ui"],
+      "message": "mobile bottom nav / FAB geometry のローカル CSS 禁止",
+      "fix": "<MobileAppShell> + <BottomTabBar> + <MobileFloatingActionButton> を使用"
+    },
+    {
+      "id": "P042",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "SheetContent[^>]*className=[^>]*(max-h-\\[(88|90|100)dvh\\]|rounded-t|safe-area-inset-bottom)|max-h-\\[(88|90|100)dvh\\][^\"']*SheetContent",
+      "excludes": [".stories.", "components/patterns/", "src/native/components/", "BottomSheetFrame", "ksk-ds-allow-custom-ui"],
+      "message": "Bottom sheet outer frame class recipe のローカル再実装禁止",
+      "fix": "<BottomSheetFrame preset=\"mobile-full|mobile-form|desktop-floating\"> を使用"
+    },
+    {
+      "id": "P043",
+      "severity": "error",
+      "category": "component-adoption",
+      "pattern": "<Tabs[^>]*tabBar=\\{[^}]*\\(props\\)|tabBar=\\{\\([^)]*props[^)]*\\)\\s*=>",
+      "excludes": [".stories.", "createExpoRouterTabBar", "LiquidBottomTabBar", "ksk-ds-allow-custom-ui"],
+      "message": "Expo Router / React Navigation tabBar のローカル再実装禁止",
+      "fix": "createExpoRouterTabBar(...) / <LiquidBottomTabBar> を使用"
     }
   ],
   "aiPatterns": {
