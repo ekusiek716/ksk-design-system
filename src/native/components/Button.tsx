@@ -1,7 +1,9 @@
 import React from "react"
 import {
+  ActivityIndicator,
   Pressable,
   Text as RNText,
+  View,
   type PressableProps,
   type StyleProp,
   type TextStyle,
@@ -32,7 +34,15 @@ export interface ButtonProps extends Omit<PressableProps, "children" | "style"> 
   pressedContainerStyle?: StyleProp<ViewStyle>
   /** 内部 Text の style を上書きするポイント */
   textStyle?: StyleProp<TextStyle>
-  children: React.ReactNode
+  /** leading icon slot. children は text または ReactNode のどちらでも可 */
+  leadingIcon?: React.ReactNode
+  /** trailing icon slot. children は text または ReactNode のどちらでも可 */
+  trailingIcon?: React.ReactNode
+  /** loading=true で spinner を表示し、button を busy/disabled として扱う */
+  loading?: boolean
+  /** loading 中も読み上げ/表示したい label。未指定なら spinner のみ */
+  loadingLabel?: string
+  children?: React.ReactNode
 }
 
 /** variant を semantic トークン（brand / active / caution / border）で表現するボタン。 */
@@ -42,10 +52,17 @@ export function Button({
   containerStyle,
   pressedContainerStyle,
   textStyle,
+  leadingIcon,
+  trailingIcon,
+  loading = false,
+  loadingLabel,
   children,
+  disabled,
+  accessibilityState,
   ...rest
 }: ButtonProps) {
   const { theme, scales, mode } = useTheme()
+  const effectiveDisabled = disabled || loading
 
   const palette: Record<
     Exclude<ButtonVariant, "glass">,
@@ -87,10 +104,13 @@ export function Button({
     const fg = mode === "dark" ? theme.text["high-emphasis"] : theme.text["high-emphasis"]
     return (
       <Pressable
+        disabled={effectiveDisabled}
+        accessibilityState={{ ...accessibilityState, disabled: effectiveDisabled, busy: loading || undefined }}
         style={{
           minHeight: scales.touchTargets.buttonCTA.min,
           borderRadius: scales.borderRadius.full,
           overflow: "hidden",
+          opacity: effectiveDisabled ? 0.56 : 1,
         }}
         {...rest}
       >
@@ -103,10 +123,22 @@ export function Button({
               paddingHorizontal: scales.spacing.scale[5],
               justifyContent: "center",
               alignItems: "center",
+              flexDirection: "row",
+              gap: scales.spacing.scale[2],
               transform: [{ scale: pressed ? 0.96 : 1 }],
             }}
           >
-            <RNText style={[resolveTypo("label.md"), { color: fg }, textStyle]}>{children}</RNText>
+            <ButtonContent
+              color={fg}
+              textStyle={textStyle}
+              loading={loading}
+              loadingLabel={loadingLabel}
+              leadingIcon={leadingIcon}
+              trailingIcon={trailingIcon}
+              gap={scales.spacing.scale[2]}
+            >
+              {children}
+            </ButtonContent>
           </GlassView>
         )}
       </Pressable>
@@ -118,6 +150,8 @@ export function Button({
 
   return (
     <Pressable
+      disabled={effectiveDisabled}
+      accessibilityState={{ ...accessibilityState, disabled: effectiveDisabled, busy: loading || undefined }}
       style={({ pressed }) => [
         {
           minHeight: scales.touchTargets.buttonCTA.min,
@@ -126,23 +160,82 @@ export function Button({
           alignItems: "center",
           borderRadius: scales.borderRadius.lg,
           borderWidth: 1,
-          backgroundColor: pressed ? p.bgActive : p.bg,
+          backgroundColor: pressed && !effectiveDisabled ? p.bgActive : p.bg,
           borderColor: p.border,
+          opacity: effectiveDisabled ? 0.56 : 1,
         },
         // raised: 下辺に厚みのある border を載せ、押下時に消して translateY で沈める
         elevation === "raised" && {
-          borderBottomWidth: pressed ? 0 : elev.bottomBorderWidth,
+          borderBottomWidth: pressed && !effectiveDisabled ? 0 : elev.bottomBorderWidth,
           borderBottomColor: p.bottomBorder,
-          transform: [{ translateY: pressed ? elev.offset : 0 }],
+          transform: [{ translateY: pressed && !effectiveDisabled ? elev.offset : 0 }],
           // raised 状態は下辺分の余白を本体に補填（押下で寸法が変わらないよう margin で吸収）
-          marginBottom: pressed ? elev.bottomBorderWidth : 0,
+          marginBottom: pressed && !effectiveDisabled ? elev.bottomBorderWidth : 0,
         },
         containerStyle,
-        pressed && pressedContainerStyle,
+        pressed && !effectiveDisabled && pressedContainerStyle,
       ]}
       {...rest}
     >
-      <RNText style={[resolveTypo("label.md"), { color: p.fg }, textStyle]}>{children}</RNText>
+      <ButtonContent
+        color={p.fg}
+        textStyle={textStyle}
+        loading={loading}
+        loadingLabel={loadingLabel}
+        leadingIcon={leadingIcon}
+        trailingIcon={trailingIcon}
+        gap={scales.spacing.scale[2]}
+      >
+        {children}
+      </ButtonContent>
     </Pressable>
   )
+}
+
+function ButtonContent({
+  color,
+  textStyle,
+  loading,
+  loadingLabel,
+  leadingIcon,
+  trailingIcon,
+  gap,
+  children,
+}: {
+  color: string
+  textStyle?: StyleProp<TextStyle>
+  loading: boolean
+  loadingLabel?: string
+  leadingIcon?: React.ReactNode
+  trailingIcon?: React.ReactNode
+  gap: number
+  children?: React.ReactNode
+}) {
+  const labelStyle = [resolveTypo("label.md"), { color }, textStyle]
+
+  if (loading) {
+    return (
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap }}>
+        <ActivityIndicator size="small" color={color} />
+        {loadingLabel ? <RNText style={labelStyle}>{loadingLabel}</RNText> : null}
+      </View>
+    )
+  }
+
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap }}>
+      {leadingIcon}
+      {renderButtonChildren(children, labelStyle)}
+      {trailingIcon}
+    </View>
+  )
+}
+
+function renderButtonChildren(children: React.ReactNode, labelStyle: StyleProp<TextStyle>) {
+  return React.Children.map(children, (child) => {
+    if (typeof child === "string" || typeof child === "number") {
+      return <RNText style={labelStyle}>{child}</RNText>
+    }
+    return child
+  })
 }

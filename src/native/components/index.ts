@@ -4,7 +4,15 @@ export { Button, type ButtonProps, type ButtonVariant } from "./Button"
 export { Card, type CardProps } from "./Card"
 export { Badge, type BadgeProps, type BadgeTone } from "./Badge"
 export { Stack, type StackProps } from "./Stack"
-export { GlassView, type GlassViewProps, type GlassIntensity, type GlassTint } from "./GlassView"
+export {
+  GlassView,
+  isNativeLiquidGlassAvailable,
+  type GlassEffectStyle,
+  type GlassFallback,
+  type GlassViewProps,
+  type GlassIntensity,
+  type GlassTint,
+} from "./GlassView"
 
 // Phase 1: Display
 export { Avatar, type AvatarProps, type AvatarSize } from "./Avatar"
@@ -67,6 +75,7 @@ export { ToastProvider, useToast, type ToastItem, type ToastTone } from "./Toast
 export { MenuDrawer, type MenuDrawerProps, type MenuDrawerItem, type MenuDrawerSection } from "./MenuDrawer"
 export { ConfirmDialog, type ConfirmDialogProps } from "./ConfirmDialog"
 export { BottomSheetForm, type BottomSheetFormProps } from "./BottomSheetForm"
+export { BottomSheetFrame, type BottomSheetFramePreset, type BottomSheetFrameProps } from "./BottomSheetFrame"
 export { ReviewOverlay, type ReviewOverlayProps } from "./ReviewOverlay"
 export { CoachMark, type CoachMarkProps } from "./CoachMark"
 export { CoachMarkOverlay, type CoachMarkOverlayProps } from "./CoachMarkOverlay"
@@ -105,6 +114,11 @@ export { Breadcrumb, type BreadcrumbProps } from "./Breadcrumb"
 export { AppHeader, type AppHeaderProps } from "./AppHeader"
 export { MobileAppHeader, type MobileAppHeaderProps } from "./MobileAppHeader"
 export {
+  MobileAppShell,
+  type MobileAppShellBottomPadding,
+  type MobileAppShellProps,
+} from "./MobileAppShell"
+export {
   MobileFloatingActionButton,
   type MobileFloatingActionButtonBottomOffset,
   type MobileFloatingActionButtonKeyboardBehavior,
@@ -121,6 +135,13 @@ export { Banner, type BannerProps } from "./Banner"
 export { BannerCarousel, type BannerCarouselProps } from "./BannerCarousel"
 export { SearchBar, type SearchBarProps } from "./SearchBar"
 export { ListItem, type ListItemProps } from "./ListItem"
+export {
+  SettingsListRow,
+  SettingsSection,
+  type SettingsListRowProps,
+  type SettingsSectionProps,
+  type SettingsSectionVariant,
+} from "./SettingsSection"
 export { EmptyState, type EmptyStateProps } from "./EmptyState"
 export { ErrorState, type ErrorStateProps } from "./ErrorState"
 export { SectionHeader, type SectionHeaderProps } from "./SectionHeader"
@@ -128,6 +149,20 @@ export { StickyActionBar, type StickyActionBarProps } from "./StickyActionBar"
 export { SwipeRow, type SwipeRowProps, type SwipeAction } from "./SwipeRow"
 export { Footer, type FooterProps, type FooterLink } from "./Footer"
 export { FileUpload, type FileUploadProps } from "./FileUpload"
+export {
+  CompactFilePicker,
+  ImageAttachmentPicker,
+  type CompactFilePickerProps,
+  type ImageAttachmentPickerProps,
+  type NativeImageAttachment,
+} from "./CompactFilePicker"
+export {
+  ActionTile,
+  QuickActionGrid,
+  type ActionTileProps,
+  type ActionTileVariant,
+  type QuickActionGridProps,
+} from "./QuickActionGrid"
 export { ChipSelector, type ChipSelectorProps, type ChipSelectorOption } from "./ChipSelector"
 export { CategoryNav, type CategoryNavProps, type CategoryNavItem } from "./CategoryNav"
 export { CategoryScroll, type CategoryScrollProps, type CategoryScrollItem } from "./CategoryScroll"
@@ -141,7 +176,21 @@ export { SocialIcon, type SocialIconProps, type SocialIconBrand } from "./Social
 export { ListSkeletons, type ListSkeletonsProps } from "./ListSkeletons"
 
 // Phase 7: Commerce
-export { BottomTabBar, type BottomTabBarKeyboardBehavior, type BottomTabBarProps } from "./BottomTabBar"
+export {
+  BottomTabBar,
+  LiquidBottomTabBar,
+  createExpoRouterTabBar,
+  type BottomTabBarKeyboardBehavior,
+  type BottomTabBarProps,
+  type ExpoRouterTabBarFactoryOptions,
+  type LiquidBottomTabBarProps,
+  type NativeTabBarDescriptor,
+  type NativeTabBarIconProps,
+  type NativeTabBarNavigation,
+  type NativeTabBarOptions,
+  type NativeTabBarRoute,
+  type NativeTabBarState,
+} from "./BottomTabBar"
 export { FilterBar, type FilterBarProps, type FilterBarFilter } from "./FilterBar"
 export { ImageCarousel, type ImageCarouselProps } from "./ImageCarousel"
 export { PriceDisplay, type PriceDisplayProps } from "./PriceDisplay"

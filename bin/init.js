@@ -10,6 +10,7 @@
 //   npx ksk-design-system init          # AGENTS.md + CLAUDE.md を設置
 //   npx ksk-design-system init --force  # 既存ファイルを上書き
 //   npx ksk-design-system demo [dir]    # DS リポを clone + setup（お試し用）
+//   npx ksk-ds lint src                 # contracts/rules.json に基づき consumer UI を検査
 //   npx ksk-design-system postinstall   # npm postinstall から呼ばれる silent モード
 
 import { copyFileSync, existsSync } from "node:fs"
@@ -32,8 +33,17 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   npx ksk-design-system init --force  既存ファイルを上書き
   npx ksk-design-system demo [dir]    DS リポを clone + npm install（お試し）
                                       dir 省略時は ./ksk-ds-demo
+  npx ksk-ds lint src                 DS-first ルール違反を検査
+  npx ksk-ds lint src --format json   CI 向け JSON 出力
+  npx ksk-ds lint --changed           Git 差分のみ検査
 `)
   process.exit(0)
+}
+
+if (cmd === "lint") {
+  const { runLintCli } = await import("./lint.js")
+  const status = await runLintCli(args.slice(1), { cwd: process.cwd(), pkgRoot })
+  process.exit(status)
 }
 
 if (cmd === "demo") {
