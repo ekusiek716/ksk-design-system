@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { BottomTabBar } from "./bottom-tab-bar"
 
 const meta: Meta<typeof BottomTabBar> = {
@@ -154,6 +156,28 @@ export const LiquidGlassLightFallback: Story = {
         pillPosition="absolute"
         items={COMPACT_ITEMS}
         centerAction={CENTER_ACTION}
+      />
+    </div>
+  ),
+}
+
+export const KeyboardHideWithInput: Story = {
+  name: "Keyboard behavior — hide",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div className="relative min-h-screen bg-[var(--Surface-Secondary)] px-6 py-10">
+      <div className="mx-auto flex min-h-screen max-w-[430px] flex-col justify-end pb-28">
+        <div className="space-y-2 rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4">
+          <Label htmlFor="bottom-tab-keyboard-title">タイトル</Label>
+          <Input id="bottom-tab-keyboard-title" placeholder="入力中は下部ナビを隠す" />
+        </div>
+      </div>
+      <BottomTabBar
+        variant="pill"
+        keyboardBehavior="hide"
+        items={COMPACT_ITEMS}
+        centerAction={CENTER_ACTION}
+        className="lg:flex"
       />
     </div>
   ),

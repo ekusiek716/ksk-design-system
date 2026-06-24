@@ -28,24 +28,48 @@ function useVisualViewportKeyboardInset(): VisualViewportKeyboardState {
   React.useEffect(() => {
     if (typeof window === "undefined") return
     const viewport = window.visualViewport
-    if (!viewport) return
 
     const update = () => {
+      const rootKeyboardOpen =
+        document.documentElement.hasAttribute("data-kb-open") ||
+        document.body?.hasAttribute("data-kb-open") === true
+
+      if (!viewport) {
+        setState({
+          keyboardInset: 0,
+          visibleHeight: null,
+          isKeyboardOpen: rootKeyboardOpen,
+        })
+        return
+      }
+
+      const nextState = computeVisualViewportKeyboardState(
+        window.innerHeight,
+        viewport.height,
+        viewport.offsetTop
+      )
+
       setState(
-        computeVisualViewportKeyboardState(
-          window.innerHeight,
-          viewport.height,
-          viewport.offsetTop
-        )
+        rootKeyboardOpen && !nextState.isKeyboardOpen
+          ? { ...nextState, isKeyboardOpen: true }
+          : nextState
       )
     }
 
     update()
-    viewport.addEventListener("resize", update)
-    viewport.addEventListener("scroll", update)
+    viewport?.addEventListener("resize", update)
+    viewport?.addEventListener("scroll", update)
+    const observer = typeof MutationObserver !== "undefined"
+      ? new MutationObserver(update)
+      : null
+    observer?.observe(document.documentElement, { attributes: true, attributeFilter: ["data-kb-open"] })
+    if (document.body) {
+      observer?.observe(document.body, { attributes: true, attributeFilter: ["data-kb-open"] })
+    }
     return () => {
-      viewport.removeEventListener("resize", update)
-      viewport.removeEventListener("scroll", update)
+      viewport?.removeEventListener("resize", update)
+      viewport?.removeEventListener("scroll", update)
+      observer?.disconnect()
     }
   }, [])
 

@@ -31,7 +31,7 @@ export {
 export { Label, type LabelProps } from "./Label"
 export { Input, type InputProps } from "./Input"
 export { Textarea, type TextareaProps } from "./Textarea"
-export { AutoGrowTextarea, type AutoGrowTextareaProps } from "./AutoGrowTextarea"
+export { AutoGrowTextarea, type AutoGrowTextareaDensity, type AutoGrowTextareaProps } from "./AutoGrowTextarea"
 export { Switch, type SwitchProps } from "./Switch"
 export { Checkbox, type CheckboxProps } from "./Checkbox"
 export { CheckboxField, type CheckboxFieldProps } from "./CheckboxField"
@@ -141,7 +141,7 @@ export { SocialIcon, type SocialIconProps, type SocialIconBrand } from "./Social
 export { ListSkeletons, type ListSkeletonsProps } from "./ListSkeletons"
 
 // Phase 7: Commerce
-export { BottomTabBar, type BottomTabBarProps } from "./BottomTabBar"
+export { BottomTabBar, type BottomTabBarKeyboardBehavior, type BottomTabBarProps } from "./BottomTabBar"
 export { FilterBar, type FilterBarProps, type FilterBarFilter } from "./FilterBar"
 export { ImageCarousel, type ImageCarouselProps } from "./ImageCarousel"
 export { PriceDisplay, type PriceDisplayProps } from "./PriceDisplay"

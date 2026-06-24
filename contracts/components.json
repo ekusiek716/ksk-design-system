@@ -827,13 +827,17 @@
       "name": "AutoGrowTextarea",
       "path": "src/components/ui/auto-grow-textarea.tsx",
       "description": "Textarea ラッパー。入力に合わせて自動高さ調整 + 任意で文字数カウンタ。",
-      "variants": [],
+      "variants": [
+        "density: default / compact"
+      ],
       "sizes": [],
       "accessibility": [
         "aria-label inherits from Textarea"
       ],
       "rules": [
         "長文メモ・コメント入力で <Textarea> の代わりに使う",
+        "詳細シートの1行タイトル編集は minRows=1 + density=compact を使う",
+        "density=default はカーソル下に 1 行分の余白を残すため、コメント/本文入力向け",
         "maxLength 指定でカウンタが自動表示"
       ]
     },
@@ -938,7 +942,9 @@
         "Tag (表示専用) との違いは interactive 性",
         "soldOut は斜線オーバーレイ + disabled",
         "href を渡すと <a> でレンダリング",
-        "shape=pill (既定) / square、size=tile は正方形タイル"
+        "shape=pill (既定) / square、size=tile は正方形タイル",
+        "touch device では selected 切替時の color transition を走らせない",
+        "Android tap highlight は DS 側で抑制するため consumer CSS で上書きしない"
       ]
     },
     {
@@ -1131,7 +1137,7 @@
       "description": "モバイル固定 FAB。BottomTabBar と safe-area を考慮した bottom offset、start/end/center placement、keyboard hide/lift/stay を内包する。",
       "variants": [
         "placement: start / end / center",
-        "bottomOffset: none / bottom-nav / bottom-nav-pill",
+        "bottomOffset: none / bottom-nav / bottom-nav-pill / bottom-nav-pill-inline",
         "keyboardBehavior: hide / lift / stay"
       ],
       "accessibility": [
@@ -1140,6 +1146,7 @@
       "rules": [
         "画面側で fixed bottom/right と Button size=icon-lg を手組みしない",
         "BottomTabBar 併用時は bottomOffset=bottom-nav を使う",
+        "pill BottomTabBar の上に重ねる場合は bottomOffset=bottom-nav-pill、横並びに置く場合は bottomOffset=bottom-nav-pill-inline を使う",
         "keyboard 表示中に入力を邪魔する場合は keyboardBehavior=hide を使う"
       ]
     },
@@ -1171,7 +1178,8 @@
         "removable"
       ],
       "rules": [
-        "Use multiple=false for single-select. Use max to limit selection count."
+        "Use multiple=false for single-select. Use max to limit selection count.",
+        "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior."
       ]
     },
     {
@@ -1530,6 +1538,7 @@
         "centerAction",
         "labels",
         "safe-area",
+        "keyboardBehavior",
         "fixed-or-absolute",
         "maxWidth",
         "inverse-tone"
@@ -1538,6 +1547,8 @@
         "Mobile only. Use safe-area-inset-bottom.",
         "Use variant='pill' with centerAction for Liquid Glass global navigation CTA.",
         "Use showLabels when tab recognition matters; touch targets must remain at least 44px.",
+        "Use keyboardBehavior='hide' when a global nav would cover focused text inputs; do not hide nav with consumer CSS selectors.",
+        "Use keyboardBehavior='lift' only when the nav remains actionable while editing.",
         "Use tone='inverse' over dark photo/video/gradient backgrounds.",
         "Use pillPosition='absolute' only inside controlled shells or Storybook demos; fixed is the app default.",
         "Set maxWidth to the mobile web shell width when the app is centered in a desktop viewport."

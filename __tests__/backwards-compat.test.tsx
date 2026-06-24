@@ -20,7 +20,9 @@ import {
   Alert,
   AlertTitle,
   AlertDescription,
+  AutoGrowTextarea,
   Badge,
+  BottomTabBar,
   Card,
   Celebration,
   Chip,
@@ -172,6 +174,12 @@ describe("Chip — backwards-compat", () => {
   it("soldOut + href は href を無視して button + disabled", () => {
     const out = html(<Chip soldOut href="/q/foo">5号</Chip>)
     expect(out).toMatch(/^<button /)
+  })
+
+  it("touch device 向けの tap highlight 抑制を含む", () => {
+    const out = html(<Chip selected count={1}>すべて</Chip>)
+    expect(out).toContain("webkit-tap-highlight-color")
+    expect(out).toContain("@media(hover:hover)")
   })
 })
 
@@ -329,6 +337,56 @@ describe("Mobile DS recipes — render contracts", () => {
     const out = html(<UnsafeMobileFab label="追加する" variant="destructive" size="xl" />)
     expect(out).toContain('data-variant="default"')
     expect(out).toContain('data-size="icon-lg"')
+  })
+
+  it("MobileFloatingActionButton は pill nav 横並び offset を明示できる", () => {
+    const out = html(
+      <MobileFloatingActionButton
+        label="追加する"
+        bottomOffset="bottom-nav-pill-inline"
+      />
+    )
+    expect(out).toContain('data-bottom-offset="bottom-nav-pill-inline"')
+    expect(out).toContain("[--ksk-fab-bottom-offset:1rem]")
+  })
+
+  it("BottomTabBar は keyboardBehavior を DOM contract に出す", () => {
+    const out = html(
+      <BottomTabBar
+        keyboardBehavior="hide"
+        items={[{ label: "ホーム", icon: <span aria-hidden="true">H</span>, isActive: true }]}
+      />
+    )
+    expect(out).toContain('data-slot="bottom-tab-bar"')
+    expect(out).toContain('data-keyboard-behavior="hide"')
+  })
+
+  it("BottomTabBar pill は lift 用 CSS variable を持つ", () => {
+    const out = html(
+      <BottomTabBar
+        variant="pill"
+        keyboardBehavior="lift"
+        items={[{ label: "ホーム", icon: <span aria-hidden="true">H</span>, isActive: true }]}
+      />
+    )
+    expect(out).toContain('data-slot="bottom-nav-pill"')
+    expect(out).toContain('data-keyboard-behavior="lift"')
+    expect(out).toContain("--ksk-bottom-tab-bar-keyboard-inset:0px")
+  })
+
+  it("AutoGrowTextarea compact は density contract と min-height override を出す", () => {
+    const out = html(
+      <AutoGrowTextarea
+        aria-label="タイトル"
+        value="短いタイトル"
+        onChange={() => undefined}
+        minRows={1}
+        density="compact"
+      />
+    )
+    expect(out).toContain('data-slot="auto-grow-textarea"')
+    expect(out).toContain('data-density="compact"')
+    expect(out).toContain("min-h-0!")
   })
 
   it("MobileAppHeader は brand と compact status を分離して描画する", () => {

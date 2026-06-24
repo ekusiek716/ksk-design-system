@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 const chipVariants = cva(
   // justify-center をベースに含める：tile サイズ等の固定幅で text が左寄せになる問題を防ぐ。
   // padding 付きサイズ (sm/md/lg) でも flex の justify-center は副作用なし。
-  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer typo-label-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
+  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer touch-manipulation [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:transition-colors typo-label-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
   {
     variants: {
       variant: {
@@ -97,7 +97,7 @@ function Chip({
   const countBadge = count !== undefined && (
     <span
       className={cn(
-        "inline-flex items-center justify-center rounded-full px-1.5 min-w-[1.25rem] typo-label-xs transition-colors",
+        "inline-flex items-center justify-center rounded-full px-1.5 min-w-[1.25rem] typo-label-xs [@media(hover:hover)]:transition-colors",
         selected
           ? "bg-[var(--Surface-Primary)] text-[var(--Text-Accent-Primary)]"
           : "bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)]"
@@ -137,7 +137,7 @@ function Chip({
 
   // 選択時は Brand-Primary を強調表示 (CTA / PillRow と一貫)
   const selectedStyles = selected &&
-    "bg-[var(--Brand-Primary)]! text-[var(--Text-on-Inverse)]! hover:bg-[var(--Active-Primary-Button)]! active:bg-[var(--Active-Primary-Button)]! border-[var(--Brand-Primary)]! font-bold shadow-sm hover:shadow"
+    "bg-[var(--Brand-Primary)]! text-[var(--Text-on-Inverse)]! hover:bg-[var(--Active-Primary-Button)]! active:bg-[var(--Active-Primary-Button)]! border-[var(--Brand-Primary)]! shadow-sm hover:shadow"
 
   const soldOutStyles = isSoldOut &&
     "border border-[var(--Text-Disable)] bg-[var(--Surface-Secondary)]! text-[var(--Text-Disable)]! cursor-not-allowed"
@@ -174,7 +174,7 @@ function Chip({
         data-variant={variant}
         data-selected={selected || undefined}
         data-sold-out={isSoldOut || undefined}
-        className={cn("inline-flex items-center", className)}
+        className={cn("inline-flex items-center [-webkit-tap-highlight-color:transparent]", className)}
       >
         {href && !isSoldOut ? (
           <a href={href} className={actionClassName}>
@@ -200,7 +200,7 @@ function Chip({
             onRemove?.()
           }}
           className={cn(
-            "inline-flex shrink-0 items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
+            "inline-flex shrink-0 items-center justify-center touch-manipulation [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
             // 仕切り線なし・本体と同じ面色を継ぎ目なく延長。ホバー時のみ × 側を強調。
             !selected && variant === "filled" && "bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Tertiary)] hover:text-[var(--Text-High-Emphasis)]",
             !selected && variant === "accent" && "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)]",

@@ -4,12 +4,14 @@ import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 
 const WEB_INPUT_RESET = Platform.OS === "web" ? { outlineStyle: "none" } : null
+export type AutoGrowTextareaDensity = "default" | "compact"
 
 export interface AutoGrowTextareaProps extends Omit<TextInputProps, "style" | "multiline"> {
   invalid?: boolean
   disabled?: boolean
   minHeight?: number
   maxHeight?: number
+  density?: AutoGrowTextareaDensity
 }
 
 export function AutoGrowTextarea({
@@ -17,6 +19,7 @@ export function AutoGrowTextarea({
   disabled,
   minHeight = 44,
   maxHeight = 200,
+  density = "default",
   ...rest
 }: AutoGrowTextareaProps) {
   const { theme, scales } = useTheme()
@@ -30,7 +33,8 @@ export function AutoGrowTextarea({
     : theme.border["medium-emphasis"]
 
   const handleSize = (e: NativeSyntheticEvent<TextInputContentSizeChangeEventData>) => {
-    const next = Math.min(maxHeight, Math.max(minHeight, e.nativeEvent.contentSize.height + 16))
+    const extraHeight = density === "compact" ? 0 : 16
+    const next = Math.min(maxHeight, Math.max(minHeight, e.nativeEvent.contentSize.height + extraHeight))
     setHeight(next)
   }
 
@@ -53,7 +57,7 @@ export function AutoGrowTextarea({
         resolveTypo("body.md"),
         {
           height,
-          padding: scales.spacing.scale[3],
+          padding: density === "compact" ? scales.spacing.scale[2] : scales.spacing.scale[3],
           borderRadius: scales.borderRadius.md,
           borderWidth: 1,
           borderColor,

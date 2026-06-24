@@ -13,7 +13,7 @@ import { resolveTypo } from "../typography"
 
 export type MobileFloatingActionButtonPlacement = "end" | "start" | "center"
 export type MobileFloatingActionButtonKeyboardBehavior = "hide" | "lift" | "stay"
-export type MobileFloatingActionButtonBottomOffset = "none" | "bottom-nav" | "bottom-nav-pill"
+export type MobileFloatingActionButtonBottomOffset = "none" | "bottom-nav" | "bottom-nav-pill" | "bottom-nav-pill-inline"
 
 export interface MobileFloatingActionButtonProps extends Omit<PressableProps, "children" | "style"> {
   label: string
@@ -51,6 +51,7 @@ export function MobileFloatingActionButton({
 
   const bottomMap = {
     none: scales.spacing.scale[4],
+    "bottom-nav-pill-inline": scales.spacing.scale[4],
     "bottom-nav": 80,
     "bottom-nav-pill": 96,
   }
