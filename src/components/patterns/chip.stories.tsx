@@ -2,6 +2,7 @@
  * @file Chip のストーリー
  * @description フィルター / キーワード用チップコンポーネント。全バリアント、サイズ、選択状態、削除可能を網羅
  */
+import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { Chip } from "./chip"
 
@@ -31,6 +32,8 @@ const meta: Meta<typeof Chip> = {
 export default meta
 
 type Story = StoryObj<typeof Chip>
+
+const TOUCH_FILTERS = ["すべて", "未完了", "今日", "重要"]
 
 export const Filled: Story = {
   args: { children: "Filled", variant: "filled" },
@@ -171,6 +174,27 @@ export const RealWorldFilters: Story = {
             <Chip shape="square" size="tile" soldOut>XL</Chip>
           </div>
         </div>
+      </div>
+    )
+  },
+}
+
+export const TouchSelectionStable: Story = {
+  name: "Touch selection stable",
+  render: () => {
+    const [selected, setSelected] = React.useState("すべて")
+
+    return (
+      <div className="flex flex-wrap gap-2">
+        {TOUCH_FILTERS.map((filter) => (
+          <Chip
+            key={filter}
+            selected={selected === filter}
+            onClick={() => setSelected(filter)}
+          >
+            {filter}
+          </Chip>
+        ))}
       </div>
     )
   },

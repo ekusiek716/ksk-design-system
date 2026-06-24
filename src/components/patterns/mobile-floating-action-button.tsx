@@ -6,7 +6,7 @@ import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboa
 
 type MobileFloatingActionButtonPlacement = "end" | "start" | "center"
 type MobileFloatingActionButtonKeyboardBehavior = "hide" | "lift" | "stay"
-type MobileFloatingActionButtonBottomOffset = "none" | "bottom-nav" | "bottom-nav-pill"
+type MobileFloatingActionButtonBottomOffset = "none" | "bottom-nav" | "bottom-nav-pill" | "bottom-nav-pill-inline"
 
 interface MobileFloatingActionButtonProps extends Omit<React.ComponentProps<typeof Button>, "children" | "size" | "variant"> {
   label: string
@@ -51,6 +51,7 @@ function MobileFloatingActionButton({
         placement === "start" && "left-4",
         placement === "center" && "left-1/2 -translate-x-1/2",
         bottomOffset === "none" && "[--ksk-fab-bottom-offset:1rem]",
+        bottomOffset === "bottom-nav-pill-inline" && "[--ksk-fab-bottom-offset:1rem]",
         bottomOffset === "bottom-nav" && "[--ksk-fab-bottom-offset:5rem]",
         bottomOffset === "bottom-nav-pill" && "[--ksk-fab-bottom-offset:6rem]",
         mobileOnly && "lg:hidden",
