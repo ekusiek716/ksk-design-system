@@ -4,7 +4,7 @@
 
 **🔗 ライブ Storybook → https://ksk-design-system.vercel.app**
 
-115 コンポーネントを実際に操作・確認できます。
+125 コンポーネントを実際に操作・確認できます。
 
 ---
 
@@ -14,7 +14,7 @@
 - **アクセシブル** — shadcn/ui（Radix UI ベース）+ `@storybook/addon-a11y` で a11y を担保
 - **Tailwind CSS v4 ネイティブ** — `@theme` ベースのトークン設計
 - **型安全** — React 19 + TypeScript、CVA によるバリアント管理
-- **115 + 91 コンポーネント** — Web 115（UI 56 / EC 11 / 管理 8 / シェル 3 / パターン 37）+ React Native 91
+- **125 + 96 コンポーネント** — Web 125（UI 57 / EC 11 / 管理 8 / シェル 3 / パターン 46）+ React Native 96
 - **iOS 26 Liquid Glass 対応** — RN 側 `GlassView` + `Button variant="glass"`、Web 側 `.glass` CSS マテリアル
 
 ## 🎨 テーマ
@@ -53,6 +53,22 @@ import { Button, Card, Input, FormField } from "ksk-design-system"
 ```
 
 新規クライアント案件では、テーマファイルで `--Primitive-Brand-500` などブランドカラーの 10 行を定義するだけで、全コンポーネントがそのブランドカラーで動作します。
+
+### Consumer lint
+
+consumer 側のローカル grep script が古くならないよう、DS 本体から `contracts/rules.json` を読む lint CLI を同梱しています。
+
+```bash
+npx ksk-ds lint src
+npx ksk-ds lint src --format json
+npx ksk-ds lint --changed
+```
+
+出力は `file:line rule severity fix` を含みます。どうしても DS で表現できない domain-specific UI は、理由付きの escape コメントを置きます。
+
+```tsx
+// ksk-ds-allow-custom-ui: medical chart requires bespoke interaction
+```
 
 ### Media overlay utilities
 
@@ -123,10 +139,12 @@ import { ThemeProvider, Button, Card, GlassView } from "ksk-design-system/native
 
 ```bash
 # Liquid Glass を本物の UIVisualEffectView で出したい場合
-npx expo install expo-blur
+npx expo install expo-glass-effect expo-blur
 ```
 
 Web は backdrop-filter で擬似、Android は半透明 surface でフォールバックします。
+
+Expo Router / React Navigation の tab bar、native `GlassView`、Button loading、settings/attachment/mobile shell recipes は `NATIVE_RECIPES.md` を参照してください。
 
 ## 🧪 試してみる（1コマンドお試し）
 
