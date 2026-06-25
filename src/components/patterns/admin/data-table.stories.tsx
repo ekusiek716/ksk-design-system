@@ -19,6 +19,7 @@ import {
   DataTableDragHandleCell,
   DataTableInputCell,
   DataTableSelectCell,
+  DataTableDateCell,
   DataTableImageCell,
   createDataTableDateColumn,
   createDataTableChipColumn,
@@ -557,6 +558,7 @@ export const CellVariants: StoryObj = {
   render: function CellVariantsStory() {
     const [inputVal, setInputVal] = React.useState("サンプル商品")
     const [selectVal, setSelectVal] = React.useState("published")
+    const [dateVal, setDateVal] = React.useState<Date | undefined>(new Date(2026, 5, 25))
 
     return (
       <div className="p-6">
@@ -568,6 +570,7 @@ export const CellVariants: StoryObj = {
                 <DataTableHead>画像</DataTableHead>
                 <DataTableHead>商品名</DataTableHead>
                 <DataTableHead>ステータス</DataTableHead>
+                <DataTableHead>発売日</DataTableHead>
                 <DataTableHead>価格</DataTableHead>
                 <DataTableHead>リンク</DataTableHead>
               </tr>
@@ -588,12 +591,14 @@ export const CellVariants: StoryObj = {
                 <DataTableSelectCell
                   value={selectVal}
                   onValueChange={setSelectVal}
+                  contentPosition="popper"
                   options={[
                     { label: "公開", value: "published" },
                     { label: "下書き", value: "draft" },
                     { label: "非公開", value: "archived" },
                   ]}
                 />
+                <DataTableDateCell value={dateVal} onValueChange={setDateVal} width="sm" />
                 <DataTableNumberCell value={3980} prefix="¥" />
                 <DataTableLinkCell href="https://example.com" external>
                   詳細を見る
@@ -618,10 +623,129 @@ export const CellVariants: StoryObj = {
                     { label: "非公開", value: "archived" },
                   ]}
                 />
+                <DataTableDateCell value={new Date(2026, 6, 1)} width="sm" />
                 <DataTableNumberCell value={12500} prefix="¥" />
                 <DataTableLinkCell href="https://example.com">
                   内部リンク
                 </DataTableLinkCell>
+              </DataTableRow>
+            </DataTableBody>
+          </DataTableTable>
+        </DataTable>
+      </div>
+    )
+  },
+}
+
+// ─── Row Click / Full Cell Hit Area ───
+
+export const RowClickHitArea: StoryObj = {
+  name: "Row Click / Full Cell Hit Area",
+  render: function RowClickHitAreaStory() {
+    const [activeUserId, setActiveUserId] = React.useState<string>("1")
+
+    const columns = React.useMemo<DataTableColumn<User>[]>(
+      () => [
+        {
+          key: "name",
+          header: "名前",
+          width: "flex",
+          render: (user) => (
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate typo-label-md text-[var(--Text-High-Emphasis)]">
+                {user.name}
+              </span>
+              <span className="truncate typo-body-sm text-[var(--Text-Low-Emphasis)]">
+                {user.email}
+              </span>
+            </div>
+          ),
+        },
+        {
+          key: "status",
+          header: "ステータス",
+          width: "sm",
+          render: (user) => (
+            <Badge variant={statusBadgeVariant[user.status]}>
+              {statusLabel[user.status]}
+            </Badge>
+          ),
+        },
+        {
+          key: "actions",
+          header: "",
+          width: "action",
+          cell: ({ row }) => (
+            <Button size="sm" variant="secondary" onClick={() => setActiveUserId(row.id)}>
+              詳細
+            </Button>
+          ),
+        },
+      ],
+      []
+    )
+
+    return (
+      <div className="space-y-3 p-6">
+        <DataTable
+          rows={sampleUsers}
+          columns={columns}
+          getRowId={(user) => user.id}
+          onRowClick={(user) => setActiveUserId(user.id)}
+          rowClassName={(user) =>
+            user.id === activeUserId
+              ? "bg-[var(--Surface-Accent-Primary-Light)]"
+              : undefined
+          }
+        />
+        <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
+          選択中: {sampleUsers.find((user) => user.id === activeUserId)?.name}
+        </p>
+      </div>
+    )
+  },
+}
+
+// ─── Flexible Column Width ───
+
+export const FlexibleColumnWidth: StoryObj = {
+  name: "Flexible Column Width",
+  render: function FlexibleColumnWidthStory() {
+    const [owner, setOwner] = React.useState("デザイン")
+    const [status, setStatus] = React.useState("doing")
+
+    return (
+      <div className="p-6">
+        <DataTable>
+          <DataTableTable className="min-w-[720px]">
+            <DataTableHeader>
+              <tr>
+                <DataTableHead width="narrow">ID</DataTableHead>
+                <DataTableHead width="flex">内容</DataTableHead>
+                <DataTableHead width="sm">担当</DataTableHead>
+                <DataTableHead width="sm">状態</DataTableHead>
+              </tr>
+            </DataTableHeader>
+            <DataTableBody>
+              <DataTableRow>
+                <DataTableCell width="narrow">#104</DataTableCell>
+                <DataTableCell width="flex">
+                  <div className="min-w-0">
+                    <div className="truncate typo-label-md">
+                      長い説明を持つタスクでも flex 列が残り幅を受け持つ
+                    </div>
+                    <div className="truncate typo-body-sm text-[var(--Text-Low-Emphasis)]">
+                      固定列を増やしても本文列だけを伸縮させたい管理画面向け
+                    </div>
+                  </div>
+                </DataTableCell>
+                <DataTableInputCell width="sm" value={owner} onChange={setOwner} />
+                <DataTableSelectCell
+                  width="sm"
+                  value={status}
+                  onValueChange={setStatus}
+                  options={taskStatusOptions}
+                />
               </DataTableRow>
             </DataTableBody>
           </DataTableTable>
@@ -677,6 +801,14 @@ export const StickyColumns: StoryObj = {
               </tr>
             </DataTableHeader>
             <DataTableBody>
+              <DataTableSectionRow
+                label="今月参加"
+                count={rows.length}
+                colSpan={10}
+                stickyLeft
+                stickyOffset={0}
+                headingSize="lg"
+              />
               {rows.map((r) => (
                 <DataTableRow key={r.id}>
                   <DataTableCell sticky="left" stickyOffset={0} className="w-[140px]">

@@ -21,7 +21,13 @@ export { Tag, type TagProps, type TagTone, type TagVariant } from "./Tag"
 export { Spinner, type SpinnerProps, type SpinnerSize } from "./Spinner"
 export { Separator, type SeparatorProps } from "./Separator"
 export { Skeleton, SkeletonText, type SkeletonProps } from "./Skeleton"
-export { Progress, type ProgressProps } from "./Progress"
+export {
+  Progress,
+  type ProgressAutoColorConfig,
+  type ProgressProps,
+  type ProgressTone,
+  type ProgressVariant,
+} from "./Progress"
 export { ProgressRing, type ProgressRingProps } from "./ProgressRing"
 export { StarRating, type StarRatingProps } from "./StarRating"
 export { NotificationBadge, type NotificationBadgeProps } from "./NotificationBadge"

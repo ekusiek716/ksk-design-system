@@ -12,6 +12,7 @@ type Story = StoryObj<typeof CountdownTimer>
 
 const inTwoHours = () => new Date(Date.now() + 2 * 60 * 60 * 1000 + 48 * 60 * 1000 + 33 * 1000)
 const inThreeMin = () => new Date(Date.now() + 3 * 60 * 1000 + 12 * 1000)
+const inFortyDays = () => new Date(Date.now() + 40 * 24 * 60 * 60 * 1000)
 const past = () => new Date(Date.now() - 1000)
 
 export const Filled: Story = {
@@ -26,6 +27,17 @@ export const Compact: Story = {
   render: () => <CountdownTimer targetDate={inThreeMin()} compact label="締切まで" />,
 }
 
+export const DayGranularity: Story = {
+  render: () => (
+    <CountdownTimer
+      targetDate={inFortyDays()}
+      granularity="day"
+      label="出発まで"
+      todayLabel="当日"
+    />
+  ),
+}
+
 export const Ended: Story = {
   render: () => <CountdownTimer targetDate={past()} endedLabel="受付終了" />,
 }
@@ -35,6 +47,7 @@ export const AllVariants: Story = {
     <div className="flex flex-col gap-4 items-start">
       <CountdownTimer targetDate={inTwoHours()} label="セール終了まで" />
       <CountdownTimer targetDate={inTwoHours()} variant="ghost" label="残り" />
+      <CountdownTimer targetDate={inFortyDays()} granularity="day" label="出発まで" />
       <CountdownTimer targetDate={inThreeMin()} compact label="締切" />
       <CountdownTimer targetDate={past()} />
     </div>

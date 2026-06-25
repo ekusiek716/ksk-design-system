@@ -40,6 +40,7 @@ type DataTableRowId = string | number
 type DataTableSelectionMode = "none" | "single" | "multi"
 type DataTableColumnAlign = "left" | "center" | "right"
 type DataTableEditTrigger = "click" | "doubleClick" | "focus" | "manual"
+type DataTableSelectContentPosition = React.ComponentProps<typeof SelectContent>["position"]
 type DataTableColumnWidth =
   | "auto"
   | "narrow"
@@ -49,6 +50,7 @@ type DataTableColumnWidth =
   | "md"
   | "lg"
   | "xl"
+  | "flex"
 
 interface DataTableSortState {
   key: string
@@ -95,6 +97,15 @@ type DataTableRowCommitHandler<TRow> = {
   bivarianceHack(row: TRow, previousRow: TRow, index: number): void
 }["bivarianceHack"]
 
+type DataTableRowClickHandler<TRow> = {
+  bivarianceHack(
+    row: TRow,
+    index: number,
+    rowId: DataTableRowId,
+    event: React.MouseEvent<HTMLTableRowElement> | React.KeyboardEvent<HTMLTableRowElement>
+  ): void
+}["bivarianceHack"]
+
 // DataTable の columns 配列は列ごとに Date / string[] / string など別の value 型を混在させる。
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface DataTableColumn<TRow, TValue = any> {
@@ -135,6 +146,9 @@ interface DataTableSection {
   count?: number
   open?: boolean
   onToggle?: () => void
+  stickyLeft?: boolean
+  stickyOffset?: number
+  headingSize?: DataTableSectionHeadingSize
 }
 
 interface IndexedRow<TRow> {
@@ -268,6 +282,28 @@ function getCellEditTriggerProps<TRow, TValue>(
   }
 }
 
+const DATA_TABLE_INTERACTIVE_SELECTOR = [
+  "a[href]",
+  "button",
+  "input",
+  "select",
+  "textarea",
+  "[role='button']",
+  "[role='menuitem']",
+  "[role='checkbox']",
+  "[role='radio']",
+  "[data-table-ignore-row-click]",
+].join(",")
+
+function isFromNestedInteractive(
+  event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>
+) {
+  const target = event.target
+  if (!(target instanceof Element)) return false
+  if (target === event.currentTarget) return false
+  return Boolean(target.closest(DATA_TABLE_INTERACTIVE_SELECTOR))
+}
+
 function getColumnSortValue<TRow, TValue>(
   row: TRow,
   index: number,
@@ -387,6 +423,8 @@ interface DataTableProps<TRow = unknown> extends React.ComponentProps<"div"> {
   emptyDescription?: string
   emptyAction?: React.ReactNode
   sectionRow?: (row: TRow, index: number) => DataTableSection | null | undefined
+  onRowClick?: DataTableRowClickHandler<TRow>
+  rowClickable?: boolean
   tableClassName?: string
   rowClassName?: string | ((row: TRow, index: number) => string | undefined)
 }
@@ -406,6 +444,8 @@ function DataTable<TRow = unknown>({
   emptyDescription,
   emptyAction,
   sectionRow,
+  onRowClick,
+  rowClickable,
   tableClassName,
   rowClassName,
   ...props
@@ -586,6 +626,7 @@ function DataTable<TRow = unknown>({
                 sortable={column.sortable}
                 sortDirection={activeSort?.key === column.key ? activeSort.direction : null}
                 onSort={() => handleSort(column)}
+                width={column.width}
                 sticky={column.sticky}
                 stickyOffset={column.stickyOffset}
                 className={cn(
@@ -620,11 +661,18 @@ function DataTable<TRow = unknown>({
                     open={section.open}
                     onToggle={section.onToggle}
                     colSpan={colSpan}
+                    stickyLeft={section.stickyLeft}
+                    stickyOffset={section.stickyOffset}
+                    headingSize={section.headingSize}
                   />
                 )}
                 {sectionOpen && (
                   <DataTableRow
                     selected={selected}
+                    clickable={rowClickable ?? Boolean(onRowClick)}
+                    onRowClick={
+                      onRowClick ? (event) => onRowClick(row, index, rowId, event) : undefined
+                    }
                     className={
                       typeof rowClassName === "function" ? rowClassName(row, index) : rowClassName
                     }
@@ -688,6 +736,9 @@ function DataTable<TRow = unknown>({
                               options={column.editOptions}
                               onValueChange={(next) => column.onEditChange?.(row, next, index)}
                               className={column.className}
+                              width={column.width}
+                              sticky={column.sticky}
+                              stickyOffset={column.stickyOffset}
                             />
                           )
                         }
@@ -697,6 +748,9 @@ function DataTable<TRow = unknown>({
                             value={value}
                             onChange={(next) => column.onEditChange?.(row, next, index)}
                             className={column.className}
+                            width={column.width}
+                            sticky={column.sticky}
+                            stickyOffset={column.stickyOffset}
                           />
                         )
                       }
@@ -776,16 +830,51 @@ function DataTableBody({ className, children, ...props }: DataTableBodyProps) {
 
 interface DataTableRowProps extends React.ComponentProps<"tr"> {
   selected?: boolean
+  clickable?: boolean
+  onRowClick?: (
+    event: React.MouseEvent<HTMLTableRowElement> | React.KeyboardEvent<HTMLTableRowElement>
+  ) => void
 }
 
-function DataTableRow({ className, selected, children, ...props }: DataTableRowProps) {
+function DataTableRow({
+  className,
+  selected,
+  clickable,
+  onRowClick,
+  onClick,
+  onKeyDown,
+  role,
+  tabIndex,
+  children,
+  ...props
+}: DataTableRowProps) {
+  const isInteractive = clickable || Boolean(onRowClick)
+  const handleClick: React.MouseEventHandler<HTMLTableRowElement> = (event) => {
+    onClick?.(event)
+    if (event.defaultPrevented || !onRowClick || isFromNestedInteractive(event)) return
+    onRowClick(event)
+  }
+  const handleKeyDown: React.KeyboardEventHandler<HTMLTableRowElement> = (event) => {
+    onKeyDown?.(event)
+    if (event.defaultPrevented || !onRowClick || isFromNestedInteractive(event)) return
+    if (event.key !== "Enter" && event.key !== " ") return
+    event.preventDefault()
+    onRowClick(event)
+  }
   return (
     <tr
       data-slot="data-table-row"
       data-selected={selected || undefined}
+      data-clickable={isInteractive || undefined}
+      role={role}
+      tabIndex={isInteractive && tabIndex == null ? 0 : tabIndex}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       className={cn(
         "border-l-2 border-l-transparent transition-colors hover:bg-[var(--Surface-Secondary)]/50",
         selected && "bg-[var(--Surface-Accent-Primary-Light)] border-l-[var(--Brand-Primary)]",
+        isInteractive &&
+          "cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         className
       )}
       {...props}
@@ -797,10 +886,11 @@ function DataTableRow({ className, selected, children, ...props }: DataTableRowP
 
 // ─── 6. DataTableHead ───
 
-interface DataTableHeadProps extends React.ComponentProps<"th"> {
+interface DataTableHeadProps extends Omit<React.ComponentProps<"th">, "width"> {
   sortable?: boolean
   sortDirection?: SortDirection
   onSort?: () => void
+  width?: DataTableColumnWidth
   /** 横スクロール時に列を貼り付け表示する */
   sticky?: StickyPosition
   /** 同じ側に複数の固定列がある場合のオフセット(px) */
@@ -813,6 +903,7 @@ function DataTableHead({
   sortable,
   sortDirection,
   onSort,
+  width,
   sticky,
   stickyOffset,
   style,
@@ -823,7 +914,7 @@ function DataTableHead({
     <th
       data-slot="data-table-head"
       className={cn(
-        "px-3 py-2.5 text-left whitespace-nowrap typo-label-sm text-[var(--Text-Medium-Emphasis)]",
+        dataTableHeadVariants({ width }),
         stickyProps?.className,
         className
       )}
@@ -852,6 +943,30 @@ function DataTableHead({
 
 // ─── 7. DataTableCell ───
 
+const dataTableWidthVariants = {
+  auto: "",
+  narrow: "w-[48px]",
+  checkbox: "w-[40px]",
+  action: "w-[48px]",
+  sm: "w-[120px]",
+  md: "w-[200px]",
+  lg: "w-[300px]",
+  xl: "w-[400px]",
+  flex: "w-full min-w-[240px]",
+} as const
+
+const dataTableHeadVariants = cva(
+  "px-3 py-2.5 text-left whitespace-nowrap typo-label-sm text-[var(--Text-Medium-Emphasis)]",
+  {
+    variants: {
+      width: dataTableWidthVariants,
+    },
+    defaultVariants: {
+      width: "auto",
+    },
+  }
+)
+
 const dataTableCellVariants = cva("px-3 py-2.5 typo-body-md text-[var(--Text-High-Emphasis)]", {
   variants: {
     align: {
@@ -868,6 +983,7 @@ const dataTableCellVariants = cva("px-3 py-2.5 typo-body-md text-[var(--Text-Hig
       md: "w-[200px]",
       lg: "w-[300px]",
       xl: "w-[400px]",
+      flex: "w-full min-w-[240px]",
     },
   },
   defaultVariants: {
@@ -879,6 +995,7 @@ const dataTableCellVariants = cva("px-3 py-2.5 typo-body-md text-[var(--Text-Hig
 interface DataTableCellProps
   extends Omit<React.ComponentProps<"td">, "align" | "width">,
     VariantProps<typeof dataTableCellVariants> {
+  clickable?: boolean
   /** 横スクロール時に列を貼り付け表示する */
   sticky?: StickyPosition
   /** 同じ側に複数の固定列がある場合のオフセット(px) */
@@ -890,6 +1007,7 @@ function DataTableCell({
   align,
   width,
   children,
+  clickable,
   sticky,
   stickyOffset,
   style,
@@ -899,7 +1017,13 @@ function DataTableCell({
   return (
     <td
       data-slot="data-table-cell"
-      className={cn(dataTableCellVariants({ align, width }), stickyProps?.className, className)}
+      data-clickable={clickable || undefined}
+      className={cn(
+        dataTableCellVariants({ align, width }),
+        clickable && "cursor-pointer select-none",
+        stickyProps?.className,
+        className
+      )}
       style={stickyProps ? { ...stickyProps.style, ...style } : style}
       {...props}
     >
@@ -1102,7 +1226,9 @@ function DataTableActionCell({ className, items, ...props }: DataTableActionCell
 
 // ─── 12. DataTableInputCell ───
 
-interface DataTableInputCellProps extends Omit<React.ComponentProps<"td">, "onChange"> {
+interface DataTableInputCellProps
+  extends Omit<React.ComponentProps<"td">, "onChange" | "width">,
+    Pick<DataTableCellProps, "width" | "sticky" | "stickyOffset"> {
   value?: string
   onChange?: (value: string) => void
   placeholder?: string
@@ -1113,12 +1239,23 @@ function DataTableInputCell({
   value,
   onChange,
   placeholder,
+  width,
+  sticky,
+  stickyOffset,
+  style,
   ...props
 }: DataTableInputCellProps) {
+  const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
   return (
     <td
       data-slot="data-table-input-cell"
-      className={cn("px-3 py-1.5", className)}
+      className={cn(
+        dataTableCellVariants({ width }),
+        "py-1.5",
+        stickyProps?.className,
+        className
+      )}
+      style={stickyProps ? { ...stickyProps.style, ...style } : style}
       {...props}
     >
       <input
@@ -1139,11 +1276,16 @@ function DataTableInputCell({
 
 // ─── 13. DataTableSelectCell ───
 
-interface DataTableSelectCellProps extends React.ComponentProps<"td"> {
+interface DataTableSelectCellProps
+  extends Omit<React.ComponentProps<"td">, "width">,
+    Pick<DataTableCellProps, "width" | "sticky" | "stickyOffset"> {
   value?: string
   onValueChange?: (value: string) => void
   placeholder?: string
-  options: { label: string; value: string }[]
+  options: readonly { label: string; value: string }[]
+  contentPosition?: DataTableSelectContentPosition
+  triggerClassName?: string
+  contentClassName?: string
 }
 
 function DataTableSelectCell({
@@ -1152,19 +1294,39 @@ function DataTableSelectCell({
   onValueChange,
   placeholder,
   options,
+  width,
+  sticky,
+  stickyOffset,
+  style,
+  contentPosition = "popper",
+  triggerClassName,
+  contentClassName,
   ...props
 }: DataTableSelectCellProps) {
+  const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
   return (
     <td
       data-slot="data-table-select-cell"
-      className={cn("px-3 py-1.5", className)}
+      className={cn(
+        dataTableCellVariants({ width }),
+        "py-1.5",
+        stickyProps?.className,
+        className
+      )}
+      style={stickyProps ? { ...stickyProps.style, ...style } : style}
       {...props}
     >
       <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger className="h-8 min-w-[120px] typo-body-md border-transparent hover:border-[var(--Border-Low-Emphasis)]">
+        <SelectTrigger
+          className={cn(
+            "h-8 min-w-[120px] typo-body-md border-transparent hover:border-[var(--Border-Low-Emphasis)]",
+            width === "flex" && "w-full",
+            triggerClassName
+          )}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position={contentPosition} className={contentClassName}>
           {options.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
               {opt.label}
@@ -1172,6 +1334,61 @@ function DataTableSelectCell({
           ))}
         </SelectContent>
       </Select>
+    </td>
+  )
+}
+
+// ─── 13b. DataTableDateCell ───
+
+interface DataTableDateCellProps
+  extends Omit<React.ComponentProps<"td">, "value" | "onChange" | "width">,
+    Pick<DataTableCellProps, "width" | "sticky" | "stickyOffset"> {
+  value?: Date
+  onValueChange?: (date: Date | undefined) => void
+  placeholder?: string
+  disabled?: boolean
+  dateFormat?: string
+  triggerLabel?: string
+  pickerClassName?: string
+}
+
+function DataTableDateCell({
+  className,
+  value,
+  onValueChange,
+  placeholder = "日付を選択",
+  disabled,
+  dateFormat,
+  triggerLabel,
+  pickerClassName,
+  width,
+  sticky,
+  stickyOffset,
+  style,
+  ...props
+}: DataTableDateCellProps) {
+  const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
+  return (
+    <td
+      data-slot="data-table-date-cell"
+      className={cn(
+        dataTableCellVariants({ width }),
+        "py-1.5",
+        stickyProps?.className,
+        className
+      )}
+      style={stickyProps ? { ...stickyProps.style, ...style } : style}
+      {...props}
+    >
+      <DatePicker
+        value={value}
+        onChange={onValueChange}
+        placeholder={placeholder}
+        disabled={disabled}
+        dateFormat={dateFormat}
+        triggerLabel={triggerLabel}
+        className={cn("h-8 min-w-[150px] px-2 typo-body-md", width === "flex" && "w-full", pickerClassName)}
+      />
     </td>
   )
 }
@@ -1292,12 +1509,25 @@ function DataTableBulkActions({
 
 // ─── 18. DataTableSectionRow ───
 
+type DataTableSectionHeadingSize = "sm" | "md" | "lg"
+
+const dataTableSectionHeadingClass: Record<DataTableSectionHeadingSize, string> = {
+  sm: "typo-label-md",
+  md: "typo-label-lg",
+  lg: "typo-heading-sm",
+}
+
 interface DataTableSectionRowProps extends React.ComponentProps<"tr"> {
   label: string
   count?: number
   open?: boolean
   onToggle?: () => void
   colSpan?: number
+  stickyLeft?: boolean
+  stickyOffset?: number
+  headingSize?: DataTableSectionHeadingSize
+  contentClassName?: string
+  buttonClassName?: string
 }
 
 function DataTableSectionRow({
@@ -1307,6 +1537,11 @@ function DataTableSectionRow({
   open = true,
   onToggle,
   colSpan,
+  stickyLeft,
+  stickyOffset = 0,
+  headingSize = "md",
+  contentClassName,
+  buttonClassName,
   ...props
 }: DataTableSectionRowProps) {
   return (
@@ -1315,19 +1550,32 @@ function DataTableSectionRow({
       className={cn("bg-[var(--Surface-Tertiary)] border-y border-[var(--Border-Low-Emphasis)]", className)}
       {...props}
     >
-      <td colSpan={colSpan} className="px-3 py-2">
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 typo-label-lg text-[var(--Text-High-Emphasis)]"
-          onClick={onToggle}
-          aria-expanded={open}
-        >
-          <ChevronIcon open={open} />
-          {label}
-          {count !== undefined && (
-            <span className="typo-body-md text-[var(--Text-Low-Emphasis)]">({count})</span>
+      <td colSpan={colSpan} className={cn(stickyLeft ? "p-0" : "px-3 py-2")}>
+        <div
+          className={cn(
+            stickyLeft &&
+              "sticky z-[1] inline-flex bg-[var(--Surface-Tertiary)] px-3 py-2",
+            contentClassName
           )}
-        </button>
+          style={stickyLeft ? { left: stickyOffset } : undefined}
+        >
+          <button
+            type="button"
+            className={cn(
+              "inline-flex items-center gap-2 text-[var(--Text-High-Emphasis)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+              dataTableSectionHeadingClass[headingSize],
+              buttonClassName
+            )}
+            onClick={onToggle}
+            aria-expanded={open}
+          >
+            <ChevronIcon open={open} />
+            {label}
+            {count !== undefined && (
+              <span className="typo-body-md text-[var(--Text-Low-Emphasis)]">({count})</span>
+            )}
+          </button>
+        </div>
       </td>
     </tr>
   )
@@ -1455,6 +1703,7 @@ interface DataTableSelectColumnConfig<TRow, TValue extends string = string>
   onCommit?: (row: TRow, value: TValue, index: number) => void
   placeholder?: string
   emptyLabel?: string
+  contentPosition?: DataTableSelectContentPosition
 }
 
 function formatDataTableDate(value: Date) {
@@ -1588,6 +1837,7 @@ function createDataTableSelectColumn<TRow, TValue extends string = string>({
   onCommit,
   placeholder = "選択",
   emptyLabel = "未設定",
+  contentPosition = "popper",
   ...column
 }: DataTableSelectColumnConfig<TRow, TValue>): DataTableColumn<TRow, TValue | undefined> {
   return {
@@ -1612,7 +1862,7 @@ function createDataTableSelectColumn<TRow, TValue extends string = string>({
         <SelectTrigger className="h-8 min-w-[120px] typo-body-md border-transparent hover:border-[var(--Border-Low-Emphasis)]">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position={contentPosition}>
           {options.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.icon}
@@ -1641,6 +1891,7 @@ export {
   DataTableActionCell,
   DataTableInputCell,
   DataTableSelectCell,
+  DataTableDateCell,
   DataTableNumberCell,
   DataTableDragHandleCell,
   DataTableLinkCell,
@@ -1660,9 +1911,12 @@ export type {
   StickyPosition,
   DataTableRowId,
   DataTableSelectionMode,
+  DataTableSelectContentPosition,
   DataTableSortState,
   DataTableEditTrigger,
+  DataTableColumnWidth,
   DataTableCommitOptions,
+  DataTableRowClickHandler,
   DataTableCellContext,
   DataTableColumnEditOptions,
   DataTableColumnOption,
@@ -1675,4 +1929,7 @@ export type {
   DataTableChipColumnValue,
   DataTableChipColumnConfig,
   DataTableSelectColumnConfig,
+  DataTableDateCellProps,
+  DataTableSectionRowProps,
+  DataTableSectionHeadingSize,
 }
