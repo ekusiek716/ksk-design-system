@@ -20,8 +20,8 @@ Select / Combobox / MultiSelect / DropdownFilter / PillToggle / Tabs(+List/Trigg
 ### Phase 5: ナビゲーション意味変換（3）✅
 NavigationBar (BottomTabs風) / SubNav (SegmentedTabs風) / Breadcrumb (BackHeader風)
 
-### Phase 6: pattern汎用（22）✅
-AppHeader / Banner / BannerCarousel / SearchBar / ListItem / EmptyState / ErrorState / SectionHeader / StickyActionBar / SwipeRow / Footer / FileUpload / ChipSelector / CategoryNav / CategoryScroll / ProgressSteps / TagInput / ShareButtons / FilterChip / ImageGallery / SocialLoginButton / SocialIcon / ListSkeletons
+### Phase 6: pattern汎用（追加 parity 含む）✅
+AppHeader / Banner / BannerCarousel / SearchBar / ListItem / EmptyState / ErrorState / SectionHeader / StickyActionBar / SwipeRow / Footer / FileUpload / Screen / PhotoHero / MediaActionCluster / CompactFilePicker / ImageAttachmentPicker / ActionTile / QuickActionGrid / ChipSelector / CategoryNav / CategoryScroll / ProgressSteps / TagInput / ShareButtons / FilterChip / ImageGallery / SocialLoginButton / SocialIcon / ListSkeletons / ListSkeleton / GridSkeleton
 
 ### Phase 7: commerce（11）✅
 BottomTabBar / FilterBar / ImageCarousel / PriceDisplay / QuantitySelector / RatingDisplay / ProductCard / ProductCarousel / OrderSummary / ReviewCard / ReviewSummary
@@ -34,6 +34,8 @@ AppShell / MarketingShell
 - [x] tsc -p tsconfig.native.json --noEmit 通過
 - [x] npm run check エラー 0
 - [x] lint-scratch 対策（SocialIcon の brand hex を social-icon-data.ts に分離）
+- [x] Screen / PhotoHero / MediaActionCluster / ListSkeleton / GridSkeleton の Web/RN parity 追加
+- [x] scripts/check-native-parity.mjs と src/native/COMPONENT_LOOKUP.md で RN 差分の再発を検出
 
 ## スキップ
 - cookie-consent / hover-card / tooltip（hover非対応/Web専用）

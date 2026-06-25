@@ -155,6 +155,22 @@ export { StickyActionBar, type StickyActionBarProps } from "./StickyActionBar"
 export { SwipeRow, type SwipeRowProps, type SwipeAction } from "./SwipeRow"
 export { Footer, type FooterProps, type FooterLink } from "./Footer"
 export { FileUpload, type FileUploadProps } from "./FileUpload"
+export { Screen, type ScreenPadding, type ScreenProps } from "./Screen"
+export {
+  PhotoHero,
+  type PhotoHeroAlign,
+  type PhotoHeroOverlay,
+  type PhotoHeroProps,
+} from "./PhotoHero"
+export {
+  MediaActionCluster,
+  type MediaActionClusterAnchor,
+  type MediaActionClusterItem,
+  type MediaActionClusterLabelPosition,
+  type MediaActionClusterOrientation,
+  type MediaActionClusterPosition,
+  type MediaActionClusterProps,
+} from "./MediaActionCluster"
 export {
   CompactFilePicker,
   ImageAttachmentPicker,
@@ -179,7 +195,14 @@ export { FilterChip, type FilterChipProps } from "./FilterChip"
 export { ImageGallery, type ImageGalleryProps } from "./ImageGallery"
 export { SocialLoginButton, type SocialLoginButtonProps, type SocialProvider } from "./SocialLoginButton"
 export { SocialIcon, type SocialIconProps, type SocialIconBrand } from "./SocialIcon"
-export { ListSkeletons, type ListSkeletonsProps } from "./ListSkeletons"
+export {
+  GridSkeleton,
+  ListSkeleton,
+  ListSkeletons,
+  type GridSkeletonProps,
+  type ListSkeletonProps,
+  type ListSkeletonsProps,
+} from "./ListSkeletons"
 
 // Phase 7: Commerce
 export {

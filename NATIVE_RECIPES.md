@@ -1,6 +1,14 @@
 # KSK Design System Native Recipes
 
-Native / Expo consumer は、新規 UI を作る前に `ksk-design-system/native/ui` の既存コンポーネントを確認してください。ローカル `ds/` に独自 wrapper を増やす前に、このファイルの recipe を使います。
+Native / Expo consumer は、新規 UI を作る前に `ksk-design-system/native/ui` の既存コンポーネントを確認してください。ローカル `ds/` に独自 wrapper を増やす前に、`src/native/COMPONENT_LOOKUP.md` とこのファイルの recipe を使います。
+
+## Component lookup
+
+RN 側の公開 export 一覧は `src/native/COMPONENT_LOOKUP.md` で確認できます。Web 側の `src/components/COMPONENT_LOOKUP.md` と同じく、consumer 実装前の DS-first チェックに使います。
+
+```tsx
+import { Button, Screen, PhotoHero } from "ksk-design-system/native/ui"
+```
 
 ## Expo Router / React Navigation bottom tabs
 
@@ -101,6 +109,43 @@ import {
 ```
 
 Web/PWA consumer は `ksk-design-system` の `MobileAppShell` と `BottomTabBar variant="pill"` / `MobileFloatingActionButton` を組み合わせます。`bottomNavMode="fixed"` では shell が fixed wrapper と safe-area padding を持ちます。既に fixed な nav を渡す場合は `bottomNavMode="external"` を指定します。
+
+## Fullscreen screen / photo onboarding
+
+`Screen` は header / internal scroll body / footer CTA の骨組みです。写真背景のオンボーディングや入口画面は `PhotoHero` の compound slots を使います。consumer 側で safe-area footer や写真上 typography を再実装しません。
+
+```tsx
+import { Button, PhotoHero, Screen } from "ksk-design-system/native/ui"
+
+<Screen scroll={false} padding="none">
+  <PhotoHero src={{ uri: heroUrl }} overlay="dark" align="bottom">
+    <PhotoHero.Eyebrow>WELCOME</PhotoHero.Eyebrow>
+    <PhotoHero.Title>今日の準備を始める</PhotoHero.Title>
+    <PhotoHero.Body>写真の上でも読める DS typography と overlay をまとめて扱います。</PhotoHero.Body>
+    <PhotoHero.Actions>
+      <Button variant="glass" onPress={start}>始める</Button>
+    </PhotoHero.Actions>
+  </PhotoHero>
+</Screen>
+```
+
+## Media action cluster
+
+動画・写真上の Like / Share / Save などの操作群は `MediaActionCluster` を使います。`position="fixed"` は RN では absolute と同等に扱い、`href` は `Linking.openURL` に委譲します。
+
+```tsx
+<View style={{ flex: 1 }}>
+  <PhotoHero src={{ uri: mediaUrl }} overlay="medium">
+    <MediaActionCluster
+      anchor="bottom-right"
+      items={[
+        { label: "いいね", icon: <HeartIcon />, active: liked, onPress: toggleLike },
+        { label: "シェア", icon: <ShareIcon />, onPress: share },
+      ]}
+    />
+  </PhotoHero>
+</View>
+```
 
 ## Settings screens
 
