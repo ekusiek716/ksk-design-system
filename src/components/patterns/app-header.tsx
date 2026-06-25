@@ -121,7 +121,7 @@ function AppHeader({
                   data-active={item.isActive || undefined}
                   className={cn(
                     "typo-label-md text-[var(--Text-Medium-Emphasis)] hover:text-[var(--Text-High-Emphasis)] transition-colors",
-                    item.isActive && "text-[var(--Brand-Primary)] font-bold"
+                    item.isActive && "text-[var(--Brand-Primary)]"
                   )}
                 >
                   {item.label}

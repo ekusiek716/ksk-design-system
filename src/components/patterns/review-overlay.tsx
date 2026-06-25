@@ -103,7 +103,7 @@ function ReviewOverlay({
             className="absolute -translate-x-1/2 -translate-y-1/2 z-10 group"
             style={{ left: `${pin.x * 100}%`, top: `${pin.y * 100}%` }}
           >
-            <span className="flex size-5 items-center justify-center rounded-full bg-[var(--Object-Caution)] shadow-md ring-4 ring-[var(--Object-Caution)]/30 group-hover:ring-[var(--Object-Caution)]/50 transition-all" />
+            <span className="flex size-5 items-center justify-center rounded-full bg-[var(--Object-Caution)] shadow-[var(--shadow-md)] ring-4 ring-[var(--Object-Caution)]/30 group-hover:ring-[var(--Object-Caution)]/50 transition-all" />
           </button>
         ))}
     </div>

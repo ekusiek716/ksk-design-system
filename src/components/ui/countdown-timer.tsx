@@ -114,7 +114,7 @@ function DayCountdown({
           className,
         )}
       >
-        <span className="text-[22px] font-black leading-none">{todayLabel}</span>
+        <span className="typo-heading-xl leading-none">{todayLabel}</span>
       </span>
     )
   }
@@ -134,9 +134,9 @@ function DayCountdown({
         className,
       )}
     >
-      {label && <span className="text-[11px] font-semibold opacity-80 mr-1">{label}</span>}
-      <span className="text-[28px] font-black leading-none tabular-nums">{daysLeft}</span>
-      <span className="text-[12px] font-semibold opacity-80">{dayUnit}</span>
+      {label && <span className="typo-caption opacity-80 mr-1">{label}</span>}
+      <span className="typo-heading-3xl leading-none tabular-nums">{daysLeft}</span>
+      <span className="typo-label-sm opacity-80">{dayUnit}</span>
     </span>
   )
 }
@@ -241,16 +241,16 @@ function TimeCountdown({
       )}
     >
       {label && (
-        <span className="text-[11px] font-semibold opacity-80 mr-1">{label}</span>
+        <span className="typo-caption opacity-80 mr-1">{label}</span>
       )}
       {segments.map((seg, i) => (
         <React.Fragment key={seg.unit}>
           {i > 0 && (
-            <span className="text-[18px] font-bold opacity-70 mb-1.5">:</span>
+            <span className="typo-heading-lg opacity-70 mb-1.5">:</span>
           )}
           <span className="flex flex-col items-center gap-0">
-            <span className="text-[22px] font-black leading-none tabular-nums">{seg.num}</span>
-            <span className="text-[9px] font-semibold opacity-70 leading-none mt-0.5">{seg.unit}</span>
+            <span className="typo-heading-xl leading-none tabular-nums">{seg.num}</span>
+            <span className="typo-body-xs opacity-70 leading-none mt-0.5">{seg.unit}</span>
           </span>
         </React.Fragment>
       ))}

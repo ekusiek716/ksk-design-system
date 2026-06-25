@@ -58,7 +58,7 @@ function MenuDrawer({
           {sections.map((section, si) => (
             <div key={si} className={si > 0 ? "border-t border-[var(--Border-Low-Emphasis)] mt-2 pt-2" : "mt-2"}>
               {section.title && (
-                <p className="px-4 py-1.5 typo-label-xs text-[var(--Text-Low-Emphasis)] font-bold uppercase tracking-wider">
+                <p className="px-4 py-1.5 typo-label-xs text-[var(--Text-Low-Emphasis)] uppercase">
                   {section.title}
                 </p>
               )}
@@ -78,7 +78,7 @@ function MenuDrawer({
                     )}
                     <span className="flex-1">{item.label}</span>
                     {item.badge !== undefined && (
-                      <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] text-[10px] font-bold flex items-center justify-center">
+                      <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] typo-label-xs flex items-center justify-center">
                         {item.badge}
                       </span>
                     )}

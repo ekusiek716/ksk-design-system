@@ -49,7 +49,7 @@ function ChipGroup<T extends string>({
           className={cn(
             "px-3 py-1 rounded-full typo-label-xs border transition-colors whitespace-nowrap shrink-0",
             opt.value === value
-              ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] border-[var(--Brand-Primary)] font-bold"
+              ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] border-[var(--Brand-Primary)]"
               : "border-[var(--Border-Medium-Emphasis)] text-[var(--Text-Medium-Emphasis)] bg-[var(--Surface-Primary)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"
           )}
         >
@@ -86,7 +86,7 @@ function ChartControls({
       {/* Granularity */}
       {onGranularityChange && (
         <div className="flex items-start gap-3">
-          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] font-bold w-10 shrink-0 pt-1.5">粒度</span>
+          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] w-10 shrink-0 pt-1.5">粒度</span>
           <ChipGroup
             options={GRANULARITY_OPTIONS}
             value={granularity}
@@ -98,7 +98,7 @@ function ChartControls({
       {/* Period */}
       {onPeriodChange && (
         <div className="flex items-start gap-3">
-          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] font-bold w-10 shrink-0 pt-1.5">期間</span>
+          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] w-10 shrink-0 pt-1.5">期間</span>
           <ChipGroup
             options={PERIOD_OPTIONS}
             value={period}
@@ -110,14 +110,14 @@ function ChartControls({
       {/* Comparison toggle */}
       {onComparisonChange && (
         <div className="flex items-start gap-3">
-          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] font-bold w-10 shrink-0 pt-1.5">比較</span>
+          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] w-10 shrink-0 pt-1.5">比較</span>
           <button
             onClick={() => onComparisonChange(!showComparison)}
             aria-pressed={showComparison}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border typo-label-xs font-medium transition-colors",
+              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border typo-label-xs transition-colors",
               showComparison
-                ? "bg-[var(--Brand-Ultra-Light)] border-[var(--Brand-Primary)] text-[var(--Brand-Primary)] font-bold"
+                ? "bg-[var(--Brand-Ultra-Light)] border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]"
                 : "border-[var(--Border-Medium-Emphasis)] text-[var(--Text-Medium-Emphasis)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"
             )}
           >
