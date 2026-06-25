@@ -1266,7 +1266,7 @@ function DataTableInputCell({
         className={cn(
           "w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 typo-body-md text-[var(--Text-High-Emphasis)]",
           "hover:border-[var(--Border-Low-Emphasis)]",
-          "focus:border-[var(--Border-Accent-Primary)] focus:outline-none focus:shadow-[inset_0_1px_3px_rgba(0,0,0,0.08)]",
+          "focus-visible:border-[var(--Border-Accent-Primary)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
           "placeholder:text-[var(--Text-Low-Emphasis)]"
         )}
       />

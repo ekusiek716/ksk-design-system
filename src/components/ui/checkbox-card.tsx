@@ -53,7 +53,7 @@ function CheckboxCardItem({
     <CheckboxPrimitive.Root
       data-slot="checkbox-card-item"
       className={cn(
-        "group flex cursor-pointer gap-2 rounded-lg border-2 border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] p-[15px] text-left outline-none transition-colors",
+        "group flex cursor-pointer gap-2 rounded-lg border-2 border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] p-4 text-left focus-visible:outline-none transition-colors",
         expandedContent ? "flex-col items-stretch" : "items-center",
         "hover:border-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)]",
         "data-[state=checked]:border-[var(--Object-Accent-Primary)] data-[state=checked]:bg-[var(--Surface-Primary)]",

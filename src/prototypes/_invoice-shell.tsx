@@ -34,7 +34,7 @@ export function InvoiceShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="min-w-0">
-          <header className="sticky top-0 z-10 flex items-center gap-4 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-5 py-3">
+          <header data-slot="prototype-header" className="sticky top-0 z-10 flex items-center gap-4 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-5 py-3">
             <h1 className="typo-heading-sm text-[var(--Text-High-Emphasis)] flex-1">請求書の作成</h1>
             <span className="flex size-8 items-center justify-center rounded-full bg-[var(--Surface-Accent-Primary-Light)] typo-label-sm text-[var(--Text-Accent-Primary)]">奥</span>
           </header>

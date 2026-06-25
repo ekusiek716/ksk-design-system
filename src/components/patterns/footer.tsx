@@ -94,7 +94,7 @@ function Footer({
             {paymentIcons.map((p, i) => (
               <span
                 key={i}
-                className="px-2 py-1 rounded bg-[var(--Object-on-Inverse)]/10 text-[var(--Text-on-Inverse)]/60 text-[10px] font-bold"
+                className="px-2 py-1 rounded bg-[var(--Object-on-Inverse)]/10 text-[var(--Text-on-Inverse)]/60 typo-label-xs"
               >
                 {p}
               </span>
