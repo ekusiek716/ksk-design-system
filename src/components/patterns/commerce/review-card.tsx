@@ -56,15 +56,15 @@ function ReviewCard({
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-9 h-9 rounded-full shrink-0 overflow-hidden bg-gradient-to-br from-[var(--Brand-Primary)] to-[var(--Brand-Light)] flex items-center justify-center">
+        <div className="w-9 h-9 rounded-full shrink-0 overflow-hidden bg-[var(--Brand-Primary)] flex items-center justify-center">
           {avatarSrc ? (
             <img src={avatarSrc} alt={reviewer} className="w-full h-full object-cover" />
           ) : (
-            <span className="text-[var(--Text-on-Inverse)] text-sm font-bold">{initials}</span>
+            <span className="text-[var(--Text-on-Inverse)] typo-label-md">{initials}</span>
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="typo-label-sm text-[var(--Text-High-Emphasis)] font-semibold truncate">{reviewer}</p>
+          <p className="typo-label-sm text-[var(--Text-High-Emphasis)] truncate">{reviewer}</p>
           <p className="typo-body-xs text-[var(--Text-Low-Emphasis)]">{date}</p>
         </div>
         <StarRow rating={rating} />
@@ -72,7 +72,7 @@ function ReviewCard({
 
       {/* Content */}
       {title && (
-        <p className="typo-label-sm text-[var(--Text-High-Emphasis)] font-semibold mb-1">{title}</p>
+        <p className="typo-label-sm text-[var(--Text-High-Emphasis)] mb-1">{title}</p>
       )}
       <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] leading-relaxed">{body}</p>
 

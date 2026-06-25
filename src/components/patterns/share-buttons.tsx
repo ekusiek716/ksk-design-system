@@ -46,9 +46,8 @@ const PROVIDER_META: Record<
         <path d="M11 2C6.6 2 3 5 3 8.8c0 3.3 2.7 6.1 6.5 6.7l.9 1.9 3.1-1.9c3.8-.4 6.5-3.1 6.5-6.7C20 5 16.4 2 11 2z" fill="currentColor" />
       </svg>
     ),
-    // SNS 公式色は固定値のため、文字も静的白（--Text-on-Inverse はダークで反転するため不可）
-    circleClass: "bg-[#06C755] text-white",
-    inlineClass: "border-[#06C755] text-[#06C755] hover:bg-[#F0FFF4]",
+    circleClass: "bg-[var(--Brand-Line)] text-[var(--Text-on-Media)]",
+    inlineClass: "border-[var(--Brand-Line)] text-[var(--Brand-Line)] hover:bg-[var(--Surface-Success-Subtle)]",
   },
   x: {
     label: "X",
@@ -59,8 +58,8 @@ const PROVIDER_META: Record<
         <path d="M14.2 1h2.5L10.8 7.8 17.5 17h-5.3l-3.9-5.1L4 17H1.5l6.3-7.2L1 1h5.4l3.5 4.6L14.2 1zm-.9 14.3h1.4L5.7 2.4H4.2l9.1 12.9z" />
       </svg>
     ),
-    circleClass: "bg-[#000] text-white",
-    inlineClass: "border-[#000] text-[#000] hover:bg-gray-50",
+    circleClass: "bg-[var(--Surface-Inverse)] text-[var(--Text-on-Inverse)]",
+    inlineClass: "border-[var(--Border-High-Emphasis)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)]",
   },
   facebook: {
     label: "Facebook",
@@ -71,8 +70,8 @@ const PROVIDER_META: Record<
         <path d="M20 10C20 4.5 15.5 0 10 0S0 4.5 0 10c0 5 3.7 9.1 8.4 9.9v-7H5.9V10h2.5V7.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.5V10h2.8l-.4 2.9h-2.3v7C16.3 19.1 20 15 20 10z" />
       </svg>
     ),
-    circleClass: "bg-[#1877F2] text-white",
-    inlineClass: "border-[#1877F2] text-[#1877F2] hover:bg-blue-50",
+    circleClass: "bg-[var(--Info-Base)] text-[var(--Text-on-Media)]",
+    inlineClass: "border-[var(--Info-Base)] text-[var(--Text-Info)] hover:bg-[var(--Surface-Info-Subtle)]",
   },
   instagram: {
     label: "Instagram",
@@ -84,8 +83,8 @@ const PROVIDER_META: Record<
         <circle cx="14.3" cy="5.8" r="1" fill="currentColor" />
       </svg>
     ),
-    circleClass: "bg-[#E4405F] text-white",
-    inlineClass: "border-[#E4405F] text-[#E4405F] hover:bg-[#FFF1F5]",
+    circleClass: "bg-[var(--Categorical-9)] text-[var(--Text-on-Media)]",
+    inlineClass: "border-[var(--Categorical-9)] text-[var(--Categorical-9-Bold)] hover:bg-[var(--Categorical-9-Subtle)]",
   },
   email: {
     label: "メール",
@@ -110,8 +109,8 @@ const PROVIDER_META: Record<
         <path d="M7.8 6.9c.2-.4.3-.4.6-.4h.4c.1 0 .3 0 .4.3l.6 1.4c.1.2.1.3 0 .5l-.4.5c-.1.1-.2.2-.1.4.4.8 1 1.5 1.8 1.9.2.1.3.1.5-.1l.5-.6c.1-.2.3-.2.5-.1l1.4.7c.2.1.3.2.3.4 0 .5-.3 1.3-.9 1.5-.6.2-1.8.1-3.1-.7-1.5-.8-2.7-2-3.4-3.4-.7-1.3-.7-2.1-.5-2.6z" fill="currentColor" />
       </svg>
     ),
-    circleClass: "bg-[#25D366] text-white",
-    inlineClass: "border-[#25D366] text-[#128C7E] hover:bg-[#F0FFF8]",
+    circleClass: "bg-[var(--Success-Base)] text-[var(--Text-on-Media)]",
+    inlineClass: "border-[var(--Success-Base)] text-[var(--Text-Success)] hover:bg-[var(--Surface-Success-Subtle)]",
   },
   telegram: {
     label: "Telegram",
@@ -122,8 +121,8 @@ const PROVIDER_META: Record<
         <path d="M17.3 3.2L2.7 8.8c-1 .4-1 1-.2 1.3l3.7 1.2 1.4 4.2c.2.6.4.8.8.8s.6-.2.9-.5l2-2 4.1 3c.8.4 1.3.2 1.5-.7l2.6-12.2c.2-1-.4-1.4-1.2-1zM7 10.9l8.1-5.1c.4-.2.7-.1.4.2l-6.9 6.2-.3 2.7L7 10.9z" />
       </svg>
     ),
-    circleClass: "bg-[#229ED9] text-white",
-    inlineClass: "border-[#229ED9] text-[#229ED9] hover:bg-[#F0FAFF]",
+    circleClass: "bg-[var(--Categorical-2)] text-[var(--Text-on-Media)]",
+    inlineClass: "border-[var(--Categorical-2)] text-[var(--Categorical-2-Bold)] hover:bg-[var(--Categorical-2-Subtle)]",
   },
   copy: {
     label: "リンク",

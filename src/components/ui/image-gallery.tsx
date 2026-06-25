@@ -90,7 +90,7 @@ function ImageGallery({
 
         {/* Count badge — 写真上の固定黒オーバーレイのため静的白（--Text-on-Inverse はダークで反転するため不可） */}
         {images.length > 1 && (
-          <span className="absolute bottom-2 right-2 bg-black/50 text-white typo-label-xs px-2 py-0.5 rounded-full">
+          <span className="absolute bottom-2 right-2 bg-[var(--Overlay-Medium)] text-[var(--Text-on-Media)] typo-label-xs px-2 py-0.5 rounded-full">
             {active + 1} / {images.length}
           </span>
         )}
@@ -102,7 +102,7 @@ function ImageGallery({
               onClick={(e) => { e.stopPropagation(); handlePrev() }}
               disabled={active === 0}
               aria-label={prevLabel}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center disabled:opacity-0 transition-opacity hover:bg-black/60"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[var(--Overlay-Light)] text-[var(--Text-on-Media)] flex items-center justify-center disabled:opacity-0 transition-opacity hover:bg-[var(--Overlay-Medium)]"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -112,7 +112,7 @@ function ImageGallery({
               onClick={(e) => { e.stopPropagation(); handleNext() }}
               disabled={active === images.length - 1}
               aria-label={nextLabel}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center disabled:opacity-0 transition-opacity hover:bg-black/60"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[var(--Overlay-Light)] text-[var(--Text-on-Media)] flex items-center justify-center disabled:opacity-0 transition-opacity hover:bg-[var(--Overlay-Medium)]"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

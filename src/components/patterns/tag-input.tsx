@@ -109,7 +109,7 @@ function TagInput({
         }}
         disabled={disabled || (max !== undefined && value.length >= max)}
         placeholder={value.length === 0 ? placeholder : ""}
-        className="flex-1 min-w-24 bg-transparent outline-none typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] disabled:cursor-not-allowed"
+        className="flex-1 min-w-24 bg-transparent focus-visible:outline-none typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] disabled:cursor-not-allowed"
         aria-label={inputLabel}
       />
     </div>

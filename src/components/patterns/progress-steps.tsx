@@ -52,7 +52,7 @@ function ProgressSteps({
                 className={cn(
                   "typo-label-xs text-center whitespace-nowrap",
                   isCurrent
-                    ? "text-[var(--Text-High-Emphasis)] font-medium"
+                    ? "text-[var(--Text-High-Emphasis)]"
                     : "text-[var(--Text-Low-Emphasis)]"
                 )}
               >

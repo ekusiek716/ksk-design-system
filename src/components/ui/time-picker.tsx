@@ -61,7 +61,7 @@ function TimePickerColumn({
           className={cn(
             "shrink-0 h-10 flex items-center justify-center rounded-lg typo-body-md transition-colors snap-center",
             v === selected
-              ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] font-bold"
+              ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
               : "text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)]"
           )}
         >
@@ -107,7 +107,7 @@ function TimePicker({
           aria-expanded={open}
           aria-label={triggerLabel ?? placeholder}
           className={cn(
-            "flex h-12 w-full items-center justify-between rounded-lg border bg-[var(--Surface-Primary)] px-3 typo-body-md transition-colors outline-none",
+            "flex h-12 w-full items-center justify-between rounded-lg border bg-[var(--Surface-Primary)] px-3 typo-body-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
             open
               ? "border-[var(--Border-Accent-Primary)] ring-[3px] ring-[var(--Focus-High-Emphasis)]/50"
               : "border-[var(--Border-Medium-Emphasis)] hover:border-[var(--Border-High-Emphasis)]",

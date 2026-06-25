@@ -1266,7 +1266,7 @@ function SnapBottomSheetContent({
           "bg-[var(--Surface-Primary)] rounded-t-[var(--Radius-Sheet)] shadow-[var(--shadow-dialog)]",
           // Suppress Radix open/close fade — we manage transform ourselves
           "data-[state=open]:animate-none data-[state=closed]:animate-none",
-          "outline-none",
+          "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
           className
         )}
         style={{

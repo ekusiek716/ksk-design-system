@@ -71,7 +71,7 @@ function MultiSelect({
             aria-expanded={open}
             aria-haspopup="listbox"
             className={cn(
-              "relative flex min-h-12 w-full flex-wrap items-center gap-1.5 rounded-lg border bg-[var(--Surface-Primary)] px-3 py-2 pr-10 typo-body-md transition-colors outline-none text-left",
+              "relative flex min-h-12 w-full flex-wrap items-center gap-1.5 rounded-lg border bg-[var(--Surface-Primary)] px-3 py-2 pr-10 typo-body-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 text-left",
               showClearButton && "pr-16",
               open
                 ? "border-[var(--Border-Accent-Primary)] ring-[3px] ring-[var(--Focus-High-Emphasis)]/50"
@@ -141,7 +141,7 @@ function MultiSelect({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={searchPlaceholder}
-            className="flex h-10 flex-1 bg-transparent outline-none typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)]"
+            className="flex h-10 flex-1 bg-transparent focus-visible:outline-none typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)]"
           />
         </div>
         {/* List — 常時表示のスクロールバー付き（type="always"） */}
@@ -160,7 +160,7 @@ function MultiSelect({
                   disabled={opt.disabled}
                   onClick={() => toggle(opt.value)}
                   className={cn(
-                    "relative flex w-full cursor-default items-center gap-3 rounded-sm py-2 px-3 typo-body-md outline-none transition-colors text-left",
+                    "relative flex w-full cursor-default items-center gap-3 rounded-sm py-2 px-3 typo-body-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 transition-colors text-left",
                     "hover:bg-[var(--Surface-Secondary)] focus:bg-[var(--Surface-Secondary)]",
                     "disabled:pointer-events-none disabled:opacity-50"
                   )}
