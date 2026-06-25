@@ -17,6 +17,7 @@
 ```
 contracts/rules.json                     # 禁止パターン32件・AIアンチパターン10件・a11y要件
 contracts/components.json               # 全112コンポーネントの定義・バリアント・ルール
+contracts/design-context.json           # DESIGN.md と正本ファイルの関係・AI向け検査方針
 tokens.json                             # カラー・スペーシング・シャドウトークン
 src/components/COMPONENT_LOOKUP.md      # バリアント・インポートパス一覧（自動生成）
 ```
@@ -92,6 +93,7 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **AGENTS.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート |
 | **contracts/components.json** | 全112コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
 | **contracts/rules.json** | 禁止パターン32件・AIアンチパターン10件・アクセシビリティ要件 |
+| **contracts/design-context.json** | `DESIGN.md` の役割・正本ファイル・外部 DESIGN.md 参照方針 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
 | **src/components/COMPONENT_LOOKUP.md** | 全112コンポーネントのバリアント・インポートパス（自動生成） |
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |

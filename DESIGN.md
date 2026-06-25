@@ -32,7 +32,7 @@ colors:
   info: "#2563EB"
 typography:
   fontFamily: "system-ui, -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif"
-  display:  { fontSize: "48px", lineHeight: "1.2",  fontWeight: 700 }   # typo-display-xl
+  display:  { fontSize: "48px", lineHeight: "1.25", fontWeight: 700 }   # typo-display-xl
   heading:  { fontSize: "18px", lineHeight: "1.5",  fontWeight: 700 }   # typo-heading-lg（基準）
   body:     { fontSize: "14px", lineHeight: "1.75", fontWeight: 400 }   # typo-body-md（基準）
   label:    { fontSize: "12px", lineHeight: "1.5",  fontWeight: 500 }   # typo-label-sm
@@ -45,12 +45,12 @@ rounded:
   full: "9999px"   # Button / Chip
 spacing:
   unit: "4px"      # 4px グリッド（scale: 0,4,8,12,16,20,24,28,32,36,40,44,48,...）
-  page: "16px"     # 画面端マージン var(--page-px)
+  page: "16px"     # 基準画面端マージン。実レイアウトは Screen / Shell の padding contract を優先
 elevation:                                          # 影色は neutral（Gray-900 ベース rgba(17,24,39,…)）でテーマ非依存
-  sm: "0 1px 2px rgba(0,0,0,0.05)"
-  md: "0 0 8px rgba(20,20,20,0.08)"
-  lg: "0 12px 32px -4px rgba(17,24,39,0.12), 0 8px 16px -6px rgba(17,24,39,0.12)"
-  dialog: "0 12px 32px -4px rgba(17,24,39,0.12), 0 8px 16px -6px rgba(17,24,39,0.12), 0 1px 4px 1px rgba(0,0,0,0.2)"
+  sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
+  md: "0 0 8px rgba(20, 20, 20, 0.08)"
+  lg: "0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12)"
+  dialog: "0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2)"
 motion:
   microIn: "150ms ease-out"                       # fade-in / scale-in
   enter: "200ms ease-out"                          # fade-in-up / slide-in
@@ -93,6 +93,21 @@ EC/BtoC 系）を回すのが狙い。
 - **基盤**: React 19 + Tailwind v4 + shadcn/Radix + iconsax。
 - **判断基準**: 色・余白・タイポは必ずトークン経由。生の値を書かない（後述 Do/Don't）。
 
+## Source Of Truth
+
+`DESIGN.md` は Google DESIGN.md の「front matter + rationale」形式を参考にした **AI 向け配布サマリ**であり、
+実装正本ではない。KSK の正本は次のファイルに置く。
+
+- `tokens.json`: primitive / semantic / dark semantic / typography / spacing / shadow / touch target。
+- `src/styles/*.css`: 実際に publish される CSS custom properties と typography / glass utilities。
+- `contracts/rules.json`: 禁止パターン、AI anti-pattern、a11y、consumer lint の正本。
+- `contracts/components.json`: component 名、variant、subcomponent、usage rule、件数の正本。
+- `src/components/COMPONENT_LOOKUP.md`: import map、Storybook coverage、DS-first recipe の生成済み索引。
+
+Google DESIGN.md は互換フォーマットと検査観点の参照に留める。Google 側の alpha schema / CLI を
+KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / native / categorical / component contract は
+`contracts/design-context.json` と repo 内 checker で管理する。
+
 ## Colors
 
 3層トークン。コンポーネントは**必ず Semantic 層を `var()` で参照**する（Primitive 直参照・生 hex 禁止）。
@@ -125,7 +140,7 @@ EC/BtoC 系）を回すのが狙い。
 ## Layout & Spacing
 
 - **4px グリッド**。余白・サイズは 4 の倍数（scale 0–60）。
-- 画面端マージン: `var(--page-px)`（既定 16px）。
+- 画面端マージン: 16px を基準にしつつ、実レイアウトでは `Screen` / shell component の padding contract を優先する。
 - **タッチターゲット**（モバイル）: WCAG 2.5.5 / Apple HIG に従い主要操作（ボタン/アイコンボタン/入力/ナビ）の
   **min は 44px** 以上、推奨 48px。44 未満が避けられない **チップ（min 32px）は hitSlop**（不可視の拡張タップ領域）で
   実効 44px を確保する。値の正本は `tokens.json` の `touchTargets`。
