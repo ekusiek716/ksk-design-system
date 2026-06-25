@@ -24,12 +24,12 @@ interface BannerCarouselProps {
   className?: string
 }
 
-const DEFAULT_GRADIENTS = [
-  "linear-gradient(135deg, #E8426B, #F9AABF)",
-  "linear-gradient(135deg, #6366F1, #A5B4FC)",
-  "linear-gradient(135deg, #F59E0B, #FDE68A)",
-  "linear-gradient(135deg, #10B981, #6EE7B7)",
-  "linear-gradient(135deg, #3B82F6, #93C5FD)",
+const DEFAULT_BACKGROUNDS = [
+  "var(--Categorical-10)",
+  "var(--Categorical-6)",
+  "var(--Categorical-13)",
+  "var(--Categorical-3)",
+  "var(--Categorical-11)",
 ]
 
 const ASPECT: Record<string, string> = {
@@ -69,8 +69,7 @@ function BannerCarousel({
       {/* Scroll strip */}
       <div className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1">
         {items.map((item, i) => {
-          const gradient = item.gradient ?? DEFAULT_GRADIENTS[i % DEFAULT_GRADIENTS.length]
-          const isLight = gradient.includes("FDE68A") // warn if text should be dark
+          const background = item.gradient ?? DEFAULT_BACKGROUNDS[i % DEFAULT_BACKGROUNDS.length]
           // href があれば a、onClick だけなら button（キーボード操作可）、どちらも無ければ div
           const Tag = item.href ? "a" : item.onClick ? "button" : "div"
 
@@ -83,7 +82,7 @@ function BannerCarousel({
               style={{
                 width: itemWidth,
                 flexShrink: 0,
-                background: item.imageSrc ? undefined : gradient,
+                background: item.imageSrc ? undefined : background,
               }}
               className={cn(
                 "rounded-xl overflow-hidden flex flex-col justify-end p-3 text-left",
@@ -91,8 +90,7 @@ function BannerCarousel({
                 "hover:opacity-95 active:scale-[.98] transition-transform",
                 ASPECT[itemAspectRatio] ?? "aspect-[2/1]",
                 item.href && "block",
-                // 固定グラデーション背景のため静的色（--Text-on-Inverse はダークで反転するため不可）
-                !item.imageSrc && (isLight ? "text-[#111]" : "text-white")
+                !item.imageSrc && "text-[var(--Text-on-Media)]"
               )}
             >
               {item.imageSrc && (
@@ -106,10 +104,10 @@ function BannerCarousel({
               {(item.caption || item.subCaption) && (
                 <div className="relative z-10">
                   {item.caption && (
-                    <p className="typo-label-xs font-bold leading-snug text-[var(--Text-High-Emphasis)]">{item.caption}</p>
+                    <p className="typo-label-xs leading-snug text-[var(--Text-on-Media)]">{item.caption}</p>
                   )}
                   {item.subCaption && (
-                    <p className="text-[10px] opacity-75 mt-0.5 text-[var(--Text-Medium-Emphasis)]">{item.subCaption}</p>
+                    <p className="typo-label-xs opacity-75 mt-0.5 text-[var(--Text-on-Media)]">{item.subCaption}</p>
                   )}
                 </div>
               )}

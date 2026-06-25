@@ -11,14 +11,14 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       data-slot="calendar"
       showOutsideDays={showOutsideDays}
       locale={ja}
-      className={cn("p-3", className)}
+      className={cn("p-4", className)}
       classNames={{
         root: "relative w-fit",
         months: "flex flex-col sm:flex-row gap-4",
         month: "flex flex-col gap-4",
         month_caption: "flex justify-center pt-1 items-center h-9",
         caption_label: "typo-label-md text-[var(--Text-High-Emphasis)]",
-        nav: "absolute top-[16px] inset-x-0 flex justify-between px-1 z-10 pointer-events-none",
+        nav: "absolute top-4 inset-x-0 flex justify-between px-1 z-10 pointer-events-none",
         button_previous: cn(
           "h-7 w-7 flex items-center justify-center rounded-lg pointer-events-auto",
           "text-[var(--Object-Medium-Emphasis)] hover:text-[var(--Object-High-Emphasis)]",
@@ -44,14 +44,14 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
           "[&>button]:bg-[var(--Brand-Primary)] [&>button]:text-[var(--Text-on-Inverse)] [&>button]:hover:bg-[var(--Brand-Primary)] [&>button]:hover:text-[var(--Text-on-Inverse)]",
         // range の start: 右半分を帯で塗る
         range_start:
-          "bg-gradient-to-r from-transparent from-50% to-[var(--Brand-Ultra-Light)] to-50%",
+          "bg-[var(--Brand-Ultra-Light)]",
         // range の end: 左半分を帯で塗る
         range_end:
-          "bg-gradient-to-l from-transparent from-50% to-[var(--Brand-Ultra-Light)] to-50%",
+          "bg-[var(--Brand-Ultra-Light)]",
         // range の中間: 全幅を帯で塗り、ボタンの円を消す
         range_middle:
           "bg-[var(--Brand-Ultra-Light)] [&>button]:bg-transparent! [&>button]:text-[var(--Text-High-Emphasis)]! [&>button]:rounded-none [&>button]:hover:bg-[var(--Brand-Ultra-Light)]!",
-        today: "[&>button]:font-semibold [&>button]:text-[var(--Brand-Primary)]",
+        today: "[&>button]:text-[var(--Brand-Primary)]",
         outside: "opacity-30",
         disabled: "text-[var(--Text-Low-Emphasis)] opacity-50",
         hidden: "invisible",

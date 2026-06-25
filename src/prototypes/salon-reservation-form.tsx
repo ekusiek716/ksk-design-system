@@ -81,7 +81,7 @@ export default function SalonReservationForm() {
   return (
     <div className="@container min-h-dvh bg-[var(--Surface-Secondary)] pb-10">
       <div className="@xl:mx-auto @xl:max-w-xl @xl:py-8">
-        <header className="bg-[var(--Surface-Primary)] px-5 pt-6 pb-4 @xl:rounded-t-2xl">
+        <header data-slot="prototype-header" className="bg-[var(--Surface-Primary)] px-5 pt-6 pb-4 @xl:rounded-t-2xl">
           <h1 className="typo-heading-md text-[var(--Text-High-Emphasis)]">ご予約フォーム</h1>
           <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1">
             ご希望のメニュー・日時・連絡先をご入力ください。

@@ -123,7 +123,7 @@ function DropdownFilter<K extends string = string>({
                   onClick={() => handleSelect("all" as K | "all")}
                   className={cn(
                     "w-full flex items-center justify-between px-4 py-2.5 typo-body-sm transition-colors hover:bg-[var(--Surface-Secondary)]",
-                    value === "all" ? "text-[var(--Brand-Primary)] font-semibold" : "text-[var(--Text-High-Emphasis)]"
+                    value === "all" ? "text-[var(--Brand-Primary)]" : "text-[var(--Text-High-Emphasis)]"
                   )}
                 >
                   <span>{allLabel}</span>
@@ -140,7 +140,7 @@ function DropdownFilter<K extends string = string>({
                   onClick={() => handleSelect(opt.key)}
                   className={cn(
                     "w-full flex items-center justify-between gap-2 px-4 py-2.5 typo-body-sm transition-colors hover:bg-[var(--Surface-Secondary)]",
-                    value === opt.key ? "text-[var(--Brand-Primary)] font-semibold" : "text-[var(--Text-High-Emphasis)]"
+                    value === opt.key ? "text-[var(--Brand-Primary)]" : "text-[var(--Text-High-Emphasis)]"
                   )}
                 >
                   <span className="flex items-center gap-2 min-w-0">

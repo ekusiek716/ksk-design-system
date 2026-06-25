@@ -23,7 +23,7 @@ export default function SampleMypage() {
   return (
     <div className="min-h-dvh bg-[var(--Surface-Secondary)] pb-8">
       {/* ヘッダー */}
-      <header className="bg-[var(--Surface-Primary)] px-5 pt-6 pb-5">
+      <header data-slot="prototype-header" className="bg-[var(--Surface-Primary)] px-5 pt-6 pb-5">
         <div className="flex items-center gap-4">
           <div className="flex size-14 items-center justify-center rounded-full bg-[var(--Surface-Accent-Primary-Light)]">
             <span className="typo-heading-md text-[var(--Text-Accent-Primary)]">奥</span>

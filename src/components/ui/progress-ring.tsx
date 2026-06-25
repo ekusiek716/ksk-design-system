@@ -70,7 +70,7 @@ function ProgressRing({
           className={cn(
             "absolute inset-0 flex items-center justify-center",
             size === "sm" ? "typo-label-xs" : size === "md" ? "typo-label-sm" : "typo-label-md",
-            "text-[var(--Text-High-Emphasis)] font-semibold"
+            "text-[var(--Text-High-Emphasis)]"
           )}
         >
           {label ?? `${Math.round(clamped)}%`}

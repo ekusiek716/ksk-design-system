@@ -158,7 +158,7 @@ export default function AdminOrderDashboard() {
         {/* メイン */}
         <div className="min-w-0">
           {/* ヘッダー */}
-          <header className="sticky top-0 z-10 flex items-center gap-4 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-5 py-3">
+          <header data-slot="prototype-header" className="sticky top-0 z-10 flex items-center gap-4 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-5 py-3">
             <h1 className="typo-heading-sm text-[var(--Text-High-Emphasis)] flex-1">受注管理</h1>
             <div className="hidden @xl:block w-64">
               <Input

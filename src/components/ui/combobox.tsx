@@ -58,7 +58,7 @@ function Combobox({
           aria-expanded={open}
           aria-label={triggerLabel ?? placeholder}
           className={cn(
-            "flex h-12 w-full items-center justify-between rounded-lg border bg-[var(--Surface-Primary)] px-3 typo-body-md transition-colors outline-none",
+            "flex h-12 w-full items-center justify-between rounded-lg border bg-[var(--Surface-Primary)] px-3 typo-body-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
             open
               ? "border-[var(--Border-Accent-Primary)] ring-[3px] ring-[var(--Focus-High-Emphasis)]/50"
               : "border-[var(--Border-Medium-Emphasis)] hover:border-[var(--Border-High-Emphasis)]",
@@ -93,7 +93,7 @@ function Combobox({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={searchPlaceholder}
-            className="flex h-10 flex-1 bg-transparent outline-none typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)]"
+            className="flex h-10 flex-1 bg-transparent focus-visible:outline-none typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)]"
           />
         </div>
         {/* List */}
@@ -109,7 +109,7 @@ function Combobox({
                 disabled={opt.disabled}
                 onClick={() => handleSelect(opt)}
                 className={cn(
-                  "relative flex w-full cursor-default items-center rounded-sm py-2 pl-8 pr-2 typo-body-md outline-none transition-colors text-left",
+                  "relative flex w-full cursor-default items-center rounded-sm py-2 pl-8 pr-2 typo-body-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 transition-colors text-left",
                   "hover:bg-[var(--Surface-Secondary)] focus:bg-[var(--Surface-Secondary)]",
                   "disabled:pointer-events-none disabled:opacity-50",
                   opt.value === value && "text-[var(--Text-Accent-Primary)]"

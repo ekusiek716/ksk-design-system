@@ -112,7 +112,7 @@ function NumberInput({
           if (e.key === "ArrowDown") { e.preventDefault(); decrement() }
         }}
         className={cn(
-          "text-center bg-transparent outline-none text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] tabular-nums",
+          "text-center bg-transparent focus-visible:outline-none text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] tabular-nums",
           s.text
         )}
       />
