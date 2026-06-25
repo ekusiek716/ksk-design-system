@@ -317,9 +317,16 @@
     {
       "name": "Progress",
       "path": "src/components/ui/progress.tsx",
-      "description": "進捗バー。color variant (default/success/warning/caution) + transition duration (none/sm/md/lg) 拡張済。",
+      "description": "進捗バー。color variant (default/success/warning/caution) + transition duration (none/sm/md/lg) + autoColor 閾値切替に対応。",
+      "features": [
+        "color-variants",
+        "transition-duration",
+        "auto-color-thresholds"
+      ],
       "rules": [
-        "値超過で variant を切替: 100% 超なら caution",
+        "値に応じた色切替は autoColor を使い、consumer 側で個別に if 文と className を重ねない",
+        "autoColor=true の既定閾値は 80% 以上 warning、100% 以上 caution",
+        "しきい値がアプリごとに違う場合は autoColor={{ successBelow, warningFrom, warningBelow, cautionFrom }} を使う",
         "達成カード等は transitionDuration=\"lg\" で緩やかに"
       ]
     },
@@ -1728,18 +1735,30 @@
         "edit-trigger",
         "rich-column-helpers",
         "date-column",
+        "date-cell",
         "chip-column",
         "select-column",
+        "select-popper-position",
         "sort",
         "checkbox",
         "actions",
+        "row-click",
+        "full-cell-hit-area",
         "inline-edit",
+        "flexible-column-width",
         "drag",
-        "section-row"
+        "section-row",
+        "section-sticky-left",
+        "section-heading-emphasis"
       ],
       "rules": [
         "rows/columns API は最短実装向け",
         "DateField / Chip cluster / typed Select などのリッチ列は cell と edit.trigger、または createDataTableDateColumn / createDataTableChipColumn / createDataTableSelectColumn を使う",
+        "行全体をクリック可能にする場合は DataTable の onRowClick または DataTableRow の onRowClick を使い、独自の tr/td クリック実装を作らない",
+        "Select セルは DataTableSelectCell または createDataTableSelectColumn を使い、ポップオーバー位置は contentPosition で調整する",
+        "日付編集セルは DataTableDateCell または createDataTableDateColumn を使う",
+        "残り幅を受け持つ列は width=\"flex\" を使い、手書き className の w-full/min-w 再実装を避ける",
+        "セクション見出しを横スクロール中も左に残す場合は DataTableSectionRow stickyLeft / headingSize を使う",
         "複雑なテーブル全体構成は DataTableHead, DataTableRow, DataTableCell などのサブコンポーネントを使う"
       ]
     },

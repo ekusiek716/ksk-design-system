@@ -32,6 +32,38 @@ export const Full: Story = {
   args: { value: 100 },
 }
 
+export const ColorVariants: Story = {
+  render: () => (
+    <div className="flex w-[360px] flex-col gap-4">
+      <Progress value={42} variant="default" />
+      <Progress value={42} variant="success" />
+      <Progress value={42} variant="warning" />
+      <Progress value={42} variant="caution" />
+    </div>
+  ),
+}
+
+export const DurationVariants: Story = {
+  render: () => (
+    <div className="flex w-[360px] flex-col gap-4">
+      <Progress value={72} transitionDuration="none" />
+      <Progress value={72} transitionDuration="sm" />
+      <Progress value={72} transitionDuration="md" />
+      <Progress value={72} transitionDuration="lg" />
+    </div>
+  ),
+}
+
+export const AutoColor: Story = {
+  render: () => (
+    <div className="flex w-[360px] flex-col gap-4">
+      <Progress value={64} autoColor={{ successBelow: 80, warningBelow: 100, cautionFrom: 100 }} />
+      <Progress value={88} autoColor={{ successBelow: 80, warningBelow: 100, cautionFrom: 100 }} />
+      <Progress value={112} autoColor />
+    </div>
+  ),
+}
+
 export const AllStates: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
