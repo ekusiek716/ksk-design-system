@@ -76,7 +76,7 @@ export { Label } from "./components/ui/label"
 export { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "./components/ui/pagination"
 export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from "./components/ui/popover"
 export { Progress } from "./components/ui/progress"
-export type { ProgressProps } from "./components/ui/progress"
+export type { ProgressAutoColorConfig, ProgressDuration, ProgressProps, ProgressVariant } from "./components/ui/progress"
 export { RadioGroup, RadioGroupItem } from "./components/ui/radio-group"
 export { ScrollArea, ScrollBar } from "./components/ui/scroll-area"
 export { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "./components/ui/select"
@@ -232,6 +232,7 @@ export {
   DataTableActionCell,
   DataTableInputCell,
   DataTableSelectCell,
+  DataTableDateCell,
   DataTableNumberCell,
   DataTableDragHandleCell,
   DataTableLinkCell,
@@ -250,9 +251,12 @@ export type {
   StickyPosition,
   DataTableRowId,
   DataTableSelectionMode,
+  DataTableSelectContentPosition,
   DataTableSortState,
   DataTableEditTrigger,
+  DataTableColumnWidth,
   DataTableCommitOptions,
+  DataTableRowClickHandler,
   DataTableCellContext,
   DataTableColumnEditOptions,
   DataTableColumnOption,
@@ -262,9 +266,12 @@ export type {
   DataTableSection,
   DataTableProps,
   DataTableDateColumnConfig,
+  DataTableDateCellProps,
   DataTableChipColumnValue,
   DataTableChipColumnConfig,
   DataTableSelectColumnConfig,
+  DataTableSectionRowProps,
+  DataTableSectionHeadingSize,
 } from "./components/patterns/admin/data-table"
 
 export { SimplePagination } from "./components/patterns/simple-pagination"

@@ -5,6 +5,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "./dialog"
 import { Button } from "./button"
+import { Checkbox } from "./checkbox"
 import { Input } from "./input"
 import { Label } from "./label"
 import { RadioGroup, RadioGroupItem } from "./radio-group"
@@ -100,6 +101,49 @@ export const FocusOptions: Story = {
             <Button variant="secondary">キャンセル</Button>
           </DialogClose>
           <Button>送信する</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  ),
+}
+
+export const TopPositionLongList: Story = {
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>チェックリストを開く</Button>
+      </DialogTrigger>
+      <DialogContent
+        position="top"
+        autoFocus="title"
+        description="長いチェックリストを上部寄せで表示します。"
+      >
+        <DialogHeader>
+          <DialogTitle>公開前チェック</DialogTitle>
+          <DialogDescription>必要な項目を確認してください。</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-3">
+          {[
+            "画像の表示崩れがない",
+            "価格と在庫数が一致している",
+            "公開日時が正しい",
+            "通知文面を確認した",
+            "利用規約リンクが有効",
+            "タグとカテゴリが適切",
+            "モバイル表示を確認した",
+            "管理者コメントを確認した",
+          ].map((label) => (
+            <label key={label} className="flex items-center gap-3">
+              <Checkbox />
+              <span className="typo-body-md text-[var(--Text-High-Emphasis)]">{label}</span>
+            </label>
+          ))}
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="secondary">キャンセル</Button>
+          </DialogClose>
+          <Button>完了</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

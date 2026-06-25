@@ -3,6 +3,7 @@
  * @description 統計値カードコンポーネント。トレンド上昇・下降・なしのパターンを網羅
  */
 import type { Meta, StoryObj } from "@storybook/react"
+import * as React from "react"
 import { StatCard } from "./stat-card"
 
 const meta: Meta<typeof StatCard> = {
@@ -57,6 +58,33 @@ export const Variants: Story = {
       <StatCard label="ブランド" value="¥1.2M" variant="accent" trend={{ value: 8.3, label: "前月比" }} />
     </div>
   ),
+}
+
+export const Interactive: Story = {
+  render: function InteractiveStory() {
+    const [active, setActive] = React.useState("売上")
+    return (
+      <div className="flex max-w-xl flex-col gap-3">
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard
+            label="売上"
+            value="¥1.2M"
+            trend={{ value: 8.3, label: "前月比" }}
+            interactive
+            onClick={() => setActive("売上")}
+          />
+          <StatCard
+            label="注文数"
+            value="342"
+            unit="件"
+            variant="accent"
+            onClick={() => setActive("注文数")}
+          />
+        </div>
+        <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">選択中: {active}</p>
+      </div>
+    )
+  },
 }
 
 export const MultipleCards: Story = {
