@@ -59,6 +59,7 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **AGENTS.md** | 同上（Codex用。セッション開始時の読み込み指示・編集後コマンドを明記） |
 | **contracts/components.json** | 全112コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
 | **contracts/rules.json** | 禁止パターン32件・AIアンチパターン10件・アクセシビリティ要件 |
+| **contracts/design-context.json** | `DESIGN.md` の役割・正本ファイル・外部 DESIGN.md 参照方針 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
 | **src/components/COMPONENT_LOOKUP.md** | 全112コンポーネントのバリアント・インポートパス一覧（自動生成） |
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
@@ -66,8 +67,9 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 **セッション開始時 / コードを書く前に必ず読む:**
 1. `contracts/rules.json` の `prohibited` と `aiPatterns`（AIが典型的に犯すパターン集）を確認
 2. `contracts/components.json` でコンポーネント定義・バリアントを確認
-3. `src/components/COMPONENT_LOOKUP.md` で既存コンポーネントを確認（手書き・再定義の防止）
-4. `tokens.json` でカラー・余白・影・タイポのトークンを確認
+3. `contracts/design-context.json` で `DESIGN.md` と正本ファイルの関係を確認
+4. `src/components/COMPONENT_LOOKUP.md` で既存コンポーネントを確認（手書き・再定義の防止）
+5. `tokens.json` でカラー・余白・影・タイポのトークンを確認
 
 **`.tsx` を編集したら `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行すること。**
 
@@ -113,6 +115,9 @@ bash scripts/check-drift.sh
 
 # COMPONENT_LOOKUP.md 再生成（コンポーネント追加後に実行）
 npm run generate:lookup
+
+# DESIGN.md contract 検査
+npm run lint:design
 
 # 全チェック（tsc + lint + drift + lookup 一括）
 npm run check

@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "name": "KSK Design System — Agent Design Context",
+    "version": "1.0.0",
+    "description": "AI エージェント向け DESIGN.md の扱いと、KSK 固有の正本・検査方針を定義する。Google DESIGN.md は互換入口として参照し、KSK の正本は tokens / contracts / CSS に置く。"
+  },
+  "canonicalSources": [
+    {
+      "path": "tokens.json",
+      "owns": [
+        "primitive colors",
+        "semantic colors",
+        "dark semantic colors",
+        "typography",
+        "spacing scale",
+        "border radius scale",
+        "shadows",
+        "touch targets"
+      ]
+    },
+    {
+      "path": "src/styles/*.css",
+      "owns": [
+        "published CSS custom properties",
+        "typography utilities",
+        "glass utilities",
+        "categorical token CSS"
+      ]
+    },
+    {
+      "path": "contracts/rules.json",
+      "owns": [
+        "prohibited patterns",
+        "AI anti-patterns",
+        "accessibility rules",
+        "consumer lint rules"
+      ]
+    },
+    {
+      "path": "contracts/components.json",
+      "owns": [
+        "component names",
+        "variants",
+        "subcomponents",
+        "usage rules",
+        "component counts"
+      ]
+    },
+    {
+      "path": "src/components/COMPONENT_LOOKUP.md",
+      "owns": [
+        "generated import map",
+        "storybook coverage hints",
+        "DS-first recipes"
+      ]
+    }
+  ],
+  "designMd": {
+    "role": "AI 向けの視覚言語サマリ。実装正本ではなく、正本から検査される配布・参照レイヤー。",
+    "frontMatterRole": "Google DESIGN.md 互換の機械可読サマリ。KSK の主要 token を抽出して agent が読みやすい粒度にする。",
+    "bodyRole": "KSK の設計意図、使い分け、禁止事項を説明する rationale。",
+    "updatePolicy": "tokens.json / contracts/*.json / src/styles/*.css の変更で DESIGN.md の記述が古くなる場合は同じ PR で更新する。",
+    "googleDesignMdPolicy": "Google DESIGN.md の思想・検査観点・export 形式は参照する。ただし alpha 仕様や CLI を KSK の必須正本・runtime 依存にしない。"
+  },
+  "externalReferences": [
+    {
+      "name": "Google DESIGN.md",
+      "url": "https://github.com/google-labs-code/design.md",
+      "status": "optional-reference",
+      "adopt": [
+        "front matter + markdown rationale の二層構造",
+        "broken token reference check",
+        "section order check",
+        "agent-readable JSON findings",
+        "Tailwind v4 / DTCG export という互換出口の考え方"
+      ],
+      "doNotAdoptAsCanonical": [
+        "Google schema を KSK の完全正本にすること",
+        "Google CLI を publish / CI の必須依存にすること",
+        "KSK 固有の multi-theme / native / component contracts を Google alpha schema に従属させること"
+      ]
+    }
+  ],
+  "guardrails": {
+    "requiredSections": [
+      "Overview",
+      "Source Of Truth",
+      "Colors",
+      "Typography",
+      "Layout & Spacing",
+      "Elevation & Depth",
+      "Shapes",
+      "Motion",
+      "Components",
+      "Voice & Tone",
+      "Do's and Don'ts"
+    ],
+    "requiredSourceMentions": [
+      "tokens.json",
+      "src/styles/*.css",
+      "contracts/rules.json",
+      "contracts/components.json",
+      "src/components/COMPONENT_LOOKUP.md",
+      "Google DESIGN.md"
+    ],
+    "requiredFrontMatterPaths": [
+      "version",
+      "name",
+      "colors.primary",
+      "colors.primaryAction",
+      "colors.surface",
+      "colors.textHigh",
+      "colors.border",
+      "colors.focus",
+      "typography.display.fontSize",
+      "typography.display.lineHeight",
+      "typography.body.fontSize",
+      "rounded.surface",
+      "rounded.modal",
+      "rounded.sheet",
+      "spacing.unit",
+      "elevation.md",
+      "components.button.background",
+      "components.card.background",
+      "components.dialog.rounded"
+    ],
+    "checks": [
+      "DESIGN.md front matter が存在すること",
+      "front matter 内の {path.to.token} 参照が解決できること",
+      "主要 colors / typography / radius / elevation が tokens.json と src/preset.css から導出した値と一致すること",
+      "body の ## セクションが requiredSections の順序を保つこと",
+      "body が KSK の正本ファイルと Google DESIGN.md の参照方針を明示すること",
+      "front matter の components.* が contracts/components.json に存在する component を指すこと"
+    ]
+  }
+}
