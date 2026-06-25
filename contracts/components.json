@@ -1272,7 +1272,8 @@
         "safe-area anchor",
         "idle auto-hide",
         "glass buttons",
-        "text-on-media"
+        "text-on-media",
+        "React Native port"
       ],
       "accessibility": [
         "role=group",
@@ -1284,7 +1285,8 @@
         "メディア上の操作群に使用する。通常画面の下部 CTA には StickyActionBar を使う",
         "items[].label は必須。アイコン単独にしない",
         "暗い写真・動画・濃色面上では glass-inverse / text-on-media を維持する",
-        "autoHideMs=null で idle fade を無効化できる"
+        "autoHideMs=null で idle fade を無効化できる",
+        "React Native consumer は ksk-design-system/native/ui の MediaActionCluster を使い、ローカル overlay action を再実装しない"
       ]
     },
     {
@@ -1297,7 +1299,8 @@
         "min-h-0 guard",
         "fixed header slot",
         "fixed footer slot",
-        "safe-area bottom"
+        "safe-area bottom",
+        "React Native port"
       ],
       "accessibility": [
         "main landmark",
@@ -1307,7 +1310,8 @@
         "body スクロールを使わないアプリのフルスクリーン画面に使う",
         "本文が長い画面では scroll=true のまま使う",
         "写真ヒーローなど 1 画面固定では scroll=false と padding=none を組み合わせる",
-        "footer には主要 CTA を置き、safe-area 余白を消費側で再実装しない"
+        "footer には主要 CTA を置き、safe-area 余白を消費側で再実装しない",
+        "React Native consumer は ksk-design-system/native/ui の Screen を使い、header/body/footer shell をローカル再実装しない"
       ]
     },
     {
@@ -1319,7 +1323,8 @@
         "medium / dark overlay",
         "bottom / center align",
         "on-image typography",
-        "compound slots"
+        "compound slots",
+        "React Native port"
       ],
       "subcomponents": [
         "PhotoHero.Eyebrow",
@@ -1333,8 +1338,9 @@
       ],
       "rules": [
         "オンボーディング入口・写真スライド・メディア上 CTA に使う",
-        "写真上の CTA には Button variant=glass-inverse / ghost-inverse を使う",
-        "本文が長い場合は Screen scroll=true 側で内部スクロールを確保する"
+        "写真上の CTA には Web では Button variant=glass-inverse / ghost-inverse、React Native では Button variant=glass を使う",
+        "本文が長い場合は Screen scroll=true 側で内部スクロールを確保する",
+        "React Native consumer は ksk-design-system/native/ui の PhotoHero compound slots を使い、写真上 typography をローカル再実装しない"
       ]
     },
     {
@@ -1433,7 +1439,8 @@
       "rules": [
         "loadingLabel prop で i18n",
         "ListSkeleton: rowHeight で 1 行高",
-        "GridSkeleton: columns 1-4 + cardHeight で調整"
+        "GridSkeleton: columns 1-4 + cardHeight で調整",
+        "React Native consumer は ksk-design-system/native/ui の ListSkeleton / GridSkeleton alias を使う"
       ]
     },
     {

@@ -14,7 +14,7 @@
 - **アクセシブル** — shadcn/ui（Radix UI ベース）+ `@storybook/addon-a11y` で a11y を担保
 - **Tailwind CSS v4 ネイティブ** — `@theme` ベースのトークン設計
 - **型安全** — React 19 + TypeScript、CVA によるバリアント管理
-- **125 + 96 コンポーネント** — Web 125（UI 57 / EC 11 / 管理 8 / シェル 3 / パターン 46）+ React Native 96
+- **125 Web コンポーネント + 126 React Native exports** — Web 125（UI 57 / EC 11 / 管理 8 / シェル 3 / パターン 46）+ RN `native/ui` 公開 export 126
 - **iOS 26 Liquid Glass 対応** — RN 側 `GlassView` + `Button variant="glass"`、Web 側 `.glass` CSS マテリアル
 
 ## 🎨 テーマ
@@ -131,7 +131,7 @@ import { BottomTabBar } from "ksk-design-system"
 
 ### React Native / Expo
 
-`ksk-design-system/native/ui` から直接 RN 用コンポーネント（91 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
+`ksk-design-system/native/ui` から直接 RN 用コンポーネント export（126 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
 
 ```tsx
 import { ThemeProvider, Button, Card, GlassView } from "ksk-design-system/native/ui"
@@ -144,7 +144,7 @@ npx expo install expo-glass-effect expo-blur
 
 Web は backdrop-filter で擬似、Android は半透明 surface でフォールバックします。
 
-Expo Router / React Navigation の tab bar、native `GlassView`、Button loading、settings/attachment/mobile shell recipes は `NATIVE_RECIPES.md` を参照してください。
+既存コンポーネントの確認は `src/native/COMPONENT_LOOKUP.md`、Expo Router / React Navigation の tab bar、native `GlassView`、Button loading、fullscreen/media/settings/attachment/mobile shell recipes は `NATIVE_RECIPES.md` を参照してください。
 
 ## 🧪 試してみる（1コマンドお試し）
 
