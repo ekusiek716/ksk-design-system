@@ -19,6 +19,9 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 ERRORS=0
 WARNINGS=0
+CLASS_START='(^|[^[:alnum:]_-])'
+CLASS_END='($|[^[:alnum:]_-])'
+COMMENT_LINE='(^|:)[[:space:]]*//|/\*'
 
 # 色・typo 系の検出を severity 付きで報告する。
 # DS 本体(ui/patterns/icons)は段階導入として WARNING（CI は落とさない）、
@@ -68,8 +71,8 @@ for FILE in $FILES; do
   if [ "$IS_DS" = false ]; then
 
   # 1. 生の <button>
-  MATCHES=$(grep -n '<button ' "$FILE" 2>/dev/null \
-    | grep -v 'data-slot\|asChild\|Comp\|Primitive' || true)
+  MATCHES=$(grep -nE '<button([[:space:]>]|$)' "$FILE" 2>/dev/null \
+    | grep -Ev "data-slot|asChild|Comp|Primitive|$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${RED}❌ $FILE: 生の<button> → <Button variant=\"...\" size=\"...\">を使う${NC}"
     echo "$MATCHES" | head -3
@@ -77,8 +80,8 @@ for FILE in $FILES; do
   fi
 
   # 2. 生の <input>
-  MATCHES=$(grep -n '<input ' "$FILE" 2>/dev/null \
-    | grep -v 'type="hidden"\|type="search"\|type="file"\|data-slot\|asChild\|Comp\|Primitive' || true)
+  MATCHES=$(grep -nE '<input([[:space:]>]|$)' "$FILE" 2>/dev/null \
+    | grep -Ev "type=\"hidden\"|type=\"search\"|type=\"file\"|data-slot|asChild|Comp|Primitive|$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${RED}❌ $FILE: 生の<input> → <Input>コンポーネントを使う${NC}"
     echo "$MATCHES" | head -3
@@ -86,8 +89,8 @@ for FILE in $FILES; do
   fi
 
   # 3. 生の <textarea>
-  MATCHES=$(grep -n '<textarea ' "$FILE" 2>/dev/null \
-    | grep -v 'data-slot\|asChild\|Comp\|Primitive' || true)
+  MATCHES=$(grep -nE '<textarea([[:space:]>]|$)' "$FILE" 2>/dev/null \
+    | grep -Ev "data-slot|asChild|Comp|Primitive|$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${RED}❌ $FILE: 生の<textarea> → <Textarea>コンポーネントを使う${NC}"
     echo "$MATCHES" | head -3
@@ -95,8 +98,8 @@ for FILE in $FILES; do
   fi
 
   # 4. 生の <select>
-  MATCHES=$(grep -n '<select ' "$FILE" 2>/dev/null \
-    | grep -v 'data-slot\|asChild\|Comp\|Primitive' || true)
+  MATCHES=$(grep -nE '<select([[:space:]>]|$)' "$FILE" 2>/dev/null \
+    | grep -Ev "data-slot|asChild|Comp|Primitive|$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${RED}❌ $FILE: 生の<select> → <Select>コンポーネントを使う${NC}"
     echo "$MATCHES" | head -3
@@ -104,8 +107,8 @@ for FILE in $FILES; do
   fi
 
   # 5. 生の <table>
-  MATCHES=$(grep -n '<table\b' "$FILE" 2>/dev/null \
-    | grep -v 'data-slot\|asChild\|Comp\|Primitive\|// \|/\*' || true)
+  MATCHES=$(grep -nE '<table([[:space:]>]|$)' "$FILE" 2>/dev/null \
+    | grep -Ev "data-slot|asChild|Comp|Primitive|$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${RED}❌ $FILE: 生の<table> → DataTable等のDSコンポーネントを使う${NC}"
     echo "$MATCHES" | head -3
@@ -121,7 +124,7 @@ for FILE in $FILES; do
     if ! sed -n "${S},${LN}p" "$FILE" 2>/dev/null | grep -q 'asChild'; then
       MATCHES="${MATCHES}${line}\n"
     fi
-  done < <(grep -n '<a href' "$FILE" 2>/dev/null | grep -v '// \|/\*' || true)
+  done < <(grep -n '<a href' "$FILE" 2>/dev/null | grep -Ev "$COMMENT_LINE" || true)
   MATCHES=$(printf "%b" "$MATCHES" | sed '/^[[:space:]]*$/d')
   if [ -n "$MATCHES" ]; then
     echo -e "${RED}❌ $FILE: 生の<a href> → <Button variant=\"link\">を使う${NC}"
@@ -137,32 +140,32 @@ for FILE in $FILES; do
 
   # 7. HEX ハードコード
   MATCHES=$(grep -n '#[0-9a-fA-F]\{6\}' "$FILE" 2>/dev/null \
-    | grep -v 'var(\|// \|/\*\|fill="\|stroke="\|src=' || true)
+    | grep -Ev "var\(|fill=\"|stroke=\"|src=|$COMMENT_LINE" || true)
   [ -n "$MATCHES" ] && report "$SEV" "$FILE: HEXハードコード → var(--Token-Name)を使う" "$MATCHES"
 
   # 8. Tailwind 標準色クラス
-  MATCHES=$(grep -noE '\b(text|bg|border)-(gray|slate|zinc|neutral|stone|red|orange|amber|yellow|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]+' \
-    "$FILE" 2>/dev/null | grep -v '// \|/\*' || true)
+  MATCHES=$(grep -nE "${CLASS_START}(text|bg|border)-(gray|slate|zinc|neutral|stone|red|orange|amber|yellow|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]+${CLASS_END}" \
+    "$FILE" 2>/dev/null | grep -Ev "$COMMENT_LINE" || true)
   [ -n "$MATCHES" ] && report "$SEV" "$FILE: Tailwind標準色 → セマンティックトークン var(--)を使う" "$MATCHES"
 
   # 9. text-white / bg-white
-  MATCHES=$(grep -n '\btext-white\b\|\bbg-white\b' "$FILE" 2>/dev/null \
-    | grep -v '// \|/\*' || true)
+  MATCHES=$(grep -nE "${CLASS_START}(text-white|bg-white)${CLASS_END}" "$FILE" 2>/dev/null \
+    | grep -Ev "$COMMENT_LINE" || true)
   [ -n "$MATCHES" ] && report "$SEV" "$FILE: text-white/bg-white → セマンティックトークンを使う" "$MATCHES"
 
   # 10. フォントサイズ直書き text-[14px]
-  MATCHES=$(grep -noE 'text-\[[0-9]+px\]' "$FILE" 2>/dev/null \
-    | grep -v '// \|/\*' || true)
+  MATCHES=$(grep -nE "${CLASS_START}text-\[[0-9]+px\]${CLASS_END}" "$FILE" 2>/dev/null \
+    | grep -Ev "$COMMENT_LINE" || true)
   [ -n "$MATCHES" ] && report "$SEV" "$FILE: フォントサイズ直書き → typo-*クラスを使う" "$MATCHES"
 
   # 11. 任意値スペーシング px-[17px] 等
-  MATCHES=$(grep -noE '(p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|space-x|space-y)-\[[0-9]+px\]' \
-    "$FILE" 2>/dev/null | grep -v '// \|/\*' || true)
+  MATCHES=$(grep -nE "${CLASS_START}(p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|space-x|space-y)-\[[0-9]+px\]${CLASS_END}" \
+    "$FILE" 2>/dev/null | grep -Ev "$COMMENT_LINE" || true)
   [ -n "$MATCHES" ] && report "$SEV" "$FILE: 任意値スペーシング → spacingトークン（4の倍数）を使う" "$MATCHES"
 
   # 12. AI 生成パターン: カラーバー border-l-4 等
-  MATCHES=$(grep -n 'border-l-4\|border-t-4\|border-r-4\|border-b-4' "$FILE" 2>/dev/null \
-    | grep -v '// \|/\*' || true)
+  MATCHES=$(grep -nE "${CLASS_START}(border-l-4|border-t-4|border-r-4|border-b-4)${CLASS_END}" "$FILE" 2>/dev/null \
+    | grep -Ev "$COMMENT_LINE" || true)
   [ -n "$MATCHES" ] && report "$SEV" "$FILE: カラーバー（AI生成パターン禁止）→ 全周ボーダーを使う" "$MATCHES"
 
   # 13. pravatar.cc（ダミー画像サービス禁止）
@@ -178,9 +181,9 @@ for FILE in $FILES; do
   # ──────────────────────────────────────────
 
   # W1. font-bold 等の直書き
-  MATCHES=$(grep -n 'font-bold\|font-semibold\|font-medium\|font-light\|font-normal' \
+  MATCHES=$(grep -nE "${CLASS_START}font-(bold|semibold|medium|light|normal)${CLASS_END}" \
     "$FILE" 2>/dev/null \
-    | grep -v 'typo-\|cva(\|variants\|// \|/\*' || true)
+    | grep -Ev "typo-|cva\(|variants|$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: font-*直接使用 → typo-*クラスを使う${NC}"
     echo "$MATCHES" | head -3
@@ -188,8 +191,8 @@ for FILE in $FILES; do
   fi
 
   # W2. text-black
-  MATCHES=$(grep -n '\btext-black\b' "$FILE" 2>/dev/null \
-    | grep -v '// \|/\*' || true)
+  MATCHES=$(grep -nE "${CLASS_START}text-black${CLASS_END}" "$FILE" 2>/dev/null \
+    | grep -Ev "$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: text-black → text-[var(--Text-High-Emphasis)]を使う${NC}"
     echo "$MATCHES" | head -3
@@ -197,8 +200,8 @@ for FILE in $FILES; do
   fi
 
   # W3. DS 外の角丸（tokens.json borderRadius キー none/sm/md/lg/xl/2xl/full が許可セット。3xl 等は非トークン）
-  MATCHES=$(grep -noE '\brounded-3xl\b' "$FILE" 2>/dev/null \
-    | grep -v '// \|/\*' || true)
+  MATCHES=$(grep -nE "${CLASS_START}rounded-3xl${CLASS_END}" "$FILE" 2>/dev/null \
+    | grep -Ev "$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: DS外の角丸 → rounded-none/sm/md/lg/xl/2xl/full のみ${NC}"
     echo "$MATCHES" | head -3
@@ -206,8 +209,8 @@ for FILE in $FILES; do
   fi
 
   # W4. DS 外のシャドウ
-  MATCHES=$(grep -n 'shadow-md\|shadow-lg\|shadow-xl\|shadow-2xl' "$FILE" 2>/dev/null \
-    | grep -v '// \|/\*\|shadow-\[' || true)
+  MATCHES=$(grep -nE "${CLASS_START}shadow-(md|lg|xl|2xl)${CLASS_END}" "$FILE" 2>/dev/null \
+    | grep -Ev "$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: DS外シャドウ → shadow-[var(--shadow-*)]を使う${NC}"
     echo "$MATCHES" | head -3
@@ -215,8 +218,8 @@ for FILE in $FILES; do
   fi
 
   # W5. グラデーション背景（AI 生成パターン）
-  MATCHES=$(grep -n 'bg-gradient-to-' "$FILE" 2>/dev/null \
-    | grep -v '// \|/\*' || true)
+  MATCHES=$(grep -nE "${CLASS_START}bg-gradient-to-" "$FILE" 2>/dev/null \
+    | grep -Ev "$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: グラデーション → DSにグラデーション定義なし${NC}"
     echo "$MATCHES" | head -3
@@ -224,8 +227,8 @@ for FILE in $FILES; do
   fi
 
   # W6. tracking-tight（日本語可読性低下）
-  MATCHES=$(grep -n 'tracking-tight\|tracking-tighter' "$FILE" 2>/dev/null \
-    | grep -v '// \|/\*' || true)
+  MATCHES=$(grep -nE "${CLASS_START}(tracking-tight|tracking-tighter)${CLASS_END}" "$FILE" 2>/dev/null \
+    | grep -Ev "$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: tracking-tight → 日本語の可読性が低下${NC}"
     echo "$MATCHES" | head -3
@@ -233,8 +236,8 @@ for FILE in $FILES; do
   fi
 
   # W7. outline-none（フォーカスリング削除）
-  MATCHES=$(grep -n 'outline-none\b' "$FILE" 2>/dev/null \
-    | grep -v 'focus-visible\|// \|/\*' || true)
+  MATCHES=$(grep -nE "${CLASS_START}outline-none${CLASS_END}" "$FILE" 2>/dev/null \
+    | grep -Ev "focus-visible|$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: outline-none → focus-visible:ring で代替${NC}"
     echo "$MATCHES" | head -3
@@ -242,7 +245,8 @@ for FILE in $FILES; do
   fi
 
   # W8. 過剰な z-index
-  MATCHES=$(grep -n 'z-\[9999\]\|z-\[999\]' "$FILE" 2>/dev/null || true)
+  MATCHES=$(grep -nE "${CLASS_START}(z-\[9999\]|z-\[999\])${CLASS_END}" "$FILE" 2>/dev/null \
+    | grep -Ev "$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: 過剰なz-index → z-50を使う${NC}"
     echo "$MATCHES" | head -3
@@ -250,8 +254,8 @@ for FILE in $FILES; do
   fi
 
   # W9. <div onClick> / <span onClick>（アクセシビリティ）
-  MATCHES=$(grep -n '<div.*onClick\|<span.*onClick' "$FILE" 2>/dev/null \
-    | grep -v '// \|/\*' || true)
+  MATCHES=$(grep -nE '<(div|span).*onClick' "$FILE" 2>/dev/null \
+    | grep -Ev "$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: <div onClick> → <button>/<Button>を使う（キーボード操作不可）${NC}"
     echo "$MATCHES" | head -3
@@ -259,8 +263,16 @@ for FILE in $FILES; do
   fi
 
   # W10. <img> に alt なし
-  MATCHES=$(grep -n '<img ' "$FILE" 2>/dev/null \
-    | grep -v 'alt=\|// \|/\*' || true)
+  MATCHES=""
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    LN=$(echo "$line" | cut -d: -f1)
+    BLOCK=$(sed -n "${LN},$((LN + 20))p" "$FILE" 2>/dev/null | sed '/>/q')
+    if ! echo "$BLOCK" | grep -q 'alt='; then
+      MATCHES="${MATCHES}${line}\n"
+    fi
+  done < <(grep -nE '<img([[:space:]>]|$)' "$FILE" 2>/dev/null | grep -Ev "$COMMENT_LINE" || true)
+  MATCHES=$(printf "%b" "$MATCHES" | sed '/^[[:space:]]*$/d')
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: <img>にalt属性なし → alt=\"説明テキスト\"を必ず付ける${NC}"
     echo "$MATCHES" | head -3
@@ -268,8 +280,16 @@ for FILE in $FILES; do
   fi
 
   # W11. 生の <header> / <footer>
-  MATCHES=$(grep -n '<header \|<footer ' "$FILE" 2>/dev/null \
-    | grep -v 'data-slot\|// \|/\*' || true)
+  MATCHES=""
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    LN=$(echo "$line" | cut -d: -f1)
+    BLOCK=$(sed -n "${LN},$((LN + 20))p" "$FILE" 2>/dev/null | sed '/>/q')
+    if ! echo "$BLOCK" | grep -q 'data-slot'; then
+      MATCHES="${MATCHES}${line}\n"
+    fi
+  done < <(grep -nE '<(header|footer)([[:space:]>]|$)' "$FILE" 2>/dev/null | grep -Ev "$COMMENT_LINE" || true)
+  MATCHES=$(printf "%b" "$MATCHES" | sed '/^[[:space:]]*$/d')
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: 生の<header>/<footer> → AppShell等のDSシェルを検討${NC}"
     echo "$MATCHES" | head -3
@@ -281,8 +301,8 @@ for FILE in $FILES; do
   # ──────────────────────────────────────────
   if [ "$IS_DS" = false ] && [ "$HAS_DS_ESCAPE" = false ]; then
     # G1. Button を aria-pressed toggle として手組みしない
-    MATCHES=$(grep -n '<Button[^>]*aria-pressed\|aria-pressed[^>]*<Button' "$FILE" 2>/dev/null \
-      | grep -v '// \|/\*' || true)
+    MATCHES=$(grep -nE '<Button[^>]*aria-pressed|aria-pressed[^>]*<Button' "$FILE" 2>/dev/null \
+      | grep -Ev "$COMMENT_LINE" || true)
     if [ -n "$MATCHES" ]; then
       echo -e "${RED}❌ $FILE: Button toggle の手組み → PillToggle / RadioGroup / Tabs を使う（例外は ksk-ds-allow-custom-ui コメント）${NC}"
       echo "$MATCHES" | head -3
@@ -290,8 +310,8 @@ for FILE in $FILES; do
     fi
 
     # G2. 一時的な成功/同期通知を page Banner にしない
-    MATCHES=$(grep -n '<Banner[^>]*variant=["'\'']success["'\''][^>]*\(保存\|復旧\|接続\|同期\|削除\|完了\)' "$FILE" 2>/dev/null \
-      | grep -v '// \|/\*' || true)
+    MATCHES=$(grep -nE '<Banner[^>]*variant=["'\'']success["'\''][^>]*(保存|復旧|接続|同期|削除|完了)' "$FILE" 2>/dev/null \
+      | grep -Ev "$COMMENT_LINE" || true)
     if [ -n "$MATCHES" ]; then
       echo -e "${RED}❌ $FILE: transient notice を Banner 化しない → toast.success / toast.connectionRestored を使う${NC}"
       echo "$MATCHES" | head -3
@@ -299,8 +319,8 @@ for FILE in $FILES; do
     fi
 
     # G3. raw icon utility class を作らない
-    MATCHES=$(grep -n 'btn-icon\|icon-only-button\|className=.*icon-button' "$FILE" 2>/dev/null \
-      | grep -v '// \|/\*' || true)
+    MATCHES=$(grep -nE 'btn-icon|icon-only-button|className=.*icon-button' "$FILE" 2>/dev/null \
+      | grep -Ev "$COMMENT_LINE" || true)
     if [ -n "$MATCHES" ]; then
       echo -e "${RED}❌ $FILE: icon button の独自 class → Button size=\"icon\" / \"icon-sm\" / \"icon-lg\" を使う${NC}"
       echo "$MATCHES" | head -3
@@ -309,7 +329,7 @@ for FILE in $FILES; do
 
     # G4. EmptyState CTA サイズを画面ごとに className で組まない
     MATCHES=$(grep -n '<EmptyState[^>]*action={[[:space:]]*<Button[^}]*className=' "$FILE" 2>/dev/null \
-      | grep -v '// \|/\*' || true)
+      | grep -Ev "$COMMENT_LINE" || true)
     if [ -n "$MATCHES" ]; then
       echo -e "${RED}❌ $FILE: EmptyState CTA の手組み → actionLabel + actionLayout=\"content|full|compact\" を使う${NC}"
       echo "$MATCHES" | head -3
