@@ -200,7 +200,7 @@ export type { ProductCardProps, ProductCardTag } from "./components/patterns/com
 export { ProductCarousel } from "./components/patterns/commerce/product-carousel"
 export { ImageCarousel } from "./components/patterns/commerce/image-carousel"
 export { BottomTabBar } from "./components/patterns/commerce/bottom-tab-bar"
-export type { BottomTabBarItem, BottomTabBarKeyboardBehavior, BottomTabBarProps } from "./components/patterns/commerce/bottom-tab-bar"
+export type { BottomTabBarFloatingPosition, BottomTabBarItem, BottomTabBarKeyboardBehavior, BottomTabBarProps } from "./components/patterns/commerce/bottom-tab-bar"
 export { FilterBar } from "./components/patterns/commerce/filter-bar"
 export { ReviewCard } from "./components/patterns/commerce/review-card"
 export type { ReviewCardProps } from "./components/patterns/commerce/review-card"

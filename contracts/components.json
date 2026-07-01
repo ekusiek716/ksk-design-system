@@ -1747,7 +1747,7 @@
     {
       "name": "BottomTabBar",
       "path": "src/components/patterns/commerce/bottom-tab-bar.tsx",
-      "description": "SP 下部固定タブナビゲーション。default と pill（iOS 26 Liquid Glass）バリアント。pill は centerAction・ラベル表示・inverse tone・mobile shell max-width に対応。",
+      "description": "SP 下部固定タブナビゲーション。default と pill（iOS 26 Liquid Glass）バリアント。pill は centerAction・ラベル表示・inverse tone・mobile shell max-width・floatingPosition（left/center/right）に対応。",
       "features": [
         "badge",
         "centerAction",
@@ -1757,6 +1757,7 @@
         "fixed-or-absolute",
         "maxWidth",
         "inverse-tone",
+        "floatingPosition",
         "native Expo Router tabBar adapter",
         "native hidden routes"
       ],
@@ -1769,6 +1770,7 @@
         "Use tone='inverse' over dark photo/video/gradient backgrounds.",
         "Use pillPosition='absolute' only inside controlled shells or Storybook demos; fixed is the app default.",
         "Set maxWidth to the mobile web shell width when the app is centered in a desktop viewport.",
+        "Use floatingPosition='left'|'right' (variant='pill' only) when a FAB is placed on the opposite side; default 'center' keeps the existing centered float.",
         "Native Expo Router / React Navigation consumers should use createExpoRouterTabBar instead of local floating tab bars."
       ]
     },
