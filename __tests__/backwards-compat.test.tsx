@@ -31,6 +31,7 @@ import {
   CollapsibleChipField,
   CountdownHero,
   DataTable,
+  DateField,
   DetailSheetHeader,
   DetailSheetScaffold,
   EmptyState,
@@ -730,5 +731,29 @@ describe("category-presets — backwards-compat", () => {
     expect(getCategoricalColor(1)).toBe("var(--Categorical-1)")
     expect(getCategoricalSubtle(7)).toBe("var(--Categorical-7-Subtle)")
     expect(getCategoricalBold(16)).toBe("var(--Categorical-16-Bold)")
+  })
+})
+
+describe("DateField — backwards-compat", () => {
+  it("未選択（value=\"\"）でレンダリング可能", () => {
+    const out = html(<DateField value="" onChange={() => undefined} placeholder="日付を選択" />)
+    expect(out).toContain('data-slot="date-field"')
+    expect(out).toContain("日付を選択")
+  })
+
+  it("value=\"YYYY-MM-DD\" を表示に反映する（ローカルタイムで解釈、TZずれなし）", () => {
+    const out = html(<DateField value="2026-12-25" onChange={() => undefined} />)
+    expect(out).toContain('data-slot="date-field"')
+    expect(out).toContain("2026/12/25")
+  })
+
+  it("disabled が DatePicker に伝播する", () => {
+    const out = html(<DateField value="" onChange={() => undefined} disabled />)
+    expect(out).toContain("disabled")
+  })
+
+  it("dateFormat が反映される", () => {
+    const out = html(<DateField value="2026-07-02" onChange={() => undefined} dateFormat="yyyy年MM月dd日" />)
+    expect(out).toContain("2026年07月02日")
   })
 })
