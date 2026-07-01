@@ -249,6 +249,20 @@ describe("ShareButtons / KebabMenu / Celebration — backwards-compat", () => {
     expect(out).toContain('data-slot="celebration"')
     expect(out).toContain("var(--Categorical-1-Bold)")
   })
+
+  it("Celebration: emojiAnimation が既定 pop のままレンダリング可能", () => {
+    const out = html(<Celebration trigger="emoji" emoji="🎉" title="ポップ" />)
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain("🎉")
+  })
+
+  it("Celebration: emojiAnimation=bounce で celebration-emoji-pop を適用してレンダリング可能", () => {
+    const out = html(
+      <Celebration trigger="emoji" emoji="🎊" emojiAnimation="bounce" title="弾む" />
+    )
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain("celebration-emoji-pop")
+  })
 })
 
 describe("CollapsibleChipField — backwards-compat", () => {
