@@ -328,3 +328,11 @@ export type { ReviewOverlayProps, ReviewPin } from "./components/patterns/review
 
 // ─── Utilities ───
 export { cn } from "./lib/utils"
+export {
+  weddingCategories,
+  projectCategories,
+  getCategoricalColor,
+  getCategoricalSubtle,
+  getCategoricalBold,
+} from "./lib/category-presets"
+export type { CategoryPresetItem } from "./lib/category-presets"

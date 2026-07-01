@@ -1,4 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { Chip } from "@/components/patterns/chip"
+import {
+  weddingCategories,
+  projectCategories,
+  getCategoricalColor,
+  getCategoricalSubtle,
+  getCategoricalBold,
+} from "@/lib/category-presets"
 
 const meta: Meta = {
   title: "Foundation/Categorical",
@@ -67,6 +75,81 @@ export const Scale: Story = {
           </div>
         ))}
       </div>
+    </div>
+  ),
+}
+
+// ─── Domain Presets: src/lib/category-presets.ts ─────────────────────────────
+
+export const DomainPresets: Story = {
+  name: "Domain Presets（wedding / project-management）",
+  render: () => (
+    <div className="flex flex-col gap-8 max-w-2xl">
+      <p className="typo-body-sm text-[var(--Text-Low-Emphasis)]">
+        <code className="font-mono">src/lib/category-presets.ts</code> のドメイン別プリセット。
+        各アイテムは <code className="font-mono">categoricalIndex</code>（1..16）を持ち、
+        <code className="font-mono">getCategoricalColor/-Subtle/-Bold</code> ヘルパーで
+        <code className="font-mono">--Categorical-N</code> トークンに解決する。
+      </p>
+
+      <section>
+        <h3 className="typo-heading-sm text-[var(--Text-High-Emphasis)] mb-3">
+          weddingCategories（belle-todo 移植、タイムライン順）
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {weddingCategories.map((c) => (
+            <Chip
+              key={c.key}
+              variant="filled"
+              style={{
+                background: getCategoricalSubtle(c.categoricalIndex),
+                color: getCategoricalBold(c.categoricalIndex),
+              }}
+            >
+              <span aria-hidden>{c.icon}</span>
+              {c.label}
+            </Chip>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h3 className="typo-heading-sm text-[var(--Text-High-Emphasis)] mb-3">
+          projectCategories（プロジェクト管理向け）
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {projectCategories.map((c) => (
+            <Chip
+              key={c.key}
+              variant="filled"
+              style={{
+                background: getCategoricalSubtle(c.categoricalIndex),
+                color: getCategoricalBold(c.categoricalIndex),
+              }}
+            >
+              <span aria-hidden>{c.icon}</span>
+              {c.label}
+            </Chip>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h3 className="typo-heading-sm text-[var(--Text-High-Emphasis)] mb-3">
+          カレンダー予定ドット（projectCategories, base）
+        </h3>
+        <div className="flex flex-wrap gap-x-4 gap-y-2">
+          {projectCategories.map((c) => (
+            <span key={c.key} className="inline-flex items-center gap-1.5 typo-body-sm text-[var(--Text-Medium-Emphasis)]">
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-full"
+                style={{ background: getCategoricalColor(c.categoricalIndex) }}
+              />
+              {c.icon} {c.label}
+            </span>
+          ))}
+        </div>
+      </section>
     </div>
   ),
 }
