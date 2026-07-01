@@ -17,6 +17,7 @@ interface BottomTabBarItem {
 
 type BottomTabBarTone = "default" | "inverse"
 type BottomTabBarKeyboardBehavior = "hide" | "lift" | "stay"
+type BottomTabBarFloatingPosition = "left" | "center" | "right"
 
 interface BottomTabBarAction extends BottomTabBarItem {
   badgeCount?: never
@@ -55,6 +56,13 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
    */
   pillPosition?: "fixed" | "absolute"
   /**
+   * pill variant の水平フロート位置（デフォルト "center"、variant="pill" 時のみ有効）。
+   * - "center" : 画面中央にフロート（従来どおりの挙動。後方互換）
+   * - "left"   : 画面左側にフロート。右側に併置する FAB 用のスペース（80px）を確保する
+   * - "right"  : 画面右側にフロート。左側に併置する FAB 用のスペース（80px）を確保する
+   */
+  floatingPosition?: BottomTabBarFloatingPosition
+  /**
    * ソフトキーボード表示中の挙動。
    * - "stay" : 従来通り下部に固定
    * - "hide" : 入力中は非表示
@@ -92,6 +100,7 @@ function BottomTabBar({
   maxWidth,
   variant = "default",
   pillPosition = "fixed",
+  floatingPosition = "center",
   keyboardBehavior = "stay",
   ...props
 }: BottomTabBarProps) {
@@ -107,6 +116,7 @@ function BottomTabBar({
         tone={tone}
         maxWidth={maxWidth}
         pillPosition={pillPosition}
+        floatingPosition={floatingPosition}
         keyboardState={keyboardState}
         {...props}
       />
@@ -163,6 +173,7 @@ function BottomTabBarPill({
   tone = "default",
   maxWidth = 430,
   pillPosition = "fixed",
+  floatingPosition = "center",
   keyboardState,
   style,
   ...props
@@ -172,9 +183,13 @@ function BottomTabBarPill({
   const splitIndex = centerAction ? Math.ceil(items.length / 2) : items.length
   const leadingItems = items.slice(0, splitIndex)
   const trailingItems = items.slice(splitIndex)
+  // left/right フロート時は反対側に併置される FAB のスペース（80px）を
+  // safe-area 込みで確保する（belle-todo `.floating-bottom` を参考）。
+  const isSideFloating = floatingPosition === "left" || floatingPosition === "right"
   const pillStyle = {
     "--ksk-bottom-tab-bar-keyboard-inset": `${keyboardState.liftInset}px`,
-    ...(hasProminentLayout ? { width: "calc(100vw - 24px)", maxWidth } : {}),
+    ...(hasProminentLayout && !isSideFloating ? { width: "calc(100vw - 24px)", maxWidth } : {}),
+    ...(isSideFloating ? { maxWidth: "calc(100vw - 92px)" } : {}),
     ...style,
   } as React.CSSProperties
 
@@ -191,7 +206,11 @@ function BottomTabBarPill({
         keyboardState.keyboardBehavior === "lift"
           ? "bottom-[calc(env(safe-area-inset-bottom)+12px+var(--ksk-bottom-tab-bar-keyboard-inset))]"
           : "bottom-[calc(env(safe-area-inset-bottom)+12px)]",
-        "left-1/2 -translate-x-1/2",
+        // 水平位置: center は従来どおり中央フロート。left/right は反対側に
+        // FAB スペース（80px）を確保して片側へ寄せる。
+        floatingPosition === "left" && "left-3 right-20",
+        floatingPosition === "right" && "right-3 left-20",
+        floatingPosition === "center" && "left-1/2 -translate-x-1/2",
         // ピル形状 + Liquid Glass
         "flex items-center rounded-full glass glass-specular",
         hasProminentLayout ? "min-h-[66px] gap-1 px-2 py-2" : "h-[58px] gap-0 px-3",
@@ -310,4 +329,10 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
 }
 
 export { BottomTabBar }
-export type { BottomTabBarAction, BottomTabBarItem, BottomTabBarKeyboardBehavior, BottomTabBarProps }
+export type {
+  BottomTabBarAction,
+  BottomTabBarFloatingPosition,
+  BottomTabBarItem,
+  BottomTabBarKeyboardBehavior,
+  BottomTabBarProps,
+}

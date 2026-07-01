@@ -501,6 +501,30 @@ describe("Mobile DS recipes — render contracts", () => {
     expect(out).toContain("--ksk-bottom-tab-bar-keyboard-inset:0px")
   })
 
+  it("BottomTabBar pill は floatingPosition 未指定で従来どおり中央フロートする（後方互換）", () => {
+    const out = html(
+      <BottomTabBar
+        variant="pill"
+        items={[{ label: "ホーム", icon: <span aria-hidden="true">H</span>, isActive: true }]}
+      />
+    )
+    expect(out).toContain("left-1/2")
+    expect(out).toContain("-translate-x-1/2")
+  })
+
+  it("BottomTabBar pill は floatingPosition='left' で左寄せ + FAB スペースを確保する", () => {
+    const out = html(
+      <BottomTabBar
+        variant="pill"
+        floatingPosition="left"
+        items={[{ label: "ホーム", icon: <span aria-hidden="true">H</span>, isActive: true }]}
+      />
+    )
+    expect(out).toContain("left-3")
+    expect(out).toContain("right-20")
+    expect(out).not.toContain("left-1/2")
+  })
+
   it("AutoGrowTextarea compact は density contract と min-height override を出す", () => {
     const out = html(
       <AutoGrowTextarea
