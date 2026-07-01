@@ -186,6 +186,7 @@ export {
   type QuickActionGridProps,
 } from "./QuickActionGrid"
 export { ChipSelector, type ChipSelectorProps, type ChipSelectorOption } from "./ChipSelector"
+export { CollapsibleChipField, type CollapsibleChipFieldProps } from "./CollapsibleChipField"
 export { CategoryNav, type CategoryNavProps, type CategoryNavItem } from "./CategoryNav"
 export { CategoryScroll, type CategoryScrollProps, type CategoryScrollItem } from "./CategoryScroll"
 export { ProgressSteps, type ProgressStepsProps, type StepItem } from "./ProgressSteps"

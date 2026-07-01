@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 57,
-      "patterns": 46,
+      "patterns": 47,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 125
+      "total": 126
     }
   },
   "ui": [
@@ -1189,6 +1189,22 @@
       "rules": [
         "Use multiple=false for single-select. Use max to limit selection count.",
         "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior."
+      ]
+    },
+    {
+      "name": "CollapsibleChipField",
+      "path": "src/components/patterns/collapsible-chip-field.tsx",
+      "description": "折りたたみ式の単一選択チップフィールド。未選択時は全選択肢を展開表示し、選択後は選択中の1チップのみに折りたたむ。再タップで解除（onClear）または再選択用に再展開する。belle-todo 移植（Issue #106）。ChipSelector（複数選択）とは別 API・別用途。",
+      "features": [
+        "single-select",
+        "collapse-on-select",
+        "always-expanded-mode",
+        "leading-icon-or-label"
+      ],
+      "rules": [
+        "ChipSelector（chip-selector.tsx）とは別コンポーネント。混同して置き換えない。",
+        "onClear 未指定時、選択済み chip の再タップは解除でなく再選択用の再展開のみ（required field 対応）。",
+        "label 指定時は幅 w-20 固定でフィールドリストの他行とラベル幅を揃える。"
       ]
     },
     {

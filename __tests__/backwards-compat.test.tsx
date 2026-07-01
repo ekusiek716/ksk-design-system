@@ -26,6 +26,7 @@ import {
   Card,
   Celebration,
   Chip,
+  CollapsibleChipField,
   DataTable,
   DetailSheetHeader,
   DetailSheetScaffold,
@@ -233,6 +234,59 @@ describe("ShareButtons / KebabMenu / Celebration — backwards-compat", () => {
     expect(out).toContain('data-slot="celebration"')
     expect(out).toContain("達成しました")
     expect(out).toContain("完了です")
+  })
+})
+
+describe("CollapsibleChipField — backwards-compat", () => {
+  type Category = "work" | "family" | "health"
+  const LABELS: Record<Category, string> = { work: "仕事", family: "家族", health: "健康" }
+
+  it("未選択時は全 chip が展開表示される", () => {
+    const out = html(
+      <CollapsibleChipField<Category>
+        label="カテゴリ"
+        options={["work", "family", "health"]}
+        selected=""
+        onSelect={() => undefined}
+        getLabel={(k) => LABELS[k]}
+      />
+    )
+    expect(out).toContain('data-slot="collapsible-chip-field"')
+    expect(out).toContain("仕事")
+    expect(out).toContain("家族")
+    expect(out).toContain("健康")
+  })
+
+  it("選択済みの場合は選択中の chip のみ表示される", () => {
+    const out = html(
+      <CollapsibleChipField<Category>
+        icon={<span aria-hidden="true">*</span>}
+        options={["work", "family", "health"]}
+        selected="family"
+        onSelect={() => undefined}
+        onClear={() => undefined}
+        getLabel={(k) => LABELS[k]}
+      />
+    )
+    expect(out).toContain("家族")
+    expect(out).not.toContain("仕事")
+    expect(out).not.toContain("健康")
+  })
+
+  it("alwaysExpanded 指定時は選択済みでも全 chip 表示される", () => {
+    const out = html(
+      <CollapsibleChipField<Category>
+        label="比較"
+        options={["work", "family", "health"]}
+        selected="work"
+        onSelect={() => undefined}
+        getLabel={(k) => LABELS[k]}
+        alwaysExpanded
+      />
+    )
+    expect(out).toContain("仕事")
+    expect(out).toContain("家族")
+    expect(out).toContain("健康")
   })
 })
 

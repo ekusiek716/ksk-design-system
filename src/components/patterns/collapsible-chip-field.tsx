@@ -1,0 +1,108 @@
+import * as React from "react"
+import { Chip } from "@/components/patterns/chip"
+
+interface CollapsibleChipFieldProps<K extends string> {
+  /** leading アイコン。label 未指定時に w-6 の枠内で表示 */
+  icon?: React.ReactNode
+  /**
+   * アイコン代わりにテキストラベルを表示。他のフィールド行と幅 w-20 を揃えて
+   * レイアウトを統一する用途。
+   */
+  label?: string
+  options: K[]
+  /** undefined / "" は未選択扱い（全 chip 展開） */
+  selected: K | undefined | ""
+  onSelect: (key: K) => void
+  /** 選択中の chip を再タップしたとき呼ぶ。指定がない場合は再選択用に展開のみ。 */
+  onClear?: () => void
+  getLabel: (key: K) => string
+  getIcon?: (key: K) => string
+  /** 候補数が少なく、選択後も比較対象を見せたいフィールド用。常に全展開。 */
+  alwaysExpanded?: boolean
+}
+
+/**
+ * CollapsibleChipField — 折りたたみ式選択フィールド。
+ *
+ * UX:
+ * - 未選択 → 全 chip をグレーで展開表示
+ * - 選択あり → 選択した 1 chip だけ表示（折りたたみ）
+ * - 選択中の chip を再タップ → 解除（onClear）して全展開に戻る。
+ *   onClear 未指定の場合は再選択用に展開のみ（required field 対応）
+ *
+ * leading（icon/label）は w-20 固定幅、行は min-h-[36px] で高さ固定。
+ * 内部で DS の Chip（selected/onClick 制御）を使用。
+ */
+function CollapsibleChipField<K extends string>({
+  icon,
+  label,
+  options,
+  selected,
+  onSelect,
+  onClear,
+  getLabel,
+  getIcon,
+  alwaysExpanded = false,
+}: CollapsibleChipFieldProps<K>) {
+  const hasSelection = selected !== undefined && selected !== null && selected !== ""
+  const [forcedExpand, setForcedExpand] = React.useState(false)
+  // selected が外部で変化したら強制展開フラグはリセット
+  React.useEffect(() => {
+    setForcedExpand(false)
+  }, [selected])
+  const expanded = alwaysExpanded || !hasSelection || forcedExpand
+  const visible = expanded ? options : options.filter((k) => k === selected)
+
+  // 「label は 1 行目の chip と縦センター」。展開して多数の chip が折り返しても
+  // label は最上行 chip と垂直中央が合うように、leading-[36px]（chip 行の
+  // min-h=36px）で label の line-height を行高に合わせ、親 flex は items-start にする。
+  const leading = label ? (
+    <span
+      className="typo-label-sm text-[var(--Text-Medium-Emphasis)] flex-shrink-0 w-20 whitespace-nowrap leading-[36px]"
+    >
+      {label}
+    </span>
+  ) : (
+    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center" style={{ height: 36 }}>
+      {icon}
+    </div>
+  )
+
+  return (
+    <div data-slot="collapsible-chip-field" className="flex items-start gap-4 py-3">
+      {leading}
+      <div className="flex gap-2 flex-1 flex-wrap min-h-[36px] items-center">
+        {visible.map((key) => (
+          <Chip
+            key={key}
+            size="md"
+            // 強制展開中は前回選択も含めて全部グレー（再選択モード感を出す）
+            selected={!forcedExpand && selected === key}
+            onClick={() => {
+              if (forcedExpand) {
+                // 展開中: タップした chip を選択して折りたたみ
+                onSelect(key)
+                setForcedExpand(false)
+              } else if (selected === key) {
+                // 折りたたみ中に選択 chip を再タップ:
+                // - clearable: 解除
+                // - 非 clearable: 強制展開（再選択モードへ）
+                if (onClear) onClear()
+                else setForcedExpand(true)
+              } else {
+                // 折りたたみ中だが visible は selected 1 件のみなので通常ここには来ない
+                onSelect(key)
+              }
+            }}
+          >
+            {getIcon ? `${getIcon(key)} ` : ""}
+            {getLabel(key)}
+          </Chip>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export { CollapsibleChipField }
+export type { CollapsibleChipFieldProps }
