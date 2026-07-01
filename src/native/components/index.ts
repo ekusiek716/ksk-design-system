@@ -197,6 +197,7 @@ export { ProgressSteps, type ProgressStepsProps, type StepItem } from "./Progres
 export { TagInput, type TagInputProps } from "./TagInput"
 export { ShareButtons, type ShareButtonsProps } from "./ShareButtons"
 export { FilterChip, type FilterChipProps } from "./FilterChip"
+export { PresenceIndicator, type PresenceIndicatorProps } from "./PresenceIndicator"
 export { ImageGallery, type ImageGalleryProps } from "./ImageGallery"
 export { SocialLoginButton, type SocialLoginButtonProps, type SocialProvider } from "./SocialLoginButton"
 export { SocialIcon, type SocialIconProps, type SocialIconBrand } from "./SocialIcon"

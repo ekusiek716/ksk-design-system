@@ -325,6 +325,8 @@ export { DropdownFilter } from "./components/ui/dropdown-filter"
 export type { DropdownFilterProps, DropdownFilterOption } from "./components/ui/dropdown-filter"
 export { FilterChip } from "./components/patterns/filter-chip"
 export type { FilterChipProps } from "./components/patterns/filter-chip"
+export { PresenceIndicator } from "./components/patterns/presence-indicator"
+export type { PresenceIndicatorProps } from "./components/patterns/presence-indicator"
 export { ReviewOverlay } from "./components/patterns/review-overlay"
 export type { ReviewOverlayProps, ReviewPin } from "./components/patterns/review-overlay"
 
