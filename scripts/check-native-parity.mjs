@@ -27,6 +27,7 @@ const INTENTIONAL_NATIVE_GAPS = new Map([
   ["HoverCard", "hover interaction is Web-only"],
   ["ImageUploader", "admin image uploader is Web-only; native uses CompactFilePicker/ImageAttachmentPicker adapters"],
   ["KebabMenu", "admin action menu is Web-only; native uses MenuDrawer/DropdownMenu patterns"],
+  ["MobileTabBar", "web-only BottomTabBar wrapper; native uses LiquidBottomTabBar / createExpoRouterTabBar instead"],
   ["NotificationList", "admin notification list is Web-only"],
   ["SearchPanel", "admin search panel is Web-only"],
   ["StatusTabs", "admin status tabs are Web-only"],

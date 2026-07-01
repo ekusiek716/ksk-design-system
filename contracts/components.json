@@ -6,10 +6,10 @@
     "counts": {
       "ui": 57,
       "patterns": 50,
-      "commerce": 11,
+      "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 129
+      "total": 130
     }
   },
   "ui": [
@@ -1772,6 +1772,23 @@
         "Set maxWidth to the mobile web shell width when the app is centered in a desktop viewport.",
         "Use floatingPosition='left'|'right' (variant='pill' only) when a FAB is placed on the opposite side; default 'center' keeps the existing centered float.",
         "Native Expo Router / React Navigation consumers should use createExpoRouterTabBar instead of local floating tab bars."
+      ]
+    },
+    {
+      "name": "MobileTabBar",
+      "path": "src/components/patterns/commerce/mobile-tab-bar.tsx",
+      "description": "BottomTabBar の consumer-friendly ラッパー。tabs/activeTab/onSelect のジェネリック API から iconsax Linear/Bulk アイコンの自動切替・pill navigation・addAction 中央 CTA を組み立てる。belle-todo の MobileTabBar を移植。",
+      "features": [
+        "generic tab key",
+        "iconsax Linear/Bulk auto-switch",
+        "addAction center CTA",
+        "pointer capture blur",
+        "floatingPosition passthrough"
+      ],
+      "rules": [
+        "tabs は BottomTabBarItem を手組みせず MobileTabItem<T>[]（key/label/Icon）で渡す",
+        "addAction 指定時はブランド色丸背景 + Add アイコンが自動で centerAction になる",
+        "floatingPosition='left'|'right' を使う場合は FAB を反対側に併置する"
       ]
     },
     {

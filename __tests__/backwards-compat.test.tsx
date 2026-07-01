@@ -38,6 +38,7 @@ import {
   KeyboardAwareSheetFooter,
   MobileAppHeader,
   MobileFloatingActionButton,
+  MobileTabBar,
   MultiSelect,
   ShareButtons,
   StatusActionBadge,
@@ -523,6 +524,40 @@ describe("Mobile DS recipes — render contracts", () => {
     expect(out).toContain("left-3")
     expect(out).toContain("right-20")
     expect(out).not.toContain("left-1/2")
+  })
+
+  it("MobileTabBar は tabs/activeTab から BottomTabBar pill をレンダリングする", () => {
+    const DummyIcon = ({ size }: { size?: number; variant?: string; color?: string }) => (
+      <span aria-hidden="true" style={{ width: size, height: size }} />
+    )
+    const out = html(
+      <MobileTabBar
+        tabs={[
+          { key: "home", label: "ホーム", Icon: DummyIcon },
+          { key: "settings", label: "設定", Icon: DummyIcon },
+        ]}
+        activeTab="home"
+        onSelect={() => undefined}
+      />
+    )
+    expect(out).toContain('data-slot="bottom-nav-pill"')
+    expect(out).toContain("ホーム")
+    expect(out).toContain("設定")
+  })
+
+  it("MobileTabBar は addAction 指定時に中央 CTA を描画する", () => {
+    const DummyIcon = ({ size }: { size?: number; variant?: string; color?: string }) => (
+      <span aria-hidden="true" style={{ width: size, height: size }} />
+    )
+    const out = html(
+      <MobileTabBar
+        tabs={[{ key: "home", label: "ホーム", Icon: DummyIcon }]}
+        activeTab="home"
+        onSelect={() => undefined}
+        addAction={{ label: "作成", onClick: () => undefined }}
+      />
+    )
+    expect(out).toContain("data-global-nav-add-icon")
   })
 
   it("AutoGrowTextarea compact は density contract と min-height override を出す", () => {
