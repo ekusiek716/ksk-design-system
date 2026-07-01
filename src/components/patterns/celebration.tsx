@@ -16,6 +16,22 @@ interface CelebrationProps extends React.ComponentProps<"div"> {
   cardless?: boolean
   particleCount?: number
   durationMs?: number
+  /**
+   * confetti 1 粒あたりの落下アニメーション時間（ms）。未指定時は
+   * durationMs（autoDismissMs 優先）から算出される既存挙動を維持する。
+   * 指定時はその値を基準にばらつき（0.78〜1.22倍）をかける。
+   */
+  duration?: number
+  /**
+   * confetti カラーパレット。CSS 変数文字列（"var(--...)"）推奨。
+   * 未指定時は既定の DS セマンティックカラー 5 色を使用（後方互換）。
+   */
+  colors?: string[]
+  /**
+   * confetti の左右ドリフト幅（px）。粒ごとに ±driftRange/2 の範囲でランダム化。
+   * 未指定時は既定の 160px を維持する。
+   */
+  driftRange?: number
   autoDismissMs?: number
   onTapDismiss?: () => void
   onDone?: () => void
@@ -61,6 +77,9 @@ function Celebration({
   cardless = false,
   particleCount = 36,
   durationMs = 2600,
+  duration,
+  colors,
+  driftRange = 160,
   autoDismissMs,
   onTapDismiss,
   onDone,
@@ -69,18 +88,20 @@ function Celebration({
 }: CelebrationProps) {
   const reducedMotion = usePrefersReducedMotion()
   const resolvedDurationMs = autoDismissMs ?? durationMs
+  const particleDurationBase = duration ?? resolvedDurationMs
+  const palette = colors && colors.length > 0 ? colors : CONFETTI_COLORS
   const particles = React.useMemo(
     () => Array.from({ length: particleCount }, (_, index) => ({
       id: index,
       left: Math.round(seededRatio(index + 1) * 100),
       delay: Math.round(seededRatio(index + 11) * 420),
-      duration: Math.round(resolvedDurationMs * (0.78 + seededRatio(index + 21) * 0.44)),
-      drift: Math.round((seededRatio(index + 31) - 0.5) * 160),
+      duration: Math.round(particleDurationBase * (0.78 + seededRatio(index + 21) * 0.44)),
+      drift: Math.round((seededRatio(index + 31) - 0.5) * driftRange),
       rotate: Math.round(seededRatio(index + 41) * 720),
       size: 6 + Math.round(seededRatio(index + 51) * 6),
-      color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
+      color: palette[index % palette.length],
     })),
-    [particleCount, resolvedDurationMs],
+    [particleCount, particleDurationBase, driftRange, palette],
   )
 
   React.useEffect(() => {

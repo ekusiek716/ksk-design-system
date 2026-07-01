@@ -236,6 +236,19 @@ describe("ShareButtons / KebabMenu / Celebration — backwards-compat", () => {
     expect(out).toContain("達成しました")
     expect(out).toContain("完了です")
   })
+
+  it("Celebration: duration / colors / driftRange 指定でも既存デフォルト挙動を壊さずレンダリング可能", () => {
+    const out = html(
+      <Celebration
+        title="カスタム confetti"
+        duration={1200}
+        driftRange={40}
+        colors={["var(--Categorical-1-Bold)", "var(--Categorical-5-Bold)"]}
+      />
+    )
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain("var(--Categorical-1-Bold)")
+  })
 })
 
 describe("CollapsibleChipField — backwards-compat", () => {

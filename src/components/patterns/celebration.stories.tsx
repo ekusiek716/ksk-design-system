@@ -67,6 +67,24 @@ export const WithActions: Story = {
   },
 }
 
+export const CustomConfetti: Story = {
+  name: "Custom Duration / Colors / DriftRange",
+  args: {
+    active: true,
+    trigger: "confetti",
+    title: "カスタム confetti",
+    description: "duration / colors / driftRange を指定した例。",
+    duration: 1400,
+    driftRange: 40,
+    colors: [
+      "var(--Categorical-1-Bold)",
+      "var(--Categorical-5-Bold)",
+      "var(--Categorical-9-Bold)",
+      "var(--Categorical-13-Bold)",
+    ],
+  },
+}
+
 export const CardlessTapDismiss: Story = {
   name: "Cardless / Tap Dismiss",
   render: function CardlessTapDismissStory() {
