@@ -25,9 +25,11 @@ import {
   BottomTabBar,
   Card,
   Celebration,
+  CelebrationDialog,
   Chip,
   ChipFilterBar,
   CollapsibleChipField,
+  CountdownHero,
   DataTable,
   DetailSheetHeader,
   DetailSheetScaffold,
@@ -546,6 +548,65 @@ describe("Mobile DS recipes — render contracts", () => {
     expect(toast.saveComplete()).toBe("")
     expect(toast.retryStarted()).toBe("")
     expect(toast.retryFailed()).toBe("")
+  })
+})
+
+describe("CelebrationDialog — backwards-compat", () => {
+  it("open=false では SSR エラーなくレンダリング可能（Dialog 非表示状態）", () => {
+    const out = html(
+      <CelebrationDialog
+        open={false}
+        onOpenChange={() => undefined}
+        emoji="🎉"
+        title="達成しました"
+        description="お疲れさまでした"
+      />
+    )
+    expect(typeof out).toBe("string")
+  })
+
+  it("open=true で Celebration confetti オーバーレイがレンダリングされる（DialogContent は Radix Portal のため SSR 出力対象外）", () => {
+    const out = html(
+      <CelebrationDialog
+        open
+        onOpenChange={() => undefined}
+        emoji="🎊"
+        emojiAnimation="bounce"
+        title="全タスク完了！"
+        description="次の目標に進みましょう"
+        actions={<button type="button">閉じる</button>}
+      />
+    )
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain('data-trigger="confetti"')
+  })
+})
+
+describe("CountdownHero — backwards-compat", () => {
+  it("Date targetDate でレンダリング可能", () => {
+    const future = new Date()
+    future.setDate(future.getDate() + 42)
+    const out = html(<CountdownHero targetDate={future} />)
+    expect(out).toContain('data-slot="countdown-hero"')
+    expect(out).toContain("42")
+  })
+
+  it("ISO 文字列 targetDate でもレンダリング可能", () => {
+    const out = html(<CountdownHero targetDate="2099-12-31" label="年内残り" />)
+    expect(out).toContain('data-slot="countdown-hero"')
+    expect(out).toContain("年内残り")
+  })
+
+  it("illustration スロットを描画できる", () => {
+    const future = new Date()
+    future.setDate(future.getDate() + 10)
+    const out = html(
+      <CountdownHero
+        targetDate={future}
+        illustration={<span data-testid="illustration-slot">🖼️</span>}
+      />
+    )
+    expect(out).toContain("illustration-slot")
   })
 })
 

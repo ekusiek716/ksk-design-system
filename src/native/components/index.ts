@@ -40,6 +40,8 @@ export {
   type CelebrationTrigger,
   type CelebrationPlacement,
 } from "./Celebration"
+export { CelebrationDialog, type CelebrationDialogProps } from "./CelebrationDialog"
+export { CountdownHero, type CountdownHeroProps } from "./CountdownHero"
 
 // Phase 2: Basic Form
 export { Label, type LabelProps } from "./Label"
