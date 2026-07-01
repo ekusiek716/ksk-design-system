@@ -26,6 +26,7 @@ import {
   Card,
   Celebration,
   Chip,
+  ChipFilterBar,
   CollapsibleChipField,
   DataTable,
   DetailSheetHeader,
@@ -287,6 +288,49 @@ describe("CollapsibleChipField — backwards-compat", () => {
     expect(out).toContain("仕事")
     expect(out).toContain("家族")
     expect(out).toContain("健康")
+  })
+})
+
+describe("ChipFilterBar — backwards-compat", () => {
+  it("children と結果件数（デフォルトラベル）がレンダリング可能", () => {
+    const out = html(
+      <ChipFilterBar resultCount={42}>
+        <Chip>すべて</Chip>
+      </ChipFilterBar>
+    )
+    expect(out).toContain('data-slot="chip-filter-bar"')
+    expect(out).toContain("すべて")
+    expect(out).toContain("42件")
+  })
+
+  it("resultCountLabel でカスタム件数表示に差し替えられる", () => {
+    const out = html(
+      <ChipFilterBar resultCount={7} resultCountLabel={(n) => `${n} results`}>
+        <Chip>フィルタ</Chip>
+      </ChipFilterBar>
+    )
+    expect(out).toContain("7 results")
+    expect(out).not.toContain("7件")
+  })
+
+  it("sticky + stickyOffset が top インラインスタイルに反映される", () => {
+    const out = html(
+      <ChipFilterBar sticky stickyOffset={56}>
+        <Chip>絞り込み</Chip>
+      </ChipFilterBar>
+    )
+    expect(out).toContain("sticky")
+    expect(out).toContain("top:56px")
+  })
+
+  it("bare=true では children のみレンダリングされる（ラッパーなし）", () => {
+    const out = html(
+      <ChipFilterBar bare>
+        <Chip>bare</Chip>
+      </ChipFilterBar>
+    )
+    expect(out).not.toContain('data-slot="chip-filter-bar"')
+    expect(out).toContain("bare")
   })
 })
 
