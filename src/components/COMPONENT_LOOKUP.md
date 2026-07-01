@@ -98,6 +98,7 @@
 | BottomSheetFrame | `@/components/patterns/bottom-sheet-frame` | — | MobileFull, MobileForm, DesktopFloating |
 | CategoryNav | `@/components/patterns/category-nav` | — | Default, WithSelection |
 | CategoryScroll | `@/components/patterns/category-scroll` | — | Default, CircleShape, GridLayout |
+| CelebrationDialog | `@/components/patterns/celebration-dialog` | — | Basic, Bounce Emoji / Auto Dismiss, Custom Confetti Colors |
 | Celebration | `@/components/patterns/celebration` | — | Confetti, InlineEmoji, Actions Slot / Interactive, Custom Duration / Colors / DriftRange, Emoji Animation: Bounce, Cardless / Tap Dismiss |
 | ChipFilterBar | `@/components/patterns/chip-filter-bar` | — | Default, CustomResultCountLabel, Sticky, Bare |
 | ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, WithMax |
@@ -107,6 +108,7 @@
 | CompactFilePicker, ImageAttachmentPicker | `@/components/patterns/compact-file-picker` | — | SingleImageReplacement, MultiImageAttachments, ListPreview |
 | ConfirmDialog | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading |
 | CookieConsent | `@/components/patterns/cookie-consent` | — | — |
+| CountdownHero | `@/components/patterns/countdown-hero` | — | Upcoming, Today, Past, With Illustration Slot, ISO String targetDate |
 | DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
 | ErrorState | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry |

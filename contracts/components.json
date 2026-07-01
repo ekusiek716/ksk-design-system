@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 57,
-      "patterns": 48,
+      "patterns": 50,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 127
+      "total": 129
     }
   },
   "ui": [
@@ -1226,6 +1226,46 @@
         "sticky 時の top オフセットは stickyOffset prop で指定する（固定ヘッダー高さの相殺用）。",
         "resultCountLabel 未指定時は \"{n}件\" を表示。i18n が必要な場合は関数 props で差し替える。",
         "bare=true 時は overflow/padding ラッパーを付けない。外側スクロールコンテナと共有する場合に使う。"
+      ]
+    },
+    {
+      "name": "CelebrationDialog",
+      "path": "src/components/patterns/celebration-dialog.tsx",
+      "description": "達成演出用の Dialog + Celebration confetti + emoji/title/description/actions スロット合成パターン。belle-todo の MilestoneCelebration を参考に、MILESTONES 定義・アップセル CTA・store・i18n・analytics は持ち込まずスロット化（Issue #110）。",
+      "features": [
+        "dialog-based",
+        "confetti-overlay",
+        "emoji-slot",
+        "actions-slot",
+        "auto-dismiss",
+        "emoji-animation-pop-or-bounce",
+        "confetti-props-passthrough"
+      ],
+      "accessibility": [
+        "DS Dialog（Radix）ベースのため Esc / overlay クリックで閉じる",
+        "prefers-reduced-motion で confetti・emoji bounce を抑制"
+      ],
+      "rules": [
+        "MILESTONES 定義・アップセル文言・分析トラッキングは呼び出し側で actions スロットに組み込む。コンポーネント内部に業務ロジックを持たせない。",
+        "autoDismissMs 指定時は経過後に onOpenChange(false) を呼ぶだけで、closeロジック自体は呼び出し側に委譲する。",
+        "confetti 系 props（particleCount/duration/colors/driftRange）は Celebration へそのままパススルー。"
+      ]
+    },
+    {
+      "name": "CountdownHero",
+      "path": "src/components/patterns/countdown-hero.tsx",
+      "description": "装飾的な serif 数字で目標日までの残日数を表示するヒーロー表示。belle-todo の CountdownSection を参考に、日付編集フォーム・wedding イラスト・i18n・store は持ち込まず表示専用に再設計（Issue #110）。",
+      "features": [
+        "large-serif-number",
+        "today-past-active-states",
+        "illustration-slot",
+        "iso-string-or-date-target"
+      ],
+      "rules": [
+        "既存の CountdownTimer（残日数ピル表示）とは別コンポーネント。装飾ヒーロー表示専用で置き換えない。",
+        "日付編集フォームは持ち込まない。表示専用コンポーネント。",
+        "illustration スロットに wedding 画像等のドメイン固有アセットを直接埋め込まない。呼び出し側が用意する。",
+        "serif フォントは --font-display-serif トークン未定義環境向けに Georgia / Noto Serif JP / serif へフォールバックする。"
       ]
     },
     {

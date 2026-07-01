@@ -56,7 +56,7 @@ function seededRatio(seed: number) {
   return x - Math.floor(x)
 }
 
-function usePrefersReducedMotion() {
+export function usePrefersReducedMotion() {
   const [reduced, setReduced] = React.useState(false)
 
   React.useEffect(() => {
