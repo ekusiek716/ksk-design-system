@@ -44,8 +44,13 @@ import {
   StatusActionBadge,
   SubNav,
   toast,
+  weddingCategories,
+  projectCategories,
+  getCategoricalColor,
+  getCategoricalSubtle,
+  getCategoricalBold,
 } from "../src/index"
-import type { DataTableColumn } from "../src/index"
+import type { DataTableColumn, CategoryPresetItem } from "../src/index"
 
 const html = (el: React.ReactElement) => renderToStaticMarkup(el)
 
@@ -678,5 +683,52 @@ describe("Badge / Card — data-variant 出力", () => {
   it("Card に data-variant", () => {
     expect(html(<Card variant="media">x</Card>)).toContain('data-variant="media"')
     expect(html(<Card>x</Card>)).toContain('data-variant="default"')
+  })
+})
+
+describe("category-presets — backwards-compat", () => {
+  const allItems: CategoryPresetItem[] = [...weddingCategories, ...projectCategories]
+
+  it("weddingCategories は19要素", () => {
+    expect(weddingCategories).toHaveLength(19)
+  })
+
+  it("projectCategories は8要素", () => {
+    expect(projectCategories).toHaveLength(8)
+  })
+
+  it("各アイテムの categoricalIndex が 1..16 に収まる", () => {
+    for (const item of allItems) {
+      expect(item.categoricalIndex).toBeGreaterThanOrEqual(1)
+      expect(item.categoricalIndex).toBeLessThanOrEqual(16)
+      expect(Number.isInteger(item.categoricalIndex)).toBe(true)
+    }
+  })
+
+  it("各アイテムが key/label/icon を持つ", () => {
+    for (const item of allItems) {
+      expect(typeof item.key).toBe("string")
+      expect(item.key.length).toBeGreaterThan(0)
+      expect(typeof item.label).toBe("string")
+      expect(item.label.length).toBeGreaterThan(0)
+      expect(typeof item.icon).toBe("string")
+      expect(item.icon.length).toBeGreaterThan(0)
+    }
+  })
+
+  it("weddingCategories 内で key が一意", () => {
+    const keys = weddingCategories.map((c) => c.key)
+    expect(new Set(keys).size).toBe(keys.length)
+  })
+
+  it("projectCategories 内で key が一意", () => {
+    const keys = projectCategories.map((c) => c.key)
+    expect(new Set(keys).size).toBe(keys.length)
+  })
+
+  it("getCategoricalColor/-Subtle/-Bold が CSS var 文字列を返す", () => {
+    expect(getCategoricalColor(1)).toBe("var(--Categorical-1)")
+    expect(getCategoricalSubtle(7)).toBe("var(--Categorical-7-Subtle)")
+    expect(getCategoricalBold(16)).toBe("var(--Categorical-16-Bold)")
   })
 })
