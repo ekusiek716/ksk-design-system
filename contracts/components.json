@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 57,
-      "patterns": 47,
+      "patterns": 48,
       "commerce": 11,
       "admin": 8,
       "shells": 3,
-      "total": 126
+      "total": 127
     }
   },
   "ui": [
@@ -1205,6 +1205,23 @@
         "ChipSelector（chip-selector.tsx）とは別コンポーネント。混同して置き換えない。",
         "onClear 未指定時、選択済み chip の再タップは解除でなく再選択用の再展開のみ（required field 対応）。",
         "label 指定時は幅 w-20 固定でフィールドリストの他行とラベル幅を揃える。"
+      ]
+    },
+    {
+      "name": "ChipFilterBar",
+      "path": "src/components/patterns/chip-filter-bar.tsx",
+      "description": "Chip を横スクロール表示するフィルターバーパターン。sticky モード・結果件数表示・bare（ラッパーなし）モードを持つ。belle-todo 移植（Issue #104）。",
+      "features": [
+        "horizontal-scroll",
+        "sticky-mode",
+        "result-count",
+        "bare-mode"
+      ],
+      "rules": [
+        "commerce/FilterBar（filters/sortOptions 統合型）とは別コンポーネント。children に任意の Chip 群を渡すシンプルなラッパー。",
+        "sticky 時の top オフセットは stickyOffset prop で指定する（固定ヘッダー高さの相殺用）。",
+        "resultCountLabel 未指定時は \"{n}件\" を表示。i18n が必要な場合は関数 props で差し替える。",
+        "bare=true 時は overflow/padding ラッパーを付けない。外側スクロールコンテナと共有する場合に使う。"
       ]
     },
     {
