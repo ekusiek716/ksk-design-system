@@ -3,6 +3,7 @@
  * @description Button variants and sizes.
  */
 import type { Meta, StoryObj } from "@storybook/react"
+import { Add } from "iconsax-reactjs"
 import { Button } from "./button"
 
 const meta: Meta<typeof Button> = {
@@ -21,6 +22,7 @@ const meta: Meta<typeof Button> = {
         "link",
         "glass",
         "glass-inverse",
+        "glass-accent",
         "accent",
         "inverse",
         "ghost-inverse",
@@ -220,6 +222,24 @@ export const GlassInverseOnDark: Story = {
         <Button variant="glass-inverse" size="lg">今すぐ始める</Button>
         <Button variant="glass-inverse" size="icon-xl" aria-label="シェア"><ShareIcon /></Button>
       </div>
+    </div>
+  ),
+}
+
+export const GlassAccentFab: Story = {
+  name: "Glass Accent — FAB (Floating Action Button)",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div
+      className="relative flex min-h-screen items-center justify-center overflow-hidden p-8"
+      style={{ background: "linear-gradient(160deg, #dbeafe 0%, #93c5fd 60%, #3b82f6 100%)" }}
+    >
+      <p className="absolute top-8 left-1/2 -translate-x-1/2 text-[var(--Text-High-Emphasis)] typo-label-sm opacity-70">
+        variant="glass-accent" — ブランドカラーをティントした glass。FAB 等の主要アクションに
+      </p>
+      <Button variant="glass-accent" size="icon-xl" aria-label="新規作成" className="size-16">
+        <Add size={28} variant="Linear" color="currentColor" />
+      </Button>
     </div>
   ),
 }

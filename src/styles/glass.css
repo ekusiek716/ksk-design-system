@@ -213,19 +213,30 @@
  * .glass-accent
  * ブランドカラーを帯びたガラス素材。FAB・主要アクションのフローティング要素に。
  * --Brand-Primary を低透明度で重ねることで、テーマカラーに追従する。
+ * box-shadow は「上端の強いハイライト + 下端の内部影 + ブランド色の内側グロー」の
+ * 3層 inset で立体感を強め、通常の .glass より一段目立つ主要アクション用の質感にする
+ * （FAB 用途の belle-todo `.glass-fab` チューニングを踏襲）。
  */
 .glass-accent {
   background: color-mix(in srgb, var(--Brand-Primary) 15%, rgba(255, 255, 255, 0.12));
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   border: 0.5px solid color-mix(in srgb, var(--Brand-Primary) 30%, rgba(255, 255, 255, 0.30));
-  box-shadow: var(--glass-highlight), var(--glass-shadow),
-              inset 0 0 0 0.5px color-mix(in srgb, var(--Brand-Primary) 20%, transparent);
+  box-shadow:
+    inset 0 2px 1px -1px rgba(255, 255, 255, 0.90),
+    inset 0 -10px 14px -10px rgba(0, 0, 0, 0.40),
+    inset 0 0 20px 0 color-mix(in srgb, var(--Brand-Primary) 20%, transparent),
+    var(--glass-shadow);
 }
 
 .dark .glass-accent {
   background: color-mix(in srgb, var(--Brand-Primary) 20%, rgba(20, 20, 30, 0.40));
   border: 0.5px solid color-mix(in srgb, var(--Brand-Primary) 25%, rgba(255, 255, 255, 0.15));
+  box-shadow:
+    inset 0 2px 1px -1px rgba(255, 255, 255, 0.25),
+    inset 0 -10px 14px -10px rgba(0, 0, 0, 0.55),
+    inset 0 0 20px 0 color-mix(in srgb, var(--Brand-Primary) 25%, transparent),
+    var(--glass-shadow);
 }
 
 /* ─── Specular + rim layer (::before / ::after) ─── */
