@@ -42,6 +42,12 @@ export interface CelebrationProps {
    * 未指定時は既定の 160px を維持する。
    */
   driftRange?: number
+  /**
+   * emoji 表示アニメーション。
+   * - "pop"（既定）: 既存のフェード＋スケールイン（opacity/pop の Animated.spring）のみ
+   * - "bounce": emoji のみに弾むイージング（0→1.4→0.9→1 のスケール）を追加で適用
+   */
+  emojiAnimation?: "pop" | "bounce"
   autoDismissMs?: number
   onTapDismiss?: () => void
   onDone?: () => void
@@ -85,6 +91,7 @@ function Celebration({
   duration,
   colors,
   driftRange = 160,
+  emojiAnimation = "pop",
   autoDismissMs,
   onTapDismiss,
   onDone,
@@ -102,6 +109,7 @@ function Celebration({
   const overlay = placement === "overlay"
   const pop = useAnimatedValue(0.94)
   const opacity = useAnimatedValue(0)
+  const emojiScale = useAnimatedValue(0)
 
   const particles = useMemo(
     () =>
@@ -137,6 +145,36 @@ function Celebration({
       }),
     ]).start()
   }, [active, opacity, pop])
+
+  useEffect(() => {
+    if (!active || emojiAnimation !== "bounce") return
+    emojiScale.setValue(0)
+    // belle-todo の milestone-emoji keyframe（0%→0, 50%→1.4, 70%→0.9, 100%→1、
+    // 600ms ease-out, 200ms delay）を Animated.sequence で再現。
+    const animation = Animated.sequence([
+      Animated.delay(200),
+      Animated.timing(emojiScale, {
+        toValue: 1.4,
+        duration: 300,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(emojiScale, {
+        toValue: 0.9,
+        duration: 120,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(emojiScale, {
+        toValue: 1,
+        duration: 180,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ])
+    animation.start()
+    return () => animation.stop()
+  }, [active, emojiAnimation, emojiScale])
 
   useEffect(() => {
     if (!active || !onDone) return
@@ -228,9 +266,15 @@ function Celebration({
             ]}
           >
             {emoji && (
-              <RNText style={[resolveTypo("display.lg"), { marginBottom: scales.spacing.scale[3] }]}>
+              <Animated.Text
+                style={[
+                  resolveTypo("display.lg"),
+                  { marginBottom: scales.spacing.scale[3] },
+                  emojiAnimation === "bounce" ? { transform: [{ scale: emojiScale }] } : null,
+                ]}
+              >
                 {emoji}
-              </RNText>
+              </Animated.Text>
             )}
             {title && (
               <RNText

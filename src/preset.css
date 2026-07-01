@@ -143,6 +143,12 @@
   from { opacity: 0; transform: translateY(8px) scale(0.94); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+@keyframes celebration-emoji-pop {
+  0%   { transform: scale(0); }
+  50%  { transform: scale(1.4); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
 
 @theme inline {
   --animate-slide-in-right: slide-in-right 200ms ease-out;

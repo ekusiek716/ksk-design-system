@@ -1071,12 +1071,13 @@
         "duration-control",
         "custom-duration",
         "custom-colors",
-        "custom-drift-range"
+        "custom-drift-range",
+        "emoji-animation-pop-or-bounce"
       ],
       "accessibility": [
         "role=status",
         "aria-live=polite",
-        "prefers-reduced-motion で confetti を抑制"
+        "prefers-reduced-motion で confetti を抑制（emojiAnimation=bounce も含む）"
       ],
       "rules": [
         "一時的な達成演出に使用",

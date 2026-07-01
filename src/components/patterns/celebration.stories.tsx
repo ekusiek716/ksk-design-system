@@ -85,6 +85,24 @@ export const CustomConfetti: Story = {
   },
 }
 
+export const BounceEmoji: Story = {
+  name: "Emoji Animation: Bounce",
+  args: {
+    active: true,
+    trigger: "emoji",
+    placement: "inline",
+    emoji: "🎊",
+    emojiAnimation: "bounce",
+    title: "マイルストーン達成！",
+    description: "emoji に弾むイージングを適用した例。",
+  },
+  render: (args) => (
+    <div className="flex min-h-screen items-center justify-center bg-[var(--Surface-Secondary)] p-8">
+      <Celebration {...args} />
+    </div>
+  ),
+}
+
 export const CardlessTapDismiss: Story = {
   name: "Cardless / Tap Dismiss",
   render: function CardlessTapDismissStory() {

@@ -32,6 +32,12 @@ interface CelebrationProps extends React.ComponentProps<"div"> {
    * 未指定時は既定の 160px を維持する。
    */
   driftRange?: number
+  /**
+   * emoji 表示アニメーション。
+   * - "pop"（既定）: 既存の celebration-pop と同時にフェード＋スケールインする控えめな挙動
+   * - "bounce": emoji のみに弾むイージング（0→1.4→0.9→1 のスケール）を追加で適用
+   */
+  emojiAnimation?: "pop" | "bounce"
   autoDismissMs?: number
   onTapDismiss?: () => void
   onDone?: () => void
@@ -80,6 +86,7 @@ function Celebration({
   duration,
   colors,
   driftRange = 160,
+  emojiAnimation = "pop",
   autoDismissMs,
   onTapDismiss,
   onDone,
@@ -181,7 +188,15 @@ function Celebration({
           )}
         >
           {emoji && (
-            <span className="typo-display-lg mb-3 leading-none" aria-hidden="true">
+            <span
+              className={cn(
+                "typo-display-lg mb-3 leading-none",
+                !reducedMotion &&
+                  emojiAnimation === "bounce" &&
+                  "animate-[celebration-emoji-pop_600ms_ease-out_200ms_both]",
+              )}
+              aria-hidden="true"
+            >
               {emoji}
             </span>
           )}
