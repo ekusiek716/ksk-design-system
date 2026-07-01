@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 58,
-      "patterns": 50,
+      "patterns": 51,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 131
+      "total": 132
     }
   },
   "ui": [
@@ -1547,6 +1547,21 @@
       "accessibility": [],
       "rules": [
         "isActive 切替時に key を変えて Chip を強制再マウント (selected キャッシュ残り防止)"
+      ]
+    },
+    {
+      "name": "PresenceIndicator",
+      "path": "src/components/patterns/presence-indicator.tsx",
+      "description": "「誰か（何か）が今いる/見ている」ことを示す汎用インジケーター。Avatar（イニシャル）+ 右下ステータスドット + statusText + Badge（badgeLabel 指定時）。realtime 取得ロジックや i18n は持ち込まず表示専用。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "role=\"status\" + aria-label で name/statusText を読み上げ",
+        "ステータスドットは aria-hidden（色だけに依存させない）"
+      ],
+      "rules": [
+        "online=false は中立色（--Object-Low-Emphasis）、online=true（既定）は --Object-Success",
+        "レスポンシブ非表示は呼び出し側の責務（className でユーティリティを渡す）"
       ]
     },
     {

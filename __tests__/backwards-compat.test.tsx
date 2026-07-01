@@ -41,6 +41,7 @@ import {
   MobileFloatingActionButton,
   MobileTabBar,
   MultiSelect,
+  PresenceIndicator,
   ShareButtons,
   StatusActionBadge,
   SubNav,
@@ -755,5 +756,36 @@ describe("DateField — backwards-compat", () => {
   it("dateFormat が反映される", () => {
     const out = html(<DateField value="2026-07-02" onChange={() => undefined} dateFormat="yyyy年MM月dd日" />)
     expect(out).toContain("2026年07月02日")
+  })
+})
+
+describe("PresenceIndicator — backwards-compat", () => {
+  it("name のみでレンダリング可能（statusText/badgeLabel は任意）", () => {
+    const out = html(<PresenceIndicator name="田中" />)
+    expect(out).toContain('data-slot="presence-indicator"')
+    expect(out).toContain("田")
+  })
+
+  it("statusText と badgeLabel を表示する", () => {
+    const out = html(<PresenceIndicator name="佐藤" statusText="編集中" badgeLabel="オンライン" />)
+    expect(out).toContain("編集中")
+    expect(out).toContain("オンライン")
+    expect(out).toContain('data-variant="success"')
+  })
+
+  it("online=false で中立色ドットになる（--Object-Success を含まない）", () => {
+    const out = html(<PresenceIndicator name="鈴木" online={false} />)
+    expect(out).not.toContain("--Object-Success")
+    expect(out).toContain("--Object-Low-Emphasis")
+  })
+
+  it("online 省略時は既定で --Object-Success", () => {
+    const out = html(<PresenceIndicator name="山田" />)
+    expect(out).toContain("--Object-Success")
+  })
+
+  it("className を透過する", () => {
+    const out = html(<PresenceIndicator name="高橋" className="hidden min-[420px]:flex" />)
+    expect(out).toContain("min-[420px]:flex")
   })
 })
