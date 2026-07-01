@@ -106,6 +106,7 @@ export {
 } from "./Tabs"
 export { Calendar, type CalendarProps } from "./Calendar"
 export { DatePicker, type DatePickerProps } from "./DatePicker"
+export { DateField, type DateFieldProps } from "./DateField"
 export { TimePicker, type TimePickerProps, type TimeValue } from "./TimePicker"
 export { Accordion, type AccordionProps, type AccordionItem } from "./Accordion"
 export { Collapsible, type CollapsibleProps } from "./Collapsible"
