@@ -26,6 +26,22 @@ export interface CelebrationProps {
   cardless?: boolean
   particleCount?: number
   durationMs?: number
+  /**
+   * confetti 1 粒あたりの落下アニメーション時間（ms）。未指定時は
+   * durationMs（autoDismissMs 優先）から算出される既存挙動を維持する。
+   */
+  duration?: number
+  /**
+   * confetti カラーパレット。テーマの色トークン名（"brand"/"success"/"warning"/
+   * "caution"/"info"）または任意の色文字列（#hex 等）を指定可能。
+   * 未指定時は既定の 5 色を使用（後方互換）。
+   */
+  colors?: string[]
+  /**
+   * confetti の左右ドリフト幅（px）。粒ごとに ±driftRange/2 の範囲でランダム化。
+   * 未指定時は既定の 160px を維持する。
+   */
+  driftRange?: number
   autoDismissMs?: number
   onTapDismiss?: () => void
   onDone?: () => void
@@ -41,6 +57,8 @@ const CONFETTI_COLORS = [
   "caution",
   "info",
 ] as const
+
+const CONFETTI_TOKEN_NAMES: readonly string[] = CONFETTI_COLORS
 
 function seededRatio(seed: number) {
   const x = Math.sin(seed * 999) * 10000
@@ -64,6 +82,9 @@ function Celebration({
   cardless = false,
   particleCount = 36,
   durationMs = 2600,
+  duration,
+  colors,
+  driftRange = 160,
   autoDismissMs,
   onTapDismiss,
   onDone,
@@ -73,6 +94,8 @@ function Celebration({
 }: CelebrationProps) {
   const { theme, scales } = useTheme()
   const resolvedDurationMs = autoDismissMs ?? durationMs
+  const particleDurationBase = duration ?? resolvedDurationMs
+  const palette = colors && colors.length > 0 ? colors : CONFETTI_COLORS
   const showConfetti = trigger === "confetti" || trigger === "both"
   const showMessage = !cardless && (trigger === "confetti" || trigger === "emoji" || trigger === "both")
   const canTapDismiss = Boolean(onTapDismiss || interactive)
@@ -86,13 +109,13 @@ function Celebration({
         id: index,
         left: Math.round(seededRatio(index + 1) * 100),
         delay: Math.round(seededRatio(index + 11) * 420),
-        duration: Math.round(resolvedDurationMs * (0.78 + seededRatio(index + 21) * 0.44)),
-        drift: Math.round((seededRatio(index + 31) - 0.5) * 160),
+        duration: Math.round(particleDurationBase * (0.78 + seededRatio(index + 21) * 0.44)),
+        drift: Math.round((seededRatio(index + 31) - 0.5) * driftRange),
         rotate: Math.round(seededRatio(index + 41) * 720),
         size: 6 + Math.round(seededRatio(index + 51) * 6),
-        color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
+        color: palette[index % palette.length],
       })),
-    [particleCount, resolvedDurationMs],
+    [particleCount, particleDurationBase, driftRange, palette],
   )
 
   useEffect(() => {
@@ -159,7 +182,7 @@ function Celebration({
           {particles.map((piece) => (
             <ConfettiPiece
               key={piece.id}
-              color={resolveConfettiColor(theme, piece.color)}
+              color={resolveConfettiColor(theme, piece.color as string)}
               delay={piece.delay}
               duration={piece.duration}
               drift={piece.drift}
@@ -255,12 +278,16 @@ function Celebration({
 
 function resolveConfettiColor(
   theme: ReturnType<typeof useTheme>["theme"],
-  color: (typeof CONFETTI_COLORS)[number],
+  color: string,
 ) {
   if (color === "brand") return theme.brand.primary
   if (color === "success") return theme.success.base
   if (color === "warning") return theme.warning.base
   if (color === "caution") return theme.caution.base
+  if (color === "info") return theme.info.base
+  // colors prop で任意色（#hex 等）が渡された場合はそのまま使う。
+  // 既知のトークン名以外は CONFETTI_TOKEN_NAMES に含まれないため、ここに到達する。
+  if (!CONFETTI_TOKEN_NAMES.includes(color)) return color
   return theme.info.base
 }
 

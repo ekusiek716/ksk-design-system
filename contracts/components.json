@@ -1056,7 +1056,7 @@
     {
       "name": "Celebration",
       "path": "src/components/patterns/celebration.tsx",
-      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、actions slot、interactive card tap、cardless モード、tap dismiss、prefers-reduced-motion 対応。",
+      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、actions slot、interactive card tap、cardless モード、tap dismiss、prefers-reduced-motion 対応。confetti の duration / colors / driftRange をカスタマイズ可能。",
       "variants": [
         "confetti",
         "emoji",
@@ -1068,7 +1068,10 @@
         "interactive",
         "cardless",
         "tap-dismiss",
-        "duration-control"
+        "duration-control",
+        "custom-duration",
+        "custom-colors",
+        "custom-drift-range"
       ],
       "accessibility": [
         "role=status",
