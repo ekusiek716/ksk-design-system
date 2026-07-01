@@ -16,7 +16,7 @@
     {
       "name": "Button",
       "path": "src/components/ui/button.tsx",
-      "description": "アクションボタン。最重要CTAにはdefault、Liquid Glass背景にはglass、暗背景上のLiquid Glassにはglass-inverse。アイコン単独はiconサイズ群。",
+      "description": "アクションボタン。最重要CTAにはdefault、Liquid Glass背景にはglass、暗背景上のLiquid Glassにはglass-inverse、ブランドカラーをティントしたglassはglass-accent（FAB等）。アイコン単独はiconサイズ群。",
       "variants": [
         "default",
         "secondary",
@@ -27,6 +27,7 @@
         "destructive",
         "glass",
         "glass-inverse",
+        "glass-accent",
         "accent",
         "inverse",
         "ghost-inverse"
