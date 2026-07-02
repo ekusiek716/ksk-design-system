@@ -13,6 +13,16 @@ export {
   type GlassIntensity,
   type GlassTint,
 } from "./GlassView"
+export {
+  GradientSurface,
+  type GradientSurfaceProps,
+  type GradientSurfaceStop,
+} from "./GradientSurface"
+export {
+  FloatingTabBar,
+  type FloatingTabBarProps,
+  type FloatingTabBarItem,
+} from "./FloatingTabBar"
 
 // Phase 1: Display
 export { Avatar, type AvatarProps, type AvatarSize } from "./Avatar"
