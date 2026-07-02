@@ -13,6 +13,18 @@ export interface CountdownHeroProps {
   testID?: string
 }
 
+/**
+ * date-only 文字列はローカル日付として解釈する。
+ * `new Date("YYYY-MM-DD")` は UTC midnight 扱いになり、UTC より西の
+ * タイムゾーンで 1 日ずれるため自前でパースする。それ以外の文字列は Date に委譲。
+ */
+function parseTargetDate(target: Date | string): Date {
+  if (target instanceof Date) return target
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(target)
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+  return new Date(target)
+}
+
 function toLocalMidnight(d: Date) {
   const copy = new Date(d)
   copy.setHours(0, 0, 0, 0)
@@ -44,10 +56,7 @@ export function CountdownHero({
   testID,
 }: CountdownHeroProps) {
   const { theme, scales } = useTheme()
-  const target = useMemo(
-    () => (targetDate instanceof Date ? targetDate : new Date(targetDate)),
-    [targetDate],
-  )
+  const target = useMemo(() => parseTargetDate(targetDate), [targetDate])
   const daysLeft = calcDaysLeft(target)
   const isToday = daysLeft === 0
   const isPast = daysLeft < 0

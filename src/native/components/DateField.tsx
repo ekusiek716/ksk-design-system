@@ -6,8 +6,14 @@ function strToDate(s: string): Date | undefined {
   if (!s) return undefined
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s)
   if (!m) return undefined
-  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
-  return isNaN(d.getTime()) ? undefined : d
+  const y = Number(m[1])
+  const mo = Number(m[2])
+  const day = Number(m[3])
+  const d = new Date(y, mo - 1, day)
+  // Date コンストラクタは "2026-02-31" 等の範囲外値を翌月へ繰り上げて正規化してしまう。
+  // 構成要素が一致しない場合は不正値として弾く。
+  if (d.getFullYear() !== y || d.getMonth() !== mo - 1 || d.getDate() !== day) return undefined
+  return d
 }
 
 /** Date → "YYYY-MM-DD"（ローカル）。 */

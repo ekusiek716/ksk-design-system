@@ -84,11 +84,14 @@ function CollapsibleChipField<K extends string>({
                 onSelect(key)
                 setForcedExpand(false)
               } else if (selected === key) {
-                // 折りたたみ中に選択 chip を再タップ:
+                // 選択中 chip を再タップ:
                 // - clearable: 解除
-                // - 非 clearable: 強制展開（再選択モードへ）
+                // - 非 clearable かつ折りたたみ表示: 強制展開（再選択モードへ）
+                // - 非 clearable かつ alwaysExpanded: 何もしない
+                //   （全 chip が見えているので再選択モードは不要。forcedExpand を立てると
+                //     値は選択されたままなのに選択表示だけ消える視覚不整合になる）
                 if (onClear) onClear()
-                else setForcedExpand(true)
+                else if (!alwaysExpanded) setForcedExpand(true)
               } else {
                 // 折りたたみ中だが visible は selected 1 件のみなので通常ここには来ない
                 onSelect(key)

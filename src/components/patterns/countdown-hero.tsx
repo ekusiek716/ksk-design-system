@@ -2,7 +2,11 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface CountdownHeroProps {
-  /** カウントダウン先の日付。文字列の場合は `new Date()` でローカルタイム解釈する */
+  /**
+   * カウントダウン先の日付。"YYYY-MM-DD" 形式の文字列はローカルタイムの日付として
+   * 解釈する（`new Date("YYYY-MM-DD")` は UTC midnight 扱いになり、UTC より西の
+   * タイムゾーンで 1 日ずれるため自前でパースする）。それ以外の文字列は `new Date()` に委譲。
+   */
   targetDate: Date | string
   /** 残り日数の上に表示するラベル（既定 "残り"） */
   label?: string
@@ -15,6 +19,14 @@ interface CountdownHeroProps {
   /** 右上に敷く装飾イラストスロット。wedding 画像等は消費側で用意する */
   illustration?: React.ReactNode
   className?: string
+}
+
+/** date-only 文字列はローカル日付として、それ以外は Date コンストラクタで解釈する */
+function parseTargetDate(target: Date | string): Date {
+  if (target instanceof Date) return target
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(target)
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+  return new Date(target)
 }
 
 function toLocalMidnight(d: Date) {
@@ -55,10 +67,7 @@ function CountdownHero({
   illustration,
   className,
 }: CountdownHeroProps) {
-  const target = React.useMemo(
-    () => (targetDate instanceof Date ? targetDate : new Date(targetDate)),
-    [targetDate],
-  )
+  const target = React.useMemo(() => parseTargetDate(targetDate), [targetDate])
   const daysLeft = calcDaysLeft(target)
   const isToday = daysLeft === 0
   const isPast = daysLeft < 0
