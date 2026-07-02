@@ -1,5 +1,5 @@
 import React from "react"
-import { Pressable, View, Text as RNText } from "react-native"
+import { Pressable, Text as RNText } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 

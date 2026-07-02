@@ -389,6 +389,10 @@ function NavigationPanel() {
   )
 }
 
+// render 中の Date.now() 呼び出しは react-hooks/purity 違反になるため
+// module 読込時に一度だけ算出する（26時間後 = 「1日と2時間」表示のデモ用）
+const countdownTarget = new Date(Date.now() + 1000 * 60 * 60 * 26)
+
 function FiltersChipPanel() {
   const [active, setActive] = React.useState(true)
   return (
@@ -402,7 +406,7 @@ function FiltersChipPanel() {
       </div>
       <div>
         <GroupLabel>Countdown</GroupLabel>
-        <CountdownTimer targetDate={new Date(Date.now() + 1000 * 60 * 60 * 26)} />
+        <CountdownTimer targetDate={countdownTarget} />
       </div>
       <div>
         <GroupLabel>Label + Separator</GroupLabel>

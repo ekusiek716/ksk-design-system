@@ -1,7 +1,6 @@
 import React, { useState } from "react"
-import { View, Text as RNText } from "react-native"
+import { View } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
-import { resolveTypo } from "../typography"
 import { Sheet } from "./Sheet"
 import { StarRating } from "./StarRating"
 import { Textarea } from "./Textarea"
@@ -20,7 +19,7 @@ export function ReviewOverlay({
   title = "レビューを投稿",
   onSubmit,
 }: ReviewOverlayProps) {
-  const { theme, scales } = useTheme()
+  const { scales } = useTheme()
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState("")
 

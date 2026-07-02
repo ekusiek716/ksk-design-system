@@ -58,7 +58,9 @@ export function Sheet(props: SheetProps) {
 
 function PlainSheet({ open, onClose, side = "bottom", title, children }: SheetProps) {
   const { theme, scales } = useTheme()
-  const anim = useRef(new Animated.Value(0)).current
+  // useRef(new Animated.Value()).current は render 中の ref 読み取りになるため
+  // useState の lazy initializer で一度だけ生成する（react-hooks/refs）
+  const [anim] = useState(() => new Animated.Value(0))
 
   useEffect(() => {
     Animated.timing(anim, {
