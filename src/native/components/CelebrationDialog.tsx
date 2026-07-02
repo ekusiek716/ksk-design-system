@@ -115,15 +115,51 @@ export function CelebrationDialog({
           }}
         >
           {emoji && (
-            <Animated.Text
-              style={[
-                resolveTypo("display.lg"),
-                { marginBottom: scales.spacing.scale[3] },
-                emojiAnimation === "bounce" ? { transform: [{ scale: emojiScale }] } : null,
-              ]}
+            // 絵文字は素置きせず、ブランド連動のソフトな円形バッジ + 外側の淡い光輪に載せる
+            //（web 版 CelebrationDialog と同じ見た目。bounce は絵文字グリフのみに適用）
+            <View
+              style={{
+                width: 80,
+                height: 80,
+                marginBottom: scales.spacing.scale[4],
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              {emoji}
-            </Animated.Text>
+              <View
+                style={{
+                  position: "absolute",
+                  top: -12,
+                  left: -12,
+                  right: -12,
+                  bottom: -12,
+                  borderRadius: 999,
+                  backgroundColor: theme.surface["accent-primary-subtle"],
+                  opacity: 0.5,
+                }}
+              />
+              <View
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  borderRadius: 999,
+                  backgroundColor: theme.surface["accent-primary-light"],
+                  borderWidth: 1,
+                  borderColor: theme.surface["accent-primary-subtle"],
+                }}
+              />
+              <Animated.Text
+                style={[
+                  resolveTypo("display.lg"),
+                  emojiAnimation === "bounce" ? { transform: [{ scale: emojiScale }] } : null,
+                ]}
+              >
+                {emoji}
+              </Animated.Text>
+            </View>
           )}
           <RNText
             style={[
