@@ -14,11 +14,19 @@ import { useReduceMotion } from "./use-reduce-motion"
 
 export type CelebrationTrigger = "confetti" | "emoji" | "both" | "none"
 export type CelebrationPlacement = "overlay" | "inline"
+/**
+ * confetti の演出モード。
+ * - "fall"（既定）: 上から降ってくる既存挙動（後方互換）
+ * - "burst": 中央から全方位（360°）に放射状に弾ける party popper（クラッカー）演出
+ */
+export type CelebrationEffect = "fall" | "burst"
 
 export interface CelebrationProps {
   active?: boolean
   trigger?: CelebrationTrigger
   placement?: CelebrationPlacement
+  /** confetti の演出モード。"fall"（既定・後方互換）または "burst"（クラッカー演出）。 */
+  effect?: CelebrationEffect
   emoji?: string
   title?: string
   description?: string
@@ -28,8 +36,9 @@ export interface CelebrationProps {
   particleCount?: number
   durationMs?: number
   /**
-   * confetti 1 粒あたりの落下アニメーション時間（ms）。未指定時は
-   * durationMs（autoDismissMs 優先）から算出される既存挙動を維持する。
+   * confetti 1 粒あたりのアニメーション時間（ms）。未指定時は
+   * effect="fall" では durationMs（autoDismissMs 優先）から算出される既存挙動を維持し、
+   * effect="burst" では 900〜1400ms 程度（seededRatio でばらつき）を既定値とする。
    */
   duration?: number
   /**
@@ -41,6 +50,7 @@ export interface CelebrationProps {
   /**
    * confetti の左右ドリフト幅（px）。粒ごとに ±driftRange/2 の範囲でランダム化。
    * 未指定時は既定の 160px を維持する。
+   * effect="burst" では飛距離（120〜280px 基準）のばらつき幅としても再利用する。
    */
   driftRange?: number
   /**
@@ -77,10 +87,21 @@ function useAnimatedValue(initialValue: number) {
   return value
 }
 
+const BURST_DURATION_MS = 1150
+// 0°〜360° 全方位。中央発生源から均等に放射状へ飛び散らせる。
+const BURST_ANGLE_MIN_DEG = 0
+const BURST_ANGLE_MAX_DEG = 360
+const BURST_DISTANCE_MIN = 120
+const BURST_DISTANCE_MAX = 280
+// 全方位のため重力 droop は控えめ（上向きに飛んだ粒子の軌道が不自然にならない範囲）。
+const BURST_GRAVITY_DROOP_MIN = 12
+const BURST_GRAVITY_DROOP_MAX = 28
+
 function Celebration({
   active = true,
   trigger = "confetti",
   placement = "overlay",
+  effect = "fall",
   emoji = "🎉",
   title,
   description,
@@ -103,7 +124,8 @@ function Celebration({
   const { theme, scales } = useTheme()
   const reduceMotion = useReduceMotion()
   const resolvedDurationMs = autoDismissMs ?? durationMs
-  const particleDurationBase = duration ?? resolvedDurationMs
+  const isBurst = effect === "burst"
+  const particleDurationBase = duration ?? (isBurst ? BURST_DURATION_MS : resolvedDurationMs)
   const palette = colors && colors.length > 0 ? colors : CONFETTI_COLORS
   const showConfetti = trigger === "confetti" || trigger === "both"
   const showMessage = !cardless && (trigger === "confetti" || trigger === "emoji" || trigger === "both")
@@ -115,17 +137,46 @@ function Celebration({
 
   const particles = useMemo(
     () =>
-      Array.from({ length: particleCount }, (_, index) => ({
-        id: index,
-        left: Math.round(seededRatio(index + 1) * 100),
-        delay: Math.round(seededRatio(index + 11) * 420),
-        duration: Math.round(particleDurationBase * (0.78 + seededRatio(index + 21) * 0.44)),
-        drift: Math.round((seededRatio(index + 31) - 0.5) * driftRange),
-        rotate: Math.round(seededRatio(index + 41) * 720),
-        size: 6 + Math.round(seededRatio(index + 51) * 6),
-        color: palette[index % palette.length],
-      })),
-    [particleCount, particleDurationBase, driftRange, palette],
+      Array.from({ length: particleCount }, (_, index) => {
+        const base = {
+          id: index,
+          delay: isBurst
+            ? Math.round(seededRatio(index + 11) * 80)
+            : Math.round(seededRatio(index + 11) * 420),
+          duration: Math.round(particleDurationBase * (0.78 + seededRatio(index + 21) * 0.44)),
+          rotate: Math.round(seededRatio(index + 41) * 720),
+          size: 6 + Math.round(seededRatio(index + 51) * 6),
+          color: palette[index % palette.length],
+        }
+
+        if (isBurst) {
+          const angleDeg =
+            BURST_ANGLE_MIN_DEG + seededRatio(index + 61) * (BURST_ANGLE_MAX_DEG - BURST_ANGLE_MIN_DEG)
+          const angleRad = (angleDeg * Math.PI) / 180
+          const distanceJitter = (seededRatio(index + 31) - 0.5) * driftRange
+          const distance = Math.max(
+            40,
+            BURST_DISTANCE_MIN +
+              seededRatio(index + 71) * (BURST_DISTANCE_MAX - BURST_DISTANCE_MIN) +
+              distanceJitter,
+          )
+          const droop =
+            BURST_GRAVITY_DROOP_MIN +
+            seededRatio(index + 81) * (BURST_GRAVITY_DROOP_MAX - BURST_GRAVITY_DROOP_MIN)
+          const finalX = Math.round(Math.cos(angleRad) * distance)
+          const finalY = Math.round(Math.sin(angleRad) * distance + droop)
+          return { ...base, left: 0, drift: 0, finalX, finalY }
+        }
+
+        return {
+          ...base,
+          left: Math.round(seededRatio(index + 1) * 100),
+          drift: Math.round((seededRatio(index + 31) - 0.5) * driftRange),
+          finalX: 0,
+          finalY: 0,
+        }
+      }),
+    [particleCount, particleDurationBase, driftRange, palette, isBurst],
   )
 
   useEffect(() => {
@@ -224,19 +275,32 @@ function Celebration({
       ]}
     >
       {showConfetti && (
-        <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
-          {particles.map((piece) => (
-            <ConfettiPiece
-              key={piece.id}
-              color={resolveConfettiColor(theme, piece.color as string)}
-              delay={piece.delay}
-              duration={piece.duration}
-              drift={piece.drift}
-              left={`${piece.left}%`}
-              rotate={piece.rotate}
-              size={piece.size}
-            />
-          ))}
+        <View pointerEvents="none" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, overflow: "hidden" }}>
+          {particles.map((piece) =>
+            isBurst ? (
+              <ConfettiBurstPiece
+                key={piece.id}
+                color={resolveConfettiColor(theme, piece.color as string)}
+                delay={piece.delay}
+                duration={piece.duration}
+                finalX={piece.finalX}
+                finalY={piece.finalY}
+                rotate={piece.rotate}
+                size={piece.size}
+              />
+            ) : (
+              <ConfettiPiece
+                key={piece.id}
+                color={resolveConfettiColor(theme, piece.color as string)}
+                delay={piece.delay}
+                duration={piece.duration}
+                drift={piece.drift}
+                left={`${piece.left}%` as `${number}%`}
+                rotate={piece.rotate}
+                size={piece.size}
+              />
+            )
+          )}
         </View>
       )}
 
@@ -395,6 +459,87 @@ function ConfettiPiece({
           },
           {
             rotate: progress.interpolate({ inputRange: [0, 1], outputRange: ["0deg", `${rotate}deg`] }),
+          },
+        ],
+      }}
+    />
+  )
+}
+
+function ConfettiBurstPiece({
+  color,
+  delay,
+  duration,
+  finalX,
+  finalY,
+  rotate,
+  size,
+}: {
+  color: string
+  delay: number
+  duration: number
+  finalX: number
+  finalY: number
+  rotate: number
+  size: number
+}) {
+  const progress = useAnimatedValue(0)
+  // 序盤は勢いよく飛び出して減速する強い ease-out。web 版 keyframe（0%→60%→100%）と
+  // 揃えるため、60% 地点（web の mid 相当）までに全距離の 85% へ到達させる。
+  const midX = Math.round(finalX * 0.85)
+  const midY = Math.round(finalY * 0.85 - finalY * 0.02)
+
+  useEffect(() => {
+    progress.setValue(0)
+    const animation = Animated.timing(progress, {
+      toValue: 1,
+      duration,
+      delay,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    })
+    animation.start()
+    return () => animation.stop()
+  }, [delay, duration, progress])
+
+  return (
+    <Animated.View
+      style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        width: size,
+        height: Math.max(4, size - 2),
+        borderRadius: 2,
+        backgroundColor: color,
+        opacity: progress.interpolate({
+          inputRange: [0, 0.08, 0.6, 0.8, 1],
+          outputRange: [0, 1, 1, 0.9, 0],
+        }),
+        transform: [
+          {
+            translateX: progress.interpolate({
+              inputRange: [0, 0.6, 1],
+              outputRange: [0, midX, finalX],
+            }),
+          },
+          {
+            translateY: progress.interpolate({
+              inputRange: [0, 0.6, 1],
+              outputRange: [0, midY, finalY],
+            }),
+          },
+          {
+            scale: progress.interpolate({
+              inputRange: [0, 0.6, 1],
+              outputRange: [0.7, 1, 1],
+            }),
+          },
+          {
+            rotate: progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: ["0deg", `${rotate}deg`],
+            }),
           },
         ],
       }}

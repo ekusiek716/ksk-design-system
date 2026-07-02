@@ -25,7 +25,7 @@ export const Basic: Story = {
           title="はじめてのタスク完了！"
           description="この調子で次のタスクも進めましょう。"
           actions={
-            <Button size="sm" onClick={() => setOpen(false)}>
+            <Button onClick={() => setOpen(false)}>
               閉じる
             </Button>
           }
@@ -71,7 +71,7 @@ export const IconsaxBadge: Story = {
           title="実績を解除しました"
           description="emoji ではなく iconsax（Bulk variant）をバッジに載せる例。"
           actions={
-            <Button size="sm" onClick={() => setOpen(false)}>
+            <Button onClick={() => setOpen(false)}>
               閉じる
             </Button>
           }
@@ -101,10 +101,10 @@ export const CustomConfettiColors: Story = {
           driftRange={60}
           actions={
             <>
-              <Button size="sm" onClick={() => setOpen(false)}>
+              <Button onClick={() => setOpen(false)}>
                 次へ
               </Button>
-              <Button size="sm" variant="secondary" onClick={() => setOpen(false)}>
+              <Button variant="secondary" onClick={() => setOpen(false)}>
                 閉じる
               </Button>
             </>

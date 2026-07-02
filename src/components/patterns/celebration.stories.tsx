@@ -103,6 +103,34 @@ export const BounceEmoji: Story = {
   ),
 }
 
+export const BurstEffect: Story = {
+  name: "Effect: Burst（クラッカー演出）",
+  render: function BurstEffectStory() {
+    const [active, setActive] = React.useState(true)
+
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--Surface-Secondary)] p-8">
+        <Button
+          onClick={() => {
+            setActive(false)
+            // 再発火できるよう次フレームで active を戻す
+            requestAnimationFrame(() => setActive(true))
+          }}
+        >
+          もう一度弾く
+        </Button>
+        <Celebration
+          active={active}
+          trigger="confetti"
+          effect="burst"
+          cardless
+          title="達成しました"
+        />
+      </div>
+    )
+  },
+}
+
 export const CardlessTapDismiss: Story = {
   name: "Cardless / Tap Dismiss",
   render: function CardlessTapDismissStory() {

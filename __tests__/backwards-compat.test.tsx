@@ -273,6 +273,18 @@ describe("ShareButtons / KebabMenu / Celebration — backwards-compat", () => {
     expect(out).toContain('data-slot="celebration"')
     expect(out).toContain("celebration-emoji-pop")
   })
+
+  it("Celebration: effect=\"burst\" で celebration-confetti-burst を適用してレンダリング可能（既定の fall は維持）", () => {
+    const out = html(
+      <Celebration trigger="confetti" effect="burst" title="弾けました" />
+    )
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain("celebration-confetti-burst")
+
+    const fallOut = html(<Celebration trigger="confetti" title="降ります" />)
+    expect(fallOut).toContain("celebration-confetti-fall")
+    expect(fallOut).not.toContain("celebration-confetti-burst")
+  })
 })
 
 describe("CollapsibleChipField — backwards-compat", () => {
@@ -645,6 +657,32 @@ describe("CelebrationDialog — backwards-compat", () => {
     )
     expect(out).toContain('data-slot="celebration"')
     expect(out).toContain('data-trigger="confetti"')
+  })
+
+  it("effect 未指定時は既定で burst confetti（celebration-confetti-burst）がレンダリングされる", () => {
+    const out = html(
+      <CelebrationDialog
+        open
+        onOpenChange={() => undefined}
+        emoji="🎉"
+        title="達成しました"
+      />
+    )
+    expect(out).toContain("celebration-confetti-burst")
+  })
+
+  it("effect=\"fall\" を明示すると fall confetti（celebration-confetti-fall）にフォールバックできる", () => {
+    const out = html(
+      <CelebrationDialog
+        open
+        onOpenChange={() => undefined}
+        emoji="🎉"
+        title="達成しました"
+        effect="fall"
+      />
+    )
+    expect(out).toContain("celebration-confetti-fall")
+    expect(out).not.toContain("celebration-confetti-burst")
   })
 })
 

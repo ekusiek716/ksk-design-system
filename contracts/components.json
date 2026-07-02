@@ -1072,7 +1072,7 @@
     {
       "name": "Celebration",
       "path": "src/components/patterns/celebration.tsx",
-      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、actions slot、interactive card tap、cardless モード、tap dismiss、prefers-reduced-motion 対応。confetti の duration / colors / driftRange をカスタマイズ可能。",
+      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、actions slot、interactive card tap、cardless モード、tap dismiss、prefers-reduced-motion 対応。confetti の duration / colors / driftRange をカスタマイズ可能。effect で confetti の演出モード（fall / burst）を切り替え可能（Issue #111）。",
       "variants": [
         "confetti",
         "emoji",
@@ -1088,18 +1088,21 @@
         "custom-duration",
         "custom-colors",
         "custom-drift-range",
-        "emoji-animation-pop-or-bounce"
+        "emoji-animation-pop-or-bounce",
+        "effect-fall-or-burst",
+        "confetti-burst-radial-360"
       ],
       "accessibility": [
         "role=status",
         "aria-live=polite",
-        "prefers-reduced-motion で confetti を抑制（emojiAnimation=bounce も含む）"
+        "prefers-reduced-motion で confetti を抑制（emojiAnimation=bounce も含む。effect=burst も同様にスキップ）"
       ],
       "rules": [
         "一時的な達成演出に使用",
         "ローディングや常時表示の装飾用途には使わない",
         "CTA を含む達成 UI は actions slot を使い、カード tap で任意 dismiss したい場合は interactive または onTapDismiss を使う",
-        "カード不要の演出は cardless を使う"
+        "カード不要の演出は cardless を使う",
+        "effect は既定 \"fall\"（後方互換）。クラッカーが弾けた感じにしたい達成演出は effect=\"burst\" を使う（中央から全方位 360° に放射）"
       ]
     },
     {
@@ -1247,7 +1250,7 @@
     {
       "name": "CelebrationDialog",
       "path": "src/components/patterns/celebration-dialog.tsx",
-      "description": "達成演出用の Dialog + Celebration confetti + emoji/title/description/actions スロット合成パターン。belle-todo の MilestoneCelebration を参考に、MILESTONES 定義・アップセル CTA・store・i18n・analytics は持ち込まずスロット化（Issue #110）。",
+      "description": "達成演出用の Dialog + Celebration confetti + emoji/title/description/actions スロット合成パターン。belle-todo の MilestoneCelebration を参考に、MILESTONES 定義・アップセル CTA・store・i18n・analytics は持ち込まずスロット化（Issue #110）。confetti の既定 effect は \"burst\"（クラッカー演出）（Issue #111）。",
       "features": [
         "dialog-based",
         "confetti-overlay",
@@ -1255,7 +1258,8 @@
         "actions-slot",
         "auto-dismiss",
         "emoji-animation-pop-or-bounce",
-        "confetti-props-passthrough"
+        "confetti-props-passthrough",
+        "effect-burst-default"
       ],
       "accessibility": [
         "DS Dialog（Radix）ベースのため Esc / overlay クリックで閉じる",
@@ -1264,6 +1268,7 @@
       "rules": [
         "MILESTONES 定義・アップセル文言・分析トラッキングは呼び出し側で actions スロットに組み込む。コンポーネント内部に業務ロジックを持たせない。",
         "autoDismissMs 指定時は経過後に onOpenChange(false) を呼ぶだけで、closeロジック自体は呼び出し側に委譲する。",
+        "effect 既定は \"burst\"（達成演出はクラッカーが標準）。fall に戻したい場合は effect=\"fall\" を明示する。",
         "confetti 系 props（particleCount/duration/colors/driftRange）は Celebration へそのままパススルー。"
       ]
     },
