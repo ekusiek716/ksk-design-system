@@ -8,7 +8,7 @@
 //
 // 実行: node scripts/check-contrast.mjs
 // =============================================================
-import { readFileSync } from "node:fs"
+import { readFileSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
 
@@ -65,8 +65,12 @@ pairs.push([resolve(text["high-emphasis"]), surfaceSecondary, "Text-High / Surfa
 pairs.push([resolve(text["on-inverse"]), brand, "Text-on-Inverse / Brand-Primary", 4.5])
 
 // テーマごとの Brand-600 も確認する。tokens.json の default 値だけでは、
-// orange/green/violet の theme override による CTA コントラスト低下を検出できない。
-for (const theme of ["blue", "orange", "green", "violet"]) {
+// theme override による CTA コントラスト低下を検出できない。
+// 一覧は src/themes/ から動的に導出する（ハードコードだと新テーマが検証から漏れる）。
+const themes = readdirSync(join(root, "src/themes"))
+  .filter((f) => f.endsWith(".css") && f !== "default.css")
+  .map((f) => f.replace(/\.css$/, ""))
+for (const theme of themes) {
   pairs.push([
     resolve(text["on-inverse"]),
     readThemeBrandShade(theme, "600"),
