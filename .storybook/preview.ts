@@ -65,6 +65,18 @@ const THEMES: Record<string, Record<string, string>> = {
     "--Primitive-Brand-800": "#4C1D95",
     "--Primitive-Brand-900": "#3B0764",
   },
+  cobalt: {
+    "--Primitive-Brand-50":  "#EEF3FF",
+    "--Primitive-Brand-100": "#D9E5FE",
+    "--Primitive-Brand-200": "#B3CBFD",
+    "--Primitive-Brand-300": "#7FAAFB",
+    "--Primitive-Brand-400": "#4398F8",
+    "--Primitive-Brand-500": "#2053F5",
+    "--Primitive-Brand-600": "#163FF4",
+    "--Primitive-Brand-700": "#1234EE",
+    "--Primitive-Brand-800": "#0B25A4",
+    "--Primitive-Brand-900": "#03155A",
+  },
 }
 
 function applyTheme(theme: string) {
@@ -130,6 +142,7 @@ const preview: Preview = {
           { value: "orange",  title: "Orange (EC・フード)",           icon: "circle" },
           { value: "green",   title: "Green (ヘルスケア・金融)",      icon: "circle" },
           { value: "violet",  title: "Violet (プレミアム・教育)",     icon: "circle" },
+          { value: "cobalt",  title: "Cobalt (音楽・エンタメ)",       icon: "circle" },
         ],
         dynamicTitle: true,
       },
