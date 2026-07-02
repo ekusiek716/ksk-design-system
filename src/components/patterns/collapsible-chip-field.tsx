@@ -50,7 +50,10 @@ function CollapsibleChipField<K extends string>({
   React.useEffect(() => {
     setForcedExpand(false)
   }, [selected])
-  const expanded = alwaysExpanded || !hasSelection || forcedExpand
+  // selected が options に含まれない場合（外部データとの不整合等）は、
+  // 折りたたむと chip が 1 つも表示されない手詰まりになるため展開扱いにする
+  const selectionInOptions = hasSelection && options.includes(selected as K)
+  const expanded = alwaysExpanded || !selectionInOptions || forcedExpand
   const visible = expanded ? options : options.filter((k) => k === selected)
 
   // 「label は 1 行目の chip と縦センター」。展開して多数の chip が折り返しても

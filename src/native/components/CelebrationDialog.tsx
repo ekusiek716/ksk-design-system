@@ -3,6 +3,7 @@ import { Animated, Easing, Modal, Pressable, Text as RNText, View } from "react-
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { Celebration, type CelebrationProps } from "./Celebration"
+import { useReduceMotion } from "./use-reduce-motion"
 
 function useAnimatedValue(initialValue: number) {
   const [value] = useState(() => new Animated.Value(initialValue))
@@ -46,6 +47,7 @@ export function CelebrationDialog({
   testID,
 }: CelebrationDialogProps) {
   const { theme, scales } = useTheme()
+  const reduceMotion = useReduceMotion()
   const emojiScale = useAnimatedValue(0)
 
   useEffect(() => {
@@ -56,6 +58,12 @@ export function CelebrationDialog({
 
   useEffect(() => {
     if (!open || emojiAnimation !== "bounce") return
+    if (reduceMotion) {
+      // Reduce Motion 有効時はバウンスさせず最終スケールで静止表示する
+      // （初期値 0 のまま return すると絵文字が不可視になる）
+      emojiScale.setValue(1)
+      return
+    }
     emojiScale.setValue(0)
     const animation = Animated.sequence([
       Animated.delay(200),
@@ -65,7 +73,7 @@ export function CelebrationDialog({
     ])
     animation.start()
     return () => animation.stop()
-  }, [open, emojiAnimation, emojiScale])
+  }, [open, emojiAnimation, emojiScale, reduceMotion])
 
   if (!open) return null
 

@@ -29,7 +29,8 @@ interface ChipFilterBarProps {
   className?: string
 }
 
-const defaultResultCountLabel = (n: number) => `${n.toLocaleString()}件`
+// ロケールを明示する（SSR 環境とブラウザでロケールが異なると hydration mismatch になるため）
+const defaultResultCountLabel = (n: number) => `${n.toLocaleString("ja-JP")}件`
 
 /**
  * ChipFilterBar — Chip を横スクロール表示するフィルターバーパターン。
