@@ -8,6 +8,7 @@ import {
   type TextStyle,
   type ViewStyle,
 } from "react-native"
+import type { BottomTabBarProps as RNBottomTabBarProps } from "@react-navigation/bottom-tabs"
 import { NavigationBar, type NavigationBarItem } from "./NavigationBar"
 import { GlassView, type GlassIntensity, type GlassTint } from "./GlassView"
 import { useTheme } from "../theme/ThemeProvider"
@@ -23,51 +24,22 @@ export interface BottomTabBarProps {
   keyboardLiftOffset?: number
 }
 
-export interface NativeTabBarRoute {
-  key: string
-  name: string
-  params?: unknown
-}
-
-export interface NativeTabBarIconProps {
-  focused: boolean
-  color: string
-  size: number
-}
-
-export interface NativeTabBarOptions {
-  title?: string
-  tabBarLabel?: string | ((props: NativeTabBarIconProps) => React.ReactNode)
-  tabBarIcon?: (props: NativeTabBarIconProps) => React.ReactNode
-  tabBarBadge?: string | number
-  tabBarAccessibilityLabel?: string
-  tabBarTestID?: string
-  tabBarActiveTintColor?: string
-  tabBarInactiveTintColor?: string
-  tabBarStyle?: unknown
-  tabBarButton?: null | ((props: unknown) => React.ReactNode)
-  href?: string | null
-}
-
-export interface NativeTabBarDescriptor {
-  options?: NativeTabBarOptions
-}
-
-export interface NativeTabBarState {
-  index: number
-  routes: NativeTabBarRoute[]
-}
-
-export interface NativeTabBarNavigation {
-  emit?: (event: { type: "tabPress"; target: string; canPreventDefault: true }) => { defaultPrevented?: boolean }
-  navigate?: (name: string, params?: unknown) => void
-}
+// @react-navigation/bottom-tabs の実際の型をそのまま使う（旧: 自前の
+// duck-typing。tabBarLabel の関数シグネチャ等が実際の型と構造的に
+// 非互換で、consumer 側で `as unknown as` キャストが必要になっていた）。
+export type NativeTabBarState = RNBottomTabBarProps["state"]
+export type NativeTabBarRoute = NativeTabBarState["routes"][number]
+export type NativeTabBarNavigation = RNBottomTabBarProps["navigation"]
+export type NativeTabBarDescriptorMap = RNBottomTabBarProps["descriptors"]
+export type NativeTabBarDescriptor = NativeTabBarDescriptorMap[string]
+export type NativeTabBarOptions = NonNullable<NativeTabBarDescriptor["options"]>
+export type NativeTabBarIconProps = Parameters<NonNullable<NativeTabBarOptions["tabBarIcon"]>>[0]
 
 export interface LiquidBottomTabBarProps {
   state: NativeTabBarState
-  descriptors: Record<string, NativeTabBarDescriptor>
+  descriptors: NativeTabBarDescriptorMap
   navigation: NativeTabBarNavigation
-  insets?: { bottom?: number }
+  insets?: RNBottomTabBarProps["insets"]
   keyboardBehavior?: BottomTabBarKeyboardBehavior
   keyboardLiftOffset?: number
   hiddenRouteNames?: string[]
@@ -153,8 +125,17 @@ export function LiquidBottomTabBar({
   if (isTabBarDisplayNone(focusedOptions?.tabBarStyle)) return null
 
   const visibleRoutes = state.routes.filter((route) => {
-    const options = descriptors[route.key]?.options
-    return !hiddenRouteNames.includes(route.name) && options?.href !== null && options?.tabBarButton !== null
+    // href/tabBarButton は expo-router が Tabs.Screen options に足す拡張
+    // フィールド（`href: null` でタブを隠す慣習）。@react-navigation/bottom-tabs
+    // 自体の型には無いため実行時形状として緩く読む。
+    const options = descriptors[route.key]?.options as
+      | (NativeTabBarOptions & { href?: string | null })
+      | undefined
+    return (
+      !hiddenRouteNames.includes(route.name) &&
+      options?.href !== null &&
+      (options?.tabBarButton as unknown) !== null
+    )
   })
 
   if (visibleRoutes.length === 0) return null
@@ -199,7 +180,7 @@ export function LiquidBottomTabBar({
             accessibilityRole="button"
             accessibilityState={{ selected: focused }}
             accessibilityLabel={options.tabBarAccessibilityLabel ?? resolveTabLabel(route, options)}
-            testID={options.tabBarTestID}
+            testID={options.tabBarButtonTestID}
             onPress={() => {
               const event = navigation.emit?.({
                 type: "tabPress",
