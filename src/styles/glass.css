@@ -40,19 +40,21 @@
      左右(90/270deg 付近)は減衰させて「光がエッジを回り込む」見え方にする。
      グリントの肩に寒色（青系）、カウンターグリントの肩に暖色を僅かに乗せ、
      強い曲率で起きる色分散（chromatic aberration）を擬似する */
-  --glass-rim-width: 1.5px;
+  /* 幅・輝度は iOS 26 実装アプリ（Shazam 等）の「細く洗練された縁」を基準に
+     チューニング（旧: 1.5px / peak 0.80 は単色背景で縁取りが大袈裟に見えた） */
+  --glass-rim-width: 1px;
   --glass-rim: conic-gradient(
     from 0deg,
-    rgba(255, 255, 255, 0.80) 0deg,
-    rgba(186, 224, 255, 0.45) 40deg,
-    rgba(255, 255, 255, 0.20) 75deg,
-    rgba(255, 255, 255, 0.06) 120deg,
-    rgba(255, 226, 200, 0.30) 162deg,
-    rgba(255, 255, 255, 0.50) 180deg,
-    rgba(255, 226, 200, 0.30) 198deg,
-    rgba(255, 255, 255, 0.06) 240deg,
-    rgba(186, 224, 255, 0.45) 320deg,
-    rgba(255, 255, 255, 0.80) 360deg
+    rgba(255, 255, 255, 0.55) 0deg,
+    rgba(186, 224, 255, 0.32) 40deg,
+    rgba(255, 255, 255, 0.14) 75deg,
+    rgba(255, 255, 255, 0.05) 120deg,
+    rgba(255, 226, 200, 0.22) 162deg,
+    rgba(255, 255, 255, 0.35) 180deg,
+    rgba(255, 226, 200, 0.22) 198deg,
+    rgba(255, 255, 255, 0.05) 240deg,
+    rgba(186, 224, 255, 0.32) 320deg,
+    rgba(255, 255, 255, 0.55) 360deg
   );
 
   /* Inner specular highlight — レンズ上端の白い光 */
@@ -314,8 +316,8 @@
      「光を導くガラスの切断面」を作る（マスクが backdrop-filter の適用域も
      リングに限定する = progressive blur と同じ原理）。非対応環境では
      conic リムだけが残るので安全に劣化する */
-  -webkit-backdrop-filter: blur(4px) saturate(1.8) brightness(1.55);
-  backdrop-filter: blur(4px) saturate(1.8) brightness(1.55);
+  -webkit-backdrop-filter: blur(4px) saturate(1.8) brightness(1.35);
+  backdrop-filter: blur(4px) saturate(1.8) brightness(1.35);
   pointer-events: none;
   z-index: 2;
 }
