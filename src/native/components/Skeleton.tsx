@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useState } from "react"
 import { Animated, View, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 
@@ -11,7 +11,7 @@ export interface SkeletonProps {
 
 export function Skeleton({ width = "100%", height = 16, radius, style }: SkeletonProps) {
   const { theme, scales } = useTheme()
-  const opacity = useRef(new Animated.Value(0.4)).current
+  const [opacity] = useState(() => new Animated.Value(0.4))
 
   useEffect(() => {
     const loop = Animated.loop(

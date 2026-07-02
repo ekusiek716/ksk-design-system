@@ -25,8 +25,13 @@ import {
   BottomTabBar,
   Card,
   Celebration,
+  CelebrationDialog,
   Chip,
+  ChipFilterBar,
+  CollapsibleChipField,
+  CountdownHero,
   DataTable,
+  DateField,
   DetailSheetHeader,
   DetailSheetScaffold,
   EmptyState,
@@ -34,13 +39,20 @@ import {
   KeyboardAwareSheetFooter,
   MobileAppHeader,
   MobileFloatingActionButton,
+  MobileTabBar,
   MultiSelect,
+  PresenceIndicator,
   ShareButtons,
   StatusActionBadge,
   SubNav,
   toast,
+  weddingCategories,
+  projectCategories,
+  getCategoricalColor,
+  getCategoricalSubtle,
+  getCategoricalBold,
 } from "../src/index"
-import type { DataTableColumn } from "../src/index"
+import type { DataTableColumn, CategoryPresetItem } from "../src/index"
 
 const html = (el: React.ReactElement) => renderToStaticMarkup(el)
 
@@ -234,6 +246,141 @@ describe("ShareButtons / KebabMenu / Celebration — backwards-compat", () => {
     expect(out).toContain("達成しました")
     expect(out).toContain("完了です")
   })
+
+  it("Celebration: duration / colors / driftRange 指定でも既存デフォルト挙動を壊さずレンダリング可能", () => {
+    const out = html(
+      <Celebration
+        title="カスタム confetti"
+        duration={1200}
+        driftRange={40}
+        colors={["var(--Categorical-1-Bold)", "var(--Categorical-5-Bold)"]}
+      />
+    )
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain("var(--Categorical-1-Bold)")
+  })
+
+  it("Celebration: emojiAnimation が既定 pop のままレンダリング可能", () => {
+    const out = html(<Celebration trigger="emoji" emoji="🎉" title="ポップ" />)
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain("🎉")
+  })
+
+  it("Celebration: emojiAnimation=bounce で celebration-emoji-pop を適用してレンダリング可能", () => {
+    const out = html(
+      <Celebration trigger="emoji" emoji="🎊" emojiAnimation="bounce" title="弾む" />
+    )
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain("celebration-emoji-pop")
+  })
+
+  it("Celebration: effect=\"burst\" で celebration-confetti-burst を適用してレンダリング可能（既定の fall は維持）", () => {
+    const out = html(
+      <Celebration trigger="confetti" effect="burst" title="弾けました" />
+    )
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain("celebration-confetti-burst")
+
+    const fallOut = html(<Celebration trigger="confetti" title="降ります" />)
+    expect(fallOut).toContain("celebration-confetti-fall")
+    expect(fallOut).not.toContain("celebration-confetti-burst")
+  })
+})
+
+describe("CollapsibleChipField — backwards-compat", () => {
+  type Category = "work" | "family" | "health"
+  const LABELS: Record<Category, string> = { work: "仕事", family: "家族", health: "健康" }
+
+  it("未選択時は全 chip が展開表示される", () => {
+    const out = html(
+      <CollapsibleChipField<Category>
+        label="カテゴリ"
+        options={["work", "family", "health"]}
+        selected=""
+        onSelect={() => undefined}
+        getLabel={(k) => LABELS[k]}
+      />
+    )
+    expect(out).toContain('data-slot="collapsible-chip-field"')
+    expect(out).toContain("仕事")
+    expect(out).toContain("家族")
+    expect(out).toContain("健康")
+  })
+
+  it("選択済みの場合は選択中の chip のみ表示される", () => {
+    const out = html(
+      <CollapsibleChipField<Category>
+        icon={<span aria-hidden="true">*</span>}
+        options={["work", "family", "health"]}
+        selected="family"
+        onSelect={() => undefined}
+        onClear={() => undefined}
+        getLabel={(k) => LABELS[k]}
+      />
+    )
+    expect(out).toContain("家族")
+    expect(out).not.toContain("仕事")
+    expect(out).not.toContain("健康")
+  })
+
+  it("alwaysExpanded 指定時は選択済みでも全 chip 表示される", () => {
+    const out = html(
+      <CollapsibleChipField<Category>
+        label="比較"
+        options={["work", "family", "health"]}
+        selected="work"
+        onSelect={() => undefined}
+        getLabel={(k) => LABELS[k]}
+        alwaysExpanded
+      />
+    )
+    expect(out).toContain("仕事")
+    expect(out).toContain("家族")
+    expect(out).toContain("健康")
+  })
+})
+
+describe("ChipFilterBar — backwards-compat", () => {
+  it("children と結果件数（デフォルトラベル）がレンダリング可能", () => {
+    const out = html(
+      <ChipFilterBar resultCount={42}>
+        <Chip>すべて</Chip>
+      </ChipFilterBar>
+    )
+    expect(out).toContain('data-slot="chip-filter-bar"')
+    expect(out).toContain("すべて")
+    expect(out).toContain("42件")
+  })
+
+  it("resultCountLabel でカスタム件数表示に差し替えられる", () => {
+    const out = html(
+      <ChipFilterBar resultCount={7} resultCountLabel={(n) => `${n} results`}>
+        <Chip>フィルタ</Chip>
+      </ChipFilterBar>
+    )
+    expect(out).toContain("7 results")
+    expect(out).not.toContain("7件")
+  })
+
+  it("sticky + stickyOffset が top インラインスタイルに反映される", () => {
+    const out = html(
+      <ChipFilterBar sticky stickyOffset={56}>
+        <Chip>絞り込み</Chip>
+      </ChipFilterBar>
+    )
+    expect(out).toContain("sticky")
+    expect(out).toContain("top:56px")
+  })
+
+  it("bare=true では children のみレンダリングされる（ラッパーなし）", () => {
+    const out = html(
+      <ChipFilterBar bare>
+        <Chip>bare</Chip>
+      </ChipFilterBar>
+    )
+    expect(out).not.toContain('data-slot="chip-filter-bar"')
+    expect(out).toContain("bare")
+  })
 })
 
 describe("SubNav / EmptyState / DataTable — improvement APIs", () => {
@@ -374,6 +521,64 @@ describe("Mobile DS recipes — render contracts", () => {
     expect(out).toContain("--ksk-bottom-tab-bar-keyboard-inset:0px")
   })
 
+  it("BottomTabBar pill は floatingPosition 未指定で従来どおり中央フロートする（後方互換）", () => {
+    const out = html(
+      <BottomTabBar
+        variant="pill"
+        items={[{ label: "ホーム", icon: <span aria-hidden="true">H</span>, isActive: true }]}
+      />
+    )
+    expect(out).toContain("left-1/2")
+    expect(out).toContain("-translate-x-1/2")
+  })
+
+  it("BottomTabBar pill は floatingPosition='left' で左寄せ + FAB スペースを確保する", () => {
+    const out = html(
+      <BottomTabBar
+        variant="pill"
+        floatingPosition="left"
+        items={[{ label: "ホーム", icon: <span aria-hidden="true">H</span>, isActive: true }]}
+      />
+    )
+    expect(out).toContain("left-3")
+    expect(out).toContain("right-20")
+    expect(out).not.toContain("left-1/2")
+  })
+
+  it("MobileTabBar は tabs/activeTab から BottomTabBar pill をレンダリングする", () => {
+    const DummyIcon = ({ size }: { size?: number; variant?: string; color?: string }) => (
+      <span aria-hidden="true" style={{ width: size, height: size }} />
+    )
+    const out = html(
+      <MobileTabBar
+        tabs={[
+          { key: "home", label: "ホーム", Icon: DummyIcon },
+          { key: "settings", label: "設定", Icon: DummyIcon },
+        ]}
+        activeTab="home"
+        onSelect={() => undefined}
+      />
+    )
+    expect(out).toContain('data-slot="bottom-nav-pill"')
+    expect(out).toContain("ホーム")
+    expect(out).toContain("設定")
+  })
+
+  it("MobileTabBar は addAction 指定時に中央 CTA を描画する", () => {
+    const DummyIcon = ({ size }: { size?: number; variant?: string; color?: string }) => (
+      <span aria-hidden="true" style={{ width: size, height: size }} />
+    )
+    const out = html(
+      <MobileTabBar
+        tabs={[{ key: "home", label: "ホーム", Icon: DummyIcon }]}
+        activeTab="home"
+        onSelect={() => undefined}
+        addAction={{ label: "作成", onClick: () => undefined }}
+      />
+    )
+    expect(out).toContain("data-global-nav-add-icon")
+  })
+
   it("AutoGrowTextarea compact は density contract と min-height override を出す", () => {
     const out = html(
       <AutoGrowTextarea
@@ -424,6 +629,91 @@ describe("Mobile DS recipes — render contracts", () => {
   })
 })
 
+describe("CelebrationDialog — backwards-compat", () => {
+  it("open=false では SSR エラーなくレンダリング可能（Dialog 非表示状態）", () => {
+    const out = html(
+      <CelebrationDialog
+        open={false}
+        onOpenChange={() => undefined}
+        emoji="🎉"
+        title="達成しました"
+        description="お疲れさまでした"
+      />
+    )
+    expect(typeof out).toBe("string")
+  })
+
+  it("open=true で Celebration confetti オーバーレイがレンダリングされる（DialogContent は Radix Portal のため SSR 出力対象外）", () => {
+    const out = html(
+      <CelebrationDialog
+        open
+        onOpenChange={() => undefined}
+        emoji="🎊"
+        emojiAnimation="bounce"
+        title="全タスク完了！"
+        description="次の目標に進みましょう"
+        actions={<button type="button">閉じる</button>}
+      />
+    )
+    expect(out).toContain('data-slot="celebration"')
+    expect(out).toContain('data-trigger="confetti"')
+  })
+
+  it("effect 未指定時は既定で burst confetti（celebration-confetti-burst）がレンダリングされる", () => {
+    const out = html(
+      <CelebrationDialog
+        open
+        onOpenChange={() => undefined}
+        emoji="🎉"
+        title="達成しました"
+      />
+    )
+    expect(out).toContain("celebration-confetti-burst")
+  })
+
+  it("effect=\"fall\" を明示すると fall confetti（celebration-confetti-fall）にフォールバックできる", () => {
+    const out = html(
+      <CelebrationDialog
+        open
+        onOpenChange={() => undefined}
+        emoji="🎉"
+        title="達成しました"
+        effect="fall"
+      />
+    )
+    expect(out).toContain("celebration-confetti-fall")
+    expect(out).not.toContain("celebration-confetti-burst")
+  })
+})
+
+describe("CountdownHero — backwards-compat", () => {
+  it("Date targetDate でレンダリング可能", () => {
+    const future = new Date()
+    future.setDate(future.getDate() + 42)
+    const out = html(<CountdownHero targetDate={future} />)
+    expect(out).toContain('data-slot="countdown-hero"')
+    expect(out).toContain("42")
+  })
+
+  it("ISO 文字列 targetDate でもレンダリング可能", () => {
+    const out = html(<CountdownHero targetDate="2099-12-31" label="年内残り" />)
+    expect(out).toContain('data-slot="countdown-hero"')
+    expect(out).toContain("年内残り")
+  })
+
+  it("illustration スロットを描画できる", () => {
+    const future = new Date()
+    future.setDate(future.getDate() + 10)
+    const out = html(
+      <CountdownHero
+        targetDate={future}
+        illustration={<span data-testid="illustration-slot">🖼️</span>}
+      />
+    )
+    expect(out).toContain("illustration-slot")
+  })
+})
+
 describe("Badge / Card — data-variant 出力", () => {
   it("Badge に data-variant", () => {
     expect(html(<Badge variant="success">x</Badge>)).toContain('data-variant="success"')
@@ -433,5 +723,113 @@ describe("Badge / Card — data-variant 出力", () => {
   it("Card に data-variant", () => {
     expect(html(<Card variant="media">x</Card>)).toContain('data-variant="media"')
     expect(html(<Card>x</Card>)).toContain('data-variant="default"')
+  })
+})
+
+describe("category-presets — backwards-compat", () => {
+  const allItems: CategoryPresetItem[] = [...weddingCategories, ...projectCategories]
+
+  it("weddingCategories は19要素", () => {
+    expect(weddingCategories).toHaveLength(19)
+  })
+
+  it("projectCategories は8要素", () => {
+    expect(projectCategories).toHaveLength(8)
+  })
+
+  it("各アイテムの categoricalIndex が 1..16 に収まる", () => {
+    for (const item of allItems) {
+      expect(item.categoricalIndex).toBeGreaterThanOrEqual(1)
+      expect(item.categoricalIndex).toBeLessThanOrEqual(16)
+      expect(Number.isInteger(item.categoricalIndex)).toBe(true)
+    }
+  })
+
+  it("各アイテムが key/label/icon を持つ", () => {
+    for (const item of allItems) {
+      expect(typeof item.key).toBe("string")
+      expect(item.key.length).toBeGreaterThan(0)
+      expect(typeof item.label).toBe("string")
+      expect(item.label.length).toBeGreaterThan(0)
+      expect(typeof item.icon).toBe("string")
+      expect(item.icon.length).toBeGreaterThan(0)
+    }
+  })
+
+  it("weddingCategories 内で key が一意", () => {
+    const keys = weddingCategories.map((c) => c.key)
+    expect(new Set(keys).size).toBe(keys.length)
+  })
+
+  it("projectCategories 内で key が一意", () => {
+    const keys = projectCategories.map((c) => c.key)
+    expect(new Set(keys).size).toBe(keys.length)
+  })
+
+  it("getCategoricalColor/-Subtle/-Bold が CSS var 文字列を返す", () => {
+    expect(getCategoricalColor(1)).toBe("var(--Categorical-1)")
+    expect(getCategoricalSubtle(7)).toBe("var(--Categorical-7-Subtle)")
+    expect(getCategoricalBold(16)).toBe("var(--Categorical-16-Bold)")
+  })
+})
+
+describe("DateField — backwards-compat", () => {
+  it("未選択（value=\"\"）でレンダリング可能", () => {
+    const out = html(<DateField value="" onChange={() => undefined} placeholder="日付を選択" />)
+    expect(out).toContain('data-slot="date-field"')
+    expect(out).toContain("日付を選択")
+  })
+
+  it("value=\"YYYY-MM-DD\" を表示に反映する（ローカルタイムで解釈、TZずれなし）", () => {
+    const out = html(<DateField value="2026-12-25" onChange={() => undefined} />)
+    expect(out).toContain('data-slot="date-field"')
+    expect(out).toContain("2026/12/25")
+  })
+
+  it("disabled が DatePicker に伝播する", () => {
+    const out = html(<DateField value="" onChange={() => undefined} disabled />)
+    expect(out).toContain("disabled")
+  })
+
+  it("dateFormat が反映される", () => {
+    const out = html(<DateField value="2026-07-02" onChange={() => undefined} dateFormat="yyyy年MM月dd日" />)
+    expect(out).toContain("2026年07月02日")
+  })
+
+  it("繰り上がる範囲外日付（2026-02-31 等）は不正値として未選択扱いにする", () => {
+    const out = html(<DateField value="2026-02-31" onChange={() => undefined} placeholder="日付を選択" />)
+    expect(out).toContain("日付を選択")
+    expect(out).not.toContain("2026/03/03")
+  })
+})
+
+describe("PresenceIndicator — backwards-compat", () => {
+  it("name のみでレンダリング可能（statusText/badgeLabel は任意）", () => {
+    const out = html(<PresenceIndicator name="田中" />)
+    expect(out).toContain('data-slot="presence-indicator"')
+    expect(out).toContain("田")
+  })
+
+  it("statusText と badgeLabel を表示する", () => {
+    const out = html(<PresenceIndicator name="佐藤" statusText="編集中" badgeLabel="オンライン" />)
+    expect(out).toContain("編集中")
+    expect(out).toContain("オンライン")
+    expect(out).toContain('data-variant="success"')
+  })
+
+  it("online=false で中立色ドットになる（--Object-Success を含まない）", () => {
+    const out = html(<PresenceIndicator name="鈴木" online={false} />)
+    expect(out).not.toContain("--Object-Success")
+    expect(out).toContain("--Object-Low-Emphasis")
+  })
+
+  it("online 省略時は既定で --Object-Success", () => {
+    const out = html(<PresenceIndicator name="山田" />)
+    expect(out).toContain("--Object-Success")
+  })
+
+  it("className を透過する", () => {
+    const out = html(<PresenceIndicator name="高橋" className="hidden min-[420px]:flex" />)
+    expect(out).toContain("min-[420px]:flex")
   })
 })

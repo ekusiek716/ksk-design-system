@@ -14,7 +14,7 @@ export interface ProgressStepsProps {
 }
 
 export function ProgressSteps({ steps, current }: ProgressStepsProps) {
-  const { theme, scales } = useTheme()
+  const { theme } = useTheme()
   return (
     <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 0 }}>
       {steps.map((s, i) => {

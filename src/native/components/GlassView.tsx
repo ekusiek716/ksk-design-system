@@ -80,7 +80,7 @@ export function GlassView({
   children,
   ...rest
 }: GlassViewProps) {
-  const { theme, scales, mode } = useTheme()
+  const { scales, mode } = useTheme()
   const radius = borderRadius ?? scales.borderRadius.lg
   const cfg = intensityMap[intensity]
   const resolvedTint: "light" | "dark" =
@@ -104,10 +104,9 @@ export function GlassView({
   }
 
   // ── Tier 1: iOS 26+ + expo-glass-effect ──
-  const GlassEffectView = tryLoadGlassEffectView()
-  if (nativeGlass && GlassEffectView && isNativeLiquidGlassAvailable()) {
+  if (nativeGlass && LoadedGlassEffectView && isNativeLiquidGlassAvailable()) {
     return (
-      <GlassEffectView
+      <LoadedGlassEffectView
         colorScheme={resolvedTint}
         glassEffectStyle={glassEffectStyle ?? glassEffectStyleMap[intensity]}
         isInteractive={interactive}
@@ -118,15 +117,14 @@ export function GlassView({
         {showRim && <GlassRim borderRadius={radius} borderColor={resolvedRimColor} />}
         {showHighlight && <GlassHighlight borderRadius={radius} color={resolvedHighlightColor} />}
         {children}
-      </GlassEffectView>
+      </LoadedGlassEffectView>
     )
   }
 
   // ── Tier 2: expo-blur fallback ──
-  const BlurView = tryLoadBlurView()
-  if (fallback === "blur" && BlurView && Platform.OS !== "web") {
+  if (fallback === "blur" && LoadedBlurView && Platform.OS !== "web") {
     return (
-      <BlurView
+      <LoadedBlurView
         intensity={cfg.blur * 2.5}
         tint={resolvedTint === "dark" ? "dark" : "light"}
         style={[baseStyle, { backgroundColor: "transparent" }, style]}
@@ -135,7 +133,7 @@ export function GlassView({
         {showRim && <GlassRim borderRadius={radius} borderColor={resolvedRimColor} />}
         {showHighlight && <GlassHighlight borderRadius={radius} color={resolvedHighlightColor} />}
         {children}
-      </BlurView>
+      </LoadedBlurView>
     )
   }
 
@@ -262,6 +260,12 @@ function tryLoadGlassEffectModule(): ExpoGlassEffectModule | null {
 function tryLoadGlassEffectView(): GlassEffectViewComponent | null {
   return tryLoadGlassEffectModule()?.GlassView ?? null
 }
+
+// optional peerDep はモジュール初期化時に一度だけ解決する
+// （render 中に component を生成すると再マウントの原因になるため）。
+// cached* 変数（let）の TDZ を避けるため、宣言より後のここで評価すること。
+const LoadedGlassEffectView = tryLoadGlassEffectView()
+const LoadedBlurView = tryLoadBlurView()
 
 function isNativeLiquidGlassAvailable(): boolean {
   if (Platform.OS !== "ios") return false

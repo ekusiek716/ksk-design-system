@@ -28,6 +28,9 @@ const buttonVariants = cva(
         // リリース時はオーバーシュートする bezier で液体的に弾ませる。
         glass: "glass glass-specular text-[var(--Text-High-Emphasis)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:brightness-[1.06] active:scale-[0.96] active:brightness-110 rounded-full",
         "glass-inverse": "glass glass-specular glass-inverse text-[var(--glass-button-text)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:brightness-[1.06] active:scale-[0.96] active:brightness-110 rounded-full",
+        // glass-accent — ブランドカラーをティントした glass。FAB（円形アイコンボタン）等の
+        // 主要アクションを、中立色の glass より一段強い存在感で目立たせたい時に使う。
+        "glass-accent": "glass glass-specular glass-accent text-[var(--Text-on-Inverse)] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:brightness-[1.06] active:scale-[0.96] active:brightness-110 rounded-full",
         accent: "bg-gradient-to-r from-[var(--Brand-Primary)] to-[var(--Brand-Action)] text-[var(--Text-on-Inverse)] border border-transparent hover:opacity-90 rounded-full",
         // inverse — 暗背景・ヒーローセクション上に乗せる primary CTA。
         // 白背景 + アクセント文字（Brand-Primary）。
@@ -51,6 +54,9 @@ const buttonVariants = cva(
         "icon-sm": "size-8",
         "icon-lg": "size-12",
         "icon-xl": "size-11",
+        // icon-fab — BottomTabBar の pill（h-[58px]）と並べて浮かせる FAB 用。
+        // 同じ bottom オフセットで高さがピルと揃うよう 58px 固定にしている。
+        "icon-fab": "size-[58px]",
         match: "h-12 px-4 typo-label-md",
       },
       layout: {

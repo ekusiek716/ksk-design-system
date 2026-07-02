@@ -1,6 +1,5 @@
 import React from "react"
 import { View } from "react-native"
-import { useTheme } from "../theme/ThemeProvider"
 import { Dialog } from "./Dialog"
 import { Button } from "./Button"
 
@@ -25,7 +24,6 @@ export function AlertDialog({
   onConfirm,
   destructive = false,
 }: AlertDialogProps) {
-  const { scales } = useTheme()
   return (
     <Dialog
       open={open}

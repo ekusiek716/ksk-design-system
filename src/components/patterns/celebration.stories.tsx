@@ -67,6 +67,70 @@ export const WithActions: Story = {
   },
 }
 
+export const CustomConfetti: Story = {
+  name: "Custom Duration / Colors / DriftRange",
+  args: {
+    active: true,
+    trigger: "confetti",
+    title: "カスタム confetti",
+    description: "duration / colors / driftRange を指定した例。",
+    duration: 1400,
+    driftRange: 40,
+    colors: [
+      "var(--Categorical-1-Bold)",
+      "var(--Categorical-5-Bold)",
+      "var(--Categorical-9-Bold)",
+      "var(--Categorical-13-Bold)",
+    ],
+  },
+}
+
+export const BounceEmoji: Story = {
+  name: "Emoji Animation: Bounce",
+  args: {
+    active: true,
+    trigger: "emoji",
+    placement: "inline",
+    emoji: "🎊",
+    emojiAnimation: "bounce",
+    title: "マイルストーン達成！",
+    description: "emoji に弾むイージングを適用した例。",
+  },
+  render: (args) => (
+    <div className="flex min-h-screen items-center justify-center bg-[var(--Surface-Secondary)] p-8">
+      <Celebration {...args} />
+    </div>
+  ),
+}
+
+export const BurstEffect: Story = {
+  name: "Effect: Burst（クラッカー演出）",
+  render: function BurstEffectStory() {
+    const [active, setActive] = React.useState(true)
+
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--Surface-Secondary)] p-8">
+        <Button
+          onClick={() => {
+            setActive(false)
+            // 再発火できるよう次フレームで active を戻す
+            requestAnimationFrame(() => setActive(true))
+          }}
+        >
+          もう一度弾く
+        </Button>
+        <Celebration
+          active={active}
+          trigger="confetti"
+          effect="burst"
+          cardless
+          title="達成しました"
+        />
+      </div>
+    )
+  },
+}
+
 export const CardlessTapDismiss: Story = {
   name: "Cardless / Tap Dismiss",
   render: function CardlessTapDismissStory() {
