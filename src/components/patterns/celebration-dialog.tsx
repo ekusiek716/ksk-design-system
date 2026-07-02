@@ -81,15 +81,23 @@ function CelebrationDialog({
       <DialogContent className={className}>
         <div className="flex flex-col items-center text-center">
           {emoji && (
+            // 絵文字は素置きせず、ブランド連動のソフトな円形バッジ + 外側の淡い光輪に載せる
+            //（テーマの Brand 色に自動追従。bounce は絵文字グリフのみに適用）
             <span
-              className={
-                !reducedMotion && emojiAnimation === "bounce"
-                  ? "typo-display-lg mb-3 leading-none animate-[celebration-emoji-pop_600ms_ease-out_200ms_both]"
-                  : "typo-display-lg mb-3 leading-none"
-              }
+              className="relative mb-4 flex h-20 w-20 items-center justify-center"
               aria-hidden="true"
             >
-              {emoji}
+              <span className="absolute -inset-3 rounded-full bg-[var(--Surface-Accent-Primary-Subtle)] opacity-50" />
+              <span className="absolute inset-0 rounded-full bg-[var(--Surface-Accent-Primary-Light)] border border-[var(--Surface-Accent-Primary-Subtle)]" />
+              <span
+                className={
+                  !reducedMotion && emojiAnimation === "bounce"
+                    ? "relative typo-display-lg leading-none animate-[celebration-emoji-pop_600ms_ease-out_200ms_both]"
+                    : "relative typo-display-lg leading-none"
+                }
+              >
+                {emoji}
+              </span>
             </span>
           )}
           <DialogTitle className="typo-heading-xl text-[var(--Text-High-Emphasis)]">
