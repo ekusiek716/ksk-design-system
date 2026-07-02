@@ -31,13 +31,12 @@ interface MobileTabBarProps<T extends string> {
 }
 
 function AddTabIcon() {
+  // ボタン本体（BottomTabBar の CenterActionItem がラベル無し時に正円 FAB になる）が
+  // ブランド色の円を担うため、ここではアイコンのみを渡す。
+  // data-global-nav-add-icon は消費側のグローバル nav スタイルフック（belle-todo 互換）。
   return (
-    <span
-      data-global-nav-add-icon
-      aria-hidden="true"
-      className="flex size-8 items-center justify-center rounded-full bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
-    >
-      <Add size={18} variant="Linear" color="currentColor" />
+    <span data-global-nav-add-icon aria-hidden="true" className="flex items-center justify-center">
+      <Add size={24} variant="Linear" color="currentColor" />
     </span>
   )
 }

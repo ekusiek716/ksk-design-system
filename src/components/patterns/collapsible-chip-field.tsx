@@ -56,6 +56,38 @@ function CollapsibleChipField<K extends string>({
   const expanded = alwaysExpanded || !selectionInOptions || forcedExpand
   const visible = expanded ? options : options.filter((k) => k === selected)
 
+  // 折りたたみ/展開で chip の折り返し行数が変わると行エリアの高さが一瞬でガクッと
+  // 変わって見える。展開状態が切り替わった直後に前後の実測高さを取り、
+  // height を 200ms ease-out（DS の入場モーション基準）でアニメーションさせる。
+  // prefers-reduced-motion 時はアニメーションしない。
+  const rowRef = React.useRef<HTMLDivElement>(null)
+  const prevHeightRef = React.useRef<number | null>(null)
+  React.useLayoutEffect(() => {
+    const el = rowRef.current
+    if (!el) return
+    const prev = prevHeightRef.current
+    const next = el.offsetHeight
+    prevHeightRef.current = next
+    if (prev === null || prev === next) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    el.style.height = `${prev}px`
+    el.style.overflow = "hidden"
+    void el.offsetHeight // reflow を挟んで transition を効かせる
+    el.style.transition = "height 200ms ease-out"
+    el.style.height = `${next}px`
+    const done = () => {
+      el.style.height = ""
+      el.style.overflow = ""
+      el.style.transition = ""
+      el.removeEventListener("transitionend", done)
+    }
+    el.addEventListener("transitionend", done)
+    return () => {
+      el.removeEventListener("transitionend", done)
+      done()
+    }
+  }, [expanded, visible.length])
+
   // 「label は 1 行目の chip と縦センター」。展開して多数の chip が折り返しても
   // label は最上行 chip と垂直中央が合うように、leading-[36px]（chip 行の
   // min-h=36px）で label の line-height を行高に合わせ、親 flex は items-start にする。
@@ -74,7 +106,7 @@ function CollapsibleChipField<K extends string>({
   return (
     <div data-slot="collapsible-chip-field" className="flex items-start gap-4 py-3">
       {leading}
-      <div className="flex gap-2 flex-1 flex-wrap min-h-[36px] items-center">
+      <div ref={rowRef} className="flex gap-2 flex-1 flex-wrap min-h-[36px] items-center">
         {visible.map((key) => (
           <Chip
             key={key}
