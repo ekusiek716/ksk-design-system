@@ -757,6 +757,12 @@ describe("DateField — backwards-compat", () => {
     const out = html(<DateField value="2026-07-02" onChange={() => undefined} dateFormat="yyyy年MM月dd日" />)
     expect(out).toContain("2026年07月02日")
   })
+
+  it("繰り上がる範囲外日付（2026-02-31 等）は不正値として未選択扱いにする", () => {
+    const out = html(<DateField value="2026-02-31" onChange={() => undefined} placeholder="日付を選択" />)
+    expect(out).toContain("日付を選択")
+    expect(out).not.toContain("2026/03/03")
+  })
 })
 
 describe("PresenceIndicator — backwards-compat", () => {

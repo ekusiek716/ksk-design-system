@@ -85,8 +85,10 @@ export function CollapsibleChipField<K extends string>({
                 onSelect(key)
                 setForcedExpand(false)
               } else if (selected === key) {
+                // 非 clearable かつ alwaysExpanded 時は何もしない（全 chip が見えているため
+                // 再選択モード不要。forcedExpand を立てると選択表示だけ消える視覚不整合になる）
                 if (onClear) onClear()
-                else setForcedExpand(true)
+                else if (!alwaysExpanded) setForcedExpand(true)
               } else {
                 onSelect(key)
               }
