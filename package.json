@@ -111,6 +111,10 @@
       "import": "./src/themes/violet.css",
       "default": "./src/themes/violet.css"
     },
+    "./themes/cobalt": {
+      "import": "./src/themes/cobalt.css",
+      "default": "./src/themes/cobalt.css"
+    },
     "./eslint/deprecated": {
       "import": "./eslint/deprecated.js",
       "default": "./eslint/deprecated.js"
