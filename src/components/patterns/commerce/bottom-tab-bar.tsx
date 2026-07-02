@@ -281,7 +281,9 @@ function NavItem({
           compact ? (isLabelVisible ? "h-8 w-11" : "h-8 w-12") : "h-7 w-14",
           item.isActive && (
             compact
-              ? "[background:color-mix(in_srgb,var(--Surface-Primary)_42%,transparent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_1px_4px_rgba(0,0,0,0.08)]"
+              // 影は上端のインセットハイライト 1 枚のみ。外側ドロップシャドウを足すと
+              // ピル本体（.glass）の影と二重になり煩く見える
+              ? "[background:color-mix(in_srgb,var(--Surface-Primary)_42%,transparent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]"
               : "bg-[var(--Surface-Accent-Primary-Light)]"
           )
         )}
@@ -308,11 +310,15 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
   const tagProps = item.href
     ? { href: item.href }
     : { type: "button" as const, onClick: item.onClick }
+  // label 無しはアイコンのみの正円 FAB として描画する
+  //（ラベル前提の幅広ピルに空ラベルを入れると間延びした見た目になるため）
+  const hasLabel = Boolean(item.label)
 
   return (
     <Tag
       className={cn(
-        "relative flex h-12 min-w-[78px] shrink-0 items-center justify-center gap-1.5 rounded-full px-3",
+        "relative flex shrink-0 items-center justify-center rounded-full",
+        hasLabel ? "h-12 min-w-[78px] gap-1.5 px-3" : "size-12",
         "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] shadow-[0_8px_24px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.28)]",
         "typo-label-sm transition-transform active:scale-[0.96]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
@@ -320,10 +326,13 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
       aria-label={item.ariaLabel ?? item.label}
       {...tagProps}
     >
-      <span className="flex size-5 items-center justify-center" aria-hidden="true">
+      <span
+        className={cn("flex items-center justify-center", hasLabel && "size-5")}
+        aria-hidden="true"
+      >
         {item.icon}
       </span>
-      <span className="max-w-[5rem] truncate">{item.label}</span>
+      {hasLabel && <span className="max-w-[5rem] truncate">{item.label}</span>}
     </Tag>
   )
 }
