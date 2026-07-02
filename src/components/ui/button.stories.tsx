@@ -244,6 +244,46 @@ export const GlassAccentFab: Story = {
   ),
 }
 
+export const GlassBlurDemo: Story = {
+  name: "Glass — ボケ感デモ（動くコンテンツ上）",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div className="relative min-h-screen w-full overflow-hidden bg-[var(--Surface-Inverse)]">
+      <style>{`@keyframes glass-blur-demo-scroll { from { transform: translateY(0); } to { transform: translateY(-45%); } }`}</style>
+      {/* glass の backdrop blur / saturate はコンテンツが下を通過して初めて分かるため、
+          カラフルなカード列を自動スクロールさせてボタンの下をくぐらせる */}
+      <div
+        className="absolute inset-x-0 top-0 flex flex-col gap-4 p-6"
+        style={{ animation: "glass-blur-demo-scroll 16s linear infinite alternate" }}
+        aria-hidden="true"
+      >
+        {Array.from({ length: 14 }, (_, i) => (
+          <div
+            key={i}
+            className="flex h-32 items-center justify-between rounded-2xl px-6"
+            style={{
+              background: `linear-gradient(120deg, var(--Categorical-${(i % 8) + 1}), var(--Categorical-${((i + 3) % 8) + 1}-Subtle))`,
+            }}
+          >
+            <span className="typo-heading-xl text-[var(--Text-on-Inverse)] opacity-90">Aa あア 09</span>
+            <span className="size-16 rounded-full" style={{ background: `var(--Categorical-${((i + 5) % 8) + 1}-Bold)` }} />
+          </div>
+        ))}
+      </div>
+      <div className="absolute inset-x-0 bottom-20 flex items-center justify-center gap-3">
+        <Button variant="glass" size="lg">キャンセル</Button>
+        <Button variant="glass-accent" size="icon-fab" aria-label="新規作成">
+          <Add size={26} variant="Linear" color="currentColor" />
+        </Button>
+        <Button variant="glass-inverse" size="lg">実行する</Button>
+      </div>
+      <p className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-[var(--Surface-VideoOverlay-Strong,rgba(0,0,0,0.6))] px-4 py-1.5 typo-label-sm text-[var(--Text-on-Inverse)]">
+        下のコンテンツが動くと blur / saturate の質感が見える
+      </p>
+    </div>
+  ),
+}
+
 export const WithIcon: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
