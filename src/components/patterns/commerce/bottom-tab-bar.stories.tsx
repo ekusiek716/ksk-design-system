@@ -175,7 +175,7 @@ export const FloatingPositionLeftWithFab: Story = {
       <BottomTabBar variant="pill" pillPosition="absolute" floatingPosition="left" items={COMPACT_ITEMS} />
       <Button
         variant="glass-accent"
-        size="icon-xl"
+        size="icon-fab"
         aria-label="新規作成"
         className="absolute bottom-[calc(env(safe-area-inset-bottom)+12px)] right-3"
       >
@@ -195,7 +195,7 @@ export const FloatingPositionRightWithFab: Story = {
       <BottomTabBar variant="pill" pillPosition="absolute" floatingPosition="right" items={COMPACT_ITEMS} />
       <Button
         variant="glass-accent"
-        size="icon-xl"
+        size="icon-fab"
         aria-label="新規作成"
         className="absolute bottom-[calc(env(safe-area-inset-bottom)+12px)] left-3"
       >

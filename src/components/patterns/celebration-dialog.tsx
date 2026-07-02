@@ -10,7 +10,13 @@ import type { CelebrationProps } from "./celebration"
 interface CelebrationDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** ダイアログ上部に表示する絵文字。省略時は非表示 */
+  /**
+   * ダイアログ上部のバッジに表示するアイコン。iconsax の Bulk variant 推奨
+   * （例: `<MedalStar size={40} variant="Bulk" color="var(--Brand-Primary)" />`）。
+   * 指定時は emoji より優先される。
+   */
+  icon?: React.ReactNode
+  /** ダイアログ上部のバッジに表示する絵文字。icon 未指定時のみ使用。省略時はバッジ非表示 */
   emoji?: string
   title: string
   description?: string
@@ -44,6 +50,7 @@ interface CelebrationDialogProps {
 function CelebrationDialog({
   open,
   onOpenChange,
+  icon,
   emoji,
   title,
   description,
@@ -80,9 +87,10 @@ function CelebrationDialog({
       )}
       <DialogContent className={className}>
         <div className="flex flex-col items-center text-center">
-          {emoji && (
-            // 絵文字は素置きせず、ブランド連動のソフトな円形バッジ + 外側の淡い光輪に載せる
-            //（テーマの Brand 色に自動追従。bounce は絵文字グリフのみに適用）
+          {(icon || emoji) && (
+            // アイコン/絵文字は素置きせず、ブランド連動のソフトな円形バッジ +
+            // 外側の淡い光輪に載せる（テーマの Brand 色に自動追従。
+            // bounce はバッジ内のグリフのみに適用）
             <span
               className="relative mb-4 flex h-20 w-20 items-center justify-center"
               aria-hidden="true"
@@ -92,11 +100,11 @@ function CelebrationDialog({
               <span
                 className={
                   !reducedMotion && emojiAnimation === "bounce"
-                    ? "relative typo-display-lg leading-none animate-[celebration-emoji-pop_600ms_ease-out_200ms_both]"
-                    : "relative typo-display-lg leading-none"
+                    ? "relative flex items-center justify-center typo-display-lg leading-none animate-[celebration-emoji-pop_600ms_ease-out_200ms_both]"
+                    : "relative flex items-center justify-center typo-display-lg leading-none"
                 }
               >
-                {emoji}
+                {icon ?? emoji}
               </span>
             </span>
           )}

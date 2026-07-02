@@ -1,3 +1,4 @@
+import * as React from "react"
 import { cn } from "@/lib/utils"
 import { DatePicker } from "./date-picker"
 
@@ -46,6 +47,9 @@ interface DateFieldProps {
  * UTC 変換を経由しないため、日付が前後にずれない。
  */
 function DateField({ value, onChange, placeholder, disabled, className, dateFormat }: DateFieldProps) {
+  // 毎レンダーで新しい Date インスタンスを作ると、選択直後の閉じアニメーション中に
+  // Calendar が identity 変化で再レンダーされ、ちらつきの一因になる。value 基準で固定する。
+  const date = React.useMemo(() => strToDate(value), [value])
   return (
     <div
       data-slot="date-field"
@@ -57,7 +61,7 @@ function DateField({ value, onChange, placeholder, disabled, className, dateForm
       )}
     >
       <DatePicker
-        value={strToDate(value)}
+        value={date}
         onChange={(d) => onChange(dateToStr(d))}
         placeholder={placeholder}
         disabled={disabled}

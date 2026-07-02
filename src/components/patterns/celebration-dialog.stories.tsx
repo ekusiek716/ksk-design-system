@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
+import { MedalStar } from "iconsax-reactjs"
 import { CelebrationDialog } from "./celebration-dialog"
 import { Button } from "../ui/button"
 
@@ -49,6 +50,31 @@ export const BounceEmojiWithAutoDismiss: Story = {
           title="全タスク完了！"
           description="お疲れさまでした。4 秒後に自動で閉じます。"
           autoDismissMs={4000}
+        />
+      </div>
+    )
+  },
+}
+
+export const IconsaxBadge: Story = {
+  name: "Iconsax Badge（emoji の代わり）",
+  render: function IconsaxBadgeStory() {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <div className="p-8">
+        <Button onClick={() => setOpen(true)}>実績を解除する</Button>
+        <CelebrationDialog
+          open={open}
+          onOpenChange={setOpen}
+          icon={<MedalStar size={44} variant="Bulk" color="var(--Brand-Primary)" />}
+          emojiAnimation="bounce"
+          title="実績を解除しました"
+          description="emoji ではなく iconsax（Bulk variant）をバッジに載せる例。"
+          actions={
+            <Button size="sm" onClick={() => setOpen(false)}>
+              閉じる
+            </Button>
+          }
         />
       </div>
     )

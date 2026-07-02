@@ -68,6 +68,11 @@ function DatePicker({
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
   const formatted = value ? formatDate(value, dateFormat) : null
+  // ポインタ（マウス/タップ）で日付を選んで閉じたかの記録。
+  // その場合 Radix のフォーカス返却でトリガーの focus-visible リングが一瞬点灯し、
+  // open 中リングの消灯と重なって明滅（ちらつき）して見えるため、返却を抑止する。
+  // キーボード操作（Enter で選択）ではフォーカス返却を維持する（a11y）。
+  const pointerSelectionRef = React.useRef(false)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -83,7 +88,24 @@ function DatePicker({
           {calendarIcon}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent
+        className="w-auto p-0"
+        align="start"
+        onPointerDownCapture={() => {
+          pointerSelectionRef.current = true
+        }}
+        onCloseAutoFocus={(e) => {
+          if (pointerSelectionRef.current) {
+            pointerSelectionRef.current = false
+            e.preventDefault()
+            // フォーカスを閉じかけのカレンダー内に残さない（unmount 時の唐突な
+            // フォーカス移動を避け、明示的に手放す）
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur()
+            }
+          }
+        }}
+      >
         <Calendar
           mode="single"
           selected={value}
