@@ -127,6 +127,10 @@ export function GlassView({
       <LoadedBlurView
         intensity={cfg.blur * 2.5}
         tint={resolvedTint === "dark" ? "dark" : "light"}
+        // Android の既定 "none" は半透明フィルのみで実際のぼかしがかからない。
+        // "dimezisBlurView" で BlurView (RenderEffect/RenderScript) の本物のぼかしを使う。
+        // 既知の注意点: react-native-screens の画面遷移中に描画が乱れることがある。
+        experimentalBlurMethod={Platform.OS === "android" ? "dimezisBlurView" : undefined}
         style={[baseStyle, { backgroundColor: "transparent" }, style]}
         {...rest}
       >
@@ -209,6 +213,8 @@ function GlassHighlight({ borderRadius, color }: { borderRadius: number; color: 
 type BlurViewComponent = React.ComponentType<{
   intensity?: number
   tint?: "light" | "dark" | "default"
+  /** Android のみ。既定 "none" は半透明フィルにしかならず、実際のぼかしがかからない。 */
+  experimentalBlurMethod?: "none" | "dimezisBlurView"
   style?: ViewProps["style"]
   children?: React.ReactNode
 }>
