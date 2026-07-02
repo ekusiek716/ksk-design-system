@@ -1,4 +1,4 @@
-import React, { useRef } from "react"
+import React, { useState } from "react"
 import { Animated, PanResponder, Pressable, View, Text as RNText } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
@@ -19,10 +19,11 @@ export interface SwipeRowProps {
 /** 右からスワイプして action を出す簡易行。Animated.Value + PanResponder のみで実装。 */
 export function SwipeRow({ rightActions = [], actionWidth = 80, children }: SwipeRowProps) {
   const { theme } = useTheme()
-  const translateX = useRef(new Animated.Value(0)).current
+  // render 中の ref 読み取りを避けるため useState の lazy initializer で一度だけ生成
+  const [translateX] = useState(() => new Animated.Value(0))
   const openedWidth = rightActions.length * actionWidth
 
-  const responder = useRef(
+  const [responder] = useState(() =>
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 8,
       onPanResponderMove: (_, g) => {
@@ -37,7 +38,7 @@ export function SwipeRow({ rightActions = [], actionWidth = 80, children }: Swip
         }).start()
       },
     }),
-  ).current
+  )
 
   return (
     <View style={{ position: "relative", overflow: "hidden" }}>

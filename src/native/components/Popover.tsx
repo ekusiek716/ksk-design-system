@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react"
-import { Modal, Pressable, View, type LayoutChangeEvent } from "react-native"
+import React from "react"
+import { Modal, Pressable, View } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 
 export interface PopoverProps {
@@ -12,11 +12,6 @@ export interface PopoverProps {
 
 export function Popover({ open, onClose, anchor, children }: PopoverProps) {
   const { theme, scales } = useTheme()
-  const [size, setSize] = useState({ width: 200, height: 100 })
-
-  const onLayout = (e: LayoutChangeEvent) => {
-    setSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })
-  }
 
   const top = anchor ? anchor.y + (anchor.height ?? 0) + 4 : 100
   const left = anchor ? anchor.x : 0
@@ -25,7 +20,6 @@ export function Popover({ open, onClose, anchor, children }: PopoverProps) {
     <Modal visible={open} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable onPress={onClose} style={{ flex: 1 }}>
         <View
-          onLayout={onLayout}
           style={{
             position: "absolute",
             top,

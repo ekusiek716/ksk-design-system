@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react"
-import { View, PanResponder, type LayoutChangeEvent } from "react-native"
+import React, { useState } from "react"
+import { View, type LayoutChangeEvent } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 
 export interface SliderProps {
@@ -21,7 +21,6 @@ export function Slider({
 }: SliderProps) {
   const { theme, scales } = useTheme()
   const [width, setWidth] = useState(0)
-  const widthRef = useRef(0)
 
   const clamp = (v: number) => Math.max(min, Math.min(max, v))
   const snap = (v: number) => {
@@ -30,32 +29,27 @@ export function Slider({
   }
 
   const updateFromX = (x: number) => {
-    if (!widthRef.current) return
-    const ratio = Math.max(0, Math.min(1, x / widthRef.current))
+    if (!width) return
+    const ratio = Math.max(0, Math.min(1, x / width))
     const next = clamp(snap(min + (max - min) * ratio))
     onChange?.(next)
   }
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => !disabled,
-      onMoveShouldSetPanResponder: () => !disabled,
-      onPanResponderGrant: (e) => updateFromX(e.nativeEvent.locationX),
-      onPanResponderMove: (e) => updateFromX(e.nativeEvent.locationX),
-    }),
-  ).current
-
   const ratio = (clamp(value) - min) / (max - min)
   const onLayout = (e: LayoutChangeEvent) => {
-    const w = e.nativeEvent.layout.width
-    setWidth(w)
-    widthRef.current = w
+    setWidth(e.nativeEvent.layout.width)
   }
 
+  // PanResponder を render 中に生成すると react-hooks/refs 違反になるため、
+  // View の responder props を直接使う。毎 render 最新の props/width を
+  // 参照するクロージャになるので stale closure も解消される。
   return (
     <View
       onLayout={onLayout}
-      {...panResponder.panHandlers}
+      onStartShouldSetResponder={() => !disabled}
+      onMoveShouldSetResponder={() => !disabled}
+      onResponderGrant={(e) => updateFromX(e.nativeEvent.locationX)}
+      onResponderMove={(e) => updateFromX(e.nativeEvent.locationX)}
       style={{
         height: 32,
         justifyContent: "center",
