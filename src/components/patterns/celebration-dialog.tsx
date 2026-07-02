@@ -26,6 +26,11 @@ interface CelebrationDialogProps {
   autoDismissMs?: number
   /** Celebration の emoji 表示アニメーション（既定 "pop"） */
   emojiAnimation?: CelebrationProps["emojiAnimation"]
+  /**
+   * Celebration confetti の演出モード。既定は "burst"
+   * （達成演出はクラッカーが弾けた感じを標準とする）。
+   */
+  effect?: CelebrationProps["effect"]
   /** Celebration confetti のパススルー props */
   particleCount?: CelebrationProps["particleCount"]
   duration?: CelebrationProps["duration"]
@@ -57,6 +62,7 @@ function CelebrationDialog({
   actions,
   autoDismissMs,
   emojiAnimation = "pop",
+  effect = "burst",
   particleCount,
   duration,
   colors,
@@ -79,7 +85,8 @@ function CelebrationDialog({
           trigger="confetti"
           placement="overlay"
           cardless
-          particleCount={particleCount}
+          effect={effect}
+          particleCount={particleCount ?? (effect === "burst" ? 40 : 36)}
           duration={duration}
           colors={colors}
           driftRange={driftRange}
