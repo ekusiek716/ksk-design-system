@@ -22,6 +22,13 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // eslint-plugin-react-hooks 7.1 で recommended に昇格した新ルール群。
+      // 既存 DS コンポーネントに正当なパターンでの検出が多数あるため（RN Animated.Value を
+      // transform に渡す=refs、matchMedia 初期値の同期取得=set-state-in-effect 等）、
+      // lint-scratch と同じ「warn で段階導入 → 順次 error 化」方針で当面 warn に下げる。
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/exhaustive-deps": "warn",
       // 段階廃止フロー: warn → error → 削除。
       // 利用側にもこのルールを提供する想定（ksk-design-system/eslint/deprecated）。
       "ksk-deprecated/no-deprecated": "warn",

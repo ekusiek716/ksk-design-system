@@ -9,8 +9,7 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": [],
-    "baseUrl": "."
+    "types": []
   },
   "include": ["src/native", "src/tokens/native"]
 }
