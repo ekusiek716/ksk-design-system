@@ -206,7 +206,7 @@
     }
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^10.0.1",
     "@hookform/resolvers": "^5.2.2",
     "@storybook/addon-a11y": "^10.3.3",
     "@storybook/addon-docs": "^10.3.3",
@@ -215,10 +215,10 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
-    "eslint": "^9.39.1",
+    "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-storybook": "^10.3.3",
-    "globals": "^16.5.0",
+    "globals": "^17.7.0",
     "iconsax-reactjs": "^0.0.8",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",
