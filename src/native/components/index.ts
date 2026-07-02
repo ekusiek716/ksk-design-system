@@ -40,6 +40,8 @@ export {
   type CelebrationTrigger,
   type CelebrationPlacement,
 } from "./Celebration"
+export { CelebrationDialog, type CelebrationDialogProps } from "./CelebrationDialog"
+export { CountdownHero, type CountdownHeroProps } from "./CountdownHero"
 
 // Phase 2: Basic Form
 export { Label, type LabelProps } from "./Label"
@@ -104,6 +106,7 @@ export {
 } from "./Tabs"
 export { Calendar, type CalendarProps } from "./Calendar"
 export { DatePicker, type DatePickerProps } from "./DatePicker"
+export { DateField, type DateFieldProps } from "./DateField"
 export { TimePicker, type TimePickerProps, type TimeValue } from "./TimePicker"
 export { Accordion, type AccordionProps, type AccordionItem } from "./Accordion"
 export { Collapsible, type CollapsibleProps } from "./Collapsible"
@@ -186,12 +189,15 @@ export {
   type QuickActionGridProps,
 } from "./QuickActionGrid"
 export { ChipSelector, type ChipSelectorProps, type ChipSelectorOption } from "./ChipSelector"
+export { CollapsibleChipField, type CollapsibleChipFieldProps } from "./CollapsibleChipField"
+export { ChipFilterBar, type ChipFilterBarProps } from "./ChipFilterBar"
 export { CategoryNav, type CategoryNavProps, type CategoryNavItem } from "./CategoryNav"
 export { CategoryScroll, type CategoryScrollProps, type CategoryScrollItem } from "./CategoryScroll"
 export { ProgressSteps, type ProgressStepsProps, type StepItem } from "./ProgressSteps"
 export { TagInput, type TagInputProps } from "./TagInput"
 export { ShareButtons, type ShareButtonsProps } from "./ShareButtons"
 export { FilterChip, type FilterChipProps } from "./FilterChip"
+export { PresenceIndicator, type PresenceIndicatorProps } from "./PresenceIndicator"
 export { ImageGallery, type ImageGalleryProps } from "./ImageGallery"
 export { SocialLoginButton, type SocialLoginButtonProps, type SocialProvider } from "./SocialLoginButton"
 export { SocialIcon, type SocialIconProps, type SocialIconBrand } from "./SocialIcon"

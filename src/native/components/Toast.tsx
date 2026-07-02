@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react"
 import { Animated, View, Text as RNText, Pressable } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
@@ -33,7 +33,7 @@ function nextId() {
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const { theme, scales } = useTheme()
+  const { scales } = useTheme()
   const [items, setItems] = useState<ToastItem[]>([])
 
   const dismiss = useCallback((id: string) => {
@@ -76,8 +76,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
 function ToastView({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => void }) {
   const { theme, scales } = useTheme()
-  const opacity = useRef(new Animated.Value(0)).current
-  const translate = useRef(new Animated.Value(-20)).current
+  // render 中の ref 読み取りを避けるため useState の lazy initializer で一度だけ生成
+  const [opacity] = useState(() => new Animated.Value(0))
+  const [translate] = useState(() => new Animated.Value(-20))
 
   useEffect(() => {
     Animated.parallel([

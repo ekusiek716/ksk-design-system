@@ -4,19 +4,19 @@
     "version": "1.34.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 57,
-      "patterns": 46,
-      "commerce": 11,
+      "ui": 58,
+      "patterns": 51,
+      "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 125
+      "total": 132
     }
   },
   "ui": [
     {
       "name": "Button",
       "path": "src/components/ui/button.tsx",
-      "description": "アクションボタン。最重要CTAにはdefault、Liquid Glass背景にはglass、暗背景上のLiquid Glassにはglass-inverse。アイコン単独はiconサイズ群。",
+      "description": "アクションボタン。最重要CTAにはdefault、Liquid Glass背景にはglass、暗背景上のLiquid Glassにはglass-inverse、ブランドカラーをティントしたglassはglass-accent（FAB等）。アイコン単独はiconサイズ群。",
       "variants": [
         "default",
         "secondary",
@@ -27,6 +27,7 @@
         "destructive",
         "glass",
         "glass-inverse",
+        "glass-accent",
         "accent",
         "inverse",
         "ghost-inverse"
@@ -42,6 +43,7 @@
         "icon-sm",
         "icon-lg",
         "icon-xl",
+        "icon-fab",
         "match"
       ],
       "accessibility": [
@@ -95,6 +97,20 @@
       "rules": [
         "Use DatePicker not <input type='date'>",
         "Use DateRangePicker for date range selection"
+      ]
+    },
+    {
+      "name": "DateField",
+      "path": "src/components/ui/date-field.tsx",
+      "description": "DatePicker を \"YYYY-MM-DD\" ISO 文字列 API でラップする adapter。バックエンド/store が ISO date 文字列で日付を保持する場合に使う。value=\"\" が未選択を表す。",
+      "variants": [],
+      "accessibility": [
+        "Must pair with <Label>",
+        "aria-expanded on trigger button（内部 DatePicker 由来）"
+      ],
+      "rules": [
+        "value/onChange は常に \"YYYY-MM-DD\" 文字列。Date オブジェクトを直接渡さない",
+        "strToDate/dateToStr は new Date(y, m-1, d) のローカルタイム方式（TZ ずれ回避）"
       ]
     },
     {
@@ -1056,7 +1072,7 @@
     {
       "name": "Celebration",
       "path": "src/components/patterns/celebration.tsx",
-      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、actions slot、interactive card tap、cardless モード、tap dismiss、prefers-reduced-motion 対応。",
+      "description": "マイルストーン達成・大目標達成などの祝い演出。confetti / emoji 表示、actions slot、interactive card tap、cardless モード、tap dismiss、prefers-reduced-motion 対応。confetti の duration / colors / driftRange をカスタマイズ可能。effect で confetti の演出モード（fall / burst）を切り替え可能（Issue #111）。",
       "variants": [
         "confetti",
         "emoji",
@@ -1068,18 +1084,25 @@
         "interactive",
         "cardless",
         "tap-dismiss",
-        "duration-control"
+        "duration-control",
+        "custom-duration",
+        "custom-colors",
+        "custom-drift-range",
+        "emoji-animation-pop-or-bounce",
+        "effect-fall-or-burst",
+        "confetti-burst-radial-360"
       ],
       "accessibility": [
         "role=status",
         "aria-live=polite",
-        "prefers-reduced-motion で confetti を抑制"
+        "prefers-reduced-motion で confetti を抑制（emojiAnimation=bounce も含む。effect=burst も同様にスキップ）"
       ],
       "rules": [
         "一時的な達成演出に使用",
         "ローディングや常時表示の装飾用途には使わない",
         "CTA を含む達成 UI は actions slot を使い、カード tap で任意 dismiss したい場合は interactive または onTapDismiss を使う",
-        "カード不要の演出は cardless を使う"
+        "カード不要の演出は cardless を使う",
+        "effect は既定 \"fall\"（後方互換）。クラッカーが弾けた感じにしたい達成演出は effect=\"burst\" を使う（中央から全方位 360° に放射）"
       ]
     },
     {
@@ -1189,6 +1212,81 @@
       "rules": [
         "Use multiple=false for single-select. Use max to limit selection count.",
         "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior."
+      ]
+    },
+    {
+      "name": "CollapsibleChipField",
+      "path": "src/components/patterns/collapsible-chip-field.tsx",
+      "description": "折りたたみ式の単一選択チップフィールド。未選択時は全選択肢を展開表示し、選択後は選択中の1チップのみに折りたたむ。再タップで解除（onClear）または再選択用に再展開する。belle-todo 移植（Issue #106）。ChipSelector（複数選択）とは別 API・別用途。",
+      "features": [
+        "single-select",
+        "collapse-on-select",
+        "always-expanded-mode",
+        "leading-icon-or-label"
+      ],
+      "rules": [
+        "ChipSelector（chip-selector.tsx）とは別コンポーネント。混同して置き換えない。",
+        "onClear 未指定時、選択済み chip の再タップは解除でなく再選択用の再展開のみ（required field 対応）。",
+        "label 指定時は幅 w-20 固定でフィールドリストの他行とラベル幅を揃える。"
+      ]
+    },
+    {
+      "name": "ChipFilterBar",
+      "path": "src/components/patterns/chip-filter-bar.tsx",
+      "description": "Chip を横スクロール表示するフィルターバーパターン。sticky モード・結果件数表示・bare（ラッパーなし）モードを持つ。belle-todo 移植（Issue #104）。",
+      "features": [
+        "horizontal-scroll",
+        "sticky-mode",
+        "result-count",
+        "bare-mode"
+      ],
+      "rules": [
+        "commerce/FilterBar（filters/sortOptions 統合型）とは別コンポーネント。children に任意の Chip 群を渡すシンプルなラッパー。",
+        "sticky 時の top オフセットは stickyOffset prop で指定する（固定ヘッダー高さの相殺用）。",
+        "resultCountLabel 未指定時は \"{n}件\" を表示。i18n が必要な場合は関数 props で差し替える。",
+        "bare=true 時は overflow/padding ラッパーを付けない。外側スクロールコンテナと共有する場合に使う。"
+      ]
+    },
+    {
+      "name": "CelebrationDialog",
+      "path": "src/components/patterns/celebration-dialog.tsx",
+      "description": "達成演出用の Dialog + Celebration confetti + emoji/title/description/actions スロット合成パターン。belle-todo の MilestoneCelebration を参考に、MILESTONES 定義・アップセル CTA・store・i18n・analytics は持ち込まずスロット化（Issue #110）。confetti の既定 effect は \"burst\"（クラッカー演出）（Issue #111）。",
+      "features": [
+        "dialog-based",
+        "confetti-overlay",
+        "emoji-slot",
+        "actions-slot",
+        "auto-dismiss",
+        "emoji-animation-pop-or-bounce",
+        "confetti-props-passthrough",
+        "effect-burst-default"
+      ],
+      "accessibility": [
+        "DS Dialog（Radix）ベースのため Esc / overlay クリックで閉じる",
+        "prefers-reduced-motion で confetti・emoji bounce を抑制"
+      ],
+      "rules": [
+        "MILESTONES 定義・アップセル文言・分析トラッキングは呼び出し側で actions スロットに組み込む。コンポーネント内部に業務ロジックを持たせない。",
+        "autoDismissMs 指定時は経過後に onOpenChange(false) を呼ぶだけで、closeロジック自体は呼び出し側に委譲する。",
+        "effect 既定は \"burst\"（達成演出はクラッカーが標準）。fall に戻したい場合は effect=\"fall\" を明示する。",
+        "confetti 系 props（particleCount/duration/colors/driftRange）は Celebration へそのままパススルー。"
+      ]
+    },
+    {
+      "name": "CountdownHero",
+      "path": "src/components/patterns/countdown-hero.tsx",
+      "description": "装飾的な serif 数字で目標日までの残日数を表示するヒーロー表示。belle-todo の CountdownSection を参考に、日付編集フォーム・wedding イラスト・i18n・store は持ち込まず表示専用に再設計（Issue #110）。",
+      "features": [
+        "large-serif-number",
+        "today-past-active-states",
+        "illustration-slot",
+        "iso-string-or-date-target"
+      ],
+      "rules": [
+        "既存の CountdownTimer（残日数ピル表示）とは別コンポーネント。装飾ヒーロー表示専用で置き換えない。",
+        "日付編集フォームは持ち込まない。表示専用コンポーネント。",
+        "illustration スロットに wedding 画像等のドメイン固有アセットを直接埋め込まない。呼び出し側が用意する。",
+        "serif フォントは --font-display-serif トークン未定義環境向けに Georgia / Noto Serif JP / serif へフォールバックする。"
       ]
     },
     {
@@ -1458,6 +1556,21 @@
       ]
     },
     {
+      "name": "PresenceIndicator",
+      "path": "src/components/patterns/presence-indicator.tsx",
+      "description": "「誰か（何か）が今いる/見ている」ことを示す汎用インジケーター。Avatar（イニシャル）+ 右下ステータスドット + statusText + Badge（badgeLabel 指定時）。realtime 取得ロジックや i18n は持ち込まず表示専用。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "role=\"status\" + aria-label で name/statusText を読み上げ",
+        "ステータスドットは aria-hidden（色だけに依存させない）"
+      ],
+      "rules": [
+        "online=false は中立色（--Object-Low-Emphasis）、online=true（既定）は --Object-Success",
+        "レスポンシブ非表示は呼び出し側の責務（className でユーティリティを渡す）"
+      ]
+    },
+    {
       "name": "BottomSheetFrame",
       "path": "src/components/patterns/bottom-sheet-frame.tsx",
       "description": "SheetContent の responsive outer frame preset。mobile-full / mobile-form / desktop-floating を宣言し、DetailSheetScaffold と KeyboardAwareSheetFooter を内側で合成する。",
@@ -1669,7 +1782,7 @@
     {
       "name": "BottomTabBar",
       "path": "src/components/patterns/commerce/bottom-tab-bar.tsx",
-      "description": "SP 下部固定タブナビゲーション。default と pill（iOS 26 Liquid Glass）バリアント。pill は centerAction・ラベル表示・inverse tone・mobile shell max-width に対応。",
+      "description": "SP 下部固定タブナビゲーション。default と pill（iOS 26 Liquid Glass）バリアント。pill は centerAction・ラベル表示・inverse tone・mobile shell max-width・floatingPosition（left/center/right）に対応。",
       "features": [
         "badge",
         "centerAction",
@@ -1679,6 +1792,7 @@
         "fixed-or-absolute",
         "maxWidth",
         "inverse-tone",
+        "floatingPosition",
         "native Expo Router tabBar adapter",
         "native hidden routes"
       ],
@@ -1691,7 +1805,25 @@
         "Use tone='inverse' over dark photo/video/gradient backgrounds.",
         "Use pillPosition='absolute' only inside controlled shells or Storybook demos; fixed is the app default.",
         "Set maxWidth to the mobile web shell width when the app is centered in a desktop viewport.",
+        "Use floatingPosition='left'|'right' (variant='pill' only) when a FAB is placed on the opposite side; default 'center' keeps the existing centered float.",
         "Native Expo Router / React Navigation consumers should use createExpoRouterTabBar instead of local floating tab bars."
+      ]
+    },
+    {
+      "name": "MobileTabBar",
+      "path": "src/components/patterns/commerce/mobile-tab-bar.tsx",
+      "description": "BottomTabBar の consumer-friendly ラッパー。tabs/activeTab/onSelect のジェネリック API から iconsax Linear/Bulk アイコンの自動切替・pill navigation・addAction 中央 CTA を組み立てる。belle-todo の MobileTabBar を移植。",
+      "features": [
+        "generic tab key",
+        "iconsax Linear/Bulk auto-switch",
+        "addAction center CTA",
+        "pointer capture blur",
+        "floatingPosition passthrough"
+      ],
+      "rules": [
+        "tabs は BottomTabBarItem を手組みせず MobileTabItem<T>[]（key/label/Icon）で渡す",
+        "addAction 指定時はブランド色丸背景 + Add アイコンが自動で centerAction になる",
+        "floatingPosition='left'|'right' を使う場合は FAB を反対側に併置する"
       ]
     },
     {

@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { Add } from "iconsax-reactjs"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { BottomTabBar } from "./bottom-tab-bar"
@@ -157,6 +159,48 @@ export const LiquidGlassLightFallback: Story = {
         items={COMPACT_ITEMS}
         centerAction={CENTER_ACTION}
       />
+    </div>
+  ),
+}
+
+// ─── Floating position (left/right + FAB) ────────────────────────────────────
+
+export const FloatingPositionLeftWithFab: Story = {
+  name: "Floating position — left + FAB",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div className="relative w-full min-h-screen flex flex-col items-center justify-center bg-[var(--Surface-Secondary)]">
+      <p className="text-[var(--Text-High-Emphasis)] typo-heading-xl">左寄せフロート</p>
+      <p className="text-[var(--Text-Low-Emphasis)] typo-body-md mt-2">floatingPosition="left" — 右側に FAB スペースを確保</p>
+      <BottomTabBar variant="pill" pillPosition="absolute" floatingPosition="left" items={COMPACT_ITEMS} />
+      <Button
+        variant="glass-accent"
+        size="icon-fab"
+        aria-label="新規作成"
+        className="absolute bottom-[calc(env(safe-area-inset-bottom)+12px)] right-3"
+      >
+        <Add size={24} variant="Linear" color="currentColor" />
+      </Button>
+    </div>
+  ),
+}
+
+export const FloatingPositionRightWithFab: Story = {
+  name: "Floating position — right + FAB",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div className="relative w-full min-h-screen flex flex-col items-center justify-center bg-[var(--Surface-Secondary)]">
+      <p className="text-[var(--Text-High-Emphasis)] typo-heading-xl">右寄せフロート</p>
+      <p className="text-[var(--Text-Low-Emphasis)] typo-body-md mt-2">floatingPosition="right" — 左側に FAB スペースを確保</p>
+      <BottomTabBar variant="pill" pillPosition="absolute" floatingPosition="right" items={COMPACT_ITEMS} />
+      <Button
+        variant="glass-accent"
+        size="icon-fab"
+        aria-label="新規作成"
+        className="absolute bottom-[calc(env(safe-area-inset-bottom)+12px)] left-3"
+      >
+        <Add size={24} variant="Linear" color="currentColor" />
+      </Button>
     </div>
   ),
 }

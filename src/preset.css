@@ -139,9 +139,34 @@
     transform: translate3d(var(--celebration-drift, 0), 110vh, 0) rotate(var(--celebration-rotate, 360deg));
   }
 }
+@keyframes celebration-confetti-burst {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.7);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(var(--celebration-burst-mid-x, 0), var(--celebration-burst-mid-y, 0), 0)
+      rotate(calc(var(--celebration-rotate, 360deg) * 0.75)) scale(1);
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--celebration-burst-x, 0), var(--celebration-burst-y, 0), 0)
+      rotate(var(--celebration-rotate, 360deg)) scale(1);
+  }
+}
 @keyframes celebration-pop {
   from { opacity: 0; transform: translateY(8px) scale(0.94); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes celebration-emoji-pop {
+  0%   { transform: scale(0); }
+  50%  { transform: scale(1.4); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
 }
 
 @theme inline {

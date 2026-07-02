@@ -20,7 +20,7 @@ export function Pagination({ page, total, onChange, windowSize = 5 }: Pagination
   const { theme, scales } = useTheme()
   const half = Math.floor(windowSize / 2)
   let start = Math.max(1, page - half)
-  let end = Math.min(total, start + windowSize - 1)
+  const end = Math.min(total, start + windowSize - 1)
   if (end - start + 1 < windowSize) {
     start = Math.max(1, end - windowSize + 1)
   }

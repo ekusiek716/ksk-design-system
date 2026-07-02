@@ -1,5 +1,12 @@
 import React from "react"
-import { Image, Pressable, View, Text as RNText, type ImageSourcePropType } from "react-native"
+import {
+  Image,
+  Pressable,
+  View,
+  Text as RNText,
+  type DimensionValue,
+  type ImageSourcePropType,
+} from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { PriceDisplay } from "./PriceDisplay"
@@ -34,7 +41,7 @@ export function ProductCard({
   const { theme, scales } = useTheme()
 
   const isHorizontal = layout === "horizontal"
-  const imageSize = isHorizontal ? 96 : "100%"
+  const imageSize: DimensionValue = isHorizontal ? 96 : "100%"
   const imageHeight = isHorizontal ? 96 : 160
 
   const inner = (pressed = false) => (
@@ -49,7 +56,7 @@ export function ProductCard({
         opacity: pressed ? 0.85 : 1,
       }}
     >
-      <View style={{ position: "relative", width: imageSize as any, height: imageHeight }}>
+      <View style={{ position: "relative", width: imageSize, height: imageHeight }}>
         <Image
           source={image}
           style={{
