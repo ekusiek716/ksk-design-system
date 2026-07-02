@@ -10,6 +10,7 @@ import {
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
+import { useReduceMotion } from "./use-reduce-motion"
 
 export type CelebrationTrigger = "confetti" | "emoji" | "both" | "none"
 export type CelebrationPlacement = "overlay" | "inline"
@@ -100,6 +101,7 @@ function Celebration({
   testID,
 }: CelebrationProps) {
   const { theme, scales } = useTheme()
+  const reduceMotion = useReduceMotion()
   const resolvedDurationMs = autoDismissMs ?? durationMs
   const particleDurationBase = duration ?? resolvedDurationMs
   const palette = colors && colors.length > 0 ? colors : CONFETTI_COLORS
@@ -148,6 +150,12 @@ function Celebration({
 
   useEffect(() => {
     if (!active || emojiAnimation !== "bounce") return
+    if (reduceMotion) {
+      // Reduce Motion 有効時はバウンスさせず最終スケールで静止表示する
+      // （初期値 0 のまま return すると絵文字が不可視になる）
+      emojiScale.setValue(1)
+      return
+    }
     emojiScale.setValue(0)
     // belle-todo の milestone-emoji keyframe（0%→0, 50%→1.4, 70%→0.9, 100%→1、
     // 600ms ease-out, 200ms delay）を Animated.sequence で再現。
@@ -174,7 +182,7 @@ function Celebration({
     ])
     animation.start()
     return () => animation.stop()
-  }, [active, emojiAnimation, emojiScale])
+  }, [active, emojiAnimation, emojiScale, reduceMotion])
 
   useEffect(() => {
     if (!active || !onDone) return
