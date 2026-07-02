@@ -43,6 +43,7 @@
         "icon-sm",
         "icon-lg",
         "icon-xl",
+        "icon-fab",
         "match"
       ],
       "accessibility": [

@@ -13,6 +13,8 @@ function useAnimatedValue(initialValue: number) {
 export interface CelebrationDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** バッジに表示するアイコン。指定時は emoji より優先される（web 版と同じスロット設計） */
+  icon?: React.ReactNode
   emoji?: string
   title: string
   description?: string
@@ -34,6 +36,7 @@ export interface CelebrationDialogProps {
 export function CelebrationDialog({
   open,
   onOpenChange,
+  icon,
   emoji,
   title,
   description,
@@ -114,9 +117,9 @@ export function CelebrationDialog({
             paddingVertical: scales.spacing.scale[5],
           }}
         >
-          {emoji && (
-            // 絵文字は素置きせず、ブランド連動のソフトな円形バッジ + 外側の淡い光輪に載せる
-            //（web 版 CelebrationDialog と同じ見た目。bounce は絵文字グリフのみに適用）
+          {(icon || emoji) && (
+            // アイコン/絵文字は素置きせず、ブランド連動のソフトな円形バッジ + 外側の淡い光輪に載せる
+            //（web 版 CelebrationDialog と同じ見た目。bounce はバッジ内のグリフのみに適用）
             <View
               style={{
                 width: 80,
@@ -151,14 +154,22 @@ export function CelebrationDialog({
                   borderColor: theme.surface["accent-primary-subtle"],
                 }}
               />
-              <Animated.Text
-                style={[
-                  resolveTypo("display.lg"),
-                  emojiAnimation === "bounce" ? { transform: [{ scale: emojiScale }] } : null,
-                ]}
-              >
-                {emoji}
-              </Animated.Text>
+              {icon ? (
+                <Animated.View
+                  style={emojiAnimation === "bounce" ? { transform: [{ scale: emojiScale }] } : undefined}
+                >
+                  {icon}
+                </Animated.View>
+              ) : (
+                <Animated.Text
+                  style={[
+                    resolveTypo("display.lg"),
+                    emojiAnimation === "bounce" ? { transform: [{ scale: emojiScale }] } : null,
+                  ]}
+                >
+                  {emoji}
+                </Animated.Text>
+              )}
             </View>
           )}
           <RNText

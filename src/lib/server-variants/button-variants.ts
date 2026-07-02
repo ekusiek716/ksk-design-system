@@ -54,6 +54,9 @@ const buttonVariants = cva(
         "icon-sm": "size-8",
         "icon-lg": "size-12",
         "icon-xl": "size-11",
+        // icon-fab — BottomTabBar の pill（h-[58px]）と並べて浮かせる FAB 用。
+        // 同じ bottom オフセットで高さがピルと揃うよう 58px 固定にしている。
+        "icon-fab": "size-[58px]",
         match: "h-12 px-4 typo-label-md",
       },
       layout: {
