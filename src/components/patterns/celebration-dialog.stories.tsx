@@ -100,12 +100,14 @@ export const CustomConfettiColors: Story = {
           ]}
           driftRange={60}
           actions={
+            // ボタン並び順の規約: 閉じる/キャンセル等の副次アクションが左、
+            // 「次へ」等の主要 CTA が右
             <>
-              <Button onClick={() => setOpen(false)}>
-                次へ
-              </Button>
               <Button variant="secondary" onClick={() => setOpen(false)}>
                 閉じる
+              </Button>
+              <Button onClick={() => setOpen(false)}>
+                次へ
               </Button>
             </>
           }
