@@ -16,6 +16,17 @@ interface CountdownHeroProps {
   pastLabel?: string
   /** 日数の単位テキスト（既定 "days"、装飾セリフ書体で表示） */
   unit?: string
+  /**
+   * 数字の下に表示する目標日そのもの（例 "2027.01.03 (日)"）。
+   * 曜日・ロケール等のフォーマットは消費側の責務（DS はドメイン非依存を保つ）。
+   * 未指定なら日付行を出さない。
+   */
+  dateLabel?: string
+  /**
+   * 当日（残り 0 日）に、数字 "0" の代わりに表示する値（例 "本日"）。
+   * 指定時は単位（unit）も表示しない。未指定なら従来どおり "0 <unit>" 表示。
+   */
+  todayValue?: string
   /** 右上に敷く装飾イラストスロット。wedding 画像等は消費側で用意する */
   illustration?: React.ReactNode
   className?: string
@@ -64,6 +75,8 @@ function CountdownHero({
   todayLabel = "本日",
   pastLabel = "経過",
   unit = "days",
+  dateLabel,
+  todayValue,
   illustration,
   className,
 }: CountdownHeroProps) {
@@ -73,7 +86,8 @@ function CountdownHero({
   const isPast = daysLeft < 0
   const daysAbs = Math.abs(daysLeft)
   const displayLabel = isToday ? todayLabel : isPast ? pastLabel : label
-  const valueText = isToday ? "0" : String(daysAbs)
+  // today 時は todayValue（指定時）を数字の代わりに表示。単位は従来どおり today では出さない。
+  const valueText = isToday ? (todayValue ?? "0") : String(daysAbs)
   const serifFont = "var(--font-display-serif, Georgia, 'Noto Serif JP', serif)"
 
   return (
@@ -117,6 +131,11 @@ function CountdownHero({
             </span>
           )}
         </div>
+        {dateLabel && (
+          <p className="mt-0.5 typo-caption tabular-nums text-[var(--Text-Low-Emphasis)]">
+            {dateLabel}
+          </p>
+        )}
       </div>
     </div>
   )
