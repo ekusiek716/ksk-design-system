@@ -109,7 +109,7 @@
 | CompactFilePicker, ImageAttachmentPicker | `@/components/patterns/compact-file-picker` | — | SingleImageReplacement, MultiImageAttachments, ListPreview |
 | ConfirmDialog | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading |
 | CookieConsent | `@/components/patterns/cookie-consent` | — | — |
-| CountdownHero | `@/components/patterns/countdown-hero` | — | Upcoming, Today, Past, With Illustration Slot, ISO String targetDate |
+| CountdownHero | `@/components/patterns/countdown-hero` | — | Upcoming, Today, Past, With Illustration Slot, ISO String targetDate, With dateLabel (目標日を数字の下に), Today with todayValue (0 の代わりに文字) |
 | DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
 | ErrorState | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry |
