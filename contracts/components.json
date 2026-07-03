@@ -1275,12 +1275,14 @@
     {
       "name": "CountdownHero",
       "path": "src/components/patterns/countdown-hero.tsx",
-      "description": "装飾的な serif 数字で目標日までの残日数を表示するヒーロー表示。belle-todo の CountdownSection を参考に、日付編集フォーム・wedding イラスト・i18n・store は持ち込まず表示専用に再設計（Issue #110）。",
+      "description": "装飾的な serif 数字で目標日までの残日数を表示するヒーロー表示。belle-todo の CountdownSection を参考に、日付編集フォーム・wedding イラスト・i18n・store は持ち込まず表示専用に再設計（Issue #110）。dateLabel prop で数字の下に目標日そのもの（消費側でフォーマット）を、todayValue prop で当日に数字 0 の代わりの文言を表示できる（Issue #118）。",
       "features": [
         "large-serif-number",
         "today-past-active-states",
         "illustration-slot",
-        "iso-string-or-date-target"
+        "iso-string-or-date-target",
+        "date-label-slot",
+        "today-value-override"
       ],
       "rules": [
         "既存の CountdownTimer（残日数ピル表示）とは別コンポーネント。装飾ヒーロー表示専用で置き換えない。",
