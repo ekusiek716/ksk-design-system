@@ -1,0 +1,57 @@
+name: Publish
+
+# npm Trusted Publishing (OIDC) による自動 publish。
+# ローカルの npm トークンは不要（失効の概念がない）。
+# main に package.json の version 変更が届いたとき、npm 上の最新版と比較して
+# 新しければ publish する。手動実行 (workflow_dispatch) も可。
+#
+# 前提: npmjs.com の ksk-design-system パッケージ設定で Trusted Publisher に
+# このリポジトリ (ekusiek716/ksk-design-system) + workflow "publish.yml" を登録しておくこと。
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write # OIDC トークン発行に必須（Trusted Publishing の要）
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24 # npm >= 11.5.1 が Trusted Publishing に必須
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Check if version is unpublished
+        id: version
+        run: |
+          LOCAL=$(node -p "require('./package.json').version")
+          PUBLISHED=$(npm view ksk-design-system version 2>/dev/null || echo "none")
+          echo "local=$LOCAL published=$PUBLISHED"
+          if [ "$LOCAL" = "$PUBLISHED" ]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install
+        if: steps.version.outputs.publish == 'true'
+        run: npm ci
+
+      - name: Publish (prepack が build:lib を実行)
+        if: steps.version.outputs.publish == 'true'
+        run: npm publish
