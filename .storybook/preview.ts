@@ -112,11 +112,10 @@ const preview: Preview = {
   parameters: {
     layout: "fullscreen",
     backgrounds: {
-      default: "light",
-      values: [
-        { name: "light", value: "#FFFFFF" },
-        { name: "gray",  value: "#F7F7F8" },
-      ],
+      options: {
+        light: { name: "light", value: "#FFFFFF" },
+        gray: { name: "gray",  value: "#F7F7F8" }
+      }
     },
     controls: {
       matchers: {
@@ -164,6 +163,10 @@ const preview: Preview = {
   initialGlobals: {
     kskTheme: "default",
     kskHostile: "off",
+
+    backgrounds: {
+      value: "light"
+    }
   },
   decorators: [
     // 敵対的コンテキストでラップ（off のときは素通し）

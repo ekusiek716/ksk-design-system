@@ -105,9 +105,6 @@ export const Hero: Story = {
  */
 export const InverseOnDark: Story = {
   name: "Inverse on Dark Background",
-  parameters: {
-    backgrounds: { default: "dark" },
-  },
   render: () => (
     <div className="p-8 rounded-2xl bg-[var(--Surface-Inverse,#111)] flex flex-wrap items-center gap-3">
       <Button variant="inverse">Inverse</Button>
@@ -115,6 +112,11 @@ export const InverseOnDark: Story = {
       <Button variant="inverse" size="hero">Hero (Inverse)</Button>
     </div>
   ),
+  globals: {
+    backgrounds: {
+      value: "dark"
+    }
+  },
 }
 
 /** リアル UI ：ヒーローセクション上の CTA ペア */
