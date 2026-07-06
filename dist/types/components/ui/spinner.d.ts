@@ -17,6 +17,6 @@ interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
  * <Spinner size="md" />
  * ```
  */
-declare function Spinner({ className, size, label, ...props }: SpinnerProps): import("react/jsx-runtime").JSX.Element;
+declare function Spinner({ className, size, label, ...props }: SpinnerProps): React.JSX.Element;
 export { Spinner };
 export type { SpinnerProps };

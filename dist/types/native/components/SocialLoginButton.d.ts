@@ -1,3 +1,4 @@
+import React from "react";
 export type SocialProvider = "google" | "apple" | "line" | "amazon" | "github" | "x";
 export interface SocialLoginButtonProps {
     provider: SocialProvider;
@@ -5,4 +6,4 @@ export interface SocialLoginButtonProps {
     onPress?: () => void;
     disabled?: boolean;
 }
-export declare function SocialLoginButton({ provider, label, onPress, disabled, }: SocialLoginButtonProps): import("react/jsx-runtime").JSX.Element;
+export declare function SocialLoginButton({ provider, label, onPress, disabled, }: SocialLoginButtonProps): React.JSX.Element;

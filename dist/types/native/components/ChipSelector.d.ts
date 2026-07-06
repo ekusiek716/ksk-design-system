@@ -1,3 +1,4 @@
+import React from "react";
 export interface ChipSelectorOption {
     value: string;
     label: string;
@@ -10,4 +11,4 @@ export interface ChipSelectorProps {
     onChange?: (values: string[]) => void;
     multiple?: boolean;
 }
-export declare function ChipSelector({ options, values, onChange, multiple, }: ChipSelectorProps): import("react/jsx-runtime").JSX.Element;
+export declare function ChipSelector({ options, values, onChange, multiple, }: ChipSelectorProps): React.JSX.Element;

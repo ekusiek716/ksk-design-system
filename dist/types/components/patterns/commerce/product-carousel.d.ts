@@ -11,5 +11,5 @@ interface ProductCarouselProps extends React.ComponentProps<"section"> {
     showRanking?: boolean;
     showCartButton?: boolean;
 }
-declare function ProductCarousel({ className, title, subtitle, moreHref, moreLabel, onMoreClick, products, cardSize, showRanking, showCartButton, ...props }: ProductCarouselProps): import("react/jsx-runtime").JSX.Element;
+declare function ProductCarousel({ className, title, subtitle, moreHref, moreLabel, onMoreClick, products, cardSize, showRanking, showCartButton, ...props }: ProductCarouselProps): React.JSX.Element;
 export { ProductCarousel };

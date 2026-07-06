@@ -1,3 +1,4 @@
+import React from "react";
 export interface SwitchProps {
     value?: boolean;
     onValueChange?: (value: boolean) => void;
@@ -12,4 +13,4 @@ export interface SwitchProps {
  *
  * 役割は標準 Switch と同等: value / onValueChange / disabled。
  */
-export declare function Switch({ value, onValueChange, disabled }: SwitchProps): import("react/jsx-runtime").JSX.Element;
+export declare function Switch({ value, onValueChange, disabled }: SwitchProps): React.JSX.Element;

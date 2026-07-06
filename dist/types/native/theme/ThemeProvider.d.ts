@@ -16,6 +16,6 @@ export declare function ThemeProvider({ children, initialName, initialMode, }: {
     children: React.ReactNode;
     initialName?: ThemeName;
     initialMode?: ColorMode;
-}): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
 export declare function useTheme(): ThemeContextValue;
 export {};

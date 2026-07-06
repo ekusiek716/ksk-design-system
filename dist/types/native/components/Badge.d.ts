@@ -5,4 +5,4 @@ export interface BadgeProps {
     children: React.ReactNode;
 }
 /** status / accent を surface + text トークンで塗り分けるピル。 */
-export declare function Badge({ tone, children }: BadgeProps): import("react/jsx-runtime").JSX.Element;
+export declare function Badge({ tone, children }: BadgeProps): React.JSX.Element;

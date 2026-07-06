@@ -1,3 +1,4 @@
+import React from "react";
 export interface SubNavItem {
     key: string;
     label: string;
@@ -9,4 +10,4 @@ export interface SubNavProps {
     onChange?: (key: string) => void;
 }
 /** Webの SubNav を RN の SegmentedTabs 風に意味変換。横スクロール可。 */
-export declare function SubNav({ items, value, onChange }: SubNavProps): import("react/jsx-runtime").JSX.Element;
+export declare function SubNav({ items, value, onChange }: SubNavProps): React.JSX.Element;

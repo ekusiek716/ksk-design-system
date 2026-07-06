@@ -12,6 +12,6 @@ interface SwipeRowProps {
     side?: "left" | "right";
     className?: string;
 }
-declare function SwipeRow({ children, actions, side, className }: SwipeRowProps): import("react/jsx-runtime").JSX.Element;
+declare function SwipeRow({ children, actions, side, className }: SwipeRowProps): React.JSX.Element;
 export { SwipeRow };
 export type { SwipeRowProps };

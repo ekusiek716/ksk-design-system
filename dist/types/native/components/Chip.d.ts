@@ -14,4 +14,4 @@ export interface ChipProps extends Omit<PressableProps, "children" | "style"> {
     onRemove?: () => void;
     children?: React.ReactNode;
 }
-export declare function Chip({ variant, size, shape, selected, disabled, count, removable, onRemove, children, ...rest }: ChipProps): import("react/jsx-runtime").JSX.Element;
+export declare function Chip({ variant, size, shape, selected, disabled, count, removable, onRemove, children, ...rest }: ChipProps): React.JSX.Element;

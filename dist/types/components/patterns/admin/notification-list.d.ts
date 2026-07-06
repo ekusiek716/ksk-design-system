@@ -11,6 +11,6 @@ interface NotificationListProps extends React.ComponentProps<"div"> {
     variant?: "vertical" | "horizontal";
     emptyMessage?: string;
 }
-declare function NotificationList({ notifications, variant, emptyMessage, className, ...props }: NotificationListProps): import("react/jsx-runtime").JSX.Element;
+declare function NotificationList({ notifications, variant, emptyMessage, className, ...props }: NotificationListProps): React.JSX.Element;
 export { NotificationList };
 export type { NotificationItem };

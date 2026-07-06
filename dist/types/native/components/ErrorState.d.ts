@@ -5,4 +5,4 @@ export interface ErrorStateProps {
     icon?: React.ReactNode;
     action?: React.ReactNode;
 }
-export declare function ErrorState({ title, description, icon, action, }: ErrorStateProps): import("react/jsx-runtime").JSX.Element;
+export declare function ErrorState({ title, description, icon, action, }: ErrorStateProps): React.JSX.Element;

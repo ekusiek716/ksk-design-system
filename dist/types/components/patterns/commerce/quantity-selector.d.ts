@@ -17,5 +17,5 @@ interface QuantitySelectorProps extends Omit<React.ComponentProps<"div">, "onCha
     /** 削除時のコールバック */
     onDelete?: () => void;
 }
-declare function QuantitySelector({ className, value, min, max, onChange, disabled, size, showTrash, onDelete, ...props }: QuantitySelectorProps): import("react/jsx-runtime").JSX.Element;
+declare function QuantitySelector({ className, value, min, max, onChange, disabled, size, showTrash, onDelete, ...props }: QuantitySelectorProps): React.JSX.Element;
 export { QuantitySelector };

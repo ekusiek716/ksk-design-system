@@ -6,4 +6,4 @@ export interface AlertProps {
     description?: string;
     children?: React.ReactNode;
 }
-export declare function Alert({ tone, title, description, children }: AlertProps): import("react/jsx-runtime").JSX.Element;
+export declare function Alert({ tone, title, description, children }: AlertProps): React.JSX.Element;

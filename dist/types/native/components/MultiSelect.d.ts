@@ -1,3 +1,4 @@
+import React from "react";
 export interface MultiSelectOption {
     value: string;
     label: string;
@@ -10,4 +11,4 @@ export interface MultiSelectProps {
     searchPlaceholder?: string;
     disabled?: boolean;
 }
-export declare function MultiSelect({ options, values, onChange, placeholder, searchPlaceholder, disabled, }: MultiSelectProps): import("react/jsx-runtime").JSX.Element;
+export declare function MultiSelect({ options, values, onChange, placeholder, searchPlaceholder, disabled, }: MultiSelectProps): React.JSX.Element;

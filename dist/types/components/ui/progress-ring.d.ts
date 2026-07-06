@@ -26,6 +26,6 @@ interface ProgressRingProps {
     showLabel?: boolean;
     className?: string;
 }
-declare function ProgressRing({ value, size, label, showLabel, className, }: ProgressRingProps): import("react/jsx-runtime").JSX.Element;
+declare function ProgressRing({ value, size, label, showLabel, className, }: ProgressRingProps): React.JSX.Element;
 export { ProgressRing };
 export type { ProgressRingProps };

@@ -1,3 +1,4 @@
+import React from "react";
 export interface SearchBarProps {
     value: string;
     onChange: (value: string) => void;
@@ -6,4 +7,4 @@ export interface SearchBarProps {
     onClear?: () => void;
     autoFocus?: boolean;
 }
-export declare function SearchBar({ value, onChange, placeholder, onSubmit, onClear, autoFocus, }: SearchBarProps): import("react/jsx-runtime").JSX.Element;
+export declare function SearchBar({ value, onChange, placeholder, onSubmit, onClear, autoFocus, }: SearchBarProps): React.JSX.Element;

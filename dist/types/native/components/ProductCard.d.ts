@@ -1,3 +1,4 @@
+import React from "react";
 import { type ImageSourcePropType } from "react-native";
 export interface ProductCardProps {
     image?: ImageSourcePropType;
@@ -11,4 +12,4 @@ export interface ProductCardProps {
     onPress?: () => void;
     layout?: "vertical" | "horizontal";
 }
-export declare function ProductCard({ image, title, price, originalPrice, rating, reviewCount, badge, soldOut, onPress, layout, }: ProductCardProps): import("react/jsx-runtime").JSX.Element;
+export declare function ProductCard({ image, title, price, originalPrice, rating, reviewCount, badge, soldOut, onPress, layout, }: ProductCardProps): React.JSX.Element;

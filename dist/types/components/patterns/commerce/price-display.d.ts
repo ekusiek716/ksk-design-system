@@ -16,5 +16,5 @@ interface PriceDisplayProps extends React.ComponentProps<"div">, VariantProps<ty
     /** 通貨記号 */
     currency?: string;
 }
-declare function PriceDisplay({ className, price, maxPrice, originalPrice, showTaxLabel, currency, size, ...props }: PriceDisplayProps): import("react/jsx-runtime").JSX.Element;
+declare function PriceDisplay({ className, price, maxPrice, originalPrice, showTaxLabel, currency, size, ...props }: PriceDisplayProps): React.JSX.Element;
 export { PriceDisplay, priceVariants };

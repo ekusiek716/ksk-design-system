@@ -64,6 +64,6 @@ type SimplePaginationProps = SimplePaginationItemsProps | SimplePaginationPagesP
  * // ページ数指定
  * <SimplePagination page={1} totalPages={10} onPageChange={setPage} />
  */
-declare function SimplePagination({ page, onPageChange, format, compact, previousLabel, nextLabel, renderLabel, className, total, pageSize, totalPages, ...props }: SimplePaginationProps): import("react/jsx-runtime").JSX.Element;
+declare function SimplePagination({ page, onPageChange, format, compact, previousLabel, nextLabel, renderLabel, className, total, pageSize, totalPages, ...props }: SimplePaginationProps): React.JSX.Element;
 export { SimplePagination };
 export type { SimplePaginationProps, SimplePaginationFormat };

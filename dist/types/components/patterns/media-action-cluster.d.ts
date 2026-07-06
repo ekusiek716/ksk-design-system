@@ -25,6 +25,6 @@ interface MediaActionClusterProps extends Omit<React.HTMLAttributes<HTMLDivEleme
     onVisibleChange?: (visible: boolean) => void;
     "aria-label"?: string;
 }
-declare function MediaActionCluster({ items, orientation, anchor, position, labelPosition, autoHideMs, defaultVisible, onVisibleChange, className, "aria-label": ariaLabel, ...props }: MediaActionClusterProps): import("react/jsx-runtime").JSX.Element;
+declare function MediaActionCluster({ items, orientation, anchor, position, labelPosition, autoHideMs, defaultVisible, onVisibleChange, className, "aria-label": ariaLabel, ...props }: MediaActionClusterProps): React.JSX.Element;
 export { MediaActionCluster };
 export type { MediaActionClusterAnchor, MediaActionClusterItem, MediaActionClusterLabelPosition, MediaActionClusterOrientation, MediaActionClusterPosition, MediaActionClusterProps, };

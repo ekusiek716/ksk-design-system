@@ -1,3 +1,4 @@
+import React from "react";
 export interface CheckboxGroupOption {
     value: string;
     label: string;
@@ -9,4 +10,4 @@ export interface CheckboxGroupProps {
     onChange?: (values: string[]) => void;
     disabled?: boolean;
 }
-export declare function CheckboxGroup({ options, values, onChange, disabled }: CheckboxGroupProps): import("react/jsx-runtime").JSX.Element;
+export declare function CheckboxGroup({ options, values, onChange, disabled }: CheckboxGroupProps): React.JSX.Element;

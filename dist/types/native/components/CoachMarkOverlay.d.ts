@@ -16,4 +16,4 @@ export interface CoachMarkOverlayProps {
  * 背景を暗くしてフォーカスしたい領域だけ残す簡易オーバーレイ。
  * ハイライト穴は4枚の View でスポットを囲う形（Mask 非依存）。
  */
-export declare function CoachMarkOverlay({ open, onClose, highlight, children }: CoachMarkOverlayProps): import("react/jsx-runtime").JSX.Element;
+export declare function CoachMarkOverlay({ open, onClose, highlight, children }: CoachMarkOverlayProps): React.JSX.Element;

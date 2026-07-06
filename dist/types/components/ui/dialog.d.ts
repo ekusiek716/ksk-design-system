@@ -1,11 +1,11 @@
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 type LayerAutoFocusTarget = "first-input" | "title" | React.RefObject<HTMLElement | null> | false;
-declare function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>): import("react/jsx-runtime").JSX.Element;
-declare function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>): import("react/jsx-runtime").JSX.Element;
-declare function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>): import("react/jsx-runtime").JSX.Element;
-declare function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>): import("react/jsx-runtime").JSX.Element;
-declare function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>): import("react/jsx-runtime").JSX.Element;
+declare function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>): React.JSX.Element;
+declare function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>): React.JSX.Element;
+declare function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>): React.JSX.Element;
+declare function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>): React.JSX.Element;
+declare function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>): React.JSX.Element;
 interface DialogContentProps extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus"> {
     /**
      * デフォルトの内側余白とセクション間レイアウトを制御。
@@ -51,8 +51,8 @@ interface DialogContentProps extends Omit<React.ComponentProps<typeof DialogPrim
     /** Dialog 表示中に body scroll を抑止する。既定 true。 */
     bodyScrollLock?: boolean;
 }
-declare function DialogContent({ className, children, padding, description, position, autoFocus, restoreFocusOnClose, closeOnEsc, bodyScrollLock, ...props }: DialogContentProps): import("react/jsx-runtime").JSX.Element;
-declare function DialogHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
+declare function DialogContent({ className, children, padding, description, position, autoFocus, restoreFocusOnClose, closeOnEsc, bodyScrollLock, ...props }: DialogContentProps): React.JSX.Element;
+declare function DialogHeader({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
 declare function DialogFooter({ className, orientation, ...props }: React.ComponentProps<"div"> & {
     /**
      * アクションボタンの並べ方。
@@ -62,8 +62,8 @@ declare function DialogFooter({ className, orientation, ...props }: React.Compon
      *   3 つ以上のアクションや、右寄せにしたいフォーム系ダイアログで使う。
      */
     orientation?: "split" | "stacked";
-}): import("react/jsx-runtime").JSX.Element;
-declare function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): import("react/jsx-runtime").JSX.Element;
-declare function DialogDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
+declare function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): React.JSX.Element;
+declare function DialogDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>): React.JSX.Element;
 export { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger, };
 export type { DialogContentProps };

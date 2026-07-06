@@ -1,3 +1,4 @@
+import React from "react";
 export interface CoachMarkProps {
     title?: string;
     description: string;
@@ -14,4 +15,4 @@ export interface CoachMarkProps {
  * - ステップは dot indicator（1/3 等の表記より視覚的）
  * - アクションは小さめの pill ボタンを内製（DS Button は CTA 用で大きすぎるため）
  */
-export declare function CoachMark({ title, description, step, total, onNext, onSkip, nextLabel, skipLabel, }: CoachMarkProps): import("react/jsx-runtime").JSX.Element;
+export declare function CoachMark({ title, description, step, total, onNext, onSkip, nextLabel, skipLabel, }: CoachMarkProps): React.JSX.Element;

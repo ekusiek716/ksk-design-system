@@ -473,6 +473,243 @@ export declare const themes: {
             };
         };
     };
+    readonly cobalt: {
+        readonly light: {
+            readonly surface: {
+                readonly primary: "#FFFFFF";
+                readonly secondary: "#F9FAFB";
+                readonly tertiary: "#F3F4F6";
+                readonly quaternary: "#E5E7EB";
+                readonly disable: "#F3F4F6";
+                readonly inverse: "#111827";
+                readonly "accent-primary": "#2053F5";
+                readonly "accent-primary-light": "#EEF3FF";
+                readonly "accent-primary-ultra-light": "#EEF3FF";
+                readonly caution: "#FEF2F2";
+                readonly success: "#F0FDF4";
+                readonly warning: "#FFFBEB";
+                readonly info: "#EFF6FF";
+                readonly "caution-subtle": "rgba(239, 68, 68, 0.15)";
+                readonly "success-subtle": "rgba(34, 197, 94, 0.15)";
+                readonly "warning-subtle": "rgba(249, 115, 22, 0.15)";
+                readonly "info-subtle": "rgba(59, 130, 246, 0.15)";
+                readonly "accent-primary-subtle": "rgba(32, 83, 245, 0.15)";
+                readonly "caution-strong": "#EF4444";
+                readonly "success-strong": "#22C55E";
+                readonly "warning-strong": "#F97316";
+                readonly "info-strong": "#3B82F6";
+                readonly "videoOverlay-light": "rgba(0, 0, 0, 0.40)";
+                readonly "videoOverlay-medium": "rgba(0, 0, 0, 0.60)";
+                readonly "videoOverlay-strong": "rgba(0, 0, 0, 0.80)";
+            };
+            readonly text: {
+                readonly "high-emphasis": "#111827";
+                readonly "medium-emphasis": "#374151";
+                readonly "low-emphasis": "#6B7280";
+                readonly disable: "#9CA3AF";
+                readonly "on-inverse": "#FFFFFF";
+                readonly "on-inverse-secondary": "rgba(255, 255, 255, 0.80)";
+                readonly "on-media": "#FFFFFF";
+                readonly "on-media-secondary": "rgba(255, 255, 255, 0.80)";
+                readonly "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)";
+                readonly "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)";
+                readonly "accent-primary": "#163FF4";
+                readonly success: "#15803D";
+                readonly caution: "#DC2626";
+                readonly warning: "#EA580C";
+                readonly info: "#2563EB";
+            };
+            readonly object: {
+                readonly "high-emphasis": "#111827";
+                readonly "medium-emphasis": "#4B5563";
+                readonly "low-emphasis": "#9CA3AF";
+                readonly disable: "#D1D5DB";
+                readonly "on-inverse": "#FFFFFF";
+                readonly "accent-primary": "#2053F5";
+                readonly caution: "#EF4444";
+                readonly success: "#22C55E";
+                readonly warning: "#F97316";
+                readonly info: "#3B82F6";
+                readonly favorite: "#EF4444";
+                readonly rating: "#F59E0B";
+            };
+            readonly border: {
+                readonly "high-emphasis": "#374151";
+                readonly "medium-emphasis": "#D1D5DB";
+                readonly "low-emphasis": "#E5E7EB";
+                readonly disable: "#E5E7EB";
+                readonly "accent-primary": "#2053F5";
+                readonly caution: "#EF4444";
+                readonly success: "#22C55E";
+                readonly warning: "#F97316";
+                readonly info: "#3B82F6";
+                readonly "accent-primary-subtle": "rgba(32, 83, 245, 0.3)";
+                readonly "caution-subtle": "rgba(239, 68, 68, 0.30)";
+                readonly "success-subtle": "rgba(34, 197, 94, 0.30)";
+                readonly "info-subtle": "rgba(59, 130, 246, 0.30)";
+            };
+            readonly brand: {
+                readonly primary: "#163FF4";
+                readonly action: "#1234EE";
+                readonly light: "#D9E5FE";
+                readonly "ultra-light": "#EEF3FF";
+                readonly line: "#06C755";
+                readonly "google-border": "#DADCE0";
+                readonly apple: "#000000";
+                readonly amazon: "#232F3E";
+                readonly "amazon-accent": "#FF9900";
+            };
+            readonly hover: {
+                readonly "primary-button": "#1234EE";
+                readonly "secondary-button": "#EEF3FF";
+                readonly "tertiary-button": "#F3F4F6";
+                readonly "ghost-button": "#F3F4F6";
+                readonly "destructive-button": "#B91C1C";
+            };
+            readonly active: {
+                readonly "primary-button": "#0B25A4";
+                readonly "secondary-button": "#D9E5FE";
+                readonly "tertiary-button": "#E5E7EB";
+                readonly "destructive-button": "#991B1B";
+            };
+            readonly overlay: {
+                readonly dark: "rgba(17, 24, 39, 0.64)";
+                readonly medium: "rgba(17, 24, 39, 0.36)";
+                readonly light: "rgba(17, 24, 39, 0.08)";
+            };
+            readonly focus: {
+                readonly "high-emphasis": "#4398F8";
+            };
+            readonly caution: {
+                readonly base: "#DC2626";
+                readonly action: "#B91C1C";
+            };
+            readonly success: {
+                readonly base: "#16A34A";
+            };
+            readonly warning: {
+                readonly base: "#EA580C";
+            };
+            readonly info: {
+                readonly base: "#2563EB";
+            };
+        };
+        readonly dark: {
+            readonly surface: {
+                readonly primary: "#111827";
+                readonly secondary: "#1F2937";
+                readonly tertiary: "#374151";
+                readonly quaternary: "#4B5563";
+                readonly disable: "#1F2937";
+                readonly inverse: "#FFFFFF";
+                readonly "accent-primary": "#2053F5";
+                readonly "accent-primary-light": "#03155A";
+                readonly "accent-primary-ultra-light": "#03155A";
+                readonly caution: "#2d1414";
+                readonly success: "#14532D";
+                readonly warning: "#78350F";
+                readonly info: "#1E3A8A";
+                readonly "caution-subtle": "rgba(248, 113, 113, 0.20)";
+                readonly "success-subtle": "rgba(74, 222, 128, 0.20)";
+                readonly "warning-subtle": "rgba(251, 146, 60, 0.20)";
+                readonly "info-subtle": "rgba(96, 165, 250, 0.20)";
+                readonly "accent-primary-subtle": "rgba(67, 152, 248, 0.2)";
+                readonly "caution-strong": "#EF4444";
+                readonly "success-strong": "#22C55E";
+                readonly "warning-strong": "#F97316";
+                readonly "info-strong": "#3B82F6";
+                readonly "videoOverlay-light": "rgba(0, 0, 0, 0.40)";
+                readonly "videoOverlay-medium": "rgba(0, 0, 0, 0.60)";
+                readonly "videoOverlay-strong": "rgba(0, 0, 0, 0.80)";
+            };
+            readonly text: {
+                readonly "high-emphasis": "rgba(255, 255, 255, 1.00)";
+                readonly "medium-emphasis": "rgba(255, 255, 255, 0.80)";
+                readonly "low-emphasis": "rgba(255, 255, 255, 0.48)";
+                readonly disable: "rgba(255, 255, 255, 0.24)";
+                readonly "on-inverse": "#111827";
+                readonly "on-inverse-secondary": "#374151";
+                readonly "on-media": "#FFFFFF";
+                readonly "on-media-secondary": "rgba(255, 255, 255, 0.80)";
+                readonly "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)";
+                readonly "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)";
+                readonly "accent-primary": "#4398F8";
+                readonly success: "#4ADE80";
+                readonly caution: "#F87171";
+                readonly warning: "#FB923C";
+                readonly info: "#60A5FA";
+            };
+            readonly object: {
+                readonly "high-emphasis": "rgba(255, 255, 255, 1.00)";
+                readonly "medium-emphasis": "rgba(255, 255, 255, 0.64)";
+                readonly "low-emphasis": "rgba(255, 255, 255, 0.36)";
+                readonly disable: "rgba(255, 255, 255, 0.16)";
+                readonly "on-inverse": "#111827";
+                readonly "accent-primary": "#4398F8";
+                readonly caution: "#F87171";
+                readonly success: "#4ADE80";
+                readonly warning: "#FB923C";
+                readonly info: "#60A5FA";
+                readonly favorite: "#F87171";
+                readonly rating: "#FBBF24";
+            };
+            readonly border: {
+                readonly "high-emphasis": "rgba(255, 255, 255, 0.36)";
+                readonly "medium-emphasis": "rgba(255, 255, 255, 0.16)";
+                readonly "low-emphasis": "rgba(255, 255, 255, 0.08)";
+                readonly disable: "rgba(255, 255, 255, 0.04)";
+                readonly "accent-primary": "#4398F8";
+                readonly caution: "#F87171";
+                readonly success: "#4ADE80";
+                readonly warning: "#FB923C";
+                readonly info: "#60A5FA";
+                readonly "accent-primary-subtle": "rgba(67, 152, 248, 0.4)";
+                readonly "caution-subtle": "rgba(248, 113, 113, 0.40)";
+                readonly "success-subtle": "rgba(74, 222, 128, 0.40)";
+                readonly "info-subtle": "rgba(96, 165, 250, 0.40)";
+            };
+            readonly brand: {
+                readonly primary: "#4398F8";
+                readonly action: "#7FAAFB";
+                readonly light: "#03155A";
+                readonly "ultra-light": "#03155A";
+            };
+            readonly hover: {
+                readonly "primary-button": "#2053F5";
+                readonly "secondary-button": "#03155A";
+                readonly "tertiary-button": "rgba(255, 255, 255, 0.04)";
+                readonly "ghost-button": "rgba(255, 255, 255, 0.04)";
+                readonly "destructive-button": "#EF4444";
+            };
+            readonly active: {
+                readonly "primary-button": "#163FF4";
+                readonly "secondary-button": "#0B25A4";
+                readonly "tertiary-button": "rgba(255, 255, 255, 0.08)";
+                readonly "destructive-button": "#DC2626";
+            };
+            readonly overlay: {
+                readonly dark: "rgba(17, 24, 39, 0.80)";
+                readonly medium: "rgba(17, 24, 39, 0.48)";
+                readonly light: "rgba(17, 24, 39, 0.16)";
+            };
+            readonly focus: {
+                readonly "high-emphasis": "#4398F8";
+            };
+            readonly caution: {
+                readonly base: "#F87171";
+                readonly action: "#EF4444";
+            };
+            readonly success: {
+                readonly base: "#4ADE80";
+            };
+            readonly warning: {
+                readonly base: "#FB923C";
+            };
+            readonly info: {
+                readonly base: "#60A5FA";
+            };
+        };
+    };
     readonly orange: {
         readonly light: {
             readonly surface: {

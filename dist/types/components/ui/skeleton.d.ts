@@ -27,5 +27,5 @@ export interface SkeletonProps extends Omit<React.ComponentProps<"div">, "width"
  * // 旧形式 (className のみ) も互換維持
  * <Skeleton className="h-4 w-32" />
  */
-declare function Skeleton({ className, width, height, rounded, style, ...props }: SkeletonProps): import("react/jsx-runtime").JSX.Element;
+declare function Skeleton({ className, width, height, rounded, style, ...props }: SkeletonProps): React.JSX.Element;
 export { Skeleton };

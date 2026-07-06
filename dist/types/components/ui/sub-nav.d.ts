@@ -1,3 +1,4 @@
+import * as React from "react";
 interface SubNavItem {
     label: string;
     value: string;
@@ -16,6 +17,6 @@ interface SubNavProps {
     sticky?: boolean;
     className?: string;
 }
-declare function SubNav({ items, value, onChange, variant, sticky, className, }: SubNavProps): import("react/jsx-runtime").JSX.Element;
+declare function SubNav({ items, value, onChange, variant, sticky, className, }: SubNavProps): React.JSX.Element;
 export { SubNav };
 export type { SubNavProps, SubNavItem };

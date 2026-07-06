@@ -20,5 +20,5 @@ export interface CheckboxFieldProps extends React.ComponentProps<typeof Checkbox
  *
  * 目的: checkbox と label を画面側で手組みして mt / 行高がズレるのを防ぐ正準コンポーネント。
  */
-declare function CheckboxField({ label, description, error, className, id, ...props }: CheckboxFieldProps): import("react/jsx-runtime").JSX.Element;
+declare function CheckboxField({ label, description, error, className, id, ...props }: CheckboxFieldProps): React.JSX.Element;
 export { CheckboxField };

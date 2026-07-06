@@ -28,4 +28,4 @@ export interface SheetProps {
      */
     dismissible?: boolean;
 }
-export declare function Sheet(props: SheetProps): import("react/jsx-runtime").JSX.Element;
+export declare function Sheet(props: SheetProps): React.JSX.Element;

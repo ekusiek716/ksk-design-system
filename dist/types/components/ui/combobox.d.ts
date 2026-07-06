@@ -1,3 +1,4 @@
+import * as React from "react";
 export interface ComboboxOption {
     value: string;
     label: string;
@@ -15,5 +16,5 @@ export interface ComboboxProps {
     /** トリガーボタンの aria-label */
     triggerLabel?: string;
 }
-declare function Combobox({ options, value, onChange, placeholder, searchPlaceholder, emptyLabel, disabled, className, triggerLabel, }: ComboboxProps): import("react/jsx-runtime").JSX.Element;
+declare function Combobox({ options, value, onChange, placeholder, searchPlaceholder, emptyLabel, disabled, className, triggerLabel, }: ComboboxProps): React.JSX.Element;
 export { Combobox };

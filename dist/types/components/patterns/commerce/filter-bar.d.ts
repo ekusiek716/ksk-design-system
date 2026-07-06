@@ -34,6 +34,6 @@ interface FilterBarProps extends React.ComponentProps<"nav"> {
     activeFilterCount?: number;
 }
 /** 汎用フィルターバーコンポーネント */
-declare function FilterBar({ filters, resultCount, sortLabel, sortOptions, selectedSort, onSortSelect, onSortClick, onMoreFilters, activeFilterCount, className, ...props }: FilterBarProps): import("react/jsx-runtime").JSX.Element;
+declare function FilterBar({ filters, resultCount, sortLabel, sortOptions, selectedSort, onSortSelect, onSortClick, onMoreFilters, activeFilterCount, className, ...props }: FilterBarProps): React.JSX.Element;
 export { FilterBar };
 export type { FilterChip, FilterOption, FilterBarProps };

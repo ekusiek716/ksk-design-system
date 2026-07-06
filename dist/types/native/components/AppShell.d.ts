@@ -10,4 +10,4 @@ export interface AppShellProps {
  * モバイルアプリの基本シェル。Header / Body / BottomNav の三段重ね。
  * 上下のSafeAreaは AppHeader / NavigationBar 側で取っている前提。
  */
-export declare function AppShell({ header, footer, bottomNav, scrollable, children, }: AppShellProps): import("react/jsx-runtime").JSX.Element;
+export declare function AppShell({ header, footer, bottomNav, scrollable, children, }: AppShellProps): React.JSX.Element;

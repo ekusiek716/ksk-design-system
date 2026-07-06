@@ -7,4 +7,4 @@ export interface AppHeaderProps {
     onBack?: () => void;
     centered?: boolean;
 }
-export declare function AppHeader({ title, subtitle, leading, trailing, onBack, centered }: AppHeaderProps): import("react/jsx-runtime").JSX.Element;
+export declare function AppHeader({ title, subtitle, leading, trailing, onBack, centered }: AppHeaderProps): React.JSX.Element;

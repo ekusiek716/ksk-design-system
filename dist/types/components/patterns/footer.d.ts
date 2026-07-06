@@ -19,6 +19,6 @@ interface FooterProps {
     copyright?: string;
     className?: string;
 }
-declare function Footer({ logo, linkGroups, paymentIcons, socialLinks, copyright, className, }: FooterProps): import("react/jsx-runtime").JSX.Element;
+declare function Footer({ logo, linkGroups, paymentIcons, socialLinks, copyright, className, }: FooterProps): React.JSX.Element;
 export { Footer };
 export type { FooterProps, FooterLinkGroup };

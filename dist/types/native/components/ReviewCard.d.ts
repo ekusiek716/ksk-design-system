@@ -1,3 +1,4 @@
+import React from "react";
 import { type ImageSourcePropType } from "react-native";
 export interface ReviewCardProps {
     authorName: string;
@@ -8,4 +9,4 @@ export interface ReviewCardProps {
     comment: string;
     helpfulCount?: number;
 }
-export declare function ReviewCard({ authorName, authorAvatar, rating, date, title, comment, helpfulCount, }: ReviewCardProps): import("react/jsx-runtime").JSX.Element;
+export declare function ReviewCard({ authorName, authorAvatar, rating, date, title, comment, helpfulCount, }: ReviewCardProps): React.JSX.Element;

@@ -6,4 +6,4 @@ export interface FormFieldProps {
     error?: string;
     children: React.ReactNode;
 }
-export declare function FormField({ label, required, description, error, children }: FormFieldProps): import("react/jsx-runtime").JSX.Element;
+export declare function FormField({ label, required, description, error, children }: FormFieldProps): React.JSX.Element;

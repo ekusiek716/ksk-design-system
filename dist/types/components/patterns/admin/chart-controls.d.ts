@@ -11,6 +11,6 @@ interface ChartControlsProps {
     onCustomPeriod?: () => void;
     className?: string;
 }
-declare function ChartControls({ granularity, onGranularityChange, period, onPeriodChange, showComparison, onComparisonChange, onCustomPeriod, className, }: ChartControlsProps): import("react/jsx-runtime").JSX.Element;
+declare function ChartControls({ granularity, onGranularityChange, period, onPeriodChange, showComparison, onComparisonChange, onCustomPeriod, className, }: ChartControlsProps): import("react").JSX.Element;
 export { ChartControls };
 export type { ChartControlsProps, Granularity, Period };

@@ -15,6 +15,6 @@ interface ScreenProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "childr
     headerClassName?: string;
     footerClassName?: string;
 }
-declare function Screen({ children, footer, header, scroll, padding, className, bodyClassName, headerClassName, footerClassName, ...props }: ScreenProps): import("react/jsx-runtime").JSX.Element;
+declare function Screen({ children, footer, header, scroll, padding, className, bodyClassName, headerClassName, footerClassName, ...props }: ScreenProps): React.JSX.Element;
 export { Screen };
 export type { ScreenPadding, ScreenProps };

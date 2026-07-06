@@ -7,4 +7,4 @@ export interface BottomSheetFormProps {
     footer?: React.ReactNode;
     children: React.ReactNode;
 }
-export declare function BottomSheetForm({ open, onClose, title, description, footer, children, }: BottomSheetFormProps): import("react/jsx-runtime").JSX.Element;
+export declare function BottomSheetForm({ open, onClose, title, description, footer, children, }: BottomSheetFormProps): React.JSX.Element;

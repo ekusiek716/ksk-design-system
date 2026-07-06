@@ -10,5 +10,5 @@ interface ImageUploaderProps extends React.ComponentProps<"div"> {
     maxImages?: number;
     columns?: number;
 }
-declare function ImageUploader({ images, onAdd, onRemove, maxImages, columns, className, ...props }: ImageUploaderProps): import("react/jsx-runtime").JSX.Element;
+declare function ImageUploader({ images, onAdd, onRemove, maxImages, columns, className, ...props }: ImageUploaderProps): React.JSX.Element;
 export { ImageUploader };

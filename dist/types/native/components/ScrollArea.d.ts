@@ -6,4 +6,4 @@ export interface ScrollAreaProps extends ScrollViewProps {
     children: React.ReactNode;
 }
 /** ScrollView の薄いラッパ。max-height と枠線つけたいケース用。 */
-export declare function ScrollArea({ maxHeight, bordered, children, ...rest }: ScrollAreaProps): import("react/jsx-runtime").JSX.Element;
+export declare function ScrollArea({ maxHeight, bordered, children, ...rest }: ScrollAreaProps): React.JSX.Element;

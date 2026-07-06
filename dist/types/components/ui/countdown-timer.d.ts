@@ -1,3 +1,4 @@
+import * as React from "react";
 type Granularity = "day" | "hour" | "minute" | "second";
 interface CountdownTimerProps {
     /** カウントダウン先の日時 */
@@ -34,6 +35,6 @@ interface CountdownTimerProps {
  * CountdownTimer — granularity に応じて day / time モードを描画。
  * 各モードを別コンポーネントに分け、hooks を常に同じ順序で呼ぶ（Rules of Hooks 準拠）。
  */
-declare function CountdownTimer(props: CountdownTimerProps): import("react/jsx-runtime").JSX.Element;
+declare function CountdownTimer(props: CountdownTimerProps): React.JSX.Element;
 export { CountdownTimer };
 export type { CountdownTimerProps };

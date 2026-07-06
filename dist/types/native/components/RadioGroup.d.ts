@@ -1,3 +1,4 @@
+import React from "react";
 export interface RadioOption {
     value: string;
     label: string;
@@ -10,4 +11,4 @@ export interface RadioGroupProps {
     onChange?: (value: string) => void;
     disabled?: boolean;
 }
-export declare function RadioGroup({ options, value, onChange, disabled }: RadioGroupProps): import("react/jsx-runtime").JSX.Element;
+export declare function RadioGroup({ options, value, onChange, disabled }: RadioGroupProps): React.JSX.Element;

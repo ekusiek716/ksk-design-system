@@ -9,5 +9,5 @@ interface BannerProps extends React.ComponentProps<"div">, VariantProps<typeof b
     description?: string;
     action?: React.ReactNode;
 }
-declare function Banner({ className, variant, icon, title, description, action, children, ...props }: BannerProps): import("react/jsx-runtime").JSX.Element;
+declare function Banner({ className, variant, icon, title, description, action, children, ...props }: BannerProps): React.JSX.Element;
 export { Banner, bannerVariants };

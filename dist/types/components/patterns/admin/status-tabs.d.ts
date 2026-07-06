@@ -8,6 +8,6 @@ interface StatusTabsProps extends Omit<React.ComponentProps<"div">, "onSelect"> 
     activeIndex?: number;
     onSelect?: (index: number) => void;
 }
-declare function StatusTabs({ items, activeIndex, onSelect, className, ...props }: StatusTabsProps): import("react/jsx-runtime").JSX.Element;
+declare function StatusTabs({ items, activeIndex, onSelect, className, ...props }: StatusTabsProps): React.JSX.Element;
 export { StatusTabs };
 export type { StatusTabItem };

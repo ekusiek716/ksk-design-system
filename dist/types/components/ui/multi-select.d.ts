@@ -1,3 +1,4 @@
+import * as React from "react";
 export interface MultiSelectOption {
     value: string;
     label: string;
@@ -17,5 +18,5 @@ export interface MultiSelectProps {
     /** 選択済みをクリアするボタンを表示 @default true */
     clearable?: boolean;
 }
-declare function MultiSelect({ options, value, onChange, placeholder, searchPlaceholder, emptyLabel, disabled, className, maxDisplay, clearable, }: MultiSelectProps): import("react/jsx-runtime").JSX.Element;
+declare function MultiSelect({ options, value, onChange, placeholder, searchPlaceholder, emptyLabel, disabled, className, maxDisplay, clearable, }: MultiSelectProps): React.JSX.Element;
 export { MultiSelect };

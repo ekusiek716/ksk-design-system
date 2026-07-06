@@ -12,6 +12,6 @@ interface BottomSheetFormProps {
     children: React.ReactNode;
     className?: string;
 }
-declare function BottomSheetForm({ open, onOpenChange, title, description, submitLabel, cancelLabel, onSubmit, loading, children, className, }: BottomSheetFormProps): import("react/jsx-runtime").JSX.Element;
+declare function BottomSheetForm({ open, onOpenChange, title, description, submitLabel, cancelLabel, onSubmit, loading, children, className, }: BottomSheetFormProps): React.JSX.Element;
 export { BottomSheetForm };
 export type { BottomSheetFormProps };

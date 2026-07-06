@@ -1,3 +1,4 @@
+import React from "react";
 export interface SliderProps {
     value: number;
     onChange?: (value: number) => void;
@@ -6,4 +7,4 @@ export interface SliderProps {
     step?: number;
     disabled?: boolean;
 }
-export declare function Slider({ value, onChange, min, max, step, disabled, }: SliderProps): import("react/jsx-runtime").JSX.Element;
+export declare function Slider({ value, onChange, min, max, step, disabled, }: SliderProps): React.JSX.Element;

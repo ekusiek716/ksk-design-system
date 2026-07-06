@@ -75,10 +75,10 @@ function KebabMenu({ items, className, ...props }: KebabMenuProps) {
               variant={item.destructive ? "destructive" : "default"}
               disabled={item.disabled}
               onSelect={() => item.onClick?.()}
-              className="items-start justify-between gap-4"
+              className={cn("justify-between gap-4", item.description ? "items-start" : "items-center")}
             >
-              <span className="flex min-w-0 items-start gap-2">
-                {item.icon && <span className="mt-0.5 shrink-0">{item.icon}</span>}
+              <span className={cn("flex min-w-0 gap-2", item.description ? "items-start" : "items-center")}>
+                {item.icon && <span className={cn("shrink-0", item.description && "mt-0.5")}>{item.icon}</span>}
                 <span className="min-w-0">
                   <span className="block typo-body-md">{item.label}</span>
                   {item.description && (

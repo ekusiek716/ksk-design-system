@@ -19,7 +19,7 @@ export interface ListSkeletonProps {
     /** リスト行の高さ (px、既定 56) */
     rowHeight?: number;
 }
-export declare function ListSkeleton({ rows, hasFilter, loadingLabel, className, rowHeight, }: ListSkeletonProps): import("react/jsx-runtime").JSX.Element;
+export declare function ListSkeleton({ rows, hasFilter, loadingLabel, className, rowHeight, }: ListSkeletonProps): import("react").JSX.Element;
 /**
  * GridSkeleton — グリッド型サブタブ用の汎用 Skeleton。
  *
@@ -40,4 +40,4 @@ export interface GridSkeletonProps {
     /** 外枠の追加 className */
     className?: string;
 }
-export declare function GridSkeleton({ rows, columns, cardHeight, loadingLabel, className, }: GridSkeletonProps): import("react/jsx-runtime").JSX.Element;
+export declare function GridSkeleton({ rows, columns, cardHeight, loadingLabel, className, }: GridSkeletonProps): import("react").JSX.Element;

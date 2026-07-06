@@ -983,6 +983,11 @@ function SwipeToCloseBottomSheet({
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
+    // マウスはボタン非押下 (hover) のとき drag しない。ハンドラはコンテンツ全面に
+    // 付いており、pointerdown を伴わない素の mousemove でも発火するため、
+    // buttons===0 を弾かないと startYRef(初期0) 基準の dy でシートがカーソルに
+    // 追従してしまう（デスクトップでシートを開くと高さがマウスに付いてくるバグ）。
+    if (e.buttons === 0) return
     if (moveGesture(e.clientX, e.clientY, e.timeStamp)) {
       try {
         e.currentTarget.setPointerCapture(e.pointerId)

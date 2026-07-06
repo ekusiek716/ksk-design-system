@@ -7,4 +7,4 @@ export interface TextProps extends RNTextProps {
     children: React.ReactNode;
 }
 /** typo トークンを適用する DS テキスト。色は未指定なら text.high-emphasis。 */
-export declare function Text({ variant, color, style, children, ...rest }: TextProps): import("react/jsx-runtime").JSX.Element;
+export declare function Text({ variant, color, style, children, ...rest }: TextProps): React.JSX.Element;

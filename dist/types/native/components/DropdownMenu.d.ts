@@ -1,3 +1,4 @@
+import React from "react";
 export interface DropdownMenuItem {
     key: string;
     label: string;
@@ -16,4 +17,4 @@ export interface DropdownMenuProps {
     };
     items: DropdownMenuItem[];
 }
-export declare function DropdownMenu({ open, onClose, anchor, items }: DropdownMenuProps): import("react/jsx-runtime").JSX.Element;
+export declare function DropdownMenu({ open, onClose, anchor, items }: DropdownMenuProps): React.JSX.Element;

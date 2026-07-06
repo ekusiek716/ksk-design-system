@@ -38,8 +38,8 @@ type AlertProps = React.ComponentProps<"div"> & VariantProps<typeof alertVariant
     /** 右側アクション（Button など） */
     action?: React.ReactNode;
 };
-declare function Alert({ className, variant, children, title, description, icon, action, ...props }: AlertProps): import("react/jsx-runtime").JSX.Element;
-declare function AlertTitle({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
-declare function AlertDescription({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
+declare function Alert({ className, variant, children, title, description, icon, action, ...props }: AlertProps): React.JSX.Element;
+declare function AlertTitle({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
+declare function AlertDescription({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
 export { Alert, AlertTitle, AlertDescription };
 export type { AlertVariant };

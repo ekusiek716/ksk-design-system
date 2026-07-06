@@ -11,5 +11,5 @@ interface NotificationBadgeProps extends React.ComponentProps<"span"> {
      */
     size?: "xs" | "sm" | "default";
 }
-declare function NotificationBadge({ className, count, max, size, ...props }: NotificationBadgeProps): import("react/jsx-runtime").JSX.Element;
+declare function NotificationBadge({ className, count, max, size, ...props }: NotificationBadgeProps): React.JSX.Element;
 export { NotificationBadge };

@@ -1,3 +1,4 @@
+import React from "react";
 export interface SelectOption {
     value: string;
     label: string;
@@ -11,4 +12,4 @@ export interface SelectProps {
     disabled?: boolean;
     title?: string;
 }
-export declare function Select({ options, value, onChange, placeholder, disabled, title, }: SelectProps): import("react/jsx-runtime").JSX.Element;
+export declare function Select({ options, value, onChange, placeholder, disabled, title, }: SelectProps): React.JSX.Element;

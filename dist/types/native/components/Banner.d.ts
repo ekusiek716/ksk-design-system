@@ -1,3 +1,4 @@
+import React from "react";
 import { type ImageSourcePropType } from "react-native";
 export interface BannerProps {
     title?: string;
@@ -7,4 +8,4 @@ export interface BannerProps {
     tone?: "neutral" | "accent" | "success" | "warning" | "caution";
     height?: number;
 }
-export declare function Banner({ title, description, image, onPress, tone, height }: BannerProps): import("react/jsx-runtime").JSX.Element;
+export declare function Banner({ title, description, image, onPress, tone, height }: BannerProps): React.JSX.Element;

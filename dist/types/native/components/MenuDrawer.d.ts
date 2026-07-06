@@ -18,4 +18,4 @@ export interface MenuDrawerProps {
     sections: MenuDrawerSection[];
     footer?: React.ReactNode;
 }
-export declare function MenuDrawer({ open, onClose, side, header, sections, footer, }: MenuDrawerProps): import("react/jsx-runtime").JSX.Element;
+export declare function MenuDrawer({ open, onClose, side, header, sections, footer, }: MenuDrawerProps): React.JSX.Element;

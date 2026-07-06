@@ -10,4 +10,4 @@ export interface CategoryNavProps {
     onChange?: (key: string) => void;
 }
 /** 横並び・固定で表示するカテゴリナビ。スクロール可能。 */
-export declare function CategoryNav({ items, value, onChange }: CategoryNavProps): import("react/jsx-runtime").JSX.Element;
+export declare function CategoryNav({ items, value, onChange }: CategoryNavProps): React.JSX.Element;

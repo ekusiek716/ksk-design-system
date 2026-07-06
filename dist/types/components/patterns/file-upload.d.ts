@@ -1,3 +1,4 @@
+import * as React from "react";
 export interface UploadedFile {
     file: File;
     url: string;
@@ -27,5 +28,5 @@ export interface FileUploadProps {
     /** 削除ボタンの aria-label @default "削除" */
     removeLabel?: string;
 }
-declare function FileUpload({ accept, maxSize, multiple, maxFiles, onUpload, disabled, className, dragLabel, orLabel, browseLabel, maxSizeLabel, maxFilesLabel, removeLabel, }: FileUploadProps): import("react/jsx-runtime").JSX.Element;
+declare function FileUpload({ accept, maxSize, multiple, maxFiles, onUpload, disabled, className, dragLabel, orLabel, browseLabel, maxSizeLabel, maxFilesLabel, removeLabel, }: FileUploadProps): React.JSX.Element;
 export { FileUpload };

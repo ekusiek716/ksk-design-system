@@ -10,4 +10,4 @@ export interface StackProps extends ViewProps {
     children: React.ReactNode;
 }
 /** spacing トークン駆動の Flex レイアウト。Row/Column の薄いラッパ。 */
-export declare function Stack({ gap, direction, align, justify, wrap, style, children, ...rest }: StackProps): import("react/jsx-runtime").JSX.Element;
+export declare function Stack({ gap, direction, align, justify, wrap, style, children, ...rest }: StackProps): React.JSX.Element;

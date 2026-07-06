@@ -1,3 +1,4 @@
+import * as React from "react";
 interface TagInputProps {
     value?: string[];
     onChange?: (tags: string[]) => void;
@@ -15,6 +16,6 @@ interface TagInputProps {
      */
     inputLabel?: string;
 }
-declare function TagInput({ value, onChange, placeholder, disabled, max, allowDuplicates, className, inputLabel, }: TagInputProps): import("react/jsx-runtime").JSX.Element;
+declare function TagInput({ value, onChange, placeholder, disabled, max, allowDuplicates, className, inputLabel, }: TagInputProps): React.JSX.Element;
 export { TagInput };
 export type { TagInputProps };

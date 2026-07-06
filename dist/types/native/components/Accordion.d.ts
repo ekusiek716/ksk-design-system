@@ -9,4 +9,4 @@ export interface AccordionProps {
     type?: "single" | "multiple";
     defaultOpenKeys?: string[];
 }
-export declare function Accordion({ items, type, defaultOpenKeys }: AccordionProps): import("react/jsx-runtime").JSX.Element;
+export declare function Accordion({ items, type, defaultOpenKeys }: AccordionProps): React.JSX.Element;

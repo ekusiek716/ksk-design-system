@@ -1,3 +1,4 @@
+import React from "react";
 export interface TimeValue {
     hour: number;
     minute: number;
@@ -9,4 +10,4 @@ export interface TimePickerProps {
     minuteStep?: 1 | 5 | 10 | 15 | 30;
     disabled?: boolean;
 }
-export declare function TimePicker({ value, onChange, placeholder, minuteStep, disabled, }: TimePickerProps): import("react/jsx-runtime").JSX.Element;
+export declare function TimePicker({ value, onChange, placeholder, minuteStep, disabled, }: TimePickerProps): React.JSX.Element;

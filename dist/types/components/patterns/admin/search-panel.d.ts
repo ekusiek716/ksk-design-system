@@ -5,5 +5,5 @@ interface SearchPanelProps extends React.ComponentProps<"div"> {
     columns?: 2 | 3 | 4;
     layout?: "grid" | "flex";
 }
-declare function SearchPanel({ children, onSearch, onReset, columns, layout, className, ...props }: SearchPanelProps): import("react/jsx-runtime").JSX.Element;
+declare function SearchPanel({ children, onSearch, onReset, columns, layout, className, ...props }: SearchPanelProps): React.JSX.Element;
 export { SearchPanel };

@@ -18,6 +18,6 @@ interface ListItemProps extends React.ComponentProps<"div"> {
     interactive?: boolean;
     variant?: ListItemVariant;
 }
-declare function ListItem({ className, leftSlot, rightSlot, bottomSlot, title, description, interactive, variant, children, ...props }: ListItemProps): import("react/jsx-runtime").JSX.Element;
+declare function ListItem({ className, leftSlot, rightSlot, bottomSlot, title, description, interactive, variant, children, ...props }: ListItemProps): React.JSX.Element;
 export { ListItem };
 export type { ListItemProps, ListItemVariant };

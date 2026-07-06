@@ -1,3 +1,4 @@
+import React from "react";
 export interface SectionHeaderProps {
     title: string;
     description?: string;
@@ -7,4 +8,4 @@ export interface SectionHeaderProps {
     };
     variant?: "default" | "subtle";
 }
-export declare function SectionHeader({ title, description, action, variant }: SectionHeaderProps): import("react/jsx-runtime").JSX.Element;
+export declare function SectionHeader({ title, description, action, variant }: SectionHeaderProps): React.JSX.Element;

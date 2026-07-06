@@ -24,6 +24,6 @@ interface ChipSelectorProps<T extends string = string> {
     size?: "sm" | "md" | "lg";
     className?: string;
 }
-declare function ChipSelector<T extends string = string>({ options, value, onChange, multiple, max, size, className, }: ChipSelectorProps<T>): import("react/jsx-runtime").JSX.Element;
+declare function ChipSelector<T extends string = string>({ options, value, onChange, multiple, max, size, className, }: ChipSelectorProps<T>): React.JSX.Element;
 export { ChipSelector };
 export type { ChipSelectorProps, ChipSelectorOption };

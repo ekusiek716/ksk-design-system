@@ -12,6 +12,6 @@ interface InputProps extends Omit<React.ComponentProps<"input">, "prefix"> {
      */
     endAdornment?: React.ReactNode;
 }
-declare function Input({ className, type, startAdornment, endAdornment, ...props }: InputProps): import("react/jsx-runtime").JSX.Element;
+declare function Input({ className, type, startAdornment, endAdornment, ...props }: InputProps): React.JSX.Element;
 export { Input };
 export type { InputProps };

@@ -17,12 +17,12 @@ interface CardProps extends React.ComponentProps<"div">, VariantProps<typeof car
  *
  * Note: 商品の表示は `ProductCard`（patterns/commerce）を使う。
  */
-declare function Card({ className, variant, ...props }: CardProps): import("react/jsx-runtime").JSX.Element;
-declare function CardHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
-declare function CardTitle({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
-declare function CardDescription({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
-declare function CardAction({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
-declare function CardContent({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
-declare function CardFooter({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
+declare function Card({ className, variant, ...props }: CardProps): React.JSX.Element;
+declare function CardHeader({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
+declare function CardTitle({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
+declare function CardDescription({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
+declare function CardAction({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
+declare function CardContent({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
+declare function CardFooter({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
 export { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter, cardVariants };
 export type { CardProps };
