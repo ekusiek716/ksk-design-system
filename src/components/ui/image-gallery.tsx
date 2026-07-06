@@ -132,7 +132,7 @@ function ImageGallery({
               aria-label={imageLabel(i)}
               aria-pressed={i === active}
               className={cn(
-                "flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-colors bg-[var(--Surface-Tertiary)]",
+                "flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 border-transparent transition-colors bg-[var(--Surface-Tertiary)]",
                 i === active
                   ? "border-[var(--Brand-Primary)]"
                   : "border-transparent hover:border-[var(--Border-Medium-Emphasis)]"

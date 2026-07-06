@@ -100,7 +100,7 @@ function StatCard({
       onClick={isInteractive ? onClick : undefined}
       onKeyDown={isInteractive ? handleKeyDown : undefined}
       className={cn(
-        "flex flex-col gap-2 rounded-lg border p-4 shadow-[var(--shadow-md)]",
+        "flex flex-col gap-2 rounded-lg border border-[var(--Border-Low-Emphasis)] p-4 shadow-[var(--shadow-md)]",
         styles.card,
         isInteractive && [
           "cursor-pointer transition-all",

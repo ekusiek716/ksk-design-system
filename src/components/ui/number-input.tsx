@@ -69,7 +69,7 @@ function NumberInput({
   const s = SIZE[size]
 
   const btnBase = cn(
-    "flex items-center justify-center rounded-full border shrink-0 transition-colors select-none",
+    "flex items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] shrink-0 transition-colors select-none",
     s.btn,
     "border-[var(--Border-Medium-Emphasis)] text-[var(--Object-Medium-Emphasis)]",
     "hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)] hover:bg-[var(--Brand-Ultra-Light)]",

@@ -70,7 +70,7 @@ function SubNav({
               title={description}
               onClick={() => onChange(item.value)}
               className={cn(
-                "flex items-center gap-1.5 shrink-0 px-3.5 py-1.5 rounded-full border typo-label-md transition-colors",
+                "flex items-center gap-1.5 shrink-0 px-3.5 py-1.5 rounded-full border border-transparent typo-label-md transition-colors",
                 isActive
                   ? "bg-[var(--Brand-Primary)] border-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
                   : "border-transparent bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Quaternary)] hover:text-[var(--Text-High-Emphasis)]"
