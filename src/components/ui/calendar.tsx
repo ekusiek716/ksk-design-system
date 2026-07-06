@@ -18,14 +18,14 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         month: "flex flex-col gap-4",
         month_caption: "flex justify-center pt-1 items-center h-9",
         caption_label: "typo-label-md text-[var(--Text-High-Emphasis)]",
-        nav: "absolute top-4 inset-x-0 flex justify-between px-1 z-10 pointer-events-none",
+        nav: "absolute top-4 inset-x-0 z-10",
         button_previous: cn(
-          "h-7 w-7 flex items-center justify-center rounded-lg pointer-events-auto",
+          "absolute left-1 top-0 h-7 w-7 flex items-center justify-center rounded-lg",
           "text-[var(--Object-Medium-Emphasis)] hover:text-[var(--Object-High-Emphasis)]",
           "hover:bg-[var(--Surface-Secondary)] transition-colors"
         ),
         button_next: cn(
-          "h-7 w-7 flex items-center justify-center rounded-lg pointer-events-auto",
+          "absolute right-1 top-0 h-7 w-7 flex items-center justify-center rounded-lg",
           "text-[var(--Object-Medium-Emphasis)] hover:text-[var(--Object-High-Emphasis)]",
           "hover:bg-[var(--Surface-Secondary)] transition-colors"
         ),
