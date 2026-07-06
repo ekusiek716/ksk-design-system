@@ -116,6 +116,7 @@ function Celebration({
   onTapDismiss,
   onDone,
   className,
+  style,
   ...props
 }: CelebrationProps) {
   const reducedMotion = usePrefersReducedMotion()
@@ -207,17 +208,23 @@ function Celebration({
       aria-label={accessibleText}
       className={cn(
         placement === "overlay"
-          ? "pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
+          ? "fixed inset-0 z-50 flex items-center justify-center"
           : "relative flex items-center justify-center",
         className,
       )}
+      // pointer-events は Tailwind ユーティリティでなく inline style で指定する。
+      // consumer の @source スキャンが minified dist から pointer-events-auto を
+      // 拾い漏れると「親 none だけ効いて子がクリック不能」になる（issue #132 /
+      // Calendar で実発生）。inline style は CSS 生成に依存しないため安全。
+      style={placement === "overlay" ? { pointerEvents: "none", ...style } : style}
       {...props}
     >
       {canTapDismiss && (
         <button
           type="button"
           aria-label="閉じる"
-          className="pointer-events-auto absolute inset-0 cursor-pointer"
+          className="absolute inset-0 cursor-pointer"
+          style={{ pointerEvents: "auto" }}
           onClick={handleTapDismiss}
         />
       )}
@@ -226,7 +233,11 @@ function Celebration({
         // confetti の飛散だけをクリップする。ルート要素側で overflow-hidden に
         // すると placement="inline" のカード drop shadow（shadow-dialog）が
         // 欠けてしまうため、クリップはこのレイヤーに閉じ込める。
-        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{ pointerEvents: "none" }}
+          aria-hidden="true"
+        >
           {particles.map((piece) =>
             isBurst ? (
               <span
@@ -266,8 +277,9 @@ function Celebration({
       {showMessage && (
         <div
           onClick={canTapDismiss ? handleTapDismiss : undefined}
+          style={{ pointerEvents: "auto" }}
           className={cn(
-            "pointer-events-auto relative z-[1] mx-4 flex max-w-sm flex-col items-center rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-6 py-5 text-center shadow-[var(--shadow-dialog)]",
+            "relative z-[1] mx-4 flex max-w-sm flex-col items-center rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-6 py-5 text-center shadow-[var(--shadow-dialog)]",
             !reducedMotion && "animate-[celebration-pop_360ms_cubic-bezier(0.34,1.56,0.64,1)_both]",
             canTapDismiss && "cursor-pointer",
           )}
