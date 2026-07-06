@@ -1,3 +1,4 @@
+import * as React from "react";
 interface NumberInputProps {
     value?: number;
     onChange?: (value: number) => void;
@@ -15,6 +16,6 @@ interface NumberInputProps {
     /** 加算ボタンの aria-label。i18n 対応: 英語では "Increase" を渡す。@default "増やす" */
     incrementLabel?: string;
 }
-declare function NumberInput({ value, onChange, min, max, step, format, placeholder, disabled, size, className, decrementLabel, incrementLabel, }: NumberInputProps): import("react/jsx-runtime").JSX.Element;
+declare function NumberInput({ value, onChange, min, max, step, format, placeholder, disabled, size, className, decrementLabel, incrementLabel, }: NumberInputProps): React.JSX.Element;
 export { NumberInput };
 export type { NumberInputProps };

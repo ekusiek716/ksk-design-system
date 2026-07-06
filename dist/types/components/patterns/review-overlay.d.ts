@@ -21,5 +21,5 @@ export interface ReviewOverlayProps {
     className?: string;
     children?: React.ReactNode;
 }
-declare function ReviewOverlay({ active, onPinCreate, pins, onPinClick, holdDuration, onHaptic, className, children, }: ReviewOverlayProps): import("react/jsx-runtime").JSX.Element;
+declare function ReviewOverlay({ active, onPinCreate, pins, onPinClick, holdDuration, onHaptic, className, children, }: ReviewOverlayProps): React.JSX.Element;
 export { ReviewOverlay };

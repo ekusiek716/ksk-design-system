@@ -10,5 +10,5 @@ interface ImageCarouselProps extends React.ComponentProps<"div"> {
     showArrows?: boolean;
     autoPlay?: number;
 }
-declare function ImageCarousel({ images, aspectRatio, showDots, showArrows, autoPlay, className, ...props }: ImageCarouselProps): import("react/jsx-runtime").JSX.Element;
+declare function ImageCarousel({ images, aspectRatio, showDots, showArrows, autoPlay, className, ...props }: ImageCarouselProps): React.JSX.Element;
 export { ImageCarousel };

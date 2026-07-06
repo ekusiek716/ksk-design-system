@@ -1,3 +1,4 @@
+import * as React from "react";
 interface StarRatingProps {
     value: number;
     onChange?: (value: number) => void;
@@ -7,6 +8,6 @@ interface StarRatingProps {
     showLabel?: boolean;
     className?: string;
 }
-declare function StarRating({ value, onChange, max, size, showLabel, className, }: StarRatingProps): import("react/jsx-runtime").JSX.Element;
+declare function StarRating({ value, onChange, max, size, showLabel, className, }: StarRatingProps): React.JSX.Element;
 export { StarRating };
 export type { StarRatingProps };

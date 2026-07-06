@@ -1,6 +1,6 @@
 import * as React from "react";
 import { RadioGroup as RadioGroupPrimitive } from "radix-ui";
-declare function RadioGroup({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Root>): import("react/jsx-runtime").JSX.Element;
+declare function RadioGroup({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Root>): React.JSX.Element;
 /**
  * RadioGroupItem — ラジオ 1 項目
  *
@@ -18,5 +18,5 @@ declare function RadioGroup({ className, ...props }: React.ComponentProps<typeof
  */
 declare function RadioGroupItem({ className, children, description, id, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Item> & {
     description?: React.ReactNode;
-}): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
 export { RadioGroup, RadioGroupItem };

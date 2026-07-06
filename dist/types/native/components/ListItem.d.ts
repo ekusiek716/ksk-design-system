@@ -8,4 +8,4 @@ export interface ListItemProps {
     onPress?: () => void;
     disabled?: boolean;
 }
-export declare function ListItem({ leading, title, description, trailing, showChevron, onPress, disabled, }: ListItemProps): import("react/jsx-runtime").JSX.Element;
+export declare function ListItem({ leading, title, description, trailing, showChevron, onPress, disabled, }: ListItemProps): React.JSX.Element;

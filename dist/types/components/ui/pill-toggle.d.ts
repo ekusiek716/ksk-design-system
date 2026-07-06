@@ -11,6 +11,6 @@ interface PillToggleProps<T extends string = string> {
     size?: "sm" | "md";
     className?: string;
 }
-declare function PillToggle<T extends string = string>({ options, value, onChange, size, className, }: PillToggleProps<T>): import("react/jsx-runtime").JSX.Element;
+declare function PillToggle<T extends string = string>({ options, value, onChange, size, className, }: PillToggleProps<T>): React.JSX.Element;
 export { PillToggle };
 export type { PillToggleProps, PillToggleOption };

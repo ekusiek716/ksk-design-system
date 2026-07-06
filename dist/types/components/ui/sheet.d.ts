@@ -77,11 +77,11 @@ interface SheetProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
     onOpenChange?: (open: boolean) => void;
     modal?: boolean;
 }
-declare function Sheet({ snapPoints, activeSnapPoint: activeSnapPointProp, setActiveSnapPoint: setActiveSnapPointProp, fadeFromIndex, dismissible, overlay, onOpenChange, open, defaultOpen, ...props }: SheetProps): import("react/jsx-runtime").JSX.Element;
-declare function SheetTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>): import("react/jsx-runtime").JSX.Element;
-declare function SheetClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>): import("react/jsx-runtime").JSX.Element;
+declare function Sheet({ snapPoints, activeSnapPoint: activeSnapPointProp, setActiveSnapPoint: setActiveSnapPointProp, fadeFromIndex, dismissible, overlay, onOpenChange, open, defaultOpen, ...props }: SheetProps): React.JSX.Element;
+declare function SheetTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>): React.JSX.Element;
+declare function SheetClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>): React.JSX.Element;
 /** ドラッグインジケーター（Apple HIG: 36×5pt, gray, centered） */
-declare function SheetDragIndicator(): import("react/jsx-runtime").JSX.Element;
+declare function SheetDragIndicator(): React.JSX.Element;
 declare const sheetVariants: (props?: {
     side?: "top" | "left" | "right" | "bottom" | "float" | "float-glass" | "bottom-glass";
 } & import("class-variance-authority/types").ClassProp) => string;
@@ -142,8 +142,8 @@ interface SheetContentProps extends Omit<React.ComponentProps<typeof DialogPrimi
     /** Sheet 表示中に body scroll を抑止する。既定 true。 */
     bodyScrollLock?: boolean;
 }
-declare function SheetContent({ className, children, side, glassOverlay, container, padding, swipeToClose, description, autoFocus, restoreFocusOnClose, closeOnEsc, bodyScrollLock, ...props }: SheetContentProps): import("react/jsx-runtime").JSX.Element;
-declare function SheetHeader({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
+declare function SheetContent({ className, children, side, glassOverlay, container, padding, swipeToClose, description, autoFocus, restoreFocusOnClose, closeOnEsc, bodyScrollLock, ...props }: SheetContentProps): React.JSX.Element;
+declare function SheetHeader({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
 declare function SheetFooter({ className, orientation, ...props }: React.ComponentProps<"div"> & {
     /**
      * アクションボタンの並べ方。
@@ -152,8 +152,8 @@ declare function SheetFooter({ className, orientation, ...props }: React.Compone
      * - "stacked": 旧挙動。縦積み（全幅）。
      */
     orientation?: "split" | "stacked";
-}): import("react/jsx-runtime").JSX.Element;
-declare function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): import("react/jsx-runtime").JSX.Element;
-declare function SheetDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
+declare function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): React.JSX.Element;
+declare function SheetDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>): React.JSX.Element;
 export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator, computeVisualViewportInset, decideSwipeGesture, computeFlickVelocity, decideSwipeDismiss, };
 export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset };

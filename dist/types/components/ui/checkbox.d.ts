@@ -40,5 +40,5 @@ export interface CheckboxProps extends CheckboxRootProps {
  *
  * カード型の選択肢には `CheckboxCard` を使用。
  */
-declare function Checkbox({ label, description, count, containerClassName, className, id, ...props }: CheckboxProps): import("react/jsx-runtime").JSX.Element;
+declare function Checkbox({ label, description, count, containerClassName, className, id, ...props }: CheckboxProps): React.JSX.Element;
 export { Checkbox };

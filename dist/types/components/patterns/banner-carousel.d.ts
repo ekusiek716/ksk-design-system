@@ -20,6 +20,6 @@ interface BannerCarouselProps {
     itemWidth?: number;
     className?: string;
 }
-declare function BannerCarousel({ title, items, moreLabel, onMore, itemAspectRatio, itemWidth, className, }: BannerCarouselProps): import("react/jsx-runtime").JSX.Element;
+declare function BannerCarousel({ title, items, moreLabel, onMore, itemAspectRatio, itemWidth, className, }: BannerCarouselProps): import("react").JSX.Element;
 export { BannerCarousel };
 export type { BannerCarouselProps, BannerItem };

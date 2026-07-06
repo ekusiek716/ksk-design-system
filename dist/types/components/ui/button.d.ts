@@ -16,7 +16,9 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
  * - `secondary` / `tertiary`: 並列の選択肢・キャンセル。
  * - `ghost` / `link`: 文字寄りの controls。
  * - `destructive`: 削除・取り消しなど不可逆操作。
- * - `glass` / `glass-inverse` / `accent`: モバイル / ヒーローセクション向け装飾系。
+ * - `glass` / `glass-inverse` / `glass-accent` / `accent`: モバイル / ヒーローセクション向け装飾系。
+ *   `glass-accent` はブランドカラーをティントした glass。FAB（円形アイコンボタン）等、
+ *   中立色の glass より一段強い存在感を出したい主要アクションに使う。
  * - `inverse` / `ghost-inverse`: 暗背景・ヒーローセクション上で使う反転バリアント。
  *
  * サイズ:
@@ -24,6 +26,6 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
  * - `hero`: トップ hero / final-CTA 向けのピル型特大 CTA。
  * - `icon` / `icon-sm` / `icon-lg` / `icon-xl`: アイコンのみのボタン（aria-label 必須）。
  */
-declare function Button({ className, variant, size, layout, haptic, onClick, type, ...props }: ButtonProps): import("react/jsx-runtime").JSX.Element;
+declare function Button({ className, variant, size, layout, haptic, onClick, type, ...props }: ButtonProps): React.JSX.Element;
 export { Button, buttonVariants };
 export type { ButtonProps, HapticType };

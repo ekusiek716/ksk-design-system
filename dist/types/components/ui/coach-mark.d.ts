@@ -22,6 +22,6 @@ interface CoachMarkProps {
     delayDuration?: number;
     className?: string;
 }
-declare function CoachMark({ content, children, placement, variant, open, onOpenChange, step, totalSteps, onNext, showClose, onClose, delayDuration, className, }: CoachMarkProps): import("react/jsx-runtime").JSX.Element;
+declare function CoachMark({ content, children, placement, variant, open, onOpenChange, step, totalSteps, onNext, showClose, onClose, delayDuration, className, }: CoachMarkProps): React.JSX.Element;
 export { CoachMark };
 export type { CoachMarkProps, CoachMarkPlacement, CoachMarkVariant };

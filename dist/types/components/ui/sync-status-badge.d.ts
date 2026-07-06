@@ -13,5 +13,5 @@ export interface SyncStatusBadgeProps {
     retryLabel?: string;
     className?: string;
 }
-declare function SyncStatusBadge({ state, errorCount, onRetry, syncingLabel, successLabel, errorLabel, offlineLabel, retryLabel, className, }: SyncStatusBadgeProps): import("react/jsx-runtime").JSX.Element;
+declare function SyncStatusBadge({ state, errorCount, onRetry, syncingLabel, successLabel, errorLabel, offlineLabel, retryLabel, className, }: SyncStatusBadgeProps): import("react").JSX.Element;
 export { SyncStatusBadge };

@@ -1,3 +1,4 @@
+import React from "react";
 export interface PriceDisplayProps {
     price: number;
     originalPrice?: number;
@@ -5,4 +6,4 @@ export interface PriceDisplayProps {
     size?: "sm" | "md" | "lg";
     showTax?: boolean;
 }
-export declare function PriceDisplay({ price, originalPrice, currency, size, showTax, }: PriceDisplayProps): import("react/jsx-runtime").JSX.Element;
+export declare function PriceDisplay({ price, originalPrice, currency, size, showTax, }: PriceDisplayProps): React.JSX.Element;

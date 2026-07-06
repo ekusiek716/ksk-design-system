@@ -1,3 +1,4 @@
+import React from "react";
 export interface AlertDialogProps {
     open: boolean;
     onClose: () => void;
@@ -8,4 +9,4 @@ export interface AlertDialogProps {
     onConfirm?: () => void;
     destructive?: boolean;
 }
-export declare function AlertDialog({ open, onClose, title, description, confirmLabel, cancelLabel, onConfirm, destructive, }: AlertDialogProps): import("react/jsx-runtime").JSX.Element;
+export declare function AlertDialog({ open, onClose, title, description, confirmLabel, cancelLabel, onConfirm, destructive, }: AlertDialogProps): React.JSX.Element;

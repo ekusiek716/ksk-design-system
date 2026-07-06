@@ -71,6 +71,6 @@ interface AppHeaderProps {
  *   trailing={<UserMenu />}
  * />
  */
-declare function AppHeader({ layout, leading, logo, title, subtitle, centerSlot, trailing, rightSlot, nav, bottomSlot, sticky, bordered, variant, className, }: AppHeaderProps): import("react/jsx-runtime").JSX.Element;
+declare function AppHeader({ layout, leading, logo, title, subtitle, centerSlot, trailing, rightSlot, nav, bottomSlot, sticky, bordered, variant, className, }: AppHeaderProps): React.JSX.Element;
 export { AppHeader };
 export type { AppHeaderProps, AppHeaderNavItem };

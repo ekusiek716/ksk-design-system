@@ -6,4 +6,4 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
     leading?: React.ReactNode;
     trailing?: React.ReactNode;
 }
-export declare function Input({ invalid, disabled, leading, trailing, ...rest }: InputProps): import("react/jsx-runtime").JSX.Element;
+export declare function Input({ invalid, disabled, leading, trailing, ...rest }: InputProps): React.JSX.Element;

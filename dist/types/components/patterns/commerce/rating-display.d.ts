@@ -11,5 +11,5 @@ interface RatingDisplayProps extends React.ComponentProps<"div"> {
     /** 評価値を数値で表示するか */
     showValue?: boolean;
 }
-declare function RatingDisplay({ className, rating, reviewCount, size, showCount, showValue, ...props }: RatingDisplayProps): import("react/jsx-runtime").JSX.Element;
+declare function RatingDisplay({ className, rating, reviewCount, size, showCount, showValue, ...props }: RatingDisplayProps): React.JSX.Element;
 export { RatingDisplay };

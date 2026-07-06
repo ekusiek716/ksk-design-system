@@ -1,3 +1,4 @@
+import React from "react";
 export interface FilterBarFilter {
     key: string;
     label: string;
@@ -10,4 +11,4 @@ export interface FilterBarProps {
     sortLabel?: string;
     onPressSort?: () => void;
 }
-export declare function FilterBar({ filters, sortLabel, onPressSort }: FilterBarProps): import("react/jsx-runtime").JSX.Element;
+export declare function FilterBar({ filters, sortLabel, onPressSort }: FilterBarProps): React.JSX.Element;

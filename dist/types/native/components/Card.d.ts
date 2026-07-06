@@ -8,4 +8,4 @@ export interface CardProps extends ViewProps {
     children: React.ReactNode;
 }
 /** surface.primary 面 + border.low-emphasis の標準カード。 */
-export declare function Card({ padding, elevation, style, children, ...rest }: CardProps): import("react/jsx-runtime").JSX.Element;
+export declare function Card({ padding, elevation, style, children, ...rest }: CardProps): React.JSX.Element;

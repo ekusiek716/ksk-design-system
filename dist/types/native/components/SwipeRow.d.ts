@@ -11,4 +11,4 @@ export interface SwipeRowProps {
     children: React.ReactNode;
 }
 /** 右からスワイプして action を出す簡易行。Animated.Value + PanResponder のみで実装。 */
-export declare function SwipeRow({ rightActions, actionWidth, children }: SwipeRowProps): import("react/jsx-runtime").JSX.Element;
+export declare function SwipeRow({ rightActions, actionWidth, children }: SwipeRowProps): React.JSX.Element;

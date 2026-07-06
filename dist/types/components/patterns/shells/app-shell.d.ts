@@ -3,5 +3,5 @@ interface AppShellProps extends React.ComponentProps<"div"> {
     topBar?: React.ReactNode;
     bottomNav?: React.ReactNode;
 }
-declare function AppShell({ className, topBar, bottomNav, children, ...props }: AppShellProps): import("react/jsx-runtime").JSX.Element;
+declare function AppShell({ className, topBar, bottomNav, children, ...props }: AppShellProps): React.JSX.Element;
 export { AppShell };

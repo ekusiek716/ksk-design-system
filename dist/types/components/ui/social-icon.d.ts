@@ -33,6 +33,6 @@ export interface SocialIconProps extends Omit<React.ComponentProps<"svg">, "chil
  * 利用可能な platform は {@link SOCIAL_ICON_PLATFORMS}、表示名は
  * {@link SOCIAL_ICON_LABELS}。未収録の指定は何も描画しない（null）。
  */
-declare function SocialIcon({ platform, tone, size, className, ...props }: SocialIconProps): import("react/jsx-runtime").JSX.Element;
+declare function SocialIcon({ platform, tone, size, className, ...props }: SocialIconProps): React.JSX.Element;
 export { SocialIcon, SOCIAL_ICON_PLATFORMS, SOCIAL_ICON_LABELS };
 export type { SocialIconTone };

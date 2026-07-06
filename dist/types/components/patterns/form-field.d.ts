@@ -25,6 +25,6 @@ interface FormFieldProps extends React.ComponentProps<"div"> {
      */
     endLabel?: React.ReactNode;
 }
-declare function FormField({ className, label, htmlFor, required, error, description, requiredStyle, endLabel, children, ...props }: FormFieldProps): import("react/jsx-runtime").JSX.Element;
+declare function FormField({ className, label, htmlFor, required, error, description, requiredStyle, endLabel, children, ...props }: FormFieldProps): React.JSX.Element;
 export { FormField };
 export type { FormFieldProps, RequiredStyle };

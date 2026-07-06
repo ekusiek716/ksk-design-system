@@ -16,7 +16,7 @@ interface ReviewCardProps {
 declare function StarRow({ rating, size }: {
     rating: number;
     size?: number;
-}): import("react/jsx-runtime").JSX.Element;
-declare function ReviewCard({ reviewer, avatarChar, avatarSrc, rating, title, body, date, helpfulCount, onHelpful, helpful, className, }: ReviewCardProps): import("react/jsx-runtime").JSX.Element;
+}): import("react").JSX.Element;
+declare function ReviewCard({ reviewer, avatarChar, avatarSrc, rating, title, body, date, helpfulCount, onHelpful, helpful, className, }: ReviewCardProps): import("react").JSX.Element;
 export { ReviewCard, StarRow };
 export type { ReviewCardProps };

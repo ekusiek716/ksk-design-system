@@ -37,8 +37,8 @@ import { type ControllerProps, type FieldPath, type FieldValues } from "react-ho
  * - FormControl でラップしたコンポーネントに自動的に aria-describedby / aria-invalid が付与される
  * - FormMessage はエラー時のみ表示される
  */
-declare const Form: <TFieldValues extends FieldValues, TContext = any, TTransformedValues = TFieldValues>(props: import("react-hook-form").FormProviderProps<TFieldValues, TContext, TTransformedValues>) => React.JSX.Element;
-declare function FormField<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ ...props }: ControllerProps<TFieldValues, TName>): import("react/jsx-runtime").JSX.Element;
+declare const Form: <TFieldValues extends FieldValues, TContext = any, TTransformedValues = TFieldValues>({ children, watch, getValues, getFieldState, setError, clearErrors, setValue, setValues, trigger, formState, resetField, reset, handleSubmit, unregister, control, register, setFocus, subscribe, }: import("react-hook-form").FormProviderProps<TFieldValues, TContext, TTransformedValues>) => React.JSX.Element;
+declare function FormField<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ ...props }: ControllerProps<TFieldValues, TName>): React.JSX.Element;
 declare const useFormField: () => {
     invalid: boolean;
     isDirty: boolean;
@@ -51,11 +51,11 @@ declare const useFormField: () => {
     formDescriptionId: string;
     formMessageId: string;
 };
-declare function FormItem({ className, ...props }: React.ComponentProps<"div">): import("react/jsx-runtime").JSX.Element;
+declare function FormItem({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
 declare function FormLabel({ className, required, children, ...props }: React.ComponentProps<typeof LabelPrimitive.Root> & {
     required?: boolean;
-}): import("react/jsx-runtime").JSX.Element;
-declare function FormControl({ ...props }: React.ComponentProps<typeof Slot>): import("react/jsx-runtime").JSX.Element;
-declare function FormDescription({ className, ...props }: React.ComponentProps<"p">): import("react/jsx-runtime").JSX.Element;
-declare function FormMessage({ className, ...props }: React.ComponentProps<"p">): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
+declare function FormControl({ ...props }: React.ComponentProps<typeof Slot>): React.JSX.Element;
+declare function FormDescription({ className, ...props }: React.ComponentProps<"p">): React.JSX.Element;
+declare function FormMessage({ className, ...props }: React.ComponentProps<"p">): React.JSX.Element;
 export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField, };

@@ -1,3 +1,4 @@
+import React from "react";
 import { type BannerProps } from "./Banner";
 export interface BannerCarouselProps {
     banners: BannerProps[];
@@ -5,4 +6,4 @@ export interface BannerCarouselProps {
     height?: number;
     showIndicator?: boolean;
 }
-export declare function BannerCarousel({ banners, itemWidth, height, showIndicator, }: BannerCarouselProps): import("react/jsx-runtime").JSX.Element;
+export declare function BannerCarousel({ banners, itemWidth, height, showIndicator, }: BannerCarouselProps): React.JSX.Element;
