@@ -1,3 +1,4 @@
+import React from "react";
 export interface ComboboxOption {
     value: string;
     label: string;
@@ -11,4 +12,4 @@ export interface ComboboxProps {
     emptyMessage?: string;
     disabled?: boolean;
 }
-export declare function Combobox({ options, value, onChange, placeholder, searchPlaceholder, emptyMessage, disabled, }: ComboboxProps): import("react/jsx-runtime").JSX.Element;
+export declare function Combobox({ options, value, onChange, placeholder, searchPlaceholder, emptyMessage, disabled, }: ComboboxProps): React.JSX.Element;

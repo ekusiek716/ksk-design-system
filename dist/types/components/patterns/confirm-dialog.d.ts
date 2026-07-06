@@ -1,3 +1,4 @@
+import * as React from "react";
 interface ConfirmDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
@@ -27,6 +28,6 @@ interface ConfirmDialogProps {
  * タスク用の中央モーダル（絞り込み等）が要るときは `Dialog` / `Sheet` /
  * `ResponsiveDialog` を使う。
  */
-declare function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, cancelLabel, loadingLabel, variant, onConfirm, loading, }: ConfirmDialogProps): import("react/jsx-runtime").JSX.Element;
+declare function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, cancelLabel, loadingLabel, variant, onConfirm, loading, }: ConfirmDialogProps): React.JSX.Element;
 export { ConfirmDialog };
 export type { ConfirmDialogProps };

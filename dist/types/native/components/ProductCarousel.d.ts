@@ -1,3 +1,4 @@
+import React from "react";
 import { type ProductCardProps } from "./ProductCard";
 export interface ProductCarouselProps {
     title?: string;
@@ -8,4 +9,4 @@ export interface ProductCarouselProps {
     products: ProductCardProps[];
     cardWidth?: number;
 }
-export declare function ProductCarousel({ title, action, products, cardWidth, }: ProductCarouselProps): import("react/jsx-runtime").JSX.Element;
+export declare function ProductCarousel({ title, action, products, cardWidth, }: ProductCarouselProps): React.JSX.Element;

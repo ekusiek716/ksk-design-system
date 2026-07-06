@@ -6,4 +6,4 @@ export interface NotificationBadgeProps {
     children?: React.ReactNode;
 }
 /** 子要素の右上に未読カウントを重ねるバッジ。 */
-export declare function NotificationBadge({ count, max, dot, children }: NotificationBadgeProps): import("react/jsx-runtime").JSX.Element;
+export declare function NotificationBadge({ count, max, dot, children }: NotificationBadgeProps): React.JSX.Element;

@@ -19,7 +19,15 @@ export interface ButtonProps extends Omit<PressableProps, "children" | "style"> 
     pressedContainerStyle?: StyleProp<ViewStyle>;
     /** 内部 Text の style を上書きするポイント */
     textStyle?: StyleProp<TextStyle>;
-    children: React.ReactNode;
+    /** leading icon slot. children は text または ReactNode のどちらでも可 */
+    leadingIcon?: React.ReactNode;
+    /** trailing icon slot. children は text または ReactNode のどちらでも可 */
+    trailingIcon?: React.ReactNode;
+    /** loading=true で spinner を表示し、button を busy/disabled として扱う */
+    loading?: boolean;
+    /** loading 中も読み上げ/表示したい label。未指定なら spinner のみ */
+    loadingLabel?: string;
+    children?: React.ReactNode;
 }
 /** variant を semantic トークン（brand / active / caution / border）で表現するボタン。 */
-export declare function Button({ variant, elevation, containerStyle, pressedContainerStyle, textStyle, children, ...rest }: ButtonProps): import("react/jsx-runtime").JSX.Element;
+export declare function Button({ variant, elevation, containerStyle, pressedContainerStyle, textStyle, leadingIcon, trailingIcon, loading, loadingLabel, children, disabled, accessibilityState, ...rest }: ButtonProps): React.JSX.Element;

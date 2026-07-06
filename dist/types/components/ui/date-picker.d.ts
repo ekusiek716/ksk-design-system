@@ -1,3 +1,4 @@
+import * as React from "react";
 interface DatePickerProps {
     value?: Date;
     onChange?: (date: Date | undefined) => void;
@@ -17,7 +18,7 @@ interface DatePickerProps {
      */
     triggerLabel?: string;
 }
-declare function DatePicker({ value, onChange, placeholder, disabled, className, dateFormat, triggerLabel, }: DatePickerProps): import("react/jsx-runtime").JSX.Element;
+declare function DatePicker({ value, onChange, placeholder, disabled, className, dateFormat, triggerLabel, }: DatePickerProps): React.JSX.Element;
 interface DateRangePickerProps {
     value?: {
         from?: Date;
@@ -48,6 +49,6 @@ interface DateRangePickerProps {
     /** アクセシビリティラベル */
     triggerLabel?: string;
 }
-declare function DateRangePicker({ value, onChange, placeholder, disabled, className, dateFormat, triggerLabel, }: DateRangePickerProps): import("react/jsx-runtime").JSX.Element;
+declare function DateRangePicker({ value, onChange, placeholder, disabled, className, dateFormat, triggerLabel, }: DateRangePickerProps): React.JSX.Element;
 export { DatePicker, DateRangePicker };
 export type { DatePickerProps, DateRangePickerProps };

@@ -25,9 +25,9 @@ export interface CheckboxGroupProps {
     children: React.ReactNode;
     className?: string;
 }
-declare function CheckboxGroup({ label, required, helpText, error, columns, children, className, }: CheckboxGroupProps): import("react/jsx-runtime").JSX.Element;
+declare function CheckboxGroup({ label, required, helpText, error, columns, children, className, }: CheckboxGroupProps): React.JSX.Element;
 declare function CheckboxGroupItem({ className, children, description, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root> & {
     children: React.ReactNode;
     description?: React.ReactNode;
-}): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
 export { CheckboxGroup, CheckboxGroupItem };

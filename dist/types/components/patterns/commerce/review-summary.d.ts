@@ -7,6 +7,6 @@ interface ReviewSummaryProps {
     distribution: [number, number, number, number, number];
     className?: string;
 }
-declare function ReviewSummary({ averageRating, totalCount, distribution, className, }: ReviewSummaryProps): import("react/jsx-runtime").JSX.Element;
+declare function ReviewSummary({ averageRating, totalCount, distribution, className, }: ReviewSummaryProps): import("react").JSX.Element;
 export { ReviewSummary };
 export type { ReviewSummaryProps };

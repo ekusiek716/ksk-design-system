@@ -1,3 +1,4 @@
+import React from "react";
 export interface NumberInputProps {
     value: number;
     onChange?: (value: number) => void;
@@ -6,4 +7,4 @@ export interface NumberInputProps {
     step?: number;
     disabled?: boolean;
 }
-export declare function NumberInput({ value, onChange, min, max, step, disabled, }: NumberInputProps): import("react/jsx-runtime").JSX.Element;
+export declare function NumberInput({ value, onChange, min, max, step, disabled, }: NumberInputProps): React.JSX.Element;

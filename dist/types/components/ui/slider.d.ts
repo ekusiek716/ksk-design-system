@@ -10,5 +10,5 @@ import { Slider as SliderPrimitive } from "radix-ui";
  * <Slider defaultValue={[50]} min={0} max={100} step={1} />
  * ```
  */
-declare function Slider({ className, defaultValue, value, min, max, ...props }: React.ComponentProps<typeof SliderPrimitive.Root>): import("react/jsx-runtime").JSX.Element;
+declare function Slider({ className, defaultValue, value, min, max, ...props }: React.ComponentProps<typeof SliderPrimitive.Root>): React.JSX.Element;
 export { Slider };

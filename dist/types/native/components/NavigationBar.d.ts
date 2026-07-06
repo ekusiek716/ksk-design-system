@@ -15,4 +15,4 @@ export interface NavigationBarProps {
  * Webの「ヘッダ型ナビゲーション」をRNで意味変換した BottomTabs風 ナビ。
  * 画面下部に固定して使う想定。
  */
-export declare function NavigationBar({ items, value, onChange }: NavigationBarProps): import("react/jsx-runtime").JSX.Element;
+export declare function NavigationBar({ items, value, onChange }: NavigationBarProps): React.JSX.Element;

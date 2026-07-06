@@ -38,6 +38,6 @@ interface StatCardProps extends Omit<React.ComponentProps<"div">, "onClick"> {
  * - `interactive` (または `onClick`) でボタン化 — タップでナビゲートする
  *   ホーム画面のメトリクスタイル等に最適
  */
-declare function StatCard({ className, label, value, unit, trend, icon, variant, interactive, onClick, ...props }: StatCardProps): import("react/jsx-runtime").JSX.Element;
+declare function StatCard({ className, label, value, unit, trend, icon, variant, interactive, onClick, ...props }: StatCardProps): React.JSX.Element;
 export { StatCard };
 export type { StatCardProps, StatCardVariant };

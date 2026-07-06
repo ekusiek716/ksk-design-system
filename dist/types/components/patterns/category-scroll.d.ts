@@ -49,5 +49,5 @@ export interface CategoryScrollProps {
  * - thumbnailShape="circle" + thumbnailSize="sm" でクイックアクセスアイコン風
  * - layout="grid" で複数行グリッド表示（本番カテゴリ準拠）
  */
-declare function CategoryScroll({ title, moreHref, items, thumbnailSize, thumbnailShape, layout, gridRows, className, }: CategoryScrollProps): import("react/jsx-runtime").JSX.Element;
+declare function CategoryScroll({ title, moreHref, items, thumbnailSize, thumbnailShape, layout, gridRows, className, }: CategoryScrollProps): import("react").JSX.Element;
 export { CategoryScroll };

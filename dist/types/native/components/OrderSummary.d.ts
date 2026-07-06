@@ -1,3 +1,4 @@
+import React from "react";
 export interface OrderSummaryLine {
     label: string;
     value: number;
@@ -7,4 +8,4 @@ export interface OrderSummaryProps {
     lines: OrderSummaryLine[];
     currency?: string;
 }
-export declare function OrderSummary({ lines, currency }: OrderSummaryProps): import("react/jsx-runtime").JSX.Element;
+export declare function OrderSummary({ lines, currency }: OrderSummaryProps): React.JSX.Element;

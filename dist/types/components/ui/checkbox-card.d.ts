@@ -15,7 +15,7 @@ import { Checkbox as CheckboxPrimitive } from "radix-ui";
  * </CheckboxCardGroup>
  * ```
  */
-declare function CheckboxCardGroup({ className, ...props }: React.HTMLAttributes<HTMLDivElement>): import("react/jsx-runtime").JSX.Element;
+declare function CheckboxCardGroup({ className, ...props }: React.HTMLAttributes<HTMLDivElement>): React.JSX.Element;
 declare function CheckboxCardItem({ className, children, description, expandedContent, badge, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root> & {
     /** ラベルテキスト */
     children?: React.ReactNode;
@@ -25,5 +25,5 @@ declare function CheckboxCardItem({ className, children, description, expandedCo
     expandedContent?: React.ReactNode;
     /** タグバッジ（例: "20%OFF"） */
     badge?: React.ReactNode;
-}): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
 export { CheckboxCardGroup, CheckboxCardItem };

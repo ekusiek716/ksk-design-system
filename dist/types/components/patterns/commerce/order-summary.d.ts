@@ -22,5 +22,5 @@ interface OrderSummaryProps extends React.ComponentProps<"div"> {
     /** 画面下部に固定表示するか */
     fixed?: boolean;
 }
-declare function OrderSummary({ className, lineItems, totalLabel, totalValue, ctaLabel, onCTAClick, ctaDisabled, fixed, ...props }: OrderSummaryProps): import("react/jsx-runtime").JSX.Element;
+declare function OrderSummary({ className, lineItems, totalLabel, totalValue, ctaLabel, onCTAClick, ctaDisabled, fixed, ...props }: OrderSummaryProps): React.JSX.Element;
 export { OrderSummary };

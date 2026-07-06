@@ -23,5 +23,5 @@ export interface StickyActionBarProps extends React.HTMLAttributes<HTMLDivElemen
  * - SheetContent 内では sticky ではなく absolute 配置になるため注意
  * - 子要素には Button w-full を推奨
  */
-declare function StickyActionBar({ className, bordered, children, ...props }: StickyActionBarProps): import("react/jsx-runtime").JSX.Element;
+declare function StickyActionBar({ className, bordered, children, ...props }: StickyActionBarProps): React.JSX.Element;
 export { StickyActionBar };

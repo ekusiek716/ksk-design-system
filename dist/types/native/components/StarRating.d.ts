@@ -1,3 +1,4 @@
+import React from "react";
 export interface StarRatingProps {
     value: number;
     max?: number;
@@ -6,4 +7,4 @@ export interface StarRatingProps {
     readOnly?: boolean;
 }
 /** ★を文字で描画する簡易実装。半端値は0.5刻みで切り捨て。 */
-export declare function StarRating({ value, max, size, onChange, readOnly }: StarRatingProps): import("react/jsx-runtime").JSX.Element;
+export declare function StarRating({ value, max, size, onChange, readOnly }: StarRatingProps): React.JSX.Element;

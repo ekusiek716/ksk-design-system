@@ -22,6 +22,6 @@ interface MenuDrawerProps {
     width?: number;
     className?: string;
 }
-declare function MenuDrawer({ open, onClose, banner, sections, footerLinks, width, className, }: MenuDrawerProps): import("react/jsx-runtime").JSX.Element;
+declare function MenuDrawer({ open, onClose, banner, sections, footerLinks, width, className, }: MenuDrawerProps): React.JSX.Element;
 export { MenuDrawer };
 export type { MenuDrawerProps, MenuDrawerSection, MenuDrawerItem };

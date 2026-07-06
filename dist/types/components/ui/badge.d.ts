@@ -1,7 +1,7 @@
 import * as React from "react";
 import { type VariantProps } from "class-variance-authority";
 declare const badgeVariants: (props?: {
-    variant?: "default" | "success" | "info" | "warning" | "secondary" | "ghost" | "destructive" | "outline" | "subtle";
+    variant?: "success" | "info" | "warning" | "default" | "secondary" | "ghost" | "destructive" | "outline" | "subtle";
 } & import("class-variance-authority/types").ClassProp) => string;
 /**
  * Badge — ステータス / 件数表示。
@@ -14,5 +14,5 @@ declare const badgeVariants: (props?: {
  * variant: default(brand) / secondary / outline / destructive / success /
  *   warning / info / subtle(brand-light) / ghost
  */
-declare function Badge({ className, variant, ...props }: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants>): import("react/jsx-runtime").JSX.Element;
+declare function Badge({ className, variant, ...props }: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants>): React.JSX.Element;
 export { Badge, badgeVariants };

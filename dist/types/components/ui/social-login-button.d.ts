@@ -5,6 +5,6 @@ interface SocialLoginButtonProps extends React.ComponentProps<"button"> {
     loading?: boolean;
     fullWidth?: boolean;
 }
-declare function SocialLoginButton({ provider, loading, fullWidth, className, disabled, children, ...props }: SocialLoginButtonProps): import("react/jsx-runtime").JSX.Element;
+declare function SocialLoginButton({ provider, loading, fullWidth, className, disabled, children, ...props }: SocialLoginButtonProps): React.JSX.Element;
 export { SocialLoginButton };
 export type { SocialLoginButtonProps, SocialProvider };

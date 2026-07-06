@@ -1,3 +1,4 @@
+import React from "react";
 export interface ShareButtonsProps {
     message?: string;
     url?: string;
@@ -8,4 +9,4 @@ export interface ShareButtonsProps {
         onPress: () => void;
     }[];
 }
-export declare function ShareButtons({ message, url, title, extra }: ShareButtonsProps): import("react/jsx-runtime").JSX.Element;
+export declare function ShareButtons({ message, url, title, extra }: ShareButtonsProps): React.JSX.Element;

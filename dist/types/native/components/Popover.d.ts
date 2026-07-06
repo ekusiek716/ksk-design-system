@@ -11,4 +11,4 @@ export interface PopoverProps {
     };
     children: React.ReactNode;
 }
-export declare function Popover({ open, onClose, anchor, children }: PopoverProps): import("react/jsx-runtime").JSX.Element;
+export declare function Popover({ open, onClose, anchor, children }: PopoverProps): React.JSX.Element;

@@ -31,5 +31,5 @@ export interface DropdownFilterProps<K extends string = string> {
     pristineValue?: K;
     className?: string;
 }
-declare function DropdownFilter<K extends string = string>({ label, value, options, onSelect, hideAll, allLabel, getDisplayLabel, valueOnly, pristineValue, className, }: DropdownFilterProps<K>): import("react/jsx-runtime").JSX.Element;
+declare function DropdownFilter<K extends string = string>({ label, value, options, onSelect, hideAll, allLabel, getDisplayLabel, valueOnly, pristineValue, className, }: DropdownFilterProps<K>): React.JSX.Element;
 export { DropdownFilter };

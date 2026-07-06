@@ -5,4 +5,4 @@ export interface EmptyStateProps {
     icon?: React.ReactNode;
     action?: React.ReactNode;
 }
-export declare function EmptyState({ title, description, icon, action }: EmptyStateProps): import("react/jsx-runtime").JSX.Element;
+export declare function EmptyState({ title, description, icon, action }: EmptyStateProps): React.JSX.Element;

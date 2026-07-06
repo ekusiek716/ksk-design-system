@@ -4,5 +4,5 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
     header?: React.ReactNode;
     sidebarWidth?: string;
 }
-declare function AdminShell({ className, sidebar, header, children, sidebarWidth, ...props }: AdminShellProps): import("react/jsx-runtime").JSX.Element;
+declare function AdminShell({ className, sidebar, header, children, sidebarWidth, ...props }: AdminShellProps): React.JSX.Element;
 export { AdminShell };

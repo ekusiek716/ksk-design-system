@@ -1,3 +1,4 @@
+import * as React from "react";
 interface GalleryImage {
     src: string;
     alt?: string;
@@ -23,6 +24,6 @@ interface ImageGalleryProps {
      */
     imageLabel?: (index: number) => string;
 }
-declare function ImageGallery({ images, indicatorType, aspectRatio, onImageClick, className, prevLabel, nextLabel, imageLabel, }: ImageGalleryProps): import("react/jsx-runtime").JSX.Element;
+declare function ImageGallery({ images, indicatorType, aspectRatio, onImageClick, className, prevLabel, nextLabel, imageLabel, }: ImageGalleryProps): React.JSX.Element;
 export { ImageGallery };
 export type { ImageGalleryProps, GalleryImage };

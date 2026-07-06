@@ -6,4 +6,4 @@ export interface MarketingShellProps {
     children: React.ReactNode;
 }
 /** LP/集客系の縦長スクロールシェル。AppShell との違いは BottomNav なし & sticky CTA 領域あり。 */
-export declare function MarketingShell({ header, footer, cta, children }: MarketingShellProps): import("react/jsx-runtime").JSX.Element;
+export declare function MarketingShell({ header, footer, cta, children }: MarketingShellProps): React.JSX.Element;

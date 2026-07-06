@@ -12,6 +12,6 @@ interface BulkActionsProps extends React.ComponentProps<"div"> {
  * 選択件数 + アクションボタン群を横並びで表示。
  * selectedCount が 0 のとき自動で非表示になる。
  */
-declare function BulkActions({ selectedCount, onClear, children, className, ...props }: BulkActionsProps): import("react/jsx-runtime").JSX.Element;
+declare function BulkActions({ selectedCount, onClear, children, className, ...props }: BulkActionsProps): React.JSX.Element;
 export { BulkActions };
 export type { BulkActionsProps };

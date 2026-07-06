@@ -1,14 +1,14 @@
 import * as React from "react";
 declare function IconClose({ size }: {
     size?: number;
-}): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
 declare function IconBack({ size }: {
     size?: number;
-}): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
 /** iOS 26 スタイルのシェアアイコン（上向き矢印 + トレイ） */
 declare function IconShareIos({ size }: {
     size?: number;
-}): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
 export interface NavigationBarProps {
     /** 中央タイトル（絶対配置で常に視覚的中央） */
     title?: React.ReactNode;
@@ -54,5 +54,5 @@ export interface NavigationBarProps {
  * // iOS 26 ガラス（グラデーション上に重ねる）
  * <NavigationBar title="Aircraft Stats" leftIcon="close" onLeft={close} onShare={share} glass transparent />
  */
-declare function NavigationBar({ title, leftIcon, onLeft, leftLabel, rightSlot, onShare, shareLabel, glass, transparent, className, }: NavigationBarProps): import("react/jsx-runtime").JSX.Element;
+declare function NavigationBar({ title, leftIcon, onLeft, leftLabel, rightSlot, onShare, shareLabel, glass, transparent, className, }: NavigationBarProps): React.JSX.Element;
 export { NavigationBar, IconClose, IconBack, IconShareIos };

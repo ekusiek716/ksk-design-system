@@ -23,4 +23,4 @@ export interface FilterChipProps {
  * 内部で key を active 状態に紐付けて強制再マウントするため、
  * isActive=false に戻したときに Chip の selected キャッシュが残らない。
  */
-export declare function FilterChip({ label, value, isActive, onClick, className }: FilterChipProps): import("react/jsx-runtime").JSX.Element;
+export declare function FilterChip({ label, value, isActive, onClick, className }: FilterChipProps): import("react").JSX.Element;

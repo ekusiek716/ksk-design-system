@@ -39,5 +39,5 @@ export interface CategoryNavProps {
  * />
  * ```
  */
-declare function CategoryNav({ items, className }: CategoryNavProps): import("react/jsx-runtime").JSX.Element;
+declare function CategoryNav({ items, className }: CategoryNavProps): import("react").JSX.Element;
 export { CategoryNav };

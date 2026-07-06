@@ -9,4 +9,4 @@ export interface DialogProps {
     /** タップで閉じるか */
     dismissOnBackdrop?: boolean;
 }
-export declare function Dialog({ open, onClose, title, description, footer, children, dismissOnBackdrop, }: DialogProps): import("react/jsx-runtime").JSX.Element;
+export declare function Dialog({ open, onClose, title, description, footer, children, dismissOnBackdrop, }: DialogProps): React.JSX.Element;

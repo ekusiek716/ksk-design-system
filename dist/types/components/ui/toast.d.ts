@@ -1,7 +1,7 @@
 import * as React from "react";
 import { type VariantProps } from "class-variance-authority";
 declare const toastVariants: (props?: {
-    variant?: "default" | "success" | "info" | "warning" | "caution";
+    variant?: "success" | "info" | "warning" | "default" | "caution";
 } & import("class-variance-authority/types").ClassProp) => string;
 type ToastVariant = VariantProps<typeof toastVariants>["variant"];
 interface ToastAction {
@@ -34,7 +34,7 @@ interface ToastContextValue {
 declare function useToast(): ToastContextValue;
 declare function Toaster({ children }: {
     children?: React.ReactNode;
-}): import("react/jsx-runtime").JSX.Element;
+}): React.JSX.Element;
 interface ToastFn {
     (title: string, options?: ToastOptions): string;
     success: (title: string, options?: ToastOptions) => string;
@@ -42,6 +42,10 @@ interface ToastFn {
     info: (title: string, options?: ToastOptions) => string;
     warning: (title: string, options?: ToastOptions) => string;
     caution: (title: string, options?: ToastOptions) => string;
+    connectionRestored: (options?: ToastOptions) => string;
+    saveComplete: (options?: ToastOptions) => string;
+    retryStarted: (options?: ToastOptions) => string;
+    retryFailed: (options?: ToastOptions) => string;
     dismiss: (id: string) => void;
 }
 declare const toast: ToastFn;

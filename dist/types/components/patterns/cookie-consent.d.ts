@@ -59,4 +59,4 @@ export declare function isCookieDecided(storageKey?: string): boolean;
  * />
  * ```
  */
-export declare function CookieConsent({ labels, showDelay, storageKey, eventName, icon, onDecide, className, }: CookieConsentProps): import("react/jsx-runtime").JSX.Element;
+export declare function CookieConsent({ labels, showDelay, storageKey, eventName, icon, onDecide, className, }: CookieConsentProps): React.JSX.Element;
