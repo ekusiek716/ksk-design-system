@@ -9,7 +9,7 @@
 
 **🔗 ライブ Storybook → https://ksk-design-system.vercel.app**
 
-125 コンポーネントを実際に操作・確認できます。
+133 コンポーネントを実際に操作・確認できます。
 
 ---
 
@@ -19,7 +19,7 @@
 - **アクセシブル** — shadcn/ui（Radix UI ベース）+ `@storybook/addon-a11y` で a11y を担保
 - **Tailwind CSS v4 ネイティブ** — `@theme` ベースのトークン設計
 - **型安全** — React 19 + TypeScript、CVA によるバリアント管理
-- **125 Web コンポーネント + 126 React Native exports** — Web 125（UI 57 / EC 11 / 管理 8 / シェル 3 / パターン 46）+ RN `native/ui` 公開 export 126
+- **133 Web コンポーネント + 134 React Native exports** — Web 133（UI 58 / パターン 52 / EC 12 / 管理 8 / シェル 3）+ RN `native/ui` 公開 export 134
 - **iOS 26 Liquid Glass 対応** — RN 側 `GlassView` + `Button variant="glass"`、Web 側 `.glass` CSS マテリアル
 
 ## 🎨 テーマ
@@ -136,7 +136,7 @@ import { BottomTabBar } from "ksk-design-system"
 
 ### React Native / Expo
 
-`ksk-design-system/native/ui` から直接 RN 用コンポーネント export（126 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
+`ksk-design-system/native/ui` から直接 RN 用コンポーネント export（134 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
 
 ```tsx
 import { ThemeProvider, Button, Card, GlassView } from "ksk-design-system/native/ui"
