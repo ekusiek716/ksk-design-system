@@ -93,9 +93,7 @@ function MobileAppShell({
           )}
           {bottomNav && bottomNavMode === "external" ? bottomNav : null}
           {fab && (
-            <div data-slot="mobile-app-shell-fab" className="pointer-events-none">
-              {fab}
-            </div>
+            <div data-slot="mobile-app-shell-fab">{fab}</div>
           )}
         </div>
       </div>
