@@ -100,7 +100,7 @@ function StatusActionBadge({
     </>
   )
   const classes = cn(
-    "inline-flex min-h-9 max-w-full items-center justify-center gap-1.5 rounded-full border px-2.5 py-1",
+    "inline-flex min-h-9 max-w-full items-center justify-center gap-1.5 rounded-full border border-[var(--Border-Low-Emphasis)] px-2.5 py-1",
     "typo-label-xs select-none",
     stateClasses[state],
     interactive && "cursor-pointer transition-colors hover:bg-[var(--Surface-Tertiary)]",

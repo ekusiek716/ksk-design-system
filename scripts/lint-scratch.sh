@@ -347,6 +347,14 @@ for FILE in $FILES; do
 
 done
 
+# border 色指定チェック（scripts/check-border-color.mjs）。
+# package.json の "check" スクリプトは変更せず、lint-scratch.sh 経由で
+# npm run check に組み込む（lint-scratch.sh は check の中で既に呼ばれている）。
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if ! node "$ROOT/scripts/check-border-color.mjs"; then
+  ERRORS=$((ERRORS + 1))
+fi
+
 echo ""
 echo "======================================="
 if [ $ERRORS -gt 0 ]; then

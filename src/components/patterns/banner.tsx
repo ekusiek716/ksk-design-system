@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const bannerVariants = cva(
-  "flex items-start gap-3 rounded-lg border p-4",
+  "flex items-start gap-3 rounded-lg border border-[var(--Border-Info)] p-4",
   {
     variants: {
       variant: {

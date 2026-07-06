@@ -240,7 +240,7 @@ function ShareButtons({
             key={p}
             onClick={() => handleClick(p)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border typo-label-xs font-semibold transition-colors",
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--Border-Medium-Emphasis)] typo-label-xs font-semibold transition-colors",
               meta.inlineClass
             )}
           >

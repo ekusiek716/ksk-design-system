@@ -82,7 +82,7 @@ function ReviewCard({
           onClick={onHelpful}
           aria-pressed={helpful}
           className={cn(
-            "inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full border typo-label-xs transition-colors",
+            "inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full border border-[var(--Border-Medium-Emphasis)] typo-label-xs transition-colors",
             helpful
               ? "border-[var(--Brand-Primary)] text-[var(--Brand-Primary)] bg-[var(--Brand-Ultra-Light)]"
               : "border-[var(--Border-Medium-Emphasis)] text-[var(--Text-Low-Emphasis)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"

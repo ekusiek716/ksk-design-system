@@ -21,6 +21,8 @@ interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
  * ```
  */
 function Spinner({ className, size = "md", label = "読み込み中", ...props }: SpinnerProps) {
+  // check-border-color-ignore-file: 色は下の cn() 内の border-[var(--Border-Medium-Emphasis)] /
+  // border-t-[var(--Brand-Primary)] と必ず合成されるため、ここは幅のみでよい。
   const sizeClasses = {
     sm: "size-4 border-2",
     md: "size-8 border-[3px]",

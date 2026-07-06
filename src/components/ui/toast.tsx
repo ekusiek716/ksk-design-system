@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const toastVariants = cva(
-  "relative flex w-full items-center gap-3 overflow-hidden rounded-lg border p-4 shadow-[var(--shadow-lg)] transition-all animate-fade-in-up",
+  "relative flex w-full items-center gap-3 overflow-hidden rounded-lg border border-[var(--Border-Low-Emphasis)] p-4 shadow-[var(--shadow-lg)] transition-all animate-fade-in-up",
   {
     variants: {
       variant: {

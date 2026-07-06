@@ -60,7 +60,7 @@ function ActionTile({
       type={type ?? "button"}
       disabled={isDisabled}
       className={cn(
-        "relative flex min-h-24 flex-col items-start justify-between gap-3 rounded-xl border p-3 text-left transition-colors",
+        "relative flex min-h-24 flex-col items-start justify-between gap-3 rounded-xl border border-[var(--Border-Low-Emphasis)] p-3 text-left transition-colors",
         "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:outline-none",
         "hover:bg-[var(--Surface-Secondary)]",
         actionTileVariants[variant],

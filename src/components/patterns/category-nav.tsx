@@ -68,7 +68,7 @@ function CategoryNav({ items, className }: CategoryNavProps) {
             >
               <div
                 className={cn(
-                  "size-10 overflow-hidden rounded-full border",
+                  "size-10 overflow-hidden rounded-full border border-[var(--Border-Low-Emphasis)]",
                   item.isSelected
                     ? "border-[var(--Brand-Primary)]"
                     : "border-[var(--Border-Low-Emphasis)]"
@@ -108,7 +108,7 @@ function CategoryNav({ items, className }: CategoryNavProps) {
           >
             <div
               className={cn(
-                "size-10 overflow-hidden rounded-full border",
+                "size-10 overflow-hidden rounded-full border border-[var(--Border-Low-Emphasis)]",
                 item.isSelected
                   ? "border-[var(--Brand-Primary)]"
                   : "border-[var(--Border-Low-Emphasis)]"
