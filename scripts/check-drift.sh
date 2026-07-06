@@ -12,6 +12,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CONTRACTS="$ROOT/contracts/components.json"
+PACKAGE_JSON="$ROOT/package.json"
 SRC="$ROOT/src/components"
 
 RED='\033[0;31m'
@@ -154,6 +155,24 @@ if [ "$SKIP_JSON" = false ]; then
 
   if [ "$MISSING" -eq 0 ]; then
     ok "全 contracts パスが実在します"
+  fi
+fi
+
+# ─── contracts の meta.version と package.json の version 一致チェック ───
+echo ""
+echo "─── meta.version 整合性チェック ───"
+
+if [ "$SKIP_JSON" = false ]; then
+  if [ ! -f "$PACKAGE_JSON" ]; then
+    error "package.json が見つかりません"
+  else
+    CONTRACT_VERSION=$(jq -r '.meta.version' "$CONTRACTS")
+    PACKAGE_VERSION=$(node -p "require('$PACKAGE_JSON').version")
+    if [ "$CONTRACT_VERSION" != "$PACKAGE_VERSION" ]; then
+      error "meta.version 不一致: contracts/components.json の meta.version ($CONTRACT_VERSION) ≠ package.json の version ($PACKAGE_VERSION) → contracts/components.json の meta.version を更新してください"
+    else
+      ok "meta.version: $CONTRACT_VERSION ✓"
+    fi
   fi
 fi
 
