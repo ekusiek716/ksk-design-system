@@ -69,7 +69,7 @@ const alertVariants = cva("relative w-full", {
 })
 
 const alertInnerVariants = cva(
-  "flex w-full gap-2 items-start p-4 rounded-lg border",
+  "flex w-full gap-2 items-start p-4 rounded-lg border border-[var(--Border-Medium-Emphasis)]",
   {
     variants: {
       variant: {
@@ -77,9 +77,9 @@ const alertInnerVariants = cva(
         info: "border-[var(--Border-Medium-Emphasis)]",
         error: "border-[var(--Border-Caution)]",
         warning: "border-[var(--Border-Warning)]",
-        "inline-info": "",
-        "inline-caution": "",
-        "inline-warning": "",
+        "inline-info": "border-0",
+        "inline-caution": "border-0",
+        "inline-warning": "border-0",
       },
     },
     defaultVariants: { variant: "info" },

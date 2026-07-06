@@ -73,7 +73,7 @@ function SettingsSection({
         className={cn(
           "flex flex-col",
           isCard && [
-            "overflow-hidden rounded-2xl border bg-[var(--Surface-Primary)]",
+            "overflow-hidden rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
             variant === "danger"
               ? "border-[var(--Border-Caution)]"
               : "border-[var(--Border-Low-Emphasis)]",
