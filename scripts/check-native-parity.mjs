@@ -30,6 +30,7 @@ const INTENTIONAL_NATIVE_GAPS = new Map([
   ["MobileTabBar", "web-only BottomTabBar wrapper; native uses LiquidBottomTabBar / createExpoRouterTabBar instead"],
   ["NotificationList", "admin notification list is Web-only"],
   ["SearchPanel", "admin search panel is Web-only"],
+  ["SideDrawerFrame", "side detail drawer is a desktop/web layout; native mobile uses BottomSheetFrame snap sheet instead"],
   ["StatusTabs", "admin status tabs are Web-only"],
   ["Toast", "native exposes ToastProvider/useToast instead of a Toast component export"],
   ["Tooltip", "hover/focus tooltip is Web-only"],
