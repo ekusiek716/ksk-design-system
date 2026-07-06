@@ -85,17 +85,15 @@ function MobileAppShell({
           {bottomNav && bottomNavMode === "fixed" && (
             <footer
               data-slot="mobile-app-shell-bottom-nav-fixed"
-              className="pointer-events-none fixed inset-x-0 bottom-0 z-40 mx-auto w-full pb-[env(safe-area-inset-bottom)] lg:hidden"
+              className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full pb-[env(safe-area-inset-bottom)] lg:hidden"
               style={centeredPreview ? { maxWidth } : undefined}
             >
-              <div className="pointer-events-auto">{bottomNav}</div>
+              {bottomNav}
             </footer>
           )}
           {bottomNav && bottomNavMode === "external" ? bottomNav : null}
           {fab && (
-            <div data-slot="mobile-app-shell-fab" className="pointer-events-none">
-              {fab}
-            </div>
+            <div data-slot="mobile-app-shell-fab">{fab}</div>
           )}
         </div>
       </div>
