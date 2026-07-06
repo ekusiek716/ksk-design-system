@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 58,
-      "patterns": 51,
+      "patterns": 52,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 132
+      "total": 133
     }
   },
   "ui": [
@@ -1589,6 +1589,25 @@
       "rules": [
         "長い SheetContent className recipe を consumer 側に重複させず BottomSheetFrame preset を使う",
         "フォーム/詳細の中身は DetailSheetScaffold と KeyboardAwareSheetFooter を使う"
+      ]
+    },
+    {
+      "name": "SideDrawerFrame",
+      "path": "src/components/patterns/side-drawer-frame.tsx",
+      "description": "SheetContent(side=right/left) の詳細ドロワー outer frame preset。全高・padding無し・flex縦・幅md を1つの口でまとめる。PC の右詳細ドロワー用（モバイルの下部シートは BottomSheetFrame）。swipeToClose は side に追従した方向で閉じる。",
+      "variants": [
+        "left",
+        "right"
+      ],
+      "features": [
+        "full-height side drawer",
+        "flex column scroll composition",
+        "side-following swipe-to-close"
+      ],
+      "rules": [
+        "詳細ドロワーの className 上書き（p-0 w-full max-w-md flex flex-col overflow-hidden）を consumer 側に重複させず SideDrawerFrame を使う",
+        "中身は DetailSheetScaffold + 固定フッタで組む（本文 flex-1 overflow-y-auto）",
+        "モバイルの下から出る詳細/フォームは BottomSheetFrame を使う"
       ]
     },
     {

@@ -238,6 +238,39 @@ function decideSwipeDismiss(
   return false
 }
 
+/**
+ * Project a raw pointer delta onto a side drawer's "close axis" so the shared
+ * swipe helpers ({@link decideSwipeGesture}, {@link computeFlickVelocity},
+ * {@link decideSwipeDismiss}) can drive a horizontal drawer the same way they
+ * drive the bottom sheet.
+ *
+ * `primary` is the distance along the close direction (positive = toward the
+ * anchored edge = closing): rightward for a `side="right"` drawer, leftward for
+ * `side="left"`. `cross` is the perpendicular (vertical) delta — a large cross
+ * means the user is scrolling the body, not closing the drawer.
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+function projectCloseAxisDelta(
+  dx: number,
+  dy: number,
+  side: "left" | "right"
+): { primary: number; cross: number } {
+  // right: closing moves right (+dx). left: closing moves left (−dx).
+  return { primary: side === "right" ? dx : -dx, cross: dy }
+}
+
+/**
+ * Signed CSS translateX (px) that moves a side drawer toward its anchored edge
+ * by `primary` px of close-axis drag. Right drawers slide right (+), left
+ * drawers slide left (−).
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+function closeAxisTranslate(primary: number, side: "left" | "right"): number {
+  return side === "right" ? primary : -primary
+}
+
 function snapToRatio(snap: SnapPoint): number {
   if (typeof snap === "number") return Math.min(1, Math.max(0, snap))
   // "450px" → 450 / window.innerHeight
@@ -523,14 +556,21 @@ interface SheetContentProps
    */
   padding?: boolean
   /**
-   * Bottom-anchored sheets only (`side="bottom"` / `"bottom-glass"`). When true,
-   * <SheetDragIndicator /> is auto-rendered at the top and a downward swipe
-   * dragging past ~30% of the sheet height calls onOpenChange(false).
+   * Swipe-to-close gesture. Supported for bottom-anchored sheets
+   * (`side="bottom"` / `"bottom-glass"`) and side drawers (`side="left"` /
+   * `"right"`); ignored for other sides.
    *
-   * The swipe works across the whole sheet surface, not just the indicator:
-   * a downward drag dismisses when it starts on the handle, or while the
-   * touched scroll region is at its top. Mid-scroll and horizontal gestures
-   * stay with the content, so it never hijacks scrolling.
+   * Bottom sheets: <SheetDragIndicator /> is auto-rendered at the top and a
+   * downward swipe dragging past ~30% of the sheet height calls
+   * onOpenChange(false). The swipe works across the whole sheet surface, not
+   * just the indicator: a downward drag dismisses when it starts on the handle,
+   * or while the touched scroll region is at its top. Mid-scroll and horizontal
+   * gestures stay with the content, so it never hijacks scrolling.
+   *
+   * Side drawers: the close direction follows `side` — a `right` drawer closes
+   * on a rightward drag, a `left` drawer on a leftward drag (dragging past ~30%
+   * of the drawer width, or a fast flick). Vertical-dominant gestures stay with
+   * the content's scroll. No drag indicator is rendered.
    *
    * Ignored when the parent <Sheet> uses `snapPoints` (snap mode handles its
    * own drag).
@@ -564,6 +604,7 @@ interface SheetContentProps
 }
 
 const swipeSides = new Set(["bottom", "bottom-glass"])
+const sideDrawerSwipeSides = new Set(["left", "right"])
 
 function SheetContent({
   className,
@@ -665,6 +706,30 @@ function SheetContent({
       >
         {children}
       </SwipeToCloseBottomSheet>
+    )
+  }
+
+  // Side drawers (`left` / `right`) dismiss by dragging toward the anchored
+  // edge — rightward for `side="right"`, leftward for `side="left"` — matching
+  // the direction the sheet slides out. Vertical-dominant gestures stay with
+  // the content's own scroll.
+  if (swipeToClose && sideDrawerSwipeSides.has(side as string)) {
+    return (
+      <SwipeToCloseSideDrawer
+        side={side as "left" | "right"}
+        className={className}
+        glassOverlay={useGlassOverlay}
+        container={container}
+        padding={padding}
+        description={description}
+        autoFocus={autoFocus}
+        restoreFocusOnClose={restoreFocusOnClose}
+        closeOnEsc={closeOnEsc}
+        restoreFocusRef={restoreFocusRef}
+        {...props}
+      >
+        {children}
+      </SwipeToCloseSideDrawer>
     )
   }
 
@@ -1077,6 +1142,268 @@ function SwipeToCloseBottomSheet({
 }
 
 // ============================================================================
+// swipeToClose side drawer (left / right)
+// ----------------------------------------------------------------------------
+// Full-height drawer that dismisses by dragging toward its anchored edge:
+// rightward for side="right", leftward for side="left". We reuse the same pure
+// decision helpers as the bottom sheet by projecting the pointer delta onto the
+// drawer's "close axis" (projectCloseAxisDelta): a horizontal-dominant drag in
+// the close direction drives the dismiss, while a vertical-dominant gesture is
+// left to the content's own scroll. Simpler than the bottom path — no keyboard
+// inset, no drag-handle affordance, and no scroll-position gate (a horizontal
+// drag never conflicts with the body's vertical scroll).
+// ============================================================================
+
+interface SwipeToCloseSideDrawerProps
+  extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus"> {
+  side: "left" | "right"
+  className?: string
+  glassOverlay?: boolean
+  container?: HTMLElement | null
+  padding?: boolean
+  description?: React.ReactNode
+  autoFocus?: LayerAutoFocusTarget
+  restoreFocusOnClose?: boolean
+  closeOnEsc?: boolean
+  restoreFocusRef?: React.RefObject<HTMLElement | null>
+  children?: React.ReactNode
+}
+
+function SwipeToCloseSideDrawer({
+  side,
+  className,
+  glassOverlay,
+  container,
+  padding = true,
+  description,
+  autoFocus,
+  restoreFocusOnClose = true,
+  closeOnEsc = true,
+  restoreFocusRef,
+  children,
+  style,
+  ...props
+}: SwipeToCloseSideDrawerProps) {
+  const autoDescId = React.useId()
+  const hasInternalDesc = description != null && description !== false
+  const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
+  const rootCtx = React.useContext(SheetRootContext)
+  const [dragDist, setDragDist] = React.useState(0)
+  const [dragging, setDragging] = React.useState(false)
+  // Enable the spring-back transform transition only after the first drag, so
+  // it never fights the variant's slide-in open keyframe (which also animates
+  // transform). See the bottom-sheet path for the same rationale.
+  const [everDragged, setEverDragged] = React.useState(false)
+  const startXRef = React.useRef(0)
+  const startYRef = React.useRef(0)
+  const decisionRef = React.useRef<null | "drag" | "scroll">(null)
+  const draggingRef = React.useRef(false)
+  // Synchronous mirror of the close-axis drag distance for the once-bound touch
+  // listeners (state is async).
+  const dragDistRef = React.useRef(0)
+  // Trailing (position, t) samples for release-velocity (flick) detection.
+  // `y` here holds the close-axis position (not vertical) so the shared
+  // computeFlickVelocity measures close-axis velocity.
+  const samplesRef = React.useRef<DragSample[]>([])
+  const sheetRef = React.useRef<HTMLDivElement>(null)
+  const rootCtxRef = React.useRef(rootCtx)
+  React.useEffect(() => {
+    rootCtxRef.current = rootCtx
+  }, [rootCtx])
+
+  const handleOpenAutoFocus = (event: Event) => {
+    captureRestoreFocus(restoreFocusRef)
+    props.onOpenAutoFocus?.(event)
+    if (event.defaultPrevented || autoFocus == null) return
+    event.preventDefault()
+    if (autoFocus === false) return
+    window.requestAnimationFrame(() => {
+      focusLayerTarget(sheetRef.current, autoFocus, "sheet-title")
+    })
+  }
+  const handleCloseAutoFocus = (event: Event) => {
+    props.onCloseAutoFocus?.(event)
+    if (event.defaultPrevented) return
+    if (!restoreFocusOnClose) {
+      event.preventDefault()
+      return
+    }
+    if (restoreFocusRef?.current) {
+      event.preventDefault()
+      restoreFocusRef.current.focus()
+    }
+  }
+  const handleEscapeKeyDown = (event: KeyboardEvent) => {
+    props.onEscapeKeyDown?.(event)
+    if (!closeOnEsc) event.preventDefault()
+  }
+
+  const setDrag = React.useCallback((v: number) => {
+    dragDistRef.current = v
+    setDragDist(v)
+  }, [])
+
+  const beginGesture = React.useCallback(
+    (clientX: number, clientY: number, _target: EventTarget | null, t: number) => {
+      startXRef.current = clientX
+      startYRef.current = clientY
+      decisionRef.current = null
+      draggingRef.current = false
+      samplesRef.current = [{ y: 0, t }]
+    },
+    []
+  )
+
+  // Returns true once the gesture is claimed as a close-drag (caller should
+  // preventDefault() for touch so the browser stops any horizontal panning).
+  const moveGesture = React.useCallback(
+    (clientX: number, clientY: number, t: number): boolean => {
+      if (decisionRef.current === "scroll") return false
+      const dx = clientX - startXRef.current
+      const dy = clientY - startYRef.current
+      const { primary, cross } = projectCloseAxisDelta(dx, dy, side)
+      if (decisionRef.current === null) {
+        // atStart=true: a horizontal close-drag never competes with the body's
+        // vertical scroll, so there is no scroll-position gate to apply.
+        const decision = decideSwipeGesture(primary, cross, true)
+        if (decision === null) return false // below slop — keep waiting
+        decisionRef.current = decision
+        if (decision === "drag") {
+          draggingRef.current = true
+          setEverDragged(true)
+          setDragging(true)
+        } else {
+          return false
+        }
+      }
+      if (draggingRef.current) {
+        const s = samplesRef.current
+        s.push({ y: primary, t })
+        if (s.length > 12) s.shift()
+        // Close direction only — pulling the drawer further open is clamped at 0.
+        setDrag(Math.max(0, primary))
+        return true
+      }
+      return false
+    },
+    [side, setDrag]
+  )
+
+  const endGesture = React.useCallback((t: number) => {
+    const wasDragging = draggingRef.current
+    draggingRef.current = false
+    decisionRef.current = null
+    if (!wasDragging) return
+    setDragging(false)
+    // Close-axis size (width) drives the 30% distance threshold.
+    const w = sheetRef.current?.offsetWidth ?? 0
+    const velocity = computeFlickVelocity(samplesRef.current, t)
+    samplesRef.current = []
+    if (decideSwipeDismiss(dragDistRef.current, w, velocity)) {
+      rootCtxRef.current?.close()
+    }
+    setDrag(0)
+  }, [setDrag])
+
+  const detachTouchRef = React.useRef<(() => void) | null>(null)
+  const attachTouchListeners = React.useCallback(
+    (el: HTMLDivElement | null) => {
+      sheetRef.current = el
+      detachTouchRef.current?.()
+      detachTouchRef.current = null
+      if (!el) return
+      const onTouchStart = (e: TouchEvent) => {
+        if (e.touches.length !== 1) return
+        const t = e.touches[0]
+        beginGesture(t.clientX, t.clientY, e.target, e.timeStamp)
+      }
+      const onTouchMove = (e: TouchEvent) => {
+        if (e.touches.length !== 1) return
+        const t = e.touches[0]
+        if (moveGesture(t.clientX, t.clientY, e.timeStamp)) e.preventDefault()
+      }
+      const onTouchEnd = (e: TouchEvent) => endGesture(e.timeStamp)
+      el.addEventListener("touchstart", onTouchStart, { passive: true })
+      el.addEventListener("touchmove", onTouchMove, { passive: false })
+      el.addEventListener("touchend", onTouchEnd, { passive: true })
+      el.addEventListener("touchcancel", onTouchEnd, { passive: true })
+      detachTouchRef.current = () => {
+        el.removeEventListener("touchstart", onTouchStart)
+        el.removeEventListener("touchmove", onTouchMove)
+        el.removeEventListener("touchend", onTouchEnd)
+        el.removeEventListener("touchcancel", onTouchEnd)
+      }
+    },
+    [beginGesture, moveGesture, endGesture]
+  )
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return
+    if (e.button != null && e.button !== 0) return
+    beginGesture(e.clientX, e.clientY, e.target, e.timeStamp)
+  }
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return
+    if (e.buttons === 0) return
+    if (moveGesture(e.clientX, e.clientY, e.timeStamp)) {
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId)
+      } catch {
+        // setPointerCapture は未対応環境で例外を投げるため無視
+      }
+    }
+  }
+  const finishDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return
+    endGesture(e.timeStamp)
+  }
+
+  return (
+    <SheetPortal container={container}>
+      <SheetOverlay glass={glassOverlay} />
+      <DialogPrimitive.Content
+        ref={attachTouchListeners}
+        data-slot="sheet-content"
+        data-side={side}
+        className={cn(
+          sheetVariants({ side }),
+          // Block horizontal overscroll (e.g. browser back-swipe) so the
+          // close-drag owns the horizontal axis; the body still scrolls
+          // vertically.
+          "overscroll-x-none",
+          padding && "p-6",
+          className,
+        )}
+        style={{
+          ...style,
+          transform: `translate3d(${closeAxisTranslate(dragDist, side)}px, 0, 0)`,
+          transition: dragging || !everDragged
+            ? "none"
+            : "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
+          willChange: "transform",
+        }}
+        {...props}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={finishDrag}
+        onPointerCancel={finishDrag}
+        aria-describedby={ariaDescribedBy}
+        onOpenAutoFocus={handleOpenAutoFocus}
+        onCloseAutoFocus={handleCloseAutoFocus}
+        onEscapeKeyDown={handleEscapeKeyDown}
+      >
+        {hasInternalDesc && (
+          <DialogPrimitive.Description id={autoDescId} className="sr-only">
+            {description}
+          </DialogPrimitive.Description>
+        )}
+        {children}
+      </DialogPrimitive.Content>
+    </SheetPortal>
+  )
+}
+
+// ============================================================================
 // Snap-mode bottom sheet
 // ----------------------------------------------------------------------------
 // - Height is fixed to `maxSnap * 100svh`
@@ -1378,5 +1705,7 @@ export {
   decideSwipeGesture,
   computeFlickVelocity,
   decideSwipeDismiss,
+  projectCloseAxisDelta,
+  closeAxisTranslate,
 }
 export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset }
