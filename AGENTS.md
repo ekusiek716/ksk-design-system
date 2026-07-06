@@ -15,12 +15,17 @@
 コードを書く前に、以下を必ず読み込むこと:
 
 ```
-contracts/rules.json                     # 禁止パターン32件・AIアンチパターン10件・a11y要件
-contracts/components.json               # 全112コンポーネントの定義・バリアント・ルール
+.claude/skills/ksk-design-system/SKILL.md  # 判断Skill: 実装・レビューの判断基準（正本への索引）
+contracts/rules.json                     # 禁止パターン43件・AIアンチパターン10件・a11y要件
+contracts/components.json               # 全132コンポーネントの定義・バリアント・ルール
 contracts/design-context.json           # DESIGN.md と正本ファイルの関係・AI向け検査方針
 tokens.json                             # カラー・スペーシング・シャドウトークン
 src/components/COMPONENT_LOOKUP.md      # バリアント・インポートパス一覧（自動生成）
 ```
+
+UI コンポーネント・画面の生成/修正・レビューの前には、必ず
+`.claude/skills/ksk-design-system/SKILL.md` を読み、その判断基準に従うこと
+（トークン選定・コンポーネント選択・レビュー優先順位・例外運用。迷ったら同ディレクトリの `references/` を参照）。
 
 **必ず `contracts/rules.json` の `prohibited` と `aiPatterns` を確認してから実装すること。**
 特に `aiPatterns` は AI が典型的に犯すパターン集 — 自分が生成しようとしているコードと照合すること。
