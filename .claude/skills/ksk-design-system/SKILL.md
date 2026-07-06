@@ -102,6 +102,25 @@ npm run check                  # コンポーネント増減時（tsc+lint+drift
 
 Storybook ツールバーの **Hostile ctx** を loud にして、マゼンタ化・背景透け（文脈非依存違反）が無いか目視確認。
 
+**コンポーネントを増減したら**、コードだけでは完了しない。次の連鎖を全部更新する:
+`src/index.ts` → `contracts/components.json`（定義＋`meta.counts`）→ `.stories.tsx` →
+`npm run generate:lookup` → `bash scripts/check-drift.sh`（一括なら `npm run check`）。
+contracts と実装の drift は静かに壊れるため、レビューでは counts 差分も見る。
+
+## 5.5 レビュー手順（PR / 差分を見る順）
+
+壊れ方が深刻な順に見る:
+
+1. **テーマ切替で壊れないか**（error 級）: 生 hex / Tailwind 標準色 / `--Primitive-*` 直参照 / `text-white`。4テーマ全部で成立するか
+2. **消費側文脈で壊れないか**（error 級）: 無色 border・継承依存・bg 未指定サーフェス。「Storybook では正しく見える」は合格条件でない
+3. **a11y**: フォーカスリング削除・`<div onClick>`・aria-label なし icon button・placeholder のみ・色のみのステータス区別
+4. **DS スケール逸脱**（warning 級）: 角丸・shadow・spacing の許可セット外、300ms 超アニメ
+5. **ライティング**: §7 参照
+
+**severity の読み方**: rules.json の `error` は無条件で直す。`warning` は「消費側テーマ・日本語文脈で壊れる可能性」の警告 — 直さない場合は理由を PR に書く。
+
+**例外の作法**: 禁止パターンを意図的に破る正当な理由がある場合のみ `// ksk-ds-allow-custom-ui: <理由>` を該当行近くに残す。理由なしの suppress は差し戻し対象。
+
 ## 6. references/ の分岐
 
 | 状況 | 読む |
