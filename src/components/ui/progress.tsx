@@ -35,9 +35,21 @@ const DEFAULT_AUTO_COLOR: ProgressAutoColorConfig = {
   cautionFrom: 100,
 }
 
+/** masked=true のときに使う固定表示の割合（%）。value に一切依存しない。native 側と同じ値。 */
+const MASKED_PROGRESS_PCT = 45
+
 function clampProgressValue(value: number | null | undefined) {
   if (value == null) return 0
   return Math.min(100, Math.max(0, value))
+}
+
+/**
+ * 描画に使う実効値を決める純粋関数。
+ * masked=true のときは value を一切見ず常に同じ値を返す（バー幅からの逆算防止）。
+ */
+export function resolveProgressDisplayValue(value: number | null | undefined, masked: boolean | undefined): number {
+  if (masked) return MASKED_PROGRESS_PCT
+  return clampProgressValue(value)
 }
 
 function getAutoProgressVariant(
@@ -83,6 +95,12 @@ export interface ProgressProps extends React.ComponentProps<typeof ProgressPrimi
   value?: number | null
   className?: string
   id?: string
+  /**
+   * true のとき、実 value に依存しない見た目にする（バー幅を固定表示にする）。
+   * 未課金ユーザー向けティザー表示等、value からバー幅経由で実データを逆算されるのを防ぐための表示専用フラグ。
+   * masked 時は value/autoColor を無視し、常に同じ幅・同じトーンで描画する。
+   */
+  masked?: boolean
 }
 
 /**
@@ -103,16 +121,19 @@ function Progress({
   variant = "default",
   autoColor,
   transitionDuration = "sm",
+  masked,
   ...props
 }: ProgressProps) {
   const duration = DURATION_MS[transitionDuration]
-  const resolvedVariant = getAutoProgressVariant(value, variant, autoColor)
-  const displayValue = clampProgressValue(value)
+  // masked 時は autoColor による色分岐も value に依存するため使わない（バー幅だけでなく色からの逆算も防ぐ）。
+  const resolvedVariant = masked ? variant : getAutoProgressVariant(value, variant, autoColor)
+  const displayValue = resolveProgressDisplayValue(value, masked)
   return (
     <ProgressPrimitive.Root
       data-slot="progress"
       data-variant={resolvedVariant}
       data-auto-color={autoColor ? "" : undefined}
+      data-masked={masked ? "" : undefined}
       className={cn(
         "relative h-2 w-full overflow-hidden rounded-full bg-[var(--Surface-Tertiary)]",
         className,
