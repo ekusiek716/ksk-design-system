@@ -28,6 +28,9 @@
 | CoachMark | `@/components/ui/coach-mark` | — | Default, Brand, Placements, Onboarding, Hover |
 | Collapsible, CollapsibleTrigger, CollapsibleContent | `@/components/ui/collapsible` | — | Default, FAQ |
 | Combobox | `@/components/ui/combobox` | — | Default, WithDisabledOption |
+| CommitAutoGrowTextarea | `@/components/ui/commit-auto-grow-textarea` | — | — |
+| CommitInput | `@/components/ui/commit-input` | — | InputCommitTiming |
+| CommitTextarea | `@/components/ui/commit-textarea` | — | — |
 | CountdownTimer | `@/components/ui/countdown-timer` | — | Filled, Ghost, Compact, DayGranularity, Ended, AllVariants |
 | DateField | `@/components/ui/date-field` | — | Default, WithInitialValue, CustomPlaceholder, Disabled, CustomFormat |
 | DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, Disabled, RangePicker, CalendarOnly, CalendarRange |

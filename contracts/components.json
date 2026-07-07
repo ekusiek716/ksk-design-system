@@ -4,12 +4,12 @@
     "version": "1.42.2",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 58,
+      "ui": 61,
       "patterns": 52,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 133
+      "total": 136
     }
   },
   "ui": [
@@ -70,6 +70,51 @@
       ],
       "rules": [
         "Must use <Input> not <input>"
+      ]
+    },
+    {
+      "name": "CommitInput",
+      "path": "src/components/ui/commit-input.tsx",
+      "description": "IME(日本語変換)を壊さない Input の確定時コミット版。value + onCommit contract。store 直結の inline 編集で、変換中に onChange が store へ書き込んで変換が中断される問題を防ぐ。視覚は Input に完全委譲。共通ロジックは useCommitDraft フック。",
+      "variants": [],
+      "accessibility": [
+        "Must pair with <Label>"
+      ],
+      "rules": [
+        "value/onCommit contract。value は controlled、確定タイミングでのみ onCommit が呼ばれる",
+        "変換(composition)中は commit せず draft のみ更新。compositionEnd / 非変換入力時に commit",
+        "外部 value 変更は非変換中のみ draft へ反映(realtime 同期対応)",
+        "store 直結 controlled input で IME が壊れる場合に Input の代わりに使う"
+      ]
+    },
+    {
+      "name": "CommitTextarea",
+      "path": "src/components/ui/commit-textarea.tsx",
+      "description": "IME(日本語変換)を壊さない Textarea の確定時コミット版。value + onCommit contract。CommitInput と同じ流儀で compositionEnd / 非変換入力時のみ commit。視覚は Textarea に完全委譲。共通ロジックは useCommitDraft フック。",
+      "variants": [],
+      "accessibility": [
+        "Must pair with <Label>"
+      ],
+      "rules": [
+        "value/onCommit contract。value は controlled、確定タイミングでのみ onCommit が呼ばれる",
+        "変換(composition)中は commit せず draft のみ更新。compositionEnd / 非変換入力時に commit",
+        "外部 value 変更は非変換中のみ draft へ反映(realtime 同期対応)",
+        "store 直結 controlled textarea で IME が壊れる場合に Textarea の代わりに使う"
+      ]
+    },
+    {
+      "name": "CommitAutoGrowTextarea",
+      "path": "src/components/ui/commit-auto-grow-textarea.tsx",
+      "description": "IME(日本語変換)を壊さない AutoGrowTextarea の確定時コミット版。value + onCommit contract。AutoGrowTextarea の onChange は (value:string) を渡すため変換中判定は内部 composingRef のみで行う。視覚・auto-grow は AutoGrowTextarea に完全委譲。共通ロジックは useCommitDraft フック。",
+      "variants": [],
+      "accessibility": [
+        "Must pair with <Label>"
+      ],
+      "rules": [
+        "value/onCommit contract。value は controlled、確定タイミングでのみ onCommit が呼ばれる",
+        "変換(composition)中は commit せず draft のみ更新。compositionEnd / 非変換入力時に commit",
+        "外部 value 変更は非変換中のみ draft へ反映(realtime 同期対応)",
+        "store 直結 controlled AutoGrowTextarea で IME が壊れる場合に代わりに使う"
       ]
     },
     {
