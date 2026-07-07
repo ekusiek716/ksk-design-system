@@ -19,6 +19,7 @@
 @import "./styles/categorical.css";
 @import "./styles/typography.css";
 @import "./styles/glass.css";
+@import "./styles/sheet-keyboard.css";
 
 /* ─── Bridge Layer: shadcn/ui 互換マッピング ─── */
 :root {

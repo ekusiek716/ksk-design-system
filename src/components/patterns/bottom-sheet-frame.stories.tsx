@@ -60,3 +60,39 @@ export const MobileForm: Story = {
 export const DesktopFloating: Story = {
   render: () => <FrameExample preset="desktop-floating" />,
 }
+
+/**
+ * KeyboardAwareSheetFooter behavior="hide" の CSS フォールバック検証（#149）。
+ *
+ * シート内テキスト入力に :focus がある間、DS 同梱 CSS（sheet-keyboard.css の
+ * :has(:focus) フォールバック、モバイル幅のみ）で footer[data-behavior="hide"]
+ * が display:none になる。visualViewport 検知に依存しないため、実キーボードの
+ * ない Storybook でもフォーカスするだけで隠れる（≤767px 幅で確認）。
+ */
+export const KeyboardHideFallback: Story = {
+  render: () => {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button>hide フォールバックを開く</Button>
+        </SheetTrigger>
+        <BottomSheetFrame preset="mobile-form">
+          <DetailSheetScaffold
+            header={<DetailSheetHeader title="サブタスクを追加" description="入力にフォーカスすると hide フッターが隠れます。" />}
+            footer={
+              <KeyboardAwareSheetFooter behavior="hide" data-testid="hide-footer">
+                <Button className="w-full">完了する</Button>
+              </KeyboardAwareSheetFooter>
+            }
+          >
+            <div className="space-y-2">
+              <Label htmlFor="hide-fallback-title">タイトル</Label>
+              <Input id="hide-fallback-title" defaultValue="牛乳を買う" />
+            </div>
+          </DetailSheetScaffold>
+        </BottomSheetFrame>
+      </Sheet>
+    )
+  },
+}
