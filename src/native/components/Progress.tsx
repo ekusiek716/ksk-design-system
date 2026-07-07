@@ -1,16 +1,15 @@
 import React from "react"
 import { View } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import {
+  resolveProgressPct,
+  resolveProgressVariant,
+  type ProgressAutoColorConfig,
+  type ProgressTone,
+  type ProgressVariant,
+} from "../progress-logic"
 
-export type ProgressVariant = "default" | "success" | "warning" | "caution"
-export type ProgressTone = "accent" | "success" | "caution" | "warning"
-
-export interface ProgressAutoColorConfig {
-  successBelow?: number
-  warningFrom?: number
-  warningBelow?: number
-  cautionFrom?: number
-}
+export type { ProgressAutoColorConfig, ProgressTone, ProgressVariant }
 
 export interface ProgressProps {
   value: number
@@ -20,32 +19,12 @@ export interface ProgressProps {
   tone?: ProgressTone
   variant?: ProgressVariant
   autoColor?: boolean | ProgressAutoColorConfig
-}
-
-const DEFAULT_AUTO_COLOR: ProgressAutoColorConfig = {
-  warningFrom: 80,
-  cautionFrom: 100,
-}
-
-function toneToVariant(tone: ProgressTone): ProgressVariant {
-  if (tone === "accent") return "default"
-  return tone
-}
-
-function getAutoProgressVariant(
-  value: number,
-  fallback: ProgressVariant,
-  autoColor: boolean | ProgressAutoColorConfig | undefined
-): ProgressVariant {
-  if (!autoColor) return fallback
-  const config: ProgressAutoColorConfig =
-    autoColor === true ? DEFAULT_AUTO_COLOR : { ...DEFAULT_AUTO_COLOR, ...autoColor }
-
-  if (config.successBelow != null && value < config.successBelow) return "success"
-  if (config.cautionFrom != null && value >= config.cautionFrom) return "caution"
-  if (config.warningFrom != null && value >= config.warningFrom) return "warning"
-  if (config.warningBelow != null && value < config.warningBelow) return "warning"
-  return fallback
+  /**
+   * true のとき、実 value に依存しない見た目にする（バー幅を固定表示にする）。
+   * 未課金ユーザー向けティザー表示等、value からバー幅経由で実データを逆算されるのを防ぐための表示専用フラグ。
+   * masked 時は value/max/autoColor を無視し、常に同じ幅・同じトーンで描画する。
+   */
+  masked?: boolean
 }
 
 export function Progress({
@@ -55,10 +34,11 @@ export function Progress({
   tone = "accent",
   variant,
   autoColor,
+  masked,
 }: ProgressProps) {
   const { theme, scales } = useTheme()
-  const pct = max === 0 ? 0 : Math.min(100, Math.max(0, (value / max) * 100))
-  const resolvedVariant = getAutoProgressVariant(pct, variant ?? toneToVariant(tone), autoColor)
+  const pct = resolveProgressPct(value, max, masked)
+  const resolvedVariant = resolveProgressVariant(pct, tone, variant, autoColor, masked)
 
   const fill = {
     default: theme.brand.primary,

@@ -169,6 +169,8 @@ export { SwipeRow, type SwipeRowProps, type SwipeAction } from "./SwipeRow"
 export { Footer, type FooterProps, type FooterLink } from "./Footer"
 export { FileUpload, type FileUploadProps } from "./FileUpload"
 export { Screen, type ScreenPadding, type ScreenProps } from "./Screen"
+export { Prose, type ProseProps, type ProseSection } from "./Prose"
+export { DocumentScreen, type DocumentScreenProps } from "./DocumentScreen"
 export {
   PhotoHero,
   type PhotoHeroAlign,

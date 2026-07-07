@@ -139,6 +139,16 @@ export const scales = {
       "fontSize": 11,
       "fontWeight": "400",
       "lineHeight": 17
+    },
+    "caption-strong": {
+      "fontSize": 11,
+      "fontWeight": "600",
+      "lineHeight": 16
+    },
+    "prose-meta": {
+      "fontSize": 13,
+      "fontWeight": "600",
+      "lineHeight": 18
     }
   },
   "shadows": {
