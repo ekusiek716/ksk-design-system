@@ -49,6 +49,36 @@ export const WithInitialValue: Story = {
   },
 }
 
+/**
+ * value が未来の月でも、開くとその選択月（ここでは2028年6月）が表示される。
+ * defaultMonth 未指定でも value の月にフォールバックする挙動の確認用（issue #160）。
+ */
+export const FutureValueOpensSelectedMonth: Story = {
+  render: () => {
+    const [date, setDate] = React.useState<Date | undefined>(new Date(2028, 5, 15))
+    return (
+      <div className="w-72">
+        <DatePicker value={date} onChange={setDate} />
+      </div>
+    )
+  },
+}
+
+/**
+ * defaultMonth を明示指定すると、value が無くても開いた月をその月（2030年1月）にできる。
+ * 優先順は defaultMonth > value > 今月。
+ */
+export const WithDefaultMonth: Story = {
+  render: () => {
+    const [date, setDate] = React.useState<Date | undefined>()
+    return (
+      <div className="w-72">
+        <DatePicker value={date} onChange={setDate} defaultMonth={new Date(2030, 0, 1)} />
+      </div>
+    )
+  },
+}
+
 export const Disabled: Story = {
   render: () => (
     <div className="w-72">
