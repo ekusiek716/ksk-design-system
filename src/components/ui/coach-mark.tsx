@@ -51,6 +51,15 @@ function CoachMark({
 }: CoachMarkProps) {
   const isOnboarding = step !== undefined
 
+  // Radix Tooltip renders a visually-hidden role="tooltip" copy of Content's
+  // children for screen readers. When Content holds interactive JSX (次へ/スキップ
+  // ボタン), that copy duplicates the <button> into the DOM and its 1px-wide clip
+  // leaks as a broken tall band (issue #145, observed in belle-todo).
+  // Passing `aria-label` makes Radix render the label *string* instead of the
+  // children in that copy, so no button (and no Arrow) is ever duplicated while
+  // screen readers still get an accessible description via the role="tooltip" node.
+  const ariaLabel = typeof content === "string" ? content : "コーチマーク"
+
   return (
     <TooltipPrimitive.Provider delayDuration={delayDuration}>
       <TooltipPrimitive.Root open={open} onOpenChange={onOpenChange}>
@@ -61,6 +70,7 @@ function CoachMark({
           <TooltipPrimitive.Content
             data-slot="coach-mark"
             data-variant={variant}
+            aria-label={ariaLabel}
             side={sideMap[placement]}
             sideOffset={8}
             className={cn(
