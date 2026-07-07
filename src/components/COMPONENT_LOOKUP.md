@@ -33,7 +33,7 @@
 | CommitTextarea | `@/components/ui/commit-textarea` | — | — |
 | CountdownTimer | `@/components/ui/countdown-timer` | — | Filled, Ghost, Compact, DayGranularity, Ended, AllVariants |
 | DateField | `@/components/ui/date-field` | — | Default, WithInitialValue, CustomPlaceholder, Disabled, CustomFormat |
-| DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, Disabled, RangePicker, CalendarOnly, CalendarRange |
+| DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, FutureValueOpensSelectedMonth, WithDefaultMonth, Disabled, RangePicker, CalendarOnly, CalendarRange |
 | Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, ReportShop, StackedFooter |
 | DropdownFilter | `@/components/ui/dropdown-filter` | — | Default, ActiveFilter, WithIcons（ビュー切替・アイコン付き）, MultipleFilters |
 | DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent | `@/components/ui/dropdown-menu` | — | Default, WithCheckbox, WithRadio, WithSubmenu |

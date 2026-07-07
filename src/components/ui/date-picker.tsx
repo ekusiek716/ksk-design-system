@@ -55,6 +55,12 @@ interface DatePickerProps {
    * @default placeholder と同じ値
    */
   triggerLabel?: string
+  /**
+   * ポップアップを開いたときに最初に表示する月。
+   * 未指定なら選択値（value）の月、value も無ければ今月を表示する。
+   * 優先順: defaultMonth > value > 今月。
+   */
+  defaultMonth?: Date
 }
 
 function DatePicker({
@@ -65,6 +71,7 @@ function DatePicker({
   className,
   dateFormat = "yyyy/MM/dd",
   triggerLabel,
+  defaultMonth,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
   const formatted = value ? formatDate(value, dateFormat) : null
@@ -109,6 +116,7 @@ function DatePicker({
         <Calendar
           mode="single"
           selected={value}
+          defaultMonth={defaultMonth ?? value ?? undefined}
           onSelect={(date) => {
             onChange?.(date)
             setOpen(false)
@@ -143,6 +151,12 @@ interface DateRangePickerProps {
   dateFormat?: string
   /** アクセシビリティラベル */
   triggerLabel?: string
+  /**
+   * ポップアップを開いたときに最初に表示する月。
+   * 未指定なら開始日（value.from）の月、それも無ければ今月を表示する。
+   * 優先順: defaultMonth > value.from > 今月。
+   */
+  defaultMonth?: Date
 }
 
 function DateRangePicker({
@@ -153,6 +167,7 @@ function DateRangePicker({
   className,
   dateFormat = "yyyy/MM/dd",
   triggerLabel,
+  defaultMonth,
 }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false)
   const formatted = value?.from
@@ -179,6 +194,7 @@ function DateRangePicker({
         <Calendar
           mode="range"
           selected={value?.from ? { from: value.from, to: value.to } : undefined}
+          defaultMonth={defaultMonth ?? value?.from ?? undefined}
           onSelect={(r) => onChange?.(r ? { from: r.from, to: r.to } : undefined)}
           numberOfMonths={2}
           autoFocus
