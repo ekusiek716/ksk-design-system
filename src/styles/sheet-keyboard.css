@@ -1,0 +1,72 @@
+/* =============================================================
+   KSK Design System — Bottom Sheet キーボード追従（CSS フォールバック）
+
+   bottom-anchored なシート（`[data-slot="sheet-content"][data-side="bottom"]`。
+   `BottomSheetFrame` も内部で data-slot="sheet-content" + data-side="bottom" に
+   なる。#139）向けに、仮想キーボード表示時の 2 つの補正を DS 標準で提供する。
+
+   ─── #150: bottom lift + max-height 補正（consumer 互換） ──────
+   SheetContent / SwipeToCloseBottomSheet は JS（visualViewport）でも同じ
+   持ち上げ・高さ制限を行うが、visualViewport が inset を出せない環境
+   （Android Chrome の interactive-widget=resizes-content 等で layout viewport
+   自体が縮むケース）では JS 検知が発火しない。その場合でも consumer が
+   `html[data-kb-open]` + `--kb-h`（キーボード高さ px）を書けば、この CSS が
+   同じ補正を適用する。belle-todo の回避実装（globals.css）と等価。
+
+   - `bottom: var(--kb-h)` … キーボード分だけシート下端を持ち上げる
+   - `max-height: calc(100dvh - var(--kb-h))` … 上端が画面外へ抜けないよう制限
+   - snap モード（`[data-snap-active]`）は自前で高さ制御するため max-height
+     補正の対象外（`:not([data-snap-active])`）。lift は snap でも安全なので適用。
+
+   JS 検知（inline style の bottom/maxHeight）が動くときは、そちらが inline で
+   同値を書くため二重適用にはならない（同じ結果に収束）。`--kb-h` 未設定時は
+   `var(--kb-h, 0px)` で無害（bottom:0 / max-height:100dvh は既定と同じ）。
+
+   ─── #149: KeyboardAwareSheetFooter の :has(:focus) フォールバック ──
+   `[data-slot="keyboard-aware-sheet-footer"][data-behavior="hide"]` は JS の
+   visualViewport 検知でフォーカス時に隠すが、上記と同じ理由で検知が発火しない
+   端末がある。同一シート内のテキスト系入力に :focus がある間は、検知に依存せず
+   CSS だけで footer を display:none にする。
+
+   モバイル幅ガード（`@media (max-width: 767px)`。Tailwind v4 既定の md 相当）
+   を付け、PC ではキーボードによる隠しを行わない。スコープは
+   `:is(sheet-content, ...):has(input:focus) footer` で「同一シート内に
+   フォーカスがある場合のみ」に限定する。
+
+   ⚠️ プレフィックス宣言順の不変条件（glass.css と同じ）:
+   `-webkit-` 形を先、標準形を後に書くこと。ここでは該当プロパティは無いが、
+   将来追加する場合は CI（scripts/check-prefix-order.mjs）に従う。
+   ============================================================= */
+
+/* ── #150: bottom lift（snap を含む全 bottom シート） ── */
+html[data-kb-open]
+  :is([data-slot="sheet-content"], [data-slot="bottom-sheet-frame"])[data-side="bottom"] {
+  bottom: var(--kb-h, 0px);
+}
+
+/* ── #150: max-height 補正（snap モードは除外） ── */
+html[data-kb-open]
+  :is([data-slot="sheet-content"], [data-slot="bottom-sheet-frame"])[data-side="bottom"]:not([data-snap-active]) {
+  max-height: calc(100dvh - var(--kb-h, 0px));
+}
+
+/* ── #149: KeyboardAwareSheetFooter behavior="hide" の :has(:focus) フォールバック ── */
+@media (max-width: 767px) {
+  :is([data-slot="sheet-content"], [data-slot="bottom-sheet-frame"]):has(
+      :is(
+          input:not([type]),
+          input[type="text"],
+          input[type="search"],
+          input[type="email"],
+          input[type="tel"],
+          input[type="url"],
+          input[type="password"],
+          input[type="number"],
+          textarea,
+          [contenteditable="true"]
+        ):focus
+    )
+    [data-slot="keyboard-aware-sheet-footer"][data-behavior="hide"] {
+    display: none;
+  }
+}

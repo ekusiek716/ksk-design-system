@@ -127,6 +127,33 @@ function computeVisualViewportInset(
   return { keyboardInset: inset, visibleHeight: visualHeight }
 }
 
+/**
+ * Inline style that lifts a bottom-anchored sheet above the on-screen keyboard
+ * and caps its height to the visible region (see {@link computeVisualViewportInset}).
+ *
+ * Mirrors the CSS fallback shipped in styles/sheet-keyboard.css (#150):
+ *   - "bottom" (the lift) applies to every bottom sheet, snap mode included —
+ *     lifting a snap sheet above the keyboard is always safe.
+ *   - "maxHeight" (the cap) is skipped in snap mode (snapActive), because a
+ *     snap sheet manages its own height via the active snap ratio; capping it
+ *     here would fight that. This is the JS twin of the CSS
+ *     :not([data-snap-active]) branch.
+ *
+ * Returns undefined when no keyboard is present (keyboardInset <= 0) so the
+ * caller falls back to the variant default CSS (bottom-0 / max-h-[90dvh]).
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+function resolveBottomSheetKeyboardStyle(
+  keyboardInset: number,
+  visibleHeight: number | null,
+  snapActive: boolean
+): { bottom: number; maxHeight?: number } | undefined {
+  if (keyboardInset <= 0) return undefined
+  if (snapActive) return { bottom: keyboardInset }
+  return { bottom: keyboardInset, maxHeight: visibleHeight ?? undefined }
+}
+
 function useVisualViewportInset(): VisualViewportInset {
   const [inset, setInset] = React.useState<VisualViewportInset>({
     keyboardInset: 0,
@@ -738,10 +765,9 @@ function SheetContent({
   // open, lift the sheet above it and cap its height to the visible region,
   // overriding the variant's `bottom-0` / `max-h-[90dvh]`.
   const isBottomAnchored = side === "bottom" || side === "bottom-glass"
-  const keyboardStyle =
-    isBottomAnchored && keyboardInset > 0
-      ? { bottom: keyboardInset, maxHeight: visibleHeight ?? undefined }
-      : undefined
+  const keyboardStyle = isBottomAnchored
+    ? resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false)
+    : undefined
 
   return (
     <SheetPortal container={container}>
@@ -1093,9 +1119,7 @@ function SwipeToCloseBottomSheet({
           // cap its height to the visible region (maxHeight). These inline
           // values override the variant's `bottom-0` / `max-h-[90dvh]`. When no
           // keyboard is present both are inert and the CSS defaults apply.
-          ...(keyboardInset > 0
-            ? { bottom: keyboardInset, maxHeight: visibleHeight ?? undefined }
-            : null),
+          ...resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false),
           transform: `translate3d(0, ${dragY}px, 0)`,
           transition: dragging || !everDragged
             ? "none"
@@ -1702,6 +1726,7 @@ export {
   // Exported for unit testing only — not part of the public package API
   // (src/index.ts re-exports a curated list only).
   computeVisualViewportInset,
+  resolveBottomSheetKeyboardStyle,
   decideSwipeGesture,
   computeFlickVelocity,
   decideSwipeDismiss,
