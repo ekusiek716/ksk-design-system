@@ -1,6 +1,6 @@
 {
   "name": "ksk-design-system",
-  "version": "1.42.1",
+  "version": "1.42.2",
   "type": "module",
   "description": "KSK Design System — フリーランス向けマルチテーマ対応デザインシステム",
   "license": "MIT",
@@ -226,6 +226,7 @@
     "eslint-plugin-storybook": "^10.4.6",
     "globals": "^17.7.0",
     "iconsax-reactjs": "^0.0.8",
+    "jsdom": "^25.0.1",
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
