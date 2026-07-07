@@ -33,7 +33,7 @@ function BottomSheetFrame({
 }: BottomSheetFrameProps) {
   return (
     <SheetContent
-      data-slot="bottom-sheet-frame"
+      data-frame="bottom-sheet-frame"
       data-preset={preset}
       side="bottom"
       padding={false}

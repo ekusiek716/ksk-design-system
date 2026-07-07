@@ -30,7 +30,7 @@ function SideDrawerFrame({
 }: SideDrawerFrameProps) {
   return (
     <SheetContent
-      data-slot="side-drawer-frame"
+      data-frame="side-drawer-frame"
       data-side={side}
       side={side}
       padding={false}
