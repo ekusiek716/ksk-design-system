@@ -72,6 +72,26 @@
   /* Overlay blur — モーダル背景の軽いすりガラス */
   --glass-overlay-bg:   rgba(0, 0, 0, 0.15);
   --glass-overlay-blur: blur(8px);
+
+  /* ─── Edge refraction (lensing) ───
+     iOS 26 Liquid Glass の最大の特徴は「ガラスの縁で背景が歪んで見える」
+     エッジ屈折。SVG の feDisplacementMap で疑似する。
+
+     displacement map（feImage の href、data URI 内は base64 埋め込み）は
+     100x100 の角丸矩形で、中央がニュートラルグレー rgb(128,128,128)
+     （= 変位ゼロ）、四辺・四隅のバンドだけ R（横方向）/ G（縦方向）を
+     128 から±方向にずらしてある。feDisplacementMap は xChannelSelector=R /
+     yChannelSelector=G で「背景をエッジに向かって内側へ引き込み、レンズの
+     縁で拡大されて見える」向きに変位させる。feGaussianBlur でバンド境界を
+     滑らかにし、段差の不連続を消す。
+     scale はライトで 65（凸レンズ感が出るが上品な範囲。iOS 26 実機
+     Chromium プレビューで 60〜140 を比較し、80 は強すぎ・140 は明らかに
+     やり過ぎと判断して 65 に決定）、ダークは背景コントラストが低く歪みが
+     より目立ちやすいため控えめの 36 にしている。
+     Chromium（Blink）のみ SVG filter 付き backdrop-filter を描画するため、
+     必ず @supports ゲート越しに適用すること（下部参照）。 */
+  --glass-refract:      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='glass-refract' x='-20%25' y='-20%25' width='140%25' height='140%25' color-interpolation-filters='sRGB'><feImage href='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImxlZnQiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoODQsMTI4LDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0icmlnaHQiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDEyOCwxMjgpIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMTcyLDEyOCwxMjgpIi8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9InRvcCIgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9InJnYigxMjgsODQsMTI4KSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0icmdiKDEyOCwxMjgsMTI4KSIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJib3R0b20iIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDEyOCwxMjgpIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDE3MiwxMjgpIi8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9InRsIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0icmdiKDg0LDg0LDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0idHIiIHgxPSIxIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTcyLDg0LDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iYmwiIHgxPSIwIiB5MT0iMSIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoODQsMTcyLDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iYnIiIHgxPSIxIiB5MT0iMSIgeDI9IjAiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTcyLDE3MiwxMjgpIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDEyOCwxMjgpIi8+PC9saW5lYXJHcmFkaWVudD48Y2xpcFBhdGggaWQ9Im91dGVyIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjE0IiByeT0iMTQiLz48L2NsaXBQYXRoPjwvZGVmcz48ZyBjbGlwLXBhdGg9InVybCgjb3V0ZXIpIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0icmdiKDEyOCwxMjgsMTI4KSIvPjxyZWN0IHg9IjAiIHk9IjIwIiB3aWR0aD0iMTYiIGhlaWdodD0iNjAiIGZpbGw9InVybCgjbGVmdCkiLz48cmVjdCB4PSI4NCIgeT0iMjAiIHdpZHRoPSIxNiIgaGVpZ2h0PSI2MCIgZmlsbD0idXJsKCNyaWdodCkiLz48cmVjdCB4PSIyMCIgeT0iMCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjE2IiBmaWxsPSJ1cmwoI3RvcCkiLz48cmVjdCB4PSIyMCIgeT0iODQiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxNiIgZmlsbD0idXJsKCNib3R0b20pIi8+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSJ1cmwoI3RsKSIvPjxyZWN0IHg9IjgwIiB5PSIwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIGZpbGw9InVybCgjdHIpIi8+PHJlY3QgeD0iMCIgeT0iODAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0idXJsKCNibCkiLz48cmVjdCB4PSI4MCIgeT0iODAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0idXJsKCNicikiLz48L2c+PC9zdmc+' x='0' y='0' width='100%25' height='100%25' preserveAspectRatio='none' result='map'/><feGaussianBlur in='map' stdDeviation='3' result='blurmap'/><feDisplacementMap in='SourceGraphic' in2='blurmap' scale='65' xChannelSelector='R' yChannelSelector='G'/></filter></svg>#glass-refract");
+  --glass-refract-dark: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='glass-refract-dark' x='-20%25' y='-20%25' width='140%25' height='140%25' color-interpolation-filters='sRGB'><feImage href='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImxlZnQiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoODQsMTI4LDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0icmlnaHQiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDEyOCwxMjgpIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMTcyLDEyOCwxMjgpIi8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9InRvcCIgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9InJnYigxMjgsODQsMTI4KSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0icmdiKDEyOCwxMjgsMTI4KSIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJib3R0b20iIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDEyOCwxMjgpIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDE3MiwxMjgpIi8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9InRsIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0icmdiKDg0LDg0LDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0idHIiIHgxPSIxIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTcyLDg0LDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iYmwiIHgxPSIwIiB5MT0iMSIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoODQsMTcyLDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iYnIiIHgxPSIxIiB5MT0iMSIgeDI9IjAiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTcyLDE3MiwxMjgpIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDEyOCwxMjgpIi8+PC9saW5lYXJHcmFkaWVudD48Y2xpcFBhdGggaWQ9Im91dGVyIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjE0IiByeT0iMTQiLz48L2NsaXBQYXRoPjwvZGVmcz48ZyBjbGlwLXBhdGg9InVybCgjb3V0ZXIpIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0icmdiKDEyOCwxMjgsMTI4KSIvPjxyZWN0IHg9IjAiIHk9IjIwIiB3aWR0aD0iMTYiIGhlaWdodD0iNjAiIGZpbGw9InVybCgjbGVmdCkiLz48cmVjdCB4PSI4NCIgeT0iMjAiIHdpZHRoPSIxNiIgaGVpZ2h0PSI2MCIgZmlsbD0idXJsKCNyaWdodCkiLz48cmVjdCB4PSIyMCIgeT0iMCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjE2IiBmaWxsPSJ1cmwoI3RvcCkiLz48cmVjdCB4PSIyMCIgeT0iODQiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxNiIgZmlsbD0idXJsKCNib3R0b20pIi8+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSJ1cmwoI3RsKSIvPjxyZWN0IHg9IjgwIiB5PSIwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIGZpbGw9InVybCgjdHIpIi8+PHJlY3QgeD0iMCIgeT0iODAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0idXJsKCNibCkiLz48cmVjdCB4PSI4MCIgeT0iODAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0idXJsKCNicikiLz48L2c+PC9zdmc+' x='0' y='0' width='100%25' height='100%25' preserveAspectRatio='none' result='map'/><feGaussianBlur in='map' stdDeviation='3' result='blurmap'/><feDisplacementMap in='SourceGraphic' in2='blurmap' scale='36' xChannelSelector='R' yChannelSelector='G'/></filter></svg>#glass-refract-dark");
 }
 
 /* ─── Dark mode overrides ─── */
@@ -342,19 +362,100 @@
   z-index: 1;
 }
 
+/* ─── Edge refraction (progressive enhancement) ───
+ * `backdrop-filter: ... url(#filter)` の SVG filter 合成は Chromium
+ * (Blink) しかラスタライズしない。Safari は宣言全体を無効な値として
+ * 丸ごと無視するため、無条件に url() を足すと Safari で blur まで
+ * 消えてしまう（過去に yokoku-app で類似の実害あり）。
+ *
+ * そこで `-webkit-app-region` を「Chromium/Electron 系だけ true を
+ * 返す」機能検出プローブとして使い、@supports で確実にゲートする。
+ * Chromium 実機（このリポジトリの Storybook プレビュー: Electron 42 /
+ * Chromium 148 相当）で `CSS.supports('-webkit-app-region', 'none')`
+ * → true を確認済み。Safari 26 / Firefox はこのプロパティを持たず
+ * 確実に false になる（標準化されていないベンダー独自プロパティで、
+ * Chromium 系ブラウザだけが実装している）。
+ *
+ * ゲート内でのみ、既存の --glass-blur* に url(--glass-refract) を
+ * 追加合成する。ゲートに引っかからない環境では今まで通り
+ * blur+saturate+brightness のみが適用され、blur 自体は失われない
+ * （このブロックが丸ごと評価されないだけなので安全に劣化する）。
+ *
+ * -webkit-backdrop-filter 側にも同じ url() 合成値を入れている
+ * （Chromium は -webkit- 接頭辞も理解するため実害はなく、宣言順の
+ * 不変条件「-webkit- が先・標準が後」も維持している）。
+ *
+ * .glass-subtle は薄い素材（フローティング要素の軽い背景）なので、
+ * 屈折を足すとかえって主張が強くなり「薄さ」の意図を壊すため対象外。
+ */
+@supports (-webkit-app-region: none) {
+  .glass {
+    -webkit-backdrop-filter: var(--glass-blur) var(--glass-refract);
+    backdrop-filter: var(--glass-blur) var(--glass-refract);
+  }
+  .glass-medium {
+    -webkit-backdrop-filter: var(--glass-blur) var(--glass-refract);
+    backdrop-filter: var(--glass-blur) var(--glass-refract);
+  }
+  .glass-strong {
+    -webkit-backdrop-filter: var(--glass-blur-lg) var(--glass-refract);
+    backdrop-filter: var(--glass-blur-lg) var(--glass-refract);
+  }
+  .glass-clear {
+    -webkit-backdrop-filter: blur(6px) saturate(1.6) brightness(1.05) var(--glass-refract);
+    backdrop-filter: blur(6px) saturate(1.6) brightness(1.05) var(--glass-refract);
+  }
+  .glass-accent {
+    -webkit-backdrop-filter: var(--glass-blur) var(--glass-refract);
+    backdrop-filter: var(--glass-blur) var(--glass-refract);
+  }
+
+  /* ダークモードは背景コントラストが低く歪みが目立ちやすいため、
+     scale を抑えた --glass-refract-dark に差し替える */
+  .dark .glass,
+  .dark .glass-medium,
+  .dark .glass-accent {
+    -webkit-backdrop-filter: var(--glass-blur) var(--glass-refract-dark);
+    backdrop-filter: var(--glass-blur) var(--glass-refract-dark);
+  }
+  .dark .glass-strong {
+    -webkit-backdrop-filter: var(--glass-blur-lg) var(--glass-refract-dark);
+    backdrop-filter: var(--glass-blur-lg) var(--glass-refract-dark);
+  }
+  .dark .glass-clear {
+    -webkit-backdrop-filter: blur(6px) saturate(1.6) brightness(1.05) var(--glass-refract-dark);
+    backdrop-filter: blur(6px) saturate(1.6) brightness(1.05) var(--glass-refract-dark);
+  }
+}
+
 /* ─── Reduced-transparency fallback ─── */
 /**
  * アクセシビリティ: ユーザーが「透明度を下げる」を有効にしている場合、
  * backdrop-filter を無効化して不透明な背景にフォールバックする。
  */
 @media (prefers-reduced-transparency: reduce) {
+  /*
+   * ⚠️ 詳細度の不変条件: 上の @supports ブロックは `.dark .glass` 等
+   * 2 クラスセレクタで backdrop-filter を上書きしているため、ここでも
+   * 同じ `.dark .glass` 系セレクタを明示しないと、CSS の詳細度計算で
+   * このフォールバックが負けて屈折 backdrop-filter が reduced-transparency
+   * 環境でも残ってしまう（宣言順に関係なく詳細度が優先されるため、
+   * 後方に書くだけでは無効化できない）。新しい `.glass*` バリアントを
+   * 追加するときは、@supports 内の `.dark .xxx` と対で、必ずここにも
+   * 同じ 2 クラスセレクタを追加すること。
+   */
   .glass,
   .glass-subtle,
   .glass-medium,
   .glass-strong,
   .glass-dark,
   .glass-clear,
-  .glass-accent {
+  .glass-accent,
+  .dark .glass,
+  .dark .glass-medium,
+  .dark .glass-strong,
+  .dark .glass-clear,
+  .dark .glass-accent {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     background: var(--Surface-Primary);
