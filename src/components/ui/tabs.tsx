@@ -48,7 +48,11 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
       data-variant={variant}
       className={cn(
         "inline-flex items-center justify-center whitespace-nowrap typo-label-sm transition-all",
-        variant === "pill" ? "rounded-full px-4 py-1.5 gap-1.5" : "rounded-lg px-3 py-1.5",
+        variant === "pill" ? "relative rounded-full px-4 py-1.5 gap-1.5" : "rounded-lg px-3 py-1.5",
+        // pill は見た目の高さ(h-9/h-8)を維持したまま、当たり判定だけをトラック全高(44px)まで
+        // 透明な before 擬似要素で拡張する。本体の height は変更しない（belle-todo 事例の再発防止）。
+        variant === "pill" &&
+          "before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
         "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         "disabled:pointer-events-none disabled:opacity-50",
         "data-[state=active]:bg-[var(--Surface-Primary)] data-[state=active]:text-[var(--Text-High-Emphasis)] data-[state=active]:shadow-sm",

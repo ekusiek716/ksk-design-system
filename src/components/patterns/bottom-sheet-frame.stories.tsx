@@ -16,7 +16,7 @@ export default meta
 
 type Story = StoryObj<typeof BottomSheetFrame>
 
-function FrameExample({ preset }: { preset: "mobile-full" | "mobile-form" | "desktop-floating" }) {
+function FrameExample({ preset }: { preset: "mobile-full" | "mobile-form" | "mobile-page" | "desktop-floating" }) {
   const [open, setOpen] = React.useState(false)
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -62,6 +62,16 @@ export const DesktopFloating: Story = {
 }
 
 /**
+ * iOS ページシート風 preset（#159）。App Store の詳細画面のように、上端に
+ * 常時 ~2rem のギャップを残し、背後の暗転と上角丸がわずかに覗く。
+ * ノッチ端末では safe-area-inset-top も合算されるため、上のギャップは
+ * 「2rem + ノッチ分」になる。
+ */
+export const MobilePage: Story = {
+  render: () => <FrameExample preset="mobile-page" />,
+}
+
+/**
  * KeyboardAwareSheetFooter behavior="hide" の CSS フォールバック検証（#149）。
  *
  * シート内テキスト入力に :focus がある間、DS 同梱 CSS（sheet-keyboard.css の
@@ -89,6 +99,52 @@ export const KeyboardHideFallback: Story = {
             <div className="space-y-2">
               <Label htmlFor="hide-fallback-title">タイトル</Label>
               <Input id="hide-fallback-title" defaultValue="牛乳を買う" />
+            </div>
+          </DetailSheetScaffold>
+        </BottomSheetFrame>
+      </Sheet>
+    )
+  },
+}
+
+/**
+ * #164 回帰確認: swipeToClose + BottomSheetFrame + DetailSheetScaffold。
+ *
+ * DetailSheetScaffold は本文に `flex max-h-[inherit] min-h-0 flex-col` を
+ * 使う（consumer が独自に `min-h-full flex flex-col` を書くケースの DS 版）。
+ * 修正前は swipeToClose 版の SheetContent が display:block だったため、
+ * この子の max-height 制約が効かず本文が伸びて footer（保存する ボタン）が
+ * 画面外に押し出された。修正後は SheetContent 自体が flex 化されているため、
+ * 本文を大量に入れても footer は常に画面内に留まり、本文だけがスクロールする。
+ */
+export const SwipeToCloseWithScaffold: Story = {
+  name: "swipeToClose + DetailSheetScaffold (#164)",
+  render: () => {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button>swipeToClose 版を開く</Button>
+        </SheetTrigger>
+        <BottomSheetFrame preset="mobile-full" swipeToClose>
+          <DetailSheetScaffold
+            header={<DetailSheetHeader title="長い本文でも footer が画面内に残るか" description="下にスクロールしても「保存する」ボタンが常に見えていれば OK。" />}
+            footer={
+              <KeyboardAwareSheetFooter>
+                <Button variant="secondary">キャンセル</Button>
+                <Button>保存する</Button>
+              </KeyboardAwareSheetFooter>
+            }
+          >
+            <div className="flex flex-col gap-3">
+              {Array.from({ length: 30 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Secondary)] p-3 typo-body-md text-[var(--Text-High-Emphasis)]"
+                >
+                  行 {i + 1}
+                </div>
+              ))}
             </div>
           </DetailSheetScaffold>
         </BottomSheetFrame>

@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 61,
-      "patterns": 52,
+      "patterns": 54,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 136
+      "total": 138
     }
   },
   "ui": [
@@ -294,7 +294,7 @@
     {
       "name": "Sheet",
       "path": "src/components/ui/sheet.tsx",
-      "description": "サイドパネル・ボトムシート。フィルター・メニュー・補助入力に使用。モーダルより軽いコンテキストに。snapPoints でスナップ式、swipeToClose で下スワイプ閉じを有効化。autoFocus / restoreFocusOnClose / closeOnEsc / bodyScrollLock でフォーカス・スクロール挙動を制御可能。",
+      "description": "サイドパネル・ボトムシート。フィルター・メニュー・補助入力に使用。モーダルより軽いコンテキストに。snapPoints でスナップ式、swipeToClose で下スワイプ閉じを有効化。autoFocus / restoreFocusOnClose / closeOnEsc / bodyScrollLock でフォーカス・スクロール挙動を制御可能。 多段（シートの上にシート）では open 順に overlay/content の z-index が自動繰り上げされ、zIndex / overlayClassName で上書き可能。",
       "subcomponents": [
         "SheetTrigger",
         "SheetContent",
@@ -428,10 +428,13 @@
     {
       "name": "Skeleton",
       "path": "src/components/ui/skeleton.tsx",
-      "description": "読み込み中プレースホルダ。width/height/rounded shorthand 対応。",
+      "description": "読み込み中プレースホルダ。width/height/rounded shorthand 対応。SkeletonText は lines 指定の複数行テキストプレースホルダ（最終行短縮）。",
       "rules": [
         "数値は px、文字列は CSS 値として渡る",
         "rounded: none/sm/md/lg/xl/2xl/full プリセット"
+      ],
+      "subcomponents": [
+        "SkeletonText"
       ]
     },
     {
@@ -965,6 +968,24 @@
       "description": "エラー状態表示。API失敗・権限エラー等に使用。リトライアクションを必ず含める。",
       "rules": [
         "Color + icon + text. Include retry action."
+      ]
+    },
+    {
+      "name": "Prose",
+      "path": "src/components/patterns/prose.tsx",
+      "description": "静的文書（プライバシーポリシー・利用規約等）の本文レンダラー。sections: {title, body: string[]}[] を受けて見出し+段落を統一タイポで描画する。native の Prose.tsx と props 形が一致。",
+      "rules": [
+        "見出しは typo-heading-md、段落は typo-body-md",
+        "DocumentPage の子として使う想定だが単体でも利用可"
+      ]
+    },
+    {
+      "name": "DocumentPage",
+      "path": "src/components/patterns/document-page.tsx",
+      "description": "プライバシーポリシー・利用規約などの静的文書ページ。タイトル・最終更新日・本文（Prose）を固定スペーシングで組む。native の DocumentScreen.tsx に対応（web は単体ページのため命名を DocumentPage とし、戻るナビは呼び出し側のシェルに委ねる）。",
+      "rules": [
+        "本文は max-w-2xl に収めて読みやすい行長にする",
+        "戻るナビは持たない。必要なら呼び出し側のレイアウトシェルで用意する"
       ]
     },
     {
@@ -1620,9 +1641,10 @@
     {
       "name": "BottomSheetFrame",
       "path": "src/components/patterns/bottom-sheet-frame.tsx",
-      "description": "SheetContent の responsive outer frame preset。mobile-full / mobile-form / desktop-floating を宣言し、DetailSheetScaffold と KeyboardAwareSheetFooter を内側で合成する。",
+      "description": "SheetContent の responsive outer frame preset。mobile-full / mobile-page（iOS ページシート風・上端 2rem ギャップ）/ mobile-form / desktop-floating を宣言し、DetailSheetScaffold と KeyboardAwareSheetFooter を内側で合成する。",
       "variants": [
         "mobile-full",
+        "mobile-page",
         "mobile-form",
         "desktop-floating"
       ],

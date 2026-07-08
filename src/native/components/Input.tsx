@@ -14,7 +14,10 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
   trailing?: React.ReactNode
 }
 
-export function Input({ invalid, disabled, leading, trailing, ...rest }: InputProps) {
+export const Input = React.forwardRef<TextInput, InputProps>(function Input(
+  { invalid, disabled, leading, trailing, ...rest },
+  ref,
+) {
   const { theme, scales } = useTheme()
   const [focused, setFocused] = useState(false)
 
@@ -41,6 +44,7 @@ export function Input({ invalid, disabled, leading, trailing, ...rest }: InputPr
     >
       {leading}
       <TextInput
+        ref={ref}
         editable={!disabled}
         onFocus={(e) => {
           setFocused(true)
@@ -61,4 +65,4 @@ export function Input({ invalid, disabled, leading, trailing, ...rest }: InputPr
       {trailing}
     </View>
   )
-}
+})
