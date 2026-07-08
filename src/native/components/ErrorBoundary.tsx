@@ -22,7 +22,7 @@ interface ErrorBoundaryLabels {
   title?: string
   /** 説明文。既定 "データは保持されています。下のボタンで復旧してください。" */
   description?: string
-  /** 再試行ボタンラベル。onRetry 指定時のみ表示。既定 "再試行" */
+  /** 再試行ボタンラベル。ボタンは onRetry の有無に関わらず常に表示。既定 "再試行" */
   retryLabel?: string
 }
 
@@ -36,10 +36,10 @@ export interface ErrorBoundaryProps {
    */
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void
   /**
-   * 再試行ボタン押下時のコールバック。呼ばれるとまず内部の hasError を
-   * リセットして子を再マウントし、その後にこのコールバックを呼ぶ
-   * （画面の再フェッチ等、アプリ固有の復旧処理はここで行う）。
-   * 未指定の場合は再試行ボタン自体を表示しない。
+   * 再試行ボタン押下時のコールバック。ボタンは onRetry の有無に関わらず常に
+   * 表示され、押すとまず内部の hasError をリセットして子を再マウントし、
+   * その後にこのコールバックを呼ぶ（画面の再フェッチ等、アプリ固有の復旧処理は
+   * ここで行う）。未指定でも state リセットによる再試行自体は機能する。
    */
   onRetry?: () => void
   /** 完全カスタム fallback を渡したい場合 (labels より優先) */
@@ -85,24 +85,22 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   render() {
     if (!this.state.hasError) return this.props.children
 
-    const { fallback, labels, onRetry } = this.props
+    const { fallback, labels } = this.props
     const merged = { ...DEFAULT_LABELS, ...labels }
 
     if (fallback) {
       return typeof fallback === "function" ? fallback(this.state.error, this.handleRetry) : fallback
     }
 
-    return <ErrorBoundaryFallback merged={merged} onRetry={onRetry} handleRetry={this.handleRetry} />
+    return <ErrorBoundaryFallback merged={merged} handleRetry={this.handleRetry} />
   }
 }
 
 function ErrorBoundaryFallback({
   merged,
-  onRetry,
   handleRetry,
 }: {
   merged: Required<ErrorBoundaryLabels>
-  onRetry?: () => void
   handleRetry: () => void
 }) {
   const { theme, scales } = useTheme()
@@ -131,11 +129,9 @@ function ErrorBoundaryFallback({
       >
         {merged.description}
       </Text>
-      {onRetry && (
-        <Button variant="secondary" onPress={handleRetry}>
-          {merged.retryLabel}
-        </Button>
-      )}
+      <Button variant="secondary" onPress={handleRetry}>
+        {merged.retryLabel}
+      </Button>
     </View>
   )
 }

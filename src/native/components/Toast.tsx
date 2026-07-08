@@ -231,13 +231,13 @@ function ToastView({ toast: item, onDismiss }: { toast: ToastItem; onDismiss: ()
           <RNText style={[resolveTypo("label.md"), { color: palette.fg }]}>{item.title}</RNText>
         )}
         {item.description && (
-          <RNText style={[resolveTypo("body.sm"), { color: theme.text["high-emphasis"] }]}>
+          <RNText style={[resolveTypo("body.sm"), { color: palette.fg }]}>
             {item.description}
           </RNText>
         )}
       </View>
       {item.action && (
-        <Pressable onPress={item.action.onPress} hitSlop={8}>
+        <Pressable onPress={item.action.onPress} hitSlop={8} accessibilityRole="button">
           <RNText style={[resolveTypo("label.sm"), { color: palette.fg, textDecorationLine: "underline" }]}>
             {item.action.label}
           </RNText>

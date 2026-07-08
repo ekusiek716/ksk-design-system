@@ -56,6 +56,12 @@ export function useCommitDraft(
 ): UseCommitDraftResult {
   const [draft, setDraft] = React.useState(value)
   const composingRef = React.useRef(false)
+  // compositionend が onCommit(next) を呼んだ直後、同じ変更に対応する
+  // input/onChangeText がもう一度発火することがある（RNW 環境）。その時点では
+  // composingRef は既に false なので、ガード無しだと同一値で二重 commit される。
+  // 直前に compositionend で commit した値を憶えておき、直後の 1 回だけ
+  // 同値の commit をスキップする（値が異なる＝別の変更なら通常通り commit する）。
+  const lastCompositionCommitRef = React.useRef<string | null>(null)
 
   React.useEffect(() => {
     // 変換中は外部値を draft に書き戻さない（composition セッションを維持）。
@@ -65,7 +71,15 @@ export function useCommitDraft(
   const handleChange = React.useCallback(
     (next: string, isComposingHint?: boolean) => {
       setDraft(next)
-      if (shouldCommitOnChange(composingRef.current, isComposingHint)) onCommit(next)
+      if (!shouldCommitOnChange(composingRef.current, isComposingHint)) return
+      if (lastCompositionCommitRef.current === next) {
+        // compositionend 直後の同値 change — skip-next-commit ガード。
+        // 1 回消費したら解除し、以降の変更は通常通り commit する。
+        lastCompositionCommitRef.current = null
+        return
+      }
+      lastCompositionCommitRef.current = null
+      onCommit(next)
     },
     [onCommit],
   )
@@ -78,6 +92,7 @@ export function useCommitDraft(
     (next: string) => {
       composingRef.current = false
       setDraft(next)
+      lastCompositionCommitRef.current = next
       onCommit(next)
     },
     [onCommit],

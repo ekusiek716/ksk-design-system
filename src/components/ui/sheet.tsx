@@ -506,27 +506,69 @@ function sheetStackLevelOf(id: number): number {
  * sheet open). Depth is recomputed whenever any tracked sheet opens/closes,
  * so a sheet's level shifts down automatically if sheets below it close.
  *
+ * IMPORTANT: claim/release happen inside a `useEffect`, not during render.
+ * `SheetContent` itself is a plain function component rendered unconditionally
+ * as a child of `DialogPrimitive.Root` — it runs on every render regardless of
+ * whether the sheet is open, so it must NOT call this hook directly (that was
+ * the #158→#166 bug: the stack registered "tree order", not "open order", and
+ * claiming during render violated render purity, causing StrictMode's
+ * simulated remount to drop the claim without a matching re-claim).
+ *
+ * Instead this hook is used exclusively by {@link SheetStackRegistrar}, a tiny
+ * component mounted as a child of `DialogPrimitive.Content` — which Radix
+ * mounts/unmounts via `Presence` in sync with the *actual* open state. So the
+ * registrar (and thus the claim) only exists while the sheet is really open,
+ * and StrictMode's mount→unmount→remount cycle naturally re-claims on remount.
+ *
  * Exported for unit testing only — not part of the public package API.
  */
 function useSheetStackLevel(): number {
   const idRef = React.useRef<number | null>(null)
-  if (idRef.current === null) idRef.current = sheetStackOpen()
-  const id = idRef.current
+  const [id, setId] = React.useState<number | null>(null)
+  React.useEffect(() => {
+    const claimed = sheetStackOpen()
+    idRef.current = claimed
+    setId(claimed)
+    return () => {
+      sheetStackClose(claimed)
+      idRef.current = null
+    }
+  }, [])
   const subscribe = React.useCallback((onChange: () => void) => {
     sheetStackListeners.add(onChange)
     return () => {
       sheetStackListeners.delete(onChange)
     }
   }, [])
-  const getSnapshot = React.useCallback(() => sheetStackLevelOf(id), [id])
+  const getSnapshot = React.useCallback(
+    () => (id === null ? 0 : sheetStackLevelOf(id)),
+    [id]
+  )
   const level = React.useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
-  React.useEffect(() => {
-    return () => {
-      sheetStackClose(id)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
   return level
+}
+
+/**
+ * Mounts only while the parent `DialogPrimitive.Content` is actually present
+ * in the DOM (Radix's `Presence` unmounts Content when the sheet is closed,
+ * even though the outer `SheetContent` function component keeps rendering as
+ * a normal React child). Claims a stack slot on mount, releases on unmount,
+ * and reports the current depth to the parent via `onLevelChange` so the
+ * overlay/content z-index can be computed one effect-tick after open — a
+ * single-frame lag that resolves before the open animation is visible.
+ *
+ * Not exported — internal to `SheetContent`'s stacking implementation.
+ */
+function SheetStackRegistrar({
+  onLevelChange,
+}: {
+  onLevelChange: (level: number) => void
+}) {
+  const level = useSheetStackLevel()
+  React.useEffect(() => {
+    onLevelChange(level)
+  }, [level, onLevelChange])
+  return null
 }
 
 interface SheetOverlayProps extends React.ComponentProps<typeof DialogPrimitive.Overlay> {
@@ -768,12 +810,18 @@ function SheetContent({
   const contentRef = React.useRef<HTMLDivElement>(null)
   const restoreFocusRef = React.useRef<HTMLElement | null>(null)
   useBodyScrollLock(bodyScrollLock)
-  // #158: claim this sheet's depth in the global open-sheet stack so nested
-  // sheets escalate z-index instead of colliding at the fixed 40/50 pair.
-  // `zIndex` (escape hatch) overrides the content's z-index only; the
-  // overlay keeps using the auto-computed stackLevel value so it still sits
-  // just under whatever content z-index the consumer chose.
-  const stackLevel = useSheetStackLevel()
+  // #158/#166: claim this sheet's depth in the global open-sheet stack so
+  // nested sheets escalate z-index instead of colliding at the fixed 40/50
+  // pair. Unlike the pre-#166 version, `SheetContent` itself does NOT call
+  // useSheetStackLevel (it renders unconditionally regardless of open state).
+  // Instead each branch below mounts a <SheetStackRegistrar> *inside* its
+  // `DialogPrimitive.Content`, which Radix's Presence only mounts while the
+  // sheet is actually open — so the stack reflects open order, not tree
+  // order, and claim/release live entirely in effects (see useSheetStackLevel
+  // doc comment). `stackLevel` here starts at 0 and is updated one effect
+  // tick after mount by the registrar; the resulting z-index lag is a single
+  // frame, resolved before the open animation is visible.
+  const [stackLevel, setStackLevel] = React.useState(0)
   const resolvedContentZ = zIndex ?? SHEET_CONTENT_BASE_Z + stackLevel * SHEET_STACK_STEP
   const hasInternalDesc = description != null && description !== false
   const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
@@ -828,6 +876,7 @@ function SheetContent({
         glassOverlay={useGlassOverlay}
         overlayClassName={overlayClassName}
         stackLevel={stackLevel}
+        onStackLevelChange={setStackLevel}
         contentZIndex={resolvedContentZ}
         container={container}
         description={description}
@@ -850,6 +899,7 @@ function SheetContent({
         glassOverlay={useGlassOverlay}
         overlayClassName={overlayClassName}
         stackLevel={stackLevel}
+        onStackLevelChange={setStackLevel}
         contentZIndex={resolvedContentZ}
         container={container}
         padding={padding}
@@ -877,6 +927,7 @@ function SheetContent({
         glassOverlay={useGlassOverlay}
         overlayClassName={overlayClassName}
         stackLevel={stackLevel}
+        onStackLevelChange={setStackLevel}
         contentZIndex={resolvedContentZ}
         container={container}
         padding={padding}
@@ -920,6 +971,7 @@ function SheetContent({
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
+        <SheetStackRegistrar onLevelChange={setStackLevel} />
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">
             {description}
@@ -975,6 +1027,8 @@ interface SwipeToCloseBottomSheetProps
   overlayClassName?: string
   /** #158: グローバル open-sheet スタックでの深度（0=最初に開いたシート）。 */
   stackLevel?: number
+  /** #166: stackLevel の変更を親（SheetContent）へ伝える。Registrar 用。 */
+  onStackLevelChange?: (level: number) => void
   /** #158: このシートの content z-index（自動算出 or zIndex prop で上書き済みの値）。 */
   contentZIndex?: number
   container?: HTMLElement | null
@@ -993,6 +1047,7 @@ function SwipeToCloseBottomSheet({
   glassOverlay,
   overlayClassName,
   stackLevel,
+  onStackLevelChange,
   contentZIndex,
   container,
   padding = true,
@@ -1289,6 +1344,9 @@ function SwipeToCloseBottomSheet({
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
+        {onStackLevelChange && (
+          <SheetStackRegistrar onLevelChange={onStackLevelChange} />
+        )}
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">
             {description}
@@ -1337,6 +1395,8 @@ interface SwipeToCloseSideDrawerProps
   overlayClassName?: string
   /** #158: グローバル open-sheet スタックでの深度（0=最初に開いたシート）。 */
   stackLevel?: number
+  /** #166: stackLevel の変更を親（SheetContent）へ伝える。Registrar 用。 */
+  onStackLevelChange?: (level: number) => void
   /** #158: このシートの content z-index（自動算出 or zIndex prop で上書き済みの値）。 */
   contentZIndex?: number
   container?: HTMLElement | null
@@ -1355,6 +1415,7 @@ function SwipeToCloseSideDrawer({
   glassOverlay,
   overlayClassName,
   stackLevel,
+  onStackLevelChange,
   contentZIndex,
   container,
   padding = true,
@@ -1576,6 +1637,9 @@ function SwipeToCloseSideDrawer({
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
+        {onStackLevelChange && (
+          <SheetStackRegistrar onLevelChange={onStackLevelChange} />
+        )}
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">
             {description}
@@ -1605,6 +1669,8 @@ interface SnapBottomSheetContentProps
   overlayClassName?: string
   /** #158: グローバル open-sheet スタックでの深度（0=最初に開いたシート）。 */
   stackLevel?: number
+  /** #166: stackLevel の変更を親（SheetContent）へ伝える。Registrar 用。 */
+  onStackLevelChange?: (level: number) => void
   /** #158: このシートの content z-index（自動算出 or zIndex prop で上書き済みの値）。 */
   contentZIndex?: number
   container?: HTMLElement | null
@@ -1622,6 +1688,7 @@ function SnapBottomSheetContent({
   glassOverlay,
   overlayClassName,
   stackLevel,
+  onStackLevelChange,
   contentZIndex,
   container,
   description,
@@ -1816,6 +1883,9 @@ function SnapBottomSheetContent({
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
+        {onStackLevelChange && (
+          <SheetStackRegistrar onLevelChange={onStackLevelChange} />
+        )}
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">
             {description}
