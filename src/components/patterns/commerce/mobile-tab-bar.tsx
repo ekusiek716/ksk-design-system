@@ -75,6 +75,7 @@ function MobileTabBar<T extends string>({
       activeIcon: <Icon size={20} variant="Bulk" />,
       isActive: active,
       onClick: () => onSelect(item.key),
+      tabKey: item.key,
     }
   })
 

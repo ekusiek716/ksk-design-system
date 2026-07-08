@@ -57,4 +57,39 @@ function Skeleton({ className, width, height, rounded = "lg", style, ...props }:
   )
 }
 
-export { Skeleton }
+export interface SkeletonTextProps {
+  /** 表示する行数（既定 3） */
+  lines?: number
+  /** 各行の高さ（px、既定 12） */
+  lineHeight?: number
+  /** 最終行を短縮する比率（既定 "60%"）。false で全行同幅 */
+  lastLineWidth?: string | false
+  className?: string
+}
+
+/**
+ * SkeletonText — 複数行テキストのローディングプレースホルダ。
+ * `lines` 本のバーを積み、最終行だけ幅を縮めて自然なテキストブロックに見せる。
+ *
+ * ネイティブ版（`src/native/components/Skeleton.tsx` の `SkeletonText`）と対応。
+ * native は `lines` のみを受け取るが、web 版は `lineHeight` / `lastLineWidth` で
+ * 細かい調整ができるよう拡張している。
+ *
+ * @example
+ * <SkeletonText lines={3} />
+ */
+function SkeletonText({ lines = 3, lineHeight = 12, lastLineWidth = "60%", className }: SkeletonTextProps) {
+  return (
+    <div data-slot="skeleton-text" aria-hidden="true" className={cn("flex flex-col gap-2", className)}>
+      {Array.from({ length: lines }).map((_, i) => (
+        <Skeleton
+          key={i}
+          height={lineHeight}
+          width={i === lines - 1 && lastLineWidth ? lastLineWidth : "100%"}
+        />
+      ))}
+    </div>
+  )
+}
+
+export { Skeleton, SkeletonText }

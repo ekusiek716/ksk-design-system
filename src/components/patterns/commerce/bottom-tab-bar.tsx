@@ -13,6 +13,12 @@ interface BottomTabBarItem {
   onClick?: () => void
   badgeCount?: number
   isActive?: boolean
+  /**
+   * タブを一意に識別する安定 DOM アンカー。指定時は button/a に
+   * `data-tab-key` として出力される（E2E テスト・計測用のセレクタ安定化）。
+   * 中央 CTA（centerAction）には付与しない。
+   */
+  tabKey?: string
 }
 
 type BottomTabBarTone = "default" | "inverse"
@@ -258,6 +264,7 @@ function NavItem({
 
   return (
     <Tag
+      data-tab-key={item.tabKey}
       className={cn(
         "relative flex min-h-11 flex-col items-center justify-center gap-0.5 transition-opacity active:opacity-60",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] rounded-full",
