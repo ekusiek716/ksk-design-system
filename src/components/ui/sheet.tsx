@@ -446,6 +446,89 @@ function SheetPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.P
   return <DialogPrimitive.Portal data-slot="sheet-portal" {...props} />
 }
 
+// ============================================================================
+// Nested-sheet z-index stacking (#158)
+// ----------------------------------------------------------------------------
+// Overlay (z-40) / Content (z-50) were fixed constants shared by every Sheet
+// instance. When a second Sheet opens on top of a first (e.g. a detail sheet
+// triggering a confirm sheet), both overlays render at the same z-40 and both
+// contents at the same z-50 — DOM order then decides who wins, and a
+// full-screen lower content can end up covering the upper sheet's overlay so
+// it never visually dims.
+//
+// We use a module-level registry (not React Context) because two Sheets are
+// not guaranteed to share a tree: one Sheet's trigger can live *outside* the
+// other's content (e.g. both portaled as siblings under document.body from
+// unrelated trigger call sites), so a parent→child Context would miss that
+// case. A global "who opened, in what order" stack works regardless of where
+// each <Sheet> lives in the React tree.
+//
+// Each open SheetContent instance claims a stack level (0 = first opened) on
+// mount and releases it on unmount; levels are recompacted so they always run
+// 0..n-1 with no gaps, keeping the z-index formula stable even if sheets close
+// out of order. z-index = base + level * STACK_STEP, applied via inline style
+// so it always wins over the Tailwind z-40/50 utility classes (same
+// specificity would otherwise leave DOM order as the tiebreaker again).
+// ============================================================================
+
+const SHEET_OVERLAY_BASE_Z = 40
+const SHEET_CONTENT_BASE_Z = 50
+const SHEET_STACK_STEP = 20
+
+let sheetStackNextId = 0
+const sheetStackOpenIds: number[] = []
+const sheetStackListeners = new Set<() => void>()
+
+function sheetStackNotify() {
+  sheetStackListeners.forEach((l) => l())
+}
+
+function sheetStackOpen(): number {
+  const id = sheetStackNextId++
+  sheetStackOpenIds.push(id)
+  sheetStackNotify()
+  return id
+}
+
+function sheetStackClose(id: number) {
+  const idx = sheetStackOpenIds.indexOf(id)
+  if (idx !== -1) sheetStackOpenIds.splice(idx, 1)
+  sheetStackNotify()
+}
+
+function sheetStackLevelOf(id: number): number {
+  return Math.max(0, sheetStackOpenIds.indexOf(id))
+}
+
+/**
+ * Claims a slot in the global open-sheet stack for the lifetime of the
+ * mounted component and returns its current depth (0 = first/outermost
+ * sheet open). Depth is recomputed whenever any tracked sheet opens/closes,
+ * so a sheet's level shifts down automatically if sheets below it close.
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+function useSheetStackLevel(): number {
+  const idRef = React.useRef<number | null>(null)
+  if (idRef.current === null) idRef.current = sheetStackOpen()
+  const id = idRef.current
+  const subscribe = React.useCallback((onChange: () => void) => {
+    sheetStackListeners.add(onChange)
+    return () => {
+      sheetStackListeners.delete(onChange)
+    }
+  }, [])
+  const getSnapshot = React.useCallback(() => sheetStackLevelOf(id), [id])
+  const level = React.useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+  React.useEffect(() => {
+    return () => {
+      sheetStackClose(id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  return level
+}
+
 interface SheetOverlayProps extends React.ComponentProps<typeof DialogPrimitive.Overlay> {
   /**
    * true: Liquid Glass オーバーレイ
@@ -454,6 +537,17 @@ interface SheetOverlayProps extends React.ComponentProps<typeof DialogPrimitive.
   glass?: boolean
   /** 0..1 — controlled opacity for snap-mode overlays */
   opacity?: number
+  /**
+   * ネスト段数(0=最初に開いたシート)。指定時は z-index を
+   * `40 + stackLevel*20` で上書きする（#158: 多段 Sheet の overlay 暗転対策）。
+   * 未指定時は従来通り z-40 固定。
+   */
+  stackLevel?: number
+  /**
+   * escape hatch: z-index を明示指定したい consumer 向け。指定時は
+   * stackLevel による自動算出より優先する。
+   */
+  zIndex?: number
 }
 
 function SheetOverlay({
@@ -461,15 +555,21 @@ function SheetOverlay({
   glass = false,
   opacity,
   style,
+  stackLevel,
+  zIndex,
   ...props
 }: SheetOverlayProps) {
   const controlled = opacity != null
+  const resolvedZ =
+    zIndex ?? (stackLevel != null ? SHEET_OVERLAY_BASE_Z + stackLevel * SHEET_STACK_STEP : undefined)
   return (
     <DialogPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
         // Overlay sits *under* SheetContent (z-50). Using z-40 prevents
-        // the glass scrim from covering the sheet content.
+        // the glass scrim from covering the sheet content. When resolvedZ is
+        // set (stackLevel/zIndex prop) the inline style below overrides this
+        // base value per-instance (#158 nested sheets).
         "fixed inset-0 z-40",
         // For "glass" sheets, the sheet itself provides the frosted-glass
         // visual via its own backdrop-filter. Doubling that with a blurred
@@ -482,7 +582,11 @@ function SheetOverlay({
         !controlled && "transition-opacity duration-200",
         className
       )}
-      style={controlled ? { ...style, opacity } : style}
+      style={{
+        ...style,
+        ...(controlled ? { opacity } : null),
+        ...(resolvedZ != null ? { zIndex: resolvedZ } : null),
+      }}
       {...props}
     />
   )
@@ -628,6 +732,16 @@ interface SheetContentProps
   closeOnEsc?: boolean
   /** Sheet 表示中に body scroll を抑止する。既定 true。 */
   bodyScrollLock?: boolean
+  /**
+   * #158: 多段 Sheet の z-index escape hatch。
+   * 未指定時は開いている Sheet の順序（グローバルスタック）から自動算出
+   * （overlay = 40 + depth*20 / content = 50 + depth*20）されるため通常は不要。
+   * 自動算出が想定と異なる場合（他ライブラリの overlay と揃えたい等）にのみ
+   * 明示指定する。
+   */
+  zIndex?: number
+  /** overlay 要素にのみ追加の className を当てたい場合の escape hatch。 */
+  overlayClassName?: string
 }
 
 const swipeSides = new Set(["bottom", "bottom-glass"])
@@ -646,12 +760,21 @@ function SheetContent({
   restoreFocusOnClose = true,
   closeOnEsc = true,
   bodyScrollLock = true,
+  zIndex,
+  overlayClassName,
   ...props
 }: SheetContentProps) {
   const autoDescId = React.useId()
   const contentRef = React.useRef<HTMLDivElement>(null)
   const restoreFocusRef = React.useRef<HTMLElement | null>(null)
   useBodyScrollLock(bodyScrollLock)
+  // #158: claim this sheet's depth in the global open-sheet stack so nested
+  // sheets escalate z-index instead of colliding at the fixed 40/50 pair.
+  // `zIndex` (escape hatch) overrides the content's z-index only; the
+  // overlay keeps using the auto-computed stackLevel value so it still sits
+  // just under whatever content z-index the consumer chose.
+  const stackLevel = useSheetStackLevel()
+  const resolvedContentZ = zIndex ?? SHEET_CONTENT_BASE_Z + stackLevel * SHEET_STACK_STEP
   const hasInternalDesc = description != null && description !== false
   const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
   const snapCtx = React.useContext(SheetSnapContext)
@@ -703,6 +826,9 @@ function SheetContent({
         snapCtx={snapCtx}
         className={className}
         glassOverlay={useGlassOverlay}
+        overlayClassName={overlayClassName}
+        stackLevel={stackLevel}
+        contentZIndex={resolvedContentZ}
         container={container}
         description={description}
         autoFocus={autoFocus}
@@ -722,6 +848,9 @@ function SheetContent({
         side={side as "bottom" | "bottom-glass"}
         className={className}
         glassOverlay={useGlassOverlay}
+        overlayClassName={overlayClassName}
+        stackLevel={stackLevel}
+        contentZIndex={resolvedContentZ}
         container={container}
         padding={padding}
         description={description}
@@ -746,6 +875,9 @@ function SheetContent({
         side={side as "left" | "right"}
         className={className}
         glassOverlay={useGlassOverlay}
+        overlayClassName={overlayClassName}
+        stackLevel={stackLevel}
+        contentZIndex={resolvedContentZ}
         container={container}
         padding={padding}
         description={description}
@@ -771,14 +903,18 @@ function SheetContent({
 
   return (
     <SheetPortal container={container}>
-      <SheetOverlay glass={useGlassOverlay} />
+      <SheetOverlay glass={useGlassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
         ref={contentRef}
         data-slot="sheet-content"
         data-side={side}
         className={cn(sheetVariants({ side }), padding && "p-6", className)}
         {...props}
-        style={keyboardStyle ? { ...props.style, ...keyboardStyle } : props.style}
+        style={{
+          ...props.style,
+          ...keyboardStyle,
+          zIndex: resolvedContentZ,
+        }}
         aria-describedby={ariaDescribedBy}
         onOpenAutoFocus={handleOpenAutoFocus}
         onCloseAutoFocus={handleCloseAutoFocus}
@@ -835,6 +971,12 @@ interface SwipeToCloseBottomSheetProps
   side: "bottom" | "bottom-glass"
   className?: string
   glassOverlay?: boolean
+  /** #158: overlay 要素への追加 className（escape hatch）。 */
+  overlayClassName?: string
+  /** #158: グローバル open-sheet スタックでの深度（0=最初に開いたシート）。 */
+  stackLevel?: number
+  /** #158: このシートの content z-index（自動算出 or zIndex prop で上書き済みの値）。 */
+  contentZIndex?: number
   container?: HTMLElement | null
   padding?: boolean
   description?: React.ReactNode
@@ -849,6 +991,9 @@ function SwipeToCloseBottomSheet({
   side,
   className,
   glassOverlay,
+  overlayClassName,
+  stackLevel,
+  contentZIndex,
   container,
   padding = true,
   description,
@@ -1095,7 +1240,7 @@ function SwipeToCloseBottomSheet({
 
   return (
     <SheetPortal container={container}>
-      <SheetOverlay glass={glassOverlay} />
+      <SheetOverlay glass={glassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
         ref={attachTouchListeners}
         data-slot="sheet-content"
@@ -1109,7 +1254,11 @@ function SwipeToCloseBottomSheet({
           // overscroll-y-none: 先頭での引き下げ時に iOS のラバーバンドが
           // ジェスチャを先取りすると preventDefault が効かず close-drag が
           // 始められないため、contain ではなく none（ローカルバウンスも禁止）。
-          "max-h-[90dvh] overflow-y-auto overscroll-y-none",
+          // #164: 非swipe版（下の非snap SheetContent 分岐）と同じ flex 化。
+          // 子が min-h-full flex flex-col（DetailSheetScaffold 等）を書いても
+          // max-height を超えて伸びないよう、この Content 自体を flex コンテナ
+          // にする（子の flex-1 min-h-0 が親の高さキャップ内で効くようになる）。
+          "flex flex-col max-h-[90dvh] overflow-y-auto overscroll-y-none",
           padding && "p-6",
           className,
         )}
@@ -1125,6 +1274,7 @@ function SwipeToCloseBottomSheet({
             ? "none"
             : "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
           willChange: "transform",
+          zIndex: contentZIndex,
         }}
         {...props}
         // Full-surface swipe-to-close: handlers live on the content root so a
@@ -1147,7 +1297,7 @@ function SwipeToCloseBottomSheet({
         <div
           data-sheet-drag-handle
           className={cn(
-            "cursor-grab active:cursor-grabbing select-none",
+            "shrink-0 cursor-grab active:cursor-grabbing select-none",
             // Pull the indicator row out of the sheet's own padding so it
             // sits flush against the top edge, matching the snap-mode layout.
             padding && "-mx-6 -mt-6"
@@ -1183,6 +1333,12 @@ interface SwipeToCloseSideDrawerProps
   side: "left" | "right"
   className?: string
   glassOverlay?: boolean
+  /** #158: overlay 要素への追加 className（escape hatch）。 */
+  overlayClassName?: string
+  /** #158: グローバル open-sheet スタックでの深度（0=最初に開いたシート）。 */
+  stackLevel?: number
+  /** #158: このシートの content z-index（自動算出 or zIndex prop で上書き済みの値）。 */
+  contentZIndex?: number
   container?: HTMLElement | null
   padding?: boolean
   description?: React.ReactNode
@@ -1197,6 +1353,9 @@ function SwipeToCloseSideDrawer({
   side,
   className,
   glassOverlay,
+  overlayClassName,
+  stackLevel,
+  contentZIndex,
   container,
   padding = true,
   description,
@@ -1384,7 +1543,7 @@ function SwipeToCloseSideDrawer({
 
   return (
     <SheetPortal container={container}>
-      <SheetOverlay glass={glassOverlay} />
+      <SheetOverlay glass={glassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
         ref={attachTouchListeners}
         data-slot="sheet-content"
@@ -1405,6 +1564,7 @@ function SwipeToCloseSideDrawer({
             ? "none"
             : "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
           willChange: "transform",
+          zIndex: contentZIndex,
         }}
         {...props}
         onPointerDown={onPointerDown}
@@ -1441,6 +1601,12 @@ interface SnapBottomSheetContentProps
   snapCtx: SheetSnapContextValue
   className?: string
   glassOverlay?: boolean
+  /** #158: overlay 要素への追加 className（escape hatch）。 */
+  overlayClassName?: string
+  /** #158: グローバル open-sheet スタックでの深度（0=最初に開いたシート）。 */
+  stackLevel?: number
+  /** #158: このシートの content z-index（自動算出 or zIndex prop で上書き済みの値）。 */
+  contentZIndex?: number
   container?: HTMLElement | null
   description?: React.ReactNode
   autoFocus?: LayerAutoFocusTarget
@@ -1454,6 +1620,9 @@ function SnapBottomSheetContent({
   snapCtx,
   className,
   glassOverlay,
+  overlayClassName,
+  stackLevel,
+  contentZIndex,
   container,
   description,
   autoFocus,
@@ -1609,7 +1778,12 @@ function SnapBottomSheetContent({
   return (
     <SheetPortal container={container}>
       {overlay && (
-        <SheetOverlay glass={glassOverlay} opacity={overlayOpacity} />
+        <SheetOverlay
+          glass={glassOverlay}
+          opacity={overlayOpacity}
+          className={overlayClassName}
+          stackLevel={stackLevel}
+        />
       )}
       <DialogPrimitive.Content
         ref={sheetRef}
@@ -1634,6 +1808,7 @@ function SnapBottomSheetContent({
             : "transform 320ms cubic-bezier(0.32, 0.72, 0, 1)",
           willChange: "transform",
           touchAction: "none",
+          zIndex: contentZIndex,
         }}
         {...props}
         aria-describedby={ariaDescribedBy}
@@ -1732,5 +1907,6 @@ export {
   decideSwipeDismiss,
   projectCloseAxisDelta,
   closeAxisTranslate,
+  useSheetStackLevel,
 }
 export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset }

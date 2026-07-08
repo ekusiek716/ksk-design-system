@@ -432,3 +432,79 @@ export const BottomSheetPushUp: Story = {
     )
   },
 }
+
+// ─── Nested sheets (#158) ──────────────────────────────────────────────────────
+//
+// 多段 Sheet: 下のシート（全画面 bottom）の上に、確認用の 2 枚目シートを開く。
+// 修正前は overlay z-40 / content z-50 が両インスタンス共通固定だったため、
+// 2 枚目の overlay が 1 枚目の全画面 content（同じ z-50）に覆われ暗転しなかった。
+// 現在はグローバルスタックの深度に応じて z が繰り上がる
+// （1 枚目: overlay 40 / content 50、2 枚目: overlay 60 / content 70）ため、
+// 2 枚目の overlay が 1 枚目の content の上に正しく重なって暗転する。
+export const NestedSheets: Story = {
+  name: "BottomSheet — nested (#158)",
+  parameters: { layout: "fullscreen" },
+  render: () => {
+    const [outerOpen, setOuterOpen] = React.useState(false)
+    const [innerOpen, setInnerOpen] = React.useState(false)
+    return (
+      <div className="w-full min-h-screen flex flex-col items-center justify-center gap-3 bg-[var(--Surface-Secondary)] p-8">
+        <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] text-center max-w-sm">
+          1 枚目（全画面）を開いてから「確認シートを開く」を押すと 2 枚目が重なる。
+          2 枚目の背後（1 枚目の内容）が正しく暗転していれば OK。
+        </p>
+        <Button onClick={() => setOuterOpen(true)}>1 枚目のシートを開く</Button>
+        <Sheet open={outerOpen} onOpenChange={setOuterOpen}>
+          <SheetContent side="bottom" className="h-[90dvh]">
+            <SheetHeader className="mb-4">
+              <SheetTitle>1 枚目（全画面）</SheetTitle>
+              <SheetDescription>
+                ここから 2 枚目の確認シートを開ける。2 枚目が開いている間、この内容がうっすら暗転して見えるはず。
+              </SheetDescription>
+            </SheetHeader>
+            <Button onClick={() => setInnerOpen(true)} className="mb-4">
+              確認シートを開く
+            </Button>
+            <div className="flex flex-col gap-3">
+              {Array.from({ length: 15 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4 typo-body-md text-[var(--Text-High-Emphasis)]"
+                >
+                  1 枚目の行 {i + 1}
+                </div>
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
+        {/*
+          2 枚目は 1 枚目の <SheetContent> の子として開くトリガーだが、
+          Portal 先は共に document.body なので DOM 上は兄弟。
+          グローバルスタック（Context ではない）で深度を判定する理由の実例。
+        */}
+        <Sheet open={innerOpen} onOpenChange={setInnerOpen}>
+          <SheetContent
+            side="bottom"
+            swipeToClose
+            className="pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+          >
+            <SheetHeader className="mb-4">
+              <SheetTitle>確認</SheetTitle>
+              <SheetDescription>
+                この確認シートの overlay が 1 枚目のシート全体を正しく覆って暗転していることを確認する。
+              </SheetDescription>
+            </SheetHeader>
+            <SheetFooter>
+              <SheetClose asChild>
+                <Button variant="secondary" className="w-full">キャンセル</Button>
+              </SheetClose>
+              <Button className="w-full" onClick={() => setInnerOpen(false)}>
+                確定
+              </Button>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      </div>
+    )
+  },
+}

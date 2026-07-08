@@ -11,7 +11,10 @@ export interface TextareaProps extends Omit<TextInputProps, "style" | "multiline
   minHeight?: number
 }
 
-export function Textarea({ invalid, disabled, minHeight = 96, ...rest }: TextareaProps) {
+export const Textarea = React.forwardRef<TextInput, TextareaProps>(function Textarea(
+  { invalid, disabled, minHeight = 96, ...rest },
+  ref,
+) {
   const { theme, scales } = useTheme()
   const [focused, setFocused] = useState(false)
 
@@ -23,6 +26,7 @@ export function Textarea({ invalid, disabled, minHeight = 96, ...rest }: Textare
 
   return (
     <TextInput
+      ref={ref}
       editable={!disabled}
       multiline
       textAlignVertical="top"
@@ -52,4 +56,4 @@ export function Textarea({ invalid, disabled, minHeight = 96, ...rest }: Textare
       {...rest}
     />
   )
-}
+})

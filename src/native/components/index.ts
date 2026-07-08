@@ -58,6 +58,9 @@ export { Label, type LabelProps } from "./Label"
 export { Input, type InputProps } from "./Input"
 export { Textarea, type TextareaProps } from "./Textarea"
 export { AutoGrowTextarea, type AutoGrowTextareaDensity, type AutoGrowTextareaProps } from "./AutoGrowTextarea"
+export { CommitInput, type CommitInputProps } from "./CommitInput"
+export { CommitTextarea, type CommitTextareaProps } from "./CommitTextarea"
+export { CommitAutoGrowTextarea, type CommitAutoGrowTextareaProps } from "./CommitAutoGrowTextarea"
 export { Switch, type SwitchProps } from "./Switch"
 export { Checkbox, type CheckboxProps } from "./Checkbox"
 export { CheckboxField, type CheckboxFieldProps } from "./CheckboxField"
@@ -67,6 +70,14 @@ export { RadioGroup, type RadioGroupProps, type RadioOption } from "./RadioGroup
 export { Slider, type SliderProps } from "./Slider"
 export { NumberInput, type NumberInputProps } from "./NumberInput"
 export { FormField, type FormFieldProps } from "./FormField"
+export {
+  FormRoot,
+  FormSection,
+  FormActions,
+  type FormRootProps,
+  type FormSectionProps,
+  type FormActionsProps,
+} from "./Form"
 
 // Phase 3: Overlay
 export { Alert, type AlertProps, type AlertTone } from "./Alert"
@@ -89,7 +100,17 @@ export {
 export { ResponsiveDialog, type ResponsiveDialogProps } from "./ResponsiveDialog"
 export { Popover, type PopoverProps } from "./Popover"
 export { DropdownMenu, type DropdownMenuProps, type DropdownMenuItem } from "./DropdownMenu"
-export { ToastProvider, useToast, type ToastItem, type ToastTone } from "./Toast"
+export {
+  ToastProvider,
+  useToast,
+  toast,
+  type ToastItem,
+  type ToastTone,
+  type ToastAction,
+  type ToastOptions,
+  type ToastFn,
+} from "./Toast"
+export { ErrorBoundary, type ErrorBoundaryProps } from "./ErrorBoundary"
 export { MenuDrawer, type MenuDrawerProps, type MenuDrawerItem, type MenuDrawerSection } from "./MenuDrawer"
 export { ConfirmDialog, type ConfirmDialogProps } from "./ConfirmDialog"
 export { BottomSheetForm, type BottomSheetFormProps } from "./BottomSheetForm"

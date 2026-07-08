@@ -3,7 +3,7 @@
  * @description ローディングスケルトンコンポーネント。カードスケルトン、テキストスケルトンを網羅
  */
 import type { Meta, StoryObj } from "@storybook/react"
-import { Skeleton } from "./skeleton"
+import { Skeleton, SkeletonText } from "./skeleton"
 
 const meta: Meta<typeof Skeleton> = {
   title: "Components/Skeleton",
@@ -53,4 +53,18 @@ export const AvatarWithText: Story = {
       </div>
     </div>
   ),
+}
+
+export const SkeletonTextDefault: StoryObj<typeof SkeletonText> = {
+  render: () => <SkeletonText />,
+}
+
+export const SkeletonTextLines: StoryObj<typeof SkeletonText> = {
+  name: "SkeletonText (5 lines)",
+  render: () => <SkeletonText lines={5} />,
+}
+
+export const SkeletonTextNoShrink: StoryObj<typeof SkeletonText> = {
+  name: "SkeletonText (uniform width)",
+  render: () => <SkeletonText lines={3} lastLineWidth={false} />,
 }
