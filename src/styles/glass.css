@@ -272,6 +272,17 @@
  *   ::after  — エッジの屈折リム（--glass-rim の conic リング、太さ
  *              --glass-rim-width）。光はガラス表面で反射するため
  *              コンテンツより上に重ねる（1px なので操作は阻害しない）。
+ *
+ * ── lensing（エッジ屈折）との関係（issue #168）──
+ * .glass-specular は ::before / ::after だけの装飾レイヤーで backdrop-filter を
+ * 一切設定しない。よってエッジ屈折（lensing, #163）は併用した素材クラス
+ * （.glass / .glass-medium / .glass-strong / .glass-clear / .glass-accent）側の
+ * @supports ルールから供給され、.glass.glass-specular でも lensing は保持される
+ * （specular と lensing の併用が正しい意図。両者は補完関係）。
+ *
+ * ⚠️ consumer 注意: 素材クラスの backdrop-filter を上書きして blur 量等を変える場合、
+ * CSS の backdrop-filter は合成されず全置換されるため、var(--glass-refract)
+ * （dark は var(--glass-refract-dark)）を明示的に再合成しないと lensing が消える。
  */
 .glass-specular {
   /*
