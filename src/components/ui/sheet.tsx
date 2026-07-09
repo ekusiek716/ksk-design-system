@@ -35,17 +35,6 @@ function focusLayerTarget(container: HTMLElement | null, target: LayerAutoFocusT
   el.focus()
 }
 
-function useBodyScrollLock(enabled: boolean) {
-  React.useEffect(() => {
-    if (!enabled || typeof document === "undefined") return
-    const previous = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.body.style.overflow = previous
-    }
-  }, [enabled])
-}
-
 function captureRestoreFocus(ref: React.RefObject<HTMLElement | null> | undefined) {
   if (!ref || ref.current != null || typeof document === "undefined") return
   ref.current = document.activeElement as HTMLElement | null
@@ -772,7 +761,12 @@ interface SheetContentProps
   restoreFocusOnClose?: boolean
   /** Esc キーで閉じる。既定 true。 */
   closeOnEsc?: boolean
-  /** Sheet 表示中に body scroll を抑止する。既定 true。 */
+  /**
+   * Sheet 表示中に body scroll を抑止する。既定 true。
+   * 実際の抑止は modal Sheet（Radix Dialog）標準の scroll lock が「開いている間
+   * だけ」行うため、この prop は後方互換のために受けるのみ（DOM へは流さない）。
+   * 背景スクロールを許可したい場合は非 modal な Sheet を使う。
+   */
   bodyScrollLock?: boolean
   /**
    * #158: 多段 Sheet の z-index escape hatch。
@@ -809,7 +803,13 @@ function SheetContent({
   const autoDescId = React.useId()
   const contentRef = React.useRef<HTMLDivElement>(null)
   const restoreFocusRef = React.useRef<HTMLElement | null>(null)
-  useBodyScrollLock(bodyScrollLock)
+  // body scroll lock は Radix (modal Dialog) の react-remove-scroll が
+  // 「開いている間だけ」担うため、ここでは何もしない。bodyScrollLock prop は
+  // API 互換のため残し、DOM へ流さないよう分割代入で受けるだけにしている。
+  // 以前ここにあった手動ロックは、直後のコメントにある通り SheetContent が
+  // 開閉に関係なく毎回レンダリングされる（=フックが常時走る）ため、Sheet が
+  // 閉じていても body に overflow:hidden を出しっぱなしにし、その Sheet を含む
+  // ページ／Storybook 全体のスクロールを殺していた。
   // #158/#166: claim this sheet's depth in the global open-sheet stack so
   // nested sheets escalate z-index instead of colliding at the fixed 40/50
   // pair. Unlike the pre-#166 version, `SheetContent` itself does NOT call
