@@ -34,17 +34,6 @@ function focusLayerTarget(container: HTMLElement | null, target: LayerAutoFocusT
   el.focus()
 }
 
-function useBodyScrollLock(enabled: boolean) {
-  React.useEffect(() => {
-    if (!enabled || typeof document === "undefined") return
-    const previous = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    return () => {
-      document.body.style.overflow = previous
-    }
-  }, [enabled])
-}
-
 function captureRestoreFocus(ref: React.RefObject<HTMLElement | null>) {
   if (ref.current != null || typeof document === "undefined") return
   ref.current = document.activeElement as HTMLElement | null
@@ -124,7 +113,12 @@ interface DialogContentProps
   restoreFocusOnClose?: boolean
   /** Esc キーで閉じる。既定 true。 */
   closeOnEsc?: boolean
-  /** Dialog 表示中に body scroll を抑止する。既定 true。 */
+  /**
+   * Dialog 表示中に body scroll を抑止する。既定 true。
+   * 実際の抑止は modal Dialog（Radix）標準の scroll lock が「開いている間だけ」
+   * 行うため、この prop は後方互換のために受けるのみ（DOM へは流さない）。
+   * 背景スクロールを許可したい場合は非 modal な Dialog を使う。
+   */
   bodyScrollLock?: boolean
 }
 
@@ -143,7 +137,12 @@ function DialogContent({
   const autoDescId = React.useId()
   const contentRef = React.useRef<HTMLDivElement>(null)
   const restoreFocusRef = React.useRef<HTMLElement | null>(null)
-  useBodyScrollLock(bodyScrollLock)
+  // body scroll lock は Radix (modal Dialog) の react-remove-scroll が
+  // 「開いている間だけ」担うため、ここでは何もしない。bodyScrollLock prop は
+  // API 互換のため残し、DOM へ流さないよう分割代入で受けるだけにしている。
+  // （以前ここにあった手動ロックは DialogContent が閉じていても実行され、
+  //   body の overflow:hidden を出しっぱなしにしてページ全体のスクロールを
+  //   殺していた。#storybook でコンテンツがスクロールできない原因。）
   const hasInternalDesc = description != null && description !== false
   // - description 渡しあり → 生成した sr-only Description の id
   // - description なし → 呼び出し側の aria-describedby（無ければ undefined を明示）
