@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect } from "storybook/test"
 
 const meta: Meta = {
   title: "Foundation/Colors",
@@ -165,4 +166,46 @@ export const GlassTokens: Story = {
       </div>
     </div>
   ),
+}
+
+export const GlassLensingWithSpecular: Story = {
+  name: "Lensing × Specular 併用（回帰ガード）",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div
+      className="min-h-screen p-8"
+      style={{ background: "linear-gradient(160deg, #a8c8f8 0%, #3b82f6 60%, #1e40af 100%)" }}
+    >
+      <h2 className="typo-heading-lg text-white mb-2">Lensing × Specular</h2>
+      <p className="typo-body-sm text-white/70 mb-8">
+        .glass 単体と .glass.glass-specular 併用でエッジ屈折（lensing, #163）が両方効くことを検証（issue #168 回帰ガード）。
+      </p>
+      <div className="grid grid-cols-2 gap-4 max-w-lg">
+        <div data-testid="glass-plain" className="glass rounded-2xl p-4">
+          <p className="typo-label-sm text-white font-mono">.glass</p>
+          <p className="typo-body-xs text-white/70 mt-0.5">素材のみ（lensing あり）</p>
+        </div>
+        <div data-testid="glass-specular" className="glass glass-specular rounded-2xl p-4">
+          <p className="typo-label-sm text-white font-mono">.glass.glass-specular</p>
+          <p className="typo-body-xs text-white/70 mt-0.5">specular 併用（lensing 保持）</p>
+        </div>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    // lensing は @supports (-webkit-app-region: none) ゲート（Chromium のみ true）
+    // 内でのみ適用される。非対応環境では assert をスキップして落とさない。
+    if (!CSS.supports("-webkit-app-region", "none")) return
+
+    const plain = canvasElement.querySelector('[data-testid="glass-plain"]')!
+    const specular = canvasElement.querySelector('[data-testid="glass-specular"]')!
+
+    const plainFilter = getComputedStyle(plain).backdropFilter
+    const specularFilter = getComputedStyle(specular).backdropFilter
+
+    // .glass 単体で lensing（url(#glass-refract) 合成）が効いていること
+    expect(plainFilter).toContain("url(")
+    // .glass.glass-specular 併用でも lensing が保持されること（issue #168 の意図）
+    expect(specularFilter).toContain("url(")
+  },
 }
