@@ -23,13 +23,19 @@
   --glass-blur-sm:  blur(14px) saturate(1.7) brightness(1.05);
   --glass-blur:     blur(28px) saturate(1.9) brightness(1.06);
   --glass-blur-lg:  blur(56px) saturate(2.0) brightness(1.05);
+  /* 暗いメディア上の .glass-dark 専用。ライト用 --glass-blur の brightness(1.06)
+     は暗い背景を持ち上げて素材が白ずむため、macOS 26 コントロールセンターの
+     「背景をわずかに沈めた濃いフロスト」に合わせて brightness を 1 未満に倒す */
+  --glass-blur-media-dark: blur(32px) saturate(1.8) brightness(0.95);
 
   /* Background */
   --glass-bg:         rgba(255, 255, 255, 0.18);
   --glass-bg-subtle:  rgba(255, 255, 255, 0.10);
   --glass-bg-medium:  rgba(255, 255, 255, 0.28);
   --glass-bg-strong:  rgba(255, 255, 255, 0.55);
-  --glass-bg-dark:    rgba(10, 10, 20, 0.25);
+  /* macOS 26 コントロールセンター実機の濃度に合わせて 0.25 → 0.32
+     （0.25 は暗い写真上で薄く、白文字のコントラスト確保を blur 頼みにしていた） */
+  --glass-bg-dark:    rgba(10, 10, 20, 0.32);
 
   /* Border — 上端の光の屈折を模した細い輪郭 */
   --glass-border:      rgba(255, 255, 255, 0.42);
@@ -189,11 +195,14 @@
 /**
  * .glass-dark
  * ダークコンテンツ上用ガラス（グラデーション・写真上に重ねる）。
+ * iOS/macOS 26 の「暗いメディア上ではガラス自体が暗くなる」適応挙動を
+ * 手動で選ぶための素材。tone="inverse" 系の面（BottomTabBar pill 等）は
+ * 白ベースの .glass ではなくこちらを使う（白ガラスだと milky に浮く）。
  */
 .glass-dark {
   background: var(--glass-bg-dark);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur-media-dark);
+  backdrop-filter: var(--glass-blur-media-dark);
   border: 0.5px solid var(--glass-border-dark);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12),
               0 8px 32px rgba(0, 0, 0, 0.28);
@@ -419,6 +428,12 @@
   .glass-accent {
     -webkit-backdrop-filter: var(--glass-blur) var(--glass-refract);
     backdrop-filter: var(--glass-blur) var(--glass-refract);
+  }
+  /* 暗いメディア上素材。屈折 scale はダークテーマ同様、コントラストの低い
+     背景で歪みが暴れないよう控えめな --glass-refract-dark を使う */
+  .glass-dark {
+    -webkit-backdrop-filter: var(--glass-blur-media-dark) var(--glass-refract-dark);
+    backdrop-filter: var(--glass-blur-media-dark) var(--glass-refract-dark);
   }
 
   /* ダークモードは背景コントラストが低く歪みが目立ちやすいため、

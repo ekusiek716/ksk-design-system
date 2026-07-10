@@ -217,8 +217,12 @@ function BottomTabBarPill({
         floatingPosition === "left" && "left-3 right-20",
         floatingPosition === "right" && "right-3 left-20",
         floatingPosition === "center" && "left-1/2 -translate-x-1/2",
-        // ピル形状 + Liquid Glass
-        "flex items-center rounded-full glass glass-specular",
+        // ピル形状 + Liquid Glass。iOS 26 の適応挙動に合わせ、暗いメディア上
+        //（tone="inverse"）では白ベースの .glass ではなく暗い素材 .glass-dark を
+        // 使う（白ガラスは暗い写真上で milky に浮き、白ラベルのコントラストも
+        // 素材頼みになる）。
+        "flex items-center rounded-full glass-specular",
+        tone === "inverse" ? "glass-dark" : "glass",
         hasProminentLayout ? "min-h-[66px] gap-1 px-2 py-2" : "h-[58px] gap-0 px-3",
         keyboardState.shouldHide && "translate-y-2 opacity-0 pointer-events-none invisible",
         className
@@ -261,14 +265,35 @@ function NavItem({
     ? { href: item.href }
     : { type: "button" as const, onClick: item.onClick }
   const isLabelVisible = showLabel ?? !compact
+  // iOS 26 のタブ選択プラッターは「アイコン+ラベルを 1 カプセルで包む」。
+  // pill（compact）でラベル表示時は Tag 自体にプラッターを敷き、
+  // アイコンのみ（ラベル非表示）時は従来どおりアイコン周りに敷く。
+  // default variant（非 compact・M3 スタイル）は従来のアイコンピルを維持。
+  const platterOnTag = compact && isLabelVisible && item.isActive
+  const platterOnIcon = item.isActive && (!compact || !isLabelVisible)
+  // プラッター色は「背後のメディア」に相対（テーマ非依存のガラス素材）なので、
+  // .glass 系素材と同じく白リテラルを使う（このファイル既存の
+  // color-mix / inset ハイライトと同じ扱い。Brand テーマ切替の対象外）
+  // ライトはガラス面自体が白いためプラッターが沈みやすい。白 70% + ごく浅い
+  // 外影 1 枚で「持ち上がった水滴」の輪郭を出す（強い外影はピル本体の影と
+  // 二重になるため 3px/8% に留める）
+  const platterSurface =
+    tone === "inverse"
+      ? "bg-[rgba(255,255,255,0.20)] shadow-[inset_0_1px_0_rgba(255,255,255,0.30)]"
+      : "[background:color-mix(in_srgb,var(--Surface-Primary)_70%,transparent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.60),0_1px_3px_rgba(0,0,0,0.08)]"
 
   return (
     <Tag
       data-tab-key={item.tabKey}
       className={cn(
-        "relative flex min-h-11 flex-col items-center justify-center gap-0.5 transition-opacity active:opacity-60",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] rounded-full",
-        compact ? (isLabelVisible ? "h-full min-w-0 flex-1 px-1" : "h-full w-14") : "min-w-0 flex-1 pb-1 pt-1",
+        "relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-full",
+        // iOS 26 のガラスは押下で沈む（ゲル感）。opacity だけでなく scale も入れる
+        "transition-[transform,opacity] duration-150 active:scale-95 active:opacity-80",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
+        compact ? (isLabelVisible ? "h-full min-w-0 flex-1 px-2 py-1" : "h-full w-14") : "min-w-0 flex-1 pb-1 pt-1",
+        // 影は上端のインセットハイライト 1 枚のみ。外側ドロップシャドウを足すと
+        // ピル本体（.glass）の影と二重になり煩く見える
+        platterOnTag && platterSurface,
         item.isActive
           ? tone === "inverse"
             ? "text-[var(--Text-on-Inverse)]"
@@ -281,16 +306,14 @@ function NavItem({
       aria-current={item.isActive ? "page" : undefined}
       {...tagProps}
     >
-      {/* アクティブ状態のピル背景 */}
+      {/* アイコン領域（アイコンのみ表示時・default variant ではプラッターを兼ねる） */}
       <span
         className={cn(
           "relative flex items-center justify-center rounded-full transition-colors",
-          compact ? (isLabelVisible ? "h-8 w-11" : "h-8 w-12") : "h-7 w-14",
-          item.isActive && (
+          compact ? (isLabelVisible ? "h-7 min-w-7" : "h-8 w-12") : "h-7 w-14",
+          platterOnIcon && (
             compact
-              // 影は上端のインセットハイライト 1 枚のみ。外側ドロップシャドウを足すと
-              // ピル本体（.glass）の影と二重になり煩く見える
-              ? "[background:color-mix(in_srgb,var(--Surface-Primary)_42%,transparent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]"
+              ? platterSurface
               : "bg-[var(--Surface-Accent-Primary-Light)]"
           )
         )}
@@ -304,7 +327,9 @@ function NavItem({
         )}
       </span>
       {isLabelVisible && (
-        <span className={cn("max-w-full truncate px-0.5 text-center", item.isActive ? "typo-label-xs" : "typo-body-xs")}>
+        // typo クラスはアクティブ状態で変えない（weight ジャンプでラベルが揺れる）。
+        // 状態差は色・opacity のみで表現する（iOS 26 と同じ）
+        <span className="max-w-full truncate px-0.5 text-center typo-label-xs">
           {item.label}
         </span>
       )}
@@ -325,9 +350,13 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
     <Tag
       className={cn(
         "relative flex shrink-0 items-center justify-center rounded-full",
-        hasLabel ? "h-12 min-w-[78px] gap-1.5 px-3" : "size-12",
-        "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] shadow-[0_8px_24px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.28)]",
-        "typo-label-sm transition-transform active:scale-[0.96]",
+        hasLabel ? "h-12 min-w-[78px] gap-1 px-3" : "size-12",
+        // iOS 26 の主要アクションはフラット塗りではなく brand ティントの
+        // Liquid Glass（.glass-accent = lensing + 3層 inset の質感、
+        // .glass-specular = エッジの屈折リム）。テーマ・reduced-transparency
+        // フォールバックは glass.css 側で面倒を見る
+        "glass-accent glass-specular text-[var(--Text-on-Inverse)]",
+        "typo-label-sm transition-transform duration-150 active:scale-[0.96]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
       )}
       aria-label={item.ariaLabel ?? item.label}
