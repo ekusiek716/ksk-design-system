@@ -75,7 +75,32 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
    * - "lift" : keyboard inset 分だけ上へ逃がす
    */
   keyboardBehavior?: BottomTabBarKeyboardBehavior
+  /**
+   * iOS 26 の scroll edge effect（variant="pill" 時のみ有効）。
+   * バーの背後をコンテンツがスクロールする帯に progressive blur を敷き、
+   * バー付近でコンテンツが徐々にぼけて溶けるようにする。
+   * コンテンツがバーの下を通過するレイアウト（全画面リスト等）で指定する。
+   */
+  scrollEdge?: boolean
 }
+
+// 選択プラッター（水滴カプセル）の面。色は「背後のメディア」に相対する
+// テーマ非依存のガラス素材なので、.glass 系素材と同じく白リテラルを使う
+// （このファイル既存の color-mix / inset ハイライトと同じ扱い。
+//   Brand テーマ切替の対象外）。
+// ライトはガラス面自体が白いためプラッターが沈みやすい。白 70% + ごく浅い
+// 外影 1 枚で「持ち上がった水滴」の輪郭を出す（強い外影はピル本体の影と
+// 二重になるため 3px/8% に留める）
+function platterSurfaceClass(tone: BottomTabBarTone) {
+  return tone === "inverse"
+    ? "bg-[rgba(255,255,255,0.20)] shadow-[inset_0_1px_0_rgba(255,255,255,0.30)]"
+    : "[background:color-mix(in_srgb,var(--Surface-Primary)_70%,transparent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.60),0_1px_3px_rgba(0,0,0,0.08)]"
+}
+
+// SSR（react-dom/server）では useLayoutEffect が警告を出すため、
+// サーバでは useEffect に落とす定番パターン（どちらもサーバでは走らない）
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
 
 interface BottomTabBarKeyboardState {
   keyboardBehavior: BottomTabBarKeyboardBehavior
@@ -108,6 +133,7 @@ function BottomTabBar({
   pillPosition = "fixed",
   floatingPosition = "center",
   keyboardBehavior = "stay",
+  scrollEdge = false,
   ...props
 }: BottomTabBarProps) {
   const keyboardState = useBottomTabBarKeyboardState(keyboardBehavior)
@@ -123,6 +149,7 @@ function BottomTabBar({
         maxWidth={maxWidth}
         pillPosition={pillPosition}
         floatingPosition={floatingPosition}
+        scrollEdge={scrollEdge}
         keyboardState={keyboardState}
         {...props}
       />
@@ -171,6 +198,13 @@ function BottomTabBarDefault({
 
 // ─── Pill variant (iOS 26 Liquid Glass) ──────────────────────────────────────
 
+interface PlatterRect {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
 function BottomTabBarPill({
   className,
   items,
@@ -180,6 +214,7 @@ function BottomTabBarPill({
   maxWidth = 430,
   pillPosition = "fixed",
   floatingPosition = "center",
+  scrollEdge = false,
   keyboardState,
   style,
   ...props
@@ -189,6 +224,64 @@ function BottomTabBarPill({
   const splitIndex = centerAction ? Math.ceil(items.length / 2) : items.length
   const leadingItems = items.slice(0, splitIndex)
   const trailingItems = items.slice(splitIndex)
+
+  // ── Sliding selection platter（iOS 26 の droplet morph）──
+  // アクティブタブの選択カプセルを per-item の静的背景ではなく、nav 内に
+  // 1 枚だけ置いた overlay とし、アクティブ位置へ transform/width で滑らせる。
+  // 計測は NavItem 側が付ける [data-platter-anchor]（ラベル表示時は Tag、
+  // アイコンのみ時はアイコン領域）を getBoundingClientRect で拾う。
+  // SSR / 計測前は overlay を出さず NavItem の静的プラッターで描画する
+  // （hydration 後に同位置の overlay へ引き継ぐため見た目は変わらない）。
+  const navRef = React.useRef<HTMLElement>(null)
+  const [platterRect, setPlatterRect] = React.useState<PlatterRect | null>(null)
+  // 初回配置はアニメーションさせない（原点から飛んでくるちらつき防止）。
+  // 最初の rect 確定の次フレームで transition を有効化する
+  const [platterAnimated, setPlatterAnimated] = React.useState(false)
+  const measurePlatter = React.useCallback(() => {
+    const nav = navRef.current
+    if (!nav) return
+    const anchor = nav.querySelector<HTMLElement>("[data-platter-anchor]")
+    if (!anchor) {
+      setPlatterRect(null)
+      return
+    }
+    const navBox = nav.getBoundingClientRect()
+    const box = anchor.getBoundingClientRect()
+    setPlatterRect((prev) => {
+      const next = {
+        x: box.left - navBox.left,
+        y: box.top - navBox.top,
+        w: box.width,
+        h: box.height,
+      }
+      // サブピクセル差の再セットで無限再レンダーしないようガード
+      if (
+        prev &&
+        Math.abs(prev.x - next.x) < 0.5 &&
+        Math.abs(prev.y - next.y) < 0.5 &&
+        Math.abs(prev.w - next.w) < 0.5 &&
+        Math.abs(prev.h - next.h) < 0.5
+      ) {
+        return prev
+      }
+      return next
+    })
+  }, [])
+  // items（isActive 含む）が変わるたびに描画前へ再計測。ガード付きなのでループしない
+  useIsomorphicLayoutEffect(measurePlatter)
+  React.useEffect(() => {
+    if (platterRect && !platterAnimated) {
+      const raf = requestAnimationFrame(() => setPlatterAnimated(true))
+      return () => cancelAnimationFrame(raf)
+    }
+  }, [platterRect, platterAnimated])
+  React.useEffect(() => {
+    const nav = navRef.current
+    if (!nav || typeof ResizeObserver === "undefined") return
+    const observer = new ResizeObserver(measurePlatter)
+    observer.observe(nav)
+    return () => observer.disconnect()
+  }, [measurePlatter])
   // left/right フロート時は反対側に併置される FAB のスペース（80px）を
   // safe-area 込みで確保する（belle-todo `.floating-bottom` を参考）。
   const isSideFloating = floatingPosition === "left" || floatingPosition === "right"
@@ -200,7 +293,23 @@ function BottomTabBarPill({
   } as React.CSSProperties
 
   return (
-    <nav
+    <>
+      {/* Scroll edge effect（iOS 26）: バー背後の帯に progressive blur を敷き、
+          下を通過するコンテンツがバー付近で徐々にぼけて溶けるようにする。
+          バー本体(z-50)の下・コンテンツの上に挟む装飾層 */}
+      {scrollEdge && (
+        <div
+          aria-hidden="true"
+          className={cn(
+            "inset-x-0 bottom-0 z-40 h-28 lg:hidden",
+            "glass-scroll-edge-bottom",
+            "transition-opacity duration-200",
+            pillPosition === "fixed" ? "fixed" : "absolute",
+            keyboardState.shouldHide && "opacity-0"
+          )}
+        />
+      )}
+      <nav
       data-slot="bottom-nav-pill"
       data-keyboard-behavior={keyboardState.keyboardBehavior}
       data-keyboard-open={keyboardState.isKeyboardOpen || undefined}
@@ -228,10 +337,37 @@ function BottomTabBarPill({
         className
       )}
       style={pillStyle}
+      ref={navRef}
       {...props}
     >
+      {/* Sliding selection platter（droplet）。DOM 先頭 = アイテムの背後。
+          Tailwind `absolute` を持つ子は .glass-specular の z-lift 対象外なので、
+          z-1 のアイテムより下・::before(z0) より上に自然に収まる */}
+      {platterRect && (
+        <span
+          aria-hidden="true"
+          className={cn(
+            "absolute left-0 top-0 rounded-full pointer-events-none",
+            platterAnimated &&
+              "transition-[transform,width,height] duration-200 ease-out motion-reduce:transition-none",
+            platterSurfaceClass(tone)
+          )}
+          style={{
+            width: platterRect.w,
+            height: platterRect.h,
+            transform: `translate3d(${platterRect.x}px, ${platterRect.y}px, 0)`,
+          }}
+        />
+      )}
       {leadingItems.map((item, index) => (
-        <NavItem key={`${item.href ?? item.label}-${index}`} item={item} compact showLabel={shouldShowLabels} tone={tone} />
+        <NavItem
+          key={`${item.href ?? item.label}-${index}`}
+          item={item}
+          compact
+          showLabel={shouldShowLabels}
+          tone={tone}
+          suppressPlatter={platterRect !== null}
+        />
       ))}
       {centerAction ? <CenterActionItem item={centerAction} /> : null}
       {trailingItems.map((item, index) => (
@@ -241,9 +377,11 @@ function BottomTabBarPill({
           compact
           showLabel={shouldShowLabels}
           tone={tone}
+          suppressPlatter={platterRect !== null}
         />
       ))}
-    </nav>
+      </nav>
+    </>
   )
 }
 
@@ -254,11 +392,17 @@ function NavItem({
   compact,
   showLabel,
   tone = "default",
+  suppressPlatter = false,
 }: {
   item: BottomTabBarItem
   compact: boolean
   showLabel?: boolean
   tone?: BottomTabBarTone
+  /**
+   * 親（pill）がスライド式プラッター overlay を描画中は true。
+   * 静的プラッターを二重に敷かないよう抑止する（計測アンカーは出し続ける）。
+   */
+  suppressPlatter?: boolean
 }) {
   const Tag = item.href ? "a" : "button"
   const tagProps = item.href
@@ -269,22 +413,19 @@ function NavItem({
   // pill（compact）でラベル表示時は Tag 自体にプラッターを敷き、
   // アイコンのみ（ラベル非表示）時は従来どおりアイコン周りに敷く。
   // default variant（非 compact・M3 スタイル）は従来のアイコンピルを維持。
-  const platterOnTag = compact && isLabelVisible && item.isActive
-  const platterOnIcon = item.isActive && (!compact || !isLabelVisible)
-  // プラッター色は「背後のメディア」に相対（テーマ非依存のガラス素材）なので、
-  // .glass 系素材と同じく白リテラルを使う（このファイル既存の
-  // color-mix / inset ハイライトと同じ扱い。Brand テーマ切替の対象外）
-  // ライトはガラス面自体が白いためプラッターが沈みやすい。白 70% + ごく浅い
-  // 外影 1 枚で「持ち上がった水滴」の輪郭を出す（強い外影はピル本体の影と
-  // 二重になるため 3px/8% に留める）
-  const platterSurface =
-    tone === "inverse"
-      ? "bg-[rgba(255,255,255,0.20)] shadow-[inset_0_1px_0_rgba(255,255,255,0.30)]"
-      : "[background:color-mix(in_srgb,var(--Surface-Primary)_70%,transparent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.60),0_1px_3px_rgba(0,0,0,0.08)]"
+  // SSR / 計測前の静的描画。hydration 後は親のスライド overlay に引き継ぐ
+  const platterOnTag = compact && isLabelVisible && item.isActive && !suppressPlatter
+  const platterOnIcon =
+    item.isActive && (!compact || (!isLabelVisible && !suppressPlatter))
+  // スライド overlay の計測アンカー（プラッターが包むべき矩形）
+  const isPlatterAnchorTag = compact && isLabelVisible && item.isActive
+  const isPlatterAnchorIcon = compact && !isLabelVisible && item.isActive
+  const platterSurface = platterSurfaceClass(tone)
 
   return (
     <Tag
       data-tab-key={item.tabKey}
+      data-platter-anchor={isPlatterAnchorTag || undefined}
       className={cn(
         "relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-full",
         // iOS 26 のガラスは押下で沈む（ゲル感）。opacity だけでなく scale も入れる
@@ -308,6 +449,7 @@ function NavItem({
     >
       {/* アイコン領域（アイコンのみ表示時・default variant ではプラッターを兼ねる） */}
       <span
+        data-platter-anchor={isPlatterAnchorIcon || undefined}
         className={cn(
           "relative flex items-center justify-center rounded-full transition-colors",
           compact ? (isLabelVisible ? "h-7 min-w-7" : "h-8 w-12") : "h-7 w-14",

@@ -1870,7 +1870,7 @@
     {
       "name": "BottomTabBar",
       "path": "src/components/patterns/commerce/bottom-tab-bar.tsx",
-      "description": "SP 下部固定タブナビゲーション。default と pill（iOS 26 Liquid Glass）バリアント。pill は centerAction・ラベル表示・inverse tone・mobile shell max-width・floatingPosition（left/center/right）に対応。",
+      "description": "SP 下部固定タブナビゲーション。default と pill（iOS 26 Liquid Glass）バリアント。pill は centerAction・ラベル表示・inverse tone・mobile shell max-width・floatingPosition（left/center/right）に対応。選択カプセルはアイコン+ラベルを包む水滴（droplet）で、タブ切替時にスライドして移動する。scrollEdge でバー背後に progressive blur（iOS 26 scroll edge effect）を敷ける。",
       "features": [
         "badge",
         "centerAction",
@@ -1881,6 +1881,8 @@
         "maxWidth",
         "inverse-tone",
         "floatingPosition",
+        "sliding-selection-platter",
+        "scrollEdge",
         "native Expo Router tabBar adapter",
         "native hidden routes"
       ],

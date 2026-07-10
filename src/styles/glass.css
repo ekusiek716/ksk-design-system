@@ -454,6 +454,34 @@
   }
 }
 
+/* ─── Scroll edge effect (iOS 26) ─── */
+/**
+ * .glass-scroll-edge-top / .glass-scroll-edge-bottom
+ * ガラスバーの背後をコンテンツがスクロールして通過する縁の領域に敷く
+ * progressive blur。iOS 26 の scroll edge effect（バー付近でコンテンツが
+ * 徐々にぼけて溶ける）を、グラデーションマスク付き backdrop-filter で擬似する。
+ *
+ * 使い方: バーとは別の「バーの背後に重なる帯」に付ける。
+ *   <div class="fixed inset-x-0 bottom-0 h-28 pointer-events-none glass-scroll-edge-bottom" />
+ * バー本体には付けない（バーは .glass 系素材が担う）。マスクにより
+ * blur の適用域がバー側の端ほど濃くなり、逆端でゼロに落ちる。
+ * 非対応環境ではマスクごと無視され、何も起きない（安全に劣化）。
+ */
+.glass-scroll-edge-top {
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-mask-image: linear-gradient(to top, transparent, rgba(0, 0, 0, 0.85) 55%, #000);
+  mask-image: linear-gradient(to top, transparent, rgba(0, 0, 0, 0.85) 55%, #000);
+}
+.glass-scroll-edge-bottom {
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.85) 55%, #000);
+  mask-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.85) 55%, #000);
+}
+
 /* ─── Reduced-transparency fallback ─── */
 /**
  * アクセシビリティ: ユーザーが「透明度を下げる」を有効にしている場合、
@@ -522,6 +550,13 @@
   /* スペキュラ・リムの装飾層も透明表現の一部なので無効化 */
   .glass-specular::before,
   .glass-specular::after {
+    display: none;
+  }
+
+  /* scroll edge の progressive blur も透明表現なので丸ごと消す
+     （バー本体は上記フォールバックで不透明になり可読性は保たれる） */
+  .glass-scroll-edge-top,
+  .glass-scroll-edge-bottom {
     display: none;
   }
 
