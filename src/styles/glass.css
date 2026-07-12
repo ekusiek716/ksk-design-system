@@ -367,6 +367,10 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
+  /* ::before と揃えて squircle 面でも縁の屈折リムが角の形に追従する。
+     inherit しないと ::after だけ円弧角のままになり、squircle 面
+     （.ksk-squircle + .glass-specular の Sheet 等）で縁リングが角でズレる */
+  corner-shape: inherit;
   padding: var(--glass-rim-width);
   background: var(--glass-rim);
   /* padding 部分だけ残すリング状マスク（gradient border の定石） */

@@ -337,8 +337,12 @@ function BottomTabBarPill({
         className
       )}
       style={pillStyle}
-      ref={navRef}
       {...props}
+      // ref は {...props} の後に置く。BottomTabBarProps は ComponentProps<"nav">
+      // を継承するため consumer が ref を渡し得るが、スライド platter の実測に
+      // 内部 navRef が必須。spread の後に置くことで内部 ref を常に優先する
+      // （consumer ref より platter の動作を優先）。
+      ref={navRef}
     >
       {/* Sliding selection platter（droplet）。DOM 先頭 = アイテムの背後。
           Tailwind `absolute` を持つ子は .glass-specular の z-lift 対象外なので、
