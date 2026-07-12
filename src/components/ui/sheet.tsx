@@ -633,7 +633,9 @@ function SheetDragIndicator() {
 }
 
 const sheetVariants = cva(
-  "fixed z-50 text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)] transition ease-in-out",
+  // ksk-squircle: 角丸のあるシート（bottom / float 等）の角を連続曲率にする。
+  // radius 0 の side（top / left / right の平辺）では no-op。
+  "fixed z-50 ksk-squircle text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)] transition ease-in-out",
   {
     variants: {
       side: {
