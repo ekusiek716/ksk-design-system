@@ -23,13 +23,19 @@
   --glass-blur-sm:  blur(14px) saturate(1.7) brightness(1.05);
   --glass-blur:     blur(28px) saturate(1.9) brightness(1.06);
   --glass-blur-lg:  blur(56px) saturate(2.0) brightness(1.05);
+  /* 暗いメディア上の .glass-dark 専用。ライト用 --glass-blur の brightness(1.06)
+     は暗い背景を持ち上げて素材が白ずむため、macOS 26 コントロールセンターの
+     「背景をわずかに沈めた濃いフロスト」に合わせて brightness を 1 未満に倒す */
+  --glass-blur-media-dark: blur(32px) saturate(1.8) brightness(0.95);
 
   /* Background */
   --glass-bg:         rgba(255, 255, 255, 0.18);
   --glass-bg-subtle:  rgba(255, 255, 255, 0.10);
   --glass-bg-medium:  rgba(255, 255, 255, 0.28);
   --glass-bg-strong:  rgba(255, 255, 255, 0.55);
-  --glass-bg-dark:    rgba(10, 10, 20, 0.25);
+  /* macOS 26 コントロールセンター実機の濃度に合わせて 0.25 → 0.32
+     （0.25 は暗い写真上で薄く、白文字のコントラスト確保を blur 頼みにしていた） */
+  --glass-bg-dark:    rgba(10, 10, 20, 0.32);
 
   /* Border — 上端の光の屈折を模した細い輪郭 */
   --glass-border:      rgba(255, 255, 255, 0.42);
@@ -61,13 +67,20 @@
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.60),
                      inset 0 -1px 0 rgba(255, 255, 255, 0.08);
 
-  /* Shadow — ガラスを浮かせる影 */
-  --glass-shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.08),
-                     0 1px 4px  rgba(0, 0, 0, 0.05);
-  --glass-shadow:    0 8px 32px  rgba(0, 0, 0, 0.12),
-                     0 2px 8px   rgba(0, 0, 0, 0.06);
-  --glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.16),
-                     0 4px 12px  rgba(0, 0, 0, 0.08);
+  /* Shadow — ガラスを浮かせる影。
+     Apple Liquid Glass は「広く淡い ambient（負スプレッドで内側に締めて
+     周囲へ滲みすぎない）＋ 近接の contact（設置感を出す薄く濃い1枚）」の
+     多層構成。3 枚目に極薄の contact ラインを足し、浮遊しつつ面に接地して
+     見えるバランスにする。 */
+  --glass-shadow-sm: 0 6px 20px -6px rgba(0, 0, 0, 0.12),
+                     0 2px 6px  -2px rgba(0, 0, 0, 0.08),
+                     0 0.5px 1px     rgba(0, 0, 0, 0.04);
+  --glass-shadow:    0 14px 40px -10px rgba(0, 0, 0, 0.16),
+                     0 4px 12px  -4px  rgba(0, 0, 0, 0.10),
+                     0 1px 2px          rgba(0, 0, 0, 0.05);
+  --glass-shadow-lg: 0 30px 70px -16px rgba(0, 0, 0, 0.22),
+                     0 10px 24px -10px rgba(0, 0, 0, 0.12),
+                     0 1px 3px           rgba(0, 0, 0, 0.06);
 
   /* Overlay blur — モーダル背景の軽いすりガラス */
   --glass-overlay-bg:   rgba(0, 0, 0, 0.15);
@@ -189,11 +202,14 @@
 /**
  * .glass-dark
  * ダークコンテンツ上用ガラス（グラデーション・写真上に重ねる）。
+ * iOS/macOS 26 の「暗いメディア上ではガラス自体が暗くなる」適応挙動を
+ * 手動で選ぶための素材。tone="inverse" 系の面（BottomTabBar pill 等）は
+ * 白ベースの .glass ではなくこちらを使う（白ガラスだと milky に浮く）。
  */
 .glass-dark {
   background: var(--glass-bg-dark);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur-media-dark);
+  backdrop-filter: var(--glass-blur-media-dark);
   border: 0.5px solid var(--glass-border-dark);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12),
               0 8px 32px rgba(0, 0, 0, 0.28);
@@ -309,9 +325,22 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
+  corner-shape: inherit;
   background:
+    /* 指向性シーン（#4）: 単一光源を左上に固定した斜めスィーン。radial の
+       スペキュラだけだと光源が曖昧になるため、左上→右下の linear を 1 枚
+       重ねて「上端左が最も明るい」Apple 的な方向性を明確にする */
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.05) 20%,
+      transparent 44%
+    ),
+    /* 上面スペキュラ（レンズ上部の楕円シーン）。中心は既定 25% / -20%。
+       --glass-hl-x / --glass-hl-y を JS で更新すると pointer に追従する（#3）。
+       未設定時はフォールバックで従来と同じ静的位置になり、inert に劣化する */
     radial-gradient(
-      140% 95% at 25% -20%,
+      140% 95% at var(--glass-hl-x, 25%) var(--glass-hl-y, -20%),
       rgba(255, 255, 255, 0.36) 0%,
       rgba(255, 255, 255, 0.07) 45%,
       transparent 70%
@@ -321,10 +350,12 @@
       rgba(255, 255, 255, 0.16) 0%,
       transparent 55%
     );
-  /* 縁の内側に光が拡散して溜まる表現（屈折の擬似） */
+  /* 縁の内側に光が拡散して溜まる表現（屈折の擬似）。3 枚目に右下の淡い
+     内影を足し、左上光源に対する影側（右下）を締めて立体の方向性を補強（#4） */
   box-shadow:
     inset 0 0 14px rgba(255, 255, 255, 0.09),
-    inset 0 -10px 22px -14px rgba(255, 255, 255, 0.45);
+    inset 0 -10px 22px -14px rgba(255, 255, 255, 0.45),
+    inset -8px -8px 20px -18px rgba(0, 0, 0, 0.18);
   pointer-events: none;
   z-index: 0;
 }
@@ -336,6 +367,10 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
+  /* ::before と揃えて squircle 面でも縁の屈折リムが角の形に追従する。
+     inherit しないと ::after だけ円弧角のままになり、squircle 面
+     （.ksk-squircle + .glass-specular の Sheet 等）で縁リングが角でズレる */
+  corner-shape: inherit;
   padding: var(--glass-rim-width);
   background: var(--glass-rim);
   /* padding 部分だけ残すリング状マスク（gradient border の定石） */
@@ -371,6 +406,53 @@
 .glass-specular > *:not(.absolute):not(.fixed):not(.sticky) {
   position: relative;
   z-index: 1;
+}
+
+/* ─── Interactive light response（#3: press gel + pointer 追従スペキュラ）─── */
+/**
+ * .glass-interactive
+ * 押下時に軽く縮む "ゲル" プレス応答を付与する。glass ボタン等の操作可能な
+ * ガラス要素に付ける（ナビバー等の非操作コンテナには付けない）。
+ *
+ * pointer 追従スペキュラは .glass-specular::before が読む --glass-hl-x /
+ * --glass-hl-y を JS 側で更新して実現する（CSS 変数の受け皿はこのクラス無しでも
+ * 機能するが、追従を使う要素にこのクラスを併記して意図を明示する）。
+ * 例:
+ *   onPointerMove={(e) => {
+ *     const r = e.currentTarget.getBoundingClientRect()
+ *     e.currentTarget.style.setProperty("--glass-hl-x", `${((e.clientX - r.left) / r.width) * 100}%`)
+ *     e.currentTarget.style.setProperty("--glass-hl-y", `${((e.clientY - r.top) / r.height) * 100}%`)
+ *   }}
+ */
+.glass-interactive {
+  transition: transform 150ms ease-out;
+}
+.glass-interactive:active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-interactive {
+    transition: none;
+  }
+  .glass-interactive:active {
+    transform: none;
+  }
+}
+
+/* ─── Squircle / concentric corner（#2: 連続曲率の角）─── */
+/**
+ * .ksk-squircle
+ * border-radius の角を Apple 的な連続曲率（superellipse=squircle）に置き換える。
+ * corner-shape は border-radius の「値」は変えず「角の形」だけを変えるため、
+ * 既存の rounded-* / --Radius-* トークンをそのまま使える。
+ * 非対応ブラウザでは通常の円弧角にフォールバック（progressive enhancement、
+ * lensing と同じ思想）。border-radius が 0 の要素では無効なので、面/シート/
+ * モーダル等の角丸矩形にのみ付ける（ピル= rounded-full には付けない）。
+ */
+@supports (corner-shape: squircle) {
+  .ksk-squircle {
+    corner-shape: squircle;
+  }
 }
 
 /* ─── Edge refraction (progressive enhancement) ───
@@ -420,6 +502,12 @@
     -webkit-backdrop-filter: var(--glass-blur) var(--glass-refract);
     backdrop-filter: var(--glass-blur) var(--glass-refract);
   }
+  /* 暗いメディア上素材。屈折 scale はダークテーマ同様、コントラストの低い
+     背景で歪みが暴れないよう控えめな --glass-refract-dark を使う */
+  .glass-dark {
+    -webkit-backdrop-filter: var(--glass-blur-media-dark) var(--glass-refract-dark);
+    backdrop-filter: var(--glass-blur-media-dark) var(--glass-refract-dark);
+  }
 
   /* ダークモードは背景コントラストが低く歪みが目立ちやすいため、
      scale を抑えた --glass-refract-dark に差し替える */
@@ -437,6 +525,34 @@
     -webkit-backdrop-filter: blur(6px) saturate(1.6) brightness(1.05) var(--glass-refract-dark);
     backdrop-filter: blur(6px) saturate(1.6) brightness(1.05) var(--glass-refract-dark);
   }
+}
+
+/* ─── Scroll edge effect (iOS 26) ─── */
+/**
+ * .glass-scroll-edge-top / .glass-scroll-edge-bottom
+ * ガラスバーの背後をコンテンツがスクロールして通過する縁の領域に敷く
+ * progressive blur。iOS 26 の scroll edge effect（バー付近でコンテンツが
+ * 徐々にぼけて溶ける）を、グラデーションマスク付き backdrop-filter で擬似する。
+ *
+ * 使い方: バーとは別の「バーの背後に重なる帯」に付ける。
+ *   <div class="fixed inset-x-0 bottom-0 h-28 pointer-events-none glass-scroll-edge-bottom" />
+ * バー本体には付けない（バーは .glass 系素材が担う）。マスクにより
+ * blur の適用域がバー側の端ほど濃くなり、逆端でゼロに落ちる。
+ * 非対応環境ではマスクごと無視され、何も起きない（安全に劣化）。
+ */
+.glass-scroll-edge-top {
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-mask-image: linear-gradient(to top, transparent, rgba(0, 0, 0, 0.85) 55%, #000);
+  mask-image: linear-gradient(to top, transparent, rgba(0, 0, 0, 0.85) 55%, #000);
+}
+.glass-scroll-edge-bottom {
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.85) 55%, #000);
+  mask-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.85) 55%, #000);
 }
 
 /* ─── Reduced-transparency fallback ─── */
@@ -507,6 +623,13 @@
   /* スペキュラ・リムの装飾層も透明表現の一部なので無効化 */
   .glass-specular::before,
   .glass-specular::after {
+    display: none;
+  }
+
+  /* scroll edge の progressive blur も透明表現なので丸ごと消す
+     （バー本体は上記フォールバックで不透明になり可読性は保たれる） */
+  .glass-scroll-edge-top,
+  .glass-scroll-edge-bottom {
     display: none;
   }
 

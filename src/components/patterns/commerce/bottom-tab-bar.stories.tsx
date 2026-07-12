@@ -1,3 +1,4 @@
+import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { Add } from "iconsax-reactjs"
 import { Button } from "@/components/ui/button"
@@ -158,6 +159,73 @@ export const LiquidGlassLightFallback: Story = {
         pillPosition="absolute"
         items={COMPACT_ITEMS}
         centerAction={CENTER_ACTION}
+      />
+    </div>
+  ),
+}
+
+// ─── Sliding selection (droplet morph) ───────────────────────────────────────
+
+function SlidingSelectionDemo() {
+  const [active, setActive] = React.useState(0)
+  const items = [
+    { label: "ホーム", icon: HomeIcon, activeIcon: HomeActive },
+    { label: "検索", icon: SearchIcon },
+    { label: "お気に入り", icon: HeartIcon },
+  ].map((item, index) => ({
+    ...item,
+    isActive: index === active,
+    onClick: () => setActive(index),
+  }))
+  return (
+    <div className="relative w-full min-h-screen flex flex-col items-center justify-center bg-[var(--Surface-Secondary)]">
+      <p className="text-[var(--Text-High-Emphasis)] typo-heading-xl">タブを切り替えてみる</p>
+      <p className="text-[var(--Text-Low-Emphasis)] typo-body-md mt-2">
+        選択カプセル（droplet）がタブ間をスライドして移動する — iOS 26 の morph
+      </p>
+      <BottomTabBar variant="pill" pillPosition="absolute" items={items} showLabels />
+    </div>
+  )
+}
+
+export const LiquidGlassSlidingSelection: Story = {
+  name: "Liquid Glass — sliding selection (interactive)",
+  parameters: { layout: "fullscreen" },
+  render: () => <SlidingSelectionDemo />,
+}
+
+// ─── Scroll edge effect ───────────────────────────────────────────────────────
+
+export const LiquidGlassScrollEdge: Story = {
+  name: "Liquid Glass — scroll edge effect",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div className="relative h-[600px] overflow-hidden bg-[var(--Surface-Primary)]">
+      <div className="h-full overflow-y-auto px-6 py-6">
+        <div className="mx-auto flex max-w-[430px] flex-col gap-3 pb-32">
+          <p className="typo-heading-md text-[var(--Text-High-Emphasis)]">Scroll edge effect</p>
+          <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
+            スクロールするとバーの背後でコンテンツが徐々にぼけて溶けます（iOS 26）。
+          </p>
+          {Array.from({ length: 24 }, (_, i) => (
+            <div
+              key={i}
+              className="rounded-[var(--Radius-Surface)] border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4"
+            >
+              <p className="typo-label-md text-[var(--Text-High-Emphasis)]">リスト項目 {i + 1}</p>
+              <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-1">
+                バーの下を通過する際に progressive blur がかかるコンテンツ。
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <BottomTabBar
+        variant="pill"
+        pillPosition="absolute"
+        items={ITEMS.slice(0, 3)}
+        showLabels
+        scrollEdge
       />
     </div>
   ),

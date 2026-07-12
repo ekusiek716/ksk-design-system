@@ -286,6 +286,46 @@ export const GlassBlurDemo: Story = {
   ),
 }
 
+// ─── Glass — カーソル追従スペキュラ（#3: interactive light response）──────────
+// スペキュラのハイライト中心（--glass-hl-x / --glass-hl-y）を pointer 位置に
+// 追従させ、"生きたガラス" の光応答を出す。CSS 変数の受け皿は glass.css 側に
+// あり、ここでは onPointerMove で % を書き込むだけ。押下時は .glass-interactive
+// が軽く縮む（ゲル）。
+export const GlassPointerLensing: Story = {
+  name: "Glass — カーソル追従スペキュラ",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div className="relative min-h-screen w-full overflow-hidden bg-[var(--Surface-Inverse)]">
+      <div className="absolute inset-0 grid grid-cols-3 gap-4 p-6" aria-hidden="true">
+        {Array.from({ length: 9 }, (_, i) => (
+          <div
+            key={i}
+            className="rounded-2xl"
+            style={{ background: `linear-gradient(140deg, var(--Categorical-${(i % 8) + 1}), var(--Categorical-${((i + 4) % 8) + 1}-Bold))` }}
+          />
+        ))}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="glass-strong glass-specular glass-interactive ksk-squircle flex h-56 w-80 flex-col items-center justify-center gap-2 rounded-[var(--Radius-Sheet)] p-6 text-[var(--Text-High-Emphasis)]"
+          onPointerMove={(e) => {
+            const r = e.currentTarget.getBoundingClientRect()
+            e.currentTarget.style.setProperty("--glass-hl-x", `${((e.clientX - r.left) / r.width) * 100}%`)
+            e.currentTarget.style.setProperty("--glass-hl-y", `${((e.clientY - r.top) / r.height) * 100}%`)
+          }}
+          onPointerLeave={(e) => {
+            e.currentTarget.style.removeProperty("--glass-hl-x")
+            e.currentTarget.style.removeProperty("--glass-hl-y")
+          }}
+        >
+          <span className="typo-heading-md">カーソルを重ねて動かす</span>
+          <span className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">ハイライトがカーソルに追従・押下で軽く縮む</span>
+        </div>
+      </div>
+    </div>
+  ),
+}
+
 export const WithIcon: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
