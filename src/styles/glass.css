@@ -378,18 +378,18 @@
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  /* リング部分だけ背景を増光サンプリングし、縁が背景色を拾って光る
-     「光を導くガラスの切断面」を作る（マスクが backdrop-filter の適用域も
-     リングに限定する = progressive blur と同じ原理）。非対応環境では
-     conic リムだけが残るので安全に劣化する */
-  -webkit-backdrop-filter: blur(4px) saturate(1.8) brightness(1.35);
-  backdrop-filter: blur(4px) saturate(1.8) brightness(1.35);
+  /* ⚠️ backdrop-filter はここには書かない。下の Chromium 専用 @supports ゲート内
+     でのみ適用する。理由（回帰: yokoku-app Safari で Liquid Glass シート内の
+     ボタン文字が全部ぼやける、2026-07）:
+     この ::after は z-index:2 でコンテンツ(z1)より上にあり、backdrop-filter は
+     「背後に描画済みの兄弟＝シート本文」をぼかす。Blink は mask(exclude) で
+     backdrop-filter の適用域も 1px リングに限定するが、WebKit は mask で
+     backdrop-filter のサンプリング域をクリップしないため、blur(4px) がシート
+     全面に乗り前景テキストを潰す。conic リム(背景)自体は WebKit でも mask で
+     正しく 1px に切り取られるので、非 Chromium では「リムだけ・blur なし」に
+     安全劣化させる（作者の当初意図どおり）。 */
   pointer-events: none;
   z-index: 2;
-}
-.dark .glass-specular::after {
-  -webkit-backdrop-filter: blur(4px) saturate(1.6) brightness(1.25);
-  backdrop-filter: blur(4px) saturate(1.6) brightness(1.25);
 }
 /*
  * フロー内の子をレンズ層の間（::before z0 の上 / ::after z2 の下）へ持ち上げる。
@@ -482,6 +482,19 @@
  * 屈折を足すとかえって主張が強くなり「薄さ」の意図を壊すため対象外。
  */
 @supports (-webkit-app-region: none) {
+  /* .glass-specular リムの progressive blur は Chromium 限定。
+     WebKit では mask が backdrop-filter の適用域をクリップせずシート全面が
+     ぼやけて前景テキストを潰すため（上の ::after のコメント参照）、この
+     増光ブラーはここでのみ供給し、非対応環境は conic リムのみに劣化させる。 */
+  .glass-specular::after {
+    -webkit-backdrop-filter: blur(4px) saturate(1.8) brightness(1.35);
+    backdrop-filter: blur(4px) saturate(1.8) brightness(1.35);
+  }
+  .dark .glass-specular::after {
+    -webkit-backdrop-filter: blur(4px) saturate(1.6) brightness(1.25);
+    backdrop-filter: blur(4px) saturate(1.6) brightness(1.25);
+  }
+
   .glass {
     -webkit-backdrop-filter: var(--glass-blur) var(--glass-refract);
     backdrop-filter: var(--glass-blur) var(--glass-refract);
