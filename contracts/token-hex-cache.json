@@ -1,0 +1,454 @@
+{
+  "meta": {
+    "name": "KSK Design System — Semantic Token Hex Cache",
+    "version": "1.44.0",
+    "description": "semantic / semanticDark トークン（var(--Primitive-*) 参照）を実 hex に解決したサイドカー生成物。tokens.json 本体のスキーマは変更せず、AI がこのファイルだけで実色を把握できるようにし、primitive 値の変更による semantic 実色のドリフトを --check で機械検出する。",
+    "generatedBy": "scripts/generate-token-hex-cache.mjs",
+    "skipped": [
+      {
+        "key": "surface.caution-subtle",
+        "value": "rgba(239, 68, 68, 0.15)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.success-subtle",
+        "value": "rgba(34, 197, 94, 0.15)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.warning-subtle",
+        "value": "rgba(249, 115, 22, 0.15)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.info-subtle",
+        "value": "rgba(59, 130, 246, 0.15)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.accent-primary-subtle",
+        "value": "color-mix(in srgb, var(--Primitive-Brand-500) 15%, transparent)",
+        "reason": "color-mix"
+      },
+      {
+        "key": "surface.videoOverlay-light",
+        "value": "rgba(0, 0, 0, 0.40)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.videoOverlay-medium",
+        "value": "rgba(0, 0, 0, 0.60)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.videoOverlay-strong",
+        "value": "rgba(0, 0, 0, 0.80)",
+        "reason": "rgba"
+      },
+      {
+        "key": "text.on-inverse-secondary",
+        "value": "var(--Primitive-White-Alpha-800)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "text.on-media-secondary",
+        "value": "var(--Primitive-White-Alpha-800)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "text.on-media-shadow",
+        "value": "0 1px 3px rgba(0, 0, 0, 0.85)",
+        "reason": "box-shadow"
+      },
+      {
+        "key": "text.shadow-on-image",
+        "value": "0 2px 8px rgba(0, 0, 0, 0.45)",
+        "reason": "box-shadow"
+      },
+      {
+        "key": "border.accent-primary-subtle",
+        "value": "color-mix(in srgb, var(--Primitive-Brand-500) 30%, transparent)",
+        "reason": "color-mix"
+      },
+      {
+        "key": "border.caution-subtle",
+        "value": "rgba(239, 68, 68, 0.30)",
+        "reason": "rgba"
+      },
+      {
+        "key": "border.success-subtle",
+        "value": "rgba(34, 197, 94, 0.30)",
+        "reason": "rgba"
+      },
+      {
+        "key": "border.info-subtle",
+        "value": "rgba(59, 130, 246, 0.30)",
+        "reason": "rgba"
+      },
+      {
+        "key": "overlay.dark",
+        "value": "var(--Primitive-Gray-Alpha-800)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "overlay.medium",
+        "value": "var(--Primitive-Gray-Alpha-600)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "overlay.light",
+        "value": "var(--Primitive-Gray-Alpha-200)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "surface.caution-subtle",
+        "value": "rgba(248, 113, 113, 0.20)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.success-subtle",
+        "value": "rgba(74, 222, 128, 0.20)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.warning-subtle",
+        "value": "rgba(251, 146, 60, 0.20)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.info-subtle",
+        "value": "rgba(96, 165, 250, 0.20)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.accent-primary-subtle",
+        "value": "color-mix(in srgb, var(--Primitive-Brand-400) 20%, transparent)",
+        "reason": "color-mix"
+      },
+      {
+        "key": "surface.videoOverlay-light",
+        "value": "rgba(0, 0, 0, 0.40)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.videoOverlay-medium",
+        "value": "rgba(0, 0, 0, 0.60)",
+        "reason": "rgba"
+      },
+      {
+        "key": "surface.videoOverlay-strong",
+        "value": "rgba(0, 0, 0, 0.80)",
+        "reason": "rgba"
+      },
+      {
+        "key": "text.high-emphasis",
+        "value": "var(--Primitive-White-Alpha-1000)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "text.medium-emphasis",
+        "value": "var(--Primitive-White-Alpha-800)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "text.low-emphasis",
+        "value": "var(--Primitive-White-Alpha-600)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "text.disable",
+        "value": "var(--Primitive-White-Alpha-400)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "text.on-media-secondary",
+        "value": "var(--Primitive-White-Alpha-800)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "text.on-media-shadow",
+        "value": "0 1px 3px rgba(0, 0, 0, 0.85)",
+        "reason": "box-shadow"
+      },
+      {
+        "key": "text.shadow-on-image",
+        "value": "0 2px 8px rgba(0, 0, 0, 0.45)",
+        "reason": "box-shadow"
+      },
+      {
+        "key": "object.high-emphasis",
+        "value": "var(--Primitive-White-Alpha-1000)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "object.medium-emphasis",
+        "value": "var(--Primitive-White-Alpha-700)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "object.low-emphasis",
+        "value": "var(--Primitive-White-Alpha-500)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "object.disable",
+        "value": "var(--Primitive-White-Alpha-300)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "border.high-emphasis",
+        "value": "var(--Primitive-White-Alpha-500)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "border.medium-emphasis",
+        "value": "var(--Primitive-White-Alpha-300)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "border.low-emphasis",
+        "value": "var(--Primitive-White-Alpha-200)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "border.disable",
+        "value": "var(--Primitive-White-Alpha-100)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "border.accent-primary-subtle",
+        "value": "color-mix(in srgb, var(--Primitive-Brand-400) 40%, transparent)",
+        "reason": "color-mix"
+      },
+      {
+        "key": "border.caution-subtle",
+        "value": "rgba(248, 113, 113, 0.40)",
+        "reason": "rgba"
+      },
+      {
+        "key": "border.success-subtle",
+        "value": "rgba(74, 222, 128, 0.40)",
+        "reason": "rgba"
+      },
+      {
+        "key": "border.info-subtle",
+        "value": "rgba(96, 165, 250, 0.40)",
+        "reason": "rgba"
+      },
+      {
+        "key": "hover.tertiary-button",
+        "value": "var(--Primitive-White-Alpha-100)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "hover.ghost-button",
+        "value": "var(--Primitive-White-Alpha-100)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "active.tertiary-button",
+        "value": "var(--Primitive-White-Alpha-200)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "overlay.dark",
+        "value": "var(--Primitive-Gray-Alpha-900)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "overlay.medium",
+        "value": "var(--Primitive-Gray-Alpha-700)",
+        "reason": "unresolvable-var"
+      },
+      {
+        "key": "overlay.light",
+        "value": "var(--Primitive-Gray-Alpha-400)",
+        "reason": "unresolvable-var"
+      }
+    ]
+  },
+  "semantic": {
+    "surface.primary": "#FFFFFF",
+    "surface.secondary": "#F9FAFB",
+    "surface.tertiary": "#F3F4F6",
+    "surface.quaternary": "#E5E7EB",
+    "surface.disable": "#F3F4F6",
+    "surface.inverse": "#111827",
+    "surface.accent-primary": "#3B82F6",
+    "surface.accent-primary-light": "#EFF6FF",
+    "surface.accent-primary-ultra-light": "#EFF6FF",
+    "surface.caution": "#FEF2F2",
+    "surface.success": "#F0FDF4",
+    "surface.warning": "#FFFBEB",
+    "surface.info": "#EFF6FF",
+    "surface.caution-strong": "#EF4444",
+    "surface.success-strong": "#22C55E",
+    "surface.warning-strong": "#F97316",
+    "surface.info-strong": "#3B82F6",
+    "text.high-emphasis": "#111827",
+    "text.medium-emphasis": "#374151",
+    "text.low-emphasis": "#6B7280",
+    "text.disable": "#9CA3AF",
+    "text.on-inverse": "#FFFFFF",
+    "text.on-media": "#FFFFFF",
+    "text.accent-primary": "#2563EB",
+    "text.success": "#15803D",
+    "text.caution": "#DC2626",
+    "text.warning": "#EA580C",
+    "text.info": "#2563EB",
+    "object.high-emphasis": "#111827",
+    "object.medium-emphasis": "#4B5563",
+    "object.low-emphasis": "#9CA3AF",
+    "object.disable": "#D1D5DB",
+    "object.on-inverse": "#FFFFFF",
+    "object.accent-primary": "#3B82F6",
+    "object.caution": "#EF4444",
+    "object.success": "#22C55E",
+    "object.warning": "#F97316",
+    "object.info": "#3B82F6",
+    "object.favorite": "#EF4444",
+    "object.rating": "#F59E0B",
+    "border.high-emphasis": "#374151",
+    "border.medium-emphasis": "#D1D5DB",
+    "border.low-emphasis": "#E5E7EB",
+    "border.disable": "#E5E7EB",
+    "border.accent-primary": "#3B82F6",
+    "border.caution": "#EF4444",
+    "border.success": "#22C55E",
+    "border.warning": "#F97316",
+    "border.info": "#3B82F6",
+    "brand.primary": "#2563EB",
+    "brand.action": "#1D4ED8",
+    "brand.light": "#DBEAFE",
+    "brand.ultra-light": "#EFF6FF",
+    "brand.line": "#06C755",
+    "brand.google-border": "#DADCE0",
+    "brand.apple": "#000000",
+    "brand.amazon": "#232F3E",
+    "brand.amazon-accent": "#FF9900",
+    "hover.primary-button": "#1D4ED8",
+    "hover.secondary-button": "#EFF6FF",
+    "hover.tertiary-button": "#F3F4F6",
+    "hover.ghost-button": "#F3F4F6",
+    "hover.destructive-button": "#B91C1C",
+    "active.primary-button": "#1E40AF",
+    "active.secondary-button": "#DBEAFE",
+    "active.tertiary-button": "#E5E7EB",
+    "active.destructive-button": "#991B1B",
+    "focus.high-emphasis": "#60A5FA",
+    "caution.base": "#DC2626",
+    "caution.action": "#B91C1C",
+    "success.base": "#16A34A",
+    "warning.base": "#EA580C",
+    "info.base": "#2563EB",
+    "brandExternal.line": "#06C755",
+    "brandExternal.googleBorder": "#DADCE0",
+    "brandExternal.apple": "#000000",
+    "brandExternal.amazon": "#232F3E",
+    "brandExternal.amazonAccent": "#FF9900",
+    "categorical.1.base": "#EF4444",
+    "categorical.1.subtle": "#FEE2E2",
+    "categorical.1.bold": "#B91C1C",
+    "categorical.2.base": "#0EA5E9",
+    "categorical.2.subtle": "#E0F2FE",
+    "categorical.2.bold": "#0369A1",
+    "categorical.3.base": "#14B8A6",
+    "categorical.3.subtle": "#CCFBF1",
+    "categorical.3.bold": "#0F766E",
+    "categorical.4.base": "#64748B",
+    "categorical.4.subtle": "#F1F5F9",
+    "categorical.4.bold": "#334155",
+    "categorical.5.base": "#EAB308",
+    "categorical.5.subtle": "#FEF9C3",
+    "categorical.5.bold": "#A16207",
+    "categorical.6.base": "#6366F1",
+    "categorical.6.subtle": "#E0E7FF",
+    "categorical.6.bold": "#4338CA",
+    "categorical.7.base": "#F97316",
+    "categorical.7.subtle": "#FFEDD5",
+    "categorical.7.bold": "#C2410C",
+    "categorical.8.base": "#06B6D4",
+    "categorical.8.subtle": "#CFFAFE",
+    "categorical.8.bold": "#0E7490",
+    "categorical.9.base": "#EC4899",
+    "categorical.9.subtle": "#FCE7F3",
+    "categorical.9.bold": "#BE185D",
+    "categorical.10.base": "#F43F5E",
+    "categorical.10.subtle": "#FFE4E6",
+    "categorical.10.bold": "#BE123C",
+    "categorical.11.base": "#3B82F6",
+    "categorical.11.subtle": "#DBEAFE",
+    "categorical.11.bold": "#1D4ED8",
+    "categorical.12.base": "#84CC16",
+    "categorical.12.subtle": "#ECFCCB",
+    "categorical.12.bold": "#4D7C0F",
+    "categorical.13.base": "#F59E0B",
+    "categorical.13.subtle": "#FEF3C7",
+    "categorical.13.bold": "#B45309",
+    "categorical.14.base": "#D946EF",
+    "categorical.14.subtle": "#FAE8FF",
+    "categorical.14.bold": "#A21CAF",
+    "categorical.15.base": "#A855F7",
+    "categorical.15.subtle": "#F3E8FF",
+    "categorical.15.bold": "#7E22CE",
+    "categorical.16.base": "#8B5CF6",
+    "categorical.16.subtle": "#EDE9FE",
+    "categorical.16.bold": "#6D28D9"
+  },
+  "semanticDark": {
+    "surface.primary": "#111827",
+    "surface.secondary": "#1F2937",
+    "surface.tertiary": "#374151",
+    "surface.quaternary": "#4B5563",
+    "surface.disable": "#1F2937",
+    "surface.inverse": "#FFFFFF",
+    "surface.accent-primary": "#3B82F6",
+    "surface.accent-primary-light": "#1E3A8A",
+    "surface.accent-primary-ultra-light": "#1E3A8A",
+    "surface.caution": "#2d1414",
+    "surface.success": "#14532D",
+    "surface.warning": "#78350F",
+    "surface.info": "#1E3A8A",
+    "surface.caution-strong": "#EF4444",
+    "surface.success-strong": "#22C55E",
+    "surface.warning-strong": "#F97316",
+    "surface.info-strong": "#3B82F6",
+    "text.on-inverse": "#111827",
+    "text.on-inverse-secondary": "#374151",
+    "text.on-media": "#FFFFFF",
+    "text.accent-primary": "#60A5FA",
+    "text.success": "#4ADE80",
+    "text.caution": "#F87171",
+    "text.warning": "#FB923C",
+    "text.info": "#60A5FA",
+    "object.on-inverse": "#111827",
+    "object.accent-primary": "#60A5FA",
+    "object.caution": "#F87171",
+    "object.success": "#4ADE80",
+    "object.warning": "#FB923C",
+    "object.info": "#60A5FA",
+    "object.favorite": "#F87171",
+    "object.rating": "#FBBF24",
+    "border.accent-primary": "#60A5FA",
+    "border.caution": "#F87171",
+    "border.success": "#4ADE80",
+    "border.warning": "#FB923C",
+    "border.info": "#60A5FA",
+    "brand.primary": "#60A5FA",
+    "brand.action": "#93C5FD",
+    "brand.light": "#1E3A8A",
+    "brand.ultra-light": "#1E3A8A",
+    "hover.primary-button": "#3B82F6",
+    "hover.secondary-button": "#1E3A8A",
+    "hover.destructive-button": "#EF4444",
+    "active.primary-button": "#2563EB",
+    "active.secondary-button": "#1E40AF",
+    "active.destructive-button": "#DC2626",
+    "focus.high-emphasis": "#60A5FA",
+    "caution.base": "#F87171",
+    "caution.action": "#EF4444",
+    "success.base": "#4ADE80",
+    "warning.base": "#FB923C",
+    "info.base": "#60A5FA"
+  }
+}
