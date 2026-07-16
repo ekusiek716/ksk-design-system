@@ -209,3 +209,61 @@ export const GlassLensingWithSpecular: Story = {
     expect(specularFilter).toContain("url(")
   },
 }
+
+export const AdaptiveMaterial: Story = {
+  name: "Adaptive Material（宣言的適応）",
+  parameters: { layout: "fullscreen" },
+  render: () => {
+    // 左右で「まったく同じ glass カードの markup」を、背後の明暗を宣言する
+    // ラッパー（data-glass-backdrop）だけ変えて並べる。material と .glass-fg
+    // 前景がコンテキストに応じて自動で切り替わることを示す。
+    const Card = () => (
+      <div className="glass glass-specular ksk-squircle rounded-2xl p-5">
+        <p className="glass-fg typo-label-md font-mono">.glass + .glass-fg</p>
+        <p className="glass-fg typo-body-sm mt-1 opacity-80">
+          markup は左右で同一。背景宣言だけで material と前景が追従する。
+        </p>
+      </div>
+    )
+    return (
+      <div className="grid min-h-screen grid-cols-2">
+        {/* 明背景の宣言。前景は濃色のまま */}
+        <section
+          data-glass-backdrop="light"
+          data-testid="ctx-light"
+          className="flex flex-col items-center justify-center gap-4 p-8"
+          style={{ background: "linear-gradient(160deg, #eef2f7 0%, #dbe4f0 100%)" }}
+        >
+          <p className="typo-label-sm text-[var(--Text-Medium-Emphasis)] font-mono">data-glass-backdrop=&quot;light&quot;</p>
+          <div className="w-full max-w-xs" data-testid="card-light"><Card /></div>
+        </section>
+        {/* 暗背景の宣言。material が暗メディア用へ、前景は白系＋影へ */}
+        <section
+          data-glass-backdrop="dark"
+          data-testid="ctx-dark"
+          className="flex flex-col items-center justify-center gap-4 p-8"
+          style={{ background: "linear-gradient(160deg, #1e293b 0%, #0b1220 100%)" }}
+        >
+          <p className="typo-label-sm text-white/70 font-mono">data-glass-backdrop=&quot;dark&quot;</p>
+          <div className="w-full max-w-xs" data-testid="card-dark"><Card /></div>
+        </section>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    // 同一 markup が、背景宣言だけで前景色と material 背景を変えること（回帰ガード）。
+    const fgLight = canvasElement.querySelector('[data-testid="card-light"] .glass-fg')!
+    const fgDark = canvasElement.querySelector('[data-testid="card-dark"] .glass-fg')!
+    const bgLight = canvasElement.querySelector('[data-testid="card-light"] .glass')!
+    const bgDark = canvasElement.querySelector('[data-testid="card-dark"] .glass')!
+
+    // 前景色: light は濃色 / dark は白系 → 異なる
+    expect(getComputedStyle(fgLight).color).not.toBe(getComputedStyle(fgDark).color)
+
+    // material 背景: light は白ベース / dark は暗ベース → 異なる
+    expect(getComputedStyle(bgLight).backgroundColor).not.toBe(getComputedStyle(bgDark).backgroundColor)
+
+    // 暗コンテキストの前景は可読性のため text-shadow が付く
+    expect(getComputedStyle(fgDark).textShadow).not.toBe("none")
+  },
+}

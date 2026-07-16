@@ -41,6 +41,11 @@
   --glass-border:      rgba(255, 255, 255, 0.42);
   --glass-border-dark: rgba(255, 255, 255, 0.15);
 
+  /* Foreground — ガラス面上の文字/アイコンの既定色（#4 宣言的適応マテリアル）。
+     明背景では濃色、暗背景（[data-glass-backdrop="dark"] / .dark）では白系へ
+     自動追従する。text-[var(--glass-foreground)] または .glass-fg で参照する。 */
+  --glass-foreground: var(--Text-High-Emphasis);
+
   /* Edge rim — レンズ縁での光の屈折リング（.glass-specular の ::after）。
      0deg=上端に主光源のグリント、180deg=下端に内部反射のカウンターグリント、
      左右(90/270deg 付近)は減衰させて「光がエッジを回り込む」見え方にする。
@@ -107,8 +112,14 @@
   --glass-refract-dark: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='glass-refract-dark' x='-20%25' y='-20%25' width='140%25' height='140%25' color-interpolation-filters='sRGB'><feImage href='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImxlZnQiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoODQsMTI4LDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0icmlnaHQiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDEyOCwxMjgpIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMTcyLDEyOCwxMjgpIi8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9InRvcCIgeDE9IjAiIHkxPSIwIiB4Mj0iMCIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9InJnYigxMjgsODQsMTI4KSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0icmdiKDEyOCwxMjgsMTI4KSIvPjwvbGluZWFyR3JhZGllbnQ+PGxpbmVhckdyYWRpZW50IGlkPSJib3R0b20iIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDEyOCwxMjgpIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDE3MiwxMjgpIi8+PC9saW5lYXJHcmFkaWVudD48bGluZWFyR3JhZGllbnQgaWQ9InRsIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0icmdiKDg0LDg0LDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0idHIiIHgxPSIxIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTcyLDg0LDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iYmwiIHgxPSIwIiB5MT0iMSIgeDI9IjEiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoODQsMTcyLDEyOCkiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9InJnYigxMjgsMTI4LDEyOCkiLz48L2xpbmVhckdyYWRpZW50PjxsaW5lYXJHcmFkaWVudCBpZD0iYnIiIHgxPSIxIiB5MT0iMSIgeDI9IjAiIHkyPSIwIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSJyZ2IoMTcyLDE3MiwxMjgpIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSJyZ2IoMTI4LDEyOCwxMjgpIi8+PC9saW5lYXJHcmFkaWVudD48Y2xpcFBhdGggaWQ9Im91dGVyIj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjE0IiByeT0iMTQiLz48L2NsaXBQYXRoPjwvZGVmcz48ZyBjbGlwLXBhdGg9InVybCgjb3V0ZXIpIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0icmdiKDEyOCwxMjgsMTI4KSIvPjxyZWN0IHg9IjAiIHk9IjIwIiB3aWR0aD0iMTYiIGhlaWdodD0iNjAiIGZpbGw9InVybCgjbGVmdCkiLz48cmVjdCB4PSI4NCIgeT0iMjAiIHdpZHRoPSIxNiIgaGVpZ2h0PSI2MCIgZmlsbD0idXJsKCNyaWdodCkiLz48cmVjdCB4PSIyMCIgeT0iMCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjE2IiBmaWxsPSJ1cmwoI3RvcCkiLz48cmVjdCB4PSIyMCIgeT0iODQiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxNiIgZmlsbD0idXJsKCNib3R0b20pIi8+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSJ1cmwoI3RsKSIvPjxyZWN0IHg9IjgwIiB5PSIwIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIGZpbGw9InVybCgjdHIpIi8+PHJlY3QgeD0iMCIgeT0iODAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0idXJsKCNibCkiLz48cmVjdCB4PSI4MCIgeT0iODAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0idXJsKCNicikiLz48L2c+PC9zdmc+' x='0' y='0' width='100%25' height='100%25' preserveAspectRatio='none' result='map'/><feGaussianBlur in='map' stdDeviation='3' result='blurmap'/><feDisplacementMap in='SourceGraphic' in2='blurmap' scale='36' xChannelSelector='R' yChannelSelector='G'/></filter></svg>#glass-refract-dark");
 }
 
-/* ─── Dark mode overrides ─── */
-.dark {
+/* ─── Dark material overrides ───
+   `.dark`（アプリのダークテーマ）と `[data-glass-backdrop="dark"]`
+   （#4 宣言的適応マテリアル: 暗い写真・動画・濃色面の上に glass を置く区画を
+   消費側が宣言する）で同じ「暗いメディア用ガラス」値を共有する。後者を使うと
+   .glass-dark へのクラス貼り替えや tone="inverse" prop 無しで、配下の
+   .glass* が material と前景（--glass-foreground）を自動で暗背景向けへ倒す。 */
+.dark,
+[data-glass-backdrop="dark"] {
   --glass-blur-sm:  blur(14px) saturate(1.5) brightness(0.95);
   --glass-blur:     blur(28px) saturate(1.6) brightness(0.92);
   --glass-blur-lg:  blur(56px) saturate(1.7) brightness(0.90);
@@ -119,6 +130,8 @@
   --glass-bg-dark:    rgba(0, 0, 10, 0.45);
   --glass-border:      rgba(255, 255, 255, 0.18);
   --glass-border-dark: rgba(255, 255, 255, 0.08);
+  /* 暗背景では前景を白系（メディア上テキスト）へ。text-shadow は .glass-fg 側で付与 */
+  --glass-foreground: var(--Text-on-Media);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.20),
                      inset 0 -1px 0 rgba(255, 255, 255, 0.04);
   --glass-rim: conic-gradient(
@@ -161,6 +174,43 @@
   --glass-button-text: var(--Text-on-Media);
   color: var(--glass-button-text);
   text-shadow: var(--Text-on-Media-Shadow);
+}
+
+/**
+ * .glass-fg（#4 宣言的適応マテリアルの前景）
+ * ガラス面上の文字/アイコンに付けると、背景コンテキストに応じて色が自動追従する:
+ *   - 既定（明背景）        → --Text-High-Emphasis（濃色）
+ *   - [data-glass-backdrop="dark"] / .dark 配下（暗背景）→ --Text-on-Media（白系）
+ * .glass-inverse のように「面ごとに手動で inverse 宣言」する代わりに、区画の
+ * [data-glass-backdrop] 宣言 1 つで material と前景をまとめて切り替えられる。
+ * 暗背景では可読性のため text-shadow を足す（明背景では付けない）。
+ */
+.glass-fg {
+  color: var(--glass-foreground);
+}
+[data-glass-backdrop="dark"] .glass-fg,
+.dark .glass-fg {
+  text-shadow: var(--Text-on-Media-Shadow);
+}
+
+/**
+ * [data-glass-backdrop="light" | "dark"]（#4 宣言的適応マテリアル・区画宣言）
+ * 「この区画の背後は明るい / 暗い」を消費側が宣言するコンテキスト属性。配下の
+ * .glass* が material（bg/blur/border/highlight）を、.glass-fg を付けた前景が
+ * 色を、それぞれ自動で切り替える（JS 実測なし・SSR 安全・クラス貼り替え不要）。
+ *   <section data-glass-backdrop="dark">          背後が暗い写真/動画/濃色面
+ *     <div class="glass glass-specular ...">
+ *       <span class="glass-fg">…</span>           自動で白系＋影
+ *     </div>
+ *   </section>
+ * "light" は既定（:root）と同義だが、暗コンテキストの内側に明るい島を作る
+ * ネスト時に前景を濃色へ戻すために明示できる。
+ */
+[data-glass-backdrop="light"] {
+  --glass-foreground: var(--Text-High-Emphasis);
+}
+[data-glass-backdrop="light"] .glass-fg {
+  text-shadow: none;
 }
 
 /**
@@ -359,7 +409,8 @@
   pointer-events: none;
   z-index: 0;
 }
-.dark .glass-specular::before {
+.dark .glass-specular::before,
+[data-glass-backdrop="dark"] .glass-specular::before {
   opacity: 0.55;
 }
 .glass-specular::after {
@@ -490,7 +541,8 @@
     -webkit-backdrop-filter: blur(4px) saturate(1.8) brightness(1.35);
     backdrop-filter: blur(4px) saturate(1.8) brightness(1.35);
   }
-  .dark .glass-specular::after {
+  .dark .glass-specular::after,
+  [data-glass-backdrop="dark"] .glass-specular::after {
     -webkit-backdrop-filter: blur(4px) saturate(1.6) brightness(1.25);
     backdrop-filter: blur(4px) saturate(1.6) brightness(1.25);
   }
@@ -522,19 +574,24 @@
     backdrop-filter: var(--glass-blur-media-dark) var(--glass-refract-dark);
   }
 
-  /* ダークモードは背景コントラストが低く歪みが目立ちやすいため、
-     scale を抑えた --glass-refract-dark に差し替える */
+  /* ダークモード / 暗背景宣言区画は背景コントラストが低く歪みが目立ち
+     やすいため、scale を抑えた --glass-refract-dark に差し替える */
   .dark .glass,
   .dark .glass-medium,
-  .dark .glass-accent {
+  .dark .glass-accent,
+  [data-glass-backdrop="dark"] .glass,
+  [data-glass-backdrop="dark"] .glass-medium,
+  [data-glass-backdrop="dark"] .glass-accent {
     -webkit-backdrop-filter: var(--glass-blur) var(--glass-refract-dark);
     backdrop-filter: var(--glass-blur) var(--glass-refract-dark);
   }
-  .dark .glass-strong {
+  .dark .glass-strong,
+  [data-glass-backdrop="dark"] .glass-strong {
     -webkit-backdrop-filter: var(--glass-blur-lg) var(--glass-refract-dark);
     backdrop-filter: var(--glass-blur-lg) var(--glass-refract-dark);
   }
-  .dark .glass-clear {
+  .dark .glass-clear,
+  [data-glass-backdrop="dark"] .glass-clear {
     -webkit-backdrop-filter: blur(6px) saturate(1.6) brightness(1.05) var(--glass-refract-dark);
     backdrop-filter: blur(6px) saturate(1.6) brightness(1.05) var(--glass-refract-dark);
   }
@@ -595,7 +652,12 @@
   .dark .glass-medium,
   .dark .glass-strong,
   .dark .glass-clear,
-  .dark .glass-accent {
+  .dark .glass-accent,
+  [data-glass-backdrop="dark"] .glass,
+  [data-glass-backdrop="dark"] .glass-medium,
+  [data-glass-backdrop="dark"] .glass-strong,
+  [data-glass-backdrop="dark"] .glass-clear,
+  [data-glass-backdrop="dark"] .glass-accent {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     background: var(--Surface-Primary);
@@ -629,7 +691,14 @@
   .dark .glass-strong,
   .dark .glass-dark,
   .dark .glass-clear,
-  .dark .glass-accent {
+  .dark .glass-accent,
+  [data-glass-backdrop="dark"] .glass,
+  [data-glass-backdrop="dark"] .glass-subtle,
+  [data-glass-backdrop="dark"] .glass-medium,
+  [data-glass-backdrop="dark"] .glass-strong,
+  [data-glass-backdrop="dark"] .glass-dark,
+  [data-glass-backdrop="dark"] .glass-clear,
+  [data-glass-backdrop="dark"] .glass-accent {
     background: var(--Surface-Inverse);
   }
 
