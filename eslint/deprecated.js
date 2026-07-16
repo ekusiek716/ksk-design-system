@@ -33,7 +33,7 @@
  *   removeIn: "2.0.0",
  * },
  */
-const DEPRECATED = [
+export const DEPRECATED = [
   // 現時点で deprecated エントリなし。
   // 破壊変更時にここに追加し、codemod とセットでリリースする。
 ]
