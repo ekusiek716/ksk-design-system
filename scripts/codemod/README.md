@@ -2,6 +2,21 @@
 
 `ksk-design-system` で破壊変更を入れる際の自動移行スクリプト置き場。
 
+## 移行状況の確認（check-migration）
+
+非推奨 API（`eslint/deprecated.js` の `DEPRECATED` が正本）が利用側プロジェクトに
+まだ残っているかを read-only で検査する。書き換えは一切行わない。
+
+```bash
+npx ksk-design-system check-migration ./src
+# または
+node node_modules/ksk-design-system/scripts/codemod/check-migration.mjs ./src
+```
+
+- `ksk-design-system` を参照していないファイルはスキップする（誤検知防止）
+- 0 件なら「移行完了」で exit 0、1 件以上見つかれば識別子別の内訳を出力して exit 1
+- 検出されたら該当する codemod（下記）を使って移行する
+
 ## 使い方（利用側プロジェクトで）
 
 ```bash

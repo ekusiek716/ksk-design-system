@@ -36,6 +36,7 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   npx ksk-ds lint src                 DS-first ルール違反を検査
   npx ksk-ds lint src --format json   CI 向け JSON 出力
   npx ksk-ds lint --changed           Git 差分のみ検査
+  npx ksk-ds check-migration ./src    非推奨 API の残存を検査（read-only）
 `)
   process.exit(0)
 }
@@ -43,6 +44,12 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
 if (cmd === "lint") {
   const { runLintCli } = await import("./lint.js")
   const status = await runLintCli(args.slice(1), { cwd: process.cwd(), pkgRoot })
+  process.exit(status)
+}
+
+if (cmd === "check-migration") {
+  const { runCheckMigrationCli } = await import("../scripts/codemod/check-migration.mjs")
+  const status = runCheckMigrationCli(args.slice(1))
   process.exit(status)
 }
 
