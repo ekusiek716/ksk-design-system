@@ -1,0 +1,19 @@
+name: Codex Review Receipt
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  receipt:
+    if: github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    # The public reusable workflow is pinned to an audited immutable commit.
+    uses: ekusiek716/.github/.github/workflows/codex-review-receipt.yml@632bee09e15c9a66ae154ba912bb22325de703be
+
