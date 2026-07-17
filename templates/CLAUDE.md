@@ -15,6 +15,7 @@ Claude Code は UI 作業を始める前に、以下のファイルを**必ず**
 | `node_modules/ksk-design-system/contracts/components.json` | 全コンポーネントの定義・バリアント |
 | `node_modules/ksk-design-system/contracts/rules.json` | 禁止パターン31件・AIアンチパターン9件 |
 | `node_modules/ksk-design-system/tokens.json` | カラー・余白・角丸・影・タイポ |
+| `node_modules/ksk-design-system/contracts/token-hex-cache.json` | semantic トークンのデフォルトテーマ解決済み hex（テーマ依存キーは meta.themeDependentKeys 参照） |
 | `node_modules/ksk-design-system/src/components/COMPONENT_LOOKUP.md` | 全コンポーネントのバリアント・インポートパス一覧 |
 
 > DS 側のルール更新は `npm update ksk-design-system` で自動反映されます。このファイルは書き換え不要。

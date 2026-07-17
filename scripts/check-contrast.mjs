@@ -11,23 +11,18 @@
 import { readFileSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
+import { loadDefaultBrandRamp, resolveTokenColor } from "./lib/resolve-token-color.mjs"
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 const tokens = JSON.parse(readFileSync(join(root, "tokens.json"), "utf8"))
 const prim = tokens.colors.primitive
 const sem = tokens.colors.semantic
+// デフォルトテーマの Brand ランプの正本は src/styles/primitive.css
+const brandRamp = loadDefaultBrandRamp(root)
 
 // `var(--Primitive-Gray-900)` / `var(--Primitive-White)` / 生 hex を hex に解決
 function resolve(val) {
-  if (!val) return null
-  if (val.startsWith("#")) return val
-  const m = val.match(/^var\(--Primitive-([A-Za-z]+)(?:-(\d+))?\)$/)
-  if (!m) return null // rgba / color-mix 等は対象外
-  // brand は primitive ではなく alias レイヤー。default テーマでは Blue を指すため
-  // --Primitive-Brand-* は Blue ランプに解決する。
-  const fam = prim[m[1].toLowerCase()] ?? (m[1].toLowerCase() === "brand" ? prim.blue : null)
-  if (fam == null) return null
-  return typeof fam === "string" ? fam : (m[2] ? fam[m[2]] : null)
+  return resolveTokenColor(val, prim, brandRamp)
 }
 
 const srgb2lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4 }
