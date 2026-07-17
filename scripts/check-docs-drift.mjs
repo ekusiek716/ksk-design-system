@@ -49,6 +49,7 @@ const CANDIDATE_DOCS = [
   "MIGRATION.md",
   "RELEASE.md",
   "PUBLISHING.md",
+  "UPDATING.md",
 ]
 
 function walkMd(dir) {

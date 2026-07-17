@@ -80,3 +80,4 @@ GitHub Releases にコピペできるテンプレ:
 - [PUBLISHING.md](./PUBLISHING.md) — 実際の手順
 - [MIGRATION.md](./MIGRATION.md) — メジャー毎の移行ガイド
 - [scripts/codemod/README.md](./scripts/codemod/README.md) — codemod 雛形と使い方
+- [UPDATING.md](./UPDATING.md) — 消費側（DS を npm 依存に持つプロジェクト）向けのアップデート手順

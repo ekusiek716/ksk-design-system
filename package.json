@@ -35,7 +35,8 @@
     "MIGRATION.md",
     "NATIVE_RECIPES.md",
     "PUBLISHING.md",
-    "RELEASE.md"
+    "RELEASE.md",
+    "UPDATING.md"
   ],
   "exports": {
     ".": {

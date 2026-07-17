@@ -116,8 +116,8 @@ export function runCheckMigrationCli(argv, { deprecated = DEPRECATED } = {}) {
   for (const { identifier, count } of byIdentifier) {
     console.log(`  ${count.toString().padStart(4)}  ${identifier}`)
   }
-  console.log(`\n移行方法は codemod/MIGRATION.md を参照してください。`)
-  console.log(`  npx ksk-design-system codemod <name> ${targetDir}`)
+  console.log(`\n移行方法は MIGRATION.md の該当バージョン節を参照してください。`)
+  console.log(`（codemod が提供されているバージョンは MIGRATION.md にコマンドが記載されます）`)
 
   return 1
 }
