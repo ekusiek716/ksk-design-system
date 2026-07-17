@@ -17,6 +17,7 @@ Claude Code は UI 作業を始める前に、以下のファイルを**必ず**
 | `node_modules/ksk-design-system/tokens.json` | カラー・余白・角丸・影・タイポ |
 | `node_modules/ksk-design-system/contracts/token-hex-cache.json` | semantic トークンのデフォルトテーマ解決済み hex（テーマ依存キーは meta.themeDependentKeys 参照） |
 | `node_modules/ksk-design-system/src/components/COMPONENT_LOOKUP.md` | 全コンポーネントのバリアント・インポートパス一覧 |
+| `node_modules/ksk-design-system/contracts/screen-patterns.json` | 画面実装前にどのシェル/パターンを使うかの decisionTree |
 
 > DS 側のルール更新は `npm update ksk-design-system` で自動反映されます。このファイルは書き換え不要。
 

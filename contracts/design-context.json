@@ -59,6 +59,24 @@
       "owns": [
         "default-theme resolved semantic hex values (generated sidecar; theme-dependent keys listed in meta.themeDependentKeys)"
       ]
+    },
+    {
+      "path": "contracts/screen-patterns.json",
+      "owns": [
+        "screen shell/pattern selection (decisionTree)",
+        "crud-to-pattern mapping",
+        "edit UI selection criteria (dialog vs page vs focused workspace)"
+      ]
+    },
+    {
+      "path": "contracts/composition.json",
+      "owns": [
+        "page skeleton structure per shell",
+        "spacing rhythm",
+        "card/surface depth hierarchy",
+        "text hierarchy (typo-* x Text-* tokens)",
+        "CTA priority hierarchy (Button variant ordering)"
+      ]
     }
   ],
   "designMd": {

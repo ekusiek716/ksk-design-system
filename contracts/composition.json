@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "name": "KSK Design System — Composition Contracts",
+    "version": "0.1.0",
+    "description": "選んだ画面パターン内部で、シェル骨格・余白リズム・カード階層・テキスト階層・CTA優先度をどう組むかを定義する機械可読契約。roleSeparation: contracts/screen-patterns.json が「どのパターン（シェル・crud・遷移）を使うか」を decisionTree で決め、本ファイルはその内部を「どう並べるか」を pageSkeletons/spacingRhythm/cardHierarchy/textHierarchy/ctaHierarchy で決める。requiredComponents/optionalComponents は contracts/components.json の実在名と一致すること（scripts/check-screen-contracts.mjs で検証）。"
+  },
+  "pageSkeletons": {
+    "mobile": {
+      "requiredComponents": ["MobileAppShell"],
+      "optionalComponents": ["MobileAppHeader", "BottomTabBar", "MobileTabBar", "MobileFloatingActionButton", "NavigationBar"],
+      "implementation": "src/components/patterns/mobile-app-shell.tsx",
+      "structure": [
+        "MobileAppShell (min-h-dvh, bg-[var(--Surface-Secondary)], mx-auto max-width=430 で中央プレビュー)",
+        "  header slot: sticky top-0 z-40 (MobileAppHeader 等)",
+        "  main (bottomPadding prop により pb-20/pb-28 をシェル側が自動付与。消費側で個別に padding-bottom を積み増さない)",
+        "    content wrapper (contentClassName)",
+        "  bottomNav slot: fixed inset-x-0 bottom-0 z-40, pb-[env(safe-area-inset-bottom)] をシェルが処理",
+        "  fab slot: bottomNav の上に浮くレイヤーとしてシェルが配置"
+      ],
+      "rules": [
+        "下部固定要素（BottomTabBar/MobileFloatingActionButton）分の余白は MobileAppShell の bottomPadding prop（\"bottom-nav\" | \"bottom-nav-fab\"）に持たせる。ページ側で pb-* を手書きしない（シェルとの二重計上を防ぐ）",
+        "safe-area-inset-bottom の吸収はシェルの責務。消費側コンポーネントで env(safe-area-inset-bottom) を再実装しない",
+        "デスクトップ表示との両対応が要る場合は desktopSidebar slot を使う（AppShell への差し替えではなく同一シェル内で lg: 分岐する）"
+      ]
+    },
+    "desktop": {
+      "requiredComponents": ["AppShell"],
+      "optionalComponents": ["Breadcrumb", "SectionHeader", "SubNav"],
+      "implementation": "src/components/patterns/shells/app-shell.tsx",
+      "structure": [
+        "AppShell (flex flex-col min-h-screen, bg-[var(--Surface-Primary)])",
+        "  topBar slot: sticky top-0 z-40, border-b, h-14, px-4",
+        "  main (flex-1。bottomNav が渡された場合のみ pb-16 をシェルが自動付与)",
+        "  bottomNav slot: fixed bottom-0 inset-x-0 z-40, h-14（PC でモバイル的下部ナビを使う場合のみ）"
+      ],
+      "rules": [
+        "topBar の高さ（h-14=56px）は固定値。ページ側で高さを変えたい場合は topBar 内の要素で padding 調整し、シェルの h-14 自体は変更しない",
+        "bottomNav を渡すページは main に pb-16 が自動で付くため、ページ側で追加の下部余白を積まない"
+      ]
+    },
+    "admin": {
+      "requiredComponents": ["AdminShell"],
+      "optionalComponents": ["DataTable", "SearchPanel", "StatusTabs", "BulkActions"],
+      "implementation": "src/components/patterns/shells/admin-shell.tsx",
+      "structure": [
+        "AdminShell (flex h-screen, bg-[var(--Surface-Secondary)])",
+        "  sidebar slot: aside hidden lg:flex, border-r, bg-[var(--Surface-Primary)], ScrollArea でラップ済み（sidebarWidth prop で幅調整、既定 w-64）",
+        "  header slot: 任意。border-b, h-16, px-6",
+        "  main: flex-1 overflow-auto p-6（ページコンテンツの外周余白はここで確保済み）"
+      ],
+      "rules": [
+        "main の p-6（24px）がページ外周の既定余白。ページ側で二重に外周 padding を足さない",
+        "sidebar は lg 未満で hidden になる（モバイル用の代替ナビは呼び出し側の責務。AdminShell 自体はモバイル用ドロワーを持たない）",
+        "sidebarWidth を変える場合、hidden lg:flex は維持し幅クラスのみ差し替える"
+      ]
+    },
+    "marketing": {
+      "requiredComponents": ["MarketingShell"],
+      "optionalComponents": ["Footer", "BannerCarousel", "CountdownHero", "PhotoHero"],
+      "implementation": "src/components/patterns/shells/marketing-shell.tsx",
+      "structure": [
+        "MarketingShell (flex flex-col min-h-screen, bg-[var(--Surface-Primary)])",
+        "  header slot: sticky top-0 z-40, bg-[var(--Surface-Primary)]/95 backdrop-blur, h-16, px-6 lg:px-16",
+        "  main: flex-1",
+        "  footer slot: border-t, bg-[var(--Surface-Secondary)], py-12, px-6 lg:px-16"
+      ],
+      "rules": [
+        "左右の外周余白は px-6（モバイル）/ lg:px-16（デスクトップ）をシェルの header/footer が既に持つ。main 直下のセクションはページ側で同じ px-6 lg:px-16 を明示して揃える（シェルは main 自体に横 padding を強制しないため）",
+        "header は backdrop-blur 前提の半透明背景。header 直下に実質同色の不透明要素を重ねる場合は視覚的な二重線に注意する"
+      ]
+    }
+  },
+  "spacingRhythm": {
+    "levels": [
+      { "level": 0, "spacing": "4px (gap-1)", "usage": "ラベルと補助テキストなど、同一要素内の密接な関連情報" },
+      { "level": 1, "spacing": "8px〜12px (gap-2 / gap-3)", "usage": "アイコンとテキスト、ボタン同士の横並び、FormActions の要素間" },
+      { "level": 2, "spacing": "16px (gap-4)", "usage": "FormSection 内のフィールド間、カード内のブロック間" },
+      { "level": 3, "spacing": "24px (gap-6)", "usage": "FormRoot のセクション間、ページ内の主要ブロック間の既定リズム" }
+    ]
+  },
+  "cardHierarchy": {
+    "layers": [
+      { "depth": 0, "token": "var(--Surface-Secondary)", "usage": "ページ/シェルの背景（AdminShell・MobileAppShell 等の基底面）" },
+      { "depth": 1, "token": "var(--Surface-Primary)", "usage": "最初の浮き上がり面。Card / シート / ヘッダー・サイドバーなどページ背景の上に乗る面" },
+      { "depth": 2, "token": "var(--Surface-Tertiary)", "usage": "Card 内部でさらに一段沈める領域（コードブロック風の埋め込み、入れ子カード等）" },
+      { "depth": 3, "token": "var(--Surface-Quaternary)", "usage": "選択・ホバーなどインタラクション状態の強調背景（常設の階層としては使わない）" }
+    ],
+    "note": "hex 値は書かない。実測値が要る場合は contracts/token-hex-cache.json（デフォルトテーマ解決済み）を参照する。"
+  },
+  "textHierarchy": {
+    "tree": [
+      { "role": "画面タイトル / H1", "typo": "typo-heading-2xl", "color": "var(--Text-High-Emphasis)" },
+      { "role": "セクション見出し / H2", "typo": "typo-heading-xl", "color": "var(--Text-High-Emphasis)" },
+      { "role": "カード見出し / H3", "typo": "typo-heading-md", "color": "var(--Text-High-Emphasis)" },
+      { "role": "本文", "typo": "typo-body-md", "color": "var(--Text-High-Emphasis)" },
+      { "role": "補助本文 / 説明文", "typo": "typo-body-sm", "color": "var(--Text-Medium-Emphasis)" },
+      { "role": "ラベル（フォーム・ボタン・ナビ）", "typo": "typo-label-md", "color": "var(--Text-High-Emphasis)" },
+      { "role": "メタ情報 / タイムスタンプ", "typo": "typo-label-sm", "color": "var(--Text-Low-Emphasis)" },
+      { "role": "法的表記 / 注釈", "typo": "typo-caption", "color": "var(--Text-Low-Emphasis)" },
+      { "role": "暗背景・画像上のテキスト", "typo": "typo-on-image", "color": "var(--Text-on-Inverse)" }
+    ]
+  },
+  "ctaHierarchy": {
+    "priority": [
+      { "variant": "default", "role": "primary", "note": "1ビューポート1つまで。最重要 CTA（保存・購入・次へ 等）" },
+      { "variant": "accent", "role": "primary-decorative", "note": "primary と同格だがブランドグラデーションで一段強く目立たせたい特別な CTA（ヒーローセクション等）。default と併用しない" },
+      { "variant": "secondary", "role": "secondary", "note": "primary と並ぶ選択肢・戻る" },
+      { "variant": "secondary-switch", "role": "secondary-selected", "note": "secondary のトグル選択状態（選択中のフィルタ切替等）" },
+      { "variant": "tertiary", "role": "tertiary", "note": "primary/secondary より弱い並列アクション" },
+      { "variant": "ghost", "role": "low-emphasis", "note": "文字寄りの補助操作" },
+      { "variant": "link", "role": "inline", "note": "本文内リンク相当の操作" },
+      { "variant": "destructive", "role": "danger", "note": "削除・取り消し等。alert-dialog / ConfirmDialog 内で使うことが多い" },
+      { "variant": "inverse", "role": "primary-on-dark", "note": "暗背景・ヒーローセクション上の primary 相当" },
+      { "variant": "ghost-inverse", "role": "low-emphasis-on-dark", "note": "暗背景上の ghost 相当" },
+      { "variant": "glass", "role": "primary-on-glass", "note": "Liquid Glass 背景上の CTA" },
+      { "variant": "glass-inverse", "role": "primary-on-glass-dark", "note": "暗背景上の Liquid Glass CTA" },
+      { "variant": "glass-accent", "role": "primary-on-glass-accent", "note": "FAB 等、glass より一段強い主要アクション" }
+    ],
+    "rules": [
+      "primary（default）は1ビューポートにつき1つまで。同一ビューポートに複数の primary CTA を並べない",
+      "destructive は確認なしの即時実行トリガーにしない。alert-dialog / ConfirmDialog を経由させる",
+      "同一画面で glass 系と非 glass 系の CTA variant を隣接して混在させない（背景コンテキストが揃っている範囲でのみ glass 系を使う）",
+      "CTA の優先度は上記 priority 配列の並び順を優先度の正本とする。同一画面に variant が複数出る場合、視覚的な強さの順序は配列順と一致させる"
+    ]
+  }
+}
