@@ -72,7 +72,8 @@ RESULTS=()
 # 中断（Ctrl-C 等）時も処理中リポの一時 worktree を残さない。
 # cleanup はループ内で毎回 $repo / $wt を掴んで再定義される。
 cleanup() { :; }
-trap 'cleanup' EXIT INT TERM
+trap 'cleanup' EXIT
+trap 'cleanup; trap - INT TERM EXIT; exit 130' INT TERM
 
 # ── 引数 → 対象リポのパス解決 ──
 resolve_repo() {
@@ -108,6 +109,8 @@ else
 fi
 
 for repo in "${REPOS[@]}"; do
+  # 前リポの cleanup（$repo/$wt/$branch を掴んだまま）が trap 経由で誤発火しないよう毎回リセット
+  cleanup() { :; }
   name="$(basename "$repo")"
   echo ""
   echo -e "${CYAN}=== $name ===${NC}"
@@ -259,13 +262,20 @@ for repo in "${REPOS[@]}"; do
   fi
 
   # ── push ──
-  # 再実行時に既存 remote branch と衝突しうるため --force-with-lease。
-  # lease の基準になる remote-tracking ref を最新化しておく（無ければ新規ブランチなので無視）
-  git -C "$wt" fetch origin "$branch" >/dev/null 2>&1
-  if ! git -C "$wt" push -u --force-with-lease origin "$branch" >/dev/null 2>&1; then
-    echo -e "${RED}FAIL: push${NC}"
-    cleanup
-    RESULTS+=("$name: FAIL (push)")
+  # 同名の remote branch が既に存在する場合（前回実行の PR が open のまま等）は
+  # 上書きしない。人手の追い commit を force-push で潰さないため、既存 PR の URL を
+  # 報告してスキップする。作り直したい場合は remote branch を削除して再実行する。
+  if ! git -C "$wt" push -u origin "$branch" >/dev/null 2>&1; then
+    existing_pr="$(cd "$wt" && gh pr list --head "$branch" --json url -q '.[0].url' 2>/dev/null)"
+    if [ -n "$existing_pr" ]; then
+      echo -e "${YELLOW}→ 既存 PR あり・push スキップ: $existing_pr${NC}"
+      cleanup
+      RESULTS+=("$name: SKIP (既存 PR: $existing_pr)")
+    else
+      echo -e "${RED}FAIL: push${NC}"
+      cleanup
+      RESULTS+=("$name: FAIL (push)")
+    fi
     continue
   fi
 
