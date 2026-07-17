@@ -68,13 +68,35 @@ describe("token-hex-cache", () => {
     // brand.primary は必ず Brand primitive 参照（テーマ依存の代表例）
     expect(keys).toContain("semantic.brand.primary")
     expect(keys.length).toBeGreaterThanOrEqual(10)
+    const skippedKeys = new Set(
+      cache.meta.skipped.map((e: { key: string; mode: string }) => `${e.mode}.${e.key}`)
+    )
     for (const key of keys) {
       const [mode, ...rest] = key.split(".")
       expect(["semantic", "semanticDark"]).toContain(mode)
       const flatKey = rest.join(".")
-      // キー自体にドットを含むため toHaveProperty（ドットをパス区切りと解釈する）は使わない
-      expect(cache[mode][flatKey], key).toBeDefined()
+      // resolved マップか skipped のどちらかに必ず実在する
+      // （キー自体にドットを含むため toHaveProperty は使わない）
+      expect(
+        cache[mode][flatKey] !== undefined || skippedKeys.has(key),
+        `${key} が resolved にも skipped にも存在しない`
+      ).toBe(true)
     }
+  })
+
+  it("skipped かつ Brand 依存のキー（color-mix(var(--Primitive-Brand-*)) 等）も themeDependentKeys に含まれる", () => {
+    const cache = loadCache()
+    const keys: string[] = cache.meta.themeDependentKeys
+    // resolve 不能（color-mix）でもテーマ依存であることは変わらない
+    expect(keys).toContain("semantic.surface.accent-primary-subtle")
+    expect(keys).toContain("semantic.border.accent-primary-subtle")
+    expect(keys).toContain("semanticDark.surface.accent-primary-subtle")
+    // skipped 側の値も実際に Brand primitive を参照していることを突合
+    const entry = cache.meta.skipped.find(
+      (e: { key: string; mode: string }) =>
+        e.mode === "semantic" && e.key === "surface.accent-primary-subtle"
+    )
+    expect(entry?.value).toContain("var(--Primitive-Brand-")
   })
 
   it("meta.generatedBy がスクリプトパスを指す", () => {

@@ -57,11 +57,12 @@ function walk(node, path, mode, resolved, skipped, themeDependentKeys) {
       continue
     }
     if (typeof value !== "string") continue
+    // Brand primitive 参照はテーマ差し替えで実色が変わる。resolve の成否とは独立に判定する
+    // （color-mix(var(--Primitive-Brand-*)) 等、skipped でもテーマ依存のエントリがある）。
+    if (isBrandDependent(value)) themeDependentKeys.push(`${mode}.${nextPath}`)
     const hex = resolveTokenColor(value, primitive)
     if (hex) {
       resolved[nextPath] = hex
-      // Brand primitive 参照はテーマ差し替えで実色が変わる（下の hex はデフォルト＝Blue テーマ値）
-      if (isBrandDependent(value)) themeDependentKeys.push(`${mode}.${nextPath}`)
     } else {
       skipped.push({ key: nextPath, mode, value, reason: classifySkipReason(value) })
     }
