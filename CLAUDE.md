@@ -94,6 +94,8 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 
 **`.tsx` を編集したら `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行すること。**
 
+Storybook 全体を横断で視覚監査する（定期監査・リリース前総点検・「全ページ確認して」）場合は `.claude/skills/audit-pages/SKILL.md` を使う。
+
 ---
 
 ## ディレクトリ構成
