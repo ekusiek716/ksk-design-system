@@ -11,16 +11,18 @@
 import { readFileSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
-import { resolveTokenColor } from "./lib/resolve-token-color.mjs"
+import { loadDefaultBrandRamp, resolveTokenColor } from "./lib/resolve-token-color.mjs"
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 const tokens = JSON.parse(readFileSync(join(root, "tokens.json"), "utf8"))
 const prim = tokens.colors.primitive
 const sem = tokens.colors.semantic
+// デフォルトテーマの Brand ランプの正本は src/styles/primitive.css
+const brandRamp = loadDefaultBrandRamp(root)
 
 // `var(--Primitive-Gray-900)` / `var(--Primitive-White)` / 生 hex を hex に解決
 function resolve(val) {
-  return resolveTokenColor(val, prim)
+  return resolveTokenColor(val, prim, brandRamp)
 }
 
 const srgb2lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4 }

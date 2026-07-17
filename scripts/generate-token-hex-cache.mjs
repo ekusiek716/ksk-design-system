@@ -22,7 +22,7 @@
 import { readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { isBrandDependent, resolveTokenColor } from "./lib/resolve-token-color.mjs"
+import { isBrandDependent, loadDefaultBrandRamp, resolveTokenColor } from "./lib/resolve-token-color.mjs"
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
 const OUT_PATH = join(ROOT, "contracts", "token-hex-cache.json")
@@ -31,6 +31,10 @@ const CHECK = process.argv.includes("--check")
 const tokens = JSON.parse(readFileSync(join(ROOT, "tokens.json"), "utf8"))
 const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"))
 const primitive = tokens.colors.primitive
+// デフォルトテーマの Brand ランプの正本は src/styles/primitive.css
+// （generate-platform-tokens.mjs と同じ扱い）。Blue パレットへのフォールバックだと
+// primitive.css の Brand 値が Blue と独立に変わったとき cache が古いまま検出できない。
+const brandRamp = loadDefaultBrandRamp(ROOT)
 
 // メタデータのみで「値」ではないキー（走査から除外する）
 const NON_COLOR_KEYS = new Set(["_doc", "hue"])
@@ -60,7 +64,7 @@ function walk(node, path, mode, resolved, skipped, themeDependentKeys) {
     // Brand primitive 参照はテーマ差し替えで実色が変わる。resolve の成否とは独立に判定する
     // （color-mix(var(--Primitive-Brand-*)) 等、skipped でもテーマ依存のエントリがある）。
     if (isBrandDependent(value)) themeDependentKeys.push(`${mode}.${nextPath}`)
-    const hex = resolveTokenColor(value, primitive)
+    const hex = resolveTokenColor(value, primitive, brandRamp)
     if (hex) {
       resolved[nextPath] = hex
     } else {

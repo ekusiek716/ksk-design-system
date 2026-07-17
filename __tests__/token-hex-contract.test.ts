@@ -84,6 +84,19 @@ describe("token-hex-cache", () => {
     }
   })
 
+  it("Brand 系の hex は正本 src/styles/primitive.css の --Primitive-Brand-* から解決される", () => {
+    const cache = loadCache()
+    const tokens = JSON.parse(readFileSync("tokens.json", "utf8"))
+    const css = readFileSync("src/styles/primitive.css", "utf8")
+    // brand.primary の参照 shade を tokens.json から取り、primitive.css の同 shade と突合
+    const ref: string = tokens.colors.semantic.brand.primary
+    const shade = ref.match(/^var\(--Primitive-Brand-(\d+)\)$/)?.[1]
+    expect(shade, `brand.primary が Brand 参照ではない: ${ref}`).toBeDefined()
+    const cssHex = css.match(new RegExp(`--Primitive-Brand-${shade}:\\s*(#[0-9A-Fa-f]{6})`))?.[1]
+    expect(cssHex, `primitive.css に --Primitive-Brand-${shade} が無い`).toBeDefined()
+    expect(cache.semantic["brand.primary"]).toBe(cssHex)
+  })
+
   it("skipped かつ Brand 依存のキー（color-mix(var(--Primitive-Brand-*)) 等）も themeDependentKeys に含まれる", () => {
     const cache = loadCache()
     const keys: string[] = cache.meta.themeDependentKeys

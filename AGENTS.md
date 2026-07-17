@@ -20,6 +20,7 @@ contracts/rules.json                     # 禁止パターン43件・AIアンチ
 contracts/components.json               # 全132コンポーネントの定義・バリアント・ルール
 contracts/design-context.json           # DESIGN.md と正本ファイルの関係・AI向け検査方針
 tokens.json                             # カラー・スペーシング・シャドウトークン
+contracts/token-hex-cache.json          # semantic トークンのデフォルトテーマ解決済み hex（テーマ依存キーは meta.themeDependentKeys 参照・自動生成）
 src/components/COMPONENT_LOOKUP.md      # バリアント・インポートパス一覧（自動生成）
 ```
 
