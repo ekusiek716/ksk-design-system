@@ -24,7 +24,7 @@
       "group": "standard",
       "purpose": "グロナビ・ヘッダーを保持したまま一覧/詳細情報を閲覧させる、最も基本的なページ骨格。",
       "dsComponents": ["AppShell", "MobileAppShell", "SectionHeader", "Card", "EmptyState", "Skeleton", "Pagination", "SimplePagination"],
-      "dsComponentsNote": "デスクトップは AppShell、モバイルは MobileAppShell。両対応が必要な画面は viewport で出し分ける（同一コンポーネント内で共存させない）。",
+      "dsComponentsNote": "シェルは「どちらの viewport を起点とするプロダクトか」で選ぶ。モバイル起点のアプリ（PWA 等）は MobileAppShell 一本で実装し、PC 対応は desktopSidebar slot に委ねる（sidebar は lg 以上で表示・bottomNav は lg 未満のみ、と同一シェル内で handoff する設計。stories の DesktopSidebarHandoff 参照）。デスクトップ起点の業務/Web ページは AppShell を使う。同一画面で AppShell と MobileAppShell を viewport 分岐で併用しない。",
       "navigation": { "globalNav": true, "breadcrumb": true, "header": true },
       "crud": ["read"],
       "whenToUse": [

@@ -20,7 +20,7 @@
       "rules": [
         "下部固定要素（BottomTabBar/MobileFloatingActionButton）分の余白は MobileAppShell の bottomPadding prop（\"bottom-nav\" | \"bottom-nav-fab\"）に持たせる。ページ側で pb-* を手書きしない（シェルとの二重計上を防ぐ）",
         "safe-area-inset-bottom の吸収はシェルの責務。消費側コンポーネントで env(safe-area-inset-bottom) を再実装しない",
-        "デスクトップ表示との両対応が要る場合は desktopSidebar slot を使う（AppShell への差し替えではなく同一シェル内で lg: 分岐する）"
+        "モバイル起点のプロダクトが PC 対応する場合は desktopSidebar slot を使い、同一シェル内で lg: 分岐する（screen-patterns.json の判断基準と同じ。デスクトップ起点の業務/Web ページであれば最初から AppShell を選ぶ — MobileAppShell からの差し替えや viewport 分岐での併用はしない）"
       ]
     },
     "desktop": {
