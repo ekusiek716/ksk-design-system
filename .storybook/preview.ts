@@ -146,6 +146,18 @@ const preview: Preview = {
         dynamicTitle: true,
       },
     },
+    kskDark: {
+      description: "ダークモード切替（semantic.css の .dark クラススコープを適用）",
+      toolbar: {
+        title: "Dark",
+        icon: "moon",
+        items: [
+          { value: "light", title: "Light", icon: "sun" },
+          { value: "dark",  title: "Dark",  icon: "moon" },
+        ],
+        dynamicTitle: true,
+      },
+    },
     kskHostile: {
       description: "敵対的コンテキスト（文脈非依存の漏れ検出）",
       toolbar: {
@@ -162,6 +174,7 @@ const preview: Preview = {
   },
   initialGlobals: {
     kskTheme: "default",
+    kskDark: "light",
     kskHostile: "off",
 
     backgrounds: {
@@ -188,6 +201,17 @@ const preview: Preview = {
     (Story, context) => {
       const theme = (context.globals.kskTheme as string) || "default"
       applyTheme(theme)
+      const dark = (context.globals.kskDark as string) === "dark"
+      document.documentElement.classList.toggle("dark", dark)
+      // backgrounds addon は .dark を知らないため、canvas 背景をダークトークンに追随させる
+      // （addon-backgrounds は !important で body 背景を塗るため、同じく !important で上書き）
+      if (dark) {
+        document.body.style.setProperty("background", "var(--Surface-Primary)", "important")
+        document.documentElement.style.setProperty("background", "var(--Surface-Primary)", "important")
+      } else {
+        document.body.style.removeProperty("background")
+        document.documentElement.style.removeProperty("background")
+      }
       return Story()
     },
   ],

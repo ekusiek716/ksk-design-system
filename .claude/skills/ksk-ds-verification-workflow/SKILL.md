@@ -14,6 +14,7 @@ description: KSK Design System で UI コードを生成・修正した「後」
 | 書く前のチェック項目 | CLAUDE.md 冒頭「実装前セルフチェック」 |
 | 禁止の内容・理由・トークン選択 | `.claude/skills/ksk-design-system/`（判断ルール本体） |
 | **検証の実行手順・レビュー運用・モデル分担** | 本スキル |
+| Storybook 全体の横断視覚監査（定期監査・リリース前総点検） | `.claude/skills/audit-pages/`（本スキルは実装直後の差分検証、audit-pages はストーリー群のバッチ巡回） |
 
 ## 1. rules.json 準拠チェック手順（実装後・レビュー時共通）
 
