@@ -79,6 +79,7 @@ git diff --name-only main -- '*.tsx' | xargs grep -nE '<検証したい pattern>
 3. **4テーマ前提を明示**: 「default/orange/green/violet(+cobalt) 全テーマで成立するか。1テーマでしか見ていない色指定は不合格」
 4. **消費側文脈を敵対的に想定**: 「Storybook で正しく見える、は合格条件ではない。濃色テキスト・色付き背景の親に置かれても崩れないか」
 5. **variant 上書きの繰り返しを設計課題として報告させる**: 「className 上書きが2回続いたら、その場しのぎを続けず variant 追加を提案しろ」
+6. **同型バグを直したら検出手段（スクリプト/テスト）を同時に追加させる**: 「このバグを直すだけでなく、`scripts/*.mjs` や `__tests__/` に再発検出を追加しろ。次に同じパターンが出た時に人力レビュー頼みにしない」（border 色, #142 の `check-border-color.mjs` / Celebration pointer-events, #143 の `pointer-events-mine.test.ts` で有効だった型）
 
 ## 5. 過去インシデント由来の判断基準（同型の再発防止）
 
@@ -89,3 +90,6 @@ git diff --name-only main -- '*.tsx' | xargs grep -nE '<検証したい pattern>
 - **アニメーション付き入力はちらつきを疑う**: 高さ・値が変わるフィールドは制御/非制御の混在でちらつく。変更後に実際に入力して確認（DateField, #111）
 - **検証スクリプトに列挙をハードコードしない**: テーマ・コンポーネント一覧はディレクトリ/正本から動的導出。追加時に検証が黙って対象外になるのが最悪の壊れ方（#112）
 - **外部レビュー（CodeRabbit 等）の指摘は severity を rules.json に照らして再判定**: DS の規約と矛盾する提案（Tailwind 標準色への「簡略化」等）は従わない
+- **`pointer-events-none`/`-auto` の親子ペアは consumer の Tailwind v4 `@source` が minified dist をスキャンする際に拾い漏れうる**: DS 内でしか出現しないクラスは consumer 側で CSS 生成されず、子のクリックが不能になる。一度 Calendar（#132/#134）で直しても Toast/MobileAppShell（#138）、Celebration（#143）と同型が他コンポーネントに残っていた。修正時は当該パターンを**リポジトリ全体で横断 grep**し、1箇所ずつ潰さない
+- **ラッパーコンポーネントは下位プリミティブの識別属性（`data-slot` 等）を `{...props}` spread で上書きしないか確認する**: BottomSheetFrame/SideDrawerFrame が独自の `data-slot` を渡し `SheetContent` の `data-slot="sheet-content"` を消していた。consumer が `[data-slot="..."]` 前提で書く CSS/`closest()` が丸ごとマッチしなくなる実害があった。フレーム識別は別属性（`data-frame` 等）に分離する（#139）
+- **無色 `border` の currentColor 汚染は cva の variant 個別対応だけでは終わらない**: base に既定色トークンがないコンポーネントが横断的に残っていないか、直した箇所以外も一括点検する（border color, #142）
