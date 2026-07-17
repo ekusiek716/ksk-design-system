@@ -117,8 +117,13 @@ extract_exports() {
       let m
       while ((m = re.exec(src))) {
         for (const tok of m[1].split(",")) {
-          const t = tok.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0].trim()
-          if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(t)) names.add(t)
+          // `Foo as Bar` は元名と alias（公開名）の両方を許容する
+          // （ドキュメントは公開名で言及するため alias 側が本命）
+          const base = tok.trim().replace(/^type\s+/, "")
+          for (const part of base.split(/\s+as\s+/)) {
+            const t = part.trim()
+            if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(t)) names.add(t)
+          }
         }
       }
       console.log([...names].join("\n"))
@@ -193,15 +198,62 @@ fi
 echo ""
 echo "─── CSS 変数名チェック ───"
 
+# CSS ファイルからは「宣言位置」（`--Name:` のプロパティ宣言）のみ抽出する。
+# `var(--X)` のような参照を定義扱いすると、未定義変数への参照まで
+# 「定義済み」と誤判定してしまうため。
+extract_css_declarations() {
+  local file="$1"
+  [ -f "$file" ] || return 0
+  grep -oE -- '(^|[{;])[[:space:]]*--[A-Za-z][A-Za-z0-9-]*[[:space:]]*:' "$file" \
+    | grep -oE -- '--[A-Za-z][A-Za-z0-9-]*' || true
+}
+
+# tokens.json は grep でなく node で JSON パースし、キーから
+# CSS 変数名を組み立てる（値内の var(--X) 参照や説明文を定義扱いしないため）。
+# 命名規約は scripts/generate-platform-tokens.mjs の pascalDash と同一。
+extract_tokens_json_vars() {
+  local file="$1"
+  [ -f "$file" ] || return 0
+  node -e '
+    const t = require(process.argv[1])
+    const out = new Set()
+    const pd = (k) => k.split("-").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join("-")
+    // primitive: colors.primitive.{family}.{shade} → --Primitive-{Family}-{shade}
+    for (const [fam, val] of Object.entries(t.colors?.primitive ?? {})) {
+      if (typeof val === "string") out.add(`--Primitive-${pd(fam)}`)
+      else for (const shade of Object.keys(val)) out.add(`--Primitive-${pd(fam)}-${shade}`)
+    }
+    // brand ランプ: colors.brand.{shade} → --Primitive-Brand-{shade}
+    for (const shade of Object.keys(t.colors?.brand ?? {})) out.add(`--Primitive-Brand-${shade}`)
+    // semantic / semanticDark: {category}.{role} → --{Category}-{Role}
+    for (const sem of [t.colors?.semantic, t.colors?.semanticDark]) {
+      if (!sem) continue
+      for (const [cat, roles] of Object.entries(sem)) {
+        if (cat.startsWith("_") || typeof roles !== "object" || roles == null) continue
+        if (cat === "brandExternal") continue // CSS 側と命名が異なるため CSS 宣言を正とする
+        for (const role of Object.keys(roles)) {
+          if (role.startsWith("_")) continue
+          out.add(`--${pd(cat)}-${pd(role)}`)
+        }
+      }
+    }
+    // shadows: shadows.{key} → --shadow-{key}
+    for (const k of Object.keys(t.shadows ?? {})) {
+      if (!k.startsWith("_")) out.add(`--shadow-${k}`)
+    }
+    console.log([...out].join("\n"))
+  ' "$file" 2>/dev/null || true
+}
+
 DEFINED_VARS_FILE="$(mktemp)"
 {
   for f in "$ROOT"/src/styles/*.css; do
-    [ -f "$f" ] && grep -oE -- '--[A-Za-z][A-Za-z0-9-]*' "$f" || true
+    extract_css_declarations "$f"
   done
-  [ -f "$ROOT/src/preset.css" ] && grep -oE -- '--[A-Za-z][A-Za-z0-9-]*' "$ROOT/src/preset.css" || true
-  [ -f "$ROOT/tokens.json" ] && grep -oE -- '--[A-Za-z][A-Za-z0-9-]*' "$ROOT/tokens.json" || true
+  extract_css_declarations "$ROOT/src/preset.css"
+  extract_tokens_json_vars "$ROOT/tokens.json"
   for f in "$ROOT"/src/themes/*.css; do
-    [ -f "$f" ] && grep -oE -- '--[A-Za-z][A-Za-z0-9-]*' "$f" || true
+    extract_css_declarations "$f"
   done
 } | sort -u > "$DEFINED_VARS_FILE"
 
@@ -216,13 +268,12 @@ for doc in "${DOCS[@]}"; do
     line_no="${entry%%:*}"
     content="${entry#*:}"
 
-    # プレースホルダー行（--{Category} や --Categorical-{1..16} 等の範囲/汎用表記、
-    # --Surface-* のようなワイルドカード表記）はスキップ
-    if echo "$content" | grep -qE -- '--[A-Za-z0-9-]*(\{|\*)'; then
-      continue
-    fi
+    # プレースホルダー表現のトークンだけを除去してから残りを検証する
+    # （--Surface-* / --Categorical-{1..16} / --{Category}-{Role} 等。
+    #  行ごとスキップすると同一行の本物の typo が素通りするため、トークン単位で除去）
+    sanitized=$(echo "$content" | sed -E 's/--[A-Za-z0-9-]*(\{[^}]*\}|\*)[A-Za-z0-9*{},.-]*//g')
 
-    vars=$(echo "$content" | grep -oE -- '--[A-Za-z][A-Za-z0-9-]*' || true)
+    vars=$(echo "$sanitized" | grep -oE -- '--[A-Za-z][A-Za-z0-9-]*' || true)
     [ -z "$vars" ] && continue
     while IFS= read -r var; do
       [ -z "$var" ] && continue
