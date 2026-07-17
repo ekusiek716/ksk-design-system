@@ -70,7 +70,7 @@ GitHub Releases にコピペできるテンプレ:
 
 ```md
 ### Breaking Changes
-- `OldComponent` を削除。`NewComponent` を使ってください。
+- `OldComponent` を削除。`NewComponent` を使ってください。<!-- docs-drift-ignore: 記入例のプレースホルダー名 -->
   自動移行: `npx ksk-design-system codemod v1-to-v2 ./src`
 - 詳細: [MIGRATION.md](./MIGRATION.md)
 ```
