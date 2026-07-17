@@ -48,6 +48,7 @@ echo "======================================="
 
 # ─── 対象ドキュメントを配列にまとめる（存在するものだけ） ───
 CANDIDATE_DOCS=(
+  "README.md"
   "CLAUDE.md"
   "AGENTS.md"
   "DESIGN.md"
@@ -101,7 +102,12 @@ echo ""
 echo "─── コンポーネント名チェック ───"
 
 # ホワイトリスト（一般語・技術用語・略語）
-WHITELIST_RE='^(API|URL|URI|JSON|CSS|HTML|HIG|M3|AI|React|TypeScript|Tailwind|Storybook|Radix|CVA|WCAG|CVD|PascalCase|Props|Provider|DOM|SDK|CLI|PR|CI|CD|JSX|TSX|SVG|PNG|UI|UX|DS|ID|SSR|CSR|npm|Node|Vite|ESLint|Figma|GitHub|Slack|README|CHANGELOG|TODO|FIXME|NOTE|WARN|ERROR|OK|NG|MIT|Apache|BSD|POSIX|YAML|XML|CSV|PDF|SVG|OS|iOS|Android|macOS|Windows|Linux|RGB|RGBA|HSL|HEX|CTA|KPI|MVP|POC|SaaS|BtoB|BtoC|EC|PdM|QA|E2E|Vitest|Jest|Playwright|Zustand|Redux|Context|Hook|Hooks|HOC|Ref|Refs|State|Props|Children|Fragment|Portal|Suspense|StrictMode|ThemeProvider|Codex|Claude|Anthropic|Fable|Opus|Sonnet|Haiku|ActivityIndicator|ScrollView|FlatList|SectionList|TouchableOpacity|TouchableHighlight|SafeAreaView|StyleSheet|Animated|Dimensions|Platform|StatusBar|KeyboardAvoidingView|Pressable|TextInput)$'
+WHITELIST_RE='^(API|URL|URI|JSON|CSS|HTML|HIG|M3|AI|React|TypeScript|Tailwind|Storybook|Radix|CVA|WCAG|CVD|PascalCase|Props|Provider|DOM|SDK|CLI|PR|CI|CD|JSX|TSX|SVG|PNG|UI|UX|DS|ID|SSR|CSR|npm|Node|Vite|ESLint|Figma|GitHub|Slack|README|CHANGELOG|TODO|FIXME|NOTE|WARN|ERROR|OK|NG|MIT|Apache|BSD|POSIX|YAML|XML|CSV|PDF|SVG|OS|iOS|Android|macOS|Windows|Linux|RGB|RGBA|HSL|HEX|CTA|KPI|MVP|POC|SaaS|BtoB|BtoC|EC|PdM|QA|E2E|Vitest|Jest|Playwright|Zustand|Redux|Context|Hook|Hooks|HOC|Ref|Refs|State|Props|Children|Fragment|Portal|Suspense|StrictMode|ThemeProvider|Codex|Claude|Anthropic|Fable|Opus|Sonnet|Haiku|ActivityIndicator|ScrollView|FlatList|SectionList|TouchableOpacity|TouchableHighlight|SafeAreaView|StyleSheet|Animated|Dimensions|Platform|StatusBar|KeyboardAvoidingView|Pressable|TextInput|View|Image|Modal|Switch|Notion)$'
+
+# コード例中のプレースホルダー名パターン:
+#  - `<HeartIcon />` 等の *Icon はアイコン例（実物は iconsax-reactjs から import され DS export ではない）
+#  - `<HomeScreen />` 等の *Screen は利用者側アプリの画面例
+PLACEHOLDER_NAME_RE='^[A-Z][A-Za-z0-9]*(Icon|Screen)$'
 
 extract_exports() {
   local file="$1"
@@ -144,11 +150,26 @@ for doc in "${DOCS[@]}"; do
   while IFS= read -r entry; do
     line_no="${entry%%:*}"
     content="${entry#*:}"
-    names=$(echo "$content" | grep -oE '`[A-Z][a-zA-Z]+`' | tr -d '`' || true)
+    # 抽出対象は3系統:
+    #  a) backtick 内の PascalCase 単独語（`Button` 等）
+    #  b) JSX タグ（<Button ...> 等。<Tab.Navigator> のような名前空間タグは除外）
+    #  c) ksk-design-system からの import 文の named import
+    backtick_names=$(echo "$content" | grep -oE '`[A-Z][a-zA-Z]+`' | tr -d '`' || true)
+    jsx_names=$(echo "$content" | grep -oE '<[A-Z][A-Za-z0-9]*[.]?' | grep -v '\.$' | tr -d '<' || true)
+    import_names=""
+    if echo "$content" | grep -qE 'from ["'"'"']ksk-design-system'; then
+      import_names=$(echo "$content" | grep -oE '\{[^}]*\}' | tr -d '{}' | tr ',' '\n' \
+        | sed -E 's/^[[:space:]]*type[[:space:]]+//; s/[[:space:]]+as[[:space:]]+/\n/; s/[[:space:]]//g' \
+        | grep -E '^[A-Za-z_][A-Za-z0-9_]*$' || true)
+    fi
+    names=$(printf '%s\n%s\n%s\n' "$backtick_names" "$jsx_names" "$import_names" | grep -v '^$' | sort -u || true)
     [ -z "$names" ] && continue
     while IFS= read -r name; do
       [ -z "$name" ] && continue
       if echo "$name" | grep -qE "$WHITELIST_RE"; then
+        continue
+      fi
+      if echo "$name" | grep -qE "$PLACEHOLDER_NAME_RE"; then
         continue
       fi
       if ! grep -qxF -- "$name" "$KNOWN_NAMES_FILE"; then
@@ -259,7 +280,7 @@ DEFINED_VARS_FILE="$(mktemp)"
 
 # CLI フラグ等、CSS 変数と紛らわしいが実際は無関係な誤検知の除外リスト
 # （`--dry-run` `--access` `--force` 等。ドキュメント中のコマンド例に頻出）
-CSS_VAR_FALSE_POSITIVE_RE='^--(dry-run|dry|access|force|quiet|tags|name-only|noEmit|no-verify|save-dev)$'
+CSS_VAR_FALSE_POSITIVE_RE='^--(dry-run|dry|access|force|quiet|tags|name-only|noEmit|no-verify|save-dev|format|changed|json|range|check|watch|help|version)$'
 
 CSS_VAR_ERRORS=0
 for doc in "${DOCS[@]}"; do
