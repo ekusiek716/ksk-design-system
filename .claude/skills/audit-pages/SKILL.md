@@ -21,31 +21,38 @@ argument-hint: "[story-id または glob。省略で全ストーリー]"
 
 ## STEP 1 — 静的解析（機械）
 
-独自の grep を書かず既存スクリプトを呼ぶ:
+独自の grep を書かず既存スクリプトを呼ぶ。
+
+**注意**: `scripts/lint-scratch.sh` は**無引数だと `*.stories.tsx` を除外する**（スクリプト内の find に `-not -name '*.stories.tsx'` がある）。ストーリーを検査するには監査対象の `.stories.tsx` を**明示的に引数で渡す**こと（引数ありモードは渡したファイルをそのまま検査する）:
 
 ```bash
+# 対象ストーリーを引数で渡す（全件なら find で列挙して渡す）
+find src -name '*.stories.tsx' | xargs bash scripts/lint-scratch.sh
+# 実装本体側の通常検査（無引数 = stories 除外の全 .tsx）
 bash scripts/lint-scratch.sh
 bash scripts/check-story-reuse.sh
 node scripts/check-contrast.mjs
 ```
 
-検出があれば STEP 3 の修正対象リストに積む。
+`check-story-reuse.sh` のカバー範囲は限定的（ストーリー内の DS コンポーネント再利用チェックのみ）なので、拾えない視覚崩れは STEP 2 の目視確認が補完する。検出があれば STEP 3 の修正対象リストに積む。
 
 ## STEP 2 — 視覚確認（目視・ブラウザツール）
 
 `npm run storybook` を起動（ポートは `package.json` の `"storybook": "storybook dev -p 6010"` を正とする。現状 **6010**）。
 
-Storybook Manager UI 経由ではなく iframe.html 直アクセスで globals を固定する。URL パターン（`.storybook/preview.ts` の `globalTypes` キー名 `kskTheme` / `kskHostile` に準拠）:
+Storybook Manager UI 経由ではなく iframe.html 直アクセスで globals を固定する。URL パターン（`.storybook/preview.ts` の `globalTypes` キー名 `kskTheme` / `kskDark` / `kskHostile` に準拠）:
 
 ```
-http://localhost:6010/iframe.html?id=<story-id>&globals=kskTheme:default;kskHostile:<off|ink|loud>
+http://localhost:6010/iframe.html?id=<story-id>&globals=kskTheme:default;kskDark:<light|dark>;kskHostile:<off|ink|loud>
 ```
+
+ダークモードは `kskDark:dark` を指定する。preview.ts のデコレータが `document.documentElement` に `dark` クラスを付与し、`src/styles/semantic.css` の `.dark` スコープのダークトークンが適用される（OS/ブラウザの prefers-color-scheme では切り替わらないので使わない）。
 
 各ストーリーを Claude Code のブラウザツール群（resize_window / navigate / computer screenshot 等）で **4パターン**確認する:
 
-1. **SP 375px × ダークモード**（`resize_window` で 375 幅に設定。ダークモードは OS/ブラウザ側のカラースキームで切り替え。DS 自体のダーク対応は各コンポーネントの CSS 変数解決に依存するため、コンポーネントがダーク値を持つ場合のみ意味を持つ — 無ければ通常表示との差分なしを確認するだけでよい）
+1. **SP 375px × ダークモード**（`resize_window` で 375 幅、URL に `kskDark:dark`）
 2. **600px（SP/PC 境界）× ライト**
-3. **PC（1280px 目安）× ダークモード**
+3. **PC（1280px 目安）× ダークモード**（`kskDark:dark`）
 4. **Hostile ctx を loud × ライト** — URL の `kskHostile:loud` を指定して読み込む
 
 ### 確認観点チェックリスト
