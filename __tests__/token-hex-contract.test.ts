@@ -43,12 +43,37 @@ describe("token-hex-cache", () => {
     expect(cache.meta.skipped.length).toBeLessThanOrEqual(70)
   })
 
-  it("skipped エントリは key/value/reason を持つ", () => {
+  it("skipped エントリは key/mode/value/reason を持ち、mode で light/dark を区別できる", () => {
     const cache = loadCache()
     for (const entry of cache.meta.skipped) {
       expect(entry).toHaveProperty("key")
       expect(entry).toHaveProperty("value")
       expect(entry).toHaveProperty("reason")
+      expect(["semantic", "semanticDark"]).toContain(entry.mode)
+    }
+    // mode を含めたキーは一意（同名トークンが semantic / semanticDark で重複しても区別できる）
+    const uniqueKeys = new Set(cache.meta.skipped.map((e: { key: string; mode: string }) => `${e.mode}.${e.key}`))
+    expect(uniqueKeys.size).toBe(cache.meta.skipped.length)
+  })
+
+  it("meta.theme が default（キャッシュはデフォルトテーマスコープ）", () => {
+    const cache = loadCache()
+    expect(cache.meta.theme).toBe("default")
+    expect(cache.meta.description).toContain("デフォルト")
+  })
+
+  it("themeDependentKeys が Brand 依存エントリを列挙し、実在キーを指す", () => {
+    const cache = loadCache()
+    const keys: string[] = cache.meta.themeDependentKeys
+    // brand.primary は必ず Brand primitive 参照（テーマ依存の代表例）
+    expect(keys).toContain("semantic.brand.primary")
+    expect(keys.length).toBeGreaterThanOrEqual(10)
+    for (const key of keys) {
+      const [mode, ...rest] = key.split(".")
+      expect(["semantic", "semanticDark"]).toContain(mode)
+      const flatKey = rest.join(".")
+      // キー自体にドットを含むため toHaveProperty（ドットをパス区切りと解釈する）は使わない
+      expect(cache[mode][flatKey], key).toBeDefined()
     }
   })
 

@@ -17,6 +17,17 @@
  * @param {Record<string, string | Record<string, string>>} primitive tokens.json の colors.primitive
  * @returns {string | null} 解決できた hex、できなければ null（rgba/color-mix/未知の var 等）
  */
+/**
+ * 値が `var(--Primitive-Brand-*)` を参照しているか（＝テーマ差し替えで実色が変わるか）。
+ * デフォルト（Blue）テーマ以外では resolveTokenColor の返す hex と実際の表示色が異なる。
+ *
+ * @param {string} val 判定対象の値
+ * @returns {boolean}
+ */
+export function isBrandDependent(val) {
+  return typeof val === "string" && /var\(--Primitive-Brand-/.test(val)
+}
+
 export function resolveTokenColor(val, primitive) {
   if (!val) return null
   if (val.startsWith("#")) return val

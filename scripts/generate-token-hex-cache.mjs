@@ -22,7 +22,7 @@
 import { readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { resolveTokenColor } from "./lib/resolve-token-color.mjs"
+import { isBrandDependent, resolveTokenColor } from "./lib/resolve-token-color.mjs"
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
 const OUT_PATH = join(ROOT, "contracts", "token-hex-cache.json")
@@ -48,30 +48,33 @@ function classifySkipReason(value) {
  * semantic / semanticDark のネストされたオブジェクトを走査し、
  * resolve 可能なエントリと skip されたエントリに分ける。
  */
-function walk(node, path, resolved, skipped) {
+function walk(node, path, mode, resolved, skipped, themeDependentKeys) {
   for (const [key, value] of Object.entries(node)) {
     if (NON_COLOR_KEYS.has(key)) continue
     const nextPath = path ? `${path}.${key}` : key
     if (value && typeof value === "object" && !Array.isArray(value)) {
-      walk(value, nextPath, resolved, skipped)
+      walk(value, nextPath, mode, resolved, skipped, themeDependentKeys)
       continue
     }
     if (typeof value !== "string") continue
     const hex = resolveTokenColor(value, primitive)
     if (hex) {
       resolved[nextPath] = hex
+      // Brand primitive 参照はテーマ差し替えで実色が変わる（下の hex はデフォルト＝Blue テーマ値）
+      if (isBrandDependent(value)) themeDependentKeys.push(`${mode}.${nextPath}`)
     } else {
-      skipped.push({ key: nextPath, value, reason: classifySkipReason(value) })
+      skipped.push({ key: nextPath, mode, value, reason: classifySkipReason(value) })
     }
   }
 }
 
 function buildCache() {
   const skipped = []
+  const themeDependentKeys = []
   const semantic = {}
   const semanticDark = {}
-  walk(tokens.colors.semantic, "", semantic, skipped)
-  walk(tokens.colors.semanticDark, "", semanticDark, skipped)
+  walk(tokens.colors.semantic, "", "semantic", semantic, skipped, themeDependentKeys)
+  walk(tokens.colors.semanticDark, "", "semanticDark", semanticDark, skipped, themeDependentKeys)
 
   return {
     meta: {
@@ -79,9 +82,14 @@ function buildCache() {
       version: pkg.version,
       description:
         "semantic / semanticDark トークン（var(--Primitive-*) 参照）を実 hex に解決したサイドカー生成物。" +
+        "hex はデフォルト（Blue）テーマでの解決値であり、Brand 系（meta.themeDependentKeys に列挙）は" +
+        "テーマ差し替え（orange/green/violet 等）で実色が変わる。テーマ別の完全解決値は " +
+        "src/tokens/native/tokens.native.json（generate-platform-tokens.mjs）を参照。" +
         "tokens.json 本体のスキーマは変更せず、AI がこのファイルだけで実色を把握できるようにし、" +
         "primitive 値の変更による semantic 実色のドリフトを --check で機械検出する。",
       generatedBy: "scripts/generate-token-hex-cache.mjs",
+      theme: "default",
+      themeDependentKeys,
       skipped,
     },
     semantic,
