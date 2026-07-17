@@ -69,6 +69,11 @@ DEFAULT_REPOS=(
 GREEN='\033[0;32m'; RED='\033[0;31m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
 RESULTS=()
 
+# 中断（Ctrl-C 等）時も処理中リポの一時 worktree を残さない。
+# cleanup はループ内で毎回 $repo / $wt を掴んで再定義される。
+cleanup() { :; }
+trap 'cleanup' EXIT INT TERM
+
 # ── 引数 → 対象リポのパス解決 ──
 resolve_repo() {
   local arg="$1"
@@ -224,6 +229,8 @@ for repo in "${REPOS[@]}"; do
   # 書き換えた package.json 群・全 lockfile・vendor の git rm はいずれも
   # 追跡ファイルの変更なので git add -u で拾える。
   git -C "$wt" add -u >/dev/null 2>&1
+  # lockfile が新規生成された場合は -u で拾えないので明示的に add
+  git -C "$wt" add -- 'package-lock.json' ':(glob)**/package-lock.json' >/dev/null 2>&1
   if git -C "$wt" diff --staged --quiet; then
     echo -e "${YELLOW}→ 変更なし${NC}"
     cleanup
@@ -231,11 +238,16 @@ for repo in "${REPOS[@]}"; do
     continue
   fi
 
-  git -C "$wt" commit -m "chore: ksk-design-system を v$VERSION に bump
+  if ! git -C "$wt" commit -m "chore: ksk-design-system を v$VERSION に bump
 
 - package.json の ksk-design-system 依存を ^$VERSION に更新（monorepo は全 package.json）
 - package-lock.json を npm registry のメタ情報で更新
-- vendor/ksk-design-system-*.tgz が残っていれば削除（過去版は git history で追える）" >/dev/null 2>&1
+- vendor/ksk-design-system-*.tgz が残っていれば削除（過去版は git history で追える）" >/dev/null 2>&1; then
+    echo -e "${RED}FAIL: commit（pre-commit hook / git identity 等）${NC}"
+    cleanup
+    RESULTS+=("$name: FAIL (commit)")
+    continue
+  fi
 
   # ── DRY_RUN: push/PR せず要約して掃除 ──
   if [ -n "${DRY_RUN:-}" ]; then
@@ -247,7 +259,9 @@ for repo in "${REPOS[@]}"; do
   fi
 
   # ── push ──
-  # 再実行時に既存 remote branch と衝突しうるため --force-with-lease
+  # 再実行時に既存 remote branch と衝突しうるため --force-with-lease。
+  # lease の基準になる remote-tracking ref を最新化しておく（無ければ新規ブランチなので無視）
+  git -C "$wt" fetch origin "$branch" >/dev/null 2>&1
   if ! git -C "$wt" push -u --force-with-lease origin "$branch" >/dev/null 2>&1; then
     echo -e "${RED}FAIL: push${NC}"
     cleanup
