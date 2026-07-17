@@ -158,3 +158,7 @@ bash scripts/update-consumers.sh <version> <影響リポ...>
 v1.36.0 以降は npm registry 経由配布。GitHub Actions による自動 publish はなく、
 ローカルの `npm login` 済み環境から `scripts/release.sh` で公開する。
 CI/CD に戻す場合は、NPM_TOKEN の Secrets 登録と workflow の再作成をセットで行うこと。
+
+## 関連
+
+- [UPDATING.md](./UPDATING.md) — 消費側（DS を npm 依存に持つプロジェクト）向けのアップデート手順
