@@ -26,7 +26,7 @@
 - **P008 生 `#hex`** → `var(--...)`。テーマ切替・dark 反転に追随しない死に色になる
 - **P009 Tailwind 標準色（`bg-blue-500` 等）** → 同上。しかも「たまたま今のテーマと似た色」が選ばれるため、テーマを替えた瞬間だけ破綻して発見が遅れる
 - **P010 `text-white` / `bg-white`** → `text-[var(--Text-on-Inverse)]` / `bg-[var(--Surface-Primary)]`。dark モードで白背景が残留する典型源
-- **P015 `--Primitive-Brand` 直接使用** → `var(--Brand-Primary)` 等。Primitive 直参照は「どの shade を使うか」の判断が画面ごとにバラけ、hover/active の段階設計（600/700/800）を破壊する
+- **P015 `--Primitive-Brand` 直接使用** <!-- docs-drift-ignore: --Primitive-Brand --> → `var(--Brand-Primary)` 等。Primitive 直参照は「どの shade を使うか」の判断が画面ごとにバラけ、hover/active の段階設計（600/700/800）を破壊する
 - **P018 `text-black`** → `text-[var(--Text-High-Emphasis)]`。純黒 #000 は DS に存在しない（最暗は Gray-900）。dark でも反転しない
 
 ## typography（P011, P016, P017）
