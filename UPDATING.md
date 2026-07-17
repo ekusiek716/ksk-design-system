@@ -60,10 +60,10 @@ npm install ksk-design-system@latest
 # 4. 非推奨 API の残存を検査（read-only。書き換えは行わない）
 npx ksk-design-system check-migration ./src
 
-# 5. 検出があれば MIGRATION.md を確認し、必要に応じて codemod を適用
-npx ksk-design-system codemod vX-to-vY ./src --dry   # まず dry-run
-npx ksk-design-system codemod vX-to-vY ./src         # 問題なければ適用
-git diff   # 意図通りか必ず目視確認
+# 5. 検出があれば MIGRATION.md の該当バージョン節の手順に従って移行する
+#    （codemod が提供されているバージョンは MIGRATION.md に実行コマンドが記載される。
+#      提供がないバージョンは MIGRATION.md の before/after に沿って手動で置換）
+git diff   # 移行で src を書き換えた場合は意図通りか必ず目視確認
 
 # 6. ビルド・lint・テスト
 npm run build
@@ -74,7 +74,9 @@ npm test
 npm run dev   # または storybook 等、対象プロジェクトの起動コマンド
 
 # 8. commit / push / PR
+#    依存ファイルに加え、移行（codemod / 手動置換）で書き換えたソースも忘れずに stage する
 git add package.json package-lock.json
+git add <移行で変更した src 配下のファイル>   # 変更がある場合。git status で漏れがないか確認
 git commit -m "chore: ksk-design-system を <version> に更新"
 git push -u origin chore/bump-ds-<version>
 gh pr create
@@ -112,10 +114,14 @@ git diff package.json package-lock.json   # 意図通り戻ったか確認
 または `npm install` 後もバージョンが変わらない場合:
 
 ```bash
-npm cache clean --force
-rm -rf node_modules package-lock.json
-npm install
+npm cache verify                                  # まずキャッシュの整合性を確認
+npm install ksk-design-system@<version>           # バージョンを明示して再取得
 ```
+
+publish 直後は registry への反映に数分かかることがあるため、少し待ってから再実行する。
+それでも解決しない場合は `npm cache clean --force` の後に上記の再取得を試す。
+**追跡済みの `package-lock.json` を削除しないこと**（lockfile 全体が再生成され、
+無関係な依存まで差分に混ざる）。
 
 ### peer dependency 警告
 
