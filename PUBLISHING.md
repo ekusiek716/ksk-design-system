@@ -5,7 +5,8 @@
 > **配布方式**: v1.36.0 以降は npm レジストリ経由で配布する。
 > `npm publish --access public` で公開し、各消費リポジトリの
 > `package.json` は `ksk-design-system@X.Y.Z` を参照する。
-> 消費リポ: belle-todo / trip_todo / ninshin-todo / yokoku-app / pawly（いずれも `~/LocalDev/` 直下）。
+> 対象の消費リポ一覧は `scripts/update-consumers.sh` の `DEFAULT_REPOS` が正本
+> （単体リポ・monorepo が混在し、`~/LocalDev/` と `~/LocalDev/Examination/` 配下にまたがる）。
 
 ## 前提
 
@@ -26,7 +27,7 @@ bash scripts/release.sh minor   # patch / minor / major / x.y.z
 4. `npm pack`（prepack で `dist/` を生成し、中身を検証）
 5. `npm publish --access public`
 6. `git push origin main --tags`
-7. `bash scripts/update-consumers.sh <version>`（5 リポへ PR 自動作成）
+7. `bash scripts/update-consumers.sh <version>`（`DEFAULT_REPOS` の全消費リポへ PR 自動作成）
 
 > v1.35.0 で旧名 `@ksk/design-system` 互換 tgz の生成は廃止。
 > 消費5リポ + todo-shared が新名 `ksk-design-system` に移行済。
