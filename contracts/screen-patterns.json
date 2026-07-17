@@ -1,0 +1,228 @@
+{
+  "meta": {
+    "name": "KSK Design System — Screen Pattern Contracts",
+    "version": "0.1.0",
+    "description": "画面実装前に「どのシェル/パターンを使い、どのように画面を構成するか」を決めるための機械可読契約。patterns[].dsComponents は contracts/components.json の実在名（ui / patterns / commerce / admin / shells）と一致すること（scripts/check-screen-contracts.mjs で検証）。役割分離: 本ファイル = どのパターン（シェル・画面骨格・crud・遷移）を使うか、contracts/composition.json = 選んだパターン内部の要素をどう並べるか（骨格の構造・余白リズム・カード階層・テキスト階層・CTA優先度）。両者は decisionTree（本ファイル）→ pageSkeletons（composition.json）の順で参照する。"
+  },
+  "model": {
+    "axes": {
+      "shell": {
+        "standard": "AppShell / MobileAppShell / AdminShell / MarketingShell によるグロナビ・パンくず・ヘッダーを備えた通常ページ骨格",
+        "focused": "グロナビ無し。単一タスクへの集中を優先する編集/ウィザード/オンボーディング画面。既存シェルの nav 系 prop を渡さない構成、または Screen パターンで実装する",
+        "overlay": "現在のページ骨格を維持したまま前面に重ねる Dialog / Sheet / AlertDialog / ResponsiveDialog"
+      },
+      "mode": {
+        "view": "閲覧・一覧・詳細表示。破壊的操作を伴わない",
+        "edit": "作成・編集・削除など状態を変更する操作を伴う"
+      }
+    }
+  },
+  "patterns": [
+    {
+      "id": "standard-page-view",
+      "name": "標準ページ（閲覧）",
+      "group": "standard",
+      "purpose": "グロナビ・ヘッダーを保持したまま一覧/詳細情報を閲覧させる、最も基本的なページ骨格。",
+      "dsComponents": ["AppShell", "MobileAppShell", "SectionHeader", "Card", "EmptyState", "Skeleton", "Pagination", "SimplePagination"],
+      "dsComponentsNote": "シェルは「どちらの viewport を起点とするプロダクトか」で選ぶ。モバイル起点のアプリ（PWA 等）は MobileAppShell 一本で実装し、PC 対応は desktopSidebar slot に委ねる（sidebar は lg 以上で表示・bottomNav は lg 未満のみ、と同一シェル内で handoff する設計。stories の DesktopSidebarHandoff 参照）。デスクトップ起点の業務/Web ページは AppShell を使う。同一画面で AppShell と MobileAppShell を viewport 分岐で併用しない。",
+      "navigation": { "globalNav": true, "breadcrumb": true, "header": true },
+      "crud": ["read"],
+      "whenToUse": [
+        "一覧・詳細・ダッシュボードなど閲覧中心のページ",
+        "グロナビ経由でユーザーが自由に行き来する画面"
+      ],
+      "whenNotToUse": [
+        "編集・作成操作が主目的 → standard-page-edit",
+        "管理画面のテーブル中心操作 → admin-workspace",
+        "単一タスクに集中させたい → focused-workspace"
+      ],
+      "examples": ["ダッシュボード", "商品一覧", "設定トップ"]
+    },
+    {
+      "id": "standard-page-edit",
+      "name": "標準ページ（編集）",
+      "group": "standard",
+      "purpose": "グロナビを保持したまま、フォームによる作成・編集を行うページ骨格。",
+      "dsComponents": ["AppShell", "MobileAppShell", "Form", "FormField", "StickyActionBar", "SectionHeader"],
+      "dsComponentsNote": "Form（src/components/patterns/form.tsx）が FormRoot/FormSection/FormActions をエクスポートする。保存/キャンセルの CTA はスクロールに追従させたい場合 StickyActionBar、通常のページ末尾に置く場合は Form の FormActions を使う。",
+      "navigation": { "globalNav": true, "breadcrumb": true, "header": true },
+      "crud": ["create", "update"],
+      "whenToUse": [
+        "グロナビの文脈を保ったまま完結する編集フォーム",
+        "他ページへの遷移や参照をしながら編集する場合"
+      ],
+      "whenNotToUse": [
+        "他タスクへの気が散る要素を排除したい → focused-workspace",
+        "軽量な単項目編集・確認 → responsive-dialog"
+      ],
+      "examples": ["プロフィール編集ページ", "商品編集ページ"]
+    },
+    {
+      "id": "admin-workspace",
+      "name": "管理ワークスペース",
+      "group": "admin",
+      "purpose": "サイドバー + テーブル中心の管理画面。大量データの一覧・絞り込み・一括操作を行う。",
+      "dsComponents": ["AdminShell", "DataTable", "SearchPanel", "StatusTabs", "BulkActions", "ChartControls", "KebabMenu", "NotificationList", "ImageUploader"],
+      "dsComponentsNote": "AdminShell の sidebar/header slot を必ず埋める。テーブル本体は DataTable の Cell API（DataTableActionCell 等）を使い、生 <table> やセル div を書かない。",
+      "navigation": { "globalNav": true, "breadcrumb": true, "header": true },
+      "crud": ["create", "read", "update", "delete"],
+      "whenToUse": [
+        "多数のレコードを一覧・検索・一括操作する管理画面",
+        "PC 前提のバックオフィス/ダッシュボード業務"
+      ],
+      "whenNotToUse": [
+        "モバイル対応が必須の一般ユーザー向け画面 → standard-page-view / MobileAppShell",
+        "単発の詳細編集のみ → responsive-dialog"
+      ],
+      "examples": ["注文管理", "ユーザー管理", "在庫管理"]
+    },
+    {
+      "id": "focused-workspace",
+      "name": "集中ワークスペース（グロナビ無し）",
+      "group": "focused",
+      "purpose": "オンボーディング・ウィザード・決済フローなど、他ページへの離脱経路を断って単一タスクに集中させる画面。",
+      "dsComponents": ["Screen", "ProgressSteps", "Form", "StickyActionBar", "NavigationBar"],
+      "dsComponentsNote": "ksk には専用の FocusedShell は無い。実装ガイド: AppShell/MobileAppShell を使う場合は topBar/header に戻る導線のみを置きグロナビ本体（複数メニュー項目・タブ）は渡さない。より軽量にしたい場合は Screen パターン（ScrollableWithFooter/WithHeader）を直接使い、ページ上部に NavigationBar（戻る/閉じるのみ）を置く。",
+      "navigation": { "globalNav": false, "breadcrumb": false, "header": true },
+      "crud": ["create", "update"],
+      "whenToUse": [
+        "複数ステップのウィザード・オンボーディング",
+        "決済・申込など離脱率を下げたいフロー",
+        "編集中の意図しない離脱を防ぎたい重要な作成/編集"
+      ],
+      "whenNotToUse": [
+        "他ページへの回遊を許容してよい通常の編集 → standard-page-edit",
+        "1〜2項目の軽量な入力のみ → responsive-dialog"
+      ],
+      "examples": ["会員登録ウィザード", "決済フロー", "初回セットアップ"]
+    },
+    {
+      "id": "responsive-dialog",
+      "name": "レスポンシブダイアログ",
+      "group": "overlay",
+      "purpose": "現在の画面を維持したまま前面に重ねる軽量な作成/編集/詳細確認 UI。PC/モバイルでコンポーネントを出し分ける。",
+      "dsComponents": ["ResponsiveDialog", "Dialog", "Sheet", "BottomSheetForm", "DetailSheetScaffold", "FormField"],
+      "dsComponentsNote": "PC/モバイル自動切替が必要な場合は ResponsiveDialog を第一候補にする（PC=Dialog相当・モバイル=Sheet相当を内部で出し分ける）。フォーム系のボトムシートは BottomSheetForm、閲覧+編集の detail sheet は DetailSheetScaffold を使う。ResponsiveDialog を使わず自前で Dialog と Sheet を viewport 分岐する場合は、両方に同じ内容を実装し片方だけ更新して差分が出ないよう注意する。",
+      "navigation": { "globalNav": false, "breadcrumb": false, "header": false },
+      "crud": ["create", "read", "update"],
+      "whenToUse": [
+        "一覧から離脱せず完了できる軽量な作成/編集",
+        "1〜数項目の入力・詳細プレビュー"
+      ],
+      "whenNotToUse": [
+        "破壊的操作の確認 → alert-dialog",
+        "複数ステップの重い編集フロー → focused-workspace"
+      ],
+      "examples": ["タスクのクイック編集", "商品詳細のクイックビュー", "コメント追加"]
+    },
+    {
+      "id": "alert-dialog",
+      "name": "確認ダイアログ",
+      "group": "overlay",
+      "purpose": "削除・取り消しなど不可逆/破壊的操作の意図確認、または処理不能を伝える1アクションの確認。",
+      "dsComponents": ["AlertDialog", "ConfirmDialog"],
+      "dsComponentsNote": "破壊的操作の確認は ConfirmDialog（AlertDialog のラップ、destructive/loading state を持つ）を優先する。ConfirmDialog で表現できない特殊ケースのみ AlertDialog を直接組み立てる。",
+      "navigation": { "globalNav": false, "breadcrumb": false, "header": false },
+      "crud": ["delete"],
+      "whenToUse": [
+        "削除・退会・取り消しなど不可逆操作の直前確認",
+        "他アクションをブロックして1つの判断を求める場面"
+      ],
+      "whenNotToUse": [
+        "複数項目を編集させたい → responsive-dialog",
+        "破壊的でない軽い確認（トースト等で十分な場面） → Toaster"
+      ],
+      "examples": ["データ削除確認", "退会確認", "変更内容の破棄確認"]
+    },
+    {
+      "id": "commerce-storefront",
+      "name": "コマース商品閲覧/購入導線",
+      "group": "commerce",
+      "purpose": "MarketingShell をベースにした EC 商品一覧・詳細・カート導線。",
+      "dsComponents": ["MarketingShell", "ProductCard", "ProductCarousel", "FilterBar", "PriceDisplay", "QuantitySelector", "ReviewSummary", "ReviewCard", "OrderSummary", "MobileTabBar", "BottomTabBar"],
+      "dsComponentsNote": "モバイルの下部タブは MobileTabBar（addAction 付き）または BottomTabBar（Liquid Glass 表現）を用途に応じて選ぶ。両方を同一画面で併用しない。",
+      "navigation": { "globalNav": true, "breadcrumb": false, "header": true },
+      "crud": ["read", "update"],
+      "whenToUse": [
+        "商品一覧・詳細・カート・購入完了などコマース系ページ",
+        "ブランド訴求を伴うマーケティング色の強いページ"
+      ],
+      "whenNotToUse": [
+        "業務管理画面 → admin-workspace",
+        "決済ステップの離脱防止が必要 → focused-workspace"
+      ],
+      "examples": ["商品一覧", "商品詳細", "カート"]
+    }
+  ],
+  "crudMatrix": [
+    { "operation": "create", "situation": "グロナビ内で完結する新規作成", "pattern": "standard-page-edit" },
+    { "operation": "create", "situation": "軽量な1〜数項目の新規作成", "pattern": "responsive-dialog" },
+    { "operation": "create", "situation": "離脱防止が必要な複数ステップの新規作成", "pattern": "focused-workspace" },
+    { "operation": "read", "situation": "一覧・詳細の閲覧", "pattern": "standard-page-view" },
+    { "operation": "read", "situation": "大量データの一覧・検索・絞り込み", "pattern": "admin-workspace" },
+    { "operation": "update", "situation": "グロナビ内で完結する編集", "pattern": "standard-page-edit" },
+    { "operation": "update", "situation": "一覧から離脱せず行う軽量編集", "pattern": "responsive-dialog", "note": "DataTable の行内編集セル（DataTableInputCell 等）で完結できる場合は admin-workspace 内で完結させ dialog を開かない選択肢もある" },
+    { "operation": "delete", "situation": "任意の削除操作", "pattern": "alert-dialog", "note": "削除は常に確認を挟む。確認無しの即時削除は rules.json のアンチパターンに抵触する" }
+  ],
+  "decisionTree": [
+    {
+      "step": 1,
+      "question": "現在のページ骨格を維持したまま前面に重ねる UI か（一覧を離れない）？",
+      "yes": 2,
+      "no": 3
+    },
+    {
+      "step": 2,
+      "question": "破壊的操作（削除・取り消し等）の確認か？",
+      "yes": "alert-dialog",
+      "no": "responsive-dialog"
+    },
+    {
+      "step": 3,
+      "question": "他ページへの離脱経路を断って単一タスクに集中させたいか（ウィザード・決済・オンボーディング）？",
+      "yes": "focused-workspace",
+      "no": 4
+    },
+    {
+      "step": 4,
+      "question": "大量データの一覧・検索・一括操作が中心の PC 業務画面か？",
+      "yes": "admin-workspace",
+      "no": 5
+    },
+    {
+      "step": 5,
+      "question": "EC 商品・購入導線などコマース色の強いページか？",
+      "yes": "commerce-storefront",
+      "no": 6
+    },
+    {
+      "step": 6,
+      "question": "状態を変更する操作（作成・編集）が主目的か？",
+      "yes": "standard-page-edit",
+      "no": "standard-page-view"
+    }
+  ],
+  "editUiSelection": {
+    "criteria": [
+      {
+        "method": "responsive-dialog",
+        "cost": "低",
+        "whenToPrefer": "1〜数項目・現在の一覧文脈を保ったまま完結できる",
+        "risk": "項目が増えると窮屈になり離脱率が上がる"
+      },
+      {
+        "method": "standard-page-edit",
+        "cost": "中",
+        "whenToPrefer": "項目数が多い、他ページ参照をしながら編集する、URL 遷移で状態を共有したい",
+        "risk": "グロナビからの離脱で保存前の変更が失われるリスクがある"
+      },
+      {
+        "method": "focused-workspace",
+        "cost": "高",
+        "whenToPrefer": "複数ステップ、離脱防止が必要、決済/申込など失敗コストが高い",
+        "risk": "実装・状態管理のコストが最も高い。過剰適用に注意"
+      }
+    ],
+    "rule": "3方式のうち何を選ぶかは要件の多数決（項目数・ステップ数などの平均）で決めない。強い制約が1つでもあれば、それだけでより重い方式へ倒す。例: 項目数が1つでも「途中離脱で致命的な損失が出る（決済等）」なら focused-workspace を選ぶ。逆に項目数が多くても離脱コストが低いなら standard-page-edit で十分。"
+  }
+}
