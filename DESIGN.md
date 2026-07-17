@@ -116,9 +116,9 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 |---|---|---|
 | ブランド | `var(--Brand-Primary)` | `#2563EB` |
 | 背景(白/薄灰) | `var(--Surface-Primary)` / `-Secondary` | `#FFFFFF` / `#F9FAFB` |
-| 文字(強/中/弱) | `var(--Text-High/Medium/Low-Emphasis)` <!-- docs-drift-ignore: 省略記法 --> | `#111827` / `#374151` / `#6B7280` |
+| 文字(強/中/弱) | `var(--Text-High/Medium/Low-Emphasis)` <!-- docs-drift-ignore: --Text-High/Medium/Low-Emphasis --> | `#111827` / `#374151` / `#6B7280` |
 | 罫線 | `var(--Border-Low-Emphasis)` | `#E5E7EB` |
-| 状態 | `--Success/Warning/Caution/Info-Base` <!-- docs-drift-ignore: 省略記法 --> | `#16A34A` / `#EA580C` / `#DC2626` / `#2563EB` |
+| 状態 | `--Success/Warning/Caution/Info-Base` <!-- docs-drift-ignore: --Success/Warning/Caution/Info-Base --> | `#16A34A` / `#EA580C` / `#DC2626` / `#2563EB` |
 
 - **状態色の正本**: 上記は `*-Base`（テキスト/アイコン基準＝Primitive **600**）。`tokens.json` を正本とし、本表はその要約。
   バッジ/ピル等の強調 **fill** は別ロール `--Surface-*-Strong`（Primitive **500**）で、わざと一段明るい。役割が違うだけで矛盾ではない。

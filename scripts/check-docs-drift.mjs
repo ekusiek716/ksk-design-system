@@ -76,22 +76,50 @@ const docs = [
 info(`対象ドキュメント: ${docs.length} 件`)
 
 // ─── ドキュメント読み込みと ignore マーカー処理 ───
-// docCache: { relPath, text, lines, ignored: Set<lineNo(1-based)> }
+// マーカーの2形態:
+//   1) 単独行 `<!-- docs-drift-ignore -->` → 次の1行を丸ごと検査対象から除外
+//   2) 行内 `<!-- docs-drift-ignore: <トークン...> -->` → spec 部に書かれた
+//      トークン（CSS 変数候補 / PascalCase 名）だけをその行で除外する。
+//      spec 無しの行内マーカーは、マーカー直後の最初の1トークンのみ除外。
+// docCache: { relPath, text, lines, ignored: Set<lineNo>, ignoredTokens: Map<lineNo, Set<string>> }
 const MARKER_ONLY_RE = /^\s*<!--\s*docs-drift-ignore[^>]*-->\s*$/
+const INLINE_MARKER_RE = /<!--\s*docs-drift-ignore(?::([^>]*?))?\s*-->/g
+const TOKEN_IN_SPEC_RE = /--[A-Za-z][A-Za-z0-9-]*(?:\/[A-Za-z0-9/-]*)?|\b[A-Z][a-zA-Z]+\b/g
+
 const docCache = docs.map((full) => {
   const text = readFileSync(full, "utf8")
   const lines = text.split(/\r?\n/)
   const ignored = new Set()
+  const ignoredTokens = new Map()
   for (let i = 0; i < lines.length; i += 1) {
+    const lineNo = i + 1
     if (MARKER_ONLY_RE.test(lines[i])) {
-      ignored.add(i + 1) // マーカー行自身
-      ignored.add(i + 2) // 次の1行
-    } else if (lines[i].includes("docs-drift-ignore")) {
-      ignored.add(i + 1) // 行内マーカー: その行自身のみ
+      ignored.add(lineNo) // マーカー行自身
+      ignored.add(lineNo + 1) // 次の1行
+      continue
+    }
+    for (const m of lines[i].matchAll(INLINE_MARKER_RE)) {
+      const tokens = ignoredTokens.get(lineNo) ?? new Set()
+      const spec = (m[1] ?? "").trim()
+      if (spec) {
+        // spec 内のトークン（--Var 形式は / 区切り省略記法の先頭部も拾う）
+        for (const t of spec.matchAll(TOKEN_IN_SPEC_RE)) {
+          const tok = t[0].split("/")[0]
+          tokens.add(tok)
+        }
+      } else {
+        // spec 無し: マーカー直後の最初の1トークンのみ
+        const rest = lines[i].slice(m.index + m[0].length)
+        const first = rest.match(/--[A-Za-z][A-Za-z0-9-]*|`([A-Z][a-zA-Z]+)`/)
+        if (first) tokens.add(first[1] ?? first[0])
+      }
+      if (tokens.size > 0) ignoredTokens.set(lineNo, tokens)
     }
   }
-  return { relPath: relative(ROOT, full), text, lines, ignored }
+  return { relPath: relative(ROOT, full), text, lines, ignored, ignoredTokens }
 })
+
+const isTokenIgnored = (doc, lineNo, token) => doc.ignoredTokens.get(lineNo)?.has(token) ?? false
 
 // =============================================================
 // 1) コンポーネント名の存在照合
@@ -120,14 +148,22 @@ const WHITELIST = new Set(
 //  - `<HomeScreen />` 等の *Screen は利用者側アプリの画面例
 const PLACEHOLDER_NAME_RE = /^[A-Z][A-Za-z0-9]*(Icon|Screen)$/
 
+// モジュール指定子をファイルパスに解決（.ts / .tsx / /index.ts の順に試す）
+function resolveModule(fromFile, spec) {
+  const base = join(dirname(fromFile), spec)
+  for (const cand of [`${base}.ts`, `${base}.tsx`, join(base, "index.ts"), join(base, "index.tsx")]) {
+    if (existsSync(cand)) return cand
+  }
+  return null
+}
+
 // エクスポート名の収集。`Foo as Bar` は元名と alias（公開名）の両方を許容する。
-function extractExports(file) {
-  const names = new Set()
-  if (!existsSync(file)) return names
+// `export * from "./xxx"` は depth 段まで再帰的に辿る（現状の index 構成では1段で十分）。
+function extractExports(file, names = new Set(), depth = 1, visited = new Set()) {
+  if (!existsSync(file) || visited.has(file)) return names
+  visited.add(file)
   const src = readFileSync(file, "utf8")
-  const re = /\{([^}]*)\}/g
-  let m
-  while ((m = re.exec(src))) {
+  for (const m of src.matchAll(/\{([^}]*)\}/g)) {
     for (const tok of m[1].split(",")) {
       const base = tok.trim().replace(/^type\s+/, "")
       for (const part of base.split(/\s+as\s+/)) {
@@ -136,21 +172,36 @@ function extractExports(file) {
       }
     }
   }
+  // export const / function / class / type / interface の宣言エクスポート
+  for (const m of src.matchAll(/^export\s+(?:const|function|class|type|interface|enum)\s+([A-Za-z_][A-Za-z0-9_]*)/gm)) {
+    names.add(m[1])
+  }
+  // star re-export を1段解決
+  if (depth > 0) {
+    for (const m of src.matchAll(/^export\s+\*\s+from\s+["']([^"']+)["']/gm)) {
+      const resolved = resolveModule(file, m[1])
+      if (resolved) extractExports(resolved, names, depth - 1, visited)
+    }
+  }
   return names
 }
 
 const knownNames = new Set()
-for (const f of ["src/index.ts", "src/native/index.ts", "src/native/components/index.ts"]) {
-  for (const n of extractExports(join(ROOT, f))) knownNames.add(n)
+for (const f of ["src/index.ts", "src/native/index.ts"]) {
+  extractExports(join(ROOT, f), knownNames)
 }
 
 const lineNoOfIndex = (text, index) => text.slice(0, index).split("\n").length
 
 let componentErrors = 0
-const checkName = (doc, lineNo, name) => {
-  if (WHITELIST.has(name)) return
-  if (PLACEHOLDER_NAME_RE.test(name)) return
+// 照合順序: まず export プール（実在すれば OK。typo 検出のため最優先）
+// → ホワイトリスト → *Icon/*Screen のプレースホルダー除外（backtick/JSX のみ。
+//    実在しない場合に限りプレースホルダー扱いにする）
+const checkName = (doc, lineNo, name, { allowPlaceholder = true } = {}) => {
   if (knownNames.has(name)) return
+  if (WHITELIST.has(name)) return
+  if (allowPlaceholder && PLACEHOLDER_NAME_RE.test(name)) return
+  if (isTokenIgnored(doc, lineNo, name)) return
   error(`${doc.relPath}:${lineNo}: 未知のコンポーネント/識別子名 \`${name}\`（src/index.ts 等に存在しません）`)
   componentErrors += 1
 }
@@ -181,9 +232,12 @@ for (const doc of docCache) {
       const original = base.split(/\s+as\s+/)[0].trim()
       if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(original)) seen.add(original)
     }
+    // import はパッケージからの取得を明示しているため、*Icon/*Screen の
+    // プレースホルダー除外は適用しない（実在しなければ必ずエラー）
     for (const name of seen) {
       if (knownNames.has(name)) continue
-      if (WHITELIST.has(name) || PLACEHOLDER_NAME_RE.test(name)) continue
+      if (WHITELIST.has(name)) continue
+      if (isTokenIgnored(doc, lineNo, name)) continue
       error(`${doc.relPath}:${lineNo}: 未知の import 名 \`${name}\`（ksk-design-system のエクスポートに存在しません）`)
       componentErrors += 1
     }
@@ -267,15 +321,16 @@ for (const dir of ["src/styles", "src/themes"]) {
 extractCssDeclarations(join(ROOT, "src/preset.css"), definedVars)
 extractTokensJsonVars(join(ROOT, "tokens.json"), definedVars)
 
-// CLI フラグ等、CSS 変数と紛らわしいが実際は無関係な誤検知の除外リスト
-// （`--dry-run` `--access` `--force` 等。ドキュメント中のコマンド例に頻出）
-const CSS_VAR_FALSE_POSITIVE_RE =
-  /^--(dry-run|dry|access|force|quiet|tags|name-only|noEmit|no-verify|save-dev|format|changed|json|range|check|watch|help|version)$/
-
 // プレースホルダー表現のトークン除去（--Surface-* / --Categorical-{1..16} /
 // --{Category}-{Role} 等）。行ごとスキップすると同一行の本物の typo が
 // 素通りするため、トークン単位で除去してから残りを検証する。
 const PLACEHOLDER_TOKEN_RE = /--[A-Za-z0-9-]*(\{[^}]*\}|\*)[A-Za-z0-9*{},.-]*/g
+
+// CSS 変数候補は `--` 直後が大文字の PascalCase 形式のみ。
+// KSK のトークンは全て大文字始まり（--Surface-Primary 等）なので、
+// `--dry-run` / `--json` のような CLI フラグ（小文字始まり）は原理的に除外される。
+// （小文字始まりの bridge 変数 --primary / --shadow-md 等は本チェックの対象外）
+const CSS_VAR_CANDIDATE_RE = /--[A-Z][A-Za-z0-9-]*/g
 
 let cssVarErrors = 0
 for (const doc of docCache) {
@@ -284,10 +339,10 @@ for (const doc of docCache) {
     if (doc.ignored.has(lineNo)) continue
     const sanitized = doc.lines[i].replace(PLACEHOLDER_TOKEN_RE, "")
     const seen = new Set()
-    for (const m of sanitized.matchAll(/--[A-Za-z][A-Za-z0-9-]*/g)) seen.add(m[0])
+    for (const m of sanitized.matchAll(CSS_VAR_CANDIDATE_RE)) seen.add(m[0])
     for (const varName of seen) {
-      if (CSS_VAR_FALSE_POSITIVE_RE.test(varName)) continue
       if (definedVars.has(varName)) continue
+      if (isTokenIgnored(doc, lineNo, varName)) continue
       error(`${doc.relPath}:${lineNo}: 未定義の CSS 変数 ${varName}`)
       cssVarErrors += 1
     }
