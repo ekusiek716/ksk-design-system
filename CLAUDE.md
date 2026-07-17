@@ -4,6 +4,7 @@
 
 UI を書く前に必ず確認すること:
 
+- [ ] 画面の骨格は `contracts/screen-patterns.json` の decisionTree で選んだか
 - [ ] 既存コンポーネントを `src/components/COMPONENT_LOOKUP.md` で確認したか（手書き・再定義は禁止）
 - [ ] 色は semantic token（`var(--Surface-*)` / `var(--Brand-Primary)` 等）か。Tailwind標準色・生 `#hex` は禁止
 - [ ] `border` は色を併記したか（`border-[var(--Border-Low-Emphasis)]` 等）。Tailwind v4 では無色 border は currentColor になり、消費側の濃色テキストで黒ずむ（preset.css の base layer が保険だが明示が原則）
@@ -80,6 +81,8 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **contracts/token-hex-cache.json** | semantic トークンのデフォルトテーマ解決済み hex（テーマ依存キーは meta.themeDependentKeys 参照・自動生成） |
 | **src/components/COMPONENT_LOOKUP.md** | 全112コンポーネントのバリアント・インポートパス一覧（自動生成） |
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
+| **contracts/screen-patterns.json** | 画面実装前にどのシェル/パターンを使うかを決める decisionTree・crudMatrix |
+| **contracts/composition.json** | 選んだパターン内部の並べ方（骨格構造・余白リズム・カード階層・テキスト階層・CTA優先度） |
 
 **セッション開始時 / コードを書く前に必ず読む:**
 1. `contracts/rules.json` の `prohibited` と `aiPatterns`（AIが典型的に犯すパターン集）を確認
@@ -87,6 +90,7 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 3. `contracts/design-context.json` で `DESIGN.md` と正本ファイルの関係を確認
 4. `src/components/COMPONENT_LOOKUP.md` で既存コンポーネントを確認（手書き・再定義の防止）
 5. `tokens.json` でカラー・余白・影・タイポのトークンを確認
+6. 画面（ページ/ダイアログ等）を実装する場合は `contracts/screen-patterns.json` の decisionTree でシェル/パターンを選び、`contracts/composition.json` で内部の並べ方を確認
 
 **`.tsx` を編集したら `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行すること。**
 
