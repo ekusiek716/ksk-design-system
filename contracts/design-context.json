@@ -53,6 +53,12 @@
         "storybook coverage hints",
         "DS-first recipes"
       ]
+    },
+    {
+      "path": "contracts/token-hex-cache.json",
+      "owns": [
+        "default-theme resolved semantic hex values (generated sidecar; theme-dependent keys listed in meta.themeDependentKeys)"
+      ]
     }
   ],
   "designMd": {

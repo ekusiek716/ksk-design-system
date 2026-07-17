@@ -77,6 +77,7 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **contracts/rules.json** | 禁止パターン32件・AIアンチパターン10件・アクセシビリティ要件 |
 | **contracts/design-context.json** | `DESIGN.md` の役割・正本ファイル・外部 DESIGN.md 参照方針 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
+| **contracts/token-hex-cache.json** | semantic トークンのデフォルトテーマ解決済み hex（テーマ依存キーは meta.themeDependentKeys 参照・自動生成） |
 | **src/components/COMPONENT_LOOKUP.md** | 全112コンポーネントのバリアント・インポートパス一覧（自動生成） |
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
 
