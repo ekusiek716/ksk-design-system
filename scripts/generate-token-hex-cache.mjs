@@ -84,7 +84,7 @@ function buildCache() {
         "semantic / semanticDark トークン（var(--Primitive-*) 参照）を実 hex に解決したサイドカー生成物。" +
         "hex はデフォルト（Blue）テーマでの解決値であり、Brand 系（meta.themeDependentKeys に列挙）は" +
         "テーマ差し替え（orange/green/violet 等）で実色が変わる。テーマ別の完全解決値は " +
-        "src/tokens/native/tokens.native.json（generate-platform-tokens.mjs）を参照。" +
+        "`ksk-design-system/native` エクスポート（バンドル済み native トークンモジュール）の themes を参照。" +
         "tokens.json 本体のスキーマは変更せず、AI がこのファイルだけで実色を把握できるようにし、" +
         "primitive 値の変更による semantic 実色のドリフトを --check で機械検出する。",
       generatedBy: "scripts/generate-token-hex-cache.mjs",
