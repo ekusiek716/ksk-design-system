@@ -6,6 +6,9 @@ export interface SwitchProps {
   value?: boolean
   onValueChange?: (value: boolean) => void
   disabled?: boolean
+  /** Visible text is often outside the control, so callers must be able to name it. */
+  accessibilityLabel?: string
+  accessibilityHint?: string
 }
 
 /**
@@ -17,7 +20,13 @@ export interface SwitchProps {
  *
  * 役割は標準 Switch と同等: value / onValueChange / disabled。
  */
-export function Switch({ value = false, onValueChange, disabled = false }: SwitchProps) {
+export function Switch({
+  value = false,
+  onValueChange,
+  disabled = false,
+  accessibilityLabel,
+  accessibilityHint,
+}: SwitchProps) {
   const { theme } = useTheme()
 
   const W = 50
@@ -31,6 +40,9 @@ export function Switch({ value = false, onValueChange, disabled = false }: Switc
       disabled={disabled}
       accessibilityRole="switch"
       accessibilityState={{ checked: value, disabled }}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }}
       style={{
         width: W,
         height: H,
