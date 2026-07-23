@@ -129,7 +129,7 @@
     "build": "tsc -b && vite build",
     "build:preview": "tsc -b && vite build --config vite.config.preview.ts",
     "build:vercel": "npm run build-storybook && npm run build:preview && rm -rf storybook-static/preview && cp -r dist-preview storybook-static/preview",
-    "build:lib": "vite build --config vite.config.lib.ts && tsc --project tsconfig.lib.json || true",
+    "build:lib": "vite build --config vite.config.lib.ts && tsc --project tsconfig.lib.json",
     "prepack": "npm run build:lib",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -137,6 +137,8 @@
     "build-storybook": "storybook build",
     "lint:scratch": "bash scripts/lint-scratch.sh",
     "lint:deps": "bash scripts/check-deps.sh",
+    "lint:published-deps": "node scripts/check-published-deps.mjs",
+    "lint:css-setup": "node scripts/check-css-setup.mjs",
     "lint:responsive": "bash scripts/check-responsive.sh",
     "lint:story-reuse": "bash scripts/check-story-reuse.sh",
     "lint:contrast": "node scripts/check-contrast.mjs",
@@ -155,27 +157,28 @@
     "check:native-parity": "node scripts/check-native-parity.mjs",
     "check:native-lookup": "node scripts/generate-native-component-lookup.mjs --check",
     "test": "vitest run",
+    "test:consumer:web": "npm run build:lib && node scripts/test-packed-web-consumer.mjs",
     "test:watch": "vitest",
-    "check": "tsc -p tsconfig.app.json --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && bash scripts/check-drift.sh && node scripts/check-screen-contracts.mjs && node scripts/check-docs-drift.mjs && node scripts/check-contrast.mjs && node scripts/check-design-md.mjs && node scripts/check-tailwind-v4.mjs && node scripts/check-prefix-order.mjs && node scripts/generate-component-lookup.mjs --check && node scripts/generate-platform-tokens.mjs --check && node scripts/generate-token-hex-cache.mjs --check && tsc -p tsconfig.native.json --noEmit && node scripts/check-native-parity.mjs && node scripts/generate-native-component-lookup.mjs --check",
+    "check": "tsc -p tsconfig.app.json --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && node scripts/check-published-deps.mjs && node scripts/check-css-setup.mjs && bash scripts/check-drift.sh && node scripts/check-screen-contracts.mjs && node scripts/check-docs-drift.mjs && node scripts/check-contrast.mjs && node scripts/check-design-md.mjs && node scripts/check-tailwind-v4.mjs && node scripts/check-prefix-order.mjs && node scripts/generate-component-lookup.mjs --check && node scripts/generate-platform-tokens.mjs --check && node scripts/generate-token-hex-cache.mjs --check && tsc -p tsconfig.native.json --noEmit && node scripts/check-native-parity.mjs && node scripts/generate-native-component-lookup.mjs --check",
     "check:agent": "npm run lint && npm run check && npm test && npm run lint:story-reuse",
     "postinstall": "node bin/init.js postinstall",
     "mcp:build": "cd mcp-server && npm install && npm run build",
     "mcp:start": "node mcp-server/dist/index.js"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "iconsax-reactjs": "^0.0.8",
+    "radix-ui": "^1.0.0",
     "react-day-picker": "^10.0.1",
     "react-hook-form": "^7.75.0",
     "tailwind-merge": "^3.5.0"
   },
   "peerDependencies": {
-    "@radix-ui/react-slot": "^1.0.0",
     "@react-navigation/bottom-tabs": ">=7.0.0",
     "expo-blur": "*",
     "expo-glass-effect": "*",
-    "iconsax-reactjs": "^0.0.8",
-    "radix-ui": "^1.0.0",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "react-native": ">=0.74.0",
@@ -183,9 +186,6 @@
     "tailwindcss": "^4.0.0"
   },
   "peerDependenciesMeta": {
-    "@radix-ui/react-slot": {
-      "optional": true
-    },
     "@react-navigation/bottom-tabs": {
       "optional": true
     },
@@ -195,19 +195,13 @@
     "expo-glass-effect": {
       "optional": true
     },
-    "iconsax-reactjs": {
-      "optional": true
-    },
-    "radix-ui": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    },
     "react-native": {
       "optional": true
     },
     "react-native-svg": {
+      "optional": true
+    },
+    "react-dom": {
       "optional": true
     },
     "tailwindcss": {
@@ -228,6 +222,7 @@
     "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-storybook": "^10.4.6",
+    "es-module-lexer": "^2.3.0",
     "globals": "^17.7.0",
     "iconsax-reactjs": "^0.0.8",
     "jsdom": "^25.0.1",

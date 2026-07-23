@@ -26,18 +26,29 @@ describe("native package contract", () => {
     }
   })
 
-  it("web-only peers stay optional for native-only Expo installs", () => {
+  it("native-only peers stay optional for Expo installs", () => {
     for (const peer of [
-      "@radix-ui/react-slot",
       "expo-blur",
       "expo-glass-effect",
-      "iconsax-reactjs",
-      "radix-ui",
       "react-dom",
       "react-native",
       "tailwindcss",
     ]) {
       expect(packageJson.peerDependenciesMeta[peer]?.optional, peer).toBe(true)
     }
+  })
+
+  it("web bundle runtime packages are installed or required peers", () => {
+    for (const dependency of [
+      "@radix-ui/react-slot",
+      "iconsax-reactjs",
+      "radix-ui",
+    ]) {
+      expect(packageJson.dependencies[dependency], dependency).toBeTypeOf("string")
+      expect(packageJson.peerDependenciesMeta[dependency], dependency).toBeUndefined()
+    }
+
+    expect(packageJson.peerDependencies["react-dom"]).toBeTypeOf("string")
+    expect(packageJson.peerDependenciesMeta["react-dom"]?.optional).toBe(true)
   })
 })

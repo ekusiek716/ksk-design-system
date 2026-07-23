@@ -85,6 +85,21 @@ gh pr create
 手動移行が必要な項目（codemod で拾いきれないもの）は [MIGRATION.md](./MIGRATION.md) の
 「移行作業の進め方」節を参照。
 
+### Tailwind CSS v4 の走査設定
+
+アップデート後も、consumer のエントリCSSには次の構成を維持する。
+CSSファイルの場所に応じて `../../` の数だけ調整する。
+
+```css
+@import "tailwindcss";
+@import "ksk-design-system/preset";
+@import "ksk-design-system/themes/default";
+@source "../../node_modules/ksk-design-system/dist";
+```
+
+`@source` を外すと、DS内部だけで使われるクラスが生成されない。`dist` のプリビルドCSSと
+consumer側Tailwindを重ねる二重ビルド方式にも切り替えないこと。
+
 ## 5. していい・ダメ早見表
 
 | していい | ダメ |
