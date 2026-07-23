@@ -31,10 +31,10 @@ function FieldLegend({ className, ...props }: React.ComponentProps<"legend">) {
 function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
+      {...props}
       data-slot="field-group"
       role="group"
       className={cn("flex min-w-0 flex-col gap-4", className)}
-      {...props}
     />
   )
 }
@@ -56,14 +56,14 @@ function FieldError({
   children,
   ...props
 }: React.ComponentProps<"p">) {
-  if (children == null || children === false || children === "") return null
+  if (React.Children.toArray(children).length === 0) return null
 
   return (
     <p
+      {...props}
       data-slot="field-error"
       role="alert"
       className={cn("typo-body-sm text-[var(--Text-Caution)]", className)}
-      {...props}
     >
       {children}
     </p>
@@ -76,7 +76,7 @@ function FieldSeparator({
   children,
   ...props
 }: React.ComponentProps<"div">) {
-  const hasLabel = children != null && children !== false && children !== ""
+  const hasLabel = React.Children.toArray(children).length > 0
 
   return (
     <div

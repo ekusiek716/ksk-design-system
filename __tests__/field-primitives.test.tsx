@@ -45,19 +45,29 @@ describe("Field layout semantics", () => {
     )
     expect(html(<FieldError>{null}</FieldError>)).toBe("")
     expect(html(<FieldError>{false}</FieldError>)).toBe("")
+    expect(html(<FieldError>{true}</FieldError>)).toBe("")
   })
 
   it("FieldSeparator はラベルありで 2 本、なしで 1 本の区切りを描画する", () => {
     const labelled = html(<FieldSeparator>または</FieldSeparator>)
     const plain = html(<FieldSeparator />)
+    const booleanOnly = html(<FieldSeparator>{true}</FieldSeparator>)
     expect(labelled.match(/data-slot="separator"/g)).toHaveLength(2)
     expect(labelled).toContain("または")
     expect(plain.match(/data-slot="separator"/g)).toHaveLength(1)
+    expect(booleanOnly.match(/data-slot="separator"/g)).toHaveLength(1)
   })
 
   it("縦リズムを FieldSet=24px / FieldGroup=16px に固定する", () => {
     expect(html(<FieldSet />)).toContain("gap-6")
     expect(html(<FieldGroup />)).toContain("gap-4")
+  })
+
+  it("必須 ARIA role は caller props で上書きできない", () => {
+    expect(html(<FieldGroup role="presentation" />)).toContain('role="group"')
+    expect(html(<FieldError role="status">エラー</FieldError>)).toContain(
+      'role="alert"',
+    )
   })
 })
 
