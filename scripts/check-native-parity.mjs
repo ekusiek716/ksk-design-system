@@ -24,6 +24,7 @@ const INTENTIONAL_NATIVE_GAPS = new Map([
   ["CookieConsent", "browser cookie consent is Web-only"],
   ["DataTable", "complex admin table editing is Web-only"],
   ["DocumentPage", "web naming of the static document page; native provides the same role as DocumentScreen (Screen+AppHeader scaffold)"],
+  ["FieldSet", "fieldset/legend/group semantics are Web-only; native uses FormSection and FormField for the same visual hierarchy"],
   ["Form", "contracts name 'Form' at src/components/patterns/form.tsx is a label, not an export — Web itself only exports FormRoot/FormSection/FormActions (no `Form` symbol). Native mirrors this with FormRoot/FormSection/FormActions in src/native/components/Form.tsx; the RHF form root at src/components/ui/form.tsx (also named 'Form' in contracts) has no native equivalent by design (native uses FormField plus native inputs instead)"],
   ["HoverCard", "hover interaction is Web-only"],
   ["ImageUploader", "admin image uploader is Web-only; native uses CompactFilePicker/ImageAttachmentPicker adapters"],
