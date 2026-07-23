@@ -82,6 +82,69 @@ npx ksk-ds lint --changed
 // ksk-ds-allow-custom-ui: medical chart requires bespoke interaction
 ```
 
+### Jest（CommonJS）でコンポーネントをテストする
+
+このパッケージは **ESM-only** です。CJS との dual build は配布せず、Jest
+側で DS とその ESM 依存を `babel-jest` の変換対象にします。Vitest など
+ESM をネイティブに扱うランナーでは、以下の設定は不要です。
+
+Jest 29 では Babel 7 系を使います（Babel 8 は `babel-jest@29` の peer
+範囲外です）。
+
+```bash
+npm install --save-dev \
+  jest@29.7.0 babel-jest@29.7.0 jest-environment-jsdom@29.7.0 \
+  @babel/core@^7.28.0 @babel/preset-env@^7.28.0 \
+  @babel/preset-react@^7.28.0 @babel/preset-typescript@^7.28.0
+```
+
+```js
+// babel.config.cjs
+module.exports = {
+  presets: [
+    ["@babel/preset-env", { targets: { node: "current" } }],
+    ["@babel/preset-react", { runtime: "automatic" }],
+    ["@babel/preset-typescript", { allExtensions: true, isTSX: true }],
+  ],
+}
+```
+
+```js
+// jest.config.cjs
+module.exports = {
+  testEnvironment: "jsdom",
+  transform: {
+    "^.+\\.m?[jt]sx?$": "babel-jest",
+  },
+  transformIgnorePatterns: [
+    "<rootDir>/node_modules/.pnpm/(?!(ksk-design-system|radix-ui|iconsax-reactjs|@radix-ui\\+[^@]+)@)",
+    "node_modules/(?!.pnpm|ksk-design-system|radix-ui|@radix-ui|iconsax-reactjs)",
+  ],
+  moduleNameMapper: {
+    "\\.(css|less|sass|scss)$": "<rootDir>/test/style-mock.cjs",
+    "^ksk-design-system/(preset|styles(?:\\.css)?|glass|tokens/(?:primitive|semantic|typography|categorical)|themes/(?:default|blue|orange|green|violet|cobalt))$":
+      "<rootDir>/test/style-mock.cjs",
+  },
+}
+```
+
+```js
+// test/style-mock.cjs
+module.exports = {}
+```
+
+この構成なら `ksk-design-system` をコンポーネント単位で mock せず、そのまま
+render できます。リポジトリ内では、実際に `npm pack` した tgz を空の Jest
+プロジェクトへインストールする再現テストを実行できます。
+
+```bash
+npm run test:jest-consumer
+```
+
+React Native / Expo の `jest-expo` でも考え方は同じです。既存の Expo preset
+は維持し、`transformIgnorePatterns` の除外対象へ
+`ksk-design-system` と利用する ESM peer を加えてください。
+
 ### Consumer duplicate check
 
 DS に存在する部品を consumer 側で再実装しないよう、コンポーネント名の重複検査を同梱しています。
