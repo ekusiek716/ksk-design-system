@@ -19,6 +19,7 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 ERRORS=0
 WARNINGS=0
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CLASS_START='(^|[^[:alnum:]_-])'
 CLASS_END='($|[^[:alnum:]_-])'
 COMMENT_LINE='(^|:)[[:space:]]*//|/\*'
@@ -347,10 +348,20 @@ for FILE in $FILES; do
 
 done
 
+# W12. default Card 直下の縦 margin / space-y（二重余白）
+# TypeScript AST は全ファイルを一度の Node 起動で検査する。direct child のみを
+# 見るため CardContent 等の内側は対象外で、variant="media" も除外する。
+MATCHES=$(node "$ROOT/scripts/check-card-child-spacing.mjs" $FILES 2>/dev/null || true)
+if [ -n "$MATCHES" ]; then
+  echo -e "${YELLOW}⚠️  Card 直下の縦余白 → default Card の gap-6 に任せる（media variant は対象外）${NC}"
+  echo "$MATCHES" | head -3
+  WARNING_COUNT=$(printf "%s\n" "$MATCHES" | sed '/^[[:space:]]*$/d' | wc -l | tr -d ' ')
+  WARNINGS=$((WARNINGS + WARNING_COUNT))
+fi
+
 # border 色指定チェック（scripts/check-border-color.mjs）。
 # package.json の "check" スクリプトは変更せず、lint-scratch.sh 経由で
 # npm run check に組み込む（lint-scratch.sh は check の中で既に呼ばれている）。
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 if ! node "$ROOT/scripts/check-border-color.mjs"; then
   ERRORS=$((ERRORS + 1))
 fi

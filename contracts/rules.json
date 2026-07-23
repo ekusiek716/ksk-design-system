@@ -2,7 +2,7 @@
   "meta": {
     "name": "KSK Design System — Rules Contracts",
     "version": "1.1.0",
-    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン45件・AIアンチパターン10件。"
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン46件・AIアンチパターン10件。"
   },
   "prohibited": [
     {
@@ -407,6 +407,20 @@
       "excludes": [".stories.", "components/ui/sub-nav.tsx", "ksk-ds-allow-custom-ui"],
       "message": "SubNav をページ内アンカー目次に流用しない",
       "fix": "ビュー状態切替は SubNav、href=#section-id のページ内移動は SectionNav を使用する"
+    },
+    {
+      "id": "P046",
+      "severity": "warning",
+      "category": "spacing",
+      "pattern": "card-direct-child-spacing",
+      "engine": "card-direct-child-spacing",
+      "excludes": [
+        "Card variant=\"media\"",
+        "CardContent 等の直下ではない子"
+      ],
+      "message": "default Card 直下の子に縦 margin / space-y を足すと gap-6 と二重がけになる",
+      "fix": "Card 直下の縦間隔は Card の gap-6 に任せる。余白を自前管理するメディア構成は variant=\"media\" を使用",
+      "note": "公開 CLI とリポジトリ内 lint は共通の TypeScript AST 検査で、全 direct child・条件分岐・Fragment・入れ子 Card を検査する。別 CSS ファイルや実行時に組み立てる className の margin は検出できない"
     }
   ],
   "aiPatterns": {
