@@ -89,6 +89,7 @@ function Button({
     "aria-disabled"?: React.AriaAttributes["aria-disabled"]
     tabIndex?: number
     disabled?: boolean
+    href?: string
   }>(children)
     ? React.cloneElement(children, {
         onClick: handleClick,
@@ -96,6 +97,7 @@ function Button({
         "aria-disabled": true,
         tabIndex: -1,
         disabled: undefined,
+        href: undefined,
       })
     : children
 

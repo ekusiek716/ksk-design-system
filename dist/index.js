@@ -246,7 +246,8 @@ function W({ className: e, variant: r, size: i, layout: a, asChild: o = !1, hapt
 		onClickCapture: v,
 		"aria-disabled": !0,
 		tabIndex: -1,
-		disabled: void 0
+		disabled: void 0,
+		href: void 0
 	}) : p;
 	return /* @__PURE__ */ N(h, {
 		"data-slot": "button",

@@ -131,6 +131,7 @@ describe("Button asChild semantics", () => {
     })
 
     expect(link?.tagName).toBe("A")
+    expect(link?.getAttribute("href")).toBeNull()
     expect(link?.getAttribute("aria-disabled")).toBe("true")
     expect(link?.tabIndex).toBe(-1)
     expect(event.defaultPrevented).toBe(true)
@@ -153,6 +154,7 @@ describe("Button asChild semantics", () => {
     })
 
     expect(link?.getAttribute("aria-disabled")).toBe("true")
+    expect(link?.getAttribute("href")).toBeNull()
     expect(link?.tabIndex).toBe(-1)
     expect(event.defaultPrevented).toBe(true)
     expect(onClick).not.toHaveBeenCalled()
