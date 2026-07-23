@@ -234,7 +234,16 @@ function convertCategorical(src) {
 }
 
 const scales = {
-  spacing: { unit: pxNum(tokens.spacing.unit), scale: tokens.spacing.scale.slice() },
+  spacing: {
+    unit: pxNum(tokens.spacing.unit),
+    scale: tokens.spacing.scale.slice(),
+    section: Object.fromEntries(
+      Object.entries(tokens.spacing.section ?? {}).map(([key, value]) => [
+        key,
+        pxNum(value),
+      ])
+    ),
+  },
   breakpoints: convertBreakpoints(tokens.breakpoints),
   borderRadius: Object.fromEntries(
     Object.entries(tokens.borderRadius)

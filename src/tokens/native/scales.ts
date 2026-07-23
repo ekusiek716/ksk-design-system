@@ -25,7 +25,15 @@ export const scales = {
       52,
       56,
       60
-    ]
+    ],
+    "section": {
+      "xs": 32,
+      "sm": 40,
+      "md": 48,
+      "lg": 56,
+      "xl": 64,
+      "2xl": 80
+    }
   },
   "breakpoints": {
     "viewport": {

@@ -96,6 +96,18 @@
   --Radius-Sheet:   2rem;    /* 32px — 端寄せ Sheet（bottom / float） */
 }
 
+/* ─── Section Spacing Tokens ───
+   コンポーネント内の 4px scale と分離した、ページセクション間の縦リズム。
+   Tailwind を使わない consumer も var(--Space-Section-*) で参照できる。 */
+:root {
+  --Space-Section-xs:  32px;
+  --Space-Section-sm:  40px;
+  --Space-Section-md:  48px;
+  --Space-Section-lg:  56px;
+  --Space-Section-xl:  64px;
+  --Space-Section-2xl: 80px;
+}
+
 /* ─── Shadow Tokens ───
    影色はテーマ非依存の neutral（Gray-900 ベース rgba(17,24,39,…)）。
    旧来の青寄り rgba(24,39,75) は default=Blue 前提で、violet/orange/green
