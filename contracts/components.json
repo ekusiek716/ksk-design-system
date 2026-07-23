@@ -1526,6 +1526,7 @@
         "shared dots and arrows",
         "autoPlay",
         "interaction and reduced-motion autoplay pause",
+        "44px dot touch targets",
         "keyboard navigation"
       ],
       "accessibility": [

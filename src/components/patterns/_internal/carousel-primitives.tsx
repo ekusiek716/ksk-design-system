@@ -118,20 +118,26 @@ function carouselControls({
         </>
       )}
       {showDots && total > 1 && (
-        <div className="mt-2 flex items-center justify-center gap-1.5 lg:hidden">
+        <div className="mt-2 flex items-center justify-center lg:hidden">
           {Array.from({ length: total }, (_, index) => (
             <button
               key={index}
               type="button"
               onClick={() => onGoTo(index)}
               aria-label={`スライド ${index + 1}`}
-              className={cn(
-                "size-2 rounded-full transition-colors",
-                index === active
-                  ? "bg-[var(--Text-High-Emphasis)]"
-                  : "bg-[var(--Surface-Tertiary)]",
-              )}
-            />
+              aria-current={index === active ? "true" : undefined}
+              className="flex size-11 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "size-2 rounded-full transition-colors",
+                  index === active
+                    ? "bg-[var(--Text-High-Emphasis)]"
+                    : "bg-[var(--Surface-Tertiary)]",
+                )}
+              />
+            </button>
           ))}
         </div>
       )}

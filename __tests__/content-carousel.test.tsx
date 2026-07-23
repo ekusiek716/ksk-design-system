@@ -63,6 +63,10 @@ describe("ContentCarousel", () => {
       const imageControl = images.querySelector(`[aria-label="${label}"]`)
       expect(contentControl?.outerHTML).toBe(imageControl?.outerHTML)
     }
+
+    const firstDot = content.querySelector('[aria-label="スライド 1"]')
+    expect(firstDot?.className).toContain("size-11")
+    expect(firstDot?.querySelector("span")?.className).toContain("size-2")
   })
 
   it("controls を個別に非表示にできる", () => {
