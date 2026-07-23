@@ -37,6 +37,22 @@ describe("ksk-ds lint", () => {
     expect(result.stdout).not.toContain("P046")
   })
 
+  it("先頭ではない direct child の spacing も警告する", () => {
+    const result = runPublicLint(`
+      import { Card, CardHeader, CardContent } from "ksk-design-system"
+      export function Example() {
+        return (
+          <Card>
+            <CardHeader>見出し</CardHeader>
+            <CardContent className="mb-4">本文</CardContent>
+          </Card>
+        )
+      }
+    `)
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain("warn P046")
+  })
+
   it("media Card の spacing は警告しない", () => {
     const result = runPublicLint(`
       import { Card } from "ksk-design-system"
