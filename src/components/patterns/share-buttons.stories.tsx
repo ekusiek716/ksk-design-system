@@ -66,7 +66,7 @@ export const WithShareTracking: Story = {
           region="jp"
           layout="inline"
           onShare={(provider) => setLastProvider(provider)}
-          onCopy={() => setLastProvider("copy:onCopy")}
+          onCopy={(result) => setLastProvider(`copy:${result}`)}
         />
         <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
           last event: <span className="typo-label-sm text-[var(--Text-High-Emphasis)]">{lastProvider}</span>

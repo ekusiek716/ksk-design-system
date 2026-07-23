@@ -1,11 +1,15 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "../../ui/scroll-area"
+import { SkipLink } from "../../ui/skip-link"
 
 interface AdminShellProps extends React.ComponentProps<"div"> {
   sidebar: React.ReactNode
   header?: React.ReactNode
   sidebarWidth?: string
+  mainId?: string
+  skipLink?: boolean
+  skipLinkLabel?: string | null
 }
 
 function AdminShell({
@@ -14,6 +18,9 @@ function AdminShell({
   header,
   children,
   sidebarWidth = "w-64",
+  mainId = "main-content",
+  skipLink = true,
+  skipLinkLabel = "コンテンツへ移動",
   ...props
 }: AdminShellProps) {
   return (
@@ -22,6 +29,7 @@ function AdminShell({
       className={cn("flex h-screen bg-[var(--Surface-Secondary)]", className)}
       {...props}
     >
+      {skipLink && skipLinkLabel && <SkipLink targetId={mainId} label={skipLinkLabel} />}
       <aside
         data-slot="admin-sidebar"
         className={cn(
@@ -40,7 +48,7 @@ function AdminShell({
             {header}
           </header>
         )}
-        <main data-slot="admin-main" className="flex-1 overflow-auto p-6">
+        <main id={mainId} tabIndex={-1} data-slot="admin-main" className="flex-1 overflow-auto p-6">
           {children}
         </main>
       </div>
@@ -49,3 +57,4 @@ function AdminShell({
 }
 
 export { AdminShell }
+export type { AdminShellProps }

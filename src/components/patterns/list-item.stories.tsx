@@ -58,19 +58,16 @@ export const Interactive: Story = {
       <ListItem
         title="プロジェクト設定を更新"
         description="2分前"
-        interactive
         onClick={() => alert("クリック")}
       />
       <ListItem
         title="新しいメンバーを招待"
         description="15分前"
-        interactive
-        onClick={() => alert("クリック")}
+        href="#invite"
       />
       <ListItem
         title="デプロイが完了しました"
         description="1時間前"
-        interactive
         onClick={() => alert("クリック")}
       />
     </div>

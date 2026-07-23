@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { SkipLink } from "../ui/skip-link"
 
 type ScreenPadding = "none" | "page"
 
@@ -17,6 +18,9 @@ interface ScreenProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "childr
   bodyClassName?: string
   headerClassName?: string
   footerClassName?: string
+  mainId?: string
+  skipLink?: boolean
+  skipLinkLabel?: string | null
 }
 
 const BODY_PADDING_CLASS: Record<ScreenPadding, string> = {
@@ -34,6 +38,9 @@ function Screen({
   bodyClassName,
   headerClassName,
   footerClassName,
+  mainId = "main-content",
+  skipLink = true,
+  skipLinkLabel = "コンテンツへ移動",
   ...props
 }: ScreenProps) {
   return (
@@ -47,6 +54,7 @@ function Screen({
       )}
       {...props}
     >
+      {skipLink && skipLinkLabel && <SkipLink targetId={mainId} label={skipLinkLabel} />}
       {header && (
         <div
           data-slot="screen-header"
@@ -56,6 +64,8 @@ function Screen({
         </div>
       )}
       <main
+        id={mainId}
+        tabIndex={-1}
         data-slot="screen-body"
         className={cn(
           "flex-1 min-h-0",
