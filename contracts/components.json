@@ -4,12 +4,12 @@
     "version": "1.45.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 61,
+      "ui": 62,
       "patterns": 54,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 138
+      "total": 139
     }
   },
   "ui": [
@@ -926,6 +926,22 @@
       "rules": [
         "onError は dev 時には自動 console.error。本番では明示指定時のみ"
       ]
+    },
+    {
+      "name": "SkipLink",
+      "path": "src/components/ui/skip-link.tsx",
+      "description": "キーボード利用者が反復ナビゲーションを飛ばして本文へ移動するためのリンク。通常は非表示で、フォーカス時に表示される。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "real anchor with href",
+        "focuses and scrolls the target landmark",
+        "44px minimum touch target"
+      ],
+      "rules": [
+        "targetId はページ内のフォーカス可能な main landmark の id と一致させる",
+        "AppShell / AdminShell / MarketingShell / Screen は既定で SkipLink を内包するため重複配置しない"
+      ]
     }
   ],
   "patterns": [
@@ -1007,7 +1023,17 @@
     {
       "name": "ListItem",
       "path": "src/components/patterns/list-item.tsx",
-      "description": "汎用リストアイテム。left/right/bottomスロット付き。設定・通知・ユーザー一覧等に使用。"
+      "description": "汎用リストアイテム。left/right/bottomスロット付き。href で link、onClick で button、どちらもない場合は静的 div として描画する。",
+      "accessibility": [
+        "href renders a real anchor",
+        "onClick renders a real button",
+        "44px minimum target and visible focus ring for actionable items"
+      ],
+      "rules": [
+        "遷移は href、同一画面内の操作は onClick を ListItem 自体に渡す",
+        "interactive は既存 wrapper の視覚互換用。新規実装では使用しない",
+        "静的項目に role=button や tabIndex を付けない"
+      ]
     },
     {
       "name": "SearchBar",
@@ -1417,14 +1443,22 @@
       "features": [
         "providers",
         "region defaults",
-        "copy fallback",
+        "copy success / error feedback",
         "circle / inline layout",
-        "onShare tracking"
+        "onShare tracking",
+        "onCopy result tracking"
+      ],
+      "accessibility": [
+        "button semantics",
+        "polite live feedback for copy result",
+        "44px minimum touch target",
+        "visible focus ring"
       ],
       "rules": [
         "providers を渡すと明示順で表示",
         "region=jp は line/x/copy、region=us は whatsapp/x/copy を既定にする",
-        "provider 別の計測には onShare(provider) を使う。copy 完了時だけ必要なら onCopy も併用する"
+        "provider 別の計測には onShare(provider) を使う。コピー結果の計測には onCopy(result) を使う",
+        "Clipboard API が利用不可または拒否された場合も copyErrorLabel を通知する"
       ]
     },
     {
@@ -1469,6 +1503,7 @@
         "React Native port"
       ],
       "accessibility": [
+        "skip link to main content",
         "main landmark",
         "footer landmark when footer is present"
       ],
@@ -1476,6 +1511,7 @@
         "body スクロールを使わないアプリのフルスクリーン画面に使う",
         "本文が長い画面では scroll=true のまま使う",
         "写真ヒーローなど 1 画面固定では scroll=false と padding=none を組み合わせる",
+        "mainId で本文 landmark の id を調整でき、skipLink=false で内蔵 SkipLink を無効化できる",
         "footer には主要 CTA を置き、safe-area 余白を消費側で再実装しない",
         "React Native consumer は ksk-design-system/native/ui の Screen を使い、header/body/footer shell をローカル再実装しない"
       ]
@@ -2067,25 +2103,37 @@
     {
       "name": "AdminShell",
       "path": "src/components/patterns/shells/admin-shell.tsx",
-      "description": "管理画面レイアウトシェル。サイドバー+ヘッダー+メインコンテンツ構成。管理・ダッシュボード系ページ用。",
+      "description": "管理画面レイアウトシェル。スキップリンク+サイドバー+ヘッダー+メインコンテンツ構成。管理・ダッシュボード系ページ用。",
+      "accessibility": [
+        "skip link to focusable main landmark"
+      ],
       "rules": [
-        "For admin/dashboard pages"
+        "For admin/dashboard pages",
+        "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる"
       ]
     },
     {
       "name": "AppShell",
       "path": "src/components/patterns/shells/app-shell.tsx",
-      "description": "汎用アプリレイアウトシェル。ヘッダー+メインコンテンツ+フッター構成。一般的なWebアプリページ用。",
+      "description": "汎用アプリレイアウトシェル。スキップリンク+ヘッダー+メインコンテンツ+フッター構成。一般的なWebアプリページ用。",
+      "accessibility": [
+        "skip link to focusable main landmark"
+      ],
       "rules": [
-        "For general app pages"
+        "For general app pages",
+        "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる"
       ]
     },
     {
       "name": "MarketingShell",
       "path": "src/components/patterns/shells/marketing-shell.tsx",
-      "description": "マーケティング・LPレイアウトシェル。最大幅コントロール・ヒーロー対応。LP・ランディングページ用。",
+      "description": "マーケティング・LPレイアウトシェル。スキップリンク+最大幅コントロール・ヒーロー対応。LP・ランディングページ用。",
+      "accessibility": [
+        "skip link to focusable main landmark"
+      ],
       "rules": [
-        "For LP/marketing pages"
+        "For LP/marketing pages",
+        "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる"
       ]
     }
   ]

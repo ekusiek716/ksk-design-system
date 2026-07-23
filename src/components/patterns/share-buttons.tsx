@@ -1,9 +1,11 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { CloseCircle, TickCircle } from "iconsax-reactjs"
 
 type ShareProvider = "line" | "x" | "facebook" | "copy" | "instagram" | "email" | "whatsapp" | "telegram"
 type ShareLayout = "circle" | "inline"
 type ShareRegion = "global" | "jp" | "us"
+type ShareCopyResult = "success" | "error"
 
 interface ShareButtonsProps {
   url: string
@@ -13,7 +15,10 @@ interface ShareButtonsProps {
   layout?: ShareLayout
   className?: string
   onShare?: (provider: ShareProvider) => void
-  onCopy?: () => void
+  onCopy?: (result: ShareCopyResult) => void
+  copiedLabel?: string
+  copyErrorLabel?: string
+  feedbackDuration?: number
 }
 
 const REGION_PROVIDERS: Record<ShareRegion, ShareProvider[]> = {
@@ -146,19 +151,43 @@ function ShareButtons({
   className,
   onShare,
   onCopy,
+  copiedLabel = "コピーしました",
+  copyErrorLabel = "コピーできませんでした",
+  feedbackDuration = 2000,
 }: ShareButtonsProps) {
-  const [copiedProvider, setCopiedProvider] = React.useState<ShareProvider | null>(null)
+  const [copyFeedback, setCopyFeedback] = React.useState<{
+    provider: ShareProvider
+    result: ShareCopyResult
+  } | null>(null)
+  const feedbackTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const activeProviders = providers ?? REGION_PROVIDERS[region]
 
-  const markCopied = (provider: ShareProvider) => {
-    setCopiedProvider(provider)
-    onCopy?.()
-    setTimeout(() => setCopiedProvider(null), 2000)
+  React.useEffect(() => {
+    return () => {
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
+    }
+  }, [])
+
+  const markCopyResult = (provider: ShareProvider, result: ShareCopyResult) => {
+    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
+    setCopyFeedback({ provider, result })
+    onCopy?.(result)
+    feedbackTimerRef.current = setTimeout(() => {
+      setCopyFeedback(null)
+      feedbackTimerRef.current = null
+    }, feedbackDuration)
   }
 
   const copyUrl = async (provider: ShareProvider) => {
-    await navigator.clipboard.writeText(url)
-    markCopied(provider)
+    try {
+      if (typeof navigator === "undefined" || !navigator.clipboard?.writeText) {
+        throw new Error("Clipboard API is unavailable")
+      }
+      await navigator.clipboard.writeText(url)
+      markCopyResult(provider, "success")
+    } catch {
+      markCopyResult(provider, "error")
+    }
   }
 
   const handleClick = async (provider: ShareProvider) => {
@@ -170,7 +199,11 @@ function ShareButtons({
     }
     const meta = PROVIDER_META[provider]
     if (meta.webShare && typeof navigator !== "undefined" && "share" in navigator) {
-      await navigator.share({ title, url })
+      try {
+        await navigator.share({ title, url })
+      } catch {
+        // ユーザーのキャンセルを含むため、コピー成功/失敗には変換しない。
+      }
       return
     }
     if (meta.webShare) {
@@ -194,26 +227,31 @@ function ShareButtons({
       >
         {activeProviders.map((p) => {
           const meta = PROVIDER_META[p]
-          const isCopied = copiedProvider === p
+          const feedback = copyFeedback?.provider === p ? copyFeedback.result : null
+          const feedbackLabel =
+            feedback === "success" ? copiedLabel : feedback === "error" ? copyErrorLabel : meta.label
           return (
             <button
               key={p}
-              onClick={() => handleClick(p)}
+              type="button"
+              onClick={() => void handleClick(p)}
               aria-label={meta.label}
-              className="flex flex-col items-center gap-1.5 cursor-pointer"
+              className="flex min-h-11 flex-col items-center gap-2 rounded-lg cursor-pointer focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
             >
               <span className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 active:scale-95",
+                "size-12 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 active:scale-95",
                 meta.circleClass
               )}>
-                {isCopied ? (
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                    <path d="M3 9l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ) : meta.icon}
+                {feedback === "success" && <TickCircle size={18} aria-hidden="true" />}
+                {feedback === "error" && <CloseCircle size={18} aria-hidden="true" />}
+                {!feedback && meta.icon}
               </span>
-              <span className="typo-label-xs text-[var(--Text-Medium-Emphasis)]">
-                {isCopied ? "コピー済" : meta.label}
+              <span
+                aria-live="polite"
+                aria-atomic="true"
+                className="typo-label-xs text-[var(--Text-Medium-Emphasis)]"
+              >
+                {feedbackLabel}
               </span>
             </button>
           )
@@ -234,22 +272,28 @@ function ShareButtons({
     >
       {activeProviders.map((p) => {
         const meta = PROVIDER_META[p]
-        const isCopied = copiedProvider === p
+        const feedback = copyFeedback?.provider === p ? copyFeedback.result : null
+        const feedbackLabel =
+          feedback === "success" ? copiedLabel : feedback === "error" ? copyErrorLabel : meta.label
         return (
           <button
             key={p}
-            onClick={() => handleClick(p)}
+            type="button"
+            onClick={() => void handleClick(p)}
+            aria-label={meta.label}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--Border-Medium-Emphasis)] typo-label-xs font-semibold transition-colors",
+              "inline-flex min-h-11 items-center gap-2 px-3 py-2 rounded-full border border-[var(--Border-Medium-Emphasis)] typo-label-xs transition-colors focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
               meta.inlineClass
             )}
           >
-            <span className="w-3.5 h-3.5 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
-              {isCopied ? (
-                <svg viewBox="0 0 12 12" fill="none"><path d="M1 6l3 3 7-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-              ) : meta.icon}
+            <span className="size-4 flex items-center justify-center [&>svg]:size-full">
+              {feedback === "success" && <TickCircle size={16} aria-hidden="true" />}
+              {feedback === "error" && <CloseCircle size={16} aria-hidden="true" />}
+              {!feedback && meta.icon}
             </span>
-            {isCopied ? "コピー済み" : meta.label}
+            <span aria-live="polite" aria-atomic="true">
+              {feedbackLabel}
+            </span>
           </button>
         )
       })}
@@ -258,4 +302,4 @@ function ShareButtons({
 }
 
 export { ShareButtons }
-export type { ShareButtonsProps, ShareProvider, ShareLayout, ShareRegion }
+export type { ShareButtonsProps, ShareProvider, ShareLayout, ShareRegion, ShareCopyResult }

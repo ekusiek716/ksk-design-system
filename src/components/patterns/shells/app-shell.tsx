@@ -1,15 +1,22 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { SkipLink } from "../../ui/skip-link"
 
 interface AppShellProps extends React.ComponentProps<"div"> {
   topBar?: React.ReactNode
   bottomNav?: React.ReactNode
+  mainId?: string
+  skipLink?: boolean
+  skipLinkLabel?: string | null
 }
 
 function AppShell({
   className,
   topBar,
   bottomNav,
+  mainId = "main-content",
+  skipLink = true,
+  skipLinkLabel = "コンテンツへ移動",
   children,
   ...props
 }: AppShellProps) {
@@ -19,6 +26,7 @@ function AppShell({
       className={cn("flex flex-col min-h-screen bg-[var(--Surface-Primary)]", className)}
       {...props}
     >
+      {skipLink && skipLinkLabel && <SkipLink targetId={mainId} label={skipLinkLabel} />}
       {topBar && (
         <header
           data-slot="app-topbar"
@@ -28,6 +36,8 @@ function AppShell({
         </header>
       )}
       <main
+        id={mainId}
+        tabIndex={-1}
         data-slot="app-main"
         className={cn("flex-1", bottomNav ? "pb-16" : "")}
       >
@@ -46,3 +56,4 @@ function AppShell({
 }
 
 export { AppShell }
+export type { AppShellProps }

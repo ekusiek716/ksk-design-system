@@ -1,15 +1,22 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { SkipLink } from "../../ui/skip-link"
 
 interface MarketingShellProps extends React.ComponentProps<"div"> {
   header?: React.ReactNode
   footer?: React.ReactNode
+  mainId?: string
+  skipLink?: boolean
+  skipLinkLabel?: string | null
 }
 
 function MarketingShell({
   className,
   header,
   footer,
+  mainId = "main-content",
+  skipLink = true,
+  skipLinkLabel = "コンテンツへ移動",
   children,
   ...props
 }: MarketingShellProps) {
@@ -19,6 +26,7 @@ function MarketingShell({
       className={cn("flex flex-col min-h-screen bg-[var(--Surface-Primary)]", className)}
       {...props}
     >
+      {skipLink && skipLinkLabel && <SkipLink targetId={mainId} label={skipLinkLabel} />}
       {header && (
         <header
           data-slot="marketing-header"
@@ -27,7 +35,7 @@ function MarketingShell({
           {header}
         </header>
       )}
-      <main data-slot="marketing-main" className="flex-1">
+      <main id={mainId} tabIndex={-1} data-slot="marketing-main" className="flex-1">
         {children}
       </main>
       {footer && (
@@ -43,3 +51,4 @@ function MarketingShell({
 }
 
 export { MarketingShell }
+export type { MarketingShellProps }
