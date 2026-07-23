@@ -1,6 +1,6 @@
 "use client";
 import { n as e } from "./rolldown-runtime-Df-vAQej.js";
-import { t } from "./server-variants-BtHHqzwI.js";
+import { t } from "./server-variants-DF8guEvD.js";
 import * as n from "react";
 import r, { createContext as i, useCallback as a, useContext as o, useEffect as s, useLayoutEffect as c, useMemo as l, useRef as u, useState as d } from "react";
 import { Accordion as f, AlertDialog as p, Avatar as m, Checkbox as h, Collapsible as g, Dialog as _, DropdownMenu as v, HoverCard as y, Label as b, Popover as x, Progress as S, RadioGroup as C, ScrollArea as w, Select as T, Separator as E, Slider as D, Switch as ee, Tabs as O, Tooltip as k } from "radix-ui";
@@ -228,23 +228,46 @@ var Ee = {
 		30
 	]
 };
-function W({ className: e, variant: r, size: i, layout: a, haptic: o, onClick: s, type: c, ...l }) {
-	let u = n.useCallback((e) => {
-		o && typeof navigator < "u" && "vibrate" in navigator && navigator.vibrate(Ee[o]), s?.(e);
-	}, [o, s]);
-	return /* @__PURE__ */ N("button", {
+function W({ className: e, variant: r, size: i, layout: a, asChild: o = !1, haptic: s, onClick: c, type: l, disabled: u, tabIndex: d, "aria-disabled": f, children: p, ...m }) {
+	let h = o ? ue : "button", g = u || f === !0 || f === "true", _ = n.useCallback((e) => {
+		if (g) {
+			e.preventDefault(), e.stopPropagation();
+			return;
+		}
+		s && typeof navigator < "u" && "vibrate" in navigator && navigator.vibrate(Ee[s]), c?.(e);
+	}, [
+		s,
+		g,
+		c
+	]), v = n.useCallback((e) => {
+		e.preventDefault(), e.stopPropagation();
+	}, []), y = o && g && n.isValidElement(p) ? n.cloneElement(p, {
+		onClick: _,
+		onClickCapture: v,
+		onAuxClickCapture: v,
+		onContextMenuCapture: v,
+		"aria-disabled": !0,
+		tabIndex: -1,
+		disabled: void 0,
+		...p.type === "a" ? { href: void 0 } : {}
+	}) : p;
+	return /* @__PURE__ */ N(h, {
 		"data-slot": "button",
 		"data-variant": r ?? "default",
 		"data-size": i ?? "default",
-		type: c ?? "button",
+		type: o ? void 0 : l ?? "button",
+		disabled: o ? void 0 : u,
+		"aria-disabled": o && g ? !0 : f,
+		tabIndex: o && g ? -1 : d,
 		className: U(t({
 			variant: r,
 			size: i,
 			layout: a,
 			className: e
 		})),
-		onClick: u,
-		...l
+		onClick: o && g ? void 0 : _,
+		...m,
+		children: y
 	});
 }
 //#endregion
