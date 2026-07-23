@@ -13,6 +13,7 @@
         "dark semantic colors",
         "typography",
         "spacing scale",
+        "viewport and container-query breakpoints",
         "border radius scale",
         "shadows",
         "touch targets"
