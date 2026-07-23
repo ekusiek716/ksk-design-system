@@ -22,17 +22,29 @@ const sectionVariants = cva("w-full", {
   },
 })
 
+type SectionElement = "section" | "div" | "footer" | "aside"
+
 interface SectionProps
   extends React.ComponentProps<"section">,
-    VariantProps<typeof sectionVariants> {}
+    VariantProps<typeof sectionVariants> {
+  as?: SectionElement
+}
 
 /**
  * 全幅の背景帯とセクション間の縦リズムを管理する。
  * 最大幅・中央寄せ・左右 gutter は内側の Container に委ねる。
  */
-function Section({ className, spacing, background, ...props }: SectionProps) {
+function Section({
+  as: Component = "section",
+  className,
+  spacing,
+  background,
+  ...props
+}: SectionProps) {
+  const Root = Component as React.ElementType
+
   return (
-    <section
+    <Root
       data-slot="section"
       data-spacing={spacing ?? "md"}
       data-background={background ?? "none"}
@@ -43,4 +55,4 @@ function Section({ className, spacing, background, ...props }: SectionProps) {
 }
 
 export { Section, sectionVariants }
-export type { SectionProps }
+export type { SectionElement, SectionProps }
