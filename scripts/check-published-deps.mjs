@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs"
+import { ImportType, init, parse } from "es-module-lexer"
 
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
 const webBundle = readFileSync(new URL("../dist/index.js", import.meta.url), "utf8")
@@ -9,9 +10,19 @@ const packageName = (specifier) => {
 }
 
 const staticImports = new Set()
-const importPattern = /(?:^|\n)import(?:[\s\S]*?\sfrom\s*)?["']([^"']+)["'];?/g
-for (const match of webBundle.matchAll(importPattern)) {
-  const specifier = match[1]
+await init
+const [imports] = parse(webBundle)
+for (const importSpecifier of imports) {
+  if (
+    importSpecifier.t !== ImportType.Static &&
+    importSpecifier.t !== ImportType.StaticSourcePhase &&
+    importSpecifier.t !== ImportType.StaticDeferPhase
+  ) {
+    continue
+  }
+
+  const specifier = importSpecifier.n
+  if (!specifier) continue
   if (!specifier.startsWith(".") && !specifier.startsWith("node:")) {
     staticImports.add(packageName(specifier))
   }

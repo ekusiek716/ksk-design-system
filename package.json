@@ -219,6 +219,7 @@
     "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-storybook": "^10.4.6",
+    "es-module-lexer": "^2.3.0",
     "globals": "^17.7.0",
     "iconsax-reactjs": "^0.0.8",
     "jsdom": "^25.0.1",

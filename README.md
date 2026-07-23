@@ -58,7 +58,7 @@ npm install ksk-design-system
 
 Tailwind CSS v4 は `node_modules` を既定では走査しません。`@source` がないと、
 DS 内部だけで使うレイアウト・サイズ・状態クラスが生成されず、コンポーネントの表示や操作が崩れます。
-consumer 側の Tailwind と DS を同じビルドで処理するため、上記4行をセットで使用してください。
+consumer 側の Tailwind と DS を同じビルドで処理するため、上記の設定をセットで使用してください。
 
 ```tsx
 import { Button, Card, Input, FormField } from "ksk-design-system"

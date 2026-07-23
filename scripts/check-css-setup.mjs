@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs"
 
 const requiredFiles = [
   "README.md",
+  "UPDATING.md",
   "templates/AGENTS.md",
   "templates/CLAUDE.md",
 ]
@@ -15,7 +16,9 @@ for (const path of requiredFiles) {
   if (!source.includes('@import "ksk-design-system/preset"')) {
     missing.push(`${path}: @import "ksk-design-system/preset"`)
   }
-  if (!source.includes("@source") || !source.includes("ksk-design-system/dist")) {
+  const hasDesignSystemSource =
+    /^\s*@source\s+["'][^"'\n]*ksk-design-system\/dist["']\s*;?\s*$/m.test(source)
+  if (!hasDesignSystemSource) {
     missing.push(`${path}: @source .../ksk-design-system/dist`)
   }
 }
