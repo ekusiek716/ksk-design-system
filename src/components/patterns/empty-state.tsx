@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button, type ButtonProps } from "@/components/ui/button"
+import { IconBadge } from "@/components/ui/icon-badge"
 
 interface EmptyStateProps extends React.ComponentProps<"div"> {
   icon?: React.ReactNode
@@ -69,11 +70,16 @@ function EmptyState({
       {...props}
     >
       {icon && (
-        <div className={cn(
-          "text-[var(--Object-Low-Emphasis)]",
-          isInline ? "shrink-0" : "mb-4",
-          iconClassName,
-        )}>{icon}</div>
+        <IconBadge
+          appearance="plain"
+          className={cn(
+            "text-[var(--Object-Low-Emphasis)]",
+            isInline ? "shrink-0" : "mb-4",
+            iconClassName,
+          )}
+        >
+          {icon}
+        </IconBadge>
       )}
       <div className={cn(isInline && "min-w-0 flex-1")}>
         <h3 className={cn(

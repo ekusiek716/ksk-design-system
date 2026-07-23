@@ -184,6 +184,12 @@ export {
 } from "./SettingsSection"
 export { EmptyState, type EmptyStateProps } from "./EmptyState"
 export { ErrorState, type ErrorStateProps } from "./ErrorState"
+export {
+  IconBadge,
+  type IconBadgeProps,
+  type IconBadgeRenderProps,
+  type IconBadgeSize,
+} from "./IconBadge"
 export { SectionHeader, type SectionHeaderProps } from "./SectionHeader"
 export { StickyActionBar, type StickyActionBarProps } from "./StickyActionBar"
 export { SwipeRow, type SwipeRowProps, type SwipeAction } from "./SwipeRow"

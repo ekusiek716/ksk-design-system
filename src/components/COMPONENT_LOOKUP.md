@@ -41,6 +41,7 @@
 | ErrorBoundary | `@/components/ui/error-boundary` | — | — |
 | Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField | `@/components/ui/form` | — | BasicForm, WithSelect |
 | HoverCard, HoverCardTrigger, HoverCardContent | `@/components/ui/hover-card` | — | Default |
+| IconBadge | `@/components/ui/icon-badge` | **size**: `md`, `ml`, `lg`<br>**appearance**: `accent`, `plain` | Medium, MediumLarge, Large, InCardFlow |
 | ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |
 | Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, DisabledState |
