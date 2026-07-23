@@ -87,6 +87,17 @@
       "container query の値を変える場合は tokens.json と preset の --container-* を同時に更新する"
     ]
   },
+  "formHierarchy": {
+    "layers": [
+      { "component": "FieldSet", "spacing": "24px (gap-6)", "role": "フォーム全体または大セクション。fieldset + legend semantics" },
+      { "component": "FieldGroup", "spacing": "16px (gap-4)", "role": "関連する複数 FormField のまとまり" },
+      { "component": "FormField", "spacing": "6px (gap-1.5)", "role": "label + control + description/error の最小単位" }
+    ],
+    "rules": [
+      "FieldSet > FieldGroup > FormField の階層で組み、各層の外側に mt-/mb-/space-y-* を重ねない",
+      "FormSection は短いフォームの簡易 API。長いフォームは FieldSet / FieldLegend / FieldGroup を使う"
+    ]
+  },
   "cardHierarchy": {
     "layers": [
       { "depth": 0, "token": "var(--Surface-Secondary)", "usage": "ページ/シェルの背景（AdminShell・MobileAppShell 等の基底面）" },
