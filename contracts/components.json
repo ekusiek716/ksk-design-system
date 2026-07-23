@@ -242,7 +242,9 @@
         "CardFooter"
       ],
       "rules": [
-        "rounded-lg (8px)"
+        "rounded-lg (8px)",
+        "default variant は gap-6 が直下の子の縦間隔を所有する。直下の子に mt-* / mb-* / my-* / space-y-* を追加しない",
+        "variant=media は gap / padding を持たないため、内側コンテンツで明示的に余白を管理できる"
       ]
     },
     {

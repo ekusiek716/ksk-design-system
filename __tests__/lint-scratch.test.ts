@@ -110,4 +110,68 @@ describe("lint-scratch.sh", () => {
     expect(result.status).toBe(0)
     expect(outputOf(result)).toContain("✓ 問題なし")
   })
+
+  it("default Card 直下の縦 margin を warning 検出する", () => {
+    const result = runLintScratch(`
+      import { Card } from "ksk-design-system"
+      export function Example() {
+        return <Card><div className="mt-4">本文</div></Card>
+      }
+    `)
+    expect(result.status).toBe(0)
+    expect(outputOf(result)).toContain("Card 直下の縦余白")
+    expect(outputOf(result)).toContain("mt-4")
+  })
+
+  it("conditional rendering された direct child の space-y も検出する", () => {
+    const result = runLintScratch(`
+      import { Card } from "ksk-design-system"
+      export function Example({ show }: { show: boolean }) {
+        return <Card>{show && <section className="space-y-4">本文</section>}</Card>
+      }
+    `)
+    expect(result.status).toBe(0)
+    expect(outputOf(result)).toContain("Card 直下の縦余白")
+    expect(outputOf(result)).toContain("space-y-4")
+  })
+
+  it("CardContent 内部の子は direct child として誤検知しない", () => {
+    const result = runLintScratch(`
+      import { Card, CardContent } from "ksk-design-system"
+      export function Example() {
+        return <Card><CardContent><div className="mt-4">本文</div></CardContent></Card>
+      }
+    `)
+    expect(result.status).toBe(0)
+    expect(outputOf(result)).toContain("✓ 問題なし")
+  })
+
+  it("media Card は内側で余白を管理できる", () => {
+    const result = runLintScratch(`
+      import { Card } from "ksk-design-system"
+      export function Example() {
+        return <Card variant="media"><div className="my-4">本文</div></Card>
+      }
+    `)
+    expect(result.status).toBe(0)
+    expect(outputOf(result)).toContain("✓ 問題なし")
+  })
+
+  it("Card が入れ子でも内側 Card の direct child を検査する", () => {
+    const result = runLintScratch(`
+      import { Card, CardContent } from "ksk-design-system"
+      export function Example() {
+        return (
+          <Card>
+            <CardContent>
+              <Card><div className="mb-4">内側</div></Card>
+            </CardContent>
+          </Card>
+        )
+      }
+    `)
+    expect(result.status).toBe(0)
+    expect(outputOf(result)).toContain("Card 直下の縦余白")
+    expect(outputOf(result)).toContain("mb-4")
+  })
 })

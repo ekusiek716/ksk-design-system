@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { extname, join, relative, resolve } from "node:path"
 import { spawnSync } from "node:child_process"
+import { inspectCardChildSpacing } from "./card-child-spacing.js"
 
 const DEFAULT_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx"])
 const DEFAULT_IGNORES = [
@@ -166,6 +167,15 @@ function lintFile(file, cwd, rules) {
   const lines = source.split(/\r?\n/)
 
   for (const rule of rules) {
+    if (rule.engine === "card-direct-child-spacing") {
+      for (const finding of inspectCardChildSpacing(source, file)) {
+        const line = lines[finding.line - 1] ?? ""
+        if (!matchesRuleExclude(rule, rel, line)) {
+          findings.push(toFinding(rule, rel, finding.line))
+        }
+      }
+      continue
+    }
     let regex
     try {
       regex = new RegExp(rule.pattern)
