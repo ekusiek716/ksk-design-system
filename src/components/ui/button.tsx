@@ -54,6 +54,7 @@ function Button({
   disabled,
   tabIndex,
   "aria-disabled": ariaDisabled,
+  children,
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : "button"
@@ -74,6 +75,30 @@ function Button({
     [haptic, isDisabled, onClick]
   )
 
+  const handleDisabledCapture = React.useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+    },
+    []
+  )
+
+  const slottedChild = asChild && isDisabled && React.isValidElement<{
+    onClick?: React.MouseEventHandler
+    onClickCapture?: React.MouseEventHandler
+    "aria-disabled"?: React.AriaAttributes["aria-disabled"]
+    tabIndex?: number
+    disabled?: boolean
+  }>(children)
+    ? React.cloneElement(children, {
+        onClick: handleClick,
+        onClickCapture: handleDisabledCapture,
+        "aria-disabled": true,
+        tabIndex: -1,
+        disabled: undefined,
+      })
+    : children
+
   return (
     <Comp
       data-slot="button"
@@ -87,9 +112,11 @@ function Button({
       aria-disabled={asChild && isDisabled ? true : ariaDisabled}
       tabIndex={asChild && isDisabled ? -1 : tabIndex}
       className={cn(buttonVariants({ variant, size, layout, className }))}
-      onClick={handleClick}
+      onClick={asChild && isDisabled ? undefined : handleClick}
       {...props}
-    />
+    >
+      {slottedChild}
+    </Comp>
   )
 }
 

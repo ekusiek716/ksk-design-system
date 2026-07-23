@@ -115,9 +115,12 @@ describe("ListItem semantics", () => {
 describe("Button asChild semantics", () => {
   it("disabled link はフォーカスと遷移を抑止する", () => {
     const onClick = vi.fn()
+    const childOnClick = vi.fn()
     mount(
       <Button asChild variant="link" disabled onClick={onClick}>
-        <a href="/danger">無効</a>
+        <a href="/danger" aria-disabled="false" tabIndex={0} onClick={childOnClick}>
+          無効
+        </a>
       </Button>,
     )
 
@@ -132,6 +135,7 @@ describe("Button asChild semantics", () => {
     expect(link?.tabIndex).toBe(-1)
     expect(event.defaultPrevented).toBe(true)
     expect(onClick).not.toHaveBeenCalled()
+    expect(childOnClick).not.toHaveBeenCalled()
   })
 
   it("aria-disabled link もフォーカスと遷移を抑止する", () => {

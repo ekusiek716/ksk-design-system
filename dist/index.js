@@ -228,34 +228,43 @@ var Ee = {
 		30
 	]
 };
-function W({ className: e, variant: r, size: i, layout: a, asChild: o = !1, haptic: s, onClick: c, type: l, disabled: u, tabIndex: d, "aria-disabled": f, ...p }) {
-	let m = o ? ue : "button", h = u || f === !0 || f === "true", g = n.useCallback((e) => {
-		if (h) {
+function W({ className: e, variant: r, size: i, layout: a, asChild: o = !1, haptic: s, onClick: c, type: l, disabled: u, tabIndex: d, "aria-disabled": f, children: p, ...m }) {
+	let h = o ? ue : "button", g = u || f === !0 || f === "true", _ = n.useCallback((e) => {
+		if (g) {
 			e.preventDefault(), e.stopPropagation();
 			return;
 		}
 		s && typeof navigator < "u" && "vibrate" in navigator && navigator.vibrate(Ee[s]), c?.(e);
 	}, [
 		s,
-		h,
+		g,
 		c
-	]);
-	return /* @__PURE__ */ N(m, {
+	]), v = n.useCallback((e) => {
+		e.preventDefault(), e.stopPropagation();
+	}, []), y = o && g && n.isValidElement(p) ? n.cloneElement(p, {
+		onClick: _,
+		onClickCapture: v,
+		"aria-disabled": !0,
+		tabIndex: -1,
+		disabled: void 0
+	}) : p;
+	return /* @__PURE__ */ N(h, {
 		"data-slot": "button",
 		"data-variant": r ?? "default",
 		"data-size": i ?? "default",
 		type: o ? void 0 : l ?? "button",
 		disabled: o ? void 0 : u,
-		"aria-disabled": o && h ? !0 : f,
-		tabIndex: o && h ? -1 : d,
+		"aria-disabled": o && g ? !0 : f,
+		tabIndex: o && g ? -1 : d,
 		className: U(t({
 			variant: r,
 			size: i,
 			layout: a,
 			className: e
 		})),
-		onClick: g,
-		...p
+		onClick: o && g ? void 0 : _,
+		...m,
+		children: y
 	});
 }
 //#endregion
