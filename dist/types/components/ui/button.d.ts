@@ -5,6 +5,8 @@ import { buttonVariants } from "../../lib/server-variants/button-variants";
 declare const HAPTIC_PATTERNS: Record<string, number | number[]>;
 type HapticType = keyof typeof HAPTIC_PATTERNS;
 interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
+    /** 子要素へ Button の見た目と操作属性を委譲する。リンクを Button として見せる場合に使用。 */
+    asChild?: boolean;
     /** モバイルでの触覚フィードバック。navigator.vibrate() を使用。未対応環境では無視される。 */
     haptic?: HapticType;
 }
@@ -26,6 +28,6 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
  * - `hero`: トップ hero / final-CTA 向けのピル型特大 CTA。
  * - `icon` / `icon-sm` / `icon-lg` / `icon-xl`: アイコンのみのボタン（aria-label 必須）。
  */
-declare function Button({ className, variant, size, layout, haptic, onClick, type, ...props }: ButtonProps): React.JSX.Element;
+declare function Button({ className, variant, size, layout, asChild, haptic, onClick, type, ...props }: ButtonProps): React.JSX.Element;
 export { Button, buttonVariants };
 export type { ButtonProps, HapticType };

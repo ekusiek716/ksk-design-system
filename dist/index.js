@@ -228,23 +228,23 @@ var Ee = {
 		30
 	]
 };
-function W({ className: e, variant: r, size: i, layout: a, haptic: o, onClick: s, type: c, ...l }) {
-	let u = n.useCallback((e) => {
-		o && typeof navigator < "u" && "vibrate" in navigator && navigator.vibrate(Ee[o]), s?.(e);
-	}, [o, s]);
-	return /* @__PURE__ */ N("button", {
+function W({ className: e, variant: r, size: i, layout: a, asChild: o = !1, haptic: s, onClick: c, type: l, ...u }) {
+	let d = o ? ue : "button", f = n.useCallback((e) => {
+		s && typeof navigator < "u" && "vibrate" in navigator && navigator.vibrate(Ee[s]), c?.(e);
+	}, [s, c]);
+	return /* @__PURE__ */ N(d, {
 		"data-slot": "button",
 		"data-variant": r ?? "default",
 		"data-size": i ?? "default",
-		type: c ?? "button",
+		type: o ? l : l ?? "button",
 		className: U(t({
 			variant: r,
 			size: i,
 			layout: a,
 			className: e
 		})),
-		onClick: u,
-		...l
+		onClick: f,
+		...u
 	});
 }
 //#endregion
