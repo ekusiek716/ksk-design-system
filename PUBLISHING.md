@@ -18,7 +18,9 @@
 ```bash
 # release branch で package.json / package-lock.json と契約 version を更新
 # PR を main にマージ
-gh run watch --workflow=publish.yml
+RUN_ID="$(gh run list --workflow=publish.yml --branch=main --limit=1 \
+  --json databaseId --jq '.[0].databaseId')"
+gh run watch "$RUN_ID" --exit-status
 ```
 
 main への version 変更を `.github/workflows/publish.yml` が検知し、npm Trusted
