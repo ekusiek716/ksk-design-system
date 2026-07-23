@@ -76,7 +76,14 @@
       { "level": 1, "spacing": "8px〜12px (gap-2 / gap-3)", "usage": "アイコンとテキスト、ボタン同士の横並び、FormActions の要素間" },
       { "level": 2, "spacing": "16px (gap-4)", "usage": "FormSection 内のフィールド間、カード内のブロック間" },
       { "level": 3, "spacing": "24px (gap-6)", "usage": "FormRoot のセクション間、ページ内の主要ブロック間の既定リズム" }
-    ]
+    ],
+    "sectionLevels": [
+      { "spacing": "sm", "token": "--Space-Section-xs", "value": "32px", "usage": "コンパクトな関連セクション" },
+      { "spacing": "md", "token": "--Space-Section-md", "value": "48px", "usage": "ページセクションの既定" },
+      { "spacing": "lg", "token": "--Space-Section-xl", "value": "64px", "usage": "主要セクションの区切り" },
+      { "spacing": "xl", "token": "--Space-Section-2xl", "value": "80px", "usage": "LP の大きな章区切り" }
+    ],
+    "sectionTokenSource": "tokens.json#/spacing/section"
   },
   "responsive": {
     "source": "tokens.json#/breakpoints",

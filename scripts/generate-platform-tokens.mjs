@@ -233,8 +233,32 @@ function convertCategorical(src) {
   return out;
 }
 
+const REQUIRED_SECTION_SPACING = ['xs', 'sm', 'md', 'lg', 'xl', '2xl'];
+function convertSectionSpacing(src) {
+  if (!src || typeof src !== 'object' || Array.isArray(src)) {
+    throw new Error('tokens.spacing.section must be an object');
+  }
+
+  const out = {};
+  for (const key of REQUIRED_SECTION_SPACING) {
+    if (!(key in src)) {
+      throw new Error(`tokens.spacing.section.${key} is required`);
+    }
+    const value = pxNum(src[key]);
+    if (!Number.isFinite(value)) {
+      throw new Error(`tokens.spacing.section.${key} must be a numeric px value`);
+    }
+    out[key] = value;
+  }
+  return out;
+}
+
 const scales = {
-  spacing: { unit: pxNum(tokens.spacing.unit), scale: tokens.spacing.scale.slice() },
+  spacing: {
+    unit: pxNum(tokens.spacing.unit),
+    scale: tokens.spacing.scale.slice(),
+    section: convertSectionSpacing(tokens.spacing.section),
+  },
   breakpoints: convertBreakpoints(tokens.breakpoints),
   borderRadius: Object.fromEntries(
     Object.entries(tokens.borderRadius)

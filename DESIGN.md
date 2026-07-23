@@ -46,6 +46,7 @@ rounded:
 spacing:
   unit: "4px"      # 4px グリッド（scale: 0,4,8,12,16,20,24,28,32,36,40,44,48,...）
   page: "16px"     # 基準画面端マージン。実レイアウトは Screen / Shell の padding contract を優先
+  section: { xs: "32px", sm: "40px", md: "48px", lg: "56px", xl: "64px", 2xl: "80px" }
 elevation:                                          # 影色は neutral（Gray-900 ベース rgba(17,24,39,…)）でテーマ非依存
   sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
   md: "0 0 8px rgba(20, 20, 20, 0.08)"
@@ -140,6 +141,7 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 ## Layout & Spacing
 
 - **4px グリッド**。余白・サイズは 4 の倍数（scale 0–60）。
+- セクション同士の縦リズムは `--Space-Section-{xs..2xl}`（32–80px）を使い、コンポーネント内の gap scale と分離する。
 - 画面端マージン: 16px を基準にしつつ、実レイアウトでは `Screen` / shell component の padding contract を優先する。
 - **タッチターゲット**（モバイル）: WCAG 2.5.5 / Apple HIG に従い主要操作（ボタン/アイコンボタン/入力/ナビ）の
   **min は 44px** 以上、推奨 48px。44 未満が避けられない **チップ（min 32px）は hitSlop**（不可視の拡張タップ領域）で
