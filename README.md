@@ -94,7 +94,8 @@ Jest 29 では Babel 7 系を使います（Babel 8 は `babel-jest@29` の peer
 ```bash
 npm install --save-dev \
   jest@29.7.0 babel-jest@29.7.0 jest-environment-jsdom@29.7.0 \
-  @babel/core@^7.28.0 @babel/preset-env@^7.28.0 @babel/preset-react@^7.28.0
+  @babel/core@^7.28.0 @babel/preset-env@^7.28.0 \
+  @babel/preset-react@^7.28.0 @babel/preset-typescript@^7.28.0
 ```
 
 ```js
@@ -103,6 +104,7 @@ module.exports = {
   presets: [
     ["@babel/preset-env", { targets: { node: "current" } }],
     ["@babel/preset-react", { runtime: "automatic" }],
+    ["@babel/preset-typescript", { allExtensions: true, isTSX: true }],
   ],
 }
 ```
