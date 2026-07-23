@@ -3,6 +3,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 import { cn } from "@/lib/utils"
 
 export interface TimePickerProps {
+  id?: string
   /** "HH:mm" 形式の値。例: "09:30" */
   value?: string
   onChange?: (time: string) => void
@@ -13,6 +14,8 @@ export interface TimePickerProps {
   className?: string
   /** トリガーボタンの aria-label。@default placeholder */
   triggerLabel?: string
+  "aria-describedby"?: string
+  "aria-invalid"?: React.AriaAttributes["aria-invalid"]
 }
 
 function pad2(n: number) {
@@ -56,6 +59,7 @@ function TimePickerColumn({
       {items.map((v) => (
         <button
           key={v}
+          type="button"
           data-selected={v === selected}
           onClick={() => onSelect(v)}
           className={cn(
@@ -73,6 +77,7 @@ function TimePickerColumn({
 }
 
 function TimePicker({
+  id,
   value,
   onChange,
   placeholder = "時刻を選択",
@@ -80,6 +85,8 @@ function TimePicker({
   minuteStep = 1,
   className,
   triggerLabel,
+  "aria-describedby": ariaDescribedBy,
+  "aria-invalid": ariaInvalid,
 }: TimePickerProps) {
   const [open, setOpen] = React.useState(false)
   const parsed = parseTime(value)
@@ -102,10 +109,14 @@ function TimePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
+          id={id}
+          type="button"
           data-slot="time-picker-trigger"
           disabled={disabled}
           aria-expanded={open}
-          aria-label={triggerLabel ?? placeholder}
+          aria-label={triggerLabel ?? (displayValue ? undefined : placeholder)}
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={ariaInvalid}
           className={cn(
             "flex h-12 w-full items-center justify-between rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-3 typo-body-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
             open

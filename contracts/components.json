@@ -4,12 +4,12 @@
     "version": "1.45.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 66,
+      "ui": 67,
       "patterns": 56,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 145
+      "total": 146
     }
   },
   "ui": [
@@ -146,7 +146,24 @@
       ],
       "rules": [
         "Use DatePicker not <input type='date'>",
-        "Use DateRangePicker for date range selection"
+        "Use DateRangePicker for date range selection",
+        "min / max で選択可能日を制限し、FormField の htmlFor と id を一致させられる"
+      ]
+    },
+    {
+      "name": "DateTimePicker",
+      "path": "src/components/ui/date-time-picker.tsx",
+      "description": "DatePicker と TimePicker を単一の Date value/onChange にまとめる日時入力。ローカル Date を保持し、タイムゾーン変換は行わない。",
+      "variants": [],
+      "accessibility": [
+        "FormField の htmlFor と DateTimePicker id を一致させる",
+        "aria-describedby / aria-invalid を日付・時刻の両トリガーへ伝播"
+      ],
+      "rules": [
+        "日時入力は DatePicker と TimePicker を consumer で手組みせず DateTimePicker を使う",
+        "minuteStep の既定値は 5 分",
+        "日付変更時は時刻を、時刻変更時は日付を保持する",
+        "Date はローカル時刻として扱い、UTC/TZ 変換は consumer の保存境界で行う"
       ]
     },
     {
@@ -935,7 +952,7 @@
     {
       "name": "TimePicker",
       "path": "src/components/ui/time-picker.tsx",
-      "description": "時刻選択。15 分刻みデフォルト。HH:mm。",
+      "description": "時刻選択。HH:mm 形式で、minuteStep により分の刻み幅を指定できる（既定 1 分）。",
       "variants": [],
       "sizes": [],
       "accessibility": [
