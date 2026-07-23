@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Container } from "../../ui/container"
 import { SkipLink } from "../../ui/skip-link"
 
 interface AppShellProps extends React.ComponentProps<"div"> {
@@ -30,9 +31,11 @@ function AppShell({
       {topBar && (
         <header
           data-slot="app-topbar"
-          className="sticky top-0 z-40 flex items-center border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-4 h-14 shrink-0"
+          className="sticky top-0 z-40 h-14 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]"
         >
-          {topBar}
+          <Container size="fluid" gutter="tight" className="flex h-full items-center">
+            {topBar}
+          </Container>
         </header>
       )}
       <main

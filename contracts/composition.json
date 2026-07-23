@@ -25,11 +25,11 @@
     },
     "desktop": {
       "requiredComponents": ["AppShell"],
-      "optionalComponents": ["Breadcrumb", "SectionHeader", "SubNav"],
+      "optionalComponents": ["Breadcrumb", "Container", "Section", "SectionHeader", "SubNav"],
       "implementation": "src/components/patterns/shells/app-shell.tsx",
       "structure": [
         "AppShell (flex flex-col min-h-screen, bg-[var(--Surface-Primary)])",
-        "  topBar slot: sticky top-0 z-40, border-b, h-14, px-4",
+        "  topBar slot: sticky top-0 z-40, border-b, h-14。内蔵 Container(size=fluid, gutter=tight) が px-4 を担当",
         "  main (flex-1。bottomNav が渡された場合のみ pb-16 をシェルが自動付与)",
         "  bottomNav slot: fixed bottom-0 inset-x-0 z-40, h-14（PC でモバイル的下部ナビを使う場合のみ）"
       ],
@@ -40,13 +40,13 @@
     },
     "admin": {
       "requiredComponents": ["AdminShell"],
-      "optionalComponents": ["DataTable", "SearchPanel", "StatusTabs", "BulkActions"],
+      "optionalComponents": ["Container", "DataTable", "SearchPanel", "StatusTabs", "BulkActions"],
       "implementation": "src/components/patterns/shells/admin-shell.tsx",
       "structure": [
         "AdminShell (flex h-screen, bg-[var(--Surface-Secondary)])",
         "  sidebar slot: aside hidden lg:flex, border-r, bg-[var(--Surface-Primary)], ScrollArea でラップ済み（sidebarWidth prop で幅調整、既定 w-64）",
-        "  header slot: 任意。border-b, h-16, px-6",
-        "  main: flex-1 overflow-auto p-6（ページコンテンツの外周余白はここで確保済み）"
+        "  header slot: 任意。border-b, h-16。内蔵 Container(size=fluid) が px-6 を担当",
+        "  main: flex-1 overflow-auto。内蔵 Container(size=fluid, className=py-6) が p-6 相当の外周余白を担当"
       ],
       "rules": [
         "main の p-6（24px）がページ外周の既定余白。ページ側で二重に外周 padding を足さない",
@@ -56,16 +56,16 @@
     },
     "marketing": {
       "requiredComponents": ["MarketingShell"],
-      "optionalComponents": ["Footer", "BannerCarousel", "CountdownHero", "PhotoHero"],
+      "optionalComponents": ["Footer", "Container", "Section", "BannerCarousel", "CountdownHero", "PhotoHero"],
       "implementation": "src/components/patterns/shells/marketing-shell.tsx",
       "structure": [
         "MarketingShell (flex flex-col min-h-screen, bg-[var(--Surface-Primary)])",
-        "  header slot: sticky top-0 z-40, bg-[var(--Surface-Primary)]/95 backdrop-blur, h-16, px-6 lg:px-16",
+        "  header slot: sticky top-0 z-40, bg-[var(--Surface-Primary)]/95 backdrop-blur, h-16。内蔵 Container(gutter=spacious) が px-6 lg:px-16 を担当",
         "  main: flex-1",
-        "  footer slot: border-t, bg-[var(--Surface-Secondary)], py-12, px-6 lg:px-16"
+        "  footer slot: Section(as=footer, spacing=md, background=subtle) + Container(size=fluid, gutter=spacious)"
       ],
       "rules": [
-        "左右の外周余白は px-6（モバイル）/ lg:px-16（デスクトップ）をシェルの header/footer が既に持つ。main 直下のセクションはページ側で同じ px-6 lg:px-16 を明示して揃える（シェルは main 自体に横 padding を強制しないため）",
+        "header/footer の左右外周余白は内蔵 Container(gutter=spacious) が担う。main 直下は <Section><Container gutter=\"spacious\">...</Container></Section> で揃え、Section 自体に左右 padding を追加しない",
         "header は backdrop-blur 前提の半透明背景。header 直下に実質同色の不透明要素を重ねる場合は視覚的な二重線に注意する"
       ]
     }

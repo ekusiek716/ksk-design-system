@@ -4,12 +4,12 @@
     "version": "1.45.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 62,
+      "ui": 64,
       "patterns": 54,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 139
+      "total": 141
     }
   },
   "ui": [
@@ -941,6 +941,36 @@
       "rules": [
         "targetId はページ内のフォーカス可能な main landmark の id と一致させる",
         "AppShell / AdminShell / MarketingShell / Screen は既定で SkipLink を内包するため重複配置しない"
+      ]
+    },
+    {
+      "name": "Container",
+      "path": "src/components/ui/container.tsx",
+      "description": "ページ内容の最大幅・中央寄せ・左右 gutter を一元管理するレイアウトプリミティブ。",
+      "variants": [
+        "size: narrow / page / wide / fluid",
+        "gutter: none / tight / default / spacious"
+      ],
+      "sizes": [],
+      "rules": [
+        "左右 gutter と最大幅は Container だけが担当する",
+        "縦余白や背景帯は Container に追加せず Section を使う",
+        "全幅背景の内側では <Section><Container>...</Container></Section> の順に組む"
+      ]
+    },
+    {
+      "name": "Section",
+      "path": "src/components/ui/section.tsx",
+      "description": "全幅の背景帯とセクション間の縦リズムを管理するレイアウトプリミティブ。左右 padding は持たない。",
+      "variants": [
+        "spacing: sm / md / lg / xl",
+        "background: none / subtle / accent-subtle"
+      ],
+      "sizes": [],
+      "rules": [
+        "縦余白と背景だけを担当し、px-* / pl-* / pr-* を追加しない",
+        "最大幅・中央寄せ・左右 gutter は内側の Container に委ねる",
+        "footer の全幅背景帯には as=\"footer\" を使える"
       ]
     }
   ],
@@ -2109,7 +2139,8 @@
       ],
       "rules": [
         "For admin/dashboard pages",
-        "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる"
+        "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる",
+        "header と main の既定 gutter は内蔵 Container が担うためページ側で外周 padding を重ねない"
       ]
     },
     {
@@ -2121,7 +2152,8 @@
       ],
       "rules": [
         "For general app pages",
-        "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる"
+        "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる",
+        "topBar の既定 gutter は内蔵 Container が担う"
       ]
     },
     {
@@ -2133,7 +2165,8 @@
       ],
       "rules": [
         "For LP/marketing pages",
-        "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる"
+        "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる",
+        "header / footer の左右 gutter は内蔵 Container、footer の縦余白と背景は内蔵 Section が担う"
       ]
     }
   ]

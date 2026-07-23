@@ -31,6 +31,7 @@
 | CommitAutoGrowTextarea | `@/components/ui/commit-auto-grow-textarea` | — | — |
 | CommitInput | `@/components/ui/commit-input` | — | InputCommitTiming |
 | CommitTextarea | `@/components/ui/commit-textarea` | — | — |
+| Container | `@/components/ui/container` | **size**: `narrow`, `page`, `wide`, `fluid`<br>**gutter**: `none`, `tight`, `default`, `spacious` | Sizes |
 | CountdownTimer | `@/components/ui/countdown-timer` | — | Filled, Ghost, Compact, DayGranularity, Ended, AllVariants |
 | DateField | `@/components/ui/date-field` | — | Default, WithInitialValue, CustomPlaceholder, Disabled, CustomFormat |
 | DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, FutureValueOpensSelectedMonth, WithDefaultMonth, Disabled, RangePicker, CalendarOnly, CalendarRange |
@@ -54,6 +55,7 @@
 | RadioGroup, RadioGroupItem | `@/components/ui/radio-group` | — | ThreeOptions, WithDisabled, WithDescription, HoverState |
 | ResponsiveDialog, ResponsiveDialogTrigger, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter, ResponsiveDialogClose | `@/components/ui/responsive-dialog` | — | Default |
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
+| Section | `@/components/ui/section` | **spacing**: `sm`, `md`, `lg`, `xl`<br>**background**: `none`, `subtle`, `accent-subtle` | FullBleedBandWithContainedContent |
 | Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
 | Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass` | BottomSheet, FloatSheet, RightSheet, A11yOptions, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158) |

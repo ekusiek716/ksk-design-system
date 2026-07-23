@@ -2,7 +2,7 @@
   "meta": {
     "name": "KSK Design System — Rules Contracts",
     "version": "1.1.0",
-    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン43件・AIアンチパターン10件。"
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン44件・AIアンチパターン10件。"
   },
   "prohibited": [
     {
@@ -389,6 +389,15 @@
       "excludes": [".stories.", "createExpoRouterTabBar", "LiquidBottomTabBar", "ksk-ds-allow-custom-ui"],
       "message": "Expo Router / React Navigation tabBar のローカル再実装禁止",
       "fix": "createExpoRouterTabBar(...) / <LiquidBottomTabBar> を使用"
+    },
+    {
+      "id": "P044",
+      "severity": "error",
+      "category": "layout",
+      "pattern": "<Section[^>]*className=[^>]*(px-|pl-|pr-)",
+      "excludes": [".stories.", "components/ui/section.tsx", "ksk-ds-allow-custom-ui"],
+      "message": "Section への左右 padding 追加禁止。背景帯と縦リズムの責務を越え、Container と二重がけになる",
+      "fix": "左右 gutter と最大幅は <Container>、縦余白と背景は <Section> に分離する"
     }
   ],
   "aiPatterns": {
