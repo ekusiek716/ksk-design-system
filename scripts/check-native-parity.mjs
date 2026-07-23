@@ -21,6 +21,7 @@ const INTENTIONAL_NATIVE_GAPS = new Map([
   ["BulkActions", "admin table bulk action toolbar is Web-only"],
   ["ChartControls", "admin analytics controls are Web-only"],
   ["Container", "responsive max-width and CSS gutter primitive is Web-only; native uses View layout"],
+  ["ContentCarousel", "arbitrary ReactNode slides and DOM scroll-snap are Web-only; native consumers use FlatList paging"],
   ["CookieConsent", "browser cookie consent is Web-only"],
   ["DataTable", "complex admin table editing is Web-only"],
   ["DocumentPage", "web naming of the static document page; native provides the same role as DocumentScreen (Screen+AppHeader scaffold)"],
