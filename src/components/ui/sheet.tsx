@@ -797,7 +797,7 @@ function SheetContent({
   autoFocus,
   restoreFocusOnClose = true,
   closeOnEsc = true,
-  bodyScrollLock = true,
+  bodyScrollLock: _bodyScrollLock = true,
   zIndex,
   overlayClassName,
   ...props
