@@ -16,18 +16,32 @@
 ## 最短手順（推奨）
 
 ```bash
-bash scripts/release.sh minor   # patch / minor / major / x.y.z
+# release branch で package.json / package-lock.json と契約 version を更新
+# PR を main にマージ
+RUN_ID="$(gh run list --workflow=publish.yml --branch=main --limit=1 \
+  --json databaseId --jq '.[0].databaseId')"
+gh run watch "$RUN_ID" --exit-status
 ```
 
-これだけ。中で以下を全部やる:
+main への version 変更を `.github/workflows/publish.yml` が検知し、npm Trusted
+Publishing (OIDC) で以下を自動実行する:
 
-1. `git diff --quiet` & main ブランチチェック（曜日チェック）
-2. `npm run check`
-3. `npm version <level>`（tag 切り）
-4. `npm pack`（prepack で `dist/` を生成し、中身を検証）
-5. `npm publish --access public`
-6. `git push origin main --tags`
-7. `bash scripts/update-consumers.sh <version>`（`DEFAULT_REPOS` の全消費リポへ PR 自動作成）
+1. npm 上の最新版と `package.json` の version を比較
+2. `npm ci`
+3. `npm publish`（prepack で `dist/` を生成）
+4. `vX.Y.Z` tag と GitHub Release を作成
+
+公開後、レジストリ反映を確認してから消費リポへ配布する:
+
+```bash
+npm view ksk-design-system@<version> version --json
+npm dist-tag ls ksk-design-system
+bash scripts/update-consumers.sh <version>
+```
+
+PR では `npm run check`、`npm test`、`npm pack --dry-run` を通してからマージする。
+ローカル認証による手動公開が必要な場合だけ `bash scripts/release.sh <version>` を
+フォールバックとして使う。
 
 > v1.35.0 で旧名 `@ksk/design-system` 互換 tgz の生成は廃止。
 > 消費5リポ + todo-shared が新名 `ksk-design-system` に移行済。
@@ -149,16 +163,19 @@ bash scripts/update-consumers.sh <version> <影響リポ...>
 ## 注意
 
 - 配布前に必ず `npm pack --dry-run` で中身確認
-- npm registry 公開には `npm login` 済みであること
+- 通常公開は Trusted Publishing (OIDC) を使う。`npm login` は
+  `scripts/release.sh` でローカル公開へフォールバックする場合のみ必要
 - `package.json#exports` を変更したら必ず利用側プロジェクトでの import を試す
 - 金曜午後のリリースは厳禁（週末に障害対応できない）
 - メジャーリリースは月初の月曜が望ましい（フィードバック収集期間が取れる）
 
 ## npm 公開について
 
-v1.36.0 以降は npm registry 経由配布。GitHub Actions による自動 publish はなく、
-ローカルの `npm login` 済み環境から `scripts/release.sh` で公開する。
-CI/CD に戻す場合は、NPM_TOKEN の Secrets 登録と workflow の再作成をセットで行うこと。
+v1.36.0 以降は npm registry 経由配布。通常公開は
+`.github/workflows/publish.yml` と npm Trusted Publishing (OIDC) を使うため、
+長寿命の `NPM_TOKEN` やローカルの `npm login` は不要。
+workflow が利用できない緊急時だけ、`scripts/release.sh` のローカル公開へ
+フォールバックする。
 
 ## 関連
 

@@ -80,7 +80,7 @@ function Screen({
         <footer
           data-slot="screen-footer"
           className={cn(
-            "shrink-0 bg-[var(--Surface-Primary)] px-6 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]",
+            "shrink-0 bg-[var(--Surface-Primary)] px-6 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)_+_1rem)]",
             footerClassName,
           )}
         >

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { SheetContent, type SheetContentProps } from "@/components/ui/sheet"
+import { SheetContent, type SheetContentProps } from "../ui/sheet"
 
 type BottomSheetFramePreset = "mobile-full" | "mobile-form" | "mobile-page" | "desktop-floating"
 
@@ -10,7 +10,7 @@ interface BottomSheetFrameProps extends Omit<SheetContentProps, "side" | "paddin
 const presetClasses: Record<BottomSheetFramePreset, string> = {
   "mobile-full": [
     "p-0",
-    "max-h-[calc(100dvh-env(safe-area-inset-top))]",
+    "max-h-[calc(100dvh_-_env(safe-area-inset-top))]",
     "overflow-hidden rounded-t-[var(--Radius-Sheet)]",
     "sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-h-[90dvh] sm:max-w-xl sm:rounded-[var(--Radius-Sheet)]",
   ].join(" "),
@@ -28,7 +28,7 @@ const presetClasses: Record<BottomSheetFramePreset, string> = {
    */
   "mobile-page": [
     "p-0",
-    "max-h-[calc(100dvh-2rem-env(safe-area-inset-top,0px))]",
+    "max-h-[calc(100dvh_-_2rem_-_env(safe-area-inset-top,0px))]",
     "overflow-hidden rounded-t-[var(--Radius-Sheet)]",
     "sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-h-[90dvh] sm:max-w-xl sm:rounded-[var(--Radius-Sheet)]",
   ].join(" "),

@@ -1346,7 +1346,80 @@ var e = {
 			52,
 			56,
 			60
-		]
+		],
+		section: {
+			xs: 32,
+			sm: 40,
+			md: 48,
+			lg: 56,
+			xl: 64,
+			"2xl": 80
+		}
+	},
+	breakpoints: {
+		viewport: {
+			sm: {
+				value: 640,
+				role: "switch",
+				tailwindPrefix: "sm:",
+				meaning: "狭幅モバイルから横並び可能な幅への最初の切替",
+				implementation: "Tailwind CSS v4 default @media (width >= 40rem)"
+			},
+			md: {
+				value: 768,
+				role: "switch",
+				tailwindPrefix: "md:",
+				meaning: "タブレット・中幅画面でのレイアウト切替",
+				implementation: "Tailwind CSS v4 default @media (width >= 48rem)"
+			},
+			lg: {
+				value: 1024,
+				role: "switch",
+				tailwindPrefix: "lg:",
+				meaning: "デスクトップナビ・サイドバーを表示する主要切替",
+				implementation: "Tailwind CSS v4 default @media (width >= 64rem)"
+			},
+			xl: {
+				value: 1280,
+				role: "content-max",
+				tailwindPrefix: "max-w-7xl / xl:",
+				meaning: "wide Container のコンテンツ幅上限",
+				implementation: "Tailwind CSS v4 default 80rem",
+				rule: "上限段では新しいレイアウト変形を追加せず、Container の最大幅制御に使う"
+			}
+		},
+		container: {
+			sm: {
+				value: 384,
+				tailwindPrefix: "@sm:",
+				implementation: "Tailwind CSS v4 default 24rem"
+			},
+			md: {
+				value: 448,
+				tailwindPrefix: "@md:",
+				implementation: "Tailwind CSS v4 default 28rem"
+			},
+			xl: {
+				value: 576,
+				tailwindPrefix: "@xl:",
+				implementation: "Tailwind CSS v4 default 36rem"
+			},
+			"2xl": {
+				value: 672,
+				tailwindPrefix: "@2xl:",
+				implementation: "Tailwind CSS v4 default 42rem"
+			},
+			"3xl": {
+				value: 768,
+				tailwindPrefix: "@3xl:",
+				implementation: "Tailwind CSS v4 default 48rem"
+			},
+			"4xl": {
+				value: 896,
+				tailwindPrefix: "@4xl:",
+				implementation: "Tailwind CSS v4 default 56rem"
+			}
+		}
 	},
 	borderRadius: {
 		none: 0,
@@ -1460,6 +1533,16 @@ var e = {
 			fontSize: 11,
 			fontWeight: "400",
 			lineHeight: 17
+		},
+		"caption-strong": {
+			fontSize: 11,
+			fontWeight: "600",
+			lineHeight: 16
+		},
+		"prose-meta": {
+			fontSize: 13,
+			fontWeight: "600",
+			lineHeight: 18
 		}
 	},
 	shadows: {

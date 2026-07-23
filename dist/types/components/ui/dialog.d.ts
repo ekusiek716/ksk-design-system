@@ -48,10 +48,15 @@ interface DialogContentProps extends Omit<React.ComponentProps<typeof DialogPrim
     restoreFocusOnClose?: boolean;
     /** Esc キーで閉じる。既定 true。 */
     closeOnEsc?: boolean;
-    /** Dialog 表示中に body scroll を抑止する。既定 true。 */
+    /**
+     * Dialog 表示中に body scroll を抑止する。既定 true。
+     * 実際の抑止は modal Dialog（Radix）標準の scroll lock が「開いている間だけ」
+     * 行うため、この prop は後方互換のために受けるのみ（DOM へは流さない）。
+     * 背景スクロールを許可したい場合は非 modal な Dialog を使う。
+     */
     bodyScrollLock?: boolean;
 }
-declare function DialogContent({ className, children, padding, description, position, autoFocus, restoreFocusOnClose, closeOnEsc, bodyScrollLock, ...props }: DialogContentProps): React.JSX.Element;
+declare function DialogContent({ className, children, padding, description, position, autoFocus, restoreFocusOnClose, closeOnEsc, bodyScrollLock: _bodyScrollLock, ...props }: DialogContentProps): React.JSX.Element;
 declare function DialogHeader({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
 declare function DialogFooter({ className, orientation, ...props }: React.ComponentProps<"div"> & {
     /**

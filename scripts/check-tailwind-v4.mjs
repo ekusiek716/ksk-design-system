@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // =============================================================
-// KSK Design System — Tailwind v4 先頭! 検出
+// KSK Design System — Tailwind v4 構文検査
 //
 // Tailwind v4 では important 修飾子は末尾(!): `bg-[var(--x)]!`。
 // v3 風の先頭! (`!bg-[var(--x)]`) は v4 で utility 認識されず CSS が
@@ -20,8 +20,10 @@ const srcDir = join(dirname(fileURLToPath(import.meta.url)), "..", "src")
 //   - `![a-z][a-z0-9]*-[[a-z0-9]`  util + `-` + 値/括弧（!bg-[ / !py-4 / !font-bold）
 //     `-` を要求することで `!mounted` / `!steps[idx]` 等の JS 否定を除外する。
 const RE = /:![a-z]|![a-z][a-z0-9]*-[[a-z0-9]/g
+const UNSPACED_CALC_OPERATOR_RE = /(?:[%a-z0-9)])(?:\+|-(?=\d|env\(|max\(|min\(|clamp\(|var\())/i
 
 const hits = []
+const calcHits = []
 function walk(dir) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name)
@@ -30,6 +32,10 @@ function walk(dir) {
     readFileSync(p, "utf8").split("\n").forEach((line, i) => {
       const m = line.match(RE)
       if (m) hits.push({ file: p.replace(srcDir + "/", "src/"), line: i + 1, found: [...new Set(m)].join(" ") })
+      const calcExpressions = line.match(/calc\([^"'`]*?\)\]/g) ?? []
+      if (calcExpressions.some((expression) => UNSPACED_CALC_OPERATOR_RE.test(expression))) {
+        calcHits.push({ file: p.replace(srcDir + "/", "src/"), line: i + 1 })
+      }
     })
   }
 }
@@ -42,3 +48,15 @@ if (hits.length) {
   process.exit(1)
 }
 console.log("\x1b[32m✓ 先頭! の Tailwind クラスなし\x1b[0m")
+
+console.log("🧮 Tailwind arbitrary calc() — 二項演算子の空白検査")
+if (calcHits.length) {
+  for (const hit of calcHits) {
+    console.error(`\x1b[31m[NG]\x1b[0m ${hit.file}:${hit.line}`)
+  }
+  console.error(
+    `\x1b[31m✗ ${calcHits.length} 件: calc() の + / - は _ で空白を表現してください（例 calc(100%_-_2rem)）\x1b[0m`,
+  )
+  process.exit(1)
+}
+console.log("\x1b[32m✓ calc() の二項演算子は空白付きです\x1b[0m")

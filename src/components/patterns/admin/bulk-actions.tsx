@@ -22,7 +22,7 @@ function BulkActions({ selectedCount, onClear, children, className, ...props }: 
     <div
       data-slot="bulk-actions"
       className={cn(
-        "fixed inset-x-0 bottom-6 z-50 mx-auto w-fit max-w-[calc(100%-32px)]",
+        "fixed inset-x-0 bottom-6 z-50 mx-auto w-fit max-w-[calc(100%_-_32px)]",
         "flex items-center gap-3 rounded-full bg-[var(--Surface-Inverse)] px-5 py-3 shadow-[var(--shadow-dialog)]",
         "animate-fade-in-up",
         className

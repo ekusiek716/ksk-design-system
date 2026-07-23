@@ -11,7 +11,13 @@ interface InputProps extends Omit<React.ComponentProps<"input">, "prefix"> {
      * インタラクティブ要素（ボタン等）を渡す場合はこちら（pointer-events 有効）。
      */
     endAdornment?: React.ReactNode;
+    /**
+     * 文字数カウンタを表示する。maxLength とセットで使うと
+     * 右下に「現在/max」を表示し、上限到達時は caution 色になる。
+     * controlled / uncontrolled と IME 入力の両方に追従する。
+     */
+    showCount?: boolean;
 }
-declare function Input({ className, type, startAdornment, endAdornment, ...props }: InputProps): React.JSX.Element;
+declare function Input({ className, type, startAdornment, endAdornment, showCount, maxLength, value, defaultValue, onChange, onCompositionStart, onCompositionEnd, ref, ...props }: InputProps): React.JSX.Element;
 export { Input };
 export type { InputProps };

@@ -24,7 +24,7 @@ const OVERLAY_CLASS: Record<PhotoHeroOverlay, string> = {
 }
 
 const ALIGN_CLASS: Record<PhotoHeroAlign, string> = {
-  bottom: "justify-end pt-24 pb-[calc(env(safe-area-inset-bottom,0px)+3rem)]",
+  bottom: "justify-end pt-24 pb-[calc(env(safe-area-inset-bottom,0px)_+_3rem)]",
   center: "justify-center py-16",
 }
 

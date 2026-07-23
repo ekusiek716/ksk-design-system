@@ -53,6 +53,6 @@ interface CelebrationProps extends React.ComponentProps<"div"> {
     onDone?: () => void;
 }
 export declare function usePrefersReducedMotion(): boolean;
-declare function Celebration({ active, trigger, placement, effect, emoji, title, description, actions, interactive, cardless, particleCount, durationMs, duration, colors, driftRange, emojiAnimation, autoDismissMs, onTapDismiss, onDone, className, ...props }: CelebrationProps): React.JSX.Element;
+declare function Celebration({ active, trigger, placement, effect, emoji, title, description, actions, interactive, cardless, particleCount, durationMs, duration, colors, driftRange, emojiAnimation, autoDismissMs, onTapDismiss, onDone, className, style, ...props }: CelebrationProps): React.JSX.Element;
 export { Celebration };
 export type { CelebrationProps, CelebrationTrigger, CelebrationPlacement, CelebrationEffect };

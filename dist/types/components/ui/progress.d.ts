@@ -12,6 +12,11 @@ interface ProgressAutoColorConfig {
     /** value がこの値以上なら caution。@default 100 */
     cautionFrom?: number;
 }
+/**
+ * 描画に使う実効値を決める純粋関数。
+ * masked=true のときは value を一切見ず常に同じ値を返す（バー幅からの逆算防止）。
+ */
+export declare function resolveProgressDisplayValue(value: number | null | undefined, masked: boolean | undefined): number;
 export interface ProgressProps extends React.ComponentProps<typeof ProgressPrimitive.Root> {
     /**
      * 色バリアント。autoColor=false の時はこの値がそのまま使われる。
@@ -37,6 +42,12 @@ export interface ProgressProps extends React.ComponentProps<typeof ProgressPrimi
     value?: number | null;
     className?: string;
     id?: string;
+    /**
+     * true のとき、実 value に依存しない見た目にする（バー幅を固定表示にする）。
+     * 未課金ユーザー向けティザー表示等、value からバー幅経由で実データを逆算されるのを防ぐための表示専用フラグ。
+     * masked 時は value/autoColor を無視し、常に同じ幅・同じトーンで描画する。
+     */
+    masked?: boolean;
 }
 /**
  * Progress — 進捗バー。
@@ -50,6 +61,6 @@ export interface ProgressProps extends React.ComponentProps<typeof ProgressPrimi
  * <Progress value={120} variant="caution" />              // 予算超過
  * <Progress value={progress} transitionDuration="lg" />   // ホームの達成バー
  */
-declare function Progress({ className, value, variant, autoColor, transitionDuration, ...props }: ProgressProps): React.JSX.Element;
+declare function Progress({ className, value, variant, autoColor, transitionDuration, masked, ...props }: ProgressProps): React.JSX.Element;
 export { Progress };
 export type { ProgressAutoColorConfig, ProgressDuration, ProgressVariant };

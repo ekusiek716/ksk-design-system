@@ -1,5 +1,5 @@
 import React from "react";
-import { type TextInputProps } from "react-native";
+import { TextInput, type TextInputProps } from "react-native";
 export type AutoGrowTextareaDensity = "default" | "compact";
 export interface AutoGrowTextareaProps extends Omit<TextInputProps, "style" | "multiline"> {
     invalid?: boolean;
@@ -8,4 +8,4 @@ export interface AutoGrowTextareaProps extends Omit<TextInputProps, "style" | "m
     maxHeight?: number;
     density?: AutoGrowTextareaDensity;
 }
-export declare function AutoGrowTextarea({ invalid, disabled, minHeight, maxHeight, density, ...rest }: AutoGrowTextareaProps): React.JSX.Element;
+export declare const AutoGrowTextarea: React.ForwardRefExoticComponent<AutoGrowTextareaProps & React.RefAttributes<TextInput>>;

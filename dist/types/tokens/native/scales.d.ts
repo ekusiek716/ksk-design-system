@@ -2,6 +2,79 @@ export declare const scales: {
     readonly spacing: {
         readonly unit: 4;
         readonly scale: readonly [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60];
+        readonly section: {
+            readonly xs: 32;
+            readonly sm: 40;
+            readonly md: 48;
+            readonly lg: 56;
+            readonly xl: 64;
+            readonly "2xl": 80;
+        };
+    };
+    readonly breakpoints: {
+        readonly viewport: {
+            readonly sm: {
+                readonly value: 640;
+                readonly role: "switch";
+                readonly tailwindPrefix: "sm:";
+                readonly meaning: "狭幅モバイルから横並び可能な幅への最初の切替";
+                readonly implementation: "Tailwind CSS v4 default @media (width >= 40rem)";
+            };
+            readonly md: {
+                readonly value: 768;
+                readonly role: "switch";
+                readonly tailwindPrefix: "md:";
+                readonly meaning: "タブレット・中幅画面でのレイアウト切替";
+                readonly implementation: "Tailwind CSS v4 default @media (width >= 48rem)";
+            };
+            readonly lg: {
+                readonly value: 1024;
+                readonly role: "switch";
+                readonly tailwindPrefix: "lg:";
+                readonly meaning: "デスクトップナビ・サイドバーを表示する主要切替";
+                readonly implementation: "Tailwind CSS v4 default @media (width >= 64rem)";
+            };
+            readonly xl: {
+                readonly value: 1280;
+                readonly role: "content-max";
+                readonly tailwindPrefix: "max-w-7xl / xl:";
+                readonly meaning: "wide Container のコンテンツ幅上限";
+                readonly implementation: "Tailwind CSS v4 default 80rem";
+                readonly rule: "上限段では新しいレイアウト変形を追加せず、Container の最大幅制御に使う";
+            };
+        };
+        readonly container: {
+            readonly sm: {
+                readonly value: 384;
+                readonly tailwindPrefix: "@sm:";
+                readonly implementation: "Tailwind CSS v4 default 24rem";
+            };
+            readonly md: {
+                readonly value: 448;
+                readonly tailwindPrefix: "@md:";
+                readonly implementation: "Tailwind CSS v4 default 28rem";
+            };
+            readonly xl: {
+                readonly value: 576;
+                readonly tailwindPrefix: "@xl:";
+                readonly implementation: "Tailwind CSS v4 default 36rem";
+            };
+            readonly "2xl": {
+                readonly value: 672;
+                readonly tailwindPrefix: "@2xl:";
+                readonly implementation: "Tailwind CSS v4 default 42rem";
+            };
+            readonly "3xl": {
+                readonly value: 768;
+                readonly tailwindPrefix: "@3xl:";
+                readonly implementation: "Tailwind CSS v4 default 48rem";
+            };
+            readonly "4xl": {
+                readonly value: 896;
+                readonly tailwindPrefix: "@4xl:";
+                readonly implementation: "Tailwind CSS v4 default 56rem";
+            };
+        };
     };
     readonly borderRadius: {
         readonly none: 0;
@@ -115,6 +188,16 @@ export declare const scales: {
             readonly fontSize: 11;
             readonly fontWeight: "400";
             readonly lineHeight: 17;
+        };
+        readonly "caption-strong": {
+            readonly fontSize: 11;
+            readonly fontWeight: "600";
+            readonly lineHeight: 16;
+        };
+        readonly "prose-meta": {
+            readonly fontSize: 13;
+            readonly fontWeight: "600";
+            readonly lineHeight: 18;
         };
     };
     readonly shadows: {
