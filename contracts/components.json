@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 64,
-      "patterns": 54,
+      "patterns": 55,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 141
+      "total": 142
     }
   },
   "ui": [
@@ -1131,7 +1131,33 @@
       "description": "フォームフィールドラッパー。Label+Input+エラーメッセージをセットで管理。バリデーション表示付き。",
       "rules": [
         "Label + Input + error message as unit",
-        "required asterisk は Brand 色。Caution 色は入力エラーとの混同を避ける"
+        "required asterisk は Brand 色。Caution 色は入力エラーとの混同を避ける",
+        "1 フィールド分の label / control / description / error に使う。フォーム全体のセクションには FieldSet を使う",
+        "長いフォームでは FieldGroup の中に FormField を並べる"
+      ]
+    },
+    {
+      "name": "FieldSet",
+      "path": "src/components/patterns/field.tsx",
+      "description": "フォーム全体・大セクションの semantics と縦リズムを標準化する Field 群。",
+      "subcomponents": [
+        "FieldLegend",
+        "FieldGroup",
+        "FieldDescription",
+        "FieldError",
+        "FieldSeparator"
+      ],
+      "accessibility": [
+        "FieldSet は fieldset、FieldLegend は legend を描画する",
+        "FieldGroup は role=group。単独利用時は aria-label または aria-labelledby で目的を付ける",
+        "FieldError は内容がある場合のみ role=alert を描画する"
+      ],
+      "rules": [
+        "FieldSet は gap-6（24px）、FieldGroup は gap-4（16px）の縦リズムを正本とする",
+        "個々の入力は既存 FormField を FieldGroup 内に並べる",
+        "FieldDescription はセクション・グループの補足、FieldError はグループ単位のエラーに使う",
+        "グループ横断の区切りは FieldSeparator を使い、中央ラベルは children で渡す",
+        "FormSection は title/description 一体の簡易 API、FieldSet は legend や複数 FieldGroup を明示構成する長いフォーム向け"
       ]
     },
     {
@@ -1142,6 +1168,10 @@
         "FormRoot",
         "FormSection",
         "FormActions"
+      ],
+      "rules": [
+        "FormRoot は送信とフォーム全体の gap、FormActions は末尾アクション行を担う",
+        "短いフォームは FormSection、3 セクション以上または legend / group semantics が必要なフォームは FieldSet を使う"
       ]
     },
     {

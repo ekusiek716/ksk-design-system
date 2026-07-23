@@ -190,6 +190,22 @@ export type { ProseProps, ProseSection } from "./components/patterns/prose"
 export { DocumentPage } from "./components/patterns/document-page"
 export type { DocumentPageProps } from "./components/patterns/document-page"
 export { FormField } from "./components/patterns/form-field"
+export {
+  FieldSet,
+  FieldLegend,
+  FieldGroup,
+  FieldDescription,
+  FieldError,
+  FieldSeparator,
+} from "./components/patterns/field"
+export type {
+  FieldSetProps,
+  FieldLegendProps,
+  FieldGroupProps,
+  FieldDescriptionProps,
+  FieldErrorProps,
+  FieldSeparatorProps,
+} from "./components/patterns/field"
 export { ListItem } from "./components/patterns/list-item"
 export { SettingsListRow, SettingsSection } from "./components/patterns/settings-section"
 export type { SettingsListRowProps, SettingsSectionProps, SettingsSectionVariant } from "./components/patterns/settings-section"

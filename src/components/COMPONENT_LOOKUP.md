@@ -120,6 +120,7 @@
 | DocumentPage | `@/components/patterns/document-page` | — | PrivacyPolicy, WithoutLastUpdated |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
 | ErrorState | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry |
+| FieldSet, FieldLegend, FieldGroup, FieldDescription, FieldError, FieldSeparator | `@/components/patterns/field` | — | 3セクションの長いフォーム, SeparatorWithLabel |
 | FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
 | FilterChip | `@/components/patterns/filter-chip` | — | — |
 | Footer | `@/components/patterns/footer` | — | Default, Minimal |
