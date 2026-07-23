@@ -412,14 +412,14 @@
       "id": "P046",
       "severity": "warning",
       "category": "spacing",
-      "pattern": "<Card> direct child className: (mt|mb|my|space-y)-*",
+      "pattern": "(?=[\\s\\S])<Card\\b(?![^>]*\\bvariant\\s*=\\s*(?:[\"']media[\"']|\\{\\s*[\"']media[\"']\\s*\\}))[^>]*>\\s*(?:\\{[^<]{0,200})?<[^>]*\\bclassName\\s*=\\s*(?:[\"'][^\"']*(?:mt|mb|my|space-y)-|\\{[^}]{0,300}(?:mt|mb|my|space-y)-)",
       "excludes": [
         "Card variant=\"media\"",
         "CardContent 等の直下ではない子"
       ],
       "message": "default Card 直下の子に縦 margin / space-y を足すと gap-6 と二重がけになる",
       "fix": "Card 直下の縦間隔は Card の gap-6 に任せる。余白を自前管理するメディア構成は variant=\"media\" を使用",
-      "note": "TSX の className に直接現れるクラスのみを補助 lint で検出する。別 CSS ファイルや実行時に組み立てる className の margin は検出できない"
+      "note": "公開 CLI は Card の先頭 direct child に直接現れる className を検出し、リポジトリ内 lint は条件分岐・Fragment・入れ子 Card も AST で検査する。別 CSS ファイルや実行時に組み立てる className の margin は検出できない"
     }
   ],
   "aiPatterns": {
