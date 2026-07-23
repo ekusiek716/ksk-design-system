@@ -1042,9 +1042,20 @@
     {
       "name": "ErrorState",
       "path": "src/components/patterns/error-state.tsx",
-      "description": "エラー状態表示。API失敗・権限エラー等に使用。リトライアクションを必ず含める。",
+      "description": "エラー状態表示。kind=error は API 失敗・権限エラー、kind=notFound は存在しないページの標準 404 表示に使用。",
+      "variants": [
+        "kind: error / notFound"
+      ],
+      "features": [
+        "notFound default illustration and copy",
+        "action slot",
+        "standalone NotFoundIllustration export"
+      ],
       "rules": [
-        "Color + icon + text. Include retry action."
+        "kind=error は既存のエラー文言・リトライ挙動を維持する",
+        "kind=notFound は action だけで標準 404 表示を成立させる",
+        "データが 0 件の状態には EmptyState、URL や対象が存在しない状態には ErrorState kind=notFound を使う",
+        "NotFoundIllustration の色は semantic token または currentColor のみを使う"
       ]
     },
     {
