@@ -1,7 +1,7 @@
 module.exports = {
   testEnvironment: "jsdom",
   transform: {
-    "^.+\\.[jt]sx?$": "babel-jest",
+    "^.+\\.m?[jt]sx?$": "babel-jest",
   },
   transformIgnorePatterns: [
     "<rootDir>/node_modules/.pnpm/(?!(ksk-design-system|radix-ui|iconsax-reactjs|@radix-ui\\+[^@]+)@)",

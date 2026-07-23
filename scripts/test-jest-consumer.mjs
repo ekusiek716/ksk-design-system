@@ -2,7 +2,6 @@
 
 import {
   cpSync,
-  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -59,10 +58,6 @@ function run(command, args, cwd) {
 try {
   verifyTransformIgnorePatterns()
 
-  if (!existsSync(join(root, "dist/index.js"))) {
-    throw new Error("dist/index.js がありません。先に npm run build:lib を実行してください。")
-  }
-
   const packRoot = join(temporaryRoot, "pack")
   const consumerRoot = join(temporaryRoot, "consumer")
   mkdirSync(packRoot)
@@ -70,7 +65,7 @@ try {
 
   run(
     "npm",
-    ["pack", "--ignore-scripts", "--pack-destination", packRoot],
+    ["pack", "--pack-destination", packRoot],
     root,
   )
   const tarball = readdirSync(packRoot)
@@ -80,12 +75,17 @@ try {
 
   run(
     "npm",
+    ["ci", "--ignore-scripts", "--no-audit", "--no-fund"],
+    consumerRoot,
+  )
+  run(
+    "npm",
     [
       "install",
       "--ignore-scripts",
       "--no-audit",
       "--no-fund",
-      "--package-lock=false",
+      "--no-save",
       tarball,
     ],
     consumerRoot,

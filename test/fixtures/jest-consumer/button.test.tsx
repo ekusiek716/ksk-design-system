@@ -4,9 +4,11 @@ import { Button } from "ksk-design-system"
 import "ksk-design-system/glass"
 import "ksk-design-system/themes/default"
 import "ksk-design-system/tokens/semantic"
+import { esmValue } from "./esm-value.mjs"
 
 test("packed KSK component renders without a component mock", () => {
   const label: string = "保存"
   render(<Button>{label}</Button>)
   expect(screen.getByRole("button", { name: label })).toBeTruthy()
+  expect(esmValue).toBe(42)
 })
