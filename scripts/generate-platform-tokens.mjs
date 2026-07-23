@@ -208,6 +208,22 @@ function convertTouchTargets(src) {
   return out;
 }
 
+function convertBreakpoints(src) {
+  const out = {};
+  for (const [group, entries] of Object.entries(src ?? {})) {
+    if (group === '_doc') continue;
+    out[group] = {};
+    for (const [name, breakpoint] of Object.entries(entries)) {
+      if (name === '_doc') continue;
+      out[group][name] = {
+        ...breakpoint,
+        value: pxNum(breakpoint.value),
+      };
+    }
+  }
+  return out;
+}
+
 function convertCategorical(src) {
   const out = {};
   for (const [k, v] of Object.entries(src)) {
@@ -219,6 +235,7 @@ function convertCategorical(src) {
 
 const scales = {
   spacing: { unit: pxNum(tokens.spacing.unit), scale: tokens.spacing.scale.slice() },
+  breakpoints: convertBreakpoints(tokens.breakpoints),
   borderRadius: Object.fromEntries(
     Object.entries(tokens.borderRadius)
       .filter(([k]) => k !== '_doc')
