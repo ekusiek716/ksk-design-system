@@ -9,6 +9,27 @@ interface VisualViewportInset {
 }
 declare function computeVisualViewportInset(layoutHeight: number, visualHeight: number, visualOffsetTop: number): VisualViewportInset;
 /**
+ * Inline style that lifts a bottom-anchored sheet above the on-screen keyboard
+ * and caps its height to the visible region (see {@link computeVisualViewportInset}).
+ *
+ * Mirrors the CSS fallback shipped in styles/sheet-keyboard.css (#150):
+ *   - "bottom" (the lift) applies to every bottom sheet, snap mode included —
+ *     lifting a snap sheet above the keyboard is always safe.
+ *   - "maxHeight" (the cap) is skipped in snap mode (snapActive), because a
+ *     snap sheet manages its own height via the active snap ratio; capping it
+ *     here would fight that. This is the JS twin of the CSS
+ *     :not([data-snap-active]) branch.
+ *
+ * Returns undefined when no keyboard is present (keyboardInset <= 0) so the
+ * caller falls back to the variant default CSS (bottom-0 / max-h-[90dvh]).
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+declare function resolveBottomSheetKeyboardStyle(keyboardInset: number, visibleHeight: number | null, snapActive: boolean): {
+    bottom: number;
+    maxHeight?: number;
+} | undefined;
+/**
  * Pure decision for the full-surface swipe-to-close gesture, shared by the
  * touch and pointer paths in {@link SwipeToCloseBottomSheet}.
  *
@@ -57,6 +78,31 @@ declare function computeFlickVelocity(samples: DragSample[], releaseT: number, w
  * Exported for unit testing only — not part of the public package API.
  */
 declare function decideSwipeDismiss(dragY: number, sheetHeight: number, velocity: number): boolean;
+/**
+ * Project a raw pointer delta onto a side drawer's "close axis" so the shared
+ * swipe helpers ({@link decideSwipeGesture}, {@link computeFlickVelocity},
+ * {@link decideSwipeDismiss}) can drive a horizontal drawer the same way they
+ * drive the bottom sheet.
+ *
+ * `primary` is the distance along the close direction (positive = toward the
+ * anchored edge = closing): rightward for a `side="right"` drawer, leftward for
+ * `side="left"`. `cross` is the perpendicular (vertical) delta — a large cross
+ * means the user is scrolling the body, not closing the drawer.
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+declare function projectCloseAxisDelta(dx: number, dy: number, side: "left" | "right"): {
+    primary: number;
+    cross: number;
+};
+/**
+ * Signed CSS translateX (px) that moves a side drawer toward its anchored edge
+ * by `primary` px of close-axis drag. Right drawers slide right (+), left
+ * drawers slide left (−).
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+declare function closeAxisTranslate(primary: number, side: "left" | "right"): number;
 interface SheetProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
     snapPoints?: SnapPoint[];
     activeSnapPoint?: SnapPoint | null;
@@ -80,6 +126,29 @@ interface SheetProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
 declare function Sheet({ snapPoints, activeSnapPoint: activeSnapPointProp, setActiveSnapPoint: setActiveSnapPointProp, fadeFromIndex, dismissible, overlay, onOpenChange, open, defaultOpen, ...props }: SheetProps): React.JSX.Element;
 declare function SheetTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>): React.JSX.Element;
 declare function SheetClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>): React.JSX.Element;
+/**
+ * Claims a slot in the global open-sheet stack for the lifetime of the
+ * mounted component and returns its current depth (0 = first/outermost
+ * sheet open). Depth is recomputed whenever any tracked sheet opens/closes,
+ * so a sheet's level shifts down automatically if sheets below it close.
+ *
+ * IMPORTANT: claim/release happen inside a `useEffect`, not during render.
+ * `SheetContent` itself is a plain function component rendered unconditionally
+ * as a child of `DialogPrimitive.Root` — it runs on every render regardless of
+ * whether the sheet is open, so it must NOT call this hook directly (that was
+ * the #158→#166 bug: the stack registered "tree order", not "open order", and
+ * claiming during render violated render purity, causing StrictMode's
+ * simulated remount to drop the claim without a matching re-claim).
+ *
+ * Instead this hook is used exclusively by {@link SheetStackRegistrar}, a tiny
+ * component mounted as a child of `DialogPrimitive.Content` — which Radix
+ * mounts/unmounts via `Presence` in sync with the *actual* open state. So the
+ * registrar (and thus the claim) only exists while the sheet is really open,
+ * and StrictMode's mount→unmount→remount cycle naturally re-claims on remount.
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+declare function useSheetStackLevel(): number;
 /** ドラッグインジケーター（Apple HIG: 36×5pt, gray, centered） */
 declare function SheetDragIndicator(): React.JSX.Element;
 declare const sheetVariants: (props?: {
@@ -103,14 +172,21 @@ interface SheetContentProps extends Omit<React.ComponentProps<typeof DialogPrimi
      */
     padding?: boolean;
     /**
-     * Bottom-anchored sheets only (`side="bottom"` / `"bottom-glass"`). When true,
-     * <SheetDragIndicator /> is auto-rendered at the top and a downward swipe
-     * dragging past ~30% of the sheet height calls onOpenChange(false).
+     * Swipe-to-close gesture. Supported for bottom-anchored sheets
+     * (`side="bottom"` / `"bottom-glass"`) and side drawers (`side="left"` /
+     * `"right"`); ignored for other sides.
      *
-     * The swipe works across the whole sheet surface, not just the indicator:
-     * a downward drag dismisses when it starts on the handle, or while the
-     * touched scroll region is at its top. Mid-scroll and horizontal gestures
-     * stay with the content, so it never hijacks scrolling.
+     * Bottom sheets: <SheetDragIndicator /> is auto-rendered at the top and a
+     * downward swipe dragging past ~30% of the sheet height calls
+     * onOpenChange(false). The swipe works across the whole sheet surface, not
+     * just the indicator: a downward drag dismisses when it starts on the handle,
+     * or while the touched scroll region is at its top. Mid-scroll and horizontal
+     * gestures stay with the content, so it never hijacks scrolling.
+     *
+     * Side drawers: the close direction follows `side` — a `right` drawer closes
+     * on a rightward drag, a `left` drawer on a leftward drag (dragging past ~30%
+     * of the drawer width, or a fast flick). Vertical-dominant gestures stay with
+     * the content's scroll. No drag indicator is rendered.
      *
      * Ignored when the parent <Sheet> uses `snapPoints` (snap mode handles its
      * own drag).
@@ -139,10 +215,25 @@ interface SheetContentProps extends Omit<React.ComponentProps<typeof DialogPrimi
     restoreFocusOnClose?: boolean;
     /** Esc キーで閉じる。既定 true。 */
     closeOnEsc?: boolean;
-    /** Sheet 表示中に body scroll を抑止する。既定 true。 */
+    /**
+     * Sheet 表示中に body scroll を抑止する。既定 true。
+     * 実際の抑止は modal Sheet（Radix Dialog）標準の scroll lock が「開いている間
+     * だけ」行うため、この prop は後方互換のために受けるのみ（DOM へは流さない）。
+     * 背景スクロールを許可したい場合は非 modal な Sheet を使う。
+     */
     bodyScrollLock?: boolean;
+    /**
+     * #158: 多段 Sheet の z-index escape hatch。
+     * 未指定時は開いている Sheet の順序（グローバルスタック）から自動算出
+     * （overlay = 40 + depth*20 / content = 50 + depth*20）されるため通常は不要。
+     * 自動算出が想定と異なる場合（他ライブラリの overlay と揃えたい等）にのみ
+     * 明示指定する。
+     */
+    zIndex?: number;
+    /** overlay 要素にのみ追加の className を当てたい場合の escape hatch。 */
+    overlayClassName?: string;
 }
-declare function SheetContent({ className, children, side, glassOverlay, container, padding, swipeToClose, description, autoFocus, restoreFocusOnClose, closeOnEsc, bodyScrollLock, ...props }: SheetContentProps): React.JSX.Element;
+declare function SheetContent({ className, children, side, glassOverlay, container, padding, swipeToClose, description, autoFocus, restoreFocusOnClose, closeOnEsc, bodyScrollLock: _bodyScrollLock, zIndex, overlayClassName, ...props }: SheetContentProps): React.JSX.Element;
 declare function SheetHeader({ className, ...props }: React.ComponentProps<"div">): React.JSX.Element;
 declare function SheetFooter({ className, orientation, ...props }: React.ComponentProps<"div"> & {
     /**
@@ -155,5 +246,5 @@ declare function SheetFooter({ className, orientation, ...props }: React.Compone
 }): React.JSX.Element;
 declare function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>): React.JSX.Element;
 declare function SheetDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>): React.JSX.Element;
-export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator, computeVisualViewportInset, decideSwipeGesture, computeFlickVelocity, decideSwipeDismiss, };
+export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator, computeVisualViewportInset, resolveBottomSheetKeyboardStyle, decideSwipeGesture, computeFlickVelocity, decideSwipeDismiss, projectCloseAxisDelta, closeAxisTranslate, useSheetStackLevel, };
 export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset };

@@ -9,15 +9,35 @@ import * as React from "react";
  *                   （currentColor を継承させたい場合は className で調整）。
  */
 type ListItemVariant = "default" | "destructive";
-interface ListItemProps extends React.ComponentProps<"div"> {
+interface ListItemCommonProps {
     leftSlot?: React.ReactNode;
     rightSlot?: React.ReactNode;
     bottomSlot?: React.ReactNode;
     title?: string;
     description?: string;
+    children?: React.ReactNode;
+    className?: string;
+    disabled?: boolean;
+    /**
+     * @deprecated `href` または `onClick` を ListItem 自体へ渡してください。
+     * 外側の Link / button でラップする既存コードの視覚互換用に残しています。
+     */
     interactive?: boolean;
     variant?: ListItemVariant;
 }
-declare function ListItem({ className, leftSlot, rightSlot, bottomSlot, title, description, interactive, variant, children, ...props }: ListItemProps): React.JSX.Element;
+type ListItemLinkProps = ListItemCommonProps & Omit<React.ComponentPropsWithoutRef<"a">, keyof ListItemCommonProps | "href" | "onClick"> & {
+    href: string;
+    onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+};
+type ListItemButtonProps = ListItemCommonProps & Omit<React.ComponentPropsWithoutRef<"button">, keyof ListItemCommonProps | "href" | "onClick" | "type"> & {
+    href?: never;
+    onClick: React.MouseEventHandler<HTMLButtonElement>;
+};
+type ListItemStaticProps = ListItemCommonProps & Omit<React.ComponentPropsWithoutRef<"div">, keyof ListItemCommonProps | "href" | "onClick"> & {
+    href?: never;
+    onClick?: never;
+};
+type ListItemProps = ListItemLinkProps | ListItemButtonProps | ListItemStaticProps;
+declare function ListItem({ className, leftSlot, rightSlot, bottomSlot, title, description, interactive, disabled, variant, children, href, onClick, ...props }: ListItemProps): React.JSX.Element;
 export { ListItem };
 export type { ListItemProps, ListItemVariant };

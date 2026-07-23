@@ -1,5 +1,5 @@
 import { type SheetContentProps } from "@/components/ui/sheet";
-type BottomSheetFramePreset = "mobile-full" | "mobile-form" | "desktop-floating";
+type BottomSheetFramePreset = "mobile-full" | "mobile-form" | "mobile-page" | "desktop-floating";
 interface BottomSheetFrameProps extends Omit<SheetContentProps, "side" | "padding"> {
     preset?: BottomSheetFramePreset;
 }

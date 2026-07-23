@@ -29,7 +29,7 @@ function verifyTransformIgnorePatterns() {
     )
   const mustTransform = [
     "/consumer/node_modules/ksk-design-system/dist/index.js",
-    "/consumer/node_modules/.pnpm/ksk-design-system@1.45.0/node_modules/ksk-design-system/dist/index.js",
+    "/consumer/node_modules/.pnpm/ksk-design-system@9.9.9/node_modules/ksk-design-system/dist/index.js",
     "/consumer/node_modules/.pnpm/@radix-ui+react-slot@1.2.0/node_modules/@radix-ui/react-slot/dist/index.mjs",
   ]
   for (const path of mustTransform) {

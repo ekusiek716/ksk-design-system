@@ -1,5 +1,6 @@
 import * as React from "react";
 export interface TimePickerProps {
+    id?: string;
     /** "HH:mm" 形式の値。例: "09:30" */
     value?: string;
     onChange?: (time: string) => void;
@@ -10,6 +11,8 @@ export interface TimePickerProps {
     className?: string;
     /** トリガーボタンの aria-label。@default placeholder */
     triggerLabel?: string;
+    "aria-describedby"?: string;
+    "aria-invalid"?: React.AriaAttributes["aria-invalid"];
 }
-declare function TimePicker({ value, onChange, placeholder, disabled, minuteStep, className, triggerLabel, }: TimePickerProps): React.JSX.Element;
+declare function TimePicker({ id, value, onChange, placeholder, disabled, minuteStep, className, triggerLabel, "aria-describedby": ariaDescribedBy, "aria-invalid": ariaInvalid, }: TimePickerProps): React.JSX.Element;
 export { TimePicker };
