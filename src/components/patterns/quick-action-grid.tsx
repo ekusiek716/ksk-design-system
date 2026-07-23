@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { IconBadge } from "@/components/ui/icon-badge"
 import { Spinner } from "@/components/ui/spinner"
 
 type ActionTileVariant = "neutral" | "selected" | "success" | "info" | "caution"
@@ -77,9 +78,12 @@ function ActionTile({
             </span>
           )}
           {icon && (
-            <span className="flex size-6 shrink-0 items-center justify-center text-[var(--Object-Medium-Emphasis)]" aria-hidden>
+            <IconBadge
+              appearance="plain"
+              className="size-6 text-[var(--Object-Medium-Emphasis)]"
+            >
               {icon}
-            </span>
+            </IconBadge>
           )}
           <span className="typo-label-md min-w-0 truncate">{label}</span>
         </span>
