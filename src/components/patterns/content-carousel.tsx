@@ -1,0 +1,151 @@
+import * as React from "react"
+import {
+  carouselControls as CarouselControls,
+  useCarouselController,
+} from "@/components/patterns/_internal/carousel-primitives"
+import { cn } from "@/lib/utils"
+
+interface ContentCarouselProps extends React.ComponentProps<"div"> {
+  /** 任意の React コンテンツを 1 枚ずつ表示する。 */
+  slides: React.ReactNode[]
+  showDots?: boolean
+  showArrows?: boolean
+  /** 自動送りの間隔（ms）。0 で無効。 */
+  autoPlay?: number
+}
+
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = React.useState(false)
+
+  React.useEffect(() => {
+    if (typeof window.matchMedia !== "function") return
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const update = () => setReduced(media.matches)
+    update()
+    media.addEventListener?.("change", update)
+    return () => media.removeEventListener?.("change", update)
+  }, [])
+
+  return reduced
+}
+
+/**
+ * ReactNode をスライドとして扱える汎用カルーセル。
+ *
+ * 矢印とドットは ImageCarousel と同じ内部プリミティブを使い、意匠と挙動を
+ * 同期する。画像だけなら ImageCarousel、商品一覧なら ProductCarousel を使う。
+ */
+function ContentCarousel({
+  slides,
+  showDots = true,
+  showArrows = true,
+  autoPlay = 0,
+  className,
+  "aria-label": ariaLabel = "コンテンツカルーセル",
+  onKeyDown,
+  onMouseEnter,
+  onMouseLeave,
+  onFocusCapture,
+  onBlurCapture,
+  tabIndex = 0,
+  ...props
+}: ContentCarouselProps) {
+  const normalizedSlides = React.Children.toArray(slides)
+  const total = normalizedSlides.length
+  const [interactionPaused, setInteractionPaused] = React.useState(false)
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const { active, goTo, next, previous, scrollRef } = useCarouselController({
+    total,
+    autoPlay,
+    paused: interactionPaused || prefersReducedMotion,
+  })
+
+  if (!total) return null
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(event)
+    const target = event.target as HTMLElement
+    const navigationTarget =
+      target === event.currentTarget || target.hasAttribute("data-slide")
+    if (event.defaultPrevented || !navigationTarget) return
+    if (event.key === "ArrowLeft") {
+      event.preventDefault()
+      previous()
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault()
+      next()
+    }
+  }
+
+  const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>) => {
+    setInteractionPaused(true)
+    onMouseEnter?.(event)
+  }
+
+  const handleMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
+    setInteractionPaused(false)
+    onMouseLeave?.(event)
+  }
+
+  const handleFocusCapture = (event: React.FocusEvent<HTMLDivElement>) => {
+    setInteractionPaused(true)
+    onFocusCapture?.(event)
+  }
+
+  const handleBlurCapture = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setInteractionPaused(false)
+    }
+    onBlurCapture?.(event)
+  }
+
+  return (
+    <div
+      {...props}
+      data-slot="content-carousel"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={ariaLabel}
+      tabIndex={tabIndex}
+      onKeyDown={handleKeyDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onFocusCapture={handleFocusCapture}
+      onBlurCapture={handleBlurCapture}
+      className={cn("group/carousel relative", className)}
+    >
+      <div
+        ref={scrollRef}
+        className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth"
+        style={{ scrollbarWidth: "none" }}
+      >
+        {normalizedSlides.map((slide, index) => (
+          <div
+            key={index}
+            data-slide
+            data-index={index}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${index + 1} / ${total}`}
+            tabIndex={0}
+            className="w-full shrink-0 snap-start"
+          >
+            {slide}
+          </div>
+        ))}
+      </div>
+      <CarouselControls
+        active={active}
+        total={total}
+        showArrows={showArrows}
+        showDots={showDots}
+        onPrevious={previous}
+        onNext={next}
+        onGoTo={goTo}
+      />
+    </div>
+  )
+}
+
+export { ContentCarousel }
+export type { ContentCarouselProps }
