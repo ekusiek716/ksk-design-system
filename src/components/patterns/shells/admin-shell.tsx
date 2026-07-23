@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Container } from "../../ui/container"
 import { ScrollArea } from "../../ui/scroll-area"
 import { SkipLink } from "../../ui/skip-link"
 
@@ -43,13 +44,17 @@ function AdminShell({
         {header && (
           <header
             data-slot="admin-header"
-            className="flex items-center gap-4 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-6 h-16 shrink-0"
+            className="h-16 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]"
           >
-            {header}
+            <Container size="fluid" className="flex h-full items-center gap-4">
+              {header}
+            </Container>
           </header>
         )}
-        <main id={mainId} tabIndex={-1} data-slot="admin-main" className="flex-1 overflow-auto p-6">
-          {children}
+        <main id={mainId} tabIndex={-1} data-slot="admin-main" className="flex-1 overflow-auto">
+          <Container size="fluid" className="py-6">
+            {children}
+          </Container>
         </main>
       </div>
     </div>
