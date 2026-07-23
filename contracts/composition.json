@@ -78,6 +78,15 @@
       { "level": 3, "spacing": "24px (gap-6)", "usage": "FormRoot のセクション間、ページ内の主要ブロック間の既定リズム" }
     ]
   },
+  "responsive": {
+    "source": "tokens.json#/breakpoints",
+    "rules": [
+      "viewport の sm:/md:/lg: はレイアウト切替段として使う",
+      "viewport xl=1280px はコンテンツ幅の上限段。ここで新しいレイアウト変形を追加しない",
+      "@md: など @ prefix は container query であり、同名の viewport breakpoint と値も用途も異なる",
+      "container query の値を変える場合は tokens.json と preset の --container-* を同時に更新する"
+    ]
+  },
   "cardHierarchy": {
     "layers": [
       { "depth": 0, "token": "var(--Surface-Secondary)", "usage": "ページ/シェルの背景（AdminShell・MobileAppShell 等の基底面）" },

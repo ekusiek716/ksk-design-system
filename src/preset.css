@@ -178,6 +178,19 @@
   --animate-scale-in:       scale-in 150ms ease-out;
 }
 
+/* ─── Container Query Breakpoints ───
+   @sm: / @md: などは viewport の sm: / md: と別スケール。
+   tokens.json の breakpoints.container と同じ値を publish 側にも固定し、
+   Tailwind の既定値変更や consumer 側設定に依存させない。 */
+@theme {
+  --container-sm: 24rem;   /* 384px */
+  --container-md: 28rem;   /* 448px */
+  --container-xl: 36rem;   /* 576px */
+  --container-2xl: 42rem;  /* 672px */
+  --container-3xl: 48rem;  /* 768px */
+  --container-4xl: 56rem;  /* 896px */
+}
+
 /* ─── Scrollbar Hide Utility ─── */
 @utility scrollbar-hide {
   -ms-overflow-style: none;

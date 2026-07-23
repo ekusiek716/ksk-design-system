@@ -98,7 +98,7 @@ EC/BtoC 系）を回すのが狙い。
 `DESIGN.md` は Google DESIGN.md の「front matter + rationale」形式を参考にした **AI 向け配布サマリ**であり、
 実装正本ではない。KSK の正本は次のファイルに置く。
 
-- `tokens.json`: primitive / semantic / dark semantic / typography / spacing / shadow / touch target。
+- `tokens.json`: primitive / semantic / dark semantic / typography / spacing / responsive breakpoint / shadow / touch target。
 - `src/styles/*.css`: 実際に publish される CSS custom properties と typography / glass utilities。
 - `contracts/rules.json`: 禁止パターン、AI anti-pattern、a11y、consumer lint の正本。
 - `contracts/components.json`: component 名、variant、subcomponent、usage rule、件数の正本。
