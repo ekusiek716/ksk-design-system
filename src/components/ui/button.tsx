@@ -57,10 +57,11 @@ function Button({
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : "button"
+  const isDisabled = disabled || ariaDisabled === true || ariaDisabled === "true"
 
   const handleClick = React.useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
-      if (disabled) {
+      if (isDisabled) {
         e.preventDefault()
         e.stopPropagation()
         return
@@ -70,7 +71,7 @@ function Button({
       }
       onClick?.(e as React.MouseEvent<HTMLButtonElement>)
     },
-    [disabled, haptic, onClick]
+    [haptic, isDisabled, onClick]
   )
 
   return (
@@ -83,8 +84,8 @@ function Button({
       // 暗黙依存ゼロ＝非破壊）。明示された type="submit"/"reset" はそのまま尊重。
       type={asChild ? undefined : (type ?? "button")}
       disabled={asChild ? undefined : disabled}
-      aria-disabled={asChild && disabled ? true : ariaDisabled}
-      tabIndex={asChild && disabled ? -1 : tabIndex}
+      aria-disabled={asChild && isDisabled ? true : ariaDisabled}
+      tabIndex={asChild && isDisabled ? -1 : tabIndex}
       className={cn(buttonVariants({ variant, size, layout, className }))}
       onClick={handleClick}
       {...props}

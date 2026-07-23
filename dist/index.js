@@ -229,15 +229,15 @@ var Ee = {
 	]
 };
 function W({ className: e, variant: r, size: i, layout: a, asChild: o = !1, haptic: s, onClick: c, type: l, disabled: u, tabIndex: d, "aria-disabled": f, ...p }) {
-	let m = o ? ue : "button", h = n.useCallback((e) => {
-		if (u) {
+	let m = o ? ue : "button", h = u || f === !0 || f === "true", g = n.useCallback((e) => {
+		if (h) {
 			e.preventDefault(), e.stopPropagation();
 			return;
 		}
 		s && typeof navigator < "u" && "vibrate" in navigator && navigator.vibrate(Ee[s]), c?.(e);
 	}, [
-		u,
 		s,
+		h,
 		c
 	]);
 	return /* @__PURE__ */ N(m, {
@@ -246,15 +246,15 @@ function W({ className: e, variant: r, size: i, layout: a, asChild: o = !1, hapt
 		"data-size": i ?? "default",
 		type: o ? void 0 : l ?? "button",
 		disabled: o ? void 0 : u,
-		"aria-disabled": o && u ? !0 : f,
-		tabIndex: o && u ? -1 : d,
+		"aria-disabled": o && h ? !0 : f,
+		tabIndex: o && h ? -1 : d,
 		className: U(t({
 			variant: r,
 			size: i,
 			layout: a,
 			className: e
 		})),
-		onClick: h,
+		onClick: g,
 		...p
 	});
 }

@@ -133,6 +133,26 @@ describe("Button asChild semantics", () => {
     expect(event.defaultPrevented).toBe(true)
     expect(onClick).not.toHaveBeenCalled()
   })
+
+  it("aria-disabled link もフォーカスと遷移を抑止する", () => {
+    const onClick = vi.fn()
+    mount(
+      <Button asChild variant="link" aria-disabled="true" onClick={onClick}>
+        <a href="/danger">無効</a>
+      </Button>,
+    )
+
+    const link = document.querySelector<HTMLAnchorElement>('[data-slot="button"]')
+    const event = new MouseEvent("click", { bubbles: true, cancelable: true })
+    act(() => {
+      link?.dispatchEvent(event)
+    })
+
+    expect(link?.getAttribute("aria-disabled")).toBe("true")
+    expect(link?.tabIndex).toBe(-1)
+    expect(event.defaultPrevented).toBe(true)
+    expect(onClick).not.toHaveBeenCalled()
+  })
 })
 
 describe("ShareButtons copy feedback", () => {
