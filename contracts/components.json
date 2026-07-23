@@ -669,7 +669,7 @@
       ],
       "accessibility": [
         "装飾用途は既定で aria-hidden",
-        "単独で意味を持つ場合は aria-label を指定"
+        "単独で意味を持つ場合は aria-label を指定し、role=img が自動付与される"
       ],
       "rules": [
         "外側 margin を追加せず、親の gap で配置間隔を管理する",

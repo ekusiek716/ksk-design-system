@@ -68,6 +68,7 @@ function IconBadge({
       data-slot="icon-badge"
       data-size={size ?? "md"}
       data-appearance={appearance ?? "accent"}
+      role={ariaLabel ? "img" : undefined}
       aria-hidden={ariaLabel ? undefined : true}
       aria-label={ariaLabel}
       className={cn(iconBadgeVariants({ size, appearance }), className)}

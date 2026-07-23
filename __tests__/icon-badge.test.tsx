@@ -39,6 +39,7 @@ describe("IconBadge", () => {
       </IconBadge>,
     )
     expect(labelled).toContain('aria-label="特典"')
+    expect(labelled).toContain('role="img"')
     expect(labelled).not.toContain("aria-hidden")
   })
 
