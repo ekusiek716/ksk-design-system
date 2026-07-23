@@ -58,6 +58,7 @@
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
 | Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass` | BottomSheet, FloatSheet, RightSheet, A11yOptions, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158) |
 | Skeleton, SkeletonText | `@/components/ui/skeleton` | — | CardSkeleton, TextSkeleton, SkeletonText (5 lines) |
+| SkipLink | `@/components/ui/skip-link` | — | Default |
 | Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Disabled |
 | SOCIAL_ICON_LABELS, SOCIAL_ICON_DATA, SOCIAL_ICON_PLATFORMS | `@/components/ui/social-icon-data` | — | — |
 | SocialIcon, SOCIAL_ICON_PLATFORMS, SOCIAL_ICON_LABELS | `@/components/ui/social-icon` | — | Default, AllPlatforms, AllMono, Tones |
