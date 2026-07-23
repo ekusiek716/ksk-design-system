@@ -63,7 +63,7 @@ interface DatePickerProps {
   /**
    * トリガーボタンのアクセシビリティラベル。
    * カレンダーポップアップを開くボタンの読み上げテキスト。
-   * @default placeholder と同じ値
+   * 未指定時は選択済みの日付、未選択なら placeholder が読み上げられる。
    */
   triggerLabel?: string
   /**
@@ -112,7 +112,7 @@ function DatePicker({
           data-slot="date-picker-trigger"
           disabled={disabled}
           aria-expanded={open}
-          aria-label={triggerLabel ?? placeholder}
+          aria-label={triggerLabel ?? (formatted ? undefined : placeholder)}
           aria-describedby={ariaDescribedBy}
           aria-invalid={ariaInvalid}
           className={triggerClass(open, !!formatted, className)}

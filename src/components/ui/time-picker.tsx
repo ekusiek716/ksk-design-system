@@ -114,7 +114,7 @@ function TimePicker({
           data-slot="time-picker-trigger"
           disabled={disabled}
           aria-expanded={open}
-          aria-label={triggerLabel ?? placeholder}
+          aria-label={triggerLabel ?? (displayValue ? undefined : placeholder)}
           aria-describedby={ariaDescribedBy}
           aria-invalid={ariaInvalid}
           className={cn(

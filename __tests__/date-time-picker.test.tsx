@@ -69,6 +69,21 @@ describe("DateTimePicker contract", () => {
     expect(output).toContain('id="publish-at"')
     expect(output).toContain('id="publish-at-time"')
     expect(output.match(/aria-describedby="publish-at-help"/g)).toHaveLength(2)
+    expect(output).not.toContain('aria-label="日付を選択"')
+    expect(output).not.toContain('aria-label="時刻を選択"')
+  })
+
+  it("明示した trigger label は選択値より優先する", () => {
+    const output = renderToStaticMarkup(
+      <DateTimePicker
+        value={new Date(2026, 6, 23, 9, 30)}
+        dateTriggerLabel="公開日を変更"
+        timeTriggerLabel="公開時刻を変更"
+      />,
+    )
+
+    expect(output).toContain('aria-label="公開日を変更"')
+    expect(output).toContain('aria-label="公開時刻を変更"')
   })
 
   it("未選択時は時刻入力を無効にする", () => {
