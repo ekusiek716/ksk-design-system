@@ -4,12 +4,12 @@
     "version": "1.45.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 65,
+      "ui": 66,
       "patterns": 56,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 144
+      "total": 145
     }
   },
   "ui": [
@@ -657,6 +657,24 @@
         "activeKey は利用側が制御し、IntersectionObserver をコンポーネントへ内包しない",
         "sticky は利用側の className、ジャンプ先オフセットは section の scroll-mt-* で指定する",
         "ページ内移動は SectionNav、ビュー状態の切替は SubNav。相互に代用しない"
+      ]
+    },
+    {
+      "name": "IconBadge",
+      "path": "src/components/ui/icon-badge.tsx",
+      "description": "淡いアクセント背景の円に装飾アイコンを収めるバッジ。Card や Stack の gap と競合しないよう外側 margin を持たない。",
+      "variants": [
+        "size: md(44px) / ml(48px) / lg(72px)",
+        "appearance: accent / plain"
+      ],
+      "accessibility": [
+        "装飾用途は既定で aria-hidden",
+        "単独で意味を持つ場合は aria-label を指定"
+      ],
+      "rules": [
+        "外側 margin を追加せず、親の gap で配置間隔を管理する",
+        "背景は Surface-Accent-Primary-Light、前景は Object-Accent-Primary と currentColor を使う",
+        "appearance=plain は既存パターン内部の視覚互換用途に限定する"
       ]
     },
     {
