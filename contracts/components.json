@@ -69,7 +69,9 @@
         "Must pair with <Label>"
       ],
       "rules": [
-        "Must use <Input> not <input>"
+        "Must use <Input> not <input>",
+        "showCount + maxLength で controlled / uncontrolled / IME 対応の文字数カウンタを表示",
+        "showCount 未指定時は wrapper / counter DOM を追加しない"
       ]
     },
     {
@@ -84,7 +86,8 @@
         "value/onCommit contract。value は controlled、確定タイミングでのみ onCommit が呼ばれる",
         "変換(composition)中は commit せず draft のみ更新。compositionEnd / 非変換入力時に commit",
         "外部 value 変更は非変換中のみ draft へ反映(realtime 同期対応)",
-        "store 直結 controlled input で IME が壊れる場合に Input の代わりに使う"
+        "store 直結 controlled input で IME が壊れる場合に Input の代わりに使う",
+        "Input の showCount / maxLength を透過する"
       ]
     },
     {
@@ -99,7 +102,8 @@
         "value/onCommit contract。value は controlled、確定タイミングでのみ onCommit が呼ばれる",
         "変換(composition)中は commit せず draft のみ更新。compositionEnd / 非変換入力時に commit",
         "外部 value 変更は非変換中のみ draft へ反映(realtime 同期対応)",
-        "store 直結 controlled textarea で IME が壊れる場合に Textarea の代わりに使う"
+        "store 直結 controlled textarea で IME が壊れる場合に Textarea の代わりに使う",
+        "Textarea の showCount / maxLength を透過する"
       ]
     },
     {
@@ -114,7 +118,8 @@
         "value/onCommit contract。value は controlled、確定タイミングでのみ onCommit が呼ばれる",
         "変換(composition)中は commit せず draft のみ更新。compositionEnd / 非変換入力時に commit",
         "外部 value 変更は非変換中のみ draft へ反映(realtime 同期対応)",
-        "store 直結 controlled AutoGrowTextarea で IME が壊れる場合に代わりに使う"
+        "store 直結 controlled AutoGrowTextarea で IME が壊れる場合に代わりに使う",
+        "AutoGrowTextarea の showCount / maxLength を透過する"
       ]
     },
     {
@@ -167,7 +172,9 @@
         "Must pair with <Label>"
       ],
       "rules": [
-        "Must use <Textarea> not <textarea>"
+        "Must use <Textarea> not <textarea>",
+        "showCount + maxLength で controlled / uncontrolled / IME 対応の文字数カウンタを表示",
+        "showCount 未指定時は wrapper / counter DOM を追加しない"
       ]
     },
     {
@@ -911,7 +918,8 @@
         "長文メモ・コメント入力で <Textarea> の代わりに使う",
         "詳細シートの1行タイトル編集は minRows=1 + density=compact を使う",
         "density=default はカーソル下に 1 行分の余白を残すため、コメント/本文入力向け",
-        "maxLength 指定でカウンタが自動表示"
+        "showCount + maxLength でカウンタを表示。後方互換のため showCount 未指定時も maxLength 指定で自動表示",
+        "showCount=false で maxLength の入力制限を維持したままカウンタのみ非表示にできる"
       ]
     },
     {

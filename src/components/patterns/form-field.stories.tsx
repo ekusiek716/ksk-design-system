@@ -56,6 +56,37 @@ export const WithTextarea: Story = {
   ),
 }
 
+export const WithCharacterCountAndError: Story = {
+  render: () => (
+    <div className="flex w-full max-w-md flex-col gap-6">
+      <FormField
+        label="タイトル"
+        htmlFor="ff-title-count"
+        error="タイトルを確認してください"
+      >
+        <Input
+          id="ff-title-count"
+          defaultValue="入力中のタイトル"
+          maxLength={40}
+          showCount
+        />
+      </FormField>
+      <FormField
+        label="説明"
+        htmlFor="ff-description-count"
+        error="説明を確認してください"
+      >
+        <Textarea
+          id="ff-description-count"
+          defaultValue="カウンタの下にエラー文が重ならず表示されます。"
+          maxLength={120}
+          showCount
+        />
+      </FormField>
+    </div>
+  ),
+}
+
 export const WithSelect: Story = {
   render: () => (
     <FormField label="カテゴリ" required>
