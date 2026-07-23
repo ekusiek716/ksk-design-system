@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 65,
-      "patterns": 55,
+      "patterns": 56,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 143
+      "total": 144
     }
   },
   "ui": [
@@ -1515,6 +1515,27 @@
       "name": "BannerCarousel",
       "path": "src/components/patterns/banner-carousel.tsx",
       "description": "バナーカルーセル。複数バナー画像を自動スライド表示。トップページのキービジュアルや特集告知に使用。"
+    },
+    {
+      "name": "ContentCarousel",
+      "path": "src/components/patterns/content-carousel.tsx",
+      "description": "任意の ReactNode を 1 枚ずつ表示する汎用コンテンツカルーセル。ImageCarousel と共通の矢印・ドット、scroll-snap、自動再生に対応。",
+      "features": [
+        "ReactNode slides",
+        "scroll-snap",
+        "shared dots and arrows",
+        "autoPlay",
+        "keyboard navigation"
+      ],
+      "accessibility": [
+        "ルートは role=region と aria-roledescription=carousel",
+        "各スライドは role=group と aria-roledescription=slide",
+        "ルートと各スライドをキーボードでフォーカス可能にする"
+      ],
+      "rules": [
+        "矢印・ドットは ImageCarousel と同じ内部プリミティブを使用し、コピーしない",
+        "画像だけのカルーセルには ImageCarousel、商品一覧には ProductCarousel を使う"
+      ]
     },
     {
       "name": "Footer",
