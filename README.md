@@ -117,7 +117,8 @@ module.exports = {
     "^.+\\.[jt]sx?$": "babel-jest",
   },
   transformIgnorePatterns: [
-    "/node_modules/(?!(ksk-design-system|radix-ui|@radix-ui|iconsax-reactjs)/)",
+    "<rootDir>/node_modules/.pnpm/(?!(ksk-design-system|radix-ui|iconsax-reactjs|@radix-ui\\+[^@]+)@)",
+    "node_modules/(?!.pnpm|ksk-design-system|radix-ui|@radix-ui|iconsax-reactjs)",
   ],
   moduleNameMapper: {
     "\\.(css|less|sass|scss)$": "<rootDir>/test/style-mock.cjs",
