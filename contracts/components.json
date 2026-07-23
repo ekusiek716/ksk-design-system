@@ -4,12 +4,12 @@
     "version": "1.45.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 64,
+      "ui": 65,
       "patterns": 55,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 142
+      "total": 143
     }
   },
   "ui": [
@@ -635,7 +635,29 @@
         "aria-selected on active tab",
         "description/title は title と aria-describedby に反映"
       ],
-      "rules": []
+      "rules": [
+        "同一コンテキスト内のビュー状態切替専用。button / role=tab / aria-selected を使う",
+        "ページ内アンカー移動には使わず SectionNav を使う"
+      ]
+    },
+    {
+      "name": "SectionNav",
+      "path": "src/components/ui/section-nav.tsx",
+      "description": "同一ページ内のセクションへ移動するアンカー目次。vertical / horizontal アンダーバーに対応。",
+      "variants": [
+        "orientation: vertical / horizontal"
+      ],
+      "accessibility": [
+        "nav に aria-label を付与",
+        "activeKey と一致する本物の anchor に aria-current=location を付与",
+        "role=tab / aria-selected は使わない"
+      ],
+      "rules": [
+        "items は key / label / href を持ち、href は #section-id のページ内アンカーにする",
+        "activeKey は利用側が制御し、IntersectionObserver をコンポーネントへ内包しない",
+        "sticky は利用側の className、ジャンプ先オフセットは section の scroll-mt-* で指定する",
+        "ページ内移動は SectionNav、ビュー状態の切替は SubNav。相互に代用しない"
+      ]
     },
     {
       "name": "Alert",
