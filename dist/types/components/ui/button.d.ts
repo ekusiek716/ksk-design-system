@@ -28,6 +28,6 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
  * - `hero`: トップ hero / final-CTA 向けのピル型特大 CTA。
  * - `icon` / `icon-sm` / `icon-lg` / `icon-xl`: アイコンのみのボタン（aria-label 必須）。
  */
-declare function Button({ className, variant, size, layout, asChild, haptic, onClick, type, ...props }: ButtonProps): React.JSX.Element;
+declare function Button({ className, variant, size, layout, asChild, haptic, onClick, type, disabled, tabIndex, "aria-disabled": ariaDisabled, ...props }: ButtonProps): React.JSX.Element;
 export { Button, buttonVariants };
 export type { ButtonProps, HapticType };

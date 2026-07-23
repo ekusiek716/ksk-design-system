@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { ListItem } from "../src/components/patterns/list-item"
 import { ShareButtons } from "../src/components/patterns/share-buttons"
 import { AppShell } from "../src/components/patterns/shells/app-shell"
+import { Button } from "../src/components/ui/button"
 
 let container: HTMLElement | null = null
 let root: Root | null = null
@@ -107,6 +108,29 @@ describe("ListItem semantics", () => {
 
     expect(event.defaultPrevented).toBe(true)
     expect(link?.getAttribute("aria-disabled")).toBe("true")
+    expect(onClick).not.toHaveBeenCalled()
+  })
+})
+
+describe("Button asChild semantics", () => {
+  it("disabled link はフォーカスと遷移を抑止する", () => {
+    const onClick = vi.fn()
+    mount(
+      <Button asChild variant="link" disabled onClick={onClick}>
+        <a href="/danger">無効</a>
+      </Button>,
+    )
+
+    const link = document.querySelector<HTMLAnchorElement>('[data-slot="button"]')
+    const event = new MouseEvent("click", { bubbles: true, cancelable: true })
+    act(() => {
+      link?.dispatchEvent(event)
+    })
+
+    expect(link?.tagName).toBe("A")
+    expect(link?.getAttribute("aria-disabled")).toBe("true")
+    expect(link?.tabIndex).toBe(-1)
+    expect(event.defaultPrevented).toBe(true)
     expect(onClick).not.toHaveBeenCalled()
   })
 })

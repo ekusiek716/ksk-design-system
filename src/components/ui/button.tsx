@@ -42,17 +42,35 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
  * - `hero`: トップ hero / final-CTA 向けのピル型特大 CTA。
  * - `icon` / `icon-sm` / `icon-lg` / `icon-xl`: アイコンのみのボタン（aria-label 必須）。
  */
-function Button({ className, variant, size, layout, asChild = false, haptic, onClick, type, ...props }: ButtonProps) {
+function Button({
+  className,
+  variant,
+  size,
+  layout,
+  asChild = false,
+  haptic,
+  onClick,
+  type,
+  disabled,
+  tabIndex,
+  "aria-disabled": ariaDisabled,
+  ...props
+}: ButtonProps) {
   const Comp = asChild ? Slot : "button"
 
   const handleClick = React.useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
+    (e: React.MouseEvent<HTMLElement>) => {
+      if (disabled) {
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
       if (haptic && typeof navigator !== "undefined" && "vibrate" in navigator) {
         navigator.vibrate(HAPTIC_PATTERNS[haptic])
       }
-      onClick?.(e)
+      onClick?.(e as React.MouseEvent<HTMLButtonElement>)
     },
-    [haptic, onClick]
+    [disabled, haptic, onClick]
   )
 
   return (
@@ -63,7 +81,10 @@ function Button({ className, variant, size, layout, asChild = false, haptic, onC
       // 既定を type="button" にする。生 <button> の既定 "submit" は <form> 内で
       // 意図せぬ送信/リロードを起こす footgun（消費側は皆 type="submit" を明示済みで
       // 暗黙依存ゼロ＝非破壊）。明示された type="submit"/"reset" はそのまま尊重。
-      type={asChild ? type : (type ?? "button")}
+      type={asChild ? undefined : (type ?? "button")}
+      disabled={asChild ? undefined : disabled}
+      aria-disabled={asChild && disabled ? true : ariaDisabled}
+      tabIndex={asChild && disabled ? -1 : tabIndex}
       className={cn(buttonVariants({ variant, size, layout, className }))}
       onClick={handleClick}
       {...props}

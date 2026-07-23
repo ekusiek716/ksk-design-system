@@ -1,6 +1,6 @@
 "use client";
 import { n as e } from "./rolldown-runtime-Df-vAQej.js";
-import { t } from "./server-variants-BtHHqzwI.js";
+import { t } from "./server-variants-oQMaBUX6.js";
 import * as n from "react";
 import r, { createContext as i, useCallback as a, useContext as o, useEffect as s, useLayoutEffect as c, useMemo as l, useRef as u, useState as d } from "react";
 import { Accordion as f, AlertDialog as p, Avatar as m, Checkbox as h, Collapsible as g, Dialog as _, DropdownMenu as v, HoverCard as y, Label as b, Popover as x, Progress as S, RadioGroup as C, ScrollArea as w, Select as T, Separator as E, Slider as D, Switch as ee, Tabs as O, Tooltip as k } from "radix-ui";
@@ -228,23 +228,34 @@ var Ee = {
 		30
 	]
 };
-function W({ className: e, variant: r, size: i, layout: a, asChild: o = !1, haptic: s, onClick: c, type: l, ...u }) {
-	let d = o ? ue : "button", f = n.useCallback((e) => {
+function W({ className: e, variant: r, size: i, layout: a, asChild: o = !1, haptic: s, onClick: c, type: l, disabled: u, tabIndex: d, "aria-disabled": f, ...p }) {
+	let m = o ? ue : "button", h = n.useCallback((e) => {
+		if (u) {
+			e.preventDefault(), e.stopPropagation();
+			return;
+		}
 		s && typeof navigator < "u" && "vibrate" in navigator && navigator.vibrate(Ee[s]), c?.(e);
-	}, [s, c]);
-	return /* @__PURE__ */ N(d, {
+	}, [
+		u,
+		s,
+		c
+	]);
+	return /* @__PURE__ */ N(m, {
 		"data-slot": "button",
 		"data-variant": r ?? "default",
 		"data-size": i ?? "default",
-		type: o ? l : l ?? "button",
+		type: o ? void 0 : l ?? "button",
+		disabled: o ? void 0 : u,
+		"aria-disabled": o && u ? !0 : f,
+		tabIndex: o && u ? -1 : d,
 		className: U(t({
 			variant: r,
 			size: i,
 			layout: a,
 			className: e
 		})),
-		onClick: f,
-		...u
+		onClick: h,
+		...p
 	});
 }
 //#endregion
