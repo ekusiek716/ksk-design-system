@@ -82,6 +82,17 @@ npx ksk-ds lint --changed
 // ksk-ds-allow-custom-ui: medical chart requires bespoke interaction
 ```
 
+### Consumer duplicate check
+
+DS に存在する部品を consumer 側で再実装しないよう、コンポーネント名の重複検査を同梱しています。
+
+```bash
+npx ksk-ds check-duplicates
+npx ksk-ds check-duplicates ./src --strict
+```
+
+既定は助言モードで終了コード 0、`--strict` は重複候補があると終了コード 1 です。正本は同梱の `contracts/components.json` であり、consumer 側に別の「昇格候補台帳」を作らないでください。
+
 ### Media overlay utilities
 
 動画・写真の上に文字や操作を置く場合は、`--Text-on-Media` と `.text-on-media` / `.text-on-media-secondary`、上下の `.media-scrim-top` / `.media-scrim-bottom` を使います。TikTok / Reels 型の操作群は `MediaActionCluster` が glass ボタン、ラベル、safe-area anchor、idle auto-hide をまとめて扱います。
