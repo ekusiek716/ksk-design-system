@@ -92,6 +92,13 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 5. `tokens.json` でカラー・余白・影・タイポのトークンを確認
 6. 画面（ページ/ダイアログ等）を実装する場合は `contracts/screen-patterns.json` の decisionTree でシェル/パターンを選び、`contracts/composition.json` で内部の並べ方を確認
 
+### ローカル二重実装ゲート
+
+DS に無いと思っても consumer 側に別台帳を作らないこと。最初に `contracts/components.json` と
+`COMPONENT_LOOKUP.md` を検索し、consumer では `npx ksk-ds check-duplicates ./src --strict` を実行する。
+それでも不足する場合は DS 側に issue を登録する。やむを得ない一時実装には、削除条件と issue を
+`// ksk-ds-local-fallback: DS に X が追加されたら削除 (issue #123)` の形式で残すこと。
+
 **`.tsx` を編集したら `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行すること。**
 
 Storybook 全体を横断で視覚監査する（定期監査・リリース前総点検・「全ページ確認して」）場合は `.claude/skills/audit-pages/SKILL.md` を使う。
