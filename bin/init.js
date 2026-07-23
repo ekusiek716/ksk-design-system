@@ -11,6 +11,7 @@
 //   npx ksk-design-system init --force  # 既存ファイルを上書き
 //   npx ksk-design-system demo [dir]    # DS リポを clone + setup（お試し用）
 //   npx ksk-ds lint src                 # contracts/rules.json に基づき consumer UI を検査
+//   npx ksk-ds check-duplicates src     # DS と同名のローカル実装を検査
 //   npx ksk-design-system postinstall   # npm postinstall から呼ばれる silent モード
 
 import { copyFileSync, existsSync } from "node:fs"
@@ -37,6 +38,8 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   npx ksk-ds lint src --format json   CI 向け JSON 出力
   npx ksk-ds lint --changed           Git 差分のみ検査
   npx ksk-ds check-migration ./src    非推奨 API の残存を検査（read-only）
+  npx ksk-ds check-duplicates [DIR]    DS と同名のローカル実装を検査
+  npx ksk-ds check-duplicates --strict 検出時に exit 1（CI 向け）
 `)
   process.exit(0)
 }
@@ -50,6 +53,15 @@ if (cmd === "lint") {
 if (cmd === "check-migration") {
   const { runCheckMigrationCli } = await import("../scripts/codemod/check-migration.mjs")
   const status = runCheckMigrationCli(args.slice(1))
+  process.exit(status)
+}
+
+if (cmd === "check-duplicates") {
+  const { runCheckDuplicatesCli } = await import("./check-duplicates.js")
+  const status = runCheckDuplicatesCli(args.slice(1), {
+    cwd: process.cwd(),
+    pkgRoot,
+  })
   process.exit(status)
 }
 
