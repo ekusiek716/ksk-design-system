@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils"
 const sectionVariants = cva("w-full", {
   variants: {
     spacing: {
-      sm: "py-8",
-      md: "py-12",
-      lg: "py-16",
-      xl: "py-24",
+      sm: "py-[var(--Space-Section-xs)]",
+      md: "py-[var(--Space-Section-md)]",
+      lg: "py-[var(--Space-Section-xl)]",
+      xl: "py-[var(--Space-Section-2xl)]",
     },
     background: {
       none: "bg-transparent",

@@ -36,7 +36,7 @@ describe("Section", () => {
     )
 
     expect(markup).toContain('data-slot="section"')
-    expect(markup).toContain("py-16")
+    expect(markup).toContain("py-[var(--Space-Section-xl)]")
     expect(markup).toContain("bg-[var(--Surface-Secondary)]")
     expect(markup).not.toMatch(/\b(px|pl|pr)-/)
   })
@@ -76,7 +76,7 @@ describe("shell layout ownership", () => {
     expect(markup).toContain('data-slot="marketing-footer"')
     expect(markup).toContain('data-background="subtle"')
     expect(markup).toContain('data-gutter="spacious"')
-    expect(markup).toContain("py-12")
+    expect(markup).toContain("py-[var(--Space-Section-md)]")
     expect(markup).toContain("px-6 lg:px-16")
   })
 })

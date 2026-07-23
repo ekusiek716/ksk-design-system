@@ -999,6 +999,7 @@
       "sizes": [],
       "rules": [
         "縦余白と背景だけを担当し、px-* / pl-* / pr-* を追加しない",
+        "spacing は --Space-Section-* を参照し、数値の py-* を直接持たない",
         "最大幅・中央寄せ・左右 gutter は内側の Container に委ねる",
         "footer の全幅背景帯には as=\"footer\" を使える"
       ]
