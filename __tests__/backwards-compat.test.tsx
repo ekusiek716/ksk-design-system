@@ -108,6 +108,16 @@ describe("Button — backwards-compat", () => {
     expect(out).not.toContain("<button")
     expect(out).not.toContain('type="button"')
   })
+
+  it("asChild の無効状態は pointer event をリンクで受けて抑止できる", () => {
+    const out = html(
+      <Button asChild variant="link" disabled>
+        <a href="/terms">利用規約</a>
+      </Button>
+    )
+    expect(out).toContain("aria-disabled:opacity-50")
+    expect(out).not.toContain("aria-disabled:pointer-events-none")
+  })
 })
 
 describe("Checkbox — backwards-compat", () => {
