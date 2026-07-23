@@ -86,6 +86,8 @@ function Button({
   const slottedChild = asChild && isDisabled && React.isValidElement<{
     onClick?: React.MouseEventHandler
     onClickCapture?: React.MouseEventHandler
+    onAuxClickCapture?: React.MouseEventHandler
+    onContextMenuCapture?: React.MouseEventHandler
     "aria-disabled"?: React.AriaAttributes["aria-disabled"]
     tabIndex?: number
     disabled?: boolean
@@ -94,10 +96,12 @@ function Button({
     ? React.cloneElement(children, {
         onClick: handleClick,
         onClickCapture: handleDisabledCapture,
+        onAuxClickCapture: handleDisabledCapture,
+        onContextMenuCapture: handleDisabledCapture,
         "aria-disabled": true,
         tabIndex: -1,
         disabled: undefined,
-        href: undefined,
+        ...(children.type === "a" ? { href: undefined } : {}),
       })
     : children
 

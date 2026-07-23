@@ -159,6 +159,31 @@ describe("Button asChild semantics", () => {
     expect(event.defaultPrevented).toBe(true)
     expect(onClick).not.toHaveBeenCalled()
   })
+
+  it("href 必須の Router Link は壊さず代替操作を抑止する", () => {
+    function RouterLink({ href, ...props }: React.ComponentProps<"a"> & { href: string }) {
+      if (!href) throw new Error("href is required")
+      return <a href={href} {...props} />
+    }
+
+    mount(
+      <Button asChild variant="link" disabled>
+        <RouterLink href="/danger">無効</RouterLink>
+      </Button>,
+    )
+
+    const link = document.querySelector<HTMLAnchorElement>('[data-slot="button"]')
+    const auxiliaryEvent = new MouseEvent("auxclick", { bubbles: true, cancelable: true, button: 1 })
+    const contextMenuEvent = new MouseEvent("contextmenu", { bubbles: true, cancelable: true, button: 2 })
+    act(() => {
+      link?.dispatchEvent(auxiliaryEvent)
+      link?.dispatchEvent(contextMenuEvent)
+    })
+
+    expect(link?.getAttribute("href")).toBe("/danger")
+    expect(auxiliaryEvent.defaultPrevented).toBe(true)
+    expect(contextMenuEvent.defaultPrevented).toBe(true)
+  })
 })
 
 describe("ShareButtons copy feedback", () => {
