@@ -4,11 +4,13 @@ import { cn } from "@/lib/utils"
 interface UseCarouselControllerOptions {
   total: number
   autoPlay: number
+  paused?: boolean
 }
 
 function useCarouselController({
   total,
   autoPlay,
+  paused = false,
 }: UseCarouselControllerOptions) {
   const scrollRef = React.useRef<HTMLDivElement>(null)
   const [active, setActive] = React.useState(0)
@@ -41,10 +43,10 @@ function useCarouselController({
   }, [])
 
   React.useEffect(() => {
-    if (autoPlay <= 0 || total <= 1) return
+    if (autoPlay <= 0 || total <= 1 || paused) return
     const id = window.setInterval(() => goTo((active + 1) % total), autoPlay)
     return () => window.clearInterval(id)
-  }, [active, autoPlay, goTo, total])
+  }, [active, autoPlay, goTo, paused, total])
 
   const previous = React.useCallback(
     () => goTo(active <= 0 ? total - 1 : active - 1),

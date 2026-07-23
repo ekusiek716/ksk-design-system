@@ -1525,6 +1525,7 @@
         "scroll-snap",
         "shared dots and arrows",
         "autoPlay",
+        "interaction and reduced-motion autoplay pause",
         "keyboard navigation"
       ],
       "accessibility": [

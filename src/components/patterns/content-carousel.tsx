@@ -14,6 +14,21 @@ interface ContentCarouselProps extends React.ComponentProps<"div"> {
   autoPlay?: number
 }
 
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = React.useState(false)
+
+  React.useEffect(() => {
+    if (typeof window.matchMedia !== "function") return
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)")
+    const update = () => setReduced(media.matches)
+    update()
+    media.addEventListener?.("change", update)
+    return () => media.removeEventListener?.("change", update)
+  }, [])
+
+  return reduced
+}
+
 /**
  * ReactNode をスライドとして扱える汎用カルーセル。
  *
@@ -28,14 +43,21 @@ function ContentCarousel({
   className,
   "aria-label": ariaLabel = "コンテンツカルーセル",
   onKeyDown,
+  onMouseEnter,
+  onMouseLeave,
+  onFocusCapture,
+  onBlurCapture,
   tabIndex = 0,
   ...props
 }: ContentCarouselProps) {
   const normalizedSlides = React.Children.toArray(slides)
   const total = normalizedSlides.length
+  const [interactionPaused, setInteractionPaused] = React.useState(false)
+  const prefersReducedMotion = usePrefersReducedMotion()
   const { active, goTo, next, previous, scrollRef } = useCarouselController({
     total,
     autoPlay,
+    paused: interactionPaused || prefersReducedMotion,
   })
 
   if (!total) return null
@@ -52,6 +74,28 @@ function ContentCarousel({
     }
   }
 
+  const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>) => {
+    setInteractionPaused(true)
+    onMouseEnter?.(event)
+  }
+
+  const handleMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
+    setInteractionPaused(false)
+    onMouseLeave?.(event)
+  }
+
+  const handleFocusCapture = (event: React.FocusEvent<HTMLDivElement>) => {
+    setInteractionPaused(true)
+    onFocusCapture?.(event)
+  }
+
+  const handleBlurCapture = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setInteractionPaused(false)
+    }
+    onBlurCapture?.(event)
+  }
+
   return (
     <div
       {...props}
@@ -61,6 +105,10 @@ function ContentCarousel({
       aria-label={ariaLabel}
       tabIndex={tabIndex}
       onKeyDown={handleKeyDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onFocusCapture={handleFocusCapture}
+      onBlurCapture={handleBlurCapture}
       className={cn("group/carousel relative", className)}
     >
       <div

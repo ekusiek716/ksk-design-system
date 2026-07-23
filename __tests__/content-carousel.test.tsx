@@ -111,6 +111,7 @@ describe("ContentCarousel keyboard navigation", () => {
   afterEach(() => {
     act(() => root.unmount())
     container.remove()
+    vi.useRealTimers()
     vi.unstubAllGlobals()
   })
 
@@ -142,5 +143,50 @@ describe("ContentCarousel keyboard navigation", () => {
       left: 320,
       behavior: "smooth",
     })
+  })
+
+  it("フォーカス中は autoplay を停止する", () => {
+    vi.useFakeTimers()
+    act(() =>
+      root.render(<ContentCarousel slides={slides} autoPlay={1000} />),
+    )
+    const carousel = container.querySelector<HTMLElement>(
+      '[data-slot="content-carousel"]',
+    )!
+    const viewport = carousel.firstElementChild as HTMLDivElement
+    const scrollTo = vi.fn()
+    viewport.scrollTo = scrollTo
+
+    act(() => carousel.focus())
+    act(() => vi.advanceTimersByTime(2000))
+
+    expect(scrollTo).not.toHaveBeenCalled()
+  })
+
+  it("reduced motion では autoplay を開始しない", () => {
+    vi.useFakeTimers()
+    vi.stubGlobal("matchMedia", () => ({
+      matches: true,
+      media: "(prefers-reduced-motion: reduce)",
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }))
+    act(() =>
+      root.render(<ContentCarousel slides={slides} autoPlay={1000} />),
+    )
+    const carousel = container.querySelector<HTMLElement>(
+      '[data-slot="content-carousel"]',
+    )!
+    const viewport = carousel.firstElementChild as HTMLDivElement
+    const scrollTo = vi.fn()
+    viewport.scrollTo = scrollTo
+
+    act(() => vi.advanceTimersByTime(2000))
+
+    expect(scrollTo).not.toHaveBeenCalled()
   })
 })
