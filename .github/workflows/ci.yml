@@ -43,3 +43,6 @@ jobs:
 
       - name: Unit tests (vitest)
         run: npm test
+
+      - name: Packed package Web consumer install and build
+        run: npm run test:consumer:web
