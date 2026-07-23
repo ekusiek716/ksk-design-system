@@ -30,6 +30,7 @@ describe("native package contract", () => {
     for (const peer of [
       "expo-blur",
       "expo-glass-effect",
+      "react-dom",
       "react-native",
       "tailwindcss",
     ]) {
@@ -48,6 +49,6 @@ describe("native package contract", () => {
     }
 
     expect(packageJson.peerDependencies["react-dom"]).toBeTypeOf("string")
-    expect(packageJson.peerDependenciesMeta["react-dom"]).toBeUndefined()
+    expect(packageJson.peerDependenciesMeta["react-dom"]?.optional).toBe(true)
   })
 })

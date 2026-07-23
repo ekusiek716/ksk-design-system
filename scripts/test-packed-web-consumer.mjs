@@ -5,6 +5,9 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const root = dirname(fileURLToPath(new URL("../package.json", import.meta.url)))
+const rootPackageJson = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+)
 const temp = mkdtempSync(join(tmpdir(), "ksk-web-consumer-"))
 
 const run = (command, args, cwd = temp) => {
@@ -28,7 +31,13 @@ try {
     join(temp, "package.json"),
     `${JSON.stringify({ name: "ksk-empty-web-consumer", private: true, type: "module" }, null, 2)}\n`,
   )
-  run("npm", ["install", "--ignore-scripts", tarball])
+  run("npm", [
+    "install",
+    "--ignore-scripts",
+    tarball,
+    `react@${rootPackageJson.devDependencies.react}`,
+    `react-dom@${rootPackageJson.devDependencies["react-dom"]}`,
+  ])
 
   mkdirSync(join(temp, "src"))
   writeFileSync(

@@ -3,6 +3,9 @@ import { ImportType, init, parse } from "es-module-lexer"
 
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
 const webBundle = readFileSync(new URL("../dist/index.js", import.meta.url), "utf8")
+// Native entrypoints do not use react-dom. Web consumers install it explicitly
+// alongside React, which is exercised by test-packed-web-consumer.mjs.
+const explicitWebConsumerPeers = new Set(["react-dom"])
 
 const packageName = (specifier) => {
   if (specifier.startsWith("@")) return specifier.split("/").slice(0, 2).join("/")
@@ -33,7 +36,10 @@ for (const dependency of [...staticImports].sort()) {
   if (packageJson.dependencies?.[dependency]) continue
 
   if (packageJson.peerDependencies?.[dependency]) {
-    if (packageJson.peerDependenciesMeta?.[dependency]?.optional) {
+    if (
+      packageJson.peerDependenciesMeta?.[dependency]?.optional &&
+      !explicitWebConsumerPeers.has(dependency)
+    ) {
       errors.push(`${dependency}: Web bundle が静的 import していますが optional peer のままです`)
     }
     continue
