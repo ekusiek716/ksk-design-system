@@ -163,7 +163,8 @@ bash scripts/update-consumers.sh <version> <影響リポ...>
 ## 注意
 
 - 配布前に必ず `npm pack --dry-run` で中身確認
-- npm registry 公開には `npm login` 済みであること
+- 通常公開は Trusted Publishing (OIDC) を使う。`npm login` は
+  `scripts/release.sh` でローカル公開へフォールバックする場合のみ必要
 - `package.json#exports` を変更したら必ず利用側プロジェクトでの import を試す
 - 金曜午後のリリースは厳禁（週末に障害対応できない）
 - メジャーリリースは月初の月曜が望ましい（フィードバック収集期間が取れる）
