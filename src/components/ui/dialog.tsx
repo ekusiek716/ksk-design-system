@@ -131,7 +131,7 @@ function DialogContent({
   autoFocus,
   restoreFocusOnClose = true,
   closeOnEsc = true,
-  bodyScrollLock = true,
+  bodyScrollLock: _bodyScrollLock = true,
   ...props
 }: DialogContentProps) {
   const autoDescId = React.useId()
