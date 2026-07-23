@@ -8,8 +8,9 @@ import { cn } from "@/lib/utils"
  * - 入力ごとに `scrollHeight` を計算して `style.height` を更新
  * - `minRows` で最小行数を確保（既定 density ではカーソル下に常に 1 行分の余白を残す）
  * - `density="compact"` で 1 行タイトル編集などの余白なし auto-grow に切り替え
- * - `maxLength` 指定で右下に「現在 / 上限」カウンタを表示
+ * - `showCount` + `maxLength` で右下に「現在 / 上限」カウンタを表示
  *   - 70% 超で warning 色、上限到達で caution 色
+ *   - 後方互換のため showCount 未指定時は従来どおり maxLength 指定で自動表示
  * - 内部 ref で `<textarea>` を握り、外部からの value 同期にも追従
  *
  * もとは belle-todo + ninshin-todo の共通実装（プロダクションで TaskDetailSheet /
@@ -43,6 +44,8 @@ export interface AutoGrowTextareaProps
   density?: AutoGrowTextareaDensity
   /** 指定すると右下に「現在 / 上限」カウンタを表示。70% 超で warning 色、上限到達で caution 色。 */
   maxLength?: number
+  /** 文字数カウンタの表示。false で maxLength 指定時の従来カウンタも非表示にできる。 */
+  showCount?: boolean
   className?: string
 }
 
@@ -53,6 +56,7 @@ export function AutoGrowTextarea({
   minRows = 3,
   density = "default",
   maxLength,
+  showCount,
   className,
   ...textareaProps
 }: AutoGrowTextareaProps) {
@@ -89,12 +93,13 @@ export function AutoGrowTextarea({
           ? "text-[var(--Text-Warning)]"
           : "text-[var(--Text-Low-Emphasis)]"
       : ""
+  const hasCounter = showCount === undefined ? maxLength != null : showCount
 
   return (
     <div
       data-slot="auto-grow-textarea"
       data-density={density}
-      data-has-counter={maxLength != null || undefined}
+      data-has-counter={hasCounter || undefined}
       className="relative"
     >
       <Textarea
@@ -107,12 +112,12 @@ export function AutoGrowTextarea({
         className={cn(
           "w-full resize-none overflow-hidden",
           density === "compact" && "min-h-0!",
-          maxLength != null && "pr-16",
+          hasCounter && "pr-16",
           className,
         )}
         {...textareaProps}
       />
-      {maxLength != null && (
+      {hasCounter && (
         <span
           aria-hidden="true"
           data-slot="auto-grow-textarea-counter"
@@ -121,7 +126,8 @@ export function AutoGrowTextarea({
             counterColor,
           )}
         >
-          {value.length} / {maxLength}
+          {value.length}
+          {maxLength != null ? ` / ${maxLength}` : ""}
         </span>
       )}
     </div>

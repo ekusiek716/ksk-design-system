@@ -123,7 +123,7 @@
 | FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
 | FilterChip | `@/components/patterns/filter-chip` | — | — |
 | Footer | `@/components/patterns/footer` | — | Default, Minimal |
-| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithSelect, CompleteForm |
+| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | KeyboardAwareSheetFooter | `@/components/patterns/keyboard-aware-sheet-footer` | — | Fixed, HideWhenKeyboardOpen |
 | ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot |
