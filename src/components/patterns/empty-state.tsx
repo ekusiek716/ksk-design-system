@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { Button, type ButtonProps } from "@/components/ui/button"
-import { IconBadge } from "@/components/ui/icon-badge"
+import { Button, type ButtonProps } from "../ui/button"
+import { IconBadge } from "../ui/icon-badge"
 
 interface EmptyStateProps extends React.ComponentProps<"div"> {
   icon?: React.ReactNode

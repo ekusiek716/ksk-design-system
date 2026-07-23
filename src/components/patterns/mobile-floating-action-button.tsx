@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Add } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button } from "../ui/button"
 import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
 
 type MobileFloatingActionButtonPlacement = "end" | "start" | "center"
@@ -46,7 +46,7 @@ function MobileFloatingActionButton({
       size={showLabel ? "lg" : "icon-lg"}
       className={cn(
         "fixed z-50 shadow-[var(--shadow-lg)] transition-all duration-200",
-        "bottom-[calc(env(safe-area-inset-bottom)+var(--ksk-fab-bottom-offset)+var(--ksk-fab-keyboard-inset))]",
+        "bottom-[calc(env(safe-area-inset-bottom)_+_var(--ksk-fab-bottom-offset)_+_var(--ksk-fab-keyboard-inset))]",
         placement === "end" && "right-4",
         placement === "start" && "left-4",
         placement === "center" && "left-1/2 -translate-x-1/2",

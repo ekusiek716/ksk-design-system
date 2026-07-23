@@ -8,6 +8,12 @@ interface BottomTabBarItem {
     onClick?: () => void;
     badgeCount?: number;
     isActive?: boolean;
+    /**
+     * タブを一意に識別する安定 DOM アンカー。指定時は button/a に
+     * `data-tab-key` として出力される（E2E テスト・計測用のセレクタ安定化）。
+     * 中央 CTA（centerAction）には付与しない。
+     */
+    tabKey?: string;
 }
 type BottomTabBarTone = "default" | "inverse";
 type BottomTabBarKeyboardBehavior = "hide" | "lift" | "stay";
@@ -61,7 +67,14 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
      * - "lift" : keyboard inset 分だけ上へ逃がす
      */
     keyboardBehavior?: BottomTabBarKeyboardBehavior;
+    /**
+     * iOS 26 の scroll edge effect（variant="pill" 時のみ有効）。
+     * バーの背後をコンテンツがスクロールする帯に progressive blur を敷き、
+     * バー付近でコンテンツが徐々にぼけて溶けるようにする。
+     * コンテンツがバーの下を通過するレイアウト（全画面リスト等）で指定する。
+     */
+    scrollEdge?: boolean;
 }
-declare function BottomTabBar({ className, items, centerAction, showLabels, tone, maxWidth, variant, pillPosition, floatingPosition, keyboardBehavior, ...props }: BottomTabBarProps): React.JSX.Element;
+declare function BottomTabBar({ className, items, centerAction, showLabels, tone, maxWidth, variant, pillPosition, floatingPosition, keyboardBehavior, scrollEdge, ...props }: BottomTabBarProps): React.JSX.Element;
 export { BottomTabBar };
 export type { BottomTabBarAction, BottomTabBarFloatingPosition, BottomTabBarItem, BottomTabBarKeyboardBehavior, BottomTabBarProps, };

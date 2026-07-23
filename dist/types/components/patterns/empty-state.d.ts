@@ -1,5 +1,5 @@
 import * as React from "react";
-import { type ButtonProps } from "@/components/ui/button";
+import { type ButtonProps } from "../ui/button";
 interface EmptyStateProps extends React.ComponentProps<"div"> {
     icon?: React.ReactNode;
     title: string;

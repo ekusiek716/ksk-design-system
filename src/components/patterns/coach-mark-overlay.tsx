@@ -1,6 +1,6 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
-import { CoachMark, type CoachMarkVariant } from "@/components/ui/coach-mark"
+import { CoachMark, type CoachMarkVariant } from "../ui/coach-mark"
 import { cn } from "@/lib/utils"
 
 export interface CoachStep {

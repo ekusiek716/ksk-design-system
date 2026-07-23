@@ -3,6 +3,9 @@ export interface SwitchProps {
     value?: boolean;
     onValueChange?: (value: boolean) => void;
     disabled?: boolean;
+    /** Visible text is often outside the control, so callers must be able to name it. */
+    accessibilityLabel?: string;
+    accessibilityHint?: string;
 }
 /**
  * DS トークン駆動の Switch。
@@ -13,4 +16,4 @@ export interface SwitchProps {
  *
  * 役割は標準 Switch と同等: value / onValueChange / disabled。
  */
-export declare function Switch({ value, onValueChange, disabled }: SwitchProps): React.JSX.Element;
+export declare function Switch({ value, onValueChange, disabled, accessibilityLabel, accessibilityHint, }: SwitchProps): React.JSX.Element;

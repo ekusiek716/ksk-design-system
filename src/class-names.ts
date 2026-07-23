@@ -27,4 +27,4 @@
 export {
   buttonVariants,
   type ButtonVariantsProps,
-} from "@/lib/server-variants/button-variants"
+} from "./lib/server-variants/button-variants"

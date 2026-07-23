@@ -319,8 +319,8 @@ function BottomTabBarPill({
         pillPosition === "fixed" ? "fixed" : "absolute",
         // 位置: 画面下部に余白を持ってフロート
         keyboardState.keyboardBehavior === "lift"
-          ? "bottom-[calc(env(safe-area-inset-bottom)+12px+var(--ksk-bottom-tab-bar-keyboard-inset))]"
-          : "bottom-[calc(env(safe-area-inset-bottom)+12px)]",
+          ? "bottom-[calc(env(safe-area-inset-bottom)_+_12px_+_var(--ksk-bottom-tab-bar-keyboard-inset))]"
+          : "bottom-[calc(env(safe-area-inset-bottom)_+_12px)]",
         // 水平位置: center は従来どおり中央フロート。left/right は反対側に
         // FAB スペース（80px）を確保して片側へ寄せる。
         floatingPosition === "left" && "left-3 right-20",

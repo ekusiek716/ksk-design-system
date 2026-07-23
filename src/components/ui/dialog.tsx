@@ -185,11 +185,11 @@ function DialogContent({
           // 横位置: left-[50%] + translate-x-[-50%] のみ。
           // inset-x-* と組み合わせると left/right と transform が競合して
           // SP サイズで左に大きくズレるため使わない。
-          // 幅は w-full + max-w-[calc(100%-3rem)] (左右 24px) + 480px キャップ。
-          "fixed left-[50%] z-50 w-full max-w-[calc(100%-3rem)] sm:max-w-[480px] translate-x-[-50%]",
+          // 幅は w-full + max-w-[calc(100%_-_3rem)] (左右 24px) + 480px キャップ。
+          "fixed left-[50%] z-50 w-full max-w-[calc(100%_-_3rem)] sm:max-w-[480px] translate-x-[-50%]",
           // 縦位置
           position === "top"
-            ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh-max(env(safe-area-inset-top),2rem)-2rem)] overflow-y-auto"
+            ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh_-_max(env(safe-area-inset-top),2rem)_-_2rem)] overflow-y-auto"
             : "top-[50%] translate-y-[-50%]",
           "rounded-[var(--Radius-Modal)] ksk-squircle bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)]",
           padding && "flex flex-col gap-4 p-6",

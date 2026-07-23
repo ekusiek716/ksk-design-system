@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
 type MobileFloatingActionButtonPlacement = "end" | "start" | "center";
 type MobileFloatingActionButtonKeyboardBehavior = "hide" | "lift" | "stay";
 type MobileFloatingActionButtonBottomOffset = "none" | "bottom-nav" | "bottom-nav-pill" | "bottom-nav-pill-inline";

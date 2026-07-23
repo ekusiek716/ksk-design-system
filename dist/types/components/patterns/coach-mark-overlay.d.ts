@@ -1,5 +1,5 @@
 import * as React from "react";
-import { type CoachMarkVariant } from "@/components/ui/coach-mark";
+import { type CoachMarkVariant } from "../ui/coach-mark";
 export interface CoachStep {
     /** querySelector で要素を特定。要素が無ければ画面中央にフォールバック表示。 */
     selector: string;

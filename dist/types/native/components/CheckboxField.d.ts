@@ -5,5 +5,7 @@ export interface CheckboxFieldProps {
     disabled?: boolean;
     label: string;
     description?: string;
+    accessibilityLabel?: string;
+    accessibilityHint?: string;
 }
-export declare function CheckboxField({ checked, onChange, disabled, label, description, }: CheckboxFieldProps): React.JSX.Element;
+export declare function CheckboxField({ checked, onChange, disabled, label, description, accessibilityLabel, accessibilityHint, }: CheckboxFieldProps): React.JSX.Element;

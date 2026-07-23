@@ -1,6 +1,6 @@
 {
   "name": "ksk-design-system",
-  "version": "1.45.0",
+  "version": "1.46.0",
   "type": "module",
   "description": "KSK Design System — フリーランス向けマルチテーマ対応デザインシステム",
   "license": "MIT",
@@ -129,7 +129,7 @@
     "build": "tsc -b && vite build",
     "build:preview": "tsc -b && vite build --config vite.config.preview.ts",
     "build:vercel": "npm run build-storybook && npm run build:preview && rm -rf storybook-static/preview && cp -r dist-preview storybook-static/preview",
-    "build:lib": "vite build --config vite.config.lib.ts && tsc --project tsconfig.lib.json",
+    "build:lib": "vite build --config vite.config.lib.ts && tsc --project tsconfig.lib.json && node scripts/check-published-types.mjs",
     "prepack": "npm run build:lib",
     "lint": "eslint .",
     "preview": "vite preview",
