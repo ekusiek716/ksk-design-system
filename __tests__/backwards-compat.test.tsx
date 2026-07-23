@@ -94,6 +94,30 @@ describe("Button — backwards-compat", () => {
     expect(out).toContain("rounded-full")
     expect(out).toContain("min-h-14")
   })
+
+  it("asChild は子の anchor に Button の属性を委譲し、button を入れ子にしない", () => {
+    const out = html(
+      <Button asChild variant="link" size="sm">
+        <a href="/terms">利用規約</a>
+      </Button>
+    )
+    expect(out).toMatch(/^<a /)
+    expect(out).toContain('href="/terms"')
+    expect(out).toContain('data-slot="button"')
+    expect(out).toContain('data-variant="link"')
+    expect(out).not.toContain("<button")
+    expect(out).not.toContain('type="button"')
+  })
+
+  it("asChild の無効状態は pointer event をリンクで受けて抑止できる", () => {
+    const out = html(
+      <Button asChild variant="link" disabled>
+        <a href="/terms">利用規約</a>
+      </Button>
+    )
+    expect(out).toContain("aria-disabled:opacity-50")
+    expect(out).not.toContain("aria-disabled:pointer-events-none")
+  })
 })
 
 describe("Checkbox — backwards-compat", () => {

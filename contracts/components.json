@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.46.0",
+    "version": "1.46.1",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 67,
@@ -52,6 +52,7 @@
       ],
       "rules": [
         "Must use <Button> not <button>",
+        "リンクを Button として表示する場合は <Button asChild><a href=... /></Button> を使う",
         "Icon-only buttons require aria-label",
         "Native Button supports loading/loadingLabel and leadingIcon/trailingIcon; do not wrap ActivityIndicator in Text",
         "variant=glass は背景がグラデーション/写真の場合のみ使用",
