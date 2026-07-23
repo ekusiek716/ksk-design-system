@@ -121,7 +121,7 @@
 | DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle |
 | DocumentPage | `@/components/patterns/document-page` | — | PrivacyPolicy, WithoutLastUpdated |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
-| ErrorState | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry |
+| ErrorState, NotFoundIllustration | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry, NotFound |
 | FieldSet, FieldLegend, FieldGroup, FieldDescription, FieldError, FieldSeparator | `@/components/patterns/field` | — | 3セクションの長いフォーム, SeparatorWithLabel |
 | FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
 | FilterChip | `@/components/patterns/filter-chip` | — | — |

@@ -3,6 +3,7 @@
  * @description エラー状態コンポーネント。デフォルトの再試行ボタン付き
  */
 import type { Meta, StoryObj } from "@storybook/react"
+import { Button } from "@/components/ui/button"
 import { ErrorState } from "./error-state"
 
 const meta: Meta<typeof ErrorState> = {
@@ -38,5 +39,12 @@ export const WithoutRetry: Story = {
   args: {
     title: "権限がありません",
     description: "このページを閲覧する権限がありません。管理者にお問い合わせください。",
+  },
+}
+
+export const NotFound: Story = {
+  args: {
+    kind: "notFound",
+    action: <Button>トップへ戻る</Button>,
   },
 }
