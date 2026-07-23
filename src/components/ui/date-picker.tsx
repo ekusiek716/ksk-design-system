@@ -5,9 +5,19 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 
 function formatDate(date: Date, fmt: string): string {
   const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, "0")
-  const d = String(date.getDate()).padStart(2, "0")
-  return fmt.replace("yyyy", String(y)).replace("MM", m).replace("dd", d)
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const weekday = date.getDay()
+  const values: Record<string, string> = {
+    yyyy: String(y),
+    MM: String(month).padStart(2, "0"),
+    M: String(month),
+    dd: String(day).padStart(2, "0"),
+    d: String(day),
+    EEEE: `${["日", "月", "火", "水", "木", "金", "土"][weekday]}曜日`,
+    EEE: ["日", "月", "火", "水", "木", "金", "土"][weekday],
+  }
+  return fmt.replace(/yyyy|EEEE|EEE|MM|M|dd|d/g, (token) => values[token])
 }
 
 const calendarIcon = (
@@ -38,6 +48,7 @@ function triggerClass(open: boolean, hasValue: boolean, className?: string) {
 }
 
 interface DatePickerProps {
+  id?: string
   value?: Date
   onChange?: (date: Date | undefined) => void
   /**
@@ -52,7 +63,7 @@ interface DatePickerProps {
   /**
    * トリガーボタンのアクセシビリティラベル。
    * カレンダーポップアップを開くボタンの読み上げテキスト。
-   * @default placeholder と同じ値
+   * 未指定時は選択済みの日付、未選択なら placeholder が読み上げられる。
    */
   triggerLabel?: string
   /**
@@ -61,9 +72,16 @@ interface DatePickerProps {
    * 優先順: defaultMonth > value > 今月。
    */
   defaultMonth?: Date
+  /** 選択可能な最小日時。Calendar では日単位で判定する。 */
+  min?: Date
+  /** 選択可能な最大日時。Calendar では日単位で判定する。 */
+  max?: Date
+  "aria-describedby"?: string
+  "aria-invalid"?: React.AriaAttributes["aria-invalid"]
 }
 
 function DatePicker({
+  id,
   value,
   onChange,
   placeholder = "日付を選択",
@@ -72,6 +90,10 @@ function DatePicker({
   dateFormat = "yyyy/MM/dd",
   triggerLabel,
   defaultMonth,
+  min,
+  max,
+  "aria-describedby": ariaDescribedBy,
+  "aria-invalid": ariaInvalid,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
   const formatted = value ? formatDate(value, dateFormat) : null
@@ -85,10 +107,14 @@ function DatePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
+          id={id}
+          type="button"
           data-slot="date-picker-trigger"
           disabled={disabled}
           aria-expanded={open}
-          aria-label={triggerLabel ?? placeholder}
+          aria-label={triggerLabel ?? (formatted ? undefined : placeholder)}
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={ariaInvalid}
           className={triggerClass(open, !!formatted, className)}
         >
           <span>{formatted ?? placeholder}</span>
@@ -117,6 +143,12 @@ function DatePicker({
           mode="single"
           selected={value}
           defaultMonth={defaultMonth ?? value ?? undefined}
+          startMonth={min}
+          endMonth={max}
+          disabled={[
+            ...(min ? [{ before: min }] : []),
+            ...(max ? [{ after: max }] : []),
+          ]}
           onSelect={(date) => {
             onChange?.(date)
             setOpen(false)
@@ -180,6 +212,7 @@ function DateRangePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
+          type="button"
           data-slot="date-range-picker-trigger"
           disabled={disabled}
           aria-expanded={open}

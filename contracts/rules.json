@@ -21,7 +21,7 @@
       "pattern": "<input\\b",
       "excludes": ["data-slot", ".stories.", "type=\"search\"", "type=\"file\"", "components/ui/", "components/patterns/"],
       "message": "生の <input> 禁止",
-      "fix": "<Input> コンポーネントを使用"
+      "fix": "<Input> を使用。日付は <DatePicker>、日時は <DateTimePicker> を使用"
     },
     {
       "id": "P003",
