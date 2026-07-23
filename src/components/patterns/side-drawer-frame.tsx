@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { SheetContent, type SheetContentProps } from "@/components/ui/sheet"
+import { SheetContent, type SheetContentProps } from "../ui/sheet"
 
 interface SideDrawerFrameProps extends Omit<SheetContentProps, "side" | "padding"> {
   /**

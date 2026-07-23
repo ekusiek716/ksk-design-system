@@ -279,7 +279,7 @@ function je({ className: e, size: t = "default", ...n }) {
 		"data-slot": "alert-dialog-content",
 		"data-size": t,
 		onOpenAutoFocus: (e) => e.preventDefault(),
-		className: U("group/alert-dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[var(--Radius-Modal)] border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-6 shadow-[var(--shadow-dialog)] duration-200 data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-lg", e),
+		className: U("group/alert-dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%_-_2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[var(--Radius-Modal)] border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-6 shadow-[var(--shadow-dialog)] duration-200 data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-lg", e),
 		...n
 	})] });
 }
@@ -853,7 +853,7 @@ function Ct({ className: e, children: t, padding: r = !0, description: i, positi
 		ref: f,
 		"data-slot": "dialog-content",
 		"data-position": a,
-		className: U("fixed left-[50%] z-50 w-full max-w-[calc(100%-3rem)] sm:max-w-[480px] translate-x-[-50%]", a === "top" ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh-max(env(safe-area-inset-top),2rem)-2rem)] overflow-y-auto" : "top-[50%] translate-y-[-50%]", "rounded-[var(--Radius-Modal)] ksk-squircle bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)]", r && "flex flex-col gap-4 p-6", "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95", "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95", e),
+		className: U("fixed left-[50%] z-50 w-full max-w-[calc(100%_-_3rem)] sm:max-w-[480px] translate-x-[-50%]", a === "top" ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh_-_max(env(safe-area-inset-top),2rem)_-_2rem)] overflow-y-auto" : "top-[50%] translate-y-[-50%]", "rounded-[var(--Radius-Modal)] ksk-squircle bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)]", r && "flex flex-col gap-4 p-6", "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95", "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95", e),
 		...u,
 		"aria-describedby": h,
 		onOpenAutoFocus: g,
@@ -11814,7 +11814,7 @@ function Fu({ open: e, onOpenChange: t, title: r, description: i, submitLabel: a
 					className: "flex-1 overflow-y-auto px-5 py-4 space-y-4",
 					children: l
 				}), /* @__PURE__ */ P("div", {
-					className: "shrink-0 flex gap-3 px-5 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] border-t border-[var(--Border-Low-Emphasis)]",
+					className: "shrink-0 flex gap-3 px-5 pt-4 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] border-t border-[var(--Border-Low-Emphasis)]",
 					children: [/* @__PURE__ */ N(W, {
 						type: "button",
 						variant: "secondary",
@@ -11838,7 +11838,7 @@ function Fu({ open: e, onOpenChange: t, title: r, description: i, submitLabel: a
 var Iu = {
 	"mobile-full": [
 		"p-0",
-		"max-h-[calc(100dvh-env(safe-area-inset-top))]",
+		"max-h-[calc(100dvh_-_env(safe-area-inset-top))]",
 		"overflow-hidden rounded-t-[var(--Radius-Sheet)]",
 		"sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-h-[90dvh] sm:max-w-xl sm:rounded-[var(--Radius-Sheet)]"
 	].join(" "),
@@ -11849,7 +11849,7 @@ var Iu = {
 	].join(" "),
 	"mobile-page": [
 		"p-0",
-		"max-h-[calc(100dvh-2rem-env(safe-area-inset-top,0px))]",
+		"max-h-[calc(100dvh_-_2rem_-_env(safe-area-inset-top,0px))]",
 		"overflow-hidden rounded-t-[var(--Radius-Sheet)]",
 		"sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-h-[90dvh] sm:max-w-xl sm:rounded-[var(--Radius-Sheet)]"
 	].join(" "),
@@ -12046,7 +12046,7 @@ function qu({ className: e, label: t, icon: n, showLabel: r = !1, placement: i =
 		"aria-label": u,
 		variant: "default",
 		size: r ? "lg" : "icon-lg",
-		className: U("fixed z-50 shadow-[var(--shadow-lg)] transition-all duration-200", "bottom-[calc(env(safe-area-inset-bottom)+var(--ksk-fab-bottom-offset)+var(--ksk-fab-keyboard-inset))]", i === "end" && "right-4", i === "start" && "left-4", i === "center" && "left-1/2 -translate-x-1/2", a === "none" && "[--ksk-fab-bottom-offset:1rem]", a === "bottom-nav-pill-inline" && "[--ksk-fab-bottom-offset:1rem]", a === "bottom-nav" && "[--ksk-fab-bottom-offset:5rem]", a === "bottom-nav-pill" && "[--ksk-fab-bottom-offset:6rem]", s && "lg:hidden", p && "translate-y-2 opacity-0 pointer-events-none", e),
+		className: U("fixed z-50 shadow-[var(--shadow-lg)] transition-all duration-200", "bottom-[calc(env(safe-area-inset-bottom)_+_var(--ksk-fab-bottom-offset)_+_var(--ksk-fab-keyboard-inset))]", i === "end" && "right-4", i === "start" && "left-4", i === "center" && "left-1/2 -translate-x-1/2", a === "none" && "[--ksk-fab-bottom-offset:1rem]", a === "bottom-nav-pill-inline" && "[--ksk-fab-bottom-offset:1rem]", a === "bottom-nav" && "[--ksk-fab-bottom-offset:5rem]", a === "bottom-nav-pill" && "[--ksk-fab-bottom-offset:6rem]", s && "lg:hidden", p && "translate-y-2 opacity-0 pointer-events-none", e),
 		style: {
 			"--ksk-fab-keyboard-inset": `${m}px`,
 			...c
@@ -12259,7 +12259,7 @@ function td({ className: e, items: t, centerAction: r, showLabels: i, tone: a = 
 		"data-keyboard-behavior": u.keyboardBehavior,
 		"data-keyboard-open": u.isKeyboardOpen || void 0,
 		"aria-label": "メインナビゲーション",
-		className: U("z-50 lg:hidden transition-all duration-200", s === "fixed" ? "fixed" : "absolute", u.keyboardBehavior === "lift" ? "bottom-[calc(env(safe-area-inset-bottom)+12px+var(--ksk-bottom-tab-bar-keyboard-inset))]" : "bottom-[calc(env(safe-area-inset-bottom)+12px)]", c === "left" && "left-3 right-20", c === "right" && "right-3 left-20", c === "center" && "left-1/2 -translate-x-1/2", "flex items-center rounded-full glass-specular", a === "inverse" ? "glass-dark" : "glass", p ? "min-h-[66px] gap-1 px-2 py-2" : "h-[58px] gap-0 px-3", u.shouldHide && "translate-y-2 opacity-0 pointer-events-none invisible", e),
+		className: U("z-50 lg:hidden transition-all duration-200", s === "fixed" ? "fixed" : "absolute", u.keyboardBehavior === "lift" ? "bottom-[calc(env(safe-area-inset-bottom)_+_12px_+_var(--ksk-bottom-tab-bar-keyboard-inset))]" : "bottom-[calc(env(safe-area-inset-bottom)_+_12px)]", c === "left" && "left-3 right-20", c === "right" && "right-3 left-20", c === "center" && "left-1/2 -translate-x-1/2", "flex items-center rounded-full glass-specular", a === "inverse" ? "glass-dark" : "glass", p ? "min-h-[66px] gap-1 px-2 py-2" : "h-[58px] gap-0 px-3", u.shouldHide && "translate-y-2 opacity-0 pointer-events-none invisible", e),
 		style: T,
 		...f,
 		ref: v,
@@ -14792,7 +14792,7 @@ function Yf({ items: e, className: t, ...n }) {
 function Xf({ selectedCount: e, onClear: t, children: n, className: r, ...i }) {
 	return e === 0 ? null : /* @__PURE__ */ P("div", {
 		"data-slot": "bulk-actions",
-		className: U("fixed inset-x-0 bottom-6 z-50 mx-auto w-fit max-w-[calc(100%-32px)]", "flex items-center gap-3 rounded-full bg-[var(--Surface-Inverse)] px-5 py-3 shadow-[var(--shadow-dialog)]", "animate-fade-in-up", r),
+		className: U("fixed inset-x-0 bottom-6 z-50 mx-auto w-fit max-w-[calc(100%_-_32px)]", "flex items-center gap-3 rounded-full bg-[var(--Surface-Inverse)] px-5 py-3 shadow-[var(--shadow-dialog)]", "animate-fade-in-up", r),
 		role: "toolbar",
 		"aria-label": `${e}件を選択中`,
 		...i,
@@ -16641,7 +16641,7 @@ var vm = {
 	medium: "bg-[var(--Surface-VideoOverlay-Medium)]",
 	dark: "bg-[var(--Surface-VideoOverlay-Strong)]"
 }, ym = {
-	bottom: "justify-end pt-24 pb-[calc(env(safe-area-inset-bottom,0px)+3rem)]",
+	bottom: "justify-end pt-24 pb-[calc(env(safe-area-inset-bottom,0px)_+_3rem)]",
 	center: "justify-center py-16"
 };
 function bm({ src: e, alt: t = "", overlay: n = "medium", align: r = "bottom", children: i, className: a, imageClassName: o, contentClassName: s, loading: c = "lazy", ...l }) {
@@ -16738,7 +16738,7 @@ function Dm({ children: e, footer: t, header: n, scroll: r = !0, padding: i = "p
 			}),
 			t && /* @__PURE__ */ N("footer", {
 				"data-slot": "screen-footer",
-				className: U("shrink-0 bg-[var(--Surface-Primary)] px-6 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]", c),
+				className: U("shrink-0 bg-[var(--Surface-Primary)] px-6 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)_+_1rem)]", c),
 				children: t
 			})
 		]

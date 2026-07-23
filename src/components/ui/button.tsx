@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 // 純粋な variants 定義は React に依存しない別ファイルに切り出し。
 // 同じ buttonVariants を `ksk-design-system/class-names` から Server Component
 // 経由でも参照できるようにするため。詳細は server-variants/button-variants.ts。
-import { buttonVariants } from "@/lib/server-variants/button-variants"
+import { buttonVariants } from "../../lib/server-variants/button-variants"
 
 /** navigator.vibrate のパターン (ms) */
 const HAPTIC_PATTERNS: Record<string, number | number[]> = {

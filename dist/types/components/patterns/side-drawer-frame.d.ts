@@ -1,4 +1,4 @@
-import { type SheetContentProps } from "@/components/ui/sheet";
+import { type SheetContentProps } from "../ui/sheet";
 interface SideDrawerFrameProps extends Omit<SheetContentProps, "side" | "padding"> {
     /**
      * どちらの端から出すか。既定 "right"（PC の詳細ドロワーの定番）。

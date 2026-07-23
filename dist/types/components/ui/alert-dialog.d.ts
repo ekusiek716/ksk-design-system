@@ -1,6 +1,6 @@
 import * as React from "react";
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
-import type { ButtonProps } from "@/components/ui/button";
+import type { ButtonProps } from "./button";
 /**
  * AlertDialog — 確認ダイアログ（破壊的アクションの二段階確認に使用）
  *

@@ -245,7 +245,7 @@ export const FloatingPositionLeftWithFab: Story = {
         variant="glass-accent"
         size="icon-fab"
         aria-label="新規作成"
-        className="absolute bottom-[calc(env(safe-area-inset-bottom)+12px)] right-3"
+        className="absolute bottom-[calc(env(safe-area-inset-bottom)_+_12px)] right-3"
       >
         <Add size={24} variant="Linear" color="currentColor" />
       </Button>
@@ -265,7 +265,7 @@ export const FloatingPositionRightWithFab: Story = {
         variant="glass-accent"
         size="icon-fab"
         aria-label="新規作成"
-        className="absolute bottom-[calc(env(safe-area-inset-bottom)+12px)] left-3"
+        className="absolute bottom-[calc(env(safe-area-inset-bottom)_+_12px)] left-3"
       >
         <Add size={24} variant="Linear" color="currentColor" />
       </Button>
