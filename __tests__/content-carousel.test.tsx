@@ -119,7 +119,7 @@ describe("ContentCarousel keyboard navigation", () => {
     vi.unstubAllGlobals()
   })
 
-  it("ルートの左右矢印キーで前後へ移動する", () => {
+  it("フォーカス可能な slide の左右矢印キーで前後へ移動する", () => {
     act(() => root.render(<ContentCarousel slides={slides} />))
     const carousel = container.querySelector<HTMLElement>(
       '[data-slot="content-carousel"]',
@@ -134,7 +134,7 @@ describe("ContentCarousel keyboard navigation", () => {
     })
 
     act(() => {
-      carousel.dispatchEvent(
+      slideElements[0].dispatchEvent(
         new KeyboardEvent("keydown", {
           key: "ArrowRight",
           bubbles: true,

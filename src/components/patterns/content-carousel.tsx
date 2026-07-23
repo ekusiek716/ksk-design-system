@@ -64,7 +64,10 @@ function ContentCarousel({
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(event)
-    if (event.defaultPrevented || event.target !== event.currentTarget) return
+    const target = event.target as HTMLElement
+    const navigationTarget =
+      target === event.currentTarget || target.hasAttribute("data-slide")
+    if (event.defaultPrevented || !navigationTarget) return
     if (event.key === "ArrowLeft") {
       event.preventDefault()
       previous()

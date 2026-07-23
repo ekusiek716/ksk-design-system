@@ -1,4 +1,5 @@
 import * as React from "react"
+import { ArrowLeft2, ArrowRight2 } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
 
 interface UseCarouselControllerOptions {
@@ -89,15 +90,7 @@ function carouselControls({
             aria-label="前へ"
             className="absolute left-2 top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-md)] transition-opacity lg:flex lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:focus-visible:opacity-100"
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M12 15L7 10L12 5"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ArrowLeft2 size={20} aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -105,15 +98,7 @@ function carouselControls({
             aria-label="次へ"
             className="absolute right-2 top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-md)] transition-opacity lg:flex lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:focus-visible:opacity-100"
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M8 5L13 10L8 15"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ArrowRight2 size={20} aria-hidden="true" />
           </button>
         </>
       )}
