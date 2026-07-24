@@ -80,9 +80,16 @@ function MediaActionCluster({
   "aria-label": ariaLabel = "メディアアクション",
   ...props
 }: MediaActionClusterProps) {
-  const [visible, setVisible] = React.useState(defaultVisible)
-  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoHideEnabled = autoHideMs != null && autoHideMs > 0
+  const [visibility, setVisibility] = React.useState({
+    autoHideEnabled,
+    value: defaultVisible,
+  })
+  if (visibility.autoHideEnabled !== autoHideEnabled) {
+    setVisibility({ autoHideEnabled, value: true })
+  }
+  const visible = autoHideEnabled ? visibility.value : true
+  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearHideTimer = React.useCallback(() => {
     if (timerRef.current) {
@@ -93,12 +100,13 @@ function MediaActionCluster({
 
   const setVisibleState = React.useCallback(
     (nextVisible: boolean) => {
-      setVisible((current) => {
-        if (current !== nextVisible) onVisibleChange?.(nextVisible)
-        return nextVisible
+      setVisibility((current) => {
+        const currentVisible = current.autoHideEnabled ? current.value : true
+        if (currentVisible !== nextVisible) onVisibleChange?.(nextVisible)
+        return { autoHideEnabled, value: nextVisible }
       })
     },
-    [onVisibleChange],
+    [autoHideEnabled, onVisibleChange],
   )
 
   const scheduleHide = React.useCallback(() => {
@@ -115,12 +123,11 @@ function MediaActionCluster({
   React.useEffect(() => {
     if (!autoHideEnabled) {
       clearHideTimer()
-      setVisibleState(true)
       return
     }
     scheduleHide()
     return clearHideTimer
-  }, [autoHideEnabled, clearHideTimer, scheduleHide, setVisibleState])
+  }, [autoHideEnabled, clearHideTimer, scheduleHide])
 
   React.useEffect(() => {
     if (!autoHideEnabled || typeof window === "undefined") return

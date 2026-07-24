@@ -1,4 +1,4 @@
-# 禁止パターン全43件＋AIアンチパターン10件 — なぜ禁止か
+# 禁止パターン＋AIアンチパターン（正本: rules.json）— なぜ禁止か
 
 > 正規表現・excludes の正本は `contracts/rules.json`。本ファイルは各ルールの
 > **rationale（防ぐ失敗）** を言語化した参照資料。ID は rules.json と対応。

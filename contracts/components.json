@@ -1,15 +1,15 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.46.1",
+    "version": "1.47.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 67,
-      "patterns": 56,
+      "patterns": 57,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 146
+      "total": 147
     }
   },
   "ui": [
@@ -1772,6 +1772,21 @@
       "rules": [
         "isCoachCompleted/markCoachCompleted で完了状態を永続化",
         "対象要素が見つからない step は画面中央フォールバック"
+      ]
+    },
+    {
+      "name": "PromptCoordinatorProvider/AutoPrompt",
+      "path": "src/components/patterns/prompt-coordinator.tsx",
+      "description": "自動表示プロンプトを排他制御する headless Provider。priority 降順 + FIFO、同一 id coalesce、表示間隔、全体抑制を提供。",
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "headless: rendered prompt owns dialog semantics and focus management"
+      ],
+      "rules": [
+        "表示条件・頻度・永続化・内容は consumer が管理する",
+        "自動表示プロンプトだけを登録し、ユーザー操作起点の dialog は登録しない",
+        "active prompt を閉じるときは release を必ず呼ぶ"
       ]
     },
     {

@@ -42,11 +42,11 @@ export function CollapsibleChipField<K extends string>({
 }: CollapsibleChipFieldProps<K>) {
   const { theme, scales } = useTheme()
   const hasSelection = selected !== undefined && selected !== null && selected !== ""
-  const [forcedExpand, setForcedExpand] = React.useState(false)
-
-  React.useEffect(() => {
-    setForcedExpand(false)
-  }, [selected])
+  const [expansion, setExpansion] = React.useState({ selected, forced: false })
+  if (expansion.selected !== selected) {
+    setExpansion({ selected, forced: false })
+  }
+  const forcedExpand = expansion.selected === selected && expansion.forced
 
   // selected が options に含まれない場合（外部データとの不整合等）は、
   // 折りたたむと chip が 1 つも表示されない手詰まりになるため展開扱いにする
@@ -86,12 +86,12 @@ export function CollapsibleChipField<K extends string>({
             onPress={() => {
               if (forcedExpand) {
                 onSelect(key)
-                setForcedExpand(false)
+                setExpansion({ selected: key, forced: false })
               } else if (selected === key) {
                 // 非 clearable かつ alwaysExpanded 時は何もしない（全 chip が見えているため
                 // 再選択モード不要。forcedExpand を立てると選択表示だけ消える視覚不整合になる）
                 if (onClear) onClear()
-                else if (!alwaysExpanded) setForcedExpand(true)
+                else if (!alwaysExpanded) setExpansion({ selected, forced: true })
               } else {
                 onSelect(key)
               }

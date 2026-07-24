@@ -70,13 +70,16 @@ function DayCountdown({
   onEnd,
   dayUnit = "日",
 }: CountdownTimerProps) {
-  const [daysLeft, setDaysLeft] = React.useState(() => calcDaysLeft(targetDate))
+  const [now, setNow] = React.useState(() => Date.now())
+  const daysLeft = React.useMemo(() => {
+    void now
+    return calcDaysLeft(targetDate)
+  }, [now, targetDate])
   React.useEffect(() => {
-    setDaysLeft(calcDaysLeft(targetDate))
     // 翌日 0:00 で再計算 (シンプルに 1 時間ごと polling で済ませる)
-    const id = setInterval(() => setDaysLeft(calcDaysLeft(targetDate)), 60 * 60 * 1000)
+    const id = setInterval(() => setNow(Date.now()), 60 * 60 * 1000)
     return () => clearInterval(id)
-  }, [targetDate])
+  }, [])
 
   React.useEffect(() => {
     if (daysLeft < 0) onEnd?.()

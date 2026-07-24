@@ -89,9 +89,16 @@ export function MediaActionCluster({
   style,
 }: MediaActionClusterProps) {
   const { scales } = useTheme()
-  const [visible, setVisible] = React.useState(defaultVisible)
-  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoHideEnabled = autoHideMs != null && autoHideMs > 0
+  const [visibility, setVisibility] = React.useState({
+    autoHideEnabled,
+    value: defaultVisible,
+  })
+  if (visibility.autoHideEnabled !== autoHideEnabled) {
+    setVisibility({ autoHideEnabled, value: true })
+  }
+  const visible = autoHideEnabled ? visibility.value : true
+  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const { clusterDirection, itemDirection } = directionFor(orientation, labelPosition)
 
   const clearTimer = React.useCallback(() => {
@@ -101,12 +108,13 @@ export function MediaActionCluster({
 
   const setVisibleState = React.useCallback(
     (next: boolean) => {
-      setVisible((current) => {
-        if (current !== next) onVisibleChange?.(next)
-        return next
+      setVisibility((current) => {
+        const currentVisible = current.autoHideEnabled ? current.value : true
+        if (currentVisible !== next) onVisibleChange?.(next)
+        return { autoHideEnabled, value: next }
       })
     },
-    [onVisibleChange],
+    [autoHideEnabled, onVisibleChange],
   )
 
   const scheduleHide = React.useCallback(() => {
@@ -123,12 +131,11 @@ export function MediaActionCluster({
   React.useEffect(() => {
     if (!autoHideEnabled) {
       clearTimer()
-      setVisibleState(true)
       return
     }
     scheduleHide()
     return clearTimer
-  }, [autoHideEnabled, clearTimer, scheduleHide, setVisibleState])
+  }, [autoHideEnabled, clearTimer, scheduleHide])
 
   return (
     <View

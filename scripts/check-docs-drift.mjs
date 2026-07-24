@@ -10,6 +10,8 @@
 // 検査しないもの（棲み分け）:
 //   - DESIGN.md の front matter / セクション構造 → check-design-md.mjs
 //   - contracts/components.json の件数整合性        → check-drift.sh
+//   - 件数そのものの一致                             → 正本側の各 check
+//     ただし正本と競合する可変件数を文書へ直書きすることは禁止する。
 //
 // 除外方法:
 //   - 単独行マーカー `<!-- docs-drift-ignore -->` → 次の1行を検査対象から除外
@@ -121,6 +123,32 @@ const docCache = docs.map((full) => {
 })
 
 const isTokenIgnored = (doc, lineNo, token) => doc.ignoredTokens.get(lineNo)?.has(token) ?? false
+
+// =============================================================
+// 0) 正本と競合する可変件数の直書き禁止
+// =============================================================
+console.log("")
+console.log("─── 可変件数の直書きチェック ───")
+
+const MUTABLE_COUNT_PATTERNS = [
+  /(?:既存|全)\s*\d+\s*コンポーネント/,
+  /禁止パターン\s*\d+\s*件/,
+  /AIアンチパターン\s*\d+\s*件/,
+]
+let mutableCountErrors = 0
+for (const doc of docCache) {
+  for (let i = 0; i < doc.lines.length; i += 1) {
+    const lineNo = i + 1
+    if (doc.ignored.has(lineNo)) continue
+    if (!MUTABLE_COUNT_PATTERNS.some((pattern) => pattern.test(doc.lines[i]))) continue
+    error(
+      `${doc.relPath}:${lineNo}: 可変件数を直書きせず、contracts の正本または生成済み索引を参照してください`,
+    )
+    mutableCountErrors += 1
+  }
+}
+
+if (mutableCountErrors === 0) ok("可変件数の直書きなし")
 
 // =============================================================
 // 1) コンポーネント名の存在照合

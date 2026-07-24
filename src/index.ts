@@ -151,6 +151,24 @@ export { SwipeRow } from "./components/patterns/swipe-row"
 export type { SwipeRowProps, SwipeAction } from "./components/patterns/swipe-row"
 export { ConfirmDialog } from "./components/patterns/confirm-dialog"
 export type { ConfirmDialogProps } from "./components/patterns/confirm-dialog"
+export {
+  AUTO_PROMPT_SUPPRESSION_EVENT,
+  AutoPrompt,
+  PromptCoordinatorProvider,
+  isAutoPromptSuppressed,
+  suppressAutoPrompts,
+  usePromptCoordinator,
+  usePromptSlot,
+} from "./components/patterns/prompt-coordinator"
+export type {
+  AutoPromptProps,
+  AutoPromptRenderProps,
+  PromptCoordinatorProviderProps,
+  PromptCoordinatorSnapshot,
+  PromptSlot,
+  PromptSlotOptions,
+  PromptSlotStatus,
+} from "./components/patterns/prompt-coordinator"
 export { Celebration } from "./components/patterns/celebration"
 export type { CelebrationProps, CelebrationTrigger, CelebrationPlacement } from "./components/patterns/celebration"
 export { CelebrationDialog } from "./components/patterns/celebration-dialog"
