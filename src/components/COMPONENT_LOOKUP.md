@@ -142,6 +142,7 @@
 | PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
 | PresenceIndicator | `@/components/patterns/presence-indicator` | — | 田中, 佐藤, 鈴木, 山田, 狭幅で非表示にする例（className） |
 | ProgressSteps | `@/components/patterns/progress-steps` | — | Step2Active, FirstStep, ThirdStep, AllComplete, ThreeSteps |
+| AUTO_PROMPT_SUPPRESSION_EVENT, AutoPrompt, PromptCoordinatorProvider | `@/components/patterns/prompt-coordinator` | — | Default |
 | Prose | `@/components/patterns/prose` | — | PrivacyPolicy, SingleSection |
 | ActionTile, QuickActionGrid | `@/components/patterns/quick-action-grid` | — | EmojiOnly, IconAndLabel, WithMeta |
 | ReviewOverlay | `@/components/patterns/review-overlay` | — | Default, WithPins |

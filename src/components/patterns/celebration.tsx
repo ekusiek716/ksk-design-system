@@ -70,18 +70,20 @@ function seededRatio(seed: number) {
 }
 
 export function usePrefersReducedMotion() {
-  const [reduced, setReduced] = React.useState(false)
-
-  React.useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return
+  const subscribe = React.useCallback((onChange: () => void) => {
+    if (typeof window === "undefined" || !window.matchMedia) return () => {}
     const query = window.matchMedia("(prefers-reduced-motion: reduce)")
-    setReduced(query.matches)
-    const onChange = () => setReduced(query.matches)
     query.addEventListener("change", onChange)
     return () => query.removeEventListener("change", onChange)
   }, [])
-
-  return reduced
+  const getSnapshot = React.useCallback(
+    () =>
+      typeof window !== "undefined" &&
+      !!window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  )
+  return React.useSyncExternalStore(subscribe, getSnapshot, () => false)
 }
 
 const BURST_DURATION_MS = 1150

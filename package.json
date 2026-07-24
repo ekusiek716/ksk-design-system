@@ -1,6 +1,6 @@
 {
   "name": "ksk-design-system",
-  "version": "1.46.1",
+  "version": "1.47.0",
   "type": "module",
   "description": "KSK Design System — フリーランス向けマルチテーマ対応デザインシステム",
   "license": "MIT",
@@ -116,6 +116,10 @@
       "import": "./src/themes/cobalt.css",
       "default": "./src/themes/cobalt.css"
     },
+    "./themes/plug": {
+      "import": "./src/themes/plug.css",
+      "default": "./src/themes/plug.css"
+    },
     "./eslint/deprecated": {
       "import": "./eslint/deprecated.js",
       "default": "./eslint/deprecated.js"
@@ -158,6 +162,7 @@
     "check:native-lookup": "node scripts/generate-native-component-lookup.mjs --check",
     "test": "vitest run",
     "test:consumer:web": "npm run build:lib && node scripts/test-packed-web-consumer.mjs",
+    "test:consumer:native": "npm run build:lib && node scripts/test-packed-native-consumer.mjs",
     "test:jest-consumer": "node scripts/test-jest-consumer.mjs",
     "test:watch": "vitest",
     "check": "tsc -p tsconfig.app.json --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && node scripts/check-published-deps.mjs && node scripts/check-css-setup.mjs && bash scripts/check-drift.sh && node scripts/check-screen-contracts.mjs && node scripts/check-docs-drift.mjs && node scripts/check-contrast.mjs && node scripts/check-design-md.mjs && node scripts/check-tailwind-v4.mjs && node scripts/check-prefix-order.mjs && node scripts/generate-component-lookup.mjs --check && node scripts/generate-platform-tokens.mjs --check && node scripts/generate-token-hex-cache.mjs --check && tsc -p tsconfig.native.json --noEmit && node scripts/check-native-parity.mjs && node scripts/generate-native-component-lookup.mjs --check",

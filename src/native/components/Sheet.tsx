@@ -182,7 +182,7 @@ function SnapBottomSheet({
   const activeRef = useRef(initialActive)
   // translateY: 0=フル、(maxSnap-active)*H で snap 位置、panelH で完全閉
   // useNativeDriver: true でカクつき無し。
-  const translateY = useRef(new Animated.Value(panelH)).current
+  const [translateY] = useState(() => new Animated.Value(panelH))
 
   const moveTo = (targetActive: number, duration = SNAP_DUR) => {
     activeRef.current = targetActive
@@ -212,7 +212,11 @@ function SnapBottomSheet({
   const startTYRef = useRef(0)
   const startActiveRef = useRef(initialActive)
   const scrollTopRef = useRef(0)
-  const pan = useRef(
+  // PanResponder invokes these closures only from gesture events. The hooks
+  // rule cannot see that boundary and otherwise treats passing the callbacks
+  // to React Native as a render-time ref read.
+  // eslint-disable-next-line react-hooks/refs
+  const [pan] = useState(() =>
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (_, g) => {
@@ -304,7 +308,7 @@ function SnapBottomSheet({
         moveTo(best)
       },
     }),
-  ).current
+  )
 
   // overlay opacity：translateY に追従（フル=濃く、閉=透明）
   const overlayOpacity = translateY.interpolate({

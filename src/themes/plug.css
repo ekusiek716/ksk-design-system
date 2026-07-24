@@ -1,0 +1,22 @@
+/* =============================================================
+   KSK Design System — PLUG Theme
+
+   PLUG（STRACT のショッピングアシストアプリ）ブランドテーマ。
+   主要 CTA / リンクの blue-600 を中心にした Brand ランプ。
+
+   使い方:
+   @import "ksk-design-system/themes/plug";
+   ============================================================= */
+
+@theme {
+  --Primitive-Brand-50: #eff6ff;
+  --Primitive-Brand-100: #dbeafe;
+  --Primitive-Brand-200: #bfdbfe;
+  --Primitive-Brand-300: #93c5fd;
+  --Primitive-Brand-400: #60a5fa;
+  --Primitive-Brand-500: #3b82f6;
+  --Primitive-Brand-600: #2563eb;
+  --Primitive-Brand-700: #1d4ed8;
+  --Primitive-Brand-800: #1e40af;
+  --Primitive-Brand-900: #1e3a8a;
+}

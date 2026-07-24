@@ -357,18 +357,6 @@ function Sheet({
     [isControlledSnap, setActiveSnapPointProp]
   )
 
-  // For uncontrolled snap state only: when the sheet opens we reset to the
-  // *lowest* snap (the most common "default open" expectation: peek state).
-  // Controlled callers own the initial value via `activeSnapPoint` so we
-  // never override their choice.
-  React.useEffect(() => {
-    if (actualOpen && !isControlledSnap && snapPoints && snapPoints.length > 0) {
-      setInternalSnap(snapPoints[0])
-    }
-    // We intentionally only react to `actualOpen` flipping true here.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actualOpen])
-
   const handleOpenChange = React.useCallback(
     (next: boolean) => {
       // Same logic on close: only reset our internal state if we own it.
@@ -464,28 +452,25 @@ const SHEET_OVERLAY_BASE_Z = 40
 const SHEET_CONTENT_BASE_Z = 50
 const SHEET_STACK_STEP = 20
 
-let sheetStackNextId = 0
-const sheetStackOpenIds: number[] = []
+const sheetStackOpenIds: string[] = []
 const sheetStackListeners = new Set<() => void>()
 
 function sheetStackNotify() {
   sheetStackListeners.forEach((l) => l())
 }
 
-function sheetStackOpen(): number {
-  const id = sheetStackNextId++
-  sheetStackOpenIds.push(id)
+function sheetStackOpen(id: string) {
+  if (!sheetStackOpenIds.includes(id)) sheetStackOpenIds.push(id)
   sheetStackNotify()
-  return id
 }
 
-function sheetStackClose(id: number) {
+function sheetStackClose(id: string) {
   const idx = sheetStackOpenIds.indexOf(id)
   if (idx !== -1) sheetStackOpenIds.splice(idx, 1)
   sheetStackNotify()
 }
 
-function sheetStackLevelOf(id: number): number {
+function sheetStackLevelOf(id: string): number {
   return Math.max(0, sheetStackOpenIds.indexOf(id))
 }
 
@@ -512,17 +497,13 @@ function sheetStackLevelOf(id: number): number {
  * Exported for unit testing only — not part of the public package API.
  */
 function useSheetStackLevel(): number {
-  const idRef = React.useRef<number | null>(null)
-  const [id, setId] = React.useState<number | null>(null)
+  const id = React.useId()
   React.useEffect(() => {
-    const claimed = sheetStackOpen()
-    idRef.current = claimed
-    setId(claimed)
+    sheetStackOpen(id)
     return () => {
-      sheetStackClose(claimed)
-      idRef.current = null
+      sheetStackClose(id)
     }
-  }, [])
+  }, [id])
   const subscribe = React.useCallback((onChange: () => void) => {
     sheetStackListeners.add(onChange)
     return () => {
@@ -530,7 +511,7 @@ function useSheetStackLevel(): number {
     }
   }, [])
   const getSnapshot = React.useCallback(
-    () => (id === null ? 0 : sheetStackLevelOf(id)),
+    () => sheetStackLevelOf(id),
     [id]
   )
   const level = React.useSyncExternalStore(subscribe, getSnapshot, getSnapshot)

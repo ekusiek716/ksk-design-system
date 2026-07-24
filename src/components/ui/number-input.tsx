@@ -41,10 +41,6 @@ function NumberInput({
   const [raw, setRaw] = React.useState(String(value))
   const [focused, setFocused] = React.useState(false)
 
-  React.useEffect(() => {
-    if (!focused) setRaw(String(value))
-  }, [value, focused])
-
   const commit = (str: string) => {
     const num = parseFloat(str.replace(/[^0-9.-]/g, ""))
     if (isNaN(num)) { setRaw(String(value)); return }
@@ -65,7 +61,7 @@ function NumberInput({
     onChange?.(next)
   }
 
-  const displayValue = focused ? raw : (format ? format(value) : raw)
+  const displayValue = focused ? raw : (format ? format(value) : String(value))
   const s = SIZE[size]
 
   const btnBase = cn(
