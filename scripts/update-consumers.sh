@@ -24,8 +24,10 @@
 # 処理方式（stash 方式は廃止・origin/main の一時 worktree 方式）:
 #   ローカルの作業ツリー（dirty 状態）には一切触れない。各リポで
 #     git fetch origin main
-#     git worktree add -B chore/bump-ds-<version> <tmp> origin/main
-#   と origin/main から一時 worktree を切り、その中で全作業を行い、
+#     git worktree add -B chore/bump-ds-<version> <tmp> <安全な開始点>
+#   と一時 worktree を切り、その中で全作業を行う。remote に同名 branch が
+#   ある場合はその HEAD から再開し、人手の追い commit を保持したまま通常の
+#   fast-forward push を行う。無い場合だけ origin/main から開始する。
 #   成功・失敗どちらでも worktree を必ず掃除する。
 #
 # monorepo 対応:
@@ -131,6 +133,19 @@ for repo in "${REPOS[@]}"; do
   fi
 
   branch="chore/bump-ds-$VERSION"
+  start_point="origin/main"
+  remote_head=""
+  if remote_head="$(git -C "$repo" ls-remote --heads origin "refs/heads/$branch" | awk '{print $1}')"; then
+    if [ -n "$remote_head" ]; then
+      if ! git -C "$repo" fetch origin "$branch:refs/remotes/origin/$branch" >/dev/null 2>&1; then
+        echo -e "${RED}FAIL: existing branch fetch${NC}"
+        RESULTS+=("$name: FAIL (existing branch fetch)")
+        continue
+      fi
+      start_point="origin/$branch"
+      echo "→ 既存 branch を $remote_head から再開"
+    fi
+  fi
   wt="$(mktemp -d "${TMPDIR:-/tmp}/ds-bump-XXXXXX")"
 
   cleanup() {
@@ -141,7 +156,7 @@ for repo in "${REPOS[@]}"; do
     rm -rf "$wt"
   }
 
-  if ! git -C "$repo" worktree add -B "$branch" "$wt" origin/main >/dev/null 2>&1; then
+  if ! git -C "$repo" worktree add -B "$branch" "$wt" "$start_point" >/dev/null 2>&1; then
     echo -e "${RED}FAIL: worktree add${NC}"
     cleanup
     RESULTS+=("$name: FAIL (worktree)")
@@ -235,9 +250,10 @@ for repo in "${REPOS[@]}"; do
   # lockfile が新規生成された場合は -u で拾えないので明示的に add
   git -C "$wt" add -- 'package-lock.json' ':(glob)**/package-lock.json' >/dev/null 2>&1
   if git -C "$wt" diff --staged --quiet; then
-    echo -e "${YELLOW}→ 変更なし${NC}"
+    existing_pr="$(cd "$wt" && gh pr list --state open --head "$branch" --json url -q '.[0].url' 2>/dev/null)"
+    echo -e "${YELLOW}→ 変更なし${NC} ${existing_pr:-}"
     cleanup
-    RESULTS+=("$name: SKIP (no-op)")
+    RESULTS+=("$name: SKIP (no-op${existing_pr:+: $existing_pr})")
     continue
   fi
 
@@ -262,20 +278,13 @@ for repo in "${REPOS[@]}"; do
   fi
 
   # ── push ──
-  # 同名の remote branch が既に存在する場合（前回実行の PR が open のまま等）は
-  # 上書きしない。人手の追い commit を force-push で潰さないため、既存 PR の URL を
-  # 報告してスキップする。作り直したい場合は remote branch を削除して再実行する。
+  # 既存 branch から開始しているため、通常 push が fast-forward の場合だけ更新する。
+  # 実行中に remote が進んだ場合は失敗させ、force-push で人手の commit を潰さない。
   if ! git -C "$wt" push -u origin "$branch" >/dev/null 2>&1; then
-    existing_pr="$(cd "$wt" && gh pr list --head "$branch" --json url -q '.[0].url' 2>/dev/null)"
-    if [ -n "$existing_pr" ]; then
-      echo -e "${YELLOW}→ 既存 PR あり・push スキップ: $existing_pr${NC}"
-      cleanup
-      RESULTS+=("$name: SKIP (既存 PR: $existing_pr)")
-    else
-      echo -e "${RED}FAIL: push${NC}"
-      cleanup
-      RESULTS+=("$name: FAIL (push)")
-    fi
+    existing_pr="$(cd "$wt" && gh pr list --state open --head "$branch" --json url -q '.[0].url' 2>/dev/null)"
+    echo -e "${RED}FAIL: push（remote が進んだ可能性。再実行で安全に再開）${NC} ${existing_pr:-}"
+    cleanup
+    RESULTS+=("$name: FAIL (non-fast-forward push${existing_pr:+: $existing_pr})")
     continue
   fi
 
@@ -301,10 +310,13 @@ EOF
     fs.writeFileSync(file, fs.readFileSync(file, "utf8").replaceAll("__VERSION__", version));
   ' "$pr_body_file" "$VERSION"
 
-  pr_url="$(cd "$wt" && gh pr create \
-    --title "chore: ksk-design-system v${VERSION} に bump" \
-    --body-file "$pr_body_file" \
-    2>/dev/null | tail -1)"
+  pr_url="$(cd "$wt" && gh pr list --state open --head "$branch" --json url -q '.[0].url' 2>/dev/null)"
+  if [ -z "$pr_url" ]; then
+    pr_url="$(cd "$wt" && gh pr create \
+      --title "chore: ksk-design-system v${VERSION} に bump" \
+      --body-file "$pr_body_file" \
+      2>/dev/null | tail -1)"
+  fi
   rm -f "$pr_body_file"
 
   # 既に同ブランチの PR がある場合 gh は失敗するので既存 PR URL を拾う

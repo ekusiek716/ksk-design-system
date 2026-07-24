@@ -16,8 +16,8 @@
 
 ```
 .claude/skills/ksk-design-system/SKILL.md  # 判断Skill: 実装・レビューの判断基準（正本への索引）
-contracts/rules.json                     # 禁止パターン43件・AIアンチパターン10件・a11y要件
-contracts/components.json               # 全132コンポーネントの定義・バリアント・ルール
+contracts/rules.json                     # 禁止パターン・AIアンチパターン・a11y要件（件数・内容は rules.json が正本）
+contracts/components.json               # 全コンポーネントの定義・バリアント・ルール
 contracts/design-context.json           # DESIGN.md と正本ファイルの関係・AI向け検査方針
 tokens.json                             # カラー・スペーシング・シャドウトークン
 contracts/token-hex-cache.json          # semantic トークンのデフォルトテーマ解決済み hex（テーマ依存キーは meta.themeDependentKeys 参照・自動生成）
@@ -127,11 +127,11 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | ファイル | 内容 |
 |---------|------|
 | **AGENTS.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート |
-| **contracts/components.json** | 全112コンポーネントの構造化定義（バリアント・アクセシビリティ要件） |
-| **contracts/rules.json** | 禁止パターン32件・AIアンチパターン10件・アクセシビリティ要件 |
+| **contracts/components.json** | 全コンポーネントの構造化定義（バリアント・アクセシビリティ要件。総数は meta.counts が正本） |
+| **contracts/rules.json** | 禁止パターン・AIアンチパターン・アクセシビリティ要件（正本: rules.json） |
 | **contracts/design-context.json** | `DESIGN.md` の役割・正本ファイル・外部 DESIGN.md 参照方針 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
-| **src/components/COMPONENT_LOOKUP.md** | 全112コンポーネントのバリアント・インポートパス（自動生成） |
+| **src/components/COMPONENT_LOOKUP.md** | 全コンポーネントのバリアント・インポートパス（自動生成） |
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
 | **contracts/screen-patterns.json** | 画面実装前にどのシェル/パターンを使うかを決める decisionTree・crudMatrix |
 | **contracts/composition.json** | 選んだパターン内部の並べ方（骨格構造・余白リズム・カード階層・テキスト階層・CTA優先度） |
@@ -143,20 +143,20 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 ```
 src/
 ├── components/
-│   ├── ui/           # 汎用UIコンポーネント 56個
+│   ├── ui/           # 汎用UIコンポーネント
 │   ├── patterns/
-│   │   ├── commerce/ # EC系 11個
-│   │   ├── admin/    # 管理画面系 8個
-│   │   ├── shells/   # レイアウトシェル 3個
-│   │   └── ...       # 汎用パターン 34個
+│   │   ├── commerce/ # EC系
+│   │   ├── admin/    # 管理画面系
+│   │   ├── shells/   # レイアウトシェル
+│   │   └── ...       # 汎用パターン
 │   └── icons/
 ├── styles/
 │   ├── primitive.css  # Layer 1: 原色パレット
 │   ├── semantic.css   # Layer 2: 用途別トークン
-│   └── typography.css # typo-* ユーティリティ 17クラス
+│   └── typography.css # typo-* ユーティリティ
 ├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット
-└── index.ts           # Public API（112コンポーネント）
+└── index.ts           # Public API（全コンポーネント）
 ```
 
 ---

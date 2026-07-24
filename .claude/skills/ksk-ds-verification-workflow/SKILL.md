@@ -23,7 +23,7 @@ description: KSK Design System で UI コードを生成・修正した「後」
 **Step 1 — 自動検出（必須・毎回）**
 
 ```bash
-bash scripts/lint-scratch.sh        # prohibited 43件の一括検出
+bash scripts/lint-scratch.sh        # prohibited 全件の一括検出
 ```
 
 コンポーネント増減時は `npm run check`（tsc + lint + drift + lookup を一括）。

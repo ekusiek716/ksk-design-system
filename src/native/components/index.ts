@@ -113,6 +113,22 @@ export {
 export { ErrorBoundary, type ErrorBoundaryProps } from "./ErrorBoundary"
 export { MenuDrawer, type MenuDrawerProps, type MenuDrawerItem, type MenuDrawerSection } from "./MenuDrawer"
 export { ConfirmDialog, type ConfirmDialogProps } from "./ConfirmDialog"
+export {
+  AUTO_PROMPT_SUPPRESSION_EVENT,
+  AutoPrompt,
+  PromptCoordinatorProvider,
+  isAutoPromptSuppressed,
+  suppressAutoPrompts,
+  usePromptCoordinator,
+  usePromptSlot,
+  type AutoPromptProps,
+  type AutoPromptRenderProps,
+  type PromptCoordinatorProviderProps,
+  type PromptCoordinatorSnapshot,
+  type PromptSlot,
+  type PromptSlotOptions,
+  type PromptSlotStatus,
+} from "./PromptCoordinator"
 export { BottomSheetForm, type BottomSheetFormProps } from "./BottomSheetForm"
 export { BottomSheetFrame, type BottomSheetFramePreset, type BottomSheetFrameProps } from "./BottomSheetFrame"
 export { ReviewOverlay, type ReviewOverlayProps } from "./ReviewOverlay"

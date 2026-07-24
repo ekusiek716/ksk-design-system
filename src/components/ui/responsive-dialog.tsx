@@ -4,15 +4,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose, SheetTrigger } from "./sheet"
 
 function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = React.useState(false)
-  React.useEffect(() => {
+  const subscribe = React.useCallback((onChange: () => void) => {
+    if (typeof window === "undefined") return () => {}
     const mql = window.matchMedia(query)
-    setMatches(mql.matches)
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches)
-    mql.addEventListener("change", handler)
-    return () => mql.removeEventListener("change", handler)
+    mql.addEventListener("change", onChange)
+    return () => mql.removeEventListener("change", onChange)
   }, [query])
-  return matches
+  const getSnapshot = React.useCallback(
+    () => typeof window !== "undefined" && window.matchMedia(query).matches,
+    [query],
+  )
+  return React.useSyncExternalStore(subscribe, getSnapshot, () => false)
 }
 
 interface ResponsiveDialogProps {

@@ -16,7 +16,7 @@
 
 ## タイポグラフィ（ロールマッピング）
 
-KSK の `typo-*` 17クラスは HIG Text Styles / M3 Type Scale のロールに対応する。
+KSK の `typo-*` ユーティリティは HIG Text Styles / M3 Type Scale のロールに対応する。
 **和文最適化のため値は独自**（line-height 1.5–1.75、見出し +0.04em、`tracking-tight` 禁止）。
 
 | KSK | HIG 相当 | M3 相当 | 用途 |

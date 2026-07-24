@@ -75,11 +75,11 @@ export function CoachMarkOverlay({
 }: CoachMarkOverlayProps) {
   const [idx, setIdx] = React.useState(0)
   const [rect, setRect] = React.useState<DOMRect | null>(null)
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = React.useSyncExternalStore(
+    React.useCallback(() => () => {}, []),
+    React.useCallback(() => true, []),
+    React.useCallback(() => false, []),
+  )
 
   React.useEffect(() => {
     if (!open) return

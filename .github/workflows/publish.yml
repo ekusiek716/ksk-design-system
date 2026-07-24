@@ -28,24 +28,41 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24 # npm >= 11.5.1 が Trusted Publishing に必須
           cache: npm
           registry-url: https://registry.npmjs.org
 
-      - name: Check if version is unpublished
+      - name: Check exact version and monotonicity
         id: version
         run: |
           LOCAL=$(node -p "require('./package.json').version")
-          PUBLISHED=$(npm view ksk-design-system version 2>/dev/null || echo "none")
-          echo "local=$LOCAL published=$PUBLISHED"
+          LATEST=$(npm view ksk-design-system version)
+          echo "local=$LOCAL latest=$LATEST"
           echo "version=$LOCAL" >> "$GITHUB_OUTPUT"
-          if [ "$LOCAL" = "$PUBLISHED" ]; then
+          if npm view "ksk-design-system@$LOCAL" version >/dev/null 2>&1; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
           else
+            node - "$LOCAL" "$LATEST" <<'NODE'
+          const [local, latest] = process.argv.slice(2)
+          const parse = (value) => {
+            const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(value)
+            if (!match) throw new Error(`stable semver only: ${value}`)
+            return match.slice(1).map(Number)
+          }
+          const compare = (a, b) => {
+            for (let i = 0; i < 3; i += 1) {
+              if (a[i] !== b[i]) return a[i] - b[i]
+            }
+            return 0
+          }
+          if (compare(parse(local), parse(latest)) <= 0) {
+            throw new Error(`refusing non-monotonic publish: ${local} <= ${latest}`)
+          }
+          NODE
             echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
 
@@ -56,6 +73,28 @@ jobs:
       - name: Publish (prepack が build:lib を実行)
         if: steps.version.outputs.publish == 'true'
         run: npm publish
+
+      - name: Verify registry metadata and tarball
+        if: steps.version.outputs.publish == 'true'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          for attempt in $(seq 1 12); do
+            if [ "$(npm view "ksk-design-system@$VERSION" version 2>/dev/null || true)" = "$VERSION" ]; then
+              break
+            fi
+            if [ "$attempt" = 12 ]; then
+              echo "registry did not expose $VERSION in time" >&2
+              exit 1
+            fi
+            sleep 5
+          done
+          npm view "ksk-design-system@$VERSION" version dist.integrity --json
+          PACK_DIR="$(mktemp -d)"
+          npm pack "ksk-design-system@$VERSION" --ignore-scripts --pack-destination "$PACK_DIR"
+          tar -tzf "$PACK_DIR/ksk-design-system-$VERSION.tgz" \
+            | grep -q 'package/dist/types/index.d.ts'
+          tar -tzf "$PACK_DIR/ksk-design-system-$VERSION.tgz" \
+            | grep -q 'package/src/themes/plug.css'
 
       - name: Create git tag + GitHub Release
         if: steps.version.outputs.publish == 'true'
