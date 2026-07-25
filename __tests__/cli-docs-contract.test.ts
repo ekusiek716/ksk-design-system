@@ -187,6 +187,18 @@ describe("scripts/codemod/template.mjs", () => {
     expect(after["a.tsx"]).toBe(source)
   })
 
+  it("コメントアウトされた import では書き換えない", () => {
+    const source = `// import "ksk-design-system"\nexport const OldComponent = () => null\n`
+    const { after } = runTemplateCodemod({ "a.tsx": source })
+    expect(after["a.tsx"]).toBe(source)
+  })
+
+  it("ブロックコメント内の import 例でも書き換えない", () => {
+    const source = `/**\n * 使い方: import { X } from "ksk-design-system"\n */\nexport const OldComponent = () => null\n`
+    const { after } = runTemplateCodemod({ "a.tsx": source })
+    expect(after["a.tsx"]).toBe(source)
+  })
+
   it("サブパス import / dynamic import / require も対象にする", () => {
     const { after } = runTemplateCodemod({
       "sub.tsx": `import { OldComponent } from "ksk-design-system/class-names"\nexport const A = <OldComponent />\n`,

@@ -93,6 +93,17 @@ const sortedRenames = [...RENAMES].sort((a, b) => b[0].length - a[0].length)
 // ファイル探索
 // ============================================================
 
+/**
+ * 行コメント / ブロックコメントを空白に潰す（判定用。書き換えには使わない）。
+ * この codemod は consumer に配布されるので、依存を増やさず自己完結させる。
+ */
+function stripComments(source) {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    // URL の `//`（`https://…`）は残す。直前が `:` でない `//` だけを落とす
+    .replace(/(^|[^:])\/\/[^\n]*/g, "$1")
+}
+
 function findFiles(dir) {
   const results = []
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -120,8 +131,11 @@ for (const file of findFiles(targetDir)) {
   let updated = original
   let fileChangeCount = 0
 
-  // 対象パッケージを使っていないファイルはスキップ
-  if (!PACKAGE_PATTERN.test(original)) continue
+  // 対象パッケージを使っていないファイルはスキップ。
+  // コメントアウトされた import（`// import "ksk-design-system"`）や
+  // ドキュメント用の例で判定が立つと、パッケージを使っていないファイルの
+  // 識別子まで全部書き換わるので、判定はコメントを除いた本文で行う。
+  if (!PACKAGE_PATTERN.test(stripComments(original))) continue
 
   // 識別子 rename
   for (const [oldName, newName] of sortedRenames) {
