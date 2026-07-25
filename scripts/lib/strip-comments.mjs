@@ -83,7 +83,12 @@ export function stripComments(src) {
     }
 
     // ── code ──
-    if (c === "/" && next === "/") {
+    // 直前が `:` の `//` は行コメントとして扱わない。JSX テキスト中の URL
+    // （`<span>https://example.com</span>`）を行コメント開始と誤認すると、
+    // 同じ行の以降が空白化して**違反を取りこぼす**。
+    // 逆に `{ a: // メモ` のようなコメントは剥がれずに残るが、そちらは
+    // 誤検知（CI が落ちる）方向で、見逃しよりは気付ける。
+    if (c === "/" && next === "/" && prevMeaningful !== ":") {
       while (i < src.length && src[i] !== "\n") { out += " "; i++ }
       continue
     }

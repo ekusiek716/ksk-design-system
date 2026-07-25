@@ -47,6 +47,20 @@ describe("stripComments", () => {
     expect(out).toContain("!bg-red-500")
   })
 
+  it("JSX テキスト中の URL を行コメント開始と誤認しない", () => {
+    const out = stripComments(
+      'const A = <span>https://example.com</span>\nconst cls = "!bg-red-500"',
+    )
+    expect(out).toContain("https://example.com")
+    expect(out).toContain("!bg-red-500")
+  })
+
+  it("URL が同じ行にあっても以降を空白化しない", () => {
+    const out = stripComments('const A = <a href="https://x.dev">x</a> // メモ')
+    expect(out).toContain("https://x.dev")
+    expect(out).not.toContain("メモ")
+  })
+
   it("除算はそのまま通す", () => {
     const out = stripComments('const r = width / 2\nconst cls = "!bg-red-500"')
     expect(out).toContain("width / 2")
@@ -115,6 +129,13 @@ describe("check-tailwind-v4.mjs", () => {
   it("アロー関数の式本体の正規表現のあとの違反を取りこぼさない", () => {
     const result = runOnFixture(
       `const f = () => /[/*]/\nexport const A = <div className="!bg-[var(--x)]" />\n`,
+    )
+    expect(result.status).toBe(1)
+  })
+
+  it("JSX テキストの URL のあとの違反を取りこぼさない", () => {
+    const result = runOnFixture(
+      `export const A = <div><span>https://example.com</span><div className="!bg-[var(--x)]" /></div>\n`,
     )
     expect(result.status).toBe(1)
   })
