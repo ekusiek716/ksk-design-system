@@ -10,6 +10,13 @@
       "admin": 8,
       "shells": 3,
       "total": 147
+    },
+    "exportNaming": {
+      "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
+      "exported": "既定 true。false のとき name は実装ファイル名 / グループ名であり import できない。実際に import できる名前は subcomponents に列挙する。",
+      "exportedAs": "name とは別名で export される場合の実 export 名（例: FormField を KskFormField として出す等）。未使用なら省略する。",
+      "deprecatedAliases": "互換のために残している旧 export 名。新規利用は禁止。eslint/deprecated.js の DEPRECATED と同期させる（テストで固定）。",
+      "note": "型のみの export（`export type { Toast }`）は値として import できないため exported:false 扱いにする。"
     }
   },
   "ui": [
@@ -483,6 +490,7 @@
     },
     {
       "name": "Toast",
+      "exported": false,
       "path": "src/components/ui/toast.tsx",
       "description": "トースト通知。操作結果フィードバックに使用。2 つの呼び出し方をサポート: (1) <Toaster> + useToast() の Provider モード、(2) sonner ライクな fire-and-forget API (`toast.success(...)` 等) — 後者は Toaster 不要で、初回呼び出し時に document.body 直下へ portal root を自動挿入する。",
       "variants": [
@@ -499,6 +507,11 @@
         "新規 action prop で右側に CTA ボタン (元に戻す / 再試行 等) を表示できる",
         "保存完了・接続復旧・同期開始など一時的な操作結果は Banner ではなく toast.* helper を使う",
         "connectionRestored / saveComplete / retryStarted / retryFailed helper を提供"
+      ],
+      "subcomponents": [
+        "Toaster",
+        "useToast",
+        "toast"
       ]
     },
     {
@@ -786,6 +799,7 @@
     },
     {
       "name": "CheckboxCard",
+      "exported": false,
       "path": "src/components/ui/checkbox-card.tsx",
       "description": "カード型チェックボックス。複数選択のカード型UI。単一選択には RadioGroup を使用。",
       "accessibility": [
@@ -796,6 +810,10 @@
         "CheckboxCardGroup でグループ化",
         "expandedContent で選択時展開",
         "badge でタグ表示"
+      ],
+      "subcomponents": [
+        "CheckboxCardGroup",
+        "CheckboxCardItem"
       ]
     },
     {
@@ -1776,6 +1794,7 @@
     },
     {
       "name": "PromptCoordinatorProvider/AutoPrompt",
+      "exported": false,
       "path": "src/components/patterns/prompt-coordinator.tsx",
       "description": "自動表示プロンプトを排他制御する headless Provider。priority 降順 + FIFO、同一 id coalesce、表示間隔、全体抑制を提供。",
       "variants": [],
@@ -1787,6 +1806,15 @@
         "表示条件・頻度・永続化・内容は consumer が管理する",
         "自動表示プロンプトだけを登録し、ユーザー操作起点の dialog は登録しない",
         "active prompt を閉じるときは release を必ず呼ぶ"
+      ],
+      "subcomponents": [
+        "PromptCoordinatorProvider",
+        "AutoPrompt",
+        "usePromptCoordinator",
+        "usePromptSlot",
+        "suppressAutoPrompts",
+        "isAutoPromptSuppressed",
+        "AUTO_PROMPT_SUPPRESSION_EVENT"
       ]
     },
     {
@@ -1808,6 +1836,7 @@
     },
     {
       "name": "ListSkeleton / GridSkeleton",
+      "exported": false,
       "path": "src/components/patterns/list-skeletons.tsx",
       "description": "リスト型 (上部フィルタ + N 行) / グリッド型 (M×N カード) の汎用 Skeleton レイアウト。同一ファイルに 2 component。",
       "variants": [],
@@ -1821,6 +1850,10 @@
         "ListSkeleton: rowHeight で 1 行高",
         "GridSkeleton: columns 1-4 + cardHeight で調整",
         "React Native consumer は ksk-design-system/native/ui の ListSkeleton / GridSkeleton alias を使う"
+      ],
+      "subcomponents": [
+        "ListSkeleton",
+        "GridSkeleton"
       ]
     },
     {
@@ -1893,6 +1926,7 @@
     },
     {
       "name": "SettingsSection / SettingsListRow",
+      "exported": false,
       "path": "src/components/patterns/settings-section.tsx",
       "description": "設定画面の group/card/danger section と row。title / description / action / leading / rightSlot を持ち、switch / badge / button を安定配置する。",
       "variants": [
@@ -1917,6 +1951,10 @@
         "設定一覧で ad-hoc flex row を作らず SettingsListRow を使う",
         "switch / badge / button は rightSlot に置く",
         "danger variant は削除・ログアウトなど不可逆操作のグループに限定する"
+      ],
+      "subcomponents": [
+        "SettingsSection",
+        "SettingsListRow"
       ]
     },
     {
@@ -1943,6 +1981,7 @@
     },
     {
       "name": "CompactFilePicker / ImageAttachmentPicker",
+      "exported": false,
       "path": "src/components/patterns/compact-file-picker.tsx",
       "description": "mobile sheet 内で使う compact file/image picker。hidden input trigger、preview、remove affordance、label、description、disabled/loading state を DS 化する。",
       "features": [
@@ -1967,10 +2006,15 @@
         "Native では DocumentPicker/ImagePicker を起動する onPress trigger として使う",
         "object URL の生成/破棄は consumer state 側で管理し、DS には src と id を渡す",
         "画像 preview/delete の row/grid boilerplate を consumer に置かない"
+      ],
+      "subcomponents": [
+        "CompactFilePicker",
+        "ImageAttachmentPicker"
       ]
     },
     {
       "name": "QuickActionGrid / ActionTile",
+      "exported": false,
       "path": "src/components/patterns/quick-action-grid.tsx",
       "description": "ショートカット/絵文字 action の button tile と grid。icon/emoji、label、description、meta、selected/disabled/loading state、2/3/4 column または auto-fit を持つ。",
       "variants": [
@@ -1991,6 +2035,10 @@
         "shortcut row/grid の columns/gap を consumer 側で決め打ちしない",
         "children には ActionTile を使う",
         "選択状態は selected prop を使う"
+      ],
+      "subcomponents": [
+        "QuickActionGrid",
+        "ActionTile"
       ]
     }
   ],
