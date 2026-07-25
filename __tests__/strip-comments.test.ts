@@ -94,17 +94,18 @@ describe("stripComments", () => {
 describe("check-tailwind-v4.mjs", () => {
   const ROOT = process.cwd()
 
+  // フィクスチャは一時ディレクトリに置き、検査にそこを走査させる。
+  // src/ に書くと、並行して走る他のテスト（lint-scratch.sh 等が src/ を
+  // 走査する）を汚染して落とすため。
   function runOnFixture(source: string) {
     const dir = mkdtempSync(join(tmpdir(), "ksk-ds-tw-"))
-    const file = join(ROOT, "src", `__tw_fixture_${dir.split("-").pop()}.tsx`)
-    writeFileSync(file, source)
+    writeFileSync(join(dir, "Example.tsx"), source)
     try {
-      return spawnSync("node", [join(ROOT, "scripts/check-tailwind-v4.mjs")], {
+      return spawnSync("node", [join(ROOT, "scripts/check-tailwind-v4.mjs"), dir], {
         cwd: ROOT,
         encoding: "utf8",
       })
     } finally {
-      rmSync(file, { force: true })
       rmSync(dir, { recursive: true, force: true })
     }
   }
