@@ -20,12 +20,20 @@ node node_modules/ksk-design-system/scripts/codemod/check-migration.mjs ./src
 ## 使い方（利用側プロジェクトで）
 
 ```bash
+# 利用できる codemod を一覧（現時点では 0 本）
+npx ksk-design-system codemod
+
 # 事前確認（変更を書き込まない）
-npx ksk-design-system codemod v1-to-v2 ./src --dry
+npx ksk-design-system codemod <name> ./src --dry
 
 # 実行
-npx ksk-design-system codemod v1-to-v2 ./src
+npx ksk-design-system codemod <name> ./src
 ```
+
+`<name>` は `scripts/codemod/<name>.mjs` のファイル名部分。**破壊変更に対応する
+codemod はそのリリース時に追加され、実行コマンドは MIGRATION.md に記載される。**
+`template.mjs`（雛形）と `check-migration.mjs`（読み取り専用スキャナ）は
+codemod としては呼べない。
 
 ## 新しい codemod の作り方（メンテナ向け）
 
