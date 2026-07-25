@@ -82,3 +82,27 @@ describe("ksk-ds check-duplicates", () => {
     expect(result.stdout).toContain("src/card.tsx:1 Card")
   })
 })
+
+describe("contracts の exported:false を尊重する", () => {
+  // contracts の name は「import できる名前」とは限らない。
+  // `CheckboxCard` は実装ファイル名で、実 export は CheckboxCardGroup / CheckboxCardItem。
+  // ここを登録してしまうと、consumer のローカル実装を「DS にある」と誤検知し、
+  // 存在しない export を import しろと案内してしまう。
+  it("import できない名前（exported:false）は重複として報告しない", () => {
+    const consumer = createConsumer({
+      "src/CheckboxCard.tsx": "export function CheckboxCard() { return null }\n",
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).not.toContain("CheckboxCard")
+  })
+
+  it("実際に import できる subcomponents は重複として報告する", () => {
+    const consumer = createConsumer({
+      "src/CheckboxCardGroup.tsx": "export function CheckboxCardGroup() { return null }\n",
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain("CheckboxCardGroup")
+  })
+})
