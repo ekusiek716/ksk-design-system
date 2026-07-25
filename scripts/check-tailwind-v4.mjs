@@ -2,16 +2,26 @@
 // =============================================================
 // KSK Design System — Tailwind v4 構文検査
 //
-// Tailwind v4 では important 修飾子は末尾(!): `bg-[var(--x)]!`。
-// v3 風の先頭! (`!bg-[var(--x)]`) は v4 で utility 認識されず CSS が
-// 生成されない（selected/active 等のスタイルが静かに無効化される）。
-// src を走査して先頭! の Tailwind クラスを検出し、CI で失敗させる。
+// 1) 先頭! の important 修飾子 — 記法統一の convention（動作バグ検出ではない）
+//    v4 の正式表記は末尾(!): `bg-[var(--x)]!`。
+//    v3 風の先頭! (`!bg-[var(--x)]`) も **v4.2.1 では今も utility として認識され**、
+//    `.\!bg-…{…!important}` が生成される（姉妹 DS の実ビルド出力で実測）。
+//    「先頭! は CSS が生成されず静かに無効化される」は誤り。
+//    根拠を誤ったままにすると、気付いた人に検査ごと消され、本来の意図
+//    （記法統一・v3 由来のコピペ流入の抑止）まで失われるため実態に合わせる。
+//
+// 2) arbitrary value 内 calc() の二項演算子 — こちらは実バグ検出。
+//    空白が無いと Tailwind が値を解釈できない。`_` で空白を表現する。
+//
+// どちらもコメント（行 / ブロック / JSDoc）は対象外。記法例を JSDoc に
+// 書いただけで落ちると、検査を避けるためにドキュメントが痩せる。
 //
 // 実行: node scripts/check-tailwind-v4.mjs
 // =============================================================
 import { readdirSync, readFileSync, statSync } from "node:fs"
 import { join, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
+import { stripComments } from "./lib/strip-comments.mjs"
 
 const srcDir = join(dirname(fileURLToPath(import.meta.url)), "..", "src")
 
@@ -29,7 +39,7 @@ function walk(dir) {
     const p = join(dir, name)
     if (statSync(p).isDirectory()) { walk(p); continue }
     if (!/\.(tsx?)$/.test(name)) continue // CSS の実 !important は対象外
-    readFileSync(p, "utf8").split("\n").forEach((line, i) => {
+    stripComments(readFileSync(p, "utf8")).split("\n").forEach((line, i) => {
       const m = line.match(RE)
       if (m) hits.push({ file: p.replace(srcDir + "/", "src/"), line: i + 1, found: [...new Set(m)].join(" ") })
       const calcExpressions = line.match(/calc\([^"'`]*?\)\]/g) ?? []
@@ -44,7 +54,7 @@ walk(srcDir)
 console.log("🎨 Tailwind v4 — 先頭! 検出")
 if (hits.length) {
   for (const h of hits) console.error(`\x1b[31m[NG]\x1b[0m ${h.file}:${h.line}  ${h.found}…`)
-  console.error(`\x1b[31m✗ ${hits.length} 件: 先頭! は v4 で CSS 未生成。末尾! (例 bg-[var(--x)]!) に直す\x1b[0m`)
+  console.error(`\x1b[31m✗ ${hits.length} 件: v4 の正式表記は末尾! (例 bg-[var(--x)]!)。記法を統一する\x1b[0m`)
   process.exit(1)
 }
 console.log("\x1b[32m✓ 先頭! の Tailwind クラスなし\x1b[0m")
