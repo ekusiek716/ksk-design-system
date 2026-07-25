@@ -26,8 +26,29 @@ import path from "node:path"
 // このテンプレートを複製した後、ここを編集してください
 // ============================================================
 
-/** 対象パッケージの import 文を含むファイルだけを処理 */
-const PACKAGE_PATTERN = /@ksk\/design-system/
+/**
+ * 対象パッケージを**実際に読み込んでいる**ファイルだけを処理。
+ *
+ * v1.34.0 で `@ksk/design-system` → `ksk-design-system` に改名したため両対応。
+ *
+ * 判定は「import / export ... from / import() / require() の構文に現れる
+ * モジュール指定子」に限定する。ここを緩めると、
+ *   - `my-ksk-design-system-plugin` からの import（部分一致）
+ *   - `const packageName = "ksk-design-system"` のような単なる文字列
+ *   - DS に言及しているだけのコメント
+ * を持つファイルまで対象になり、パッケージを使っていないのに RENAMES の
+ * 識別子が全部書き換わる（consumer のコードが壊れる）。
+ */
+const PACKAGE_NAME = String.raw`(?:@ksk\/design-system|ksk-design-system)(?:\/[^"']*)?`
+const PACKAGE_PATTERN = new RegExp(
+  [
+    // import ... from "pkg" / export ... from "pkg" / import "pkg"
+    String.raw`\bfrom\s*["']${PACKAGE_NAME}["']`,
+    String.raw`\bimport\s*["']${PACKAGE_NAME}["']`,
+    // import("pkg") / require("pkg")
+    String.raw`\b(?:import|require)\s*\(\s*["']${PACKAGE_NAME}["']\s*\)`,
+  ].join("|"),
+)
 
 /** 単純な識別子 rename: [oldName, newName] */
 const RENAMES = [
@@ -72,6 +93,17 @@ const sortedRenames = [...RENAMES].sort((a, b) => b[0].length - a[0].length)
 // ファイル探索
 // ============================================================
 
+/**
+ * 行コメント / ブロックコメントを空白に潰す（判定用。書き換えには使わない）。
+ * この codemod は consumer に配布されるので、依存を増やさず自己完結させる。
+ */
+function stripComments(source) {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    // URL の `//`（`https://…`）は残す。直前が `:` でない `//` だけを落とす
+    .replace(/(^|[^:])\/\/[^\n]*/g, "$1")
+}
+
 function findFiles(dir) {
   const results = []
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -99,8 +131,11 @@ for (const file of findFiles(targetDir)) {
   let updated = original
   let fileChangeCount = 0
 
-  // 対象パッケージを使っていないファイルはスキップ
-  if (!PACKAGE_PATTERN.test(original)) continue
+  // 対象パッケージを使っていないファイルはスキップ。
+  // コメントアウトされた import（`// import "ksk-design-system"`）や
+  // ドキュメント用の例で判定が立つと、パッケージを使っていないファイルの
+  // 識別子まで全部書き換わるので、判定はコメントを除いた本文で行う。
+  if (!PACKAGE_PATTERN.test(stripComments(original))) continue
 
   // 識別子 rename
   for (const [oldName, newName] of sortedRenames) {

@@ -10,7 +10,9 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 破壊変更を入れる際にはここに以下を書く:
 1. 削除した識別子 / prop の一覧（rename テーブル）
 2. before / after コード例
-3. 自動移行コマンド: `npx ksk-design-system codemod v1-to-v2 ./src`
+3. 自動移行コマンド: `npx ksk-design-system codemod <name> ./src`（`<name>` は
+   そのリリースで追加した `scripts/codemod/<name>.mjs`。利用できる名前は
+   `npx ksk-design-system codemod` で一覧できる）
 4. 手動対応が必要な項目（codemod では拾えないケース）
 
 ---
