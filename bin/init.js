@@ -12,9 +12,10 @@
 //   npx ksk-design-system demo [dir]    # DS リポを clone + setup（お試し用）
 //   npx ksk-ds lint src                 # contracts/rules.json に基づき consumer UI を検査
 //   npx ksk-ds check-duplicates src     # DS と同名のローカル実装を検査
+//   npx ksk-ds codemod <name> ./src     # scripts/codemod/<name>.mjs を実行
 //   npx ksk-design-system postinstall   # npm postinstall から呼ばれる silent モード
 
-import { copyFileSync, existsSync } from "node:fs"
+import { copyFileSync, existsSync, readdirSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { spawnSync } from "node:child_process"
@@ -25,6 +26,9 @@ const pkgRoot = resolve(__dirname, "..")
 const args = process.argv.slice(2)
 const cmd = args[0] || "init"
 const force = args.includes("--force")
+
+/** scripts/codemod/ 配下にあるが codemod として呼べないもの（雛形・読み取り専用スキャナ） */
+const NON_CODEMOD = new Set(["template", "check-migration"])
 
 if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   console.log(`ksk-design-system CLI
@@ -40,6 +44,9 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   npx ksk-ds check-migration ./src    非推奨 API の残存を検査（read-only）
   npx ksk-ds check-duplicates [DIR]    DS と同名のローカル実装を検査
   npx ksk-ds check-duplicates --strict 検出時に exit 1（CI 向け）
+  npx ksk-ds codemod                   利用できる codemod を一覧
+  npx ksk-ds codemod <name> [DIR] --dry 破壊変更の自動移行（事前確認）
+  npx ksk-ds codemod <name> [DIR]      破壊変更の自動移行（書き込み）
 `)
   process.exit(0)
 }
@@ -65,6 +72,10 @@ if (cmd === "check-duplicates") {
   process.exit(status)
 }
 
+if (cmd === "codemod") {
+  process.exit(runCodemod(args.slice(1)))
+}
+
 if (cmd === "demo") {
   runDemo(args.slice(1))
   process.exit(0)
@@ -74,6 +85,74 @@ if (cmd !== "init" && cmd !== "postinstall") {
   console.error(`未知のコマンド: ${cmd}`)
   console.error(`npx ksk-design-system help を参照してください`)
   process.exit(1)
+}
+
+// ─── codemod ────────────────────────────────────────────────
+// MIGRATION.md / RELEASE.md / scripts/codemod/README.md が案内している
+// `npx ksk-design-system codemod <name> ./src` の実体。
+// `scripts/codemod/<name>.mjs` を解決して node で起動し、残りの引数
+// （対象ディレクトリ・--dry）はそのまま渡す。
+
+function codemodDir() {
+  return join(pkgRoot, "scripts", "codemod")
+}
+
+function listCodemods() {
+  const dir = codemodDir()
+  if (!existsSync(dir)) return []
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".mjs"))
+    .map((f) => f.replace(/\.mjs$/, ""))
+    .filter((name) => !NON_CODEMOD.has(name))
+    .sort()
+}
+
+function printAvailableCodemods() {
+  const available = listCodemods()
+  if (available.length === 0) {
+    console.error(`\n現在提供されている codemod はありません。`)
+    console.error(`破壊変更に対応する codemod はリリース時に追加され、`)
+    console.error(`MIGRATION.md に実行コマンドが記載されます。`)
+    console.error(`\n非推奨 API の残存を数えるだけなら:`)
+    console.error(`  npx ksk-ds check-migration ./src`)
+    return
+  }
+  console.error(`\n利用できる codemod:`)
+  for (const name of available) console.error(`  ${name}`)
+}
+
+function runCodemod(rest) {
+  const name = rest.find((a) => !a.startsWith("--"))
+
+  if (!name) {
+    console.error(`使い方: npx ksk-design-system codemod <name> [DIR] [--dry]`)
+    printAvailableCodemods()
+    return 1
+  }
+
+  // pkgRoot の外へ抜ける名前・codemod ではないファイルを弾く
+  if (!/^[A-Za-z0-9._-]+$/.test(name) || NON_CODEMOD.has(name)) {
+    console.error(`✗ codemod 名が不正です: ${name}`)
+    printAvailableCodemods()
+    return 1
+  }
+
+  const scriptPath = join(codemodDir(), `${name}.mjs`)
+  if (!existsSync(scriptPath)) {
+    console.error(`✗ codemod が見つかりません: ${name}`)
+    console.error(`  期待したパス: ${scriptPath}`)
+    printAvailableCodemods()
+    return 1
+  }
+
+  // name だけ取り除いて残り（DIR / --dry 等）をそのまま渡す
+  const nameIndex = rest.indexOf(name)
+  const forwarded = rest.filter((_, i) => i !== nameIndex)
+  const res = spawnSync(process.execPath, [scriptPath, ...forwarded], {
+    stdio: "inherit",
+    cwd: process.cwd(),
+  })
+  return res.status ?? 1
 }
 
 function runDemo(rest) {

@@ -26,8 +26,12 @@ import path from "node:path"
 // このテンプレートを複製した後、ここを編集してください
 // ============================================================
 
-/** 対象パッケージの import 文を含むファイルだけを処理 */
-const PACKAGE_PATTERN = /@ksk\/design-system/
+/**
+ * 対象パッケージの import 文を含むファイルだけを処理。
+ * v1.34.0 で `@ksk/design-system` → `ksk-design-system` に改名したため、
+ * 旧名を残している consumer も拾えるよう両方にマッチさせる。
+ */
+const PACKAGE_PATTERN = /(?:@ksk\/design-system|ksk-design-system)/
 
 /** 単純な識別子 rename: [oldName, newName] */
 const RENAMES = [
