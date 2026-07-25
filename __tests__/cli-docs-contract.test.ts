@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { existsSync, readFileSync, readdirSync } from "node:fs"
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { spawnSync } from "node:child_process"
 
@@ -113,5 +114,70 @@ describe("ksk-ds codemod", () => {
       .filter((f) => f.endsWith(".mjs"))
       .map((f) => f.replace(/\.mjs$/, ""))
     expect([...named].filter((n) => !available.includes(n))).toEqual([])
+  })
+})
+
+describe("scripts/codemod/template.mjs", () => {
+  // テンプレートから作った codemod が、対象パッケージを import していない
+  // ファイルまで書き換えないことを end-to-end で固定する。
+  const CODEMOD_NAME = "__template_contract_fixture"
+  const codemodPath = join(ROOT, "scripts/codemod", `${CODEMOD_NAME}.mjs`)
+
+  function runTemplateCodemod(files: Record<string, string>) {
+    const template = readFileSync(join(ROOT, "scripts/codemod/template.mjs"), "utf8")
+    writeFileSync(
+      codemodPath,
+      template.replace(
+        '  // ["OldComponent", "NewComponent"],',
+        '  ["OldComponent", "NewComponent"],',
+      ),
+    )
+    const dir = mkdtempSync(join(tmpdir(), "ksk-ds-codemod-"))
+    for (const [rel, content] of Object.entries(files)) {
+      const full = join(dir, rel)
+      mkdirSync(join(full, ".."), { recursive: true })
+      writeFileSync(full, content)
+    }
+    try {
+      const result = spawnSync(
+        "node",
+        [join(ROOT, "bin/init.js"), "codemod", CODEMOD_NAME, dir],
+        { cwd: ROOT, encoding: "utf8" },
+      )
+      const after = Object.fromEntries(
+        Object.keys(files).map((rel) => [rel, readFileSync(join(dir, rel), "utf8")]),
+      )
+      return { result, after }
+    } finally {
+      rmSync(codemodPath, { force: true })
+      rmSync(dir, { recursive: true, force: true })
+    }
+  }
+
+  it("現行のパッケージ名を import しているファイルを書き換える", () => {
+    const { result, after } = runTemplateCodemod({
+      "a.tsx": `import { OldComponent } from "ksk-design-system"\nexport const A = <OldComponent />\n`,
+    })
+    expect(result.status).toBe(0)
+    expect(after["a.tsx"]).toContain("NewComponent")
+  })
+
+  it("改名前のパッケージ名も拾う", () => {
+    const { after } = runTemplateCodemod({
+      "a.tsx": `import { OldComponent } from "@ksk/design-system"\nexport const A = <OldComponent />\n`,
+    })
+    expect(after["a.tsx"]).toContain("NewComponent")
+  })
+
+  it("名前が部分一致するだけの別パッケージは書き換えない", () => {
+    const source = `import { OldComponent } from "my-ksk-design-system-plugin"\nexport const A = <OldComponent />\n`
+    const { after } = runTemplateCodemod({ "a.tsx": source })
+    expect(after["a.tsx"]).toBe(source)
+  })
+
+  it("コメントで DS に言及しているだけのファイルは書き換えない", () => {
+    const source = `// ksk-design-system と同じ命名にしている\nexport const OldComponent = () => null\n`
+    const { after } = runTemplateCodemod({ "a.tsx": source })
+    expect(after["a.tsx"]).toBe(source)
   })
 })
