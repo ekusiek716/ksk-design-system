@@ -2,8 +2,15 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
+// 背景は `--card-surface` が宣言されていればそれを、無ければ従来どおり
+// `--Surface-Primary` を使う。地を描く側（Section / 各シェルのルート等）が
+// `--card-surface` を宣言すると、その配下の Card が**指定なしで**地から
+// 浮く色に切り替わる。伝播は CSS カスタムプロパティのカスケードのみで、
+// React context を使わないので Server Component のまま使え、DS の Card 以外
+// （consumer 自前の <article> 等）には一切影響しない。
+// 明示指定（className の bg-*）は tailwind-merge で後勝ちのまま。
 const cardVariants = cva(
-  "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] flex flex-col rounded-[var(--Radius-Surface)] ksk-squircle border border-[var(--Border-Low-Emphasis)] shadow-[var(--shadow-md)] @container",
+  "bg-[var(--card-surface,var(--Surface-Primary))] text-[var(--Text-High-Emphasis)] flex flex-col rounded-[var(--Radius-Surface)] ksk-squircle border border-[var(--Border-Low-Emphasis)] shadow-[var(--shadow-md)] @container",
   {
     variants: {
       variant: {
@@ -31,6 +38,23 @@ interface CardProps
  *
  * 構成パーツ: `CardHeader` / `CardTitle` / `CardDescription` / `CardAction` /
  *   `CardContent` / `CardFooter`。`@container` クエリで内部レスポンシブ。
+ *
+ * 地と同色になるとき（`--card-surface`）:
+ *   Card の既定背景は `--Surface-Primary`。`AppShell` / `MarketingShell` の
+ *   ルートも同じ `--Surface-Primary` なので、その直下に置いた Card は
+ *   **地と完全に同色**になり、区切りは罫線（+ light では 8% の shadow）だけになる。
+ *   地を描く側が `--card-surface` を宣言すると、配下の Card が指定なしで
+ *   その色に切り替わる。カード 1 枚ずつ prop を付けて回る方式と違い、
+ *   あとからカードを足したときの付け忘れが起きない。
+ *
+ *   ```tsx
+ *   <div className="bg-[var(--Surface-Primary)] [--card-surface:var(--Surface-Secondary)]">
+ *     <Card>…</Card>  // 指定なしで Surface-Secondary になる
+ *   </div>
+ *   ```
+ *
+ *   例外的に地に馴染ませたいときは `className="bg-[var(--Surface-Primary)]"` で
+ *   上書きする（tailwind-merge で後勝ち）。
  *
  * Note: 商品の表示は `ProductCard`（patterns/commerce）を使う。
  */
