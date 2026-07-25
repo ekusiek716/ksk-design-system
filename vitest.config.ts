@@ -16,7 +16,9 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["__tests__/**/*.test.{ts,tsx}"],
+    // mcp-server/ は独立パッケージだが、参照する contracts/ は本体と同じ正本なので
+    // 契約ズレを同じ `npm run test` で検出できるようにここに含める。
+    include: ["__tests__/**/*.test.{ts,tsx}", "mcp-server/__tests__/**/*.test.ts"],
     exclude: ["node_modules", "dist", "storybook-static", "**/*.stories.tsx"],
   },
 })
