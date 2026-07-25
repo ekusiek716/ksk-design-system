@@ -14,7 +14,6 @@ KSK DS のテーマシステムは **Primitive Layer の Brand 色を差し替�
 | Blue | `blue.css` | `#3B82F6` | リクルート・HR・建設 |
 | Green | `green.css` | `#16A34A` | ヘルスケア・サステナ・金融 |
 | Violet | `violet.css` | `#7C3AED` | プレミアム・クリエイティブ・教育 |
-| CLIENT | `client.css` | `#3B82F6` | CLIENT （用途は伏せる） |
 
 ## 新しいクライアントテーマの作り方
 

@@ -15,6 +15,28 @@ interface CardProps extends React.ComponentProps<"div">, VariantProps<typeof car
  * 構成パーツ: `CardHeader` / `CardTitle` / `CardDescription` / `CardAction` /
  *   `CardContent` / `CardFooter`。`@container` クエリで内部レスポンシブ。
  *
+ * 地と同色になるとき（`--card-surface`）:
+ *   Card の既定背景は `--Surface-Primary`。`AppShell` / `MarketingShell` の
+ *   ルートも同じ `--Surface-Primary` なので、その直下に置いた Card は
+ *   **地と完全に同色**になり、区切りは罫線（+ light では 8% の shadow）だけになる。
+ *   地を描く側が `--card-surface` を宣言すると、配下の Card が指定なしで
+ *   その色に切り替わる。カード 1 枚ずつ prop を付けて回る方式と違い、
+ *   あとからカードを足したときの付け忘れが起きない。
+ *
+ *   ```tsx
+ *   <div className="bg-[var(--Surface-Primary)] [--card-surface:var(--Surface-Secondary)]">
+ *     <Card>…</Card>  // 指定なしで Surface-Secondary になる
+ *   </div>
+ *   ```
+ *
+ *   例外的に地に馴染ませたいときは `className="bg-[var(--Surface-Primary)]"` で
+ *   上書きする（tailwind-merge で後勝ち）。
+ *
+ *   入れ子カードは `--card-surface` を引き継がない（Card の直下で `initial` に
+ *   戻す）。外側が宣言色・内側が既定色になるので階層が潰れない。
+ *   `contracts/composition.json` の cardHierarchy どおり内側を一段沈めたい
+ *   場合は、内側を包む要素で `[--card-surface:var(--Surface-Tertiary)]` を宣言する。
+ *
  * Note: 商品の表示は `ProductCard`（patterns/commerce）を使う。
  */
 declare function Card({ className, variant, ...props }: CardProps): React.JSX.Element;

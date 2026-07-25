@@ -1,6 +1,6 @@
 {
   "name": "ksk-design-system",
-  "version": "1.47.0",
+  "version": "1.48.0",
   "type": "module",
   "description": "KSK Design System — フリーランス向けマルチテーマ対応デザインシステム",
   "license": "MIT",
@@ -115,10 +115,6 @@
     "./themes/cobalt": {
       "import": "./src/themes/cobalt.css",
       "default": "./src/themes/cobalt.css"
-    },
-    "./themes/client": {
-      "import": "./src/themes/client.css",
-      "default": "./src/themes/client.css"
     },
     "./eslint/deprecated": {
       "import": "./eslint/deprecated.js",
