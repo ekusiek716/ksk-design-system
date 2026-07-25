@@ -78,23 +78,27 @@ jobs:
         if: steps.version.outputs.publish == 'true'
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          PACK_DIR="$(mktemp -d)"
+          TARBALL="$PACK_DIR/ksk-design-system-$VERSION.tgz"
+          # npm view が新バージョンを返しても、tarball の解決はワンテンポ遅れることがある
+          # （v1.48.0 で実際に npm pack が ETARGET になり、後続のタグ作成まで落ちた）。
+          # metadata と tarball の両方が引けるまでを 1 つのリトライにまとめる。
           for attempt in $(seq 1 12); do
-            if [ "$(npm view "ksk-design-system@$VERSION" version 2>/dev/null || true)" = "$VERSION" ]; then
+            if [ "$(npm view "ksk-design-system@$VERSION" version 2>/dev/null || true)" = "$VERSION" ] \
+              && npm pack "ksk-design-system@$VERSION" --ignore-scripts --pack-destination "$PACK_DIR" >/dev/null 2>&1; then
               break
             fi
             if [ "$attempt" = 12 ]; then
               echo "registry did not expose $VERSION in time" >&2
+              npm view "ksk-design-system@$VERSION" version || true
+              npm pack "ksk-design-system@$VERSION" --ignore-scripts --pack-destination "$PACK_DIR" || true
               exit 1
             fi
             sleep 5
           done
           npm view "ksk-design-system@$VERSION" version dist.integrity --json
-          PACK_DIR="$(mktemp -d)"
-          npm pack "ksk-design-system@$VERSION" --ignore-scripts --pack-destination "$PACK_DIR"
-          tar -tzf "$PACK_DIR/ksk-design-system-$VERSION.tgz" \
-            | grep -q 'package/dist/types/index.d.ts'
-          tar -tzf "$PACK_DIR/ksk-design-system-$VERSION.tgz" \
-            | grep -q 'package/src/themes/default.css'
+          tar -tzf "$TARBALL" | grep -q 'package/dist/types/index.d.ts'
+          tar -tzf "$TARBALL" | grep -q 'package/src/themes/default.css'
 
       - name: Create git tag + GitHub Release
         if: steps.version.outputs.publish == 'true'
