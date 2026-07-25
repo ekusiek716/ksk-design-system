@@ -504,7 +504,7 @@ function tt({ className: e, ...t }) {
 }
 //#endregion
 //#region src/components/ui/card.tsx
-var nt = U("bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] flex flex-col rounded-[var(--Radius-Surface)] ksk-squircle border border-[var(--Border-Low-Emphasis)] shadow-[var(--shadow-md)] @container", {
+var nt = U("bg-[var(--card-surface,var(--Surface-Primary))] [&>*]:[--card-surface:initial] text-[var(--Text-High-Emphasis)] flex flex-col rounded-[var(--Radius-Surface)] ksk-squircle border border-[var(--Border-Low-Emphasis)] shadow-[var(--shadow-md)] @container", {
 	variants: { variant: {
 		default: "gap-6 p-6",
 		media: "gap-0 p-0 overflow-hidden"

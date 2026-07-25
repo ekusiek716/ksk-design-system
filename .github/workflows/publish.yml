@@ -94,7 +94,7 @@ jobs:
           tar -tzf "$PACK_DIR/ksk-design-system-$VERSION.tgz" \
             | grep -q 'package/dist/types/index.d.ts'
           tar -tzf "$PACK_DIR/ksk-design-system-$VERSION.tgz" \
-            | grep -q 'package/src/themes/plug.css'
+            | grep -q 'package/src/themes/default.css'
 
       - name: Create git tag + GitHub Release
         if: steps.version.outputs.publish == 'true'
