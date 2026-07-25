@@ -71,7 +71,7 @@ GitHub Releases にコピペできるテンプレ:
 ```md
 ### Breaking Changes
 - `OldComponent` を削除。`NewComponent` を使ってください。<!-- docs-drift-ignore: OldComponent NewComponent -->
-  自動移行: `npx ksk-design-system codemod v1-to-v2 ./src`
+  自動移行: `npx ksk-design-system codemod vX-to-vY ./src`
 - 詳細: [MIGRATION.md](./MIGRATION.md)
 ```
 
