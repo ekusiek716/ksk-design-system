@@ -3,12 +3,30 @@ name: CI
 # PR と main への push で、型 / lint / 依存方向 / ドリフト / 単体テストを検証する。
 # とくに COMPONENT_LOOKUP.md の再生成忘れ（ドリフト）を `npm run check` の
 # `generate-component-lookup.mjs --check` で自動検知する。
+#
+# 検査の追加は必ず `npm run check` に足すこと。
+# 「check に入っていない検査は存在しないのと同じ」— CI が呼ぶのはこの 1 本 + `npm test` だけ。
 
 on:
   pull_request:
+    paths-ignore:
+      - "socialicon/**"
+      - "examples/**"
+      - "storybook-static/**"
+      - "dist-preview/**"
   push:
     branches:
       - main
+    paths-ignore:
+      - "socialicon/**"
+      - "examples/**"
+      - "storybook-static/**"
+      - "dist-preview/**"
+
+# 同一 PR / ブランチへの連続 push で、進行中の古い run を打ち切る（Actions 消費削減）
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -26,7 +44,7 @@ jobs:
 
       - run: npm ci
 
-      - name: tsc / lint-scratch / deps / drift / COMPONENT_LOOKUP --check
+      - name: tsc / eslint / scratch / deps / drift / border-color / responsive / COMPONENT_LOOKUP --check
         run: npm run check
 
       - name: Unit tests (vitest)

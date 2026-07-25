@@ -142,6 +142,7 @@
     "lint:design": "node scripts/check-design-md.mjs",
     "lint:tailwind": "node scripts/check-tailwind-v4.mjs",
     "lint:prefix-order": "node scripts/check-prefix-order.mjs",
+    "lint:border-color": "node scripts/check-border-color.mjs",
     "metrics": "node scripts/download-metrics.mjs",
     "generate:lookup": "node scripts/generate-component-lookup.mjs",
     "generate:native-lookup": "node scripts/generate-native-component-lookup.mjs",
@@ -152,8 +153,8 @@
     "check:native-lookup": "node scripts/generate-native-component-lookup.mjs --check",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "tsc -p tsconfig.app.json --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && bash scripts/check-drift.sh && node scripts/check-contrast.mjs && node scripts/check-design-md.mjs && node scripts/check-tailwind-v4.mjs && node scripts/check-prefix-order.mjs && node scripts/generate-component-lookup.mjs --check && node scripts/generate-platform-tokens.mjs --check && tsc -p tsconfig.native.json --noEmit && node scripts/check-native-parity.mjs && node scripts/generate-native-component-lookup.mjs --check",
-    "check:agent": "npm run lint && npm run check && npm test && npm run lint:story-reuse",
+    "check": "tsc -p tsconfig.app.json --noEmit && eslint . && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && bash scripts/check-drift.sh && node scripts/check-contrast.mjs && node scripts/check-design-md.mjs && node scripts/check-tailwind-v4.mjs && node scripts/check-prefix-order.mjs && node scripts/check-border-color.mjs && bash scripts/check-story-reuse.sh && bash scripts/check-responsive.sh && node scripts/generate-component-lookup.mjs --check && node scripts/generate-platform-tokens.mjs --check && tsc -p tsconfig.native.json --noEmit && node scripts/check-native-parity.mjs && node scripts/generate-native-component-lookup.mjs --check",
+    "check:agent": "npm run check && npm test",
     "postinstall": "node bin/init.js postinstall",
     "mcp:build": "cd mcp-server && npm install && npm run build",
     "mcp:start": "node mcp-server/dist/index.js"
