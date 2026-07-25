@@ -180,4 +180,28 @@ describe("scripts/codemod/template.mjs", () => {
     const { after } = runTemplateCodemod({ "a.tsx": source })
     expect(after["a.tsx"]).toBe(source)
   })
+
+  it("パッケージ名がただの文字列として出てくるだけのファイルは書き換えない", () => {
+    const source = `const packageName = "ksk-design-system"\nexport const OldComponent = () => packageName\n`
+    const { after } = runTemplateCodemod({ "a.tsx": source })
+    expect(after["a.tsx"]).toBe(source)
+  })
+
+  it("サブパス import / dynamic import / require も対象にする", () => {
+    const { after } = runTemplateCodemod({
+      "sub.tsx": `import { OldComponent } from "ksk-design-system/class-names"\nexport const A = <OldComponent />\n`,
+      "dyn.tsx": `const m = await import("ksk-design-system")\nexport const OldComponent = m.OldComponent\n`,
+      "req.tsx": `const m = require("ksk-design-system")\nexport const OldComponent = m.OldComponent\n`,
+    })
+    expect(after["sub.tsx"]).toContain("NewComponent")
+    expect(after["dyn.tsx"]).toContain("NewComponent")
+    expect(after["req.tsx"]).toContain("NewComponent")
+  })
+
+  it("副作用 import（import \"pkg\"）も対象にする", () => {
+    const { after } = runTemplateCodemod({
+      "a.tsx": `import "ksk-design-system/preset"\nexport const OldComponent = () => null\n`,
+    })
+    expect(after["a.tsx"]).toContain("NewComponent")
+  })
 })

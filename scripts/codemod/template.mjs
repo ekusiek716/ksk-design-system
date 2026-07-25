@@ -27,14 +27,28 @@ import path from "node:path"
 // ============================================================
 
 /**
- * 対象パッケージの import 文を含むファイルだけを処理。
+ * 対象パッケージを**実際に読み込んでいる**ファイルだけを処理。
  *
  * v1.34.0 で `@ksk/design-system` → `ksk-design-system` に改名したため両対応。
- * **クォートで囲まれたモジュール指定子として**マッチさせる。素の部分一致だと
- * `my-ksk-design-system-plugin` からの import や、単に DS に言及している
- * コメントを持つだけのファイルまで対象になり、無関係な識別子が rename される。
+ *
+ * 判定は「import / export ... from / import() / require() の構文に現れる
+ * モジュール指定子」に限定する。ここを緩めると、
+ *   - `my-ksk-design-system-plugin` からの import（部分一致）
+ *   - `const packageName = "ksk-design-system"` のような単なる文字列
+ *   - DS に言及しているだけのコメント
+ * を持つファイルまで対象になり、パッケージを使っていないのに RENAMES の
+ * 識別子が全部書き換わる（consumer のコードが壊れる）。
  */
-const PACKAGE_PATTERN = /["'](?:@ksk\/design-system|ksk-design-system)(?:\/[^"']*)?["']/
+const PACKAGE_NAME = String.raw`(?:@ksk\/design-system|ksk-design-system)(?:\/[^"']*)?`
+const PACKAGE_PATTERN = new RegExp(
+  [
+    // import ... from "pkg" / export ... from "pkg" / import "pkg"
+    String.raw`\bfrom\s*["']${PACKAGE_NAME}["']`,
+    String.raw`\bimport\s*["']${PACKAGE_NAME}["']`,
+    // import("pkg") / require("pkg")
+    String.raw`\b(?:import|require)\s*\(\s*["']${PACKAGE_NAME}["']\s*\)`,
+  ].join("|"),
+)
 
 /** 単純な識別子 rename: [oldName, newName] */
 const RENAMES = [
