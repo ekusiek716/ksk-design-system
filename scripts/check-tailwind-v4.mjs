@@ -19,11 +19,16 @@
 // 実行: node scripts/check-tailwind-v4.mjs
 // =============================================================
 import { readdirSync, readFileSync, statSync } from "node:fs"
-import { join, dirname } from "node:path"
+import { join, dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { stripComments } from "./lib/strip-comments.mjs"
 
-const srcDir = join(dirname(fileURLToPath(import.meta.url)), "..", "src")
+// 走査対象。既定は src/。テストから一時ディレクトリを指定できるようにして、
+// フィクスチャを src/ に書き込まずに済ませる（他テストと並行実行しても汚染しない）。
+const targetArg = process.argv.slice(2).find((a) => !a.startsWith("-"))
+const srcDir = targetArg
+  ? resolve(targetArg)
+  : join(dirname(fileURLToPath(import.meta.url)), "..", "src")
 
 // 先頭! の Tailwind クラスのみを拾い、JS の否定演算子を誤検知しない:
 //   - `:![a-z]`               variant 付き（hover:! / [&>button]:! 等。JS に無い形）
