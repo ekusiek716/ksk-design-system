@@ -13,6 +13,8 @@
  * 実行: npm run test
  */
 import { describe, expect, it } from "vitest"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 import * as DS from "../src/index"
 import contracts from "../contracts/components.json"
 import { DEPRECATED } from "../eslint/deprecated.js"
@@ -48,6 +50,33 @@ function resolveExport(name: string): unknown {
 
 const isExported = (name: string) => resolveExport(name) !== undefined
 
+/**
+ * src/index.ts の値 re-export を「export 名 → 元モジュール」で引けるようにする。
+ *
+ * ランタイムの存在確認だけだと、**同名エントリが 2 つあるとき**に取り違える。
+ * 実例: `patterns/Form`（src/components/patterns/form.tsx）は `FormRoot` 等しか
+ * export していないのに、無関係な `ui/form.tsx` 由来の `DS.Form` があるせいで
+ * 「import できる」と判定されてしまう。出所まで照合して防ぐ。
+ */
+function reExportOrigins() {
+  const source = readFileSync(join(process.cwd(), "src/index.ts"), "utf8")
+  const map = new Map<string, string>()
+  const RE = /export\s+(type\s+)?\{([^}]*)\}\s*from\s*["']([^"']+)["']/g
+  for (const m of source.matchAll(RE)) {
+    if (m[1]) continue // `export type { ... }` は値ではない
+    for (const raw of m[2].split(",")) {
+      const spec = raw.trim()
+      if (!spec || /^type\s/.test(spec)) continue
+      const alias = spec.match(/(\S+)\s+as\s+(\S+)/)
+      map.set(alias ? alias[2] : spec, m[3])
+    }
+  }
+  return map
+}
+
+/** `./components/ui/form` と `src/components/ui/form.tsx` を同じ形に揃える */
+const normalizeModule = (p: string) => p.replace(/^\.\//, "src/").replace(/\.tsx?$/, "")
+
 describe("contracts/components.json の name", () => {
   it("exported:false でないものは src/index.ts から値として import できる", () => {
     const missing = entries
@@ -58,12 +87,32 @@ describe("contracts/components.json の name", () => {
     expect(missing).toEqual([])
   })
 
-  it("exported:false のものは値として export されて『いない』", () => {
-    // ここが緩むと「import できない名前」が再び import できる名前と混ざる
+  it("は entry.path 由来の export として解決される（同名エントリの取り違え防止）", () => {
+    const origins = reExportOrigins()
+    const wrong = entries
+      .filter((e) => e.exported !== false)
+      .map((e) => ({ e, importName: e.exportedAs ?? e.name }))
+      .filter(({ importName }) => !importName.includes(".")) // 複合コンポーネントの子は親で担保
+      .map(({ e, importName }) => ({ e, importName, from: origins.get(importName) }))
+      .filter(({ e, from }) => from !== undefined && normalizeModule(from) !== normalizeModule(e.path))
+      .map(
+        ({ e, importName, from }) =>
+          `${e.group}/${e.name}: ${importName} の出所は ${from}（contracts の path は ${e.path}）`,
+      )
+    expect(wrong).toEqual([])
+  })
+
+  it("exported:false のものは、その実装ファイルからは値 export されていない", () => {
+    // ここが緩むと「import できない名前」が再び import できる名前と混ざる。
+    // 同名の別エントリ（ui/Form）が export している場合があるので、出所で判定する。
+    const origins = reExportOrigins()
     const wrong = entries
       .filter((e) => e.exported === false)
-      .filter((e) => isExported(e.name))
-      .map((e) => `${e.group}/${e.name} は exported:false だが値 export されている`)
+      .filter((e) => {
+        const from = origins.get(e.name)
+        return from !== undefined && normalizeModule(from) === normalizeModule(e.path)
+      })
+      .map((e) => `${e.group}/${e.name} は exported:false だが ${e.path} から値 export されている`)
     expect(wrong).toEqual([])
   })
 

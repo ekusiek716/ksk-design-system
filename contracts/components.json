@@ -1252,6 +1252,7 @@
     },
     {
       "name": "Form",
+      "exported": false,
       "path": "src/components/patterns/form.tsx",
       "description": "フォームコンテナ。FormRoot/FormSection/FormActionsで構成。複数FormFieldをまとめる。",
       "subcomponents": [
