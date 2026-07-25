@@ -15,10 +15,17 @@ export interface ComponentResult extends ComponentEntry {
   /** 実際にヒットした名前（問い合わせ名の正規表記）。 */
   matchedName: string;
   matchedBy: MatchKind;
-  /** `matchedName` をそのまま import できるか。 */
+  /** `import { matchedName } from "ksk-design-system"` がそのまま書けるか。 */
   importable: boolean;
-  /** このエントリで実際に import できる export 名の一覧。 */
+  /** このエントリで実際に import できる named export の一覧（新規実装で使う名前）。 */
   importableNames: string[];
+  /**
+   * `PhotoHero.Title` のような複合コンポーネントのメンバー。
+   * named export ではなくルートオブジェクトのプロパティなので import はできない。
+   */
+  compoundMembers?: string[];
+  /** `matchedName` が非推奨エイリアスか（import はできるが新規利用は禁止）。 */
+  deprecated?: boolean;
   /** import できない / 非推奨のときの注意書き。 */
   note?: string;
 }
@@ -27,17 +34,31 @@ const IMPORT_PATH = "ksk-design-system";
 
 const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, "-");
 
+/** `PhotoHero.Title` 形式は複合コンポーネントのプロパティ参照で named export ではない。 */
+const isCompoundMember = (name: string) => name.includes(".");
+
+/** 複合コンポーネントメンバーの参照元（`PhotoHero.Title` → `PhotoHero`）。 */
+const compoundRootOf = (name: string) => name.split(".")[0];
+
 /**
- * エントリ配下で実際に import できる名前。
+ * エントリ配下で実際に `import { X }` できる名前。
  *
  * exported:false のエントリでは `name` は実装ファイル名 / グループ名なので除外し、
  * subcomponents に列挙された実 export だけが残る。
+ * `PhotoHero.Title` のようなドット付きは named export ではないので除外する
+ * （ルートの `PhotoHero` を import してプロパティとして使う）。
+ * deprecatedAliases は import 自体は通るが新規実装で使う名前ではないので含めない。
  */
 function importableNamesOf(entry: ComponentEntry): string[] {
   const names: string[] = [];
   if (entry.exported !== false) names.push(entry.exportedAs ?? entry.name);
-  names.push(...(entry.subcomponents ?? []));
+  names.push(...(entry.subcomponents ?? []).filter((s) => !isCompoundMember(s)));
   return [...new Set(names)];
+}
+
+/** エントリが持つ複合コンポーネントメンバー（import 不可）。 */
+function compoundMembersOf(entry: ComponentEntry): string[] {
+  return (entry.subcomponents ?? []).filter(isCompoundMember);
 }
 
 interface Match {
@@ -102,10 +123,16 @@ function buildNote(
       // 区切りは "," 固定。エントリ名自体が "ListSkeleton / GridSkeleton" のように
       // " / " を含むため、同じ区切りだと境界が読めなくなる。
       ? `import できる名前: ${importableNames.join(", ")}`
-      : "このエントリに import できる export はない";
+      : "このエントリに import できる named export はない";
 
   if (matchedBy === "deprecatedAlias") {
-    return `"${matchedName}" は非推奨エイリアス。新規実装では使わないこと。${available}。`;
+    // 互換のため実 export として残っている（contracts-export-integrity が固定）。
+    // import は通るので importable:true。ただし新規実装では使わせない。
+    return `"${matchedName}" は非推奨エイリアス。互換のため import は通るが新規実装では使わないこと。${available}。`;
+  }
+  if (isCompoundMember(matchedName)) {
+    const root = compoundRootOf(matchedName);
+    return `"${matchedName}" は named export ではないので import { } では取れない。import { ${root} } from "${IMPORT_PATH}" して ${matchedName} とプロパティ参照する。`;
   }
   if (!importable) {
     return `"${matchedName}" は import できない（contracts 上の実装ファイル名 / グループ名であり実 export ではない）。${available}。`;
@@ -119,10 +146,13 @@ function buildNote(
 
 function toResult(entry: ComponentEntry, group: string, match: Match): ComponentResult {
   const importableNames = importableNamesOf(entry);
+  const compoundMembers = compoundMembersOf(entry);
+  const deprecated = match.matchedBy === "deprecatedAlias";
   // 大文字小文字を区別して判定する（`Toast` は型のみ export、`toast` は値 export）。
+  // 非推奨エイリアスは「使うべきでない」が「import はできる」ので importable 側に入れる。
   const importable =
-    match.matchedBy !== "deprecatedAlias" &&
-    importableNames.includes(match.matchedName);
+    importableNames.includes(match.matchedName) ||
+    (deprecated && (entry.deprecatedAliases ?? []).includes(match.matchedName));
   const note = buildNote(entry, match, importable, importableNames);
 
   return {
@@ -133,6 +163,8 @@ function toResult(entry: ComponentEntry, group: string, match: Match): Component
     matchedBy: match.matchedBy,
     importable,
     importableNames,
+    ...(compoundMembers.length > 0 ? { compoundMembers } : {}),
+    ...(deprecated ? { deprecated } : {}),
     ...(note ? { note } : {}),
   };
 }

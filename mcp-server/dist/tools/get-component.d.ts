@@ -7,10 +7,17 @@ export interface ComponentResult extends ComponentEntry {
     /** 実際にヒットした名前（問い合わせ名の正規表記）。 */
     matchedName: string;
     matchedBy: MatchKind;
-    /** `matchedName` をそのまま import できるか。 */
+    /** `import { matchedName } from "ksk-design-system"` がそのまま書けるか。 */
     importable: boolean;
-    /** このエントリで実際に import できる export 名の一覧。 */
+    /** このエントリで実際に import できる named export の一覧（新規実装で使う名前）。 */
     importableNames: string[];
+    /**
+     * `PhotoHero.Title` のような複合コンポーネントのメンバー。
+     * named export ではなくルートオブジェクトのプロパティなので import はできない。
+     */
+    compoundMembers?: string[];
+    /** `matchedName` が非推奨エイリアスか（import はできるが新規利用は禁止）。 */
+    deprecated?: boolean;
     /** import できない / 非推奨のときの注意書き。 */
     note?: string;
 }

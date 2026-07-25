@@ -10,7 +10,7 @@
  *
  * 実行: npm run test
  */
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { getComponent } from "../src/tools/get-component.js"
 import contracts from "../../contracts/components.json"
 
@@ -69,8 +69,10 @@ describe("getComponent — subcomponents による解決", () => {
         const result = getComponent(sub)
         expect(result, `getComponent("${sub}") が null`).not.toBeNull()
         expect(result?.matchedName).toBe(sub)
-        expect(result?.importable).toBe(true)
-        expect(result?.importableNames).toContain(sub)
+        // `Root.Member` 形式は named export ではないので別扱い（下の describe で検証）
+        if (sub.includes(".")) continue
+        expect(result?.importable, sub).toBe(true)
+        expect(result?.importableNames, sub).toContain(sub)
       }
     }
   })
@@ -120,6 +122,80 @@ describe("getComponent — exported:false の明示", () => {
     const result = getComponent("Input")
     expect(result?.importable).toBe(true)
     expect(result?.note).toBeUndefined()
+  })
+})
+
+describe("getComponent — 複合コンポーネントのメンバー", () => {
+  it("PhotoHero.Title は import できず、ルートの import を案内する", () => {
+    const result = getComponent("PhotoHero.Title")
+    expect(result?.name).toBe("PhotoHero")
+    expect(result?.matchedName).toBe("PhotoHero.Title")
+    expect(result?.matchedBy).toBe("subcomponent")
+    // `import { PhotoHero.Title }` は書けない。PhotoHero のプロパティ。
+    expect(result?.importable).toBe(false)
+    expect(result?.importableNames).toContain("PhotoHero")
+    expect(result?.importableNames).not.toContain("PhotoHero.Title")
+    expect(result?.compoundMembers).toContain("PhotoHero.Title")
+    expect(result?.note).toContain("import { PhotoHero }")
+  })
+
+  it("importableNames にドット付きの名前を混ぜない", () => {
+    const withCompound = entries.filter((e) =>
+      (e.subcomponents ?? []).some((s) => s.includes(".")),
+    )
+    expect(withCompound.length).toBeGreaterThan(0)
+
+    for (const entry of withCompound) {
+      const result = getComponent(entry.name)
+      for (const name of result?.importableNames ?? []) {
+        expect(name, `${entry.name} の importableNames`).not.toContain(".")
+      }
+    }
+  })
+})
+
+describe("getComponent — 非推奨エイリアス", () => {
+  // contracts 側の deprecatedAliases は現在空（eslint/deprecated.js の DEPRECATED と同期）。
+  // 実データでは検証できないので loader を差し替えて挙動を固定する。
+  it("互換のため import は通る（importable:true）が deprecated として印を付ける", async () => {
+    vi.resetModules()
+    vi.doMock("../src/utils/loader.js", () => ({
+      loadComponents: () => ({
+        meta: {},
+        ui: [
+          {
+            name: "NewThing",
+            path: "src/components/ui/new-thing.tsx",
+            deprecatedAliases: ["OldThing"],
+          },
+        ],
+        patterns: [],
+        commerce: [],
+        admin: [],
+        shells: [],
+      }),
+    }))
+
+    const { getComponent: withStub } = await import("../src/tools/get-component.js")
+    const result = withStub("OldThing")
+
+    expect(result?.matchedName).toBe("OldThing")
+    expect(result?.matchedBy).toBe("deprecatedAlias")
+    // contracts-export-integrity が「旧名は実 export のままであること」を固定している。
+    // import が通る以上 importable:false は事実に反する。
+    expect(result?.importable).toBe(true)
+    expect(result?.deprecated).toBe(true)
+    expect(result?.note).toContain("非推奨")
+    expect(result?.note).toContain("NewThing")
+    // 推奨名の一覧に旧名は載せない
+    expect(result?.importableNames).toEqual(["NewThing"])
+
+    vi.doUnmock("../src/utils/loader.js")
+    vi.resetModules()
+  })
+
+  it("非推奨でない名前には deprecated を付けない", () => {
+    expect(getComponent("Button")?.deprecated).toBeUndefined()
   })
 })
 
