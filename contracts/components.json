@@ -17,6 +17,15 @@
       "exportedAs": "name とは別名で export される場合の実 export 名（例: FormField を KskFormField として出す等）。未使用なら省略する。",
       "deprecatedAliases": "互換のために残している旧 export 名。新規利用は禁止。eslint/deprecated.js の DEPRECATED と同期させる（テストで固定）。",
       "note": "型のみの export（`export type { Toast }`）は値として import できないため exported:false 扱いにする。"
+    },
+    "formBinding": {
+      "_doc": "react-hook-form との繋ぎ方。consumer と AI が「この部品は {...register()} を直接 spread できるのか」を判断するための機械可読フィールド。",
+      "register": "ネイティブ input/textarea を描画し props を素通し・ref を転送する。`<Input {...register(\"x\")} />` がそのまま動く（非制御。初期値は ref 経由で DOM に書かれ onChange は発火しない）。",
+      "controller": "value / onChange が独自シグネチャ、または Radix の onValueChange / onCheckedChange。`<Controller render={({field}) => ...} />` が必要。",
+      "layout": "値を持たないラベル / レイアウト用ラッパ。",
+      "none": "フォーム部品ではない。",
+      "rule": "register / controller を宣言したら __tests__/react-hook-form-integration.test.tsx に登場させること（defaultValues の初期表示 / reset() 追従 / 操作での値更新の 3 点）。__tests__/form-binding-contract.test.ts がこれを強制する。",
+      "rollout": "段階導入中。formBinding が未宣言のフォーム部品はまだ分類していないという意味であり、「フォーム部品ではない」という意味ではない。"
     }
   },
   "ui": [
@@ -70,6 +79,7 @@
     },
     {
       "name": "Input",
+      "formBinding": "register",
       "path": "src/components/ui/input.tsx",
       "description": "テキスト入力フィールド。h-12, rounded-sm, セマンティックトークン使用。必ずLabelとセットで使う。",
       "variants": [],
@@ -176,6 +186,7 @@
     },
     {
       "name": "DateField",
+      "formBinding": "controller",
       "path": "src/components/ui/date-field.tsx",
       "description": "DatePicker を \"YYYY-MM-DD\" ISO 文字列 API でラップする adapter。バックエンド/store が ISO date 文字列で日付を保持する場合に使う。value=\"\" が未選択を表す。",
       "variants": [],
@@ -190,6 +201,7 @@
     },
     {
       "name": "Textarea",
+      "formBinding": "register",
       "path": "src/components/ui/textarea.tsx",
       "description": "複数行テキスト入力。コメント・説明文など長文入力に使用。必ずLabelとセットで使う。",
       "variants": [],
@@ -204,6 +216,7 @@
     },
     {
       "name": "Label",
+      "formBinding": "layout",
       "path": "src/components/ui/label.tsx",
       "description": "フォームラベル。すべての入力コントロールに対して必須。htmlForで入力と紐付ける。",
       "variants": [],
@@ -225,6 +238,7 @@
     },
     {
       "name": "Checkbox",
+      "formBinding": "controller",
       "path": "src/components/ui/checkbox.tsx",
       "description": "チェックボックス。label/description/count を渡すと自動で行型レイアウトに（filter sidebar 型）。",
       "variants": [],
@@ -238,6 +252,7 @@
     },
     {
       "name": "RadioGroup",
+      "formBinding": "controller",
       "path": "src/components/ui/radio-group.tsx",
       "description": "ラジオボタングループ。単一選択に使用。各RadioGroupItemにLabelが必要。",
       "variants": [],
@@ -247,6 +262,7 @@
     },
     {
       "name": "Switch",
+      "formBinding": "controller",
       "path": "src/components/ui/switch.tsx",
       "description": "トグルスイッチ。設定のON/OFFなど即時反映するアクションに使用。",
       "variants": [],
@@ -530,6 +546,7 @@
     },
     {
       "name": "NumberInput",
+      "formBinding": "controller",
       "path": "src/components/ui/number-input.tsx",
       "description": "数値入力コンポーネント。+/-ボタン付き。min/max/stepのガード・通貨フォーマット対応。<input type='number'>の代替。",
       "features": [
@@ -769,6 +786,7 @@
     },
     {
       "name": "Slider",
+      "formBinding": "controller",
       "path": "src/components/ui/slider.tsx",
       "description": "数値スライダー。価格帯フィルタ・音量など連続値の入力。範囲スライダー（2ハンドル）も対応。",
       "accessibility": [
