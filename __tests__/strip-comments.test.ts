@@ -36,6 +36,12 @@ describe("stripComments", () => {
     expect(out).toContain("!bg-red-500")
   })
 
+  it("JSX 閉じタグの / を正規表現開始と誤認しない", () => {
+    const out = stripComments('const A = <div><span>ok</span>{/* docs: !bg-red-500 */}</div>')
+    expect(out).not.toContain("!bg-red-500")
+    expect(out).toContain("</span>")
+  })
+
   it("除算はそのまま通す", () => {
     const out = stripComments('const r = width / 2\nconst cls = "!bg-red-500"')
     expect(out).toContain("width / 2")
@@ -99,5 +105,12 @@ describe("check-tailwind-v4.mjs", () => {
       `const RE = /[/*]/\nexport const A = <div className="!bg-[var(--x)]" />\n`,
     )
     expect(result.status).toBe(1)
+  })
+
+  it("JSX 閉じタグの直後の JSX コメントは検出しない", () => {
+    const result = runOnFixture(
+      `export const A = <div><span>ok</span>{/* 例: !bg-[var(--x)] */}</div>\n`,
+    )
+    expect(result.status).toBe(0)
   })
 })
