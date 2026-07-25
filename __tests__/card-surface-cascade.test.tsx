@@ -23,7 +23,9 @@ import * as React from "react"
 import { Card } from "../src/components/ui/card"
 
 function classOf(markup: string) {
-  return /class="([^"]*)"/.exec(markup)?.[1] ?? ""
+  const raw = /class="([^"]*)"/.exec(markup)?.[1] ?? ""
+  // SSR は `&` `<` `>` を実体参照で出すので、クラス名の比較のために戻す
+  return raw.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
 }
 
 describe("Card の背景", () => {
@@ -49,6 +51,13 @@ describe("Card の背景", () => {
     )
     expect(cls).toContain("bg-[var(--Surface-Secondary)]")
     expect(cls).not.toContain("bg-[var(--card-surface,var(--Surface-Primary))]")
+  })
+
+  it("直下の子で --card-surface を initial に戻す（入れ子カードの潰れ防止）", () => {
+    // これが無いと、外側の Card が受け取った値がそのまま内側の Card にも継承され、
+    // 同色になって境界がまた消える
+    const cls = classOf(renderToStaticMarkup(<Card />))
+    expect(cls).toContain("[&>*]:[--card-surface:initial]")
   })
 
   it("罫線と影は残る（同色時の唯一の区切りなので落とさない）", () => {
@@ -79,9 +88,12 @@ describe("Tailwind v4 が実際に CSS を生成する", () => {
     const css = compiled.build([
       "bg-[var(--card-surface,var(--Surface-Primary))]",
       "[--card-surface:var(--Surface-Secondary)]",
+      "[&>*]:[--card-surface:initial]",
     ])
 
     expect(css).toContain("background-color: var(--card-surface,var(--Surface-Primary))")
     expect(css).toContain("--card-surface: var(--Surface-Secondary)")
+    // 子リセットが「セレクタ付きで」出力されること（自要素に付くと自分の背景まで戻る）
+    expect(css).toMatch(/&>\*\s*\{\s*--card-surface: initial/)
   })
 })

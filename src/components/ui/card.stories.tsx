@@ -106,6 +106,19 @@ export const OnSameColorGround: Story = {
             <p className="typo-body-md text-[var(--Text-High-Emphasis)]">指定なしで地から浮く</p>
           </CardContent>
         </Card>
+        <Card>
+          <CardContent>
+            <p className="typo-body-md text-[var(--Text-High-Emphasis)]">
+              入れ子カードは宣言を引き継がない（階層が潰れない）
+            </p>
+            <Card className="mt-4">
+              <CardContent>
+                <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">内側のカード</p>
+              </CardContent>
+            </Card>
+          </CardContent>
+        </Card>
+
         <Card className="bg-[var(--Surface-Primary)]">
           <CardContent>
             <p className="typo-body-md text-[var(--Text-High-Emphasis)]">
