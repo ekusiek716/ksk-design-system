@@ -21,6 +21,7 @@
 import { readdirSync, readFileSync, statSync } from "node:fs"
 import { join, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
+import { stripComments } from "./lib/strip-comments.mjs"
 
 const srcDir = join(dirname(fileURLToPath(import.meta.url)), "..", "src")
 
@@ -30,44 +31,6 @@ const srcDir = join(dirname(fileURLToPath(import.meta.url)), "..", "src")
 //     `-` を要求することで `!mounted` / `!steps[idx]` 等の JS 否定を除外する。
 const RE = /:![a-z]|![a-z][a-z0-9]*-[[a-z0-9]/g
 const UNSPACED_CALC_OPERATOR_RE = /(?:[%a-z0-9)])(?:\+|-(?=\d|env\(|max\(|min\(|clamp\(|var\())/i
-
-/**
- * コメントを空白に潰す（行番号・桁位置は保つ）。
- * 文字列リテラルの中身は残す（クラス名は文字列内にあるため）。
- */
-function stripComments(src) {
-  let out = ""
-  let i = 0
-  let state = "code" // code | line | block | squote | dquote | backtick
-  while (i < src.length) {
-    const c = src[i]
-    const next = src[i + 1]
-    if (state === "code") {
-      if (c === "/" && next === "/") { state = "line"; out += "  "; i += 2; continue }
-      if (c === "/" && next === "*") { state = "block"; out += "  "; i += 2; continue }
-      if (c === "'") state = "squote"
-      else if (c === '"') state = "dquote"
-      else if (c === "`") state = "backtick"
-      out += c; i++; continue
-    }
-    if (state === "line") {
-      if (c === "\n") { state = "code"; out += c } else out += " "
-      i++; continue
-    }
-    if (state === "block") {
-      if (c === "*" && next === "/") { state = "code"; out += "  "; i += 2; continue }
-      out += c === "\n" ? c : " "
-      i++; continue
-    }
-    // 文字列内: エスケープを飛ばしつつ閉じ記号まで素通し
-    if (c === "\\") { out += c + (next ?? ""); i += 2; continue }
-    if ((state === "squote" && c === "'") || (state === "dquote" && c === '"') || (state === "backtick" && c === "`")) {
-      state = "code"
-    }
-    out += c; i++
-  }
-  return out
-}
 
 const hits = []
 const calcHits = []
