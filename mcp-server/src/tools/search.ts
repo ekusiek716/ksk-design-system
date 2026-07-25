@@ -38,7 +38,9 @@ export function search(query: string): SearchResult[] {
         comp.description ?? "",
         ...(comp.variants ?? []),
         ...(comp.sizes ?? []),
-        ...(comp.subComponents ?? []),
+        ...(comp.subcomponents ?? []),
+        ...(comp.exportedAs ? [comp.exportedAs] : []),
+        ...(comp.deprecatedAliases ?? []),
         ...(comp.rules ?? []),
       ]
         .join(" ")

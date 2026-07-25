@@ -1,0 +1,148 @@
+/**
+ * MCP の get_component が contracts の export メタデータを理解しているかを固定する。
+ *
+ * 背景: contracts/components.json は `exported` / `exportedAs` / `subcomponents` /
+ * `deprecatedAliases` を持つ（__tests__/contracts-export-integrity.test.ts が
+ * src/index.ts の実 export と突き合わせて固定している）。
+ * MCP 側が `name` と `path` しか見ていないと、`CheckboxCardGroup` のような
+ * 「実際に import する名前」で引いたときに null が返り、
+ * MCP 経由ではそのコンポーネントのルールを一切取得できない。
+ *
+ * 実行: npm run test
+ */
+import { describe, expect, it } from "vitest"
+import { getComponent } from "../src/tools/get-component.js"
+import contracts from "../../contracts/components.json"
+
+type Entry = {
+  name: string
+  path: string
+  exported?: boolean
+  subcomponents?: string[]
+}
+
+const GROUPS = ["ui", "patterns", "commerce", "admin", "shells"] as const
+const all = contracts as unknown as Record<string, Entry[]>
+const entries = GROUPS.flatMap((g) => all[g])
+
+describe("getComponent — 従来の解決", () => {
+  it("name の完全一致で引ける", () => {
+    const result = getComponent("Button")
+    expect(result?.name).toBe("Button")
+    expect(result?.group).toBe("ui")
+    expect(result?.matchedBy).toBe("name")
+    expect(result?.importable).toBe(true)
+    expect(result?.importPath).toBe("ksk-design-system")
+  })
+
+  it("大文字小文字を問わない / パス断片でも引ける", () => {
+    expect(getComponent("button")?.name).toBe("Button")
+    expect(getComponent("src/components/ui/button.tsx")?.name).toBe("Button")
+  })
+
+  it("未知の名前は null", () => {
+    expect(getComponent("NotAComponentAtAll")).toBeNull()
+    expect(getComponent("")).toBeNull()
+  })
+})
+
+describe("getComponent — subcomponents による解決", () => {
+  it("subcomponent 名（CheckboxCardGroup）で親エントリを引ける", () => {
+    const result = getComponent("CheckboxCardGroup")
+    expect(result).not.toBeNull()
+    expect(result?.name).toBe("CheckboxCard")
+    expect(result?.matchedName).toBe("CheckboxCardGroup")
+    expect(result?.matchedBy).toBe("subcomponent")
+    // 引いた名前自体は実 export なので import できる
+    expect(result?.importable).toBe(true)
+    expect(result?.importableNames).toContain("CheckboxCardGroup")
+    // 親エントリ名が import できないことは note で伝える
+    expect(result?.note).toContain("CheckboxCard")
+  })
+
+  it("exported:false のエントリの全 subcomponent が引ける", () => {
+    const hidden = entries.filter((e) => e.exported === false)
+    expect(hidden.length).toBeGreaterThan(0)
+
+    for (const entry of hidden) {
+      for (const sub of entry.subcomponents ?? []) {
+        const result = getComponent(sub)
+        expect(result, `getComponent("${sub}") が null`).not.toBeNull()
+        expect(result?.matchedName).toBe(sub)
+        expect(result?.importable).toBe(true)
+        expect(result?.importableNames).toContain(sub)
+      }
+    }
+  })
+
+  it("exported な親の subcomponent（CardHeader）も引ける", () => {
+    const result = getComponent("CardHeader")
+    expect(result?.matchedName).toBe("CardHeader")
+    expect(result?.importableNames).toContain("CardHeader")
+    expect(result?.importable).toBe(true)
+  })
+})
+
+describe("getComponent — exported:false の明示", () => {
+  it("エントリ名で引くと importable:false と import 可能名を返す", () => {
+    const result = getComponent("Toast")
+    expect(result?.name).toBe("Toast")
+    expect(result?.exported).toBe(false)
+    expect(result?.matchedBy).toBe("name")
+    expect(result?.importable).toBe(false)
+    expect(result?.importableNames).toEqual(
+      expect.arrayContaining(["Toaster", "useToast", "toast"]),
+    )
+    expect(result?.note).toContain("import できない")
+  })
+
+  it("グループ名エントリ（ListSkeleton / GridSkeleton）も importable:false", () => {
+    const result = getComponent("ListSkeleton / GridSkeleton")
+    expect(result?.importable).toBe(false)
+    expect(result?.importableNames).toEqual(["ListSkeleton", "GridSkeleton"])
+  })
+
+  it("exported:false のエントリ名は importableNames に含めない", () => {
+    const checked: string[] = []
+    for (const entry of entries.filter((e) => e.exported === false)) {
+      const result = getComponent(entry.name)
+      // `Form` は ui/form.tsx にも同名エントリがある。その場合は import 可能な
+      // ui 側が引かれるのが正しいので、同一エントリに解決できたものだけ検証する。
+      if (result?.path !== entry.path) continue
+      expect(result?.importableNames, `${entry.name}`).not.toContain(entry.name)
+      expect(result?.importable, `${entry.name}`).toBe(false)
+      checked.push(entry.name)
+    }
+    expect(checked.length).toBeGreaterThan(0)
+  })
+
+  it("import 可能な名前で引いたときは note なしで importable:true", () => {
+    const result = getComponent("Input")
+    expect(result?.importable).toBe(true)
+    expect(result?.note).toBeUndefined()
+  })
+})
+
+describe("getComponent — 解決順", () => {
+  it("大文字小文字を区別する完全一致が先に当たる（Toast は型 / toast は値）", () => {
+    // 同じエントリに name "Toast"（型のみ export = import 不可）と
+    // subcomponent "toast"（値 export = import 可）が同居している。
+    // 大小を区別せずに引くと両者を取り違える。
+    const value = getComponent("toast")
+    expect(value?.matchedName).toBe("toast")
+    expect(value?.matchedBy).toBe("subcomponent")
+    expect(value?.importable).toBe(true)
+
+    const type = getComponent("Toast")
+    expect(type?.matchedName).toBe("Toast")
+    expect(type?.matchedBy).toBe("name")
+    expect(type?.importable).toBe(false)
+  })
+
+  it("同名エントリがある場合は import できる側を返す", () => {
+    // `Form` は ui/form.tsx（実 export）と patterns/form.tsx（exported:false）の両方にある。
+    const result = getComponent("Form")
+    expect(result?.path).toBe("src/components/ui/form.tsx")
+    expect(result?.importable).toBe(true)
+  })
+})

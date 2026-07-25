@@ -23,7 +23,9 @@ export function search(query) {
                 comp.description ?? "",
                 ...(comp.variants ?? []),
                 ...(comp.sizes ?? []),
-                ...(comp.subComponents ?? []),
+                ...(comp.subcomponents ?? []),
+                ...(comp.exportedAs ? [comp.exportedAs] : []),
+                ...(comp.deprecatedAliases ?? []),
                 ...(comp.rules ?? []),
             ]
                 .join(" ")

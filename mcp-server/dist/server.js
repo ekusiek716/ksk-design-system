@@ -11,13 +11,15 @@ export function createServer() {
         tools: [
             {
                 name: "get_component",
-                description: "KSK DSコンポーネントのメタデータを取得。variants, sizes, 使い方, インポートパスを返す。",
+                description: "KSK DSコンポーネントのメタデータを取得。variants, sizes, 使い方, インポートパスを返す。" +
+                    "実 export 名（CheckboxCardGroup 等の subcomponents）でも引ける。" +
+                    "import できない名前で引いた場合は importable:false と import 可能な名前を返す。",
                 inputSchema: {
                     type: "object",
                     properties: {
                         id: {
                             type: "string",
-                            description: 'コンポーネント名またはID (例: "Button", "button", "FormField", "ProductCard")',
+                            description: 'コンポーネント名またはID (例: "Button", "button", "FormField", "CheckboxCardGroup", "ProductCard")',
                         },
                     },
                     required: ["id"],
@@ -72,15 +74,13 @@ export function createServer() {
         switch (name) {
             case "get_component": {
                 const result = getComponent(args?.id);
+                // note は import できない名前（exported:false のエントリ名・非推奨エイリアス）で
+                // 引かれたときだけ付く。JSON に埋めるだけだと読み飛ばされるので先頭にも出す。
+                const text = result
+                    ? `${result.note ? `⚠️ ${result.note}\n\n` : ""}${JSON.stringify(result, null, 2)}`
+                    : `コンポーネント "${args?.id}" が見つかりません`;
                 return {
-                    content: [
-                        {
-                            type: "text",
-                            text: result
-                                ? JSON.stringify(result, null, 2)
-                                : `コンポーネント "${args?.id}" が見つかりません`,
-                        },
-                    ],
+                    content: [{ type: "text", text }],
                 };
             }
             case "get_token": {
