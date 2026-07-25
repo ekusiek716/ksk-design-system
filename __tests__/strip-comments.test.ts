@@ -61,6 +61,13 @@ describe("stripComments", () => {
     expect(out).not.toContain("メモ")
   })
 
+  it("終端の無い /* はコメントとして扱わない（以降を消さない）", () => {
+    // JSX テキストの `<code>/*</code>` 等。空白化するとファイル全体が消えて
+    // 違反を取りこぼすので、素通しに倒す
+    const out = stripComments('const A = <code>/*</code>\nconst cls = "!bg-red-500"')
+    expect(out).toContain("!bg-red-500")
+  })
+
   it("除算はそのまま通す", () => {
     const out = stripComments('const r = width / 2\nconst cls = "!bg-red-500"')
     expect(out).toContain("width / 2")
