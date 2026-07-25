@@ -94,23 +94,26 @@ describe("contracts の formBinding", () => {
   })
 
   it("register 宣言の部品は register() を spread する形で書かれている", () => {
-    const registerNames = entries
-      .filter((e) => e.formBinding === "register")
-      .map((e) => e.name)
+    const registerNames = entries.filter((e) => e.formBinding === "register").map((e) => e.name)
     expect(registerNames.length).toBeGreaterThan(0)
-    for (const name of registerNames) {
-      expect(rhfTestSource).toMatch(new RegExp(`<${name}\\s+\\{\\.\\.\\.\\s*form\\.register\\(`))
-    }
+    const bad = registerNames.filter(
+      (name) =>
+        !casesUsing(name).some((block) =>
+          new RegExp(`<${name}\\s+\\{\\.\\.\\.\\s*form\\.register\\(`).test(block),
+        ),
+    )
+    expect(bad).toEqual([])
   })
 
-  it("controller 宣言の部品は Controller の render 内で使われている", () => {
-    const controllerNames = entries
-      .filter((e) => e.formBinding === "controller")
-      .map((e) => e.name)
+  it("controller 宣言の部品は同じケース内の Controller の render で使われている", () => {
+    // ファイル全体に `<Controller` があるかを見るだけだと、ある部品だけ
+    // Controller を通さない書き方に変わっても他のケースの Controller で
+    // 素通りしてしまう。部品を使っているケース自身に Controller があることを見る。
+    const controllerNames = entries.filter((e) => e.formBinding === "controller").map((e) => e.name)
     expect(controllerNames.length).toBeGreaterThan(0)
-    expect(rhfTestSource).toContain("<Controller")
-    for (const name of controllerNames) {
-      expect(rhfTestSource).toMatch(new RegExp(`<${name}[\\s>]`))
-    }
+    const bad = controllerNames.filter(
+      (name) => !casesUsing(name).some((block) => block.includes("<Controller")),
+    )
+    expect(bad).toEqual([])
   })
 })
