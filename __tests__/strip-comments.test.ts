@@ -42,6 +42,11 @@ describe("stripComments", () => {
     expect(out).toContain("</span>")
   })
 
+  it("アロー関数の式本体の正規表現も認識する（=> の > は JSX ではない）", () => {
+    const out = stripComments('const f = () => /[/*]/\nconst cls = "!bg-red-500"')
+    expect(out).toContain("!bg-red-500")
+  })
+
   it("除算はそのまま通す", () => {
     const out = stripComments('const r = width / 2\nconst cls = "!bg-red-500"')
     expect(out).toContain("width / 2")
@@ -103,6 +108,13 @@ describe("check-tailwind-v4.mjs", () => {
   it("正規表現リテラルのあとの違反を取りこぼさない", () => {
     const result = runOnFixture(
       `const RE = /[/*]/\nexport const A = <div className="!bg-[var(--x)]" />\n`,
+    )
+    expect(result.status).toBe(1)
+  })
+
+  it("アロー関数の式本体の正規表現のあとの違反を取りこぼさない", () => {
+    const result = runOnFixture(
+      `const f = () => /[/*]/\nexport const A = <div className="!bg-[var(--x)]" />\n`,
     )
     expect(result.status).toBe(1)
   })

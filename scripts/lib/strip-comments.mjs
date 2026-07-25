@@ -20,6 +20,7 @@
  * `<` と `>` は**入れない**。tsx では `</span>` の閉じタグが最頻出で、
  * `<` を許すと `/` を正規表現開始と誤認して行末までのコメント除去を飛ばす。
  * `a < /re/.test(b)` のような比較直後の正規表現は捨てる（JSX の方が桁違いに多い）。
+ * ただし `=>` は別扱い（下の isRegexStart を参照）。
  */
 const REGEX_PRECEDING = new Set([
   "", "(", ",", "=", ":", "[", "!", "&", "|", "?", "{", "}", ";", "+", "-", "*", "%", "~", "^", "\n",
@@ -28,8 +29,16 @@ const REGEX_PRECEDING = new Set([
 /** `return /re/` のように識別子で終わっていても正規表現になるキーワード */
 const REGEX_KEYWORDS = /(?:^|[^.\w$])(?:return|typeof|instanceof|in|of|new|delete|void|throw|case|do|else|yield|await)$/
 
-function isRegexStart(prevMeaningful, emittedSoFar) {
-  if (REGEX_PRECEDING.has(prevMeaningful)) return true
+/**
+ * @param {string} prev     直前の意味のある文字
+ * @param {string} prevPrev その 1 つ前の意味のある文字
+ * @param {string} emittedSoFar ここまでの出力（キーワード判定用）
+ */
+function isRegexStart(prev, prevPrev, emittedSoFar) {
+  // `() => /[/*]/` のアロー関数の式本体。`>` は JSX 閉じタグと同じ文字なので、
+  // 直前が `=` のとき（＝ `=>`）だけ正規表現の開始として扱う。
+  if (prev === ">") return prevPrev === "="
+  if (REGEX_PRECEDING.has(prev)) return true
   return REGEX_KEYWORDS.test(emittedSoFar.trimEnd())
 }
 
@@ -45,6 +54,11 @@ export function stripComments(src) {
   // `${` に入るたび code を push し、対応する `}` で pop する。
   const stack = [{ type: "code", braceDepth: 0, interpolation: false }]
   let prevMeaningful = ""
+  let prevPrevMeaningful = ""
+  const setPrev = (ch) => {
+    prevPrevMeaningful = prevMeaningful
+    prevMeaningful = ch
+  }
 
   const blank = (ch) => (ch === "\n" ? "\n" : " ")
 
@@ -60,7 +74,7 @@ export function stripComments(src) {
         out += "${"
         i += 2
         stack.push({ type: "code", braceDepth: 0, interpolation: true })
-        prevMeaningful = "{"
+        setPrev("{")
         continue
       }
       out += c
@@ -86,7 +100,7 @@ export function stripComments(src) {
       continue
     }
 
-    if (c === "/" && isRegexStart(prevMeaningful, out)) {
+    if (c === "/" && isRegexStart(prevMeaningful, prevPrevMeaningful, out)) {
       out += c
       i++
       let inCharClass = false
@@ -100,7 +114,7 @@ export function stripComments(src) {
         else if (r === "]") inCharClass = false
         else if (r === "/" && !inCharClass) break
       }
-      prevMeaningful = "/"
+      setPrev("/")
       continue
     }
 
@@ -115,7 +129,7 @@ export function stripComments(src) {
         i++
         if (s === quote || s === "\n") break
       }
-      prevMeaningful = quote
+      setPrev(quote)
       continue
     }
 
@@ -123,19 +137,19 @@ export function stripComments(src) {
       stack.push({ type: "template" })
       out += c
       i++
-      prevMeaningful = "`"
+      setPrev("`")
       continue
     }
 
     if (top.interpolation && c === "{") top.braceDepth++
     if (top.interpolation && c === "}") {
-      if (top.braceDepth === 0) { stack.pop(); out += c; i++; prevMeaningful = "}"; continue }
+      if (top.braceDepth === 0) { stack.pop(); out += c; i++; setPrev("}"); continue }
       top.braceDepth--
     }
 
     out += c
-    if (!/\s/.test(c)) prevMeaningful = c
-    else if (c === "\n") prevMeaningful = "\n"
+    if (!/\s/.test(c)) setPrev(c)
+    else if (c === "\n") setPrev("\n")
     i++
   }
 
