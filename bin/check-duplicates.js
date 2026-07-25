@@ -68,12 +68,29 @@ function loadComponentRegistry(contractsPath) {
   const contracts = JSON.parse(readFileSync(contractsPath, "utf8"))
   const registry = new Map()
 
+  const add = (name, tier, path) => {
+    if (typeof name !== "string" || name.length === 0) return
+    const matches = registry.get(name) ?? []
+    matches.push({ tier, path })
+    registry.set(name, matches)
+  }
+
   for (const tier of ["ui", "patterns", "commerce", "admin", "shells"]) {
     for (const component of contracts[tier] ?? []) {
       if (typeof component?.name !== "string" || typeof component?.path !== "string") continue
-      const matches = registry.get(component.name) ?? []
-      matches.push({ tier, path: component.path })
-      registry.set(component.name, matches)
+
+      // contracts の name は「import できる名前」とは限らない。
+      // `exported: false` は実装ファイル名 / グループ名 / 型のみの export で、
+      // その名前で import することはできない。ここに登録してしまうと、
+      // consumer のローカル実装を「DS にある」と誤検知し、存在しない export を
+      // import しろと案内してしまう。実際に import できる名前だけを登録する。
+      if (component.exported === false) {
+        for (const sub of component.subcomponents ?? []) add(sub, tier, component.path)
+        continue
+      }
+
+      add(component.exportedAs ?? component.name, tier, component.path)
+      for (const alias of component.deprecatedAliases ?? []) add(alias, tier, component.path)
     }
   }
 
