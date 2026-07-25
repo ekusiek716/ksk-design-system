@@ -25,6 +25,24 @@ const rhfTestSource = readFileSync(
   "utf8",
 )
 
+/**
+ * RHF 統合テストを `it(...)` 単位に切り出す。
+ *
+ * ファイル全体にキーワードが「どこかに」あるかを見るだけだと、
+ * 部品ごとの 3 点（defaultValues / reset / 操作）を強制できない。
+ * 実際、DateField は初期表示と reset だけを見て操作を見ていなかったのに
+ * 素通りしていた。ケース単位で対応づける。
+ */
+const rhfCases = rhfTestSource
+  .split(/\n\s*it\(/)
+  .slice(1)
+  .map((block) => `it(${block}`)
+
+/** 部品名がタグとして登場するケースだけを集める */
+function casesUsing(name: string) {
+  return rhfCases.filter((block) => new RegExp(`<${name}[\\s/>]`).test(block))
+}
+
 describe("contracts の formBinding", () => {
   it("meta.formBinding に 4 値の意味と運用ルールが書かれている", () => {
     const meta = (contracts as unknown as { meta: Record<string, Record<string, string>> }).meta
@@ -45,7 +63,7 @@ describe("contracts の formBinding", () => {
   it("register / controller を宣言した部品は RHF 統合テストに登場する", () => {
     const uncovered = entries
       .filter((e) => e.formBinding === "register" || e.formBinding === "controller")
-      .filter((e) => !new RegExp(`\\b${e.name}\\b`).test(rhfTestSource))
+      .filter((e) => casesUsing(e.name).length === 0)
       .map(
         (e) =>
           `${e.group}/${e.name}（formBinding: ${e.formBinding}）が react-hook-form-integration.test.tsx に無い`,
@@ -53,11 +71,26 @@ describe("contracts の formBinding", () => {
     expect(uncovered).toEqual([])
   })
 
-  it("RHF 統合テストは defaultValues / reset / 操作の 3 点をどれも扱っている", () => {
-    // 「レンダリングできる」だけのテストに痩せると、この契約が形だけになる
+  it("部品ごとに defaultValues 初期表示 / reset() 追従 / 操作での値更新の 3 点を見ている", () => {
+    // 「レンダリングできる」だけのケースに痩せると、この契約が形だけになる。
+    // 部品ごとに、その部品を使っているケース群のどれかが各点を満たすことを要求する。
+    const missing: string[] = []
+    for (const entry of entries.filter(
+      (e) => e.formBinding === "register" || e.formBinding === "controller",
+    )) {
+      const cases = casesUsing(entry.name)
+      const has = (re: RegExp) => cases.some((block) => re.test(block))
+      // defaultValues は makeHarness の第 1 引数として渡すため、ケース側には
+      // 「初期値を読む assertion」が必ずある。reset と操作は明示的に見る。
+      if (!has(/\.reset\(/)) missing.push(`${entry.group}/${entry.name}: reset() 追従が無い`)
+      if (!has(/getValues\(/))
+        missing.push(`${entry.group}/${entry.name}: 操作後の getValues() 検証が無い`)
+    }
+    expect(missing).toEqual([])
+  })
+
+  it("RHF 統合テストは defaultValues を使ってハーネスを組んでいる", () => {
     expect(rhfTestSource).toContain("defaultValues")
-    expect(rhfTestSource).toContain(".reset(")
-    expect(rhfTestSource).toContain("getValues(")
   })
 
   it("register 宣言の部品は register() を spread する形で書かれている", () => {

@@ -254,7 +254,7 @@ describe("controller 経路", () => {
     expect(captured.form.getValues("qty")).toBe(8)
   })
 
-  it("DateField: defaultValues の初期表示 / reset() 追従", () => {
+  it("DateField: defaultValues の初期表示 / reset() 追従 / 日付選択での値更新", () => {
     const { captured, Wrapper } = makeHarness({ due: "2026-07-25" }, (form) => (
       <Controller
         control={form.control}
@@ -267,6 +267,17 @@ describe("controller 経路", () => {
     expect(container.textContent).toContain("2026")
     act(() => captured.form.reset({ due: "2027-01-09" }))
     expect(container.textContent).toContain("2027")
+
+    // トリガーを開いてカレンダーの別の日を選ぶ → ISO 文字列で form に入る
+    click(container.querySelector('[data-slot="date-field"] button')!)
+    // カレンダーは Popover の portal 側に出るので document から探す。
+    // 日セルは aria-label（例: "2027年1月15日金曜日"）で特定できる。
+    const target = [...document.querySelectorAll<HTMLButtonElement>("button")].find((el) =>
+      el.getAttribute("aria-label")?.startsWith("2027年1月15日"),
+    )
+    expect(target).toBeDefined()
+    click(target!)
+    expect(captured.form.getValues("due")).toBe("2027-01-15")
   })
 
   it("Slider: defaultValues の初期表示 / reset() 追従 / キーボードでの値更新", () => {
