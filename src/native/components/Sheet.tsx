@@ -14,6 +14,7 @@ import {
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
+import { createSheetRevealLifecycle } from "../sheet-reveal-lifecycle"
 
 export type SheetSide = "bottom" | "top" | "left" | "right"
 
@@ -185,57 +186,50 @@ function SnapBottomSheet({
   // useNativeDriver: true でカクつき無し。
   const [translateY] = useState(() => new Animated.Value(panelH))
   const openRef = useRef(open)
-  const revealFallbackRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [revealLifecycle] = useState(() =>
+    createSheetRevealLifecycle(REVEAL_FALLBACK_DELAY),
+  )
   const initialTranslateY = (maxSnap - initialActive) * H
 
-  const moveTo = (targetActive: number, duration = SNAP_DUR) => {
+  const moveTo = (
+    targetActive: number,
+    duration = SNAP_DUR,
+    onComplete?: (finished: boolean) => void,
+  ) => {
     activeRef.current = targetActive
     Animated.timing(translateY, {
       toValue: (maxSnap - targetActive) * H,
       duration,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
-    }).start()
+    }).start(({ finished }) => onComplete?.(finished))
   }
 
   useEffect(() => {
     openRef.current = open
-    translateY.stopAnimation()
-    if (revealFallbackRef.current) {
-      clearTimeout(revealFallbackRef.current)
-      revealFallbackRef.current = null
-    }
-
-    if (open) {
-      // Modal host が native 側で表示されるまでは完全閉位置で待つ。
-      // onShow が発火しない環境や native animation が完了しない場合でも、
-      // fallback で初期 snap を必ず可視位置へ戻す。
-      translateY.setValue(panelH)
-      revealFallbackRef.current = setTimeout(() => {
-        if (!openRef.current) return
-        activeRef.current = initialActive
-        translateY.setValue(initialTranslateY)
-        revealFallbackRef.current = null
-      }, REVEAL_FALLBACK_DELAY)
-    } else {
+    if (!open) {
+      revealLifecycle.cancel()
+      translateY.stopAnimation()
       translateY.setValue(panelH)
     }
-  }, [H, initialActive, initialTranslateY, maxSnap, open, panelH, translateY])
+  }, [open, panelH, revealLifecycle, translateY])
 
-  useEffect(
-    () => () => {
-      if (revealFallbackRef.current) {
-        clearTimeout(revealFallbackRef.current)
-      }
-    },
-    [],
-  )
+  useEffect(() => () => revealLifecycle.cancel(), [revealLifecycle])
 
   const handleModalShow = () => {
-    if (!openRef.current) return
-    translateY.stopAnimation()
-    translateY.setValue(panelH)
-    moveTo(initialActive, SNAP_DUR)
+    revealLifecycle.onModalShow(
+      (complete) => {
+        translateY.stopAnimation()
+        translateY.setValue(panelH)
+        moveTo(initialActive, SNAP_DUR, complete)
+      },
+      () => {
+        if (!openRef.current) return
+        translateY.stopAnimation()
+        activeRef.current = initialActive
+        translateY.setValue(initialTranslateY)
+      },
+    )
   }
 
   const startTYRef = useRef(0)
