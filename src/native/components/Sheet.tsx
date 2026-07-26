@@ -14,6 +14,7 @@ import {
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
+import { createSheetRevealLifecycle } from "../sheet-reveal-lifecycle"
 
 export type SheetSide = "bottom" | "top" | "left" | "right"
 
@@ -134,6 +135,7 @@ function PlainSheet({ open, onClose, side = "bottom", title, children }: SheetPr
 /* ───────────────────────────────────────────── snap mode（web版踏襲） */
 
 const SNAP_DUR = 180
+const REVEAL_FALLBACK_DELAY = SNAP_DUR + 120
 function clamp(v: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, v))
 }
@@ -183,31 +185,52 @@ function SnapBottomSheet({
   // translateY: 0=フル、(maxSnap-active)*H で snap 位置、panelH で完全閉
   // useNativeDriver: true でカクつき無し。
   const [translateY] = useState(() => new Animated.Value(panelH))
+  const openRef = useRef(open)
+  const [revealLifecycle] = useState(() =>
+    createSheetRevealLifecycle(REVEAL_FALLBACK_DELAY),
+  )
+  const initialTranslateY = (maxSnap - initialActive) * H
 
-  const moveTo = (targetActive: number, duration = SNAP_DUR) => {
+  const moveTo = (
+    targetActive: number,
+    duration = SNAP_DUR,
+    onComplete?: (finished: boolean) => void,
+  ) => {
     activeRef.current = targetActive
     Animated.timing(translateY, {
       toValue: (maxSnap - targetActive) * H,
       duration,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
-    }).start()
+    }).start(({ finished }) => onComplete?.(finished))
   }
 
   useEffect(() => {
-    if (open) {
+    openRef.current = open
+    if (!open) {
+      revealLifecycle.cancel()
+      translateY.stopAnimation()
       translateY.setValue(panelH)
-      moveTo(initialActive, SNAP_DUR)
-    } else {
-      Animated.timing(translateY, {
-        toValue: panelH,
-        duration: SNAP_DUR,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }).start()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+  }, [open, panelH, revealLifecycle, translateY])
+
+  useEffect(() => () => revealLifecycle.cancel(), [revealLifecycle])
+
+  const handleModalShow = () => {
+    revealLifecycle.onModalShow(
+      (complete) => {
+        translateY.stopAnimation()
+        translateY.setValue(panelH)
+        moveTo(initialActive, SNAP_DUR, complete)
+      },
+      () => {
+        if (!openRef.current) return
+        translateY.stopAnimation()
+        activeRef.current = initialActive
+        translateY.setValue(initialTranslateY)
+      },
+    )
+  }
 
   const startTYRef = useRef(0)
   const startActiveRef = useRef(initialActive)
@@ -318,7 +341,13 @@ function SnapBottomSheet({
   })
 
   return (
-    <Modal visible={open} transparent animationType="none" onRequestClose={onClose}>
+    <Modal
+      visible={open}
+      transparent
+      animationType="none"
+      onShow={handleModalShow}
+      onRequestClose={onClose}
+    >
       {/* scrim */}
       <Animated.View
         pointerEvents={open ? "auto" : "none"}
