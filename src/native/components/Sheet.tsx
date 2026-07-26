@@ -134,6 +134,7 @@ function PlainSheet({ open, onClose, side = "bottom", title, children }: SheetPr
 /* ───────────────────────────────────────────── snap mode（web版踏襲） */
 
 const SNAP_DUR = 180
+const REVEAL_FALLBACK_DELAY = SNAP_DUR + 120
 function clamp(v: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, v))
 }
@@ -183,6 +184,9 @@ function SnapBottomSheet({
   // translateY: 0=フル、(maxSnap-active)*H で snap 位置、panelH で完全閉
   // useNativeDriver: true でカクつき無し。
   const [translateY] = useState(() => new Animated.Value(panelH))
+  const openRef = useRef(open)
+  const revealFallbackRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const initialTranslateY = (maxSnap - initialActive) * H
 
   const moveTo = (targetActive: number, duration = SNAP_DUR) => {
     activeRef.current = targetActive
@@ -195,19 +199,44 @@ function SnapBottomSheet({
   }
 
   useEffect(() => {
-    if (open) {
-      translateY.setValue(panelH)
-      moveTo(initialActive, SNAP_DUR)
-    } else {
-      Animated.timing(translateY, {
-        toValue: panelH,
-        duration: SNAP_DUR,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }).start()
+    openRef.current = open
+    translateY.stopAnimation()
+    if (revealFallbackRef.current) {
+      clearTimeout(revealFallbackRef.current)
+      revealFallbackRef.current = null
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+
+    if (open) {
+      // Modal host が native 側で表示されるまでは完全閉位置で待つ。
+      // onShow が発火しない環境や native animation が完了しない場合でも、
+      // fallback で初期 snap を必ず可視位置へ戻す。
+      translateY.setValue(panelH)
+      revealFallbackRef.current = setTimeout(() => {
+        if (!openRef.current) return
+        activeRef.current = initialActive
+        translateY.setValue(initialTranslateY)
+        revealFallbackRef.current = null
+      }, REVEAL_FALLBACK_DELAY)
+    } else {
+      translateY.setValue(panelH)
+    }
+  }, [H, initialActive, initialTranslateY, maxSnap, open, panelH, translateY])
+
+  useEffect(
+    () => () => {
+      if (revealFallbackRef.current) {
+        clearTimeout(revealFallbackRef.current)
+      }
+    },
+    [],
+  )
+
+  const handleModalShow = () => {
+    if (!openRef.current) return
+    translateY.stopAnimation()
+    translateY.setValue(panelH)
+    moveTo(initialActive, SNAP_DUR)
+  }
 
   const startTYRef = useRef(0)
   const startActiveRef = useRef(initialActive)
@@ -318,7 +347,13 @@ function SnapBottomSheet({
   })
 
   return (
-    <Modal visible={open} transparent animationType="none" onRequestClose={onClose}>
+    <Modal
+      visible={open}
+      transparent
+      animationType="none"
+      onShow={handleModalShow}
+      onRequestClose={onClose}
+    >
       {/* scrim */}
       <Animated.View
         pointerEvents={open ? "auto" : "none"}
