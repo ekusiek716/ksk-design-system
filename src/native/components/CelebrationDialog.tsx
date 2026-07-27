@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react"
-import { Animated, Easing, Modal, Pressable, Text as RNText, View } from "react-native"
+import { Animated, Modal, Pressable, Text as RNText, View } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { Celebration, type CelebrationProps } from "./Celebration"
 import { useReduceMotion } from "./use-reduce-motion"
-import { startAnimationWithFallback } from "../modal-reveal-lifecycle"
-
-/** emoji bounce の総尺（200ms delay + 300 + 120 + 180）＋余裕 */
-const EMOJI_BOUNCE_FALLBACK_DELAY = 800 + 200
+import { useEmojiBounce } from "./use-emoji-bounce"
 
 function useAnimatedValue(initialValue: number) {
   const [value] = useState(() => new Animated.Value(initialValue))
@@ -69,33 +66,10 @@ export function CelebrationDialog({
     return () => clearTimeout(id)
   }, [open, autoDismissMs, onOpenChange])
 
-  useEffect(() => {
-    if (!open || emojiAnimation !== "bounce") return
-    if (reduceMotion) {
-      // Reduce Motion 有効時はバウンスさせず最終スケールで静止表示する
-      // （初期値 0 のまま return すると絵文字が不可視になる）
-      emojiScale.setValue(1)
-      return
-    }
-    emojiScale.setValue(0)
-    // Modal 表示前にアニメーションが走ると iOS で scale 0 のまま残り emoji が
-    // 消えるため、完走しなかった場合は最終 scale へ復旧させる（#250）。
-    const animation = Animated.sequence([
-      Animated.delay(200),
-      Animated.timing(emojiScale, { toValue: 1.4, duration: 300, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      Animated.timing(emojiScale, { toValue: 0.9, duration: 120, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-      Animated.timing(emojiScale, { toValue: 1, duration: 180, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-    ])
-    const cancelFallback = startAnimationWithFallback(
-      EMOJI_BOUNCE_FALLBACK_DELAY,
-      (complete) => animation.start(({ finished }) => complete(finished)),
-      () => emojiScale.setValue(1),
-    )
-    return () => {
-      cancelFallback()
-      animation.stop()
-    }
-  }, [open, emojiAnimation, emojiScale, reduceMotion])
+  useEmojiBounce(emojiScale, {
+    enabled: open && emojiAnimation === "bounce",
+    reduceMotion,
+  })
 
   if (!open) return null
 
