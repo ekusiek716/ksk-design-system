@@ -678,6 +678,7 @@ function AllRestShowcase() {
           title="達成おめでとう！"
           description="タップで閉じる"
           interactive
+          emojiAnimation="bounce"
           onTapDismiss={() => setCelebrationOn(false)}
           onDone={() => setCelebrationOn(false)}
         />

@@ -7,6 +7,7 @@ const celebrationDialog = readFileSync(
   "src/native/components/CelebrationDialog.tsx",
   "utf8",
 )
+const emojiBounce = readFileSync("src/native/components/use-emoji-bounce.ts", "utf8")
 
 describe("native Celebration Modal lifecycle contract (#250)", () => {
   it("overlay 配置は Modal 表示完了後にカードの入口アニメーションを開始する", () => {
@@ -22,11 +23,21 @@ describe("native Celebration Modal lifecycle contract (#250)", () => {
     expect(celebration).toContain("startCardEntrance(() => {})")
   })
 
-  it("emoji bounce は完走しなかった場合に最終 scale へ復旧する", () => {
+  it("emoji bounce は共通フックに集約し、両コンポーネントで挙動を分岐させない", () => {
     for (const source of [celebration, celebrationDialog]) {
-      expect(source).toContain("startAnimationWithFallback(")
-      expect(source).toContain("() => emojiScale.setValue(1),")
+      expect(source).toContain("useEmojiBounce(emojiScale, {")
+      // 各コンポーネントに sequence を再実装しない（drift 防止）
+      expect(source).not.toContain("Animated.delay(200)")
     }
+  })
+
+  it("emoji bounce は完走しなかった場合に最終 scale へ復旧する", () => {
+    expect(emojiBounce).toContain("startAnimationWithFallback(")
+    expect(emojiBounce).toContain("() => emojiScale.setValue(1),")
+  })
+
+  it("Reduce Motion では最終 scale で静止表示する", () => {
+    expect(emojiBounce).toContain("emojiScale.setValue(1)")
   })
 })
 

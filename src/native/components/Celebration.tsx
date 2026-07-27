@@ -11,10 +11,8 @@ import {
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { useReduceMotion } from "./use-reduce-motion"
-import {
-  createRevealLifecycle,
-  startAnimationWithFallback,
-} from "../modal-reveal-lifecycle"
+import { useEmojiBounce } from "./use-emoji-bounce"
+import { createRevealLifecycle } from "../modal-reveal-lifecycle"
 
 export type CelebrationTrigger = "confetti" | "emoji" | "both" | "none"
 export type CelebrationPlacement = "overlay" | "inline"
@@ -99,8 +97,6 @@ const BURST_DURATION_MS = 1150
  */
 const CARD_REVEAL_ANIMATION_FALLBACK_DELAY = 600
 const CARD_REVEAL_SHOW_FALLBACK_DELAY = 800
-/** emoji bounce の総尺（200ms delay + 300 + 120 + 180）＋余裕 */
-const EMOJI_BOUNCE_FALLBACK_DELAY = 800 + 200
 // 0°〜360° 全方位。中央発生源から均等に放射状へ飛び散らせる。
 const BURST_ANGLE_MIN_DEG = 0
 const BURST_ANGLE_MAX_DEG = 360
@@ -251,50 +247,10 @@ function Celebration({
     revealLifecycle.onModalShow(startCardEntrance, revealCard)
   }
 
-  useEffect(() => {
-    if (!active || emojiAnimation !== "bounce") return
-    if (reduceMotion) {
-      // Reduce Motion 有効時はバウンスさせず最終スケールで静止表示する
-      // （初期値 0 のまま return すると絵文字が不可視になる）
-      emojiScale.setValue(1)
-      return
-    }
-    emojiScale.setValue(0)
-    // belle-todo の milestone-emoji keyframe（0%→0, 50%→1.4, 70%→0.9, 100%→1、
-    // 600ms ease-out, 200ms delay）を Animated.sequence で再現。
-    // scale 0 から始まるため、アニメーションが走らないと emoji が不可視のまま
-    // 残る。完走しなかった場合は最終 scale へ復旧させる（#250）。
-    const animation = Animated.sequence([
-      Animated.delay(200),
-      Animated.timing(emojiScale, {
-        toValue: 1.4,
-        duration: 300,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(emojiScale, {
-        toValue: 0.9,
-        duration: 120,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(emojiScale, {
-        toValue: 1,
-        duration: 180,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ])
-    const cancelFallback = startAnimationWithFallback(
-      EMOJI_BOUNCE_FALLBACK_DELAY,
-      (complete) => animation.start(({ finished }) => complete(finished)),
-      () => emojiScale.setValue(1),
-    )
-    return () => {
-      cancelFallback()
-      animation.stop()
-    }
-  }, [active, emojiAnimation, emojiScale, reduceMotion])
+  useEmojiBounce(emojiScale, {
+    enabled: active && emojiAnimation === "bounce",
+    reduceMotion,
+  })
 
   useEffect(() => {
     if (!active || !onDone) return
