@@ -379,7 +379,13 @@ function SnapBottomSheet({
           config,
         )
         if (action.kind === "close") {
-          animateTo(config.panelH, SNAP_DUR, () => config.onClose())
+          animateTo(config.panelH, SNAP_DUR, () => {
+            // finished を条件にすると、アニメーション中断時（バックグラウンド化等）に
+            // 閉じ通知が失われ、不可視 panel + 透明 Modal が残って操作不能になる。
+            // 二重通知だけを防ぎたいので「まだ open のときだけ通知」で判定する。
+            if (!openRef.current) return
+            config.onClose()
+          })
           return
         }
         moveTo(action.snap)
