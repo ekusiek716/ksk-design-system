@@ -11,6 +11,7 @@ import {
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
+import { resolveRaisedElevationStyle } from "../button-elevation"
 import { GlassView } from "./GlassView"
 
 export type ButtonVariant = "primary" | "secondary" | "tertiary" | "destructive" | "glass"
@@ -164,14 +165,16 @@ export function Button({
           borderColor: p.border,
           opacity: effectiveDisabled ? 0.56 : 1,
         },
-        // raised: 下辺に厚みのある border を載せ、押下時に消して translateY で沈める
-        elevation === "raised" && {
-          borderBottomWidth: pressed && !effectiveDisabled ? 0 : elev.bottomBorderWidth,
-          borderBottomColor: p.bottomBorder,
-          transform: [{ translateY: pressed && !effectiveDisabled ? elev.offset : 0 }],
-          // raised 状態は下辺分の余白を本体に補填（押下で寸法が変わらないよう margin で吸収）
-          marginBottom: pressed && !effectiveDisabled ? elev.bottomBorderWidth : 0,
-        },
+        // raised: 下辺に厚みのある border を載せ、押下時は translateY で沈める。
+        // 下辺の太さは押下前後で不変（詳細は button-elevation.ts）。
+        elevation === "raised" &&
+          resolveRaisedElevationStyle({
+            pressed,
+            disabled: effectiveDisabled,
+            bottomBorderWidth: elev.bottomBorderWidth,
+            offset: elev.offset,
+            bottomBorderColor: p.bottomBorder,
+          }),
         containerStyle,
         pressed && !effectiveDisabled && pressedContainerStyle,
       ]}
