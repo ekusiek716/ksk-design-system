@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   Animated,
   Easing,
@@ -11,6 +11,10 @@ import {
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { useReduceMotion } from "./use-reduce-motion"
+import {
+  createRevealLifecycle,
+  startAnimationWithFallback,
+} from "../modal-reveal-lifecycle"
 
 export type CelebrationTrigger = "confetti" | "emoji" | "both" | "none"
 export type CelebrationPlacement = "overlay" | "inline"
@@ -88,6 +92,15 @@ function useAnimatedValue(initialValue: number) {
 }
 
 const BURST_DURATION_MS = 1150
+/**
+ * overlay 配置は Modal 越しに描画されるため、Modal 表示前に入口アニメーションを
+ * 走らせると iOS でカードが opacity 0 のまま残り、透明な Modal だけが操作を
+ * 遮断する（#248 と同じ機構 / #250）。onShow 起点にして二重の保険を張る。
+ */
+const CARD_REVEAL_ANIMATION_FALLBACK_DELAY = 600
+const CARD_REVEAL_SHOW_FALLBACK_DELAY = 800
+/** emoji bounce の総尺（200ms delay + 300 + 120 + 180）＋余裕 */
+const EMOJI_BOUNCE_FALLBACK_DELAY = 800 + 200
 // 0°〜360° 全方位。中央発生源から均等に放射状へ飛び散らせる。
 const BURST_ANGLE_MIN_DEG = 0
 const BURST_ANGLE_MAX_DEG = 360
@@ -179,25 +192,64 @@ function Celebration({
     [particleCount, particleDurationBase, driftRange, palette, isBurst],
   )
 
+  const activeRef = useRef(active)
+  const [revealLifecycle] = useState(() =>
+    createRevealLifecycle({
+      animationFallbackDelay: CARD_REVEAL_ANIMATION_FALLBACK_DELAY,
+      showFallbackDelay: CARD_REVEAL_SHOW_FALLBACK_DELAY,
+    }),
+  )
+
+  const revealCard = useCallback(() => {
+    if (!activeRef.current) return
+    opacity.stopAnimation()
+    pop.stopAnimation()
+    opacity.setValue(1)
+    pop.setValue(1)
+  }, [opacity, pop])
+
+  const startCardEntrance = useCallback(
+    (complete: (finished: boolean) => void) => {
+      pop.setValue(0.94)
+      opacity.setValue(0)
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 160,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.spring(pop, {
+          toValue: 1,
+          friction: 7,
+          tension: 110,
+          useNativeDriver: true,
+        }),
+      ]).start(({ finished }) => complete(finished))
+    },
+    [opacity, pop],
+  )
+
   useEffect(() => {
+    activeRef.current = active
+    revealLifecycle.cancel()
     if (!active) return
+    if (!overlay) {
+      // inline は Modal を挟まないのでそのまま開始できる
+      startCardEntrance(() => {})
+      return
+    }
+    // overlay は Modal 表示完了（onShow）を待つ。待つ間は不可視なので保険を張る。
     pop.setValue(0.94)
     opacity.setValue(0)
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 160,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.spring(pop, {
-        toValue: 1,
-        friction: 7,
-        tension: 110,
-        useNativeDriver: true,
-      }),
-    ]).start()
-  }, [active, opacity, pop])
+    revealLifecycle.onOpen(revealCard)
+  }, [active, overlay, opacity, pop, revealCard, revealLifecycle, startCardEntrance])
+
+  useEffect(() => () => revealLifecycle.cancel(), [revealLifecycle])
+
+  const handleModalShow = () => {
+    revealLifecycle.onModalShow(startCardEntrance, revealCard)
+  }
 
   useEffect(() => {
     if (!active || emojiAnimation !== "bounce") return
@@ -210,6 +262,8 @@ function Celebration({
     emojiScale.setValue(0)
     // belle-todo の milestone-emoji keyframe（0%→0, 50%→1.4, 70%→0.9, 100%→1、
     // 600ms ease-out, 200ms delay）を Animated.sequence で再現。
+    // scale 0 から始まるため、アニメーションが走らないと emoji が不可視のまま
+    // 残る。完走しなかった場合は最終 scale へ復旧させる（#250）。
     const animation = Animated.sequence([
       Animated.delay(200),
       Animated.timing(emojiScale, {
@@ -231,8 +285,15 @@ function Celebration({
         useNativeDriver: true,
       }),
     ])
-    animation.start()
-    return () => animation.stop()
+    const cancelFallback = startAnimationWithFallback(
+      EMOJI_BOUNCE_FALLBACK_DELAY,
+      (complete) => animation.start(({ finished }) => complete(finished)),
+      () => emojiScale.setValue(1),
+    )
+    return () => {
+      cancelFallback()
+      animation.stop()
+    }
   }, [active, emojiAnimation, emojiScale, reduceMotion])
 
   useEffect(() => {
@@ -386,7 +447,13 @@ function Celebration({
   if (!overlay) return content
 
   return (
-    <Modal visible transparent animationType="none" onRequestClose={handleTapDismiss}>
+    <Modal
+      visible
+      transparent
+      animationType="none"
+      onShow={handleModalShow}
+      onRequestClose={handleTapDismiss}
+    >
       <View style={{ flex: 1, backgroundColor: "transparent" }}>{content}</View>
     </Modal>
   )

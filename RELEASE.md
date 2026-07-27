@@ -41,6 +41,7 @@ T+1w  次の patch で旧 API を完全削除
 |---|---|---|---|
 | 2026-05-30 | v1.21.2 | Sheet (`side="bottom"` / `swipeToClose` / `bottom-glass`) が仮想キーボード表示時にシート上端を画面外へ出さないよう `visualViewport` 監視で修正（PR #12） | モバイルの入力付きボトムシートでタイトル/ドラッグハンドルが隠れる不具合を解消 |
 | 2026-06-13 | v1.31.1 | `.glass-specular > *` が**絶対配置の子要素**の `position`/`z-index` を踏み潰す問題を `:not(.absolute):not(.fixed):not(.sticky)` 除外で修正 | glass 面に重ねた絶対配置オーバーレイ（閉じる × 等）が consumer 側の `absolute`/`z-*` を奪われ角からはみ出す不具合を解消 |
+| 2026-07-27 | v1.48.1 | native の Modal 系オーバーレイ（Sheet plain/snap・Celebration overlay・emoji bounce）で、Modal 表示前に入口アニメーションを開始すると要素が不可視位置に残る問題を onShow 起点＋二重 fallback で修正（#250）。併せて snap sheet の gesture 状態バグ 3 件（アニメ中の再ドラッグでパネルが飛ぶ／再オープン時に下スワイプが効かない／`dismissible`・`onClose` が初回 render のまま固定）を修正 | iOS 実機で「透明なオーバーレイだけが残り操作不能」になる進行不能バグを解消。#249 で snap sheet のみ対処した同一原因が plain sheet と Celebration に残っていた |
 
 新しいホットフィックスがあれば追記する。
 

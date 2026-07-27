@@ -75,6 +75,7 @@ import {
   ReviewOverlay,
   CoachMark,
   CoachMarkOverlay,
+  Celebration,
   // 追加: Phase 4
   Combobox,
   MultiSelect,
@@ -479,6 +480,8 @@ function AllRestShowcase() {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [alertDialogOpen, setAlertDialogOpen] = React.useState(false);
   const [sheetOpen, setSheetOpen] = React.useState(false);
+  const [snapSheetOpen, setSnapSheetOpen] = React.useState(false);
+  const [celebrationOn, setCelebrationOn] = React.useState(false);
   const [responsiveOpen, setResponsiveOpen] = React.useState(false);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
@@ -550,12 +553,14 @@ function AllRestShowcase() {
           <Button onPress={() => setDialogOpen(true)}>Dialog</Button>
           <Button variant="secondary" onPress={() => setAlertDialogOpen(true)}>AlertDialog</Button>
           <Button variant="secondary" onPress={() => setSheetOpen(true)}>Sheet</Button>
+          <Button variant="secondary" onPress={() => setSnapSheetOpen(true)}>Sheet (snap)</Button>
           <Button variant="secondary" onPress={() => setResponsiveOpen(true)}>ResponsiveDialog</Button>
           <Button variant="secondary" onPress={() => setDrawerOpen(true)}>MenuDrawer</Button>
           <Button variant="secondary" onPress={() => setConfirmOpen(true)}>ConfirmDialog</Button>
           <Button variant="secondary" onPress={() => setBottomFormOpen(true)}>BottomSheetForm</Button>
           <Button variant="secondary" onPress={() => setReviewOpen(true)}>ReviewOverlay</Button>
           <Button variant="secondary" onPress={() => setCoachOpen(true)}>CoachMark</Button>
+          <Button variant="secondary" onPress={() => setCelebrationOn(true)}>Celebration</Button>
           <Button
             variant="tertiary"
             onPress={() => toast.show({ title: 'トースト', description: '保存しました', tone: 'success' })}
@@ -592,6 +597,22 @@ function AllRestShowcase() {
           <Text variant="body.md">サイドは bottom / top / left / right の4種類。</Text>
           <View style={{ height: scales.spacing.scale[3] }} />
           <Button onPress={() => setSheetOpen(false)}>閉じる</Button>
+        </Sheet>
+        {/* snap mode（#248 の当該経路）。ドラッグでハーフ↔フル、下スワイプで close */}
+        <Sheet
+          open={snapSheetOpen}
+          onClose={() => setSnapSheetOpen(false)}
+          side="bottom"
+          title="スナップシート"
+          snapPoints={[0.55, 0.92]}
+          footer={<Button onPress={() => setSnapSheetOpen(false)}>閉じる</Button>}
+        >
+          <Text variant="body.md">
+            ハンドルをドラッグしてハーフ／フルを切り替え、下方向に大きく引くと閉じる。
+          </Text>
+          {Array.from({ length: 12 }, (_, i) => (
+            <Text key={i} variant="body.sm">スクロール行 {i + 1}</Text>
+          ))}
         </Sheet>
         <ResponsiveDialog
           open={responsiveOpen}
@@ -651,6 +672,15 @@ function AllRestShowcase() {
           <FormField label="本文"><Textarea placeholder="ご意見" /></FormField>
         </BottomSheetForm>
         <ReviewOverlay open={reviewOpen} onClose={() => setReviewOpen(false)} />
+        {/* overlay 配置は Modal 越しなのでカードの入口アニメを onShow 起点にしている */}
+        <Celebration
+          active={celebrationOn}
+          title="達成おめでとう！"
+          description="タップで閉じる"
+          interactive
+          onTapDismiss={() => setCelebrationOn(false)}
+          onDone={() => setCelebrationOn(false)}
+        />
         <CoachMarkOverlay open={coachOpen} onClose={() => setCoachOpen(false)}>
           <CoachMark
             title="ようこそ"
