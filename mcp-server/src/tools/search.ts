@@ -40,6 +40,7 @@ export function search(query: string): SearchResult[] {
         ...(comp.sizes ?? []),
         ...(comp.subcomponents ?? []),
         ...(comp.exportedAs ? [comp.exportedAs] : []),
+        ...(comp.aliases ?? []),
         ...(comp.deprecatedAliases ?? []),
         ...(comp.rules ?? []),
       ]

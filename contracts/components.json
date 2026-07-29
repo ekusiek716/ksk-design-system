@@ -15,6 +15,7 @@
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
       "exported": "既定 true。false のとき name は実装ファイル名 / グループ名であり import できない。実際に import できる名前は subcomponents に列挙する。",
       "exportedAs": "name とは別名で export される場合の実 export 名（例: FormField を KskFormField として出す等）。未使用なら省略する。",
+      "aliases": "name / exportedAs とは別に、同じエントリを検索・解決できる追加の実 export 名（非推奨ではない）。同名衝突を避けて別名 export された名前（例: ui/form の FormField を index.ts で RhfFormField として export）を mcp-server の検索対象にするために使う。",
       "deprecatedAliases": "互換のために残している旧 export 名。新規利用は禁止。eslint/deprecated.js の DEPRECATED と同期させる（テストで固定）。",
       "note": "型のみの export（`export type { Toast }`）は値として import できないため exported:false 扱いにする。"
     },
@@ -894,6 +895,7 @@
       "path": "src/components/ui/form.tsx",
       "description": "react-hook-form 統合フォームラッパー。FormProvider + Controller のラッパー群。FormField / FormItem / FormLabel / FormControl / FormDescription / FormMessage で構成。",
       "usageNote": "この FormField は patterns/form-field.tsx の非 RHF 版 FormField と同名のため、index.ts では `RhfFormField` として export される。react-hook-form の Controller が必要なフォームはこちらを使う。迷ったら patterns 版 FormField（非 RHF）を使う。",
+      "aliases": ["RhfFormField"],
       "accessibility": [
         "aria-describedby 自動付与",
         "aria-invalid でエラー状態",
