@@ -33,7 +33,7 @@ function SkipLink({
       data-slot="skip-link"
       onClick={handleClick}
       className={cn(
-        "fixed left-4 top-4 z-50 flex min-h-11 -translate-y-24 items-center rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-4 py-2 typo-label-md text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-lg)] transition-transform",
+        "fixed left-4 top-4 z-[var(--Z-SkipLink)] flex min-h-11 -translate-y-24 items-center rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-4 py-2 typo-label-md text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-lg)] transition-transform",
         "focus:translate-y-0 focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         className,
       )}

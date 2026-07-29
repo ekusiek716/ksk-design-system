@@ -476,7 +476,11 @@
  *   }}
  */
 .glass-interactive {
-  transition: transform 150ms ease-out;
+  /* glass.css は `ksk-design-system/glass` として motion.css 抜きで単体 import できる。
+     その場合 --Motion-* が未定義になり transition ごと無効になるので、
+     フォールバックに素の値（= 従来値 150ms / CSS の ease-out）を持たせる。 */
+  transition: transform var(--Motion-Duration-Fast, 150ms)
+    var(--Motion-Easing-Standard, cubic-bezier(0, 0, 0.58, 1));
 }
 .glass-interactive:active {
   transform: scale(0.97);

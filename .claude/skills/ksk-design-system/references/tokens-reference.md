@@ -20,15 +20,15 @@ Layer 3 Bridge     --primary 等 shadcn 互換         ← shadcn 移植コー�
 |---|---|---|
 | Surface | `--Surface-Primary` / `-Secondary` / `-Tertiary` / `-Quaternary` | 白 / 薄灰 / 灰 / 濃灰の面 |
 | | `--Surface-Disable` / `--Surface-Inverse` | 無効面 / 反転面（黒っぽい） |
-| | `--Surface-Accent-Primary` / `-Light` / `-Ultra-Light` | ブランド面 / 薄いブランド面 |
+| | `--Surface-Accent-Primary` / `-Light` / `-Subtle` | ブランド面 / 薄いブランド面 / 透過ティント |
 | | `--Surface-{Caution,Success,Warning,Info}` | 状態の淡背景（50系） |
 | | `--Surface-{...}-Subtle` | 状態の透過ティント（15%） |
-| | `--Surface-{...}-Strong` | バッジ/ピルの強 fill（500系。Base より一段明るいのは役割違い） |
+| | `--Surface-Caution-Strong` | バッジ/ピルの強 fill（500系。Base より一段明るいのは役割違い） |
 | Text | `--Text-High/Medium/Low-Emphasis` <!-- docs-drift-ignore: --Text-High/Medium/Low-Emphasis --> / `--Text-Disable` | 文字の強弱 |
 | | `--Text-on-Inverse` / `--Text-on-Media` | 反転面 / 画像上の白文字 |
 | | `--Text-Accent-Primary` / `--Text-{Success,Caution,Warning,Info}` | 色付き文字（コントラスト確保済み 600–700系） |
 | Object | `--Object-High/Medium/Low-Emphasis` <!-- docs-drift-ignore: --Object-High/Medium/Low-Emphasis --> / `--Object-Disable` | アイコン・図形 |
-| | `--Object-{Caution,Success,Warning,Info}` / `--Object-Favorite` / `--Object-Rating` | 状態アイコン / ♥ / ★ |
+| | `--Object-{Caution,Success,Warning,Info}` / `--Object-Rating` | 状態アイコン / ★ |
 | Border | `--Border-Low-Emphasis`（区切り・淡カード） / `--Border-Medium-Emphasis`（入力・強調） / `--Border-High-Emphasis` | 罫線3段 |
 | | `--Border-{Caution,Success,Warning,Info}` / `--Border-Accent-Primary` | 状態枠線 |
 | Brand | `--Brand-Primary`（600） / `--Brand-Action`（hover/active、700） / `--Brand-Light` / `--Brand-Ultra-Light` | ブランド |

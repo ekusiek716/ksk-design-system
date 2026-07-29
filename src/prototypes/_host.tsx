@@ -357,7 +357,7 @@ function DetailView({ slug }: { slug: string }) {
     <div className="min-h-dvh">
       {/* ツールバー（プレビュー用クローム。モックの「サービスのヘッダー」と
           誤読されないよう、ダークな dev バー + PREVIEW ラベルで明確に区別する） */}
-      <div className="sticky top-0 z-50 flex items-center gap-3 bg-[var(--Surface-Inverse)] px-4 py-2.5">
+      <div className="sticky top-0 z-[var(--Z-Nav)] flex items-center gap-3 bg-[var(--Surface-Inverse)] px-4 py-2.5">
         <Button
           variant="ghost"
           size="icon-sm"

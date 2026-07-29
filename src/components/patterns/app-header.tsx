@@ -158,7 +158,7 @@ function AppHeader({
       className={cn(
         "@container",
         // Sticky
-        sticky && "sticky top-0 z-40",
+        sticky && "sticky top-0 z-[var(--Z-Nav)]",
         className
       )}
     >

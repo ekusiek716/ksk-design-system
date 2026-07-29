@@ -157,7 +157,7 @@ function MediaActionCluster({
       onPointerEnter={reveal}
       onFocusCapture={reveal}
       className={cn(
-        "z-40 flex items-center gap-3 transition-opacity duration-300",
+        "z-[var(--Z-Nav)] flex items-center gap-3 transition-opacity duration-[var(--Motion-Duration-Slow)]",
         position === "fixed" ? "fixed" : "absolute",
         ANCHOR_CLASS[anchor],
         CLUSTER_ORIENTATION_CLASS[orientation],

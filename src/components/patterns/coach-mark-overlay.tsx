@@ -144,7 +144,10 @@ export function CoachMarkOverlay({
         outlineOffset: 0,
         borderRadius: 16,
         boxShadow: "0 0 0 9999px rgba(0,0,0,0.55)",
-        zIndex: 50,
+        // boxShadow で周囲を暗くするスポットライトが scrim を兼ねる。
+        // Dialog / Sheet の上にオンボーディングを重ねることがあるため、
+        // Modal より上の専用段に置く（下だとモーダルが暗転しない）。
+        zIndex: "var(--Z-Coachmark-Overlay)",
       }
     : {
         position: "fixed",
@@ -153,7 +156,7 @@ export function CoachMarkOverlay({
         width: 1,
         height: 1,
         pointerEvents: "none",
-        zIndex: 50,
+        zIndex: "var(--Z-Coachmark-Overlay)",
       }
 
   return createPortal(
@@ -168,7 +171,7 @@ export function CoachMarkOverlay({
       {/* spotlight が無いとき (対象要素未発見) のフォールバック overlay */}
       {!hasSpotlight && (
         <div
-          className="fixed inset-0 bg-black/55 z-50 pointer-events-none"
+          className="fixed inset-0 bg-black/55 z-[var(--Z-Coachmark-Overlay)] pointer-events-none"
           aria-hidden="true"
         />
       )}

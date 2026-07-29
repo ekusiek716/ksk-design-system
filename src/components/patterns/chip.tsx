@@ -13,10 +13,39 @@ const chipVariants = cva(
         accent: "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)] disabled:bg-[var(--Surface-Secondary)] disabled:text-[var(--Text-Disable)] disabled:hover:bg-[var(--Surface-Secondary)]",
         outline: "border border-[var(--Border-Medium-Emphasis)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)] disabled:text-[var(--Text-Disable)]",
       },
+      // Chip は常にインタラクティブ（button / a）なので、44px のタッチターゲットを
+      // 縦横とも満たす必要がある。縦横で手法を変えているのは意図的:
+      //
+      // - 縦: 透明な before 擬似要素で 44px に広げ、**同じ高さぶんの縦 margin で
+      //   場所も予約する**（my-2/my-1.5/my-1 で margin box をちょうど 44px にする）。
+      //   height(28/32/36px)は触らないので見た目のピルは変わらないが、
+      //   flex-wrap で折り返したときに隣の行の当たり判定と重ならない。
+      //   margin を付けずに擬似要素だけ広げると、`flex-wrap gap-2` の md チップは
+      //   行間 40px に対し当たり判定 44px となり 4px 重なって誤タップになる。
+      //   横 margin は付けない（付けるとチップ同士の見た目の間隔まで広がるため）。
+      // - 横: 擬似要素ではなく本体に min-w-11 を効かせる。横は gap-2(8px) しか
+      //   間隔が無く、擬似要素で広げると隣のチップの当たり判定と重なって
+      //   誤タップになる（WCAG 2.5.8 のターゲット非重複にも反する）。
+      //   本体を広げれば隣は押し出されるだけなので重ならない。
+      //   ラベルが長いチップでは min-w は効かないので実質「1〜3 文字のチップだけ
+      //   少し横に広がる」挙動になる。
+      //
+      // tile(48px) は縦横とも 44px を超えているので両方とも不要。
+      //
+      // ⚠️ 置き場所の制約: 擬似要素はチップの外側へはみ出すため、**親が 44px 以上の
+      // 高さを持っていないとクリップされて当たり判定が元に戻る**。特に
+      // `overflow-x-auto` の横スクロール行は要注意で、CSS 仕様上 overflow-y も
+      // auto に落ちる（visible にできない）ため確実にクリップされる。
+      // 横スクロール行に置くときは行側に `min-h-11 items-center` を付けること
+      // （ChipFilterBar / TabsList はそうしている）。
       size: {
-        sm: "h-7 px-2.5 typo-label-xs",
-        md: "h-8 px-3 typo-label-sm",
-        lg: "h-9 px-4 typo-label-sm",
+        // my-* は「44px - 本体の高さ」の半分。28+8*2 / 32+6*2 / 36+4*2 = いずれも 44px。
+        // sm/md/lg に tile のような shrink-0 は不要。min-width は flex-shrink の
+        // 下限として効くので、min-w-11 だけで 44px は割られない。tile が #280 で
+        // shrink-0 を必要としたのは size-12 が width であって min-width ではないため。
+        sm: "h-7 my-2 min-w-11 px-2.5 typo-label-xs before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
+        md: "h-8 my-1.5 min-w-11 px-3 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
+        lg: "h-9 my-1 min-w-11 px-4 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
         // shrink-0: flex row 内で min-content 幅まで潰れて 48px タッチターゲットが崩れるのを防ぐ
         tile: "size-12 shrink-0 typo-body-md",
       },
@@ -144,10 +173,16 @@ function Chip({
     "border border-[var(--Text-Disable)] bg-[var(--Surface-Secondary)]! text-[var(--Text-Disable)]! cursor-not-allowed"
 
   // × は本体ラベルに寄せる（独立した w-8 の正方形セルにしない）。tile のみ従来の固定幅。
+  // × も独立したタップ対象なので、縦は本体と同じく透明 before 擬似要素で 44px に拡張する。
+  // 横は本体のように min-w-11 を効かせない: × は本体ラベルに寄せた副次アクションで、
+  // 44px 幅にするとチップの大半が × になり主アクション（チップ本体）が押しにくくなる。
+  // 現状 32px 幅 × 44px の当たり判定で、WCAG 2.5.8 (AA) の 24px 最小サイズは満たす。
+  const removeTouchTarget =
+    "before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']"
   const removeButtonSize = {
-    sm: "h-7 pl-0.5 pr-2",
-    md: "h-8 pl-0.5 pr-2.5",
-    lg: "h-9 pl-1 pr-3",
+    sm: `h-7 pl-0.5 pr-2 ${removeTouchTarget}`,
+    md: `h-8 pl-0.5 pr-2.5 ${removeTouchTarget}`,
+    lg: `h-9 pl-1 pr-3 ${removeTouchTarget}`,
     tile: "h-12 w-8",
   }[actualSize]
 
@@ -201,7 +236,7 @@ function Chip({
             onRemove?.()
           }}
           className={cn(
-            "inline-flex shrink-0 items-center justify-center touch-manipulation [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
+            "relative inline-flex shrink-0 items-center justify-center touch-manipulation [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
             // 仕切り線なし・本体と同じ面色を継ぎ目なく延長。ホバー時のみ × 側を強調。
             !selected && variant === "filled" && "bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Tertiary)] hover:text-[var(--Text-High-Emphasis)]",
             !selected && variant === "accent" && "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)]",
