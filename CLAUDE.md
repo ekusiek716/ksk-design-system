@@ -1,5 +1,25 @@
 # KSK Design System — 設計ルールブック
 
+## CLAUDE.md / AGENTS.md の編集ルール
+
+<!-- docs-sync-ignore -->
+このファイルと `AGENTS.md` は Claude Code 用 / Codex 用の対になる作業手順書で、
+共通で守るべき内容（実装前セルフチェック・セッション開始時に読み込むファイル・
+ローカル二重実装ゲート・このDSについて・最大の特徴・技術スタック・AIモデルの
+使い分け方針・ドキュメント構成・ディレクトリ構成・カラートークン体系・
+クイックスタート・コンポーネント追加時のチェックリスト）は**両ファイルで内容を
+同期させる**こと。
+
+- 見出し名・本文は基本的に同一にする（ツール名など明確にツール固有の1行だけ
+  <!-- docs-sync-ignore --> マーカー（単独行、次の1行を対象から除外）で除外する）
+- Codex 固有の付録（AGENTS.md 末尾の Codex PR Review Guidelines）のような
+  完全にツール固有のブロックは BEGIN/END マーカーコメント（例:
+  末尾が `codex-pr-review-guidelines` のマーカー）で囲み同期対象から除外する
+- 片方だけ編集したら **`node scripts/check-agents-docs-sync.mjs`**（`npm run check` に
+  組み込み済み）を実行し、乖離が無いことを確認する
+- `templates/CLAUDE.md` / `templates/AGENTS.md`（postinstall で配布するテンプレート）も
+  同じ仕組みで同期検査の対象
+
 ## 実装前セルフチェック（AI必読・最優先）
 
 UI を書く前に必ず確認すること:
@@ -18,6 +38,112 @@ UI を書く前に必ず確認すること:
 - [ ] クラス名は**完全な文字列**で書いたか（`` `bg-${color}` `` のような動的合成は静的抽出できず消費側で CSS が生成されない。分岐は三項演算子か cva variant で。`scripts/generate-source-safelist.mjs` が検出）
 - [ ] `.tsx` 編集後に `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行したか
 - [ ] `FormField` を import する前にどちらか確認したか（react-hook-form の Controller と統合するなら `RhfFormField`＝`ui/form` の `FormField` を index.ts で別名 export したもの。単純な label+error 表示は `patterns/form-field` の `FormField`。迷ったら後者）
+
+---
+
+## 必須: セッション開始時に読み込むファイル
+
+コードを書く前に、以下を必ず読み込むこと:
+
+```
+.claude/skills/ksk-design-system/SKILL.md  # 判断Skill: 実装・レビューの判断基準（正本への索引）
+contracts/rules.json                     # 禁止パターン・AIアンチパターン・a11y要件（件数・内容は rules.json が正本）
+contracts/components.json               # 全コンポーネントの定義・バリアント・ルール
+contracts/design-context.json           # DESIGN.md と正本ファイルの関係・AI向け検査方針
+tokens.json                             # カラー・スペーシング・シャドウトークン
+contracts/token-hex-cache.json          # semantic トークンのデフォルトテーマ解決済み hex（テーマ依存キーは meta.themeDependentKeys 参照・自動生成）
+src/components/COMPONENT_LOOKUP.md      # バリアント・インポートパス一覧（自動生成）
+contracts/screen-patterns.json          # 画面実装前にどのシェル/パターンを使うかの decisionTree・crudMatrix
+contracts/composition.json              # 選んだパターン内部の並べ方（骨格構造・余白リズム・カード階層・テキスト階層・CTA優先度）
+```
+
+画面（ページ/ダイアログ等）を実装・修正する場合は、まず `contracts/screen-patterns.json` の
+decisionTree でシェル/パターンを選び、`contracts/composition.json` で内部の並べ方を確認すること。
+
+UI コンポーネント・画面の生成/修正・レビューの前には、必ず
+`.claude/skills/ksk-design-system/SKILL.md` を読み、その判断基準に従うこと
+（トークン選定・コンポーネント選択・レビュー優先順位・例外運用。迷ったら同ディレクトリの `references/` を参照）。
+
+**必ず `contracts/rules.json` の `prohibited` と `aiPatterns` を確認してから実装すること。**
+特に `aiPatterns` は AI が典型的に犯すパターン集 — 自分が生成しようとしているコードと照合すること。
+
+コンポーネントを新規作成する前に `COMPONENT_LOOKUP.md` で同等品がないか確認すること。
+
+`FormField` は同名で2種類ある: react-hook-form の Controller と統合するなら `RhfFormField`（`ui/form` の `FormField` を index.ts で別名 export したもの）、単純な label+error 表示なら `FormField`（`patterns/form-field`）。迷ったら後者を使う。
+
+### ローカル二重実装ゲート
+
+DS に無いと思っても consumer 側に別台帳を作らないこと。最初に `contracts/components.json` と
+`COMPONENT_LOOKUP.md` を検索し、consumer では `npx ksk-ds check-duplicates ./src --strict` を実行する。
+それでも不足する場合は DS 側に issue を登録する。やむを得ない一時実装には、削除条件と issue を
+`// ksk-ds-local-fallback: DS に X が追加されたら削除 (issue #123)` の形式で残すこと。
+
+Storybook 全体を横断で視覚監査する（定期監査・リリース前総点検）場合は `.claude/skills/audit-pages/SKILL.md` の手順に従うこと。
+
+---
+
+## 必須: ファイル編集後に実行するコマンド
+
+**.tsx ファイルを作成・編集した後は必ず実行:**
+
+```bash
+bash scripts/lint-scratch.sh
+```
+
+**.css を編集した後は必ず実行:**
+
+```bash
+node scripts/check-prefix-order.mjs
+```
+
+ベンダープレフィックスは **`-webkit-` を先・標準形を後** に書く（消費側の
+minifier が同一プロパティとして dedupe し後勝ちのみ残すため、逆順だと
+標準形が消えて Firefox で静かに無効化される）。
+
+**新しい Tailwind クラスを使った後は必ず実行:**
+
+```bash
+npm run generate:safelist
+```
+
+DS 内部でしか出現しないクラスを消費側で確実に生成させるための safelist
+（`src/styles/source-safelist.css`・自動生成）を更新する。未更新は
+`npm run check` が検出する。クラス名は必ず完全な文字列で書くこと
+（`` `bg-${color}` `` のような動的合成は静的抽出できず、同スクリプトがエラーにする）。
+
+**コンポーネントを追加・削除した後は必ず実行:**
+
+```bash
+bash scripts/check-drift.sh
+npm run generate:lookup
+```
+
+**play 関数のあるコンポーネントを触った後は必ず実行:**
+
+```bash
+npm run test:interaction
+```
+
+対象は Button / Dialog / AlertDialog / Sheet / Select / DropdownMenu /
+Combobox / Tabs / Form / Toast。Storybook の play 関数を playwright chromium で
+ヘッドレス実行する（設定は `vitest.storybook.config.ts`、対象は
+`tags: ["interaction"]` を付けたストーリーのみ）。初回のみ
+`npx playwright install chromium` が必要なため `npm run check` には含まれない。
+CI では常時実行される。
+
+**UI コンポーネントを追加・修正した後は `npm run test:a11y` も実行:**
+
+```bash
+npm run test:a11y
+```
+
+axe-core による a11y 機械検証（issue #261）。`@storybook/addon-a11y` の
+afterEach フックが全ストーリー（tags フィルタなし）に対して axe-core を
+実行する（設定は `vitest.a11y.config.ts`）。color-contrast ルールのみ既知の
+トークン債務のため CI では無効化中（`.storybook/preview.ts` 参照、コントラスト自体は
+`scripts/check-contrast.mjs` が担保）。CI では常時実行される。
+
+エラーが出た場合は修正してから次に進むこと。
 
 ---
 
@@ -89,8 +215,10 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 
 | ファイル | 内容 |
 |---------|------|
+<!-- docs-sync-ignore -->
 | **CLAUDE.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート（Claude Code用） |
-| **AGENTS.md** | 同上（Codex用。セッション開始時の読み込み指示・編集後コマンドを明記） |
+<!-- docs-sync-ignore -->
+| **AGENTS.md** | 同上（Codex用。Codex PR Review Guidelines を追記） |
 | **contracts/components.json** | 全コンポーネントの構造化定義（バリアント・アクセシビリティ要件。総数は meta.counts が正本） |
 | **contracts/rules.json** | 禁止パターン・AIアンチパターン・アクセシビリティ要件（正本: rules.json） |
 | **contracts/design-context.json** | `DESIGN.md` の役割・正本ファイル・外部 DESIGN.md 参照方針 |
@@ -100,25 +228,6 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
 | **contracts/screen-patterns.json** | 画面実装前にどのシェル/パターンを使うかを決める decisionTree・crudMatrix |
 | **contracts/composition.json** | 選んだパターン内部の並べ方（骨格構造・余白リズム・カード階層・テキスト階層・CTA優先度） |
-
-**セッション開始時 / コードを書く前に必ず読む:**
-1. `contracts/rules.json` の `prohibited` と `aiPatterns`（AIが典型的に犯すパターン集）を確認
-2. `contracts/components.json` でコンポーネント定義・バリアントを確認
-3. `contracts/design-context.json` で `DESIGN.md` と正本ファイルの関係を確認
-4. `src/components/COMPONENT_LOOKUP.md` で既存コンポーネントを確認（手書き・再定義の防止）
-5. `tokens.json` でカラー・余白・影・タイポのトークンを確認
-6. 画面（ページ/ダイアログ等）を実装する場合は `contracts/screen-patterns.json` の decisionTree でシェル/パターンを選び、`contracts/composition.json` で内部の並べ方を確認
-
-### ローカル二重実装ゲート
-
-DS に無いと思っても consumer 側に別台帳を作らないこと。最初に `contracts/components.json` と
-`COMPONENT_LOOKUP.md` を検索し、consumer では `npx ksk-ds check-duplicates ./src --strict` を実行する。
-それでも不足する場合は DS 側に issue を登録する。やむを得ない一時実装には、削除条件と issue を
-`// ksk-ds-local-fallback: DS に X が追加されたら削除 (issue #123)` の形式で残すこと。
-
-**`.tsx` を編集したら `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行すること。**
-
-Storybook 全体を横断で視覚監査する（定期監査・リリース前総点検・「全ページ確認して」）場合は `.claude/skills/audit-pages/SKILL.md` を使う。
 
 ---
 
