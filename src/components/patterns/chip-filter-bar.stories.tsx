@@ -99,6 +99,8 @@ export const TouchTargetNotClipped: Story = {
 
     // 見た目の高さは据え置き（レイアウトを動かさない）
     await expect(Math.round(chipRect.height)).toBe(32)
+    // 横方向は本体の min-w-11 で 44px を満たす（擬似要素だと隣と重なるため）
+    await expect(chipRect.width).toBeGreaterThanOrEqual(44)
     // 擬似要素が 44px あり、行がそれを収めきれる高さを持つ
     await expect(Math.round(parseFloat(before.height))).toBe(44)
     await expect(rowRect.height).toBeGreaterThanOrEqual(44)
@@ -108,5 +110,13 @@ export const TouchTargetNotClipped: Story = {
     const centerY = chipRect.top + chipRect.height / 2
     await expect(centerY - beforeH / 2).toBeGreaterThanOrEqual(rowRect.top - 0.5)
     await expect(centerY + beforeH / 2).toBeLessThanOrEqual(rowRect.bottom + 0.5)
+
+    // 隣接チップの当たり判定が重なっていない（重なると誤タップになる）
+    const chips = [...canvasElement.querySelectorAll('[data-slot="chip"]')]
+    for (let i = 1; i < chips.length; i++) {
+      const prev = chips[i - 1].getBoundingClientRect()
+      const cur = chips[i].getBoundingClientRect()
+      await expect(cur.left).toBeGreaterThanOrEqual(prev.right - 0.5)
+    }
   },
 }
