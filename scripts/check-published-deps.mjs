@@ -1,8 +1,13 @@
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { ImportType, init, parse } from "es-module-lexer"
 
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
-const webBundle = readFileSync(new URL("../dist/index.js", import.meta.url), "utf8")
+const webBundlePath = new URL("../dist/index.js", import.meta.url)
+if (!existsSync(webBundlePath)) {
+  console.error("✗ dist/index.js がありません。先に `npm run build:lib` を実行してください（dist/ は git 追跡外）")
+  process.exit(1)
+}
+const webBundle = readFileSync(webBundlePath, "utf8")
 // Native entrypoints do not use react-dom. Web consumers install it explicitly
 // alongside React, which is exercised by test-packed-web-consumer.mjs.
 const explicitWebConsumerPeers = new Set(["react-dom"])

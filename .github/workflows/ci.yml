@@ -33,6 +33,11 @@ jobs:
       - name: ESLint
         run: npm run lint -- --max-warnings=0
 
+      # dist/ は git 追跡外のため、check 内の check-published-deps.mjs（dist/index.js を
+      # 読む）より前にライブラリをビルドしておく
+      - name: build:lib (dist 生成)
+        run: npm run build:lib
+
       - name: tsc / lint-scratch / deps / drift / COMPONENT_LOOKUP --check
         run: npm run check
 

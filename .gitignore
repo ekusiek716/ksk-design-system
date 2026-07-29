@@ -1,4 +1,10 @@
 node_modules
+
+# ライブラリビルド成果物（publish 時に prepack → build:lib で再生成される。
+# かつては GitHub 直参照インストールのため追跡していたが、全消費側が
+# npm registry 管理に移行したため追跡を廃止 — vite build 単体で dist/types が
+# 消える事故（PR #270 で顕在化）の再発防止）
+dist
 *.local
 .DS_Store
 storybook-static
