@@ -309,11 +309,22 @@ function diffProps(name, webPath, nativePath) {
 
   const webSet = new Set(webProps)
   const nativeSet = new Set(nativeProps)
-  const webOnly = webProps.filter((p) => !nativeSet.has(p) && !allowedWebOnly.has(p))
-  const nativeOnly = nativeProps.filter((p) => !webSet.has(p) && !allowedNativeOnly.has(p))
+  // Raw diffs, before subtracting the allowlist — used both to report real
+  // mismatches and to detect stale allowlist entries (props that no longer
+  // actually differ, e.g. because Native caught up and ported them).
+  const rawWebOnly = webProps.filter((p) => !nativeSet.has(p))
+  const rawNativeOnly = nativeProps.filter((p) => !webSet.has(p))
 
-  if (webOnly.length === 0 && nativeOnly.length === 0) return null
-  return { webOnly, nativeOnly }
+  const staleWebOnly = [...allowedWebOnly].filter((p) => !rawWebOnly.includes(p))
+  const staleNativeOnly = [...allowedNativeOnly].filter((p) => !rawNativeOnly.includes(p))
+
+  const webOnly = rawWebOnly.filter((p) => !allowedWebOnly.has(p))
+  const nativeOnly = rawNativeOnly.filter((p) => !allowedNativeOnly.has(p))
+
+  const stale = staleWebOnly.length > 0 || staleNativeOnly.length > 0 ? { staleWebOnly, staleNativeOnly } : null
+
+  if (webOnly.length === 0 && nativeOnly.length === 0) return stale ? { webOnly: [], nativeOnly: [], stale } : null
+  return { webOnly, nativeOnly, stale }
 }
 
 // ─── Part 1: existence parity (unchanged) ───
@@ -346,6 +357,7 @@ if (staleAllowlist.length > 0) {
 // ─── Part 2: prop-name parity (issue #264①) ───
 
 const propMismatches = []
+const stalePropGapEntries = []
 let propsChecked = 0
 
 for (const name of contractNames) {
@@ -357,12 +369,30 @@ for (const name of contractNames) {
   const diff = diffProps(name, webPath, nativeFile)
   if (diff === undefined) continue
   propsChecked += 1
-  if (diff) propMismatches.push({ name, ...diff })
+  if (diff?.stale) stalePropGapEntries.push({ name, ...diff.stale })
+  if (diff && (diff.webOnly.length > 0 || diff.nativeOnly.length > 0)) {
+    propMismatches.push({ name, webOnly: diff.webOnly, nativeOnly: diff.nativeOnly })
+  }
 }
 
+// Components whose contract entry disappeared entirely (name-level staleness,
+// same convention as INTENTIONAL_NATIVE_GAPS below).
 const staleProGaps = [...INTENTIONAL_PROP_GAPS.keys()].filter((name) => !contractNames.includes(name))
 if (staleProGaps.length > 0) {
-  console.warn(`[native-parity] stale prop-gap allowlist entries: ${staleProGaps.join(", ")}`)
+  console.warn(`[native-parity] stale prop-gap allowlist entries (component no longer in contracts): ${staleProGaps.join(", ")}`)
+}
+
+// Prop-level staleness: an allowlisted prop name that no longer actually
+// differs between Web and Native (e.g. Native caught up and ported it, or the
+// prop was removed from the side it was claimed to be exclusive to). Kept as
+// a warning — not a hard failure — to match the existing INTENTIONAL_NATIVE_GAPS
+// staleness check's convention above.
+if (stalePropGapEntries.length > 0) {
+  console.warn("[native-parity] stale INTENTIONAL_PROP_GAPS entries (no longer a real diff — safe to remove):")
+  for (const { name, staleWebOnly, staleNativeOnly } of stalePropGapEntries) {
+    if (staleWebOnly.length > 0) console.warn(`  - ${name}: webOnly no longer differs: ${staleWebOnly.join(", ")}`)
+    if (staleNativeOnly.length > 0) console.warn(`  - ${name}: nativeOnly no longer differs: ${staleNativeOnly.join(", ")}`)
+  }
 }
 
 if (propMismatches.length > 0) {

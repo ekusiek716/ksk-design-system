@@ -7,18 +7,42 @@ interface PillToggleOption<T extends string = string> {
   icon?: React.ReactNode
 }
 
-interface PillToggleProps<T extends string = string> {
-  options: PillToggleOption<T>[]
-  value: T
-  onChange?: (value: T) => void
-  /**
-   * @deprecated `onChange` を使ってください。後方互換のために残しているエイリアスで、
-   * `onChange` が指定されている場合はそちらが優先されます。将来のメジャーバージョンで削除予定。
-   */
-  onValueChange?: (value: T) => void
-  size?: "sm" | "md"
-  className?: string
-}
+/**
+ * onChange / onValueChange のどちらか一方は必須（両方 optional にすると
+ * どちらも渡さずコンパイルが通り、全トリガーが無反応になる退行が起きるため、
+ * ユニオン型で「少なくとも一方は必須」を型レベルで強制する）。
+ *
+ * 各 union メンバーに options/value/size/className を重複させているのは、
+ * `BaseProps & (A | B)` の交差型にすると scripts/check-native-parity.mjs の
+ * 正規表現ベースの props 抽出（型チェックまではしない軽量設計）が最初の
+ * `{` だけを own-props body として読み、base 側のフィールドを見失うため。
+ * 型レベルでは交差でも union 展開でも等価だが、抽出のしやすさを優先した。
+ */
+type PillToggleProps<T extends string = string> =
+  | {
+      options: PillToggleOption<T>[]
+      value: T
+      size?: "sm" | "md"
+      className?: string
+      onChange: (value: T) => void
+      /**
+       * @deprecated `onChange` を使ってください。後方互換のために残しているエイリアスで、
+       * `onChange` が指定されている場合はそちらが優先されます。将来のメジャーバージョンで削除予定。
+       */
+      onValueChange?: (value: T) => void
+    }
+  | {
+      options: PillToggleOption<T>[]
+      value: T
+      size?: "sm" | "md"
+      className?: string
+      onChange?: undefined
+      /**
+       * @deprecated `onChange` を使ってください。後方互換のために残しているエイリアスで、
+       * `onChange` が指定されている場合はそちらが優先されます。将来のメジャーバージョンで削除予定。
+       */
+      onValueChange: (value: T) => void
+    }
 
 /**
  * PillToggle — ピル型セグメントコントロール（値トグル）
