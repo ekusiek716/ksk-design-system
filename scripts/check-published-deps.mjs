@@ -1,11 +1,22 @@
+import { spawnSync } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
 import { ImportType, init, parse } from "es-module-lexer"
 
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
 const webBundlePath = new URL("../dist/index.js", import.meta.url)
 if (!existsSync(webBundlePath)) {
-  console.error("✗ dist/index.js がありません。先に `npm run build:lib` を実行してください（dist/ は git 追跡外）")
-  process.exit(1)
+  // dist/ は git 追跡外のため、fresh checkout では存在しない。
+  // `npm run check` や release.sh を単体で走らせても通るよう、その場でビルドする。
+  console.log("dist/index.js がないため `npm run build:lib` を実行します（dist/ は git 追跡外）")
+  const build = spawnSync("npm", ["run", "build:lib"], {
+    cwd: fileURLToPath(new URL("..", import.meta.url)),
+    stdio: "inherit",
+  })
+  if (build.status !== 0 || !existsSync(webBundlePath)) {
+    console.error("✗ build:lib に失敗し dist/index.js を生成できませんでした")
+    process.exit(1)
+  }
 }
 const webBundle = readFileSync(webBundlePath, "utf8")
 // Native entrypoints do not use react-dom. Web consumers install it explicitly
