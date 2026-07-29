@@ -19,6 +19,23 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 
 ## v1 系内の minor 変更（参考）
 
+### 次のリリース — PillToggle の onChange/onValueChange 統一（破壊変更なし）
+
+`PillToggle` のみ他コンポーネント（Switch 等の native 系を除く）と異なり `onValueChange`
+を主 API として案内していたため、`onChange` に統一した（issue #264⑥）。
+`onValueChange` は非推奨エイリアスとして両対応するため、**既存コードの書き換えは不要**。
+
+```tsx
+// Before（引き続き動作するが非推奨）
+<PillToggle options={options} value={value} onValueChange={setValue} />
+
+// After（推奨）
+<PillToggle options={options} value={value} onChange={setValue} />
+```
+
+`onChange` と `onValueChange` を両方渡した場合は `onChange` が優先される。
+`onValueChange` は将来のメジャーバージョンで削除予定。
+
 ### 次のリリース — Tailwind 4.1 以上が必要（要確認）
 
 preset に DS 内部ユーティリティの safelist（`src/styles/source-safelist.css`・自動生成）を同梱した（issue #258）。
