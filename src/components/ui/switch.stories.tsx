@@ -14,20 +14,22 @@ export default meta
 
 type Story = StoryObj<typeof Switch>
 
+// このコンポーネント単体のショーケースにはラベルテキストが無いため、
+// axe: button-name 対策で aria-label を明示する（実利用では Label 併記が前提）。
 export const Default: Story = {
-  args: {},
+  args: { "aria-label": "サンプル" },
 }
 
 export const Checked: Story = {
-  args: { defaultChecked: true },
+  args: { defaultChecked: true, "aria-label": "サンプル" },
 }
 
 export const Disabled: Story = {
-  args: { disabled: true },
+  args: { disabled: true, "aria-label": "サンプル" },
 }
 
 export const DisabledChecked: Story = {
-  args: { disabled: true, defaultChecked: true },
+  args: { disabled: true, defaultChecked: true, "aria-label": "サンプル" },
 }
 
 export const WithLabel: Story = {

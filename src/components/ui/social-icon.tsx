@@ -73,6 +73,7 @@ function SocialIcon({
       viewBox={entry.viewBox}
       fill="none"
       role="img"
+      aria-label={SOCIAL_ICON_LABELS[platform] ?? platform}
       className={cn("inline-block shrink-0", className)}
       {...props}
     >

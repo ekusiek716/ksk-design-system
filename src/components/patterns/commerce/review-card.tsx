@@ -18,7 +18,8 @@ interface ReviewCardProps {
 
 function StarRow({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
-    <div className="flex gap-0.5" aria-label={`${rating}点 / 5点`}>
+    // role="img" が無いと div への aria-label は axe: aria-prohibited-attr。
+    <div className="flex gap-0.5" role="img" aria-label={`${rating}点 / 5点`}>
       {[1, 2, 3, 4, 5].map((i) => (
         <svg key={i} width={size} height={size} viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path

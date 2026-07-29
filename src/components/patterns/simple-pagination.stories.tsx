@@ -68,9 +68,11 @@ export const Compact: Story = {
 export const DisabledAtBoundaries: Story = {
   name: "境界での disabled",
   render: () => (
+    // 同一ページ内に nav landmark が複数あるため、axe: landmark-unique 対策で
+    // それぞれに区別できる aria-label を付与する。
     <div className="mx-auto flex w-full max-w-md flex-col gap-4 p-6">
-      <SimplePagination page={1} totalPages={5} onPageChange={() => {}} />
-      <SimplePagination page={5} totalPages={5} onPageChange={() => {}} />
+      <SimplePagination page={1} totalPages={5} onPageChange={() => {}} aria-label="ページネーション（先頭）" />
+      <SimplePagination page={5} totalPages={5} onPageChange={() => {}} aria-label="ページネーション（末尾）" />
     </div>
   ),
 }

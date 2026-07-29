@@ -75,7 +75,10 @@ function StarRating({
   return (
     <div
       data-slot="star-rating"
-      role={interactive ? "radiogroup" : undefined}
+      // 非インタラクティブ時は role="img" にして aria-label（合計評価の要約）を
+      // 単一のまとまりとして読み上げさせる（axe: aria-prohibited-attr 対策。
+      // role なし div への aria-label は無効）。
+      role={interactive ? "radiogroup" : "img"}
       aria-label={interactive ? "評価" : `${value}/${max}点`}
       className={cn("inline-flex items-center gap-0.5", className)}
     >
@@ -83,26 +86,37 @@ function StarRating({
         const starValue = i + 1
         const filled = display >= starValue
         const half = !filled && display >= starValue - 0.5
+        const starClassName = cn(
+          "transition-colors text-[var(--Brand-Primary)]",
+          STAR_SIZE[size],
+          interactive
+            ? "cursor-pointer hover:scale-110 transition-transform"
+            : "cursor-default pointer-events-none",
+          !filled && !half && "text-[var(--Border-Medium-Emphasis)]"
+        )
+
+        // 非インタラクティブ時は各星が装飾の一部（合計は親の role="img" +
+        // aria-label で読み上げ済み）。<button disabled> にすると
+        // button-name 違反（accessible name 無し）になるため span + aria-hidden にする。
+        if (!interactive) {
+          return (
+            <span key={i} aria-hidden="true" className={starClassName}>
+              <StarIcon filled={filled} half={half} className="w-full h-full" />
+            </span>
+          )
+        }
 
         return (
           <button
             key={i}
             type="button"
-            role={interactive ? "radio" : undefined}
-            aria-checked={interactive ? value === starValue : undefined}
-            aria-label={interactive ? `${starValue}点` : undefined}
-            disabled={!interactive}
+            role="radio"
+            aria-checked={value === starValue}
+            aria-label={`${starValue}点`}
             onClick={() => onChange?.(starValue)}
-            onMouseEnter={() => interactive && setHovered(starValue)}
-            onMouseLeave={() => interactive && setHovered(null)}
-            className={cn(
-              "transition-colors text-[var(--Brand-Primary)]",
-              STAR_SIZE[size],
-              interactive
-                ? "cursor-pointer hover:scale-110 transition-transform"
-                : "cursor-default pointer-events-none",
-              !filled && !half && "text-[var(--Border-Medium-Emphasis)]"
-            )}
+            onMouseEnter={() => setHovered(starValue)}
+            onMouseLeave={() => setHovered(null)}
+            className={starClassName}
           >
             <StarIcon
               filled={filled}

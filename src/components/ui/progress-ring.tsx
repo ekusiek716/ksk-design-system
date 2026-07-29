@@ -12,10 +12,18 @@ interface ProgressRingProps {
   /** 0〜100 */
   value: number
   size?: keyof typeof SIZE_MAP
-  /** 中央テキスト（省略時は % 表示） */
+  /** 中央テキスト（省略時は % 表示）。"✓" のような記号や ReactNode も許容 */
   label?: React.ReactNode
   showLabel?: boolean
   className?: string
+  /**
+   * progressbar のアクセシブルネーム。
+   * 省略時は `label` が文字列ならそれを使うが、"✓" のような記号や絵文字は
+   * スクリーンリーダーで意味が通らないため、その場合は明示的に指定すること
+   * （例: "アップロード進捗 完了"）。`label` が ReactNode（非文字列）のときの
+   * 既定値は「進捗」。
+   */
+  "aria-label"?: string
 }
 
 function ProgressRing({
@@ -24,6 +32,7 @@ function ProgressRing({
   label,
   showLabel = true,
   className,
+  "aria-label": ariaLabel,
 }: ProgressRingProps) {
   const { size: px, stroke } = SIZE_MAP[size]
   const radius = (px - stroke) / 2
@@ -40,6 +49,7 @@ function ProgressRing({
       aria-valuenow={clamped}
       aria-valuemin={0}
       aria-valuemax={100}
+      aria-label={ariaLabel ?? (typeof label === "string" ? label : "進捗")}
     >
       <svg width={px} height={px} className="-rotate-90">
         {/* Track */}

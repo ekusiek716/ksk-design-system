@@ -38,7 +38,7 @@ export const Default: Story = {
     <AppHeader
       title="マイページ"
       trailing={
-        <Button variant="ghost" size="icon-sm"><SearchIcon /></Button>
+        <Button variant="ghost" size="icon-sm" aria-label="検索"><SearchIcon /></Button>
       }
     />
   ),
@@ -47,7 +47,7 @@ export const Default: Story = {
 export const WithBack: Story = {
   render: () => (
     <AppHeader
-      leading={<Button variant="ghost" size="icon-sm"><BackIcon /></Button>}
+      leading={<Button variant="ghost" size="icon-sm" aria-label="戻る"><BackIcon /></Button>}
       title="タスク詳細"
     />
   ),
@@ -56,15 +56,15 @@ export const WithBack: Story = {
 export const WithSubtitle: Story = {
   render: () => (
     <AppHeader
-      leading={<Button variant="ghost" size="icon-sm"><BackIcon /></Button>}
+      leading={<Button variant="ghost" size="icon-sm" aria-label="戻る"><BackIcon /></Button>}
       title="Wedding Todo"
       subtitle="2026年12月25日まで 241日"
       trailing={
         <div className="flex items-center gap-1">
           <NotificationBadge count={3}>
-            <Button variant="ghost" size="icon-sm"><BellIcon /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label="通知"><BellIcon /></Button>
           </NotificationBadge>
-          <Button variant="ghost" size="icon-sm"><SearchIcon /></Button>
+          <Button variant="ghost" size="icon-sm" aria-label="検索"><SearchIcon /></Button>
         </div>
       }
     />
@@ -74,7 +74,7 @@ export const WithSubtitle: Story = {
 export const WithMenu: Story = {
   render: () => (
     <AppHeader
-      leading={<Button variant="ghost" size="icon-sm"><MenuIcon /></Button>}
+      leading={<Button variant="ghost" size="icon-sm" aria-label="メニュー"><MenuIcon /></Button>}
       title="ダッシュボード"
       trailing={
         <Button size="sm">新規作成</Button>
@@ -85,7 +85,14 @@ export const WithMenu: Story = {
 
 export const Sticky: Story = {
   render: () => (
-    <div className="h-96 overflow-auto bg-[var(--Surface-Secondary)] rounded-lg">
+    // overflow-auto なスクロール領域はキーボードでフォーカス・操作できる必要がある
+    // （axe: scrollable-region-focusable）。role="region" は付けない
+    // （中に <AppHeader>=<header> があり、banner landmark が別ランドマークに
+    // 包まれてしまうため。tabIndex だけでフォーカス到達性を満たす）。
+    <div
+      className="h-96 overflow-auto bg-[var(--Surface-Secondary)] rounded-lg focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+      tabIndex={0}
+    >
       <AppHeader sticky title="スクロールしてください" subtitle="Sticky ヘッダー" />
       <div className="p-4 space-y-4">
         {Array.from({ length: 20 }, (_, i) => (
@@ -109,11 +116,11 @@ export const Glass: Story = {
     >
       <AppHeader
         variant="glass"
-        leading={<Button variant="ghost" size="icon-sm" className="text-white"><BackIcon /></Button>}
+        leading={<Button variant="ghost" size="icon-sm" className="text-white" aria-label="戻る"><BackIcon /></Button>}
         title="式場詳細"
         trailing={
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon-sm" className="text-white"><SearchIcon /></Button>
+            <Button variant="ghost" size="icon-sm" className="text-white" aria-label="検索"><SearchIcon /></Button>
           </div>
         }
       />
@@ -133,7 +140,7 @@ export const Transparent: Story = {
         sticky
         variant="transparent"
         title="Wedding Todo"
-        trailing={<Button variant="ghost" size="icon-sm" className="text-white"><BellIcon /></Button>}
+        trailing={<Button variant="ghost" size="icon-sm" className="text-white" aria-label="通知"><BellIcon /></Button>}
       />
       <div className="p-4 space-y-4 mt-2">
         {Array.from({ length: 10 }, (_, i) => (

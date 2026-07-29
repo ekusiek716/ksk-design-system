@@ -20,6 +20,7 @@ function ProgressSteps({
       aria-valuenow={currentStep + 1}
       aria-valuemin={1}
       aria-valuemax={steps.length}
+      aria-label={`ステップ ${currentStep + 1} / ${steps.length}: ${steps[currentStep] ?? ""}`}
       {...props}
     >
       {steps.map((step, index) => {

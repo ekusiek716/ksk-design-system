@@ -46,11 +46,15 @@ function ImageCarousel({
       className={cn("group/carousel relative", className)}
       {...props}
     >
-      {/* スライドコンテナ */}
+      {/* スライドコンテナ。矢印/ドットが無い構成でもキーボードで横スクロール
+          できるようにする（axe: scrollable-region-focusable）。 */}
       <div
         ref={scrollRef}
-        className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth"
+        className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
         style={{ scrollbarWidth: "none" }}
+        tabIndex={0}
+        role="region"
+        aria-label="画像カルーセル"
       >
         {images.map((img, i) => (
           <div

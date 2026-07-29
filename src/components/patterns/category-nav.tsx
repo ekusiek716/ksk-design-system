@@ -74,9 +74,12 @@ function CategoryNav({ items, className }: CategoryNavProps) {
                     : "border-[var(--Border-Low-Emphasis)]"
                 )}
               >
+                {/* item.name は隣接する <span> に可視テキストとして既出のため、既定 alt は
+                    空にして読み上げの重複を避ける（axe: image-redundant-alt）。
+                    通常の写真と異なる追加情報がある場合のみ item.imageAlt で明示する。 */}
                 <img
                   src={item.imageUrl}
-                  alt={item.imageAlt ?? item.name}
+                  alt={item.imageAlt ?? ""}
                   className="size-full object-cover"
                   loading="lazy"
                 />
@@ -116,7 +119,7 @@ function CategoryNav({ items, className }: CategoryNavProps) {
             >
               <img
                 src={item.imageUrl}
-                alt={item.imageAlt ?? item.name}
+                alt={item.imageAlt ?? ""}
                 className="size-full object-cover"
                 loading="lazy"
               />

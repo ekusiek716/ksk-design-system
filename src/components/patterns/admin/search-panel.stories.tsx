@@ -28,7 +28,9 @@ export const Default: Story = {
       <div>
         <label className="typo-label-sm text-[var(--Text-Medium-Emphasis)]">ステータス</label>
         <Select>
-          <SelectTrigger className="mt-1">
+          {/* 上の <label> は htmlFor 未設定で Radix トリガーに紐付かないため、
+              aria-label で直接アクセシブルネームを補う（axe: button-name）。 */}
+          <SelectTrigger className="mt-1" aria-label="ステータス">
             <SelectValue placeholder="すべて" />
           </SelectTrigger>
           <SelectContent>

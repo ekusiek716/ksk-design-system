@@ -123,6 +123,33 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    // axe-core による機械的 a11y 検査（issue #261）。
+    // @storybook/addon-a11y が公開する afterEach フックが、この設定を見て
+    // ストーリー描画のたびに axe-core を走らせる。"error" は違反があると
+    // テストを fail させる（Storybook 手動閲覧時は A11y パネルへの表示のみで、
+    // ブラウザ自体は落ちない）。
+    // `npm run test:a11y`（vitest.a11y.config.ts、全ストーリー対象）と
+    // `npm run test:interaction`（vitest.storybook.config.ts、
+    // tags:["interaction"] のみ）の両方に適用される。
+    // 誤検知・意図的なもの（デコレーション目的の装飾要素等）はストーリー単位で
+    // `parameters.a11y = { test: "off" }` または `config.rules` で該当ルールのみ
+    // 無効化し、理由コメントを残すこと。
+    a11y: {
+      test: "error",
+      // color-contrast は axe 側では現状 無効化 している。
+      // 理由: axe を全ストーリーに対して有効化した初回実行で、既存の semantic
+      // トークンの組み合わせ（例: Success-Base/Warning-Base 背景 +
+      // Text-on-Inverse 前景が 3.3〜3.6:1、Text-Low-Emphasis が白背景で
+      // 1.9〜2.5:1 等）に AA 4.5:1 未達が広範囲（6 テーマ×全コンポーネントに
+      // またがる規模）で見つかった。これはトークン設計そのものの見直しを要する
+      // 別件（issue 化して追跡）であり、本 PR（#261: a11y 機械検証基盤の追加）
+      // の範囲では対応しない。コントラストの機械検証自体は
+      // `scripts/check-contrast.mjs`（`npm run check` 経由、A001〜A003 の
+      // 正本チェック）が既存トークンの主要ペアに対して引き続き有効。
+      config: {
+        rules: [{ id: "color-contrast", enabled: false }],
+      },
+    },
     options: {
       storySort: {
         order: ["Foundation", ["Guidelines", "Showcase", "Gallery", "*"], "Components", "Shells", "*"],
