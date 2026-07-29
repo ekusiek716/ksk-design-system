@@ -342,6 +342,7 @@
 @source inline("flex-col");
 @source inline("flex-col-reverse");
 @source inline("flex-row");
+@source inline("flex-shrink");
 @source inline("flex-shrink-0");
 @source inline("flex-wrap");
 @source inline("focus-visible:border-[var(--Border-Accent-Primary)]");

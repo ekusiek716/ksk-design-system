@@ -40,10 +40,14 @@ const chipVariants = cva(
       // （ChipFilterBar / TabsList はそうしている）。
       size: {
         // my-* は「44px - 本体の高さ」の半分。28+8*2 / 32+6*2 / 36+4*2 = いずれも 44px。
+        // sm/md/lg に tile のような shrink-0 は不要。min-width は flex-shrink の
+        // 下限として効くので、min-w-11 だけで 44px は割られない。tile が #280 で
+        // shrink-0 を必要としたのは size-12 が width であって min-width ではないため。
         sm: "h-7 my-2 min-w-11 px-2.5 typo-label-xs before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
         md: "h-8 my-1.5 min-w-11 px-3 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
         lg: "h-9 my-1 min-w-11 px-4 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
-        tile: "size-12 typo-body-md",
+        // shrink-0: flex row 内で min-content 幅まで潰れて 48px タッチターゲットが崩れるのを防ぐ
+        tile: "size-12 shrink-0 typo-body-md",
       },
       shape: {
         pill: "rounded-full",
