@@ -5,6 +5,7 @@ import type { ComponentEntry } from "../utils/loader.js";
 export type MatchKind =
   | "name"
   | "exportedAs"
+  | "alias"
   | "subcomponent"
   | "deprecatedAlias"
   | "path";
@@ -52,6 +53,7 @@ const compoundRootOf = (name: string) => name.split(".")[0];
 function importableNamesOf(entry: ComponentEntry): string[] {
   const names: string[] = [];
   if (entry.exported !== false) names.push(entry.exportedAs ?? entry.name);
+  names.push(...(entry.aliases ?? []));
   names.push(...(entry.subcomponents ?? []).filter((s) => !isCompoundMember(s)));
   return [...new Set(names)];
 }
@@ -84,11 +86,14 @@ function findExactMatch(
   if (entry.exportedAs && eq(entry.exportedAs, query)) {
     return { matchedName: entry.exportedAs, matchedBy: "exportedAs" };
   }
+  const aliasMatch = entry.aliases?.find((a) => eq(a, query));
+  if (aliasMatch) return { matchedName: aliasMatch, matchedBy: "alias" };
+
   const sub = entry.subcomponents?.find((s) => eq(s, query));
   if (sub) return { matchedName: sub, matchedBy: "subcomponent" };
 
-  const alias = entry.deprecatedAliases?.find((a) => eq(a, query));
-  if (alias) return { matchedName: alias, matchedBy: "deprecatedAlias" };
+  const deprecatedAlias = entry.deprecatedAliases?.find((a) => eq(a, query));
+  if (deprecatedAlias) return { matchedName: deprecatedAlias, matchedBy: "deprecatedAlias" };
 
   return null;
 }
@@ -102,6 +107,9 @@ function findPartialMatch(entry: ComponentEntry, query: string): Match | null {
   if (entry.exportedAs && normalize(entry.exportedAs).includes(normalized)) {
     return { matchedName: entry.exportedAs, matchedBy: "exportedAs" };
   }
+  const aliasMatch = entry.aliases?.find((a) => normalize(a).includes(normalized));
+  if (aliasMatch) return { matchedName: aliasMatch, matchedBy: "alias" };
+
   const sub = entry.subcomponents?.find((s) => normalize(s).includes(normalized));
   if (sub) return { matchedName: sub, matchedBy: "subcomponent" };
 

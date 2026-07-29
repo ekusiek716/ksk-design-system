@@ -25,6 +25,7 @@ export function search(query) {
                 ...(comp.sizes ?? []),
                 ...(comp.subcomponents ?? []),
                 ...(comp.exportedAs ? [comp.exportedAs] : []),
+                ...(comp.aliases ?? []),
                 ...(comp.deprecatedAliases ?? []),
                 ...(comp.rules ?? []),
             ]

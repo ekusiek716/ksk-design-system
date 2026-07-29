@@ -1,6 +1,6 @@
 import type { ComponentEntry } from "../utils/loader.js";
 /** 問い合わせ名がエントリのどのフィールドに当たったか。 */
-export type MatchKind = "name" | "exportedAs" | "subcomponent" | "deprecatedAlias" | "path";
+export type MatchKind = "name" | "exportedAs" | "alias" | "subcomponent" | "deprecatedAlias" | "path";
 export interface ComponentResult extends ComponentEntry {
     importPath: string;
     group: string;

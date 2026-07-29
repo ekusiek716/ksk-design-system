@@ -221,4 +221,15 @@ describe("getComponent — 解決順", () => {
     expect(result?.path).toBe("src/components/ui/form.tsx")
     expect(result?.importable).toBe(true)
   })
+
+  it("aliases 経由で別名 export された同名コンポーネントを解決できる（#260, #266フォローアップ）", () => {
+    // ui/form の FormField は patterns/form-field の FormField と同名衝突を避けるため
+    // index.ts で RhfFormField として export される。contracts 上は aliases: ["RhfFormField"]
+    // として Form エントリに紐付いており、その名前で検索・解決できる必要がある。
+    const result = getComponent("RhfFormField")
+    expect(result?.path).toBe("src/components/ui/form.tsx")
+    expect(result?.matchedName).toBe("RhfFormField")
+    expect(result?.matchedBy).toBe("alias")
+    expect(result?.importable).toBe(true)
+  })
 })

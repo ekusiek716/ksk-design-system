@@ -90,6 +90,7 @@ function loadComponentRegistry(contractsPath) {
       }
 
       add(component.exportedAs ?? component.name, tier, component.path)
+      for (const alias of component.aliases ?? []) add(alias, tier, component.path)
       for (const alias of component.deprecatedAliases ?? []) add(alias, tier, component.path)
     }
   }

@@ -327,6 +327,7 @@ function generateMarkdown(ui, patterns) {
     "| `<div className=\"rounded-xl border p-4\">` | `<Card><CardContent>` |",
     "| `text-blue-500` 等 Tailwind 標準色 | `text-[var(--Brand-Primary)]` 等セマンティックトークン |",
     "| `font-bold` 直書き | `typo-body-md-bold` 等 typo-* クラス |",
+    "| `FormField`（同名 2 種）をどちらか確認せず import | react-hook-form を使うフォームは `RhfFormField`（実体は `ui/form` の `FormField`）、単純な label+error 表示は `FormField`（`patterns/form-field`）。迷ったら後者 |",
     "",
   )
 
@@ -349,7 +350,8 @@ function generateMarkdown(ui, patterns) {
     "| 下部ナビゲーション | `<BottomTabBar>` | `BottomTabBar` |",
     "| モバイル FAB | `<MobileFloatingActionButton label=\"追加する\" />` | `MobileFloatingActionButton` |",
     "| プログレスバー | `<Progress>` | `Progress` |",
-    "| フォームフィールド | `<FormField>` | `FormField` |",
+    "| フォームフィールド（label+error のみ、RHF 不要） | `<FormField>` | `FormField` |",
+    "| フォームフィールド（react-hook-form の Controller と統合） | `<RhfFormField control={form.control} name=\"...\" render={...} />` | `RhfFormField`（`ui/form` の `FormField` を index.ts で別名 export したもの） |",
     "| ケバブメニュー | `<KebabMenu>` | `KebabMenu` |",
     "| detail/edit sheet のヘッダー | `<DetailSheetHeader trailing={<KebabMenu ... />} />` | `DetailSheetHeader` |",
     "| Sheet footer の keyboard 対応 | `<KeyboardAwareSheetFooter behavior=\"hide\">...` | `KeyboardAwareSheetFooter` |",
