@@ -22,7 +22,7 @@ const newestSourceMtime = (path) => {
 const bundleMtime = existsSync(webBundlePath) ? statSync(webBundlePath).mtimeMs : 0
 const sourceMtime = Math.max(
   newestSourceMtime(`${rootDir}src`),
-  ...["package.json", "vite.config.lib.ts", "tsconfig.lib.json"].map(
+  ...["package.json", "package-lock.json", "vite.config.lib.ts", "tsconfig.lib.json"].map(
     (file) => statSync(`${rootDir}${file}`).mtimeMs,
   ),
 )
