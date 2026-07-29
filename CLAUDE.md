@@ -14,6 +14,7 @@ UI を書く前に必ず確認すること:
 - [ ] 生タグ（`<button>` / `<input>` / `<a href>`）でなく DS コンポーネントを使ったか
 - [ ] CSS でベンダープレフィックス併記する場合、**`-webkit-` を先・標準形を後**に書いたか（消費側の minifier が同一プロパティとして dedupe し後勝ちのみ残すため。逆順だと Firefox で静かに無効化。`node scripts/check-prefix-order.mjs` が CI で検出）
 - [ ] `.tsx` 編集後に `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行したか
+- [ ] `FormField` を import する前にどちらか確認したか（react-hook-form の Controller と統合するなら `RhfFormField`＝`ui/form` の `FormField` を index.ts で別名 export したもの。単純な label+error 表示は `patterns/form-field` の `FormField`。迷ったら後者）
 
 ---
 

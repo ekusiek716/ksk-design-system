@@ -893,6 +893,7 @@
       "name": "Form",
       "path": "src/components/ui/form.tsx",
       "description": "react-hook-form 統合フォームラッパー。FormProvider + Controller のラッパー群。FormField / FormItem / FormLabel / FormControl / FormDescription / FormMessage で構成。",
+      "usageNote": "この FormField は patterns/form-field.tsx の非 RHF 版 FormField と同名のため、index.ts では `RhfFormField` として export される。react-hook-form の Controller が必要なフォームはこちらを使う。迷ったら patterns 版 FormField（非 RHF）を使う。",
       "accessibility": [
         "aria-describedby 自動付与",
         "aria-invalid でエラー状態",
@@ -1237,6 +1238,7 @@
       "name": "FormField",
       "path": "src/components/patterns/form-field.tsx",
       "description": "フォームフィールドラッパー。Label+Input+エラーメッセージをセットで管理。バリデーション表示付き。",
+      "usageNote": "index.ts では素の `FormField` として export される。react-hook-form 不要な単純なラベル+エラー表示にはこちらを使う。react-hook-form の Controller と統合したいフォームは ui/form の `RhfFormField`（実体は FormField）を使う。迷ったらこちら（patterns 版）を使う。",
       "rules": [
         "Label + Input + error message as unit",
         "required asterisk は Brand 色。Caution 色は入力エラーとの混同を避ける",

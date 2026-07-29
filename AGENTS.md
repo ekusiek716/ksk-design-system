@@ -38,6 +38,8 @@ UI コンポーネント・画面の生成/修正・レビューの前には、�
 
 コンポーネントを新規作成する前に `COMPONENT_LOOKUP.md` で同等品がないか確認すること。
 
+`FormField` は同名で2種類ある: react-hook-form の Controller と統合するなら `RhfFormField`（`ui/form` の `FormField` を index.ts で別名 export したもの）、単純な label+error 表示なら `FormField`（`patterns/form-field`）。迷ったら後者を使う。
+
 ### ローカル二重実装ゲート
 
 DS に無いと思っても consumer 側に別台帳を作らないこと。最初に `contracts/components.json` と
