@@ -10,7 +10,12 @@ interface PillToggleOption<T extends string = string> {
 interface PillToggleProps<T extends string = string> {
   options: PillToggleOption<T>[]
   value: T
-  onChange: (value: T) => void
+  onChange?: (value: T) => void
+  /**
+   * @deprecated `onChange` を使ってください。後方互換のために残しているエイリアスで、
+   * `onChange` が指定されている場合はそちらが優先されます。将来のメジャーバージョンで削除予定。
+   */
+  onValueChange?: (value: T) => void
   size?: "sm" | "md"
   className?: string
 }
@@ -33,14 +38,16 @@ function PillToggle<T extends string = string>({
   options,
   value,
   onChange,
+  onValueChange,
   size = "md",
   className,
 }: PillToggleProps<T>) {
+  const handleChange = onChange ?? onValueChange
   return (
     <Tabs
       data-slot="pill-toggle"
       value={value}
-      onValueChange={(v) => onChange(v as T)}
+      onValueChange={(v) => handleChange?.(v as T)}
     >
       <TabsList variant="pill" className={className}>
         {options.map((opt) => (
@@ -53,9 +60,11 @@ function PillToggle<T extends string = string>({
       {/* PillToggle はパネル切り替えを行わない（値トグル専用）が、Radix Tabs は
           アクティブな trigger に aria-controls で存在しない id を指してしまう
           （TabsContent が無いため）。空の TabsContent を用意して参照先を実在させる
-          （axe: aria-valid-attr-value）。 */}
+          （axe: aria-valid-attr-value）。TabsContent は既定で非アクティブ時に
+          アンマウントされるため、forceMount で常時マウントし続けて参照切れを防ぐ
+          （PR #271 CodeRabbit 指摘 / issue #275）。 */}
       {options.map((opt) => (
-        <TabsContent key={opt.value} value={opt.value} className="hidden" />
+        <TabsContent forceMount key={opt.value} value={opt.value} className="hidden" />
       ))}
     </Tabs>
   )
