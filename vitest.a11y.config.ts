@@ -41,6 +41,11 @@ export default defineConfig({
   ],
   test: {
     name: "storybook-a11y",
+    // 全 612 テストをヘッドレス chromium で回すため、マシン負荷が高いと
+    // 描画待ちでタイムアウトしてフレークする（2026-07-29 に 5 件観測 → 再実行で全緑）。
+    // axe 検査は決定的なので、retry は負荷起因の偽陽性だけを吸収する。
+    retry: 2,
+    testTimeout: 30_000,
     browser: {
       enabled: true,
       headless: true,

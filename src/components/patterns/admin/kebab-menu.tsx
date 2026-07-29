@@ -46,7 +46,7 @@ function KebabMenu({ items, className, ...props }: KebabMenuProps) {
           type="button"
           data-slot="kebab-menu"
           className={cn(
-            "flex size-8 items-center justify-center rounded-lg hover:bg-[var(--Surface-Secondary)] transition-colors",
+            "flex size-8 shrink-0 items-center justify-center rounded-lg hover:bg-[var(--Surface-Secondary)] transition-colors",
             className
           )}
           aria-label="メニュー"

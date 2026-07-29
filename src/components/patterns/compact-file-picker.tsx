@@ -137,7 +137,7 @@ function ImageAttachmentPicker({
                 alt={image.alt ?? image.name ?? ""}
                 className={cn(
                   "block object-cover",
-                  previewVariant === "grid" ? "aspect-square w-full" : "size-14 rounded-lg"
+                  previewVariant === "grid" ? "aspect-square w-full" : "size-14 shrink-0 rounded-lg"
                 )}
               />
               {previewVariant === "list" && (

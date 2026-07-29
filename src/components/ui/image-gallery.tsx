@@ -146,14 +146,14 @@ function ImageGallery({
 
       {/* Dots */}
       {indicatorType === "dot" && images.length > 1 && (
-        <div className="flex items-center justify-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
           {images.map((_, i) => (
             <button
               key={i}
               onClick={() => setActive(i)}
               aria-label={imageLabel(i)}
               className={cn(
-                "rounded-full transition-all",
+                "shrink-0 rounded-full transition-all",
                 i === active
                   ? "w-4 h-1.5 bg-[var(--Brand-Primary)]"
                   : "w-1.5 h-1.5 bg-[var(--Border-Medium-Emphasis)] hover:bg-[var(--Text-Low-Emphasis)]"

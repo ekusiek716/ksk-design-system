@@ -34,6 +34,7 @@
 @source inline("[&>*]:flex-1");
 @source inline("[&>*]:flex-col");
 @source inline("[&>*]:min-w-[140px]");
+@source inline("[&>*]:shrink-0");
 @source inline("[&>button]:bg-[var(--Brand-Primary)]");
 @source inline("[&>button]:bg-transparent!");
 @source inline("[&>button]:h-12");

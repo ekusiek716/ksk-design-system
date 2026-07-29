@@ -23,6 +23,10 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CLASS_START='(^|[^[:alnum:]_-])'
 CLASS_END='($|[^[:alnum:]_-])'
 COMMENT_LINE='(^|:)[[:space:]]*//|/\*'
+# W11 専用: JSDoc 継続行（`* ...`）も除外する（doc コメント中の `<header>` 等を実タグと
+# 誤検知しない）。全チェック共通の COMMENT_LINE に足すと `*render() { ... }` のような
+# 正当な TSX 行まで除外されるため、W11 だけに適用する。
+DOC_COMMENT_LINE="$COMMENT_LINE"'|(^|:)[[:space:]]*\*'
 
 # 色・typo 系の検出を severity 付きで報告する。
 # DS 本体(ui/patterns/icons)は段階導入として WARNING（CI は落とさない）、
@@ -338,7 +342,7 @@ for FILE in $FILES; do
     if ! echo "$BLOCK" | grep -q 'data-slot'; then
       MATCHES="${MATCHES}${line}\n"
     fi
-  done < <(grep -nE '<(header|footer)([[:space:]>]|$)' "$FILE" 2>/dev/null | grep -Ev "$COMMENT_LINE" || true)
+  done < <(grep -nE '<(header|footer)([[:space:]>]|$)' "$FILE" 2>/dev/null | grep -Ev "$DOC_COMMENT_LINE" || true)
   MATCHES=$(printf "%b" "$MATCHES" | sed '/^[[:space:]]*$/d')
   if [ -n "$MATCHES" ]; then
     echo -e "${YELLOW}⚠️  $FILE: 生の<header>/<footer> → AppShell等のDSシェルを検討${NC}"
