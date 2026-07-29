@@ -24,12 +24,14 @@ interface BannerCarouselProps {
   className?: string
 }
 
+// 白文字（Text-on-Media）を載せるため -Bold（700 相当）を使う。
+// base（500 相当）は amber/teal 等で白文字が 2.1〜3.7:1 と AA 未達。
 const DEFAULT_BACKGROUNDS = [
-  "var(--Categorical-10)",
-  "var(--Categorical-6)",
-  "var(--Categorical-13)",
-  "var(--Categorical-3)",
-  "var(--Categorical-11)",
+  "var(--Categorical-10-Bold)",
+  "var(--Categorical-6-Bold)",
+  "var(--Categorical-13-Bold)",
+  "var(--Categorical-3-Bold)",
+  "var(--Categorical-11-Bold)",
 ]
 
 const ASPECT: Record<string, string> = {
@@ -114,7 +116,7 @@ function BannerCarousel({
                     <p className="typo-label-xs leading-snug text-[var(--Text-on-Media)]">{item.caption}</p>
                   )}
                   {item.subCaption && (
-                    <p className="typo-label-xs opacity-75 mt-0.5 text-[var(--Text-on-Media)]">{item.subCaption}</p>
+                    <p className="typo-label-xs mt-0.5 text-[var(--Text-on-Media)]">{item.subCaption}</p>
                   )}
                 </div>
               )}

@@ -38,7 +38,7 @@ export const themes = {
       "text": {
         "high-emphasis": "#111827",
         "medium-emphasis": "#374151",
-        "low-emphasis": "#6B7280",
+        "low-emphasis": "#4B5563",
         "disable": "#9CA3AF",
         "on-inverse": "#FFFFFF",
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)",
@@ -48,9 +48,10 @@ export const themes = {
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
         "accent-primary": "#2563EB",
         "success": "#15803D",
-        "caution": "#DC2626",
-        "warning": "#EA580C",
-        "info": "#2563EB"
+        "caution": "#B91C1C",
+        "warning": "#C2410C",
+        "info": "#2563EB",
+        "caution-on-inverse": "#F87171"
       },
       "object": {
         "high-emphasis": "#111827",
@@ -118,10 +119,10 @@ export const themes = {
         "action": "#B91C1C"
       },
       "success": {
-        "base": "#16A34A"
+        "base": "#15803D"
       },
       "warning": {
-        "base": "#EA580C"
+        "base": "#C2410C"
       },
       "info": {
         "base": "#2563EB"
@@ -170,7 +171,8 @@ export const themes = {
         "success": "#4ADE80",
         "caution": "#F87171",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "caution-on-inverse": "#B91C1C"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -275,7 +277,7 @@ export const themes = {
       "text": {
         "high-emphasis": "#111827",
         "medium-emphasis": "#374151",
-        "low-emphasis": "#6B7280",
+        "low-emphasis": "#4B5563",
         "disable": "#9CA3AF",
         "on-inverse": "#FFFFFF",
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)",
@@ -285,9 +287,10 @@ export const themes = {
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
         "accent-primary": "#2563EB",
         "success": "#15803D",
-        "caution": "#DC2626",
-        "warning": "#EA580C",
-        "info": "#2563EB"
+        "caution": "#B91C1C",
+        "warning": "#C2410C",
+        "info": "#2563EB",
+        "caution-on-inverse": "#F87171"
       },
       "object": {
         "high-emphasis": "#111827",
@@ -355,10 +358,10 @@ export const themes = {
         "action": "#B91C1C"
       },
       "success": {
-        "base": "#16A34A"
+        "base": "#15803D"
       },
       "warning": {
-        "base": "#EA580C"
+        "base": "#C2410C"
       },
       "info": {
         "base": "#2563EB"
@@ -407,7 +410,8 @@ export const themes = {
         "success": "#4ADE80",
         "caution": "#F87171",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "caution-on-inverse": "#B91C1C"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -512,7 +516,7 @@ export const themes = {
       "text": {
         "high-emphasis": "#111827",
         "medium-emphasis": "#374151",
-        "low-emphasis": "#6B7280",
+        "low-emphasis": "#4B5563",
         "disable": "#9CA3AF",
         "on-inverse": "#FFFFFF",
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)",
@@ -522,9 +526,10 @@ export const themes = {
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
         "accent-primary": "#163FF4",
         "success": "#15803D",
-        "caution": "#DC2626",
-        "warning": "#EA580C",
-        "info": "#2563EB"
+        "caution": "#B91C1C",
+        "warning": "#C2410C",
+        "info": "#2563EB",
+        "caution-on-inverse": "#F87171"
       },
       "object": {
         "high-emphasis": "#111827",
@@ -592,10 +597,10 @@ export const themes = {
         "action": "#B91C1C"
       },
       "success": {
-        "base": "#16A34A"
+        "base": "#15803D"
       },
       "warning": {
-        "base": "#EA580C"
+        "base": "#C2410C"
       },
       "info": {
         "base": "#2563EB"
@@ -644,7 +649,8 @@ export const themes = {
         "success": "#4ADE80",
         "caution": "#F87171",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "caution-on-inverse": "#B91C1C"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -749,7 +755,7 @@ export const themes = {
       "text": {
         "high-emphasis": "#111827",
         "medium-emphasis": "#374151",
-        "low-emphasis": "#6B7280",
+        "low-emphasis": "#4B5563",
         "disable": "#9CA3AF",
         "on-inverse": "#FFFFFF",
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)",
@@ -759,9 +765,10 @@ export const themes = {
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
         "accent-primary": "#C2410C",
         "success": "#15803D",
-        "caution": "#DC2626",
-        "warning": "#EA580C",
-        "info": "#2563EB"
+        "caution": "#B91C1C",
+        "warning": "#C2410C",
+        "info": "#2563EB",
+        "caution-on-inverse": "#F87171"
       },
       "object": {
         "high-emphasis": "#111827",
@@ -829,10 +836,10 @@ export const themes = {
         "action": "#B91C1C"
       },
       "success": {
-        "base": "#16A34A"
+        "base": "#15803D"
       },
       "warning": {
-        "base": "#EA580C"
+        "base": "#C2410C"
       },
       "info": {
         "base": "#2563EB"
@@ -881,7 +888,8 @@ export const themes = {
         "success": "#4ADE80",
         "caution": "#F87171",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "caution-on-inverse": "#B91C1C"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -986,7 +994,7 @@ export const themes = {
       "text": {
         "high-emphasis": "#111827",
         "medium-emphasis": "#374151",
-        "low-emphasis": "#6B7280",
+        "low-emphasis": "#4B5563",
         "disable": "#9CA3AF",
         "on-inverse": "#FFFFFF",
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)",
@@ -996,9 +1004,10 @@ export const themes = {
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
         "accent-primary": "#15803D",
         "success": "#15803D",
-        "caution": "#DC2626",
-        "warning": "#EA580C",
-        "info": "#2563EB"
+        "caution": "#B91C1C",
+        "warning": "#C2410C",
+        "info": "#2563EB",
+        "caution-on-inverse": "#F87171"
       },
       "object": {
         "high-emphasis": "#111827",
@@ -1066,10 +1075,10 @@ export const themes = {
         "action": "#B91C1C"
       },
       "success": {
-        "base": "#16A34A"
+        "base": "#15803D"
       },
       "warning": {
-        "base": "#EA580C"
+        "base": "#C2410C"
       },
       "info": {
         "base": "#2563EB"
@@ -1118,7 +1127,8 @@ export const themes = {
         "success": "#4ADE80",
         "caution": "#F87171",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "caution-on-inverse": "#B91C1C"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -1223,7 +1233,7 @@ export const themes = {
       "text": {
         "high-emphasis": "#111827",
         "medium-emphasis": "#374151",
-        "low-emphasis": "#6B7280",
+        "low-emphasis": "#4B5563",
         "disable": "#9CA3AF",
         "on-inverse": "#FFFFFF",
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)",
@@ -1233,9 +1243,10 @@ export const themes = {
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
         "accent-primary": "#6D28D9",
         "success": "#15803D",
-        "caution": "#DC2626",
-        "warning": "#EA580C",
-        "info": "#2563EB"
+        "caution": "#B91C1C",
+        "warning": "#C2410C",
+        "info": "#2563EB",
+        "caution-on-inverse": "#F87171"
       },
       "object": {
         "high-emphasis": "#111827",
@@ -1303,10 +1314,10 @@ export const themes = {
         "action": "#B91C1C"
       },
       "success": {
-        "base": "#16A34A"
+        "base": "#15803D"
       },
       "warning": {
-        "base": "#EA580C"
+        "base": "#C2410C"
       },
       "info": {
         "base": "#2563EB"
@@ -1355,7 +1366,8 @@ export const themes = {
         "success": "#4ADE80",
         "caution": "#F87171",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "caution-on-inverse": "#B91C1C"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",

@@ -86,7 +86,7 @@ function CoachMark({
             {isOnboarding ? (
               <div className="flex flex-col gap-2">
                 {totalSteps && (
-                  <span className="typo-label-xs opacity-70">
+                  <span className="typo-label-xs">
                     {step} / {totalSteps}
                   </span>
                 )}
@@ -99,7 +99,7 @@ function CoachMark({
                     {showClose && (
                       <button
                         onClick={onClose}
-                        className="typo-label-xs opacity-60 hover:opacity-100 transition-opacity"
+                        className="typo-label-xs underline underline-offset-2 hover:no-underline"
                       >
                         スキップ
                       </button>
@@ -107,7 +107,7 @@ function CoachMark({
                     {onNext && (
                       <button
                         onClick={onNext}
-                        className="typo-label-xs bg-[var(--Object-on-Inverse)]/20 hover:bg-[var(--Object-on-Inverse)]/30 px-2.5 py-0.5 rounded-md transition-colors ml-auto"
+                        className="typo-label-xs bg-[var(--Overlay-Light)] hover:bg-[var(--Overlay-Medium)] px-2.5 py-0.5 rounded-md transition-colors ml-auto"
                       >
                         次へ →
                       </button>

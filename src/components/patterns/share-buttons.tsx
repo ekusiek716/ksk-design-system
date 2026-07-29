@@ -52,7 +52,9 @@ const PROVIDER_META: Record<
       </svg>
     ),
     circleClass: "bg-[var(--Brand-Line)] text-[var(--Text-on-Media)]",
-    inlineClass: "border-[var(--Brand-Line)] text-[var(--Brand-Line)] hover:bg-[var(--Surface-Success-Subtle)]",
+    // ラベル文字に --Brand-Line(#06C755) を使うと白背景で 2.25:1 と AA 未達。
+    // 文字は Text-Success(緑700系)、アイコンだけ公式色を維持する。
+    inlineClass: "border-[var(--Brand-Line)] text-[var(--Text-Success)] [&_svg]:text-[var(--Brand-Line)] hover:bg-[var(--Surface-Success-Subtle)]",
   },
   x: {
     label: "X",

@@ -29,17 +29,19 @@ const THEMES: Record<string, Record<string, string>> = {
     "--Primitive-Brand-800": "#1E40AF",
     "--Primitive-Brand-900": "#1E3A8A",
   },
+  // src/themes/orange.css と同値に保つ（600=#C2410C は白文字 AA 対応済みの値。
+  // 旧値 #EA580C は 3.55:1 で未達だった）
   orange: {
     "--Primitive-Brand-50":  "#FFF7ED",
     "--Primitive-Brand-100": "#FFEDD5",
     "--Primitive-Brand-200": "#FED7AA",
     "--Primitive-Brand-300": "#FDBA74",
     "--Primitive-Brand-400": "#FB923C",
-    "--Primitive-Brand-500": "#E04B00",
-    "--Primitive-Brand-600": "#EA580C",
-    "--Primitive-Brand-700": "#C2410C",
-    "--Primitive-Brand-800": "#9A3412",
-    "--Primitive-Brand-900": "#7C2D12",
+    "--Primitive-Brand-500": "#F97316",
+    "--Primitive-Brand-600": "#C2410C",
+    "--Primitive-Brand-700": "#9A3412",
+    "--Primitive-Brand-800": "#7C2D12",
+    "--Primitive-Brand-900": "#431407",
   },
   green: {
     "--Primitive-Brand-50":  "#F0FDF4",
@@ -136,19 +138,12 @@ const preview: Preview = {
     // 無効化し、理由コメントを残すこと。
     a11y: {
       test: "error",
-      // color-contrast は axe 側では現状 無効化 している。
-      // 理由: axe を全ストーリーに対して有効化した初回実行で、既存の semantic
-      // トークンの組み合わせ（例: Success-Base/Warning-Base 背景 +
-      // Text-on-Inverse 前景が 3.3〜3.6:1、Text-Low-Emphasis が白背景で
-      // 1.9〜2.5:1 等）に AA 4.5:1 未達が広範囲（6 テーマ×全コンポーネントに
-      // またがる規模）で見つかった。これはトークン設計そのものの見直しを要する
-      // 別件（issue 化して追跡）であり、本 PR（#261: a11y 機械検証基盤の追加）
-      // の範囲では対応しない。コントラストの機械検証自体は
-      // `scripts/check-contrast.mjs`（`npm run check` 経由、A001〜A003 の
-      // 正本チェック）が既存トークンの主要ペアに対して引き続き有効。
-      config: {
-        rules: [{ id: "color-contrast", enabled: false }],
-      },
+      // color-contrast も有効（全ストーリー対象）。#261 初回導入時はトークン
+      // 債務のため一時無効化していたが、Success-Base/Warning-Base・
+      // Text-Caution/Warning・Text-Low-Emphasis の darken（semantic.css）と
+      // opacity 減衰の廃止で全違反を解消済み。無効状態（disabled）の見た目
+      // デモ等、WCAG 1.4.3 の inactive 例外に該当するストーリーだけ、
+      // ストーリー側 parameters.a11y.config.rules で理由コメント付きで除外する。
     },
     options: {
       storySort: {

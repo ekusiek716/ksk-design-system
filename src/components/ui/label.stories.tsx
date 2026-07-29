@@ -27,6 +27,11 @@ export const WithRequiredMarker: Story = {
 }
 
 export const DisabledState: Story = {
+  // 無効状態の見た目デモ。inactive UI component は WCAG 1.4.3 の
+  // コントラスト要件対象外だが、axe は label 単体を判定できないため除外する。
+  parameters: {
+    a11y: { config: { rules: [{ id: "color-contrast", enabled: false }] } },
+  },
   render: () => (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor="disabled-input" className="opacity-50 cursor-not-allowed">

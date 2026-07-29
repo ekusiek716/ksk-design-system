@@ -48,7 +48,8 @@ export const SpacingScale: Story = {
             style={{ width: px }}
           />
           <span className="typo-body-xs text-[var(--Text-Low-Emphasis)]">{px}</span>
-          <span className="typo-body-xs text-[var(--Text-Disable)]">p-{token} / m-{token} / gap-{token}</span>
+          {/* Text-Disable は無効状態専用（白背景 2.5:1）。読ませる注記は Low-Emphasis */}
+          <span className="typo-body-xs text-[var(--Text-Low-Emphasis)]">p-{token} / m-{token} / gap-{token}</span>
         </div>
       ))}
     </div>
