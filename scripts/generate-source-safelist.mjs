@@ -33,7 +33,11 @@ import { dirname, join, relative } from "node:path"
 import { fileURLToPath } from "node:url"
 import { Scanner } from "@tailwindcss/oxide"
 import { __unstable__loadDesignSystem } from "tailwindcss"
-import { formatInlineSource, UNSUPPORTED_HELP } from "./lib/source-safelist-format.mjs"
+import {
+  findDynamicClassComposition,
+  formatInlineSource,
+  UNSUPPORTED_HELP,
+} from "./lib/source-safelist-format.mjs"
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
 const OUT_PATH = join(ROOT, "src/styles/source-safelist.css")
@@ -147,21 +151,12 @@ function sourceFiles() {
   )
 }
 
-function findDynamicClassComposition(prefixes) {
-  const files = sourceFiles()
-  const violations = []
-  for (const file of files) {
-    const lines = readFileSync(file, "utf8").split("\n")
-    lines.forEach((line, i) => {
-      if (line.trimStart().startsWith("//") || line.trimStart().startsWith("*")) return
-      for (const match of line.matchAll(/`[^`]*?([a-z][a-z0-9-]*-)\$\{/g)) {
-        if (prefixes.has(match[1])) {
-          violations.push(`${relative(ROOT, file)}:${i + 1}  \`…${match[1]}\${…}\``)
-        }
-      }
-    })
-  }
-  return violations
+function collectDynamicClassViolations(prefixes) {
+  return sourceFiles().flatMap((file) =>
+    findDynamicClassComposition(readFileSync(file, "utf8"), prefixes).map(
+      ({ line, prefix }) => `${relative(ROOT, file)}:${line}  \`…${prefix}\${…}\``,
+    ),
+  )
 }
 
 /* ─── 生成 ─────────────────────────────────────────────── */
@@ -188,7 +183,7 @@ if (unsupported.length > 0) {
   process.exit(1)
 }
 
-const dynamic = findDynamicClassComposition(utilityPrefixes(utilities))
+const dynamic = collectDynamicClassViolations(utilityPrefixes(utilities))
 if (dynamic.length > 0) {
   console.error("✗ 動的なクラス名合成を検出しました（静的抽出できず消費側で CSS が生成されません）")
   for (const v of dynamic) console.error(`  ${v}`)

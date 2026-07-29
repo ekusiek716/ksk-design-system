@@ -15,6 +15,7 @@ import { execFileSync } from "node:child_process"
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import {
+  findDynamicClassComposition,
   formatInlineSource,
   UNSUPPORTED_BRACE,
   UNSUPPORTED_BOTH_QUOTES,
@@ -66,7 +67,7 @@ describe("@source safelist の同梱（issue #258）", () => {
     // SOURCE_SPECS 1 箇所から Scanner sources と検査対象ファイルの両方を導出している
     expect(script).toContain("SCANNER_SOURCES")
     expect(script).toContain("SOURCE_SPECS.flatMap")
-    expect(script).toContain("const files = sourceFiles()")
+    expect(script).toContain("sourceFiles().flatMap")
     expect(script).not.toContain('collectFiles(join(ROOT, "src/components")')
   })
 })
@@ -117,6 +118,50 @@ describe("safelist に載せられない候補の扱い（fixture）", () => {
     const script = read("scripts/generate-source-safelist.mjs")
     expect(script).toContain("unsupported.length > 0")
     expect(script).toContain("UNSUPPORTED_HELP[reason]")
+  })
+})
+
+/**
+ * 動的クラス名合成の検出（fixture）
+ *
+ * 行単位の regex だと、複数行テンプレートリテラルの途中行（その行に
+ * バッククォートが無い）を取りこぼし、check 成功のまま safelist から漏れる。
+ * ファイル内容全体を見る実装であることを固定する。
+ */
+describe("動的クラス名合成の検出（fixture）", () => {
+  const prefixes = new Set(["bg-", "pointer-events-", "text-"])
+
+  it("1行のテンプレートリテラルを検出する", () => {
+    const source = 'const c = `flex bg-${color}`\n'
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([{ line: 1, prefix: "bg-" }])
+  })
+
+  it("複数行テンプレートリテラルの途中行も検出する（行単位 regex の取りこぼし）", () => {
+    const source = ["<div", "  className={`", "    flex items-center", "    bg-${color}", "  `}", "/>", ""].join("\n")
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([{ line: 4, prefix: "bg-" }])
+  })
+
+  it("同一ファイル内の複数違反をすべて報告する", () => {
+    const source = ["const a = `", "  text-${x}", "`", "const b = `pointer-events-${y}`", ""].join("\n")
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([
+      { line: 2, prefix: "text-" },
+      { line: 4, prefix: "pointer-events-" },
+    ])
+  })
+
+  it("ユーティリティ接頭辞でない補間は誤検出しない（React の key など）", () => {
+    const source = "<Sep key={`separator-${index}`} />\n"
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([])
+  })
+
+  it("コメント内の記法例は誤検出しない", () => {
+    const source = ["// NG: `bg-${color}` のような書き方は禁止", "/* `text-${x}` も同様 */", 'const c = "bg-red-500"', ""].join("\n")
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([])
+  })
+
+  it("静的なクラス文字列は違反にしない", () => {
+    const source = 'const c = cn("flex bg-[var(--Surface-Primary)]", other)\n'
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([])
   })
 
   it("生成物が存在しない状態からブートストラップできる（自己参照で throw しない）", () => {
