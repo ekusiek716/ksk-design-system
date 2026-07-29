@@ -19,6 +19,23 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 
 ## v1 系内の minor 変更（参考）
 
+### 次のリリース — Tailwind 4.1 以上が必要（要確認）
+
+preset に DS 内部ユーティリティの safelist（`src/styles/source-safelist.css`・自動生成）を同梱した（issue #258）。
+これにより、消費側の `@source ".../ksk-design-system/dist"` の設定漏れやパスずれで
+DS 内部クラスの CSS が生成されず消費側でだけ壊れる問題（#132/#134/#138/#143）が構造的に解消する。
+
+safelist は **Tailwind 4.1 で導入された `@source inline()`** を使うため、
+peerDependencies を `tailwindcss@^4.0.0` → `^4.1.0` に引き上げた。
+API の破壊変更はないが、Tailwind 4.0.x のままだと preset の読み込みに失敗する:
+
+```bash
+# DS を上げる前に Tailwind を先に上げる
+npm install -D tailwindcss@^4.1
+```
+
+`@source` の記述は引き続き推奨（消費側自身のコードは消費側の走査対象のため）。
+
 ### v1.34.0 — パッケージ名変更（要対応）＋ RN/Expo 対応
 
 **npm パッケージ名を `@ksk/design-system` → `ksk-design-system` に変更**（npm スコープ除去・OSS 公開準備）。機能面の破壊はないが、**import の一括置換が必要**:

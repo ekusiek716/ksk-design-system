@@ -37,7 +37,8 @@ Brand 色を差し替えるだけで業種に合わせた配色に切り替わ�
 
 React 19 + TypeScript / Vite / **Tailwind CSS v4** / shadcn/ui（Radix UI）/ CVA / iconsax-reactjs / Storybook
 
-**Peer dependencies**: `react` 18 or 19, `react-dom`, `tailwindcss` ^4
+**Peer dependencies**: `react` 18 or 19, `react-dom`, `tailwindcss` ^4.1（preset が同梱する safelist が
+Tailwind 4.1 で導入された `@source inline()` を使うため）
 
 ## 🚀 使い方
 
