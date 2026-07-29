@@ -73,6 +73,33 @@ describe("lint-scratch.sh", () => {
     expect(outputOf(result)).not.toContain("モーション値の直書き")
   })
 
+  it("W13: ease-out 以外の easing キーワード（ease-in-out / linear 等）も検出する", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        return <div className="transition-all duration-[var(--Motion-Duration-Base)] ease-in-out" />
+      }
+    `)
+    expect(outputOf(result)).toContain("モーション値の直書き")
+  })
+
+  it("[回帰] W13: SVG の linearGradient を easing キーワードと誤検知しない", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        return (
+          <svg viewBox="0 0 24 24">
+            <defs>
+              <linearGradient id="paint0_linear_1234">
+                <stop stopColor="var(--Brand-Primary)" />
+              </linearGradient>
+            </defs>
+            <path d="M0 0h24v24H0z" fill="url(#paint0_linear_1234)" />
+          </svg>
+        )
+      }
+    `)
+    expect(outputOf(result)).not.toContain("モーション値の直書き")
+  })
+
   it("W13: Motion トークン参照なら検出しない", () => {
     const result = runLintScratch(`
       export function Example() {

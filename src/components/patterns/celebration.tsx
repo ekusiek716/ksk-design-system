@@ -268,7 +268,7 @@ function Celebration({
                   width: piece.size,
                   height: Math.max(4, piece.size - 2),
                   backgroundColor: piece.color,
-                  animation: `celebration-confetti-fall ${piece.duration}ms ease-in ${piece.delay}ms forwards`,
+                  animation: `celebration-confetti-fall ${piece.duration}ms var(--Motion-Easing-Accelerate) ${piece.delay}ms forwards`,
                   "--celebration-drift": `${piece.drift}px`,
                   "--celebration-rotate": `${piece.rotate}deg`,
                 } as React.CSSProperties}

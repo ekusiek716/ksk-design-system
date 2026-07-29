@@ -260,9 +260,11 @@ for FILE in $FILES; do
   #
   #   検出対象:
   #     - Tailwind クラス: duration-200 / delay-150
-  #     - 生の曲線: cubic-bezier(...) / CSS キーワードの ease-out
-  #       （Tailwind の ease-out クラスは cubic-bezier(0,0,0.2,1)、CSS キーワードは
-  #         (0,0,0.58,1) と別物なので、どちらもトークン経由にしないと取り違える）
+  #     - 生の曲線: cubic-bezier(...) と CSS/Tailwind の easing キーワード全部
+  #       （ease / ease-in / ease-out / ease-in-out / linear）。
+  #       同じ綴りでも CSS キーワードと Tailwind クラスで曲線が違う（ease-out は
+  #       (0,0,0.58,1) と (0,0,0.2,1)）ため、キーワードのままだと取り違える。
+  #       SVG の linearGradient / paint0_linear_… は単語境界で除外される。
   #     - インライン style の生 ms: style={{ transition: "height 200ms ..." }} や
   #       `transform ${x}ms ...` のようなテンプレート文字列
   #     - 秒単位の指定: "stroke-dashoffset 0.4s ease" / ".5s"
@@ -275,7 +277,8 @@ for FILE in $FILES; do
   # 宣言のみの値も拾うため）。数字や '.' の直後は許さないので、SVG path の
   # smooth-curve コマンド（a.8.8s...）は引き続き除外される。
   MOTION_SECONDS='[[:space:]("'"'"':][[:space:]]*(\.[0-9]+|[0-9]+(\.[0-9]+)?)s([[:space:];,")'"'"']|$)'
-  MOTION_TARGET=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(|${CLASS_START}ease-out${CLASS_END}|[0-9]+ms|${MOTION_SECONDS}" "$FILE" 2>/dev/null || true)
+  MOTION_EASING_KEYWORDS="${CLASS_START}(ease-in-out|ease-in|ease-out|ease|linear)${CLASS_END}"
+  MOTION_TARGET=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(|${MOTION_EASING_KEYWORDS}|[0-9]+ms|${MOTION_SECONDS}" "$FILE" 2>/dev/null || true)
   # 例外コメントが直前行にあるものを除外する（行内の指定は grep -v で落ちる）
   MATCHES=""
   while IFS= read -r line; do

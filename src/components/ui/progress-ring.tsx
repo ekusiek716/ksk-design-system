@@ -72,9 +72,10 @@ function ProgressRing({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
-          // 元の 0.4s ease をそのままトークン化（Slow/Slower に丸めると体感が変わる）。
+          // 元の `0.4s ease` を値そのままトークン化。Default は CSS の ease キーワードと
+          // 同一曲線（Standard=ease-out に寄せると加速の付き方が変わる）。
           style={{
-            transition: "stroke-dashoffset var(--Motion-Duration-Ring) var(--Motion-Easing-Standard)",
+            transition: "stroke-dashoffset var(--Motion-Duration-Ring) var(--Motion-Easing-Default)",
           }}
         />
       </svg>
