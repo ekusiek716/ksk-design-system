@@ -84,6 +84,10 @@
       "import": "./src/styles/typography.css",
       "default": "./src/styles/typography.css"
     },
+    "./tokens/motion": {
+      "import": "./src/styles/motion.css",
+      "default": "./src/styles/motion.css"
+    },
     "./tokens/categorical": {
       "import": "./src/styles/categorical.css",
       "default": "./src/styles/categorical.css"

@@ -51,7 +51,7 @@ function SubNav({
         ref={scrollRef}
         className={cn(
           "flex gap-2 overflow-x-auto scrollbar-none px-1 py-3",
-          sticky && "sticky top-0 z-30 bg-[var(--Surface-Primary)]",
+          sticky && "sticky top-0 z-[var(--Z-Sticky)] bg-[var(--Surface-Primary)]",
           className
         )}
         role="tablist"
@@ -106,7 +106,7 @@ function SubNav({
       data-variant="underline"
       className={cn(
         "border-b border-[var(--Border-Low-Emphasis)]",
-        sticky && "sticky top-0 z-30 bg-[var(--Surface-Primary)]",
+        sticky && "sticky top-0 z-[var(--Z-Sticky)] bg-[var(--Surface-Primary)]",
         className
       )}
     >

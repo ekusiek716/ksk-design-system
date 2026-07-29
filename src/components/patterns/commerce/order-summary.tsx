@@ -52,7 +52,7 @@ function OrderSummary({ className, lineItems, totalLabel = "合計（税込）",
   )
 
   return (
-    <div data-slot="order-summary" className={cn("border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]", fixed && "fixed inset-x-0 bottom-0 z-30 mx-auto max-w-lg", className)} {...props}>
+    <div data-slot="order-summary" className={cn("border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]", fixed && "fixed inset-x-0 bottom-0 z-[var(--Z-Sticky)] mx-auto max-w-lg", className)} {...props}>
       {content}
     </div>
   )

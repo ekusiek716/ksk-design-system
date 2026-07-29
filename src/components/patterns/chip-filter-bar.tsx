@@ -54,8 +54,15 @@ function ChipFilterBar({
     <div data-slot="chip-filter-bar" className={className}>
       <div
         className={cn(
-          "flex gap-2 overflow-x-auto scrollbar-hide",
-          sticky && "sticky z-30 bg-[var(--Surface-Primary)] py-2"
+          // min-h-11 + items-center は Chip の 44px 当たり判定を守るために必須。
+          // Chip は見た目の高さ(28/32/36px)を保ったまま透明な before 擬似要素で
+          // タップ領域を 44px に広げているが、overflow-x-auto は仕様上
+          // overflow-y も auto に落ちる（visible にはできない）ため、行の高さが
+          // チップの実高のままだと擬似要素の上下がクリップされて当たり判定が戻ってしまう。
+          // 行自体を 44px 確保し、チップは中央寄せにして見た目を変えずに収める。
+          // items-center を外すと flex の stretch でチップ自体が 44px に伸びるので注意。
+          "flex min-h-11 items-center gap-2 overflow-x-auto scrollbar-hide",
+          sticky && "sticky z-[var(--Z-Sticky)] bg-[var(--Surface-Primary)] py-2"
         )}
         style={sticky ? { top: stickyOffset } : undefined}
       >

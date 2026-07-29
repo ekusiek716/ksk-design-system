@@ -21,6 +21,121 @@ function outputOf(result: ReturnType<typeof runLintScratch>) {
 }
 
 describe("lint-scratch.sh", () => {
+  it("W13: インライン style の生 ms を検出する（Tailwind クラス以外も見る）", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        const s = { transition: "height 200ms ease-out" }
+        return <div style={s} />
+      }
+    `)
+    expect(outputOf(result)).toContain("モーション値の直書き")
+  })
+
+  it("W13: テンプレート文字列内の cubic-bezier を検出する", () => {
+    const result = runLintScratch(`
+      export function Example({ ms }: { ms: number }) {
+        const s = { animation: \`pop \${ms}ms cubic-bezier(0.3, 1, 0.3, 1) both\` }
+        return <div style={s} />
+      }
+    `)
+    expect(outputOf(result)).toContain("モーション値の直書き")
+  })
+
+  it("W13: 秒単位のモーション値を検出する", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        const s = { transition: "stroke-dashoffset 0.4s ease" }
+        return <div style={s} />
+      }
+    `)
+    expect(outputOf(result)).toContain("モーション値の直書き")
+  })
+
+  it("W13: 宣言のみの秒指定（transitionDuration の値だけ）も検出する", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        return <div style={{ transitionDuration: "0.4s" }} />
+      }
+    `)
+    expect(outputOf(result)).toContain("モーション値の直書き")
+  })
+
+  it("[回帰] W13: SVG path の smooth-curve コマンド（a.8.8s...）を秒数と誤検知しない", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        return (
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2a.8.8 0 0 1 .8.8s0 1-.8 1" />
+          </svg>
+        )
+      }
+    `)
+    expect(outputOf(result)).not.toContain("モーション値の直書き")
+  })
+
+  it("W13: ease-out 以外の easing キーワード（ease-in-out / linear 等）も検出する", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        return <div className="transition-all duration-[var(--Motion-Duration-Base)] ease-in-out" />
+      }
+    `)
+    expect(outputOf(result)).toContain("モーション値の直書き")
+  })
+
+  it("[回帰] W13: SVG の linearGradient を easing キーワードと誤検知しない", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        return (
+          <svg viewBox="0 0 24 24">
+            <defs>
+              <linearGradient id="paint0_linear_1234">
+                <stop stopColor="var(--Brand-Primary)" />
+              </linearGradient>
+            </defs>
+            <path d="M0 0h24v24H0z" fill="url(#paint0_linear_1234)" />
+          </svg>
+        )
+      }
+    `)
+    expect(outputOf(result)).not.toContain("モーション値の直書き")
+  })
+
+  it("W13: Tailwind の任意値 duration-[0.4s] / duration-[400ms] も検出する", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        return (
+          <>
+            <div className="transition-all duration-[0.4s]" />
+            <div className="transition-all delay-[400ms]" />
+          </>
+        )
+      }
+    `)
+    expect(outputOf(result)).toContain("モーション値の直書き")
+  })
+
+  it("W13: Motion トークン参照なら検出しない", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        const s = { transition: "height var(--Motion-Duration-Base) var(--Motion-Easing-Standard)" }
+        return <div className="duration-[var(--Motion-Duration-Fast)]" style={s} />
+      }
+    `)
+    expect(outputOf(result)).not.toContain("モーション値の直書き")
+  })
+
+  it("W13: ksk-motion-exception コメント（直前行・行内）で除外できる", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        // ksk-motion-exception: 祝祭演出専用の尺
+        const a = { animation: "confetti 1400ms linear" }
+        const b = { transition: "opacity 250ms linear" } // ksk-motion-exception
+        return <div style={{ ...a, ...b }} />
+      }
+    `)
+    expect(outputOf(result)).not.toContain("モーション値の直書き")
+  })
+
   it("[回帰] top-[16px] を p-[16px] として誤検知しない", () => {
     const result = runLintScratch(`
       export function Example() {

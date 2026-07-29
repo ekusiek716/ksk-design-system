@@ -31,7 +31,7 @@ function AppShell({
       {topBar && (
         <header
           data-slot="app-topbar"
-          className="sticky top-0 z-40 h-14 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]"
+          className="sticky top-0 z-[var(--Z-Nav)] h-14 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]"
         >
           <Container size="fluid" gutter="tight" className="flex h-full items-center">
             {topBar}
@@ -49,7 +49,7 @@ function AppShell({
       {bottomNav && (
         <nav
           data-slot="app-bottomnav"
-          className="fixed bottom-0 inset-x-0 z-40 flex items-center justify-around border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] h-14"
+          className="fixed bottom-0 inset-x-0 z-[var(--Z-Nav)] flex items-center justify-around border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] h-14"
         >
           {bottomNav}
         </nav>

@@ -19,12 +19,27 @@
 @import "./styles/categorical.css";
 @import "./styles/typography.css";
 @import "./styles/glass.css";
+@import "./styles/motion.css";
 @import "./styles/sheet-keyboard.css";
 /* DS 内部ユーティリティの safelist（自動生成 / issue #258）。
    消費側の @source が無い・パスがずれていても DS のクラス CSS が生成される保険。 */
 @import "./styles/source-safelist.css";
 
-/* ─── Bridge Layer: shadcn/ui 互換マッピング ─── */
+/* ─── Bridge Layer: shadcn/ui 互換マッピング ───
+
+   命名が 2 系統あるのは意図的な設計。統一しない。
+
+   - `--Surface-Primary` のような **PascalCase-ケバブ** は KSK の semantic 層。
+     UI を書くときに参照するのは常にこちら（CLAUDE.md のセルフチェック参照）。
+   - `--primary` / `--muted-foreground` のような **小文字ケバブ** は shadcn/ui
+     （および Radix ベースの外部コンポーネント）が決め打ちで参照する名前。
+     shadcn の CLI で追加したコンポーネントや、consumer が別途入れた
+     shadcn 資産をそのまま動かすための互換レイヤーであり、名前は
+     shadcn 側の仕様なので KSK 側では変えられない。
+
+   つまり小文字ケバブ側は「外部規約への適合」であって命名の揺れではない。
+   新しいトークンを増やすときは PascalCase 側（semantic.css）に足し、
+   shadcn 互換名が必要な場合だけここで var() でエイリアスすること。 */
 :root {
   --radius: 0.5rem;
 
@@ -111,6 +126,72 @@
   --Space-Section-2xl: 80px;
 }
 
+/* ─── Z-Index Scale ───
+   重なり順の意図をトークン化する。Portal に載る要素（Dialog / Sheet /
+   Popover / Toast 等）は DOM 上の親子関係を失うため、`z-50` を一律に振ると
+   勝敗が Portal のマウント順＝開いた順に依存してしまう。意味ごとに段を分けて
+   「常にこの順で重なる」を保証する。
+
+   下から:
+     Base    0   … 通常フロー
+     Raised  10  … カード内の重なり（画像上のバッジ、カルーセル矢印など）
+     Sticky  30  … スクロール追従のフィルタバー / サブナビ
+     Nav     40  … アプリシェルの固定ヘッダ・ボトムタブ（シェルが敷く固定ナビ）
+     Floating 45 … ナビの上に浮く一時的な操作面（FAB / 一括操作バー / 同意バナー）。
+                   Nav と同じ段だと、シェルがナビを後から描画する構造上ナビに隠れる
+     Overlay 50  … Dialog / Sheet の scrim（背面を覆う暗幕）
+     Modal   60  … Dialog / Sheet 本体。必ず自分の scrim より上
+     Alert-Overlay 900 … AlertDialog / ConfirmDialog の scrim
+     Alert   910 … AlertDialog / ConfirmDialog 本体
+     Coachmark-Overlay 950 … CoachMarkOverlay の scrim / スポットライト
+     Coachmark 960 … CoachMark の吹き出し
+     Popover 1000 … Select / Popover / DropdownMenu / HoverCard。
+                    Modal の中から開くので Modal より上
+     Toast   1100 … 通知。Modal 表示中でも読めるよう Modal / Popover より上
+     Tooltip 1200 … 補助情報。他の何かの上に出るのが役目なので実質最上位
+     SkipLink 1300 … キーボード操作の最初の逃げ道。何にも隠されてはいけない
+
+   Modal(60) と Alert-Overlay(900) の間が大きく空いているのは意図的。
+   Sheet はネストすると `Overlay + level*20` / `Modal + level*20` で段を積む
+   （src/components/ui/sheet.tsx の SHEET_*_BASE_Z / SHEET_STACK_STEP、issue #158）。
+   ここを 40 段ぶん空けておくことで、多段 Sheet が Alert 以上の層を
+   突き抜けない。この 3 定数は下の :root と対で維持すること
+   （__tests__/z-index-scale-contract.test.ts が一致を検査する）。
+
+   CoachMark も同じ理由で専用の 950/960。オンボーディングは Dialog や Sheet を
+   開いた状態の上から重ねることがあり、scrim が Modal より下だと「暗転していない
+   モーダルの上に説明だけが浮く」状態になる。scrim / スポットライトと吹き出しを
+   対で持つのは、スポットライト（boxShadow で周囲を暗くする矩形）が scrim の
+   役割を兼ねるため。
+
+   AlertDialog / ConfirmDialog が Modal(60) ではなく専用の 900/910 に居るのは、
+   これらが「Dialog や Sheet の中から開かれる割り込み確認」だから。Modal と同じ段だと
+   自分の scrim が親コンテンツの下に潜り、親が暗転しないまま確認だけが浮く
+   （＝どの操作を確認しているのか分からない状態になる）。逆に Alert から
+   Dialog / Sheet を開くフローは想定していない（Alert は終端の確認）。
+
+   z-10 / z-20 など小さい素の値は「コンポーネント内部の重なり」用途で、
+   このグローバルスケールの対象外（カード内のバッジ、カルーセル矢印など）。
+
+   Tailwind からは z-[var(--Z-Modal)] の形で参照する。 */
+:root {
+  --Z-Base:     0;
+  --Z-Raised:   10;
+  --Z-Sticky:   30;
+  --Z-Nav:      40;
+  --Z-Floating: 45;
+  --Z-Overlay:  50;
+  --Z-Modal:    60;
+  --Z-Alert-Overlay: 900;
+  --Z-Alert:    910;
+  --Z-Coachmark-Overlay: 950;
+  --Z-Coachmark: 960;
+  --Z-Popover:  1000;
+  --Z-Toast:    1100;
+  --Z-Tooltip:  1200;
+  --Z-SkipLink: 1300;
+}
+
 /* ─── Shadow Tokens ───
    影色はテーマ非依存の neutral（Gray-900 ベース rgba(17,24,39,…)）。
    旧来の青寄り rgba(24,39,75) は default=Blue 前提で、violet/orange/green
@@ -186,11 +267,13 @@
 }
 
 @theme inline {
-  --animate-slide-in-right: slide-in-right 200ms ease-out;
-  --animate-slide-in-left:  slide-in-left 200ms ease-out;
-  --animate-fade-in:        fade-in 150ms ease-out;
-  --animate-fade-in-up:     fade-in-up 200ms ease-out;
-  --animate-scale-in:       scale-in 150ms ease-out;
+  /* duration / easing は src/styles/motion.css のトークンを参照する
+     （値は従来どおり slide/fade-up=200ms・fade/scale=150ms の ease-out）。 */
+  --animate-slide-in-right: slide-in-right var(--Motion-Duration-Base) var(--Motion-Easing-Standard);
+  --animate-slide-in-left:  slide-in-left var(--Motion-Duration-Base) var(--Motion-Easing-Standard);
+  --animate-fade-in:        fade-in var(--Motion-Duration-Fast) var(--Motion-Easing-Standard);
+  --animate-fade-in-up:     fade-in-up var(--Motion-Duration-Base) var(--Motion-Easing-Standard);
+  --animate-scale-in:       scale-in var(--Motion-Duration-Fast) var(--Motion-Easing-Standard);
 }
 
 /* ─── Container Query Breakpoints ───

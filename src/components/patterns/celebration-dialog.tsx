@@ -104,10 +104,13 @@ function CelebrationDialog({
             >
               <span className="absolute -inset-3 rounded-full bg-[var(--Surface-Accent-Primary-Subtle)] opacity-50" />
               <span className="absolute inset-0 rounded-full bg-[var(--Surface-Accent-Primary-Light)] border border-[var(--Surface-Accent-Primary-Subtle)]" />
+              {/* 600ms / 200ms delay は祝祭演出専用の尺。Motion スケール（Fast/Base/Slow/Slower）から
+                  意図的に外している（トークン化すると "控えめな UI モーション" の意味が壊れるため）。 */}
               <span
                 className={
                   !reducedMotion && emojiAnimation === "bounce"
-                    ? "relative flex items-center justify-center typo-display-lg leading-none animate-[celebration-emoji-pop_600ms_ease-out_200ms_both]"
+                    // ksk-motion-exception: 祝祭演出専用の尺
+                    ? "relative flex items-center justify-center typo-display-lg leading-none animate-[celebration-emoji-pop_600ms_var(--Motion-Easing-Standard)_200ms_both]"
                     : "relative flex items-center justify-center typo-display-lg leading-none"
                 }
               >

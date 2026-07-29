@@ -64,7 +64,7 @@ function KeyboardAwareSheetFooter({
         "border-t border-[var(--Border-Low-Emphasis)]",
         "pb-[max(1rem,env(safe-area-inset-bottom))]",
         behavior === "fixed" && "sticky bottom-[var(--ksk-keyboard-inset)] z-10",
-        behavior === "hide" && "sticky bottom-[var(--ksk-keyboard-inset)] z-10 transition-all duration-200",
+        behavior === "hide" && "sticky bottom-[var(--ksk-keyboard-inset)] z-10 transition-all duration-[var(--Motion-Duration-Base)]",
         behavior === "scroll" && "relative",
         shouldHide && "translate-y-2 opacity-0 pointer-events-none",
         className

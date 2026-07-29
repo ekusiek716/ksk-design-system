@@ -381,7 +381,6 @@ export const scales = {
     "line": "#06C755",
     "googleBorder": "#DADCE0",
     "apple": "#000000",
-    "amazon": "#232F3E",
-    "amazonAccent": "#FF9900"
+    "amazon": "#232F3E"
   }
 } as const;

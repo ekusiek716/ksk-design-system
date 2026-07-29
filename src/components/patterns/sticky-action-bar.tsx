@@ -36,7 +36,7 @@ function StickyActionBar({
     <div
       data-slot="sticky-action-bar"
       className={cn(
-        "sticky bottom-0 z-40 bg-[var(--Surface-Primary)] px-4 py-3",
+        "sticky bottom-0 z-[var(--Z-Nav)] bg-[var(--Surface-Primary)] px-4 py-3",
         "pb-[max(0.75rem,env(safe-area-inset-bottom))]",
         bordered && "border-t border-[var(--Border-Low-Emphasis)]",
         className

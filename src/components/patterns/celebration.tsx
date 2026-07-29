@@ -210,7 +210,7 @@ function Celebration({
       aria-label={accessibleText}
       className={cn(
         placement === "overlay"
-          ? "fixed inset-0 z-50 flex items-center justify-center"
+          ? "fixed inset-0 z-[var(--Z-Toast)] flex items-center justify-center"
           : "relative flex items-center justify-center",
         className,
       )}
@@ -249,7 +249,9 @@ function Celebration({
                   width: piece.size,
                   height: Math.max(4, piece.size - 2),
                   backgroundColor: piece.color,
-                  animation: `celebration-confetti-burst ${piece.duration}ms cubic-bezier(0.16, 1, 0.3, 1) ${piece.delay}ms forwards`,
+                  // ksk-motion-exception: duration / delay は粒ごとにばらつかせる演出値のため
+                  // トークン化しない。カーブだけは Motion トークン（Decelerate）を参照する。
+                  animation: `celebration-confetti-burst ${piece.duration}ms var(--Motion-Easing-Decelerate) ${piece.delay}ms forwards`,
                   "--celebration-burst-x": `${piece.finalX}px`,
                   "--celebration-burst-y": `${piece.finalY}px`,
                   "--celebration-burst-mid-x": `${piece.midX}px`,
@@ -266,7 +268,7 @@ function Celebration({
                   width: piece.size,
                   height: Math.max(4, piece.size - 2),
                   backgroundColor: piece.color,
-                  animation: `celebration-confetti-fall ${piece.duration}ms ease-in ${piece.delay}ms forwards`,
+                  animation: `celebration-confetti-fall ${piece.duration}ms var(--Motion-Easing-Accelerate) ${piece.delay}ms forwards`,
                   "--celebration-drift": `${piece.drift}px`,
                   "--celebration-rotate": `${piece.rotate}deg`,
                 } as React.CSSProperties}
@@ -282,7 +284,8 @@ function Celebration({
           style={{ pointerEvents: "auto" }}
           className={cn(
             "relative z-[1] mx-4 flex max-w-sm flex-col items-center rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-6 py-5 text-center shadow-[var(--shadow-dialog)]",
-            !reducedMotion && "animate-[celebration-pop_360ms_cubic-bezier(0.34,1.56,0.64,1)_both]",
+            // ksk-motion-exception: 360ms は祝祭演出専用の尺（Motion スケールから意図的に外す）。カーブはトークン参照。
+            !reducedMotion && "animate-[celebration-pop_360ms_var(--Motion-Easing-Bounce)_both]",
             canTapDismiss && "cursor-pointer",
           )}
         >
@@ -292,7 +295,8 @@ function Celebration({
                 "typo-display-lg mb-3 leading-none",
                 !reducedMotion &&
                   emojiAnimation === "bounce" &&
-                  "animate-[celebration-emoji-pop_600ms_ease-out_200ms_both]",
+                  // ksk-motion-exception: 600ms / 200ms delay は祝祭演出専用の尺
+                  "animate-[celebration-emoji-pop_600ms_var(--Motion-Easing-Standard)_200ms_both]",
               )}
               aria-hidden="true"
             >

@@ -58,7 +58,7 @@ function CollapsibleChipField<K extends string>({
 
   // 折りたたみ/展開で chip の折り返し行数が変わると行エリアの高さが一瞬でガクッと
   // 変わって見える。展開状態が切り替わった直後に前後の実測高さを取り、
-  // height を 200ms ease-out（DS の入場モーション基準）でアニメーションさせる。
+  // height を --Motion-Duration-Base + --Motion-Easing-Standard（DS の入場モーション基準）でアニメーションさせる。
   // prefers-reduced-motion 時はアニメーションしない。
   const rowRef = React.useRef<HTMLDivElement>(null)
   const prevHeightRef = React.useRef<number | null>(null)
@@ -73,7 +73,7 @@ function CollapsibleChipField<K extends string>({
     el.style.height = `${prev}px`
     el.style.overflow = "hidden"
     void el.offsetHeight // reflow を挟んで transition を効かせる
-    el.style.transition = "height 200ms ease-out"
+    el.style.transition = "height var(--Motion-Duration-Base) var(--Motion-Easing-Standard)"
     el.style.height = `${next}px`
     const done = () => {
       el.style.height = ""
@@ -89,16 +89,19 @@ function CollapsibleChipField<K extends string>({
   }, [expanded, visible.length])
 
   // 「label は 1 行目の chip と縦センター」。展開して多数の chip が折り返しても
-  // label は最上行 chip と垂直中央が合うように、leading-[36px]（chip 行の
-  // min-h=36px）で label の line-height を行高に合わせ、親 flex は items-start にする。
+  // label は最上行 chip と垂直中央が合うように、leading-[44px]（chip 行の
+  // min-h=44px）で label の line-height を行高に合わせ、親 flex は items-start にする。
+  // 44px は Chip(md) の margin box の高さ。Chip は見た目 32px のピルの上下に
+  // my-1.5 を持ち 44px のタッチターゲットを予約するので、行高もそれに揃える
+  // （36px のままだと label が chip より 4px 上にずれる）。
   const leading = label ? (
     <span
-      className="typo-label-sm text-[var(--Text-Medium-Emphasis)] flex-shrink-0 w-20 whitespace-nowrap leading-[36px]"
+      className="typo-label-sm text-[var(--Text-Medium-Emphasis)] flex-shrink-0 w-20 whitespace-nowrap leading-[44px]"
     >
       {label}
     </span>
   ) : (
-    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center" style={{ height: 36 }}>
+    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center" style={{ height: 44 }}>
       {icon}
     </div>
   )
@@ -106,7 +109,7 @@ function CollapsibleChipField<K extends string>({
   return (
     <div data-slot="collapsible-chip-field" className="flex items-start gap-4 py-3">
       {leading}
-      <div ref={rowRef} className="flex gap-2 flex-1 flex-wrap min-h-[36px] items-center">
+      <div ref={rowRef} className="flex gap-2 flex-1 flex-wrap min-h-11 items-center">
         {visible.map((key) => (
           <Chip
             key={key}

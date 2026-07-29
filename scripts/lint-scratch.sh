@@ -246,11 +246,60 @@ for FILE in $FILES; do
     WARNINGS=$((WARNINGS + 1))
   fi
 
-  # W8. 過剰な z-index
-  MATCHES=$(grep -nE "${CLASS_START}(z-\[9999\]|z-\[999\])${CLASS_END}" "$FILE" 2>/dev/null \
+  # W8. 素の z-index（グローバル重なり層は --Z-* トークンで表す）
+  MATCHES=$(grep -nE "${CLASS_START}(z-\[9999\]|z-\[999\]|z-30|z-40|z-50)${CLASS_END}" "$FILE" 2>/dev/null \
     | grep -Ev "$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
-    echo -e "${YELLOW}⚠️  $FILE: 過剰なz-index → z-50を使う${NC}"
+    echo -e "${YELLOW}⚠️  $FILE: 素の z-index → z-[var(--Z-Sticky|Nav|Overlay|Modal|Popover|Toast|Tooltip|SkipLink)] を使う（DESIGN.md の Layering 節）${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W13. モーション値の直書き
+  # → src/styles/motion.css の --Motion-* トークンを使う。
+  #   トークン参照していないと prefers-reduced-motion の一括制御からも漏れる。
+  #
+  #   検出対象:
+  #     - Tailwind クラス: duration-200 / delay-150
+  #     - 生の曲線: cubic-bezier(...) と CSS/Tailwind の easing キーワード全部
+  #       （ease / ease-in / ease-out / ease-in-out / linear）。
+  #       同じ綴りでも CSS キーワードと Tailwind クラスで曲線が違う（ease-out は
+  #       (0,0,0.58,1) と (0,0,0.2,1)）ため、キーワードのままだと取り違える。
+  #       SVG の linearGradient / paint0_linear_… は単語境界で除外される。
+  #     - インライン style の生 ms: style={{ transition: "height 200ms ..." }} や
+  #       `transform ${x}ms ...` のようなテンプレート文字列
+  #     - 秒単位の指定: "stroke-dashoffset 0.4s ease" / ".5s"
+  #       前後に区切り文字を要求して SVG path の `a.8.8s...`（s は滑らかな曲線コマンド）
+  #       を誤検出しないようにしている
+  #
+  #   演出専用の尺（celebration の 360/600/1400ms 等）は行内か直前行に
+  #   `ksk-motion-exception` を書いて除外する。
+  # 先頭は「空白 / ( / 引用符 / : 」を許す（transitionDuration: "0.4s" のような
+  # 宣言のみの値も拾うため）。数字や '.' の直後は許さないので、SVG path の
+  # smooth-curve コマンド（a.8.8s...）は引き続き除外される。
+  MOTION_SECONDS='[[:space:]("'"'"':][[:space:]]*(\.[0-9]+|[0-9]+(\.[0-9]+)?)s([[:space:];,")'"'"']|$)'
+  MOTION_EASING_KEYWORDS="${CLASS_START}(ease-in-out|ease-in|ease-out|ease|linear)${CLASS_END}"
+  # Tailwind の任意値: duration-[400ms] / duration-[.4s] / delay-[0.2s] 等。
+  # duration-[var(--Motion-...)] は数字始まりでないので当たらない。
+  MOTION_ARBITRARY='(duration|delay)-\[[0-9.]+m?s\]'
+  MOTION_TARGET=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(|${MOTION_EASING_KEYWORDS}|[0-9]+ms|${MOTION_ARBITRARY}|${MOTION_SECONDS}" "$FILE" 2>/dev/null || true)
+  # 例外コメントが直前行にあるものを除外する（行内の指定は grep -v で落ちる）
+  MATCHES=""
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    LN=$(echo "$line" | cut -d: -f1)
+    PREV=$(sed -n "$((LN > 1 ? LN - 1 : 1))p" "$FILE" 2>/dev/null)
+    echo "$PREV" | grep -q 'ksk-motion-exception' && continue
+    MATCHES="${MATCHES}${line}\n"
+  # 注意: 「var(--Motion-* を含む行は一律スキップ」にしないこと。
+  # `animate-[pop_360ms_var(--Motion-Easing-Bounce)_both]` のようにトークン参照と
+  # 生 ms が同居する行を素通ししてしまう。除外は ksk-motion-exception の明示だけに絞る。
+  done < <(printf "%s\n" "$MOTION_TARGET" \
+    | grep -Ev "ksk-motion-exception|$COMMENT_LINE" \
+    | grep -Ev "^[0-9]+:[[:space:]]*\*" || true)
+  MATCHES=$(printf "%b" "$MATCHES" | sed '/^[[:space:]]*$/d')
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: モーション値の直書き → duration-[var(--Motion-Duration-*)] / ease-[var(--Motion-Easing-*)] を使う（演出専用の尺は ksk-motion-exception コメントで除外）${NC}"
     echo "$MATCHES" | head -3
     WARNINGS=$((WARNINGS + 1))
   fi
