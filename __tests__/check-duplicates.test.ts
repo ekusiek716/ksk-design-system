@@ -105,4 +105,18 @@ describe("contracts の exported:false を尊重する", () => {
     expect(result.status).toBe(1)
     expect(result.stdout).toContain("CheckboxCardGroup")
   })
+
+  // #260/#266 フォローアップ: ui/form の FormField は patterns/form-field の FormField と
+  // 同名衝突を避けるため index.ts では RhfFormField として export される。
+  // contracts 上は aliases: ["RhfFormField"] として ui/Form エントリに登録されており、
+  // consumer が自前で RhfFormField を再実装したら重複として検出できる必要がある。
+  it("aliases に登録された別名 export（RhfFormField）も重複として報告する", () => {
+    const consumer = createConsumer({
+      "src/RhfFormField.tsx": "export function RhfFormField() { return null }\n",
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain("RhfFormField")
+    expect(result.stdout).toContain("DS: ui / src/components/ui/form.tsx")
+  })
 })
