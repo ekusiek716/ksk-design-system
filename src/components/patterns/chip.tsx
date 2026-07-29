@@ -17,7 +17,8 @@ const chipVariants = cva(
         sm: "h-7 px-2.5 typo-label-xs",
         md: "h-8 px-3 typo-label-sm",
         lg: "h-9 px-4 typo-label-sm",
-        tile: "size-12 typo-body-md",
+        // shrink-0: flex row 内で min-content 幅まで潰れて 48px タッチターゲットが崩れるのを防ぐ
+        tile: "size-12 shrink-0 typo-body-md",
       },
       shape: {
         pill: "rounded-full",
