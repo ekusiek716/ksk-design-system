@@ -12,13 +12,13 @@
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
 | Accordion, AccordionItem, AccordionTrigger, AccordionContent | `@/components/ui/accordion` | — | ThreeItems, MultipleOpen |
-| AlertDialog, AlertDialogTrigger, AlertDialogPortal, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel | `@/components/ui/alert-dialog` | — | Default, Small |
+| AlertDialog, AlertDialogTrigger, AlertDialogPortal, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel | `@/components/ui/alert-dialog` | — | Default, Small, ConfirmActionIsImmediatelyClickable, CancelClosesWithoutAction |
 | Alert, AlertTitle, AlertDescription | `@/components/ui/alert` | **variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning` | Info, Success, Error, Warning, InlineInfo, InlineCaution, InlineWarning, AllVariants, Prop-based API (auto icon), Prop-based + action |
 | AutoGrowTextarea | `@/components/ui/auto-grow-textarea` | — | DefaultComment, CompactTitleEditor |
 | Avatar, AvatarImage, AvatarFallback | `@/components/ui/avatar` | — | WithImage, Fallback, Sizes, Group |
 | Badge | `@/components/ui/badge` | **variant**: `default`, `secondary`, `outline`, `destructive`, `success`, `warning`, `info`, `subtle`, `ghost` | Default, Secondary, Outline, Destructive, Success, Warning, Info, Subtle, Ghost, AllVariants |
 | Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis | `@/components/ui/breadcrumb` | — | ThreeLevel, WithEllipsis |
-| Button | `@/components/ui/button` | **variant**: `default`, `secondary`, `secondary-switch`, `tertiary`, `ghost`, `destructive`, `link`, `glass`, `glass-inverse`, `glass-accent`, `accent`, `inverse`, `ghost-inverse`<br>**size**: `xs`, `sm`, `default`, `lg`, `xl`, `hero`, `icon`, `icon-sm`, `icon-lg`, `icon-xl`, `icon-fab`, `match`<br>**layout**: `horizontal`, `vertical` | Default, Secondary, SecondarySwitch, Tertiary, Ghost, Destructive, Link, AllVariants, AllSizes, Hero, Inverse on Dark Background, Real UI — Hero Section CTAs, Disabled, DisabledAllVariants, IconButton, Glass — Liquid Glass (iOS 26), Glass Inverse on Dark Background, Glass Accent — FAB (Floating Action Button), Glass — ボケ感デモ（動くコンテンツ上）, Glass — カーソル追従スペキュラ, WithIcon |
+| Button | `@/components/ui/button` | **variant**: `default`, `secondary`, `secondary-switch`, `tertiary`, `ghost`, `destructive`, `link`, `glass`, `glass-inverse`, `glass-accent`, `accent`, `inverse`, `ghost-inverse`<br>**size**: `xs`, `sm`, `default`, `lg`, `xl`, `hero`, `icon`, `icon-sm`, `icon-lg`, `icon-xl`, `icon-fab`, `match`<br>**layout**: `horizontal`, `vertical` | Default, Secondary, SecondarySwitch, Tertiary, Ghost, Destructive, Link, AllVariants, AllSizes, Hero, Inverse on Dark Background, Real UI — Hero Section CTAs, Disabled, DisabledAllVariants, IconButton, Glass — Liquid Glass (iOS 26), Glass Inverse on Dark Background, Glass Accent — FAB (Floating Action Button), Glass — ボケ感デモ（動くコンテンツ上）, Glass — カーソル追従スペキュラ, WithIcon, PressDoesNotShiftLayout, DisabledIsNotClickable, FocusRingIsVisible |
 | Calendar | `@/components/ui/calendar` | — | Single, NavigatesMonths, Range |
 | Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter | `@/components/ui/card` | **variant**: `default`, `media` | FullCard, MinimalCard, HeaderOnly, OnSameColorGround |
 | CheckboxCardGroup, CheckboxCardItem | `@/components/ui/checkbox-card` | — | Default, WithDescription, WithExpandedContent, Disabled |
@@ -27,7 +27,7 @@
 | Checkbox | `@/components/ui/checkbox` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, MultipleOptions, Row Layout (label/description/count), Real UI — Filter Sidebar |
 | CoachMark | `@/components/ui/coach-mark` | — | Default, Brand, Placements, Onboarding, Hover |
 | Collapsible, CollapsibleTrigger, CollapsibleContent | `@/components/ui/collapsible` | — | Default, FAQ |
-| Combobox | `@/components/ui/combobox` | — | Default, WithDisabledOption |
+| Combobox | `@/components/ui/combobox` | — | Default, FiltersAndSelects, WithDisabledOption |
 | CommitAutoGrowTextarea | `@/components/ui/commit-auto-grow-textarea` | — | — |
 | CommitInput | `@/components/ui/commit-input` | — | InputCommitTiming |
 | CommitTextarea | `@/components/ui/commit-textarea` | — | — |
@@ -36,11 +36,11 @@
 | DateField | `@/components/ui/date-field` | — | Default, WithInitialValue, CustomPlaceholder, Disabled, CustomFormat |
 | DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, FutureValueOpensSelectedMonth, WithDefaultMonth, Disabled, RangePicker, CalendarOnly, CalendarRange |
 | DateTimePicker | `@/components/ui/date-time-picker` | — | Default, Empty, Bounded |
-| Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, ReportShop, StackedFooter |
+| Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, ReportShop, StackedFooter, OpensAndIsImmediatelyInteractive, ClosesOnEscape, TrapsFocus |
 | DropdownFilter | `@/components/ui/dropdown-filter` | — | Default, ActiveFilter, WithIcons（ビュー切替・アイコン付き）, MultipleFilters |
-| DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent | `@/components/ui/dropdown-menu` | — | Default, WithCheckbox, WithRadio, WithSubmenu |
+| DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent | `@/components/ui/dropdown-menu` | — | Default, WithCheckbox, WithRadio, WithSubmenu, OpensAndSelectsItem, NavigatesWithKeyboard |
 | ErrorBoundary | `@/components/ui/error-boundary` | — | — |
-| Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField | `@/components/ui/form` | — | BasicForm, WithSelect |
+| Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField | `@/components/ui/form` | — | BasicForm, WithSelect, ShowsValidationErrorAndClearsOnInput |
 | HoverCard, HoverCardTrigger, HoverCardContent | `@/components/ui/hover-card` | — | Default |
 | IconBadge | `@/components/ui/icon-badge` | **size**: `md`, `ml`, `lg`<br>**appearance**: `accent`, `plain` | Medium, MediumLarge, Large, InCardFlow |
 | ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |
@@ -59,9 +59,9 @@
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | SectionNav | `@/components/ui/section-nav` | — | Vertical, Horizontal, StickyGuide |
 | Section | `@/components/ui/section` | **spacing**: `sm`, `md`, `lg`, `xl`<br>**background**: `none`, `subtle`, `accent-subtle` | FullBleedBandWithContainedContent |
-| Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect |
+| Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
-| Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass` | BottomSheet, FloatSheet, RightSheet, A11yOptions, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158) |
+| Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass` | BottomSheet, FloatSheet, RightSheet, A11yOptions, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158), OpensAndIsImmediatelyInteractive |
 | Skeleton, SkeletonText | `@/components/ui/skeleton` | — | CardSkeleton, TextSkeleton, SkeletonText (5 lines) |
 | SkipLink | `@/components/ui/skip-link` | — | Default |
 | Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Disabled |
@@ -74,10 +74,10 @@
 | SubNav | `@/components/ui/sub-nav` | — | Underline, Chip, WithBadge, WithDescriptions |
 | Switch | `@/components/ui/switch` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, SettingsList |
 | SyncStatusBadge | `@/components/ui/sync-status-badge` | — | Syncing, Success, Error, Offline, AllStates |
-| Tabs, TabsList, TabsTrigger, TabsContent | `@/components/ui/tabs` | — | ThreeTabs, WithDisabledTab |
+| Tabs, TabsList, TabsTrigger, TabsContent | `@/components/ui/tabs` | — | ThreeTabs, WithDisabledTab, SwitchesByClickAndArrowKeys |
 | Textarea | `@/components/ui/textarea` | — | Default, WithPlaceholder, Disabled, Error, AutoGrow |
 | TimePicker | `@/components/ui/time-picker` | — | Default, 15分刻み |
-| Toaster | `@/components/ui/toast` | **variant**: `default`, `success`, `caution`, `warning`, `info` | Default, Success, Caution, Warning, Info, AllVariants, Fire-and-forget (no <Toaster />) |
+| Toaster | `@/components/ui/toast` | **variant**: `default`, `success`, `caution`, `warning`, `info` | Default, Success, Caution, Warning, Info, AllVariants, Fire-and-forget (no <Toaster />), AnnouncesViaLiveRegion |
 | Tooltip, TooltipTrigger, TooltipContent, TooltipProvider | `@/components/ui/tooltip` | — | HoverToShow, OnIconButton |
 
 ---
@@ -140,7 +140,7 @@
 | MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, With pill BottomTabBar inline |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
-| PresenceIndicator | `@/components/patterns/presence-indicator` | — | 田中, 佐藤, 鈴木, 山田, 狭幅で非表示にする例（className） |
+| PresenceIndicator | `@/components/patterns/presence-indicator` | — | Default, WithBadge, Offline, NameOnly, 狭幅で非表示にする例（className） |
 | ProgressSteps | `@/components/patterns/progress-steps` | — | Step2Active, FirstStep, ThirdStep, AllComplete, ThreeSteps |
 | AUTO_PROMPT_SUPPRESSION_EVENT, AutoPrompt, PromptCoordinatorProvider | `@/components/patterns/prompt-coordinator` | — | Default |
 | Prose | `@/components/patterns/prose` | — | PrivacyPolicy, SingleSection |

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -106,4 +107,84 @@ export const WithSubmenu: Story = {
       </DropdownMenuContent>
     </DropdownMenu>
   ),
+}
+
+// ─────────────────────────────────────────────────────────────
+// interaction 回帰テスト（issue #256 / `npm run test:interaction`）
+// ─────────────────────────────────────────────────────────────
+
+/** 開いた直後にクリックで項目を選べ、選択でメニューが閉じる。 */
+export const OpensAndSelectsItem: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => {
+    const onSelect = fn()
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="secondary" data-testid="trigger">メニューを開く</Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>アクション</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={onSelect}>プロフィールを見る</DropdownMenuItem>
+          <DropdownMenuItem onSelect={onSelect}>設定</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+    const trigger = canvas.getByTestId("trigger")
+
+    await userEvent.click(trigger)
+    const menu = await body.findByRole("menu")
+
+    // 入場アニメーション中でも操作できること
+    await expect(getComputedStyle(menu).pointerEvents).not.toBe("none")
+    await userEvent.click(within(menu).getByRole("menuitem", { name: "設定" }))
+
+    await waitFor(() => expect(body.queryByRole("menu")).toBeNull())
+    await expect(trigger).toHaveAttribute("aria-expanded", "false")
+  },
+}
+
+/** キーボード（矢印キー + Enter）で項目を選べる。 */
+export const NavigatesWithKeyboard: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="secondary" data-testid="trigger">メニューを開く</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem>1つ目</DropdownMenuItem>
+        <DropdownMenuItem>2つ目</DropdownMenuItem>
+        <DropdownMenuItem>3つ目</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+    const trigger = canvas.getByTestId("trigger")
+
+    trigger.focus()
+    await userEvent.keyboard("{Enter}")
+    const menu = await body.findByRole("menu")
+
+    // Enter で開いた時点で先頭項目にフォーカスが乗る（WAI-ARIA menu パターン）
+    await waitFor(() =>
+      expect(within(menu).getByRole("menuitem", { name: "1つ目" })).toHaveFocus()
+    )
+    await userEvent.keyboard("{ArrowDown}")
+    await expect(within(menu).getByRole("menuitem", { name: "2つ目" })).toHaveFocus()
+    await userEvent.keyboard("{ArrowDown}")
+    await expect(within(menu).getByRole("menuitem", { name: "3つ目" })).toHaveFocus()
+
+    // Esc で閉じ、フォーカスがトリガーに戻る
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => expect(body.queryByRole("menu")).toBeNull())
+    await expect(trigger).toHaveFocus()
+  },
 }

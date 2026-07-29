@@ -74,6 +74,19 @@ bash scripts/check-drift.sh
 node scripts/generate-component-lookup.mjs
 ```
 
+**play 関数のあるコンポーネントを触った後は必ず実行:**
+
+```bash
+npm run test:interaction
+```
+
+対象は Button / Dialog / AlertDialog / Sheet / Select / DropdownMenu /
+Combobox / Tabs / Form / Toast。Storybook の play 関数を playwright chromium で
+ヘッドレス実行する（設定は `vitest.storybook.config.ts`、対象は
+`tags: ["interaction"]` を付けたストーリーのみ）。初回のみ
+`npx playwright install chromium` が必要なため `npm run check` には含まれない。
+CI では常時実行される。
+
 エラーが出た場合は修正してから次に進むこと。
 
 ---

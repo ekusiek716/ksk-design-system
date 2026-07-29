@@ -62,6 +62,7 @@ git diff --name-only main -- '*.tsx' | xargs grep -nE '<検証したい pattern>
 | テーマ・色トークン変更 | `node scripts/check-contrast.mjs`（テーマ一覧は src/themes/ から動的導出 — テーマ名をハードコードした検証を書かない） |
 | native（src/native/）変更 | `node scripts/check-native-parity.mjs` |
 | ストーリー追加 | `bash scripts/check-story-reuse.sh`（ストーリー内も DS コンポーネント再利用） |
+| play 関数のあるコンポーネント（Button / Dialog / AlertDialog / Sheet / Select / DropdownMenu / Combobox / Tabs / Form / Toast）を触った | `npm run test:interaction`（初回のみ `npx playwright install chromium`。`npm run check` には含まれない） |
 | DESIGN.md 変更 | `npm run lint:design` |
 | リリース | `bash scripts/release.sh` → 消費側一括は `scripts/bump-consumers.sh`（対象はメモリ ds-consumers.md 参照） |
 

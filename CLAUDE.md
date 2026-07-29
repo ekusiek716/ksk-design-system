@@ -164,7 +164,24 @@ npm run lint:design
 
 # 全チェック（tsc + lint + drift + lookup 一括）
 npm run check
+
+# interaction テスト（Storybook play 関数を playwright chromium で実行）
+npm run test:interaction
 ```
+
+**interaction テストについて（issue #256）:**
+
+- 実体は Storybook の play 関数。`@storybook/addon-vitest` + vitest browser mode（playwright chromium）で
+  ヘッドレス実行する。設定は `vitest.storybook.config.ts`。
+- 対象は `tags: ["interaction"]` を付けたストーリーだけ（全ストーリーのスモークはしない）。
+- 初回のみ `npx playwright install chromium` が必要。**この前提があるため `npm run check` /
+  `check:agent` には含めていない**（CI と、下記に該当する変更をしたときに手で回す）。
+- 押下でレイアウトが沈む・入場アニメーション中に操作不能・フォーカストラップ崩れ、といった
+  v1.48.x で連続した種類の不具合をここで落とす。
+- **play 関数のあるコンポーネント（Button / Dialog / AlertDialog / Sheet / Select /
+  DropdownMenu / Combobox / Tabs / Form / Toast）を触ったら `npm run test:interaction` を回すこと。**
+- ビジュアル回帰（スクリーンショット差分）は未導入。`.claude/skills/audit-pages/SKILL.md` による
+  手動の視覚監査が現状の代替。
 
 ---
 
