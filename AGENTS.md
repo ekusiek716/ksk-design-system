@@ -69,6 +69,17 @@ node scripts/check-prefix-order.mjs
 minifier が同一プロパティとして dedupe し後勝ちのみ残すため、逆順だと
 標準形が消えて Firefox で静かに無効化される）。
 
+**新しい Tailwind クラスを使った後は必ず実行:**
+
+```bash
+npm run generate:safelist
+```
+
+DS 内部でしか出現しないクラスを消費側で確実に生成させるための safelist
+（`src/styles/source-safelist.css`・自動生成）を更新する。未更新は
+`npm run check` が検出する。クラス名は必ず完全な文字列で書くこと
+（`` `bg-${color}` `` のような動的合成は静的抽出できず、同スクリプトがエラーにする）。
+
 **コンポーネントを追加・削除した後は必ず実行:**
 
 ```bash

@@ -97,8 +97,15 @@ CSSファイルの場所に応じて `../../` の数だけ調整する。
 @source "../../node_modules/ksk-design-system/dist";
 ```
 
-`@source` を外すと、DS内部だけで使われるクラスが生成されない。`dist` のプリビルドCSSと
+`@source` を外すと、consumer 自身のコードのクラスが生成されない。`dist` のプリビルドCSSと
 consumer側Tailwindを重ねる二重ビルド方式にも切り替えないこと。
+
+DS 内部だけで使われるクラス（`pointer-events-auto` 等）については、preset に safelist
+（`src/styles/source-safelist.css`・自動生成）が同梱されているため `@source` の有無に依存しない（issue #258）。
+
+> **必要な Tailwind バージョン**: この safelist は Tailwind 4.1 で導入された `@source inline()` を使う。
+> このため次のリリース以降、peerDependencies は `tailwindcss@^4.1.0` となる。
+> 4.0.x を使っている場合は、DS を上げる前に `npm install -D tailwindcss@^4.1` で Tailwind を先に上げること。
 
 ## 5. していい・ダメ早見表
 
