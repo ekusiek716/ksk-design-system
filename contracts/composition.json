@@ -51,7 +51,11 @@
       "rules": [
         "main の p-6（24px）がページ外周の既定余白。ページ側で二重に外周 padding を足さない",
         "sidebar は lg 未満で hidden になる（モバイル用の代替ナビは呼び出し側の責務。AdminShell 自体はモバイル用ドロワーを持たない）",
-        "sidebarWidth を変える場合、hidden lg:flex は維持し幅クラスのみ差し替える"
+        "sidebarWidth を変える場合、hidden lg:flex は維持し幅クラスのみ差し替える",
+        "sidebar 内のロゴ行に border-b、フッター行に border-t を入れない。罫線は sidebar 右端の縦線と header 下の横線の 2 本だけに絞る（#253/#254）",
+        "sidebar slot の直下は flex grow flex-col にし、フッターは mt-auto で下端へ置く。h-full は使わない（slot は Radix ScrollArea の viewport ラッパー配下＝height:auto で % height が解決されない。shell 側がそのラッパーを min-h-full の縦 flex に矯正しているので grow が効く）",
+        "サイドバー開閉トリガーは sidebar 側（ロゴ行の右端）に置く。header にはページタイトルを複製せず Breadcrumb / グローバル操作を置き、置くものが無ければ header を省略する（#253/#254）",
+        "サイドナビ項目は h-11（44px）にする。44×44 は本 DS のポリシー（WCAG 2.5.5 Target Size (Enhanced) = AAA 相当。AA の最小要件は 2.5.8 の 24×24）。フッターのアバターはイニシャルを円の 44%（32px 円なら typo-label-md = 14px）にする（#253/#254）"
       ]
     },
     "marketing": {
