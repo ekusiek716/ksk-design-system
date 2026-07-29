@@ -60,6 +60,11 @@ Tailwind CSS v4 は `node_modules` を既定では走査しません。`@source`
 DS 内部だけで使うレイアウト・サイズ・状態クラスが生成されず、コンポーネントの表示や操作が崩れます。
 consumer 側の Tailwind と DS を同じビルドで処理するため、上記の設定をセットで使用してください。
 
+なお v1.49.0 以降は、preset に DS 内部ユーティリティの safelist
+（`src/styles/source-safelist.css` / 自動生成）が同梱されており、`@source` を書き忘れても
+DS のクラス CSS は生成されます（issue #258）。ただし consumer 自身のコードは
+consumer 側の走査対象なので、`@source` は引き続き推奨構成です。
+
 ```tsx
 import { Button, Card, Input, FormField } from "ksk-design-system"
 ```

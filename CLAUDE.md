@@ -13,6 +13,7 @@ UI を書く前に必ず確認すること:
 - [ ] アイコンは `iconsax-reactjs` か（`lucide-react` / `heroicons` は使わない）
 - [ ] 生タグ（`<button>` / `<input>` / `<a href>`）でなく DS コンポーネントを使ったか
 - [ ] CSS でベンダープレフィックス併記する場合、**`-webkit-` を先・標準形を後**に書いたか（消費側の minifier が同一プロパティとして dedupe し後勝ちのみ残すため。逆順だと Firefox で静かに無効化。`node scripts/check-prefix-order.mjs` が CI で検出）
+- [ ] クラス名は**完全な文字列**で書いたか（`` `bg-${color}` `` のような動的合成は静的抽出できず消費側で CSS が生成されない。分岐は三項演算子か cva variant で。`scripts/generate-source-safelist.mjs` が検出）
 - [ ] `.tsx` 編集後に `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行したか
 - [ ] `FormField` を import する前にどちらか確認したか（react-hook-form の Controller と統合するなら `RhfFormField`＝`ui/form` の `FormField` を index.ts で別名 export したもの。単純な label+error 表示は `patterns/form-field` の `FormField`。迷ったら後者）
 
@@ -136,6 +137,7 @@ src/
 │   ├── semantic.css   # Layer 2: 用途別トークン
 │   └── typography.css # typo-* ユーティリティ
 ├── themes/            # default / orange / green / violet / blue
+│   └── source-safelist.css  # @source safelist（自動生成・手で編集しない / issue #258）
 ├── preset.css         # 外部プロジェクト向けプリセット
 └── index.ts           # Public API（全コンポーネント）
 ```
@@ -163,7 +165,10 @@ npm run generate:lookup
 # DESIGN.md contract 検査
 npm run lint:design
 
-# 全チェック（tsc + lint + drift + lookup 一括）
+# @source safelist 再生成（新しい Tailwind クラスを使ったら実行）
+npm run generate:safelist
+
+# 全チェック（tsc + lint + drift + lookup + safelist 一括）
 npm run check
 
 # interaction テスト（Storybook play 関数を playwright chromium で実行）

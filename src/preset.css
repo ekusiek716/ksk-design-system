@@ -20,6 +20,9 @@
 @import "./styles/typography.css";
 @import "./styles/glass.css";
 @import "./styles/sheet-keyboard.css";
+/* DS 内部ユーティリティの safelist（自動生成 / issue #258）。
+   消費側の @source が無い・パスがずれていても DS のクラス CSS が生成される保険。 */
+@import "./styles/source-safelist.css";
 
 /* ─── Bridge Layer: shadcn/ui 互換マッピング ─── */
 :root {
