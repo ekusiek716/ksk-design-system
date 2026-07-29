@@ -203,7 +203,12 @@ export const LiquidGlassScrollEdge: Story = {
     <div className="relative h-[600px] overflow-hidden bg-[var(--Surface-Primary)]">
       {/* デモ用のスクロール背景。キーボードでも到達できるようにする
           （axe: scrollable-region-focusable）。 */}
-      <div className="h-full overflow-y-auto px-6 py-6" tabIndex={0} role="region" aria-label="スクロール可能なコンテンツ">
+      <div
+        className="h-full overflow-y-auto px-6 py-6 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+        tabIndex={0}
+        role="region"
+        aria-label="スクロール可能なコンテンツ"
+      >
         <div className="mx-auto flex max-w-[430px] flex-col gap-3 pb-32">
           <p className="typo-heading-md text-[var(--Text-High-Emphasis)]">Scroll edge effect</p>
           <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">

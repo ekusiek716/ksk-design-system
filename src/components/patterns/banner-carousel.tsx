@@ -72,7 +72,7 @@ function BannerCarousel({
           要素が無いため、キーボードで横スクロールできるようにする
           （axe: scrollable-region-focusable）。 */}
       <div
-        className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1"
+        className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
         tabIndex={0}
         role="region"
         aria-label="バナー一覧"
