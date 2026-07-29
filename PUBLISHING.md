@@ -3,8 +3,9 @@
 `ksk-design-system` のリリース・配布手順。
 
 > **配布方式**: v1.36.0 以降は npm レジストリ経由で配布する。
-> `npm publish --access public` で公開し、各消費リポジトリの
-> `package.json` は `ksk-design-system@X.Y.Z` を参照する。
+> 公開経路は `.github/workflows/publish.yml` の Trusted Publishing (OIDC) に
+> 一本化しており、`main` への version 変更 push が公開の唯一のトリガー。
+> 各消費リポジトリの `package.json` は `ksk-design-system@X.Y.Z` を参照する。
 > 対象の消費リポ一覧は `scripts/update-consumers.sh` の `DEFAULT_REPOS` が正本
 > （単体リポ・monorepo が混在し、`~/LocalDev/` と `~/LocalDev/Examination/` 配下にまたがる）。
 
@@ -40,8 +41,9 @@ bash scripts/update-consumers.sh <version>
 ```
 
 PR では `npm run check`、`npm test`、`npm pack --dry-run` を通してからマージする。
-ローカル認証による手動公開が必要な場合だけ `bash scripts/release.sh <version>` を
-フォールバックとして使う。
+ローカルでワンライナーとして回したい場合は `bash scripts/release.sh <version>` を使う
+（version bump・push・publish.yml 完了待ち・consumers 配布まで一括。publish 自体は
+このスクリプトもローカルでは行わず、push 後に publish.yml の Trusted Publishing に委ねる）。
 
 > v1.35.0 で旧名 `@ksk/design-system` 互換 tgz の生成は廃止。
 > 消費5リポ + todo-shared が新名 `ksk-design-system` に移行済。
@@ -75,17 +77,27 @@ npm version major
 ```
 
 `npm version` が自動で `package.json` を更新し、`v1.16.0` タグを切る。
+同時に `"version"` ライフサイクル（`scripts/sync-version.mjs`）が発火し、
+`contracts/components.json` の `meta.version` と `contracts/token-hex-cache.json`
+を新バージョンに同期して同一コミットに含める（issue #259）。手動更新は不要。
+
+`npm version` を使わない bump 経路（release PR で `package.json` を直接
+書き換える等）の場合は、コミット前に `node scripts/sync-version.mjs` を単体実行する。
+
 `dist/` の再ビルド・コミットはこの version bump のタイミングでのみ行う。
 
-### 3. pack / publish
+### 3. pack で中身確認（publish はしない）
 
 ```bash
 npm pack --dry-run
-npm publish --access public
 ```
 
-`prepack` フックで `npm run build:lib` が自動実行され、公開パッケージに入る
-`dist/` / `contracts/` / `tokens.json` / docs の中身が更新される。
+公開経路は `.github/workflows/publish.yml` の Trusted Publishing に一本化した
+（下記「npm 公開について」参照）。ローカルから `npm publish` を直接実行する
+経路は廃止した。ここでは `npm pack --dry-run` で公開物の中身だけ確認する。
+実際の publish は次の push で CI が行う。`prepack` フックで `npm run build:lib`
+が自動実行され、公開パッケージに入る `dist/` / `contracts/` / `tokens.json` /
+docs の中身が更新される。
 
 中身を確認したい場合:
 
@@ -139,9 +151,9 @@ bash scripts/update-consumers.sh 1.16.0 belle-todo pawly
 # 修正コミット
 git commit -m "fix: 重大なバグの説明"
 
-npm version patch
-npm publish --access public
-git push origin main --tags
+npm version patch  # sync-version.mjs が自動で追従・git add
+git push origin main --tags  # publish.yml が npm publish を自動実行
+npm view ksk-design-system@<version> version  # 反映確認
 bash scripts/update-consumers.sh <version> <影響リポ...>
 ```
 
@@ -163,19 +175,20 @@ bash scripts/update-consumers.sh <version> <影響リポ...>
 ## 注意
 
 - 配布前に必ず `npm pack --dry-run` で中身確認
-- 通常公開は Trusted Publishing (OIDC) を使う。`npm login` は
-  `scripts/release.sh` でローカル公開へフォールバックする場合のみ必要
+- 公開経路は `.github/workflows/publish.yml` の Trusted Publishing (OIDC) に一本化。
+  `scripts/release.sh` を含め、ローカルから `npm publish` を直接叩く経路はない
+  （`npm login` / `NPM_TOKEN` は不要）
 - `package.json#exports` を変更したら必ず利用側プロジェクトでの import を試す
 - 金曜午後のリリースは厳禁（週末に障害対応できない）
 - メジャーリリースは月初の月曜が望ましい（フィードバック収集期間が取れる）
 
 ## npm 公開について
 
-v1.36.0 以降は npm registry 経由配布。通常公開は
-`.github/workflows/publish.yml` と npm Trusted Publishing (OIDC) を使うため、
-長寿命の `NPM_TOKEN` やローカルの `npm login` は不要。
-workflow が利用できない緊急時だけ、`scripts/release.sh` のローカル公開へ
-フォールバックする。
+v1.36.0 以降は npm registry 経由配布。公開経路は
+`.github/workflows/publish.yml` と npm Trusted Publishing (OIDC) に一本化した
+（issue #259）。長寿命の `NPM_TOKEN` やローカルの `npm login` は不要で、
+`scripts/release.sh` を含めローカルから `npm publish` を直接実行する経路はない。
+push 後は publish.yml の完了を待ち、レジストリ反映を確認してから consumers へ配布する。
 
 ## 関連
 

@@ -25,15 +25,38 @@ T-0   全消費リポへ配布 (update-consumers.sh)、リリースノート公�
 T+1w  次の patch で旧 API を完全削除
 ```
 
+## version bump の自動同期（issue #259）
+
+`npm version <level>` を実行すると npm の `"version"` ライフサイクルで
+`scripts/sync-version.mjs` が自動発火し、以下を同一コミットに同梱する:
+
+- `contracts/components.json` の `meta.version` を新バージョンに更新
+- `contracts/token-hex-cache.json` の再生成
+
+`npm version` を使わない手動 bump（release PR で `package.json` の version を
+直接書き換える方式など）の場合は、コミット前に単体実行すること:
+
+```bash
+node scripts/sync-version.mjs
+```
+
+変更があったファイルは自動で `git add` される（コミットは自分で行う）。
+
 ## ホットフィックス手順
 
 本番障害が発生したら:
 
 1. main で直接修正（or hotfix ブランチ）
-2. `npm version patch`
-3. `npm publish --access public` → `bash scripts/update-consumers.sh <version> <影響リポ...>`
-4. 影響範囲・原因・修正内容を「ホットフィックス履歴」に記録
-5. ポストモーテムを Issue / wiki に書く
+2. `npm version patch`（`sync-version.mjs` が自動で追従・git add まで実行）
+3. `git push origin main --tags` → `.github/workflows/publish.yml` の
+   Trusted Publishing が npm publish を自動実行
+4. 公開を確認: `npm view ksk-design-system@<version> version` →
+   `bash scripts/update-consumers.sh <version> <影響リポ...>`
+5. 影響範囲・原因・修正内容を「ホットフィックス履歴」に記録
+6. ポストモーテムを Issue / wiki に書く
+
+ローカルから `npm publish` を直接叩く経路は廃止した（publish.yml への一本化。
+下記参照）。
 
 ## ホットフィックス履歴
 
