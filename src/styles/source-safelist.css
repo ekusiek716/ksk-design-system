@@ -46,6 +46,7 @@
 @source inline("[&>button]:rounded-none");
 @source inline("[&>button]:text-[var(--Brand-Primary)]");
 @source inline("[&>button]:text-[var(--Text-High-Emphasis)]!");
+@source inline("[&>button]:text-[var(--Text-Low-Emphasis)]!");
 @source inline("[&>button]:text-[var(--Text-on-Inverse)]");
 @source inline("[&>button]:w-full");
 @source inline("[&>span]:line-clamp-1");
@@ -65,6 +66,7 @@
 @source inline("[&_svg]:size-5");
 @source inline("[&_svg]:size-6");
 @source inline("[&_svg]:size-[2.375rem]");
+@source inline("[&_svg]:text-[var(--Brand-Line)]");
 @source inline("[--card-surface:var(--Surface-Secondary)]");
 @source inline("[--card-surface:var(--Surface-Tertiary)]");
 @source inline("[--ksk-fab-bottom-offset:1rem]");
@@ -135,7 +137,6 @@
 @source inline("bg-[var(--Object-Success)]");
 @source inline("bg-[var(--Object-Warning)]");
 @source inline("bg-[var(--Object-on-Inverse)]/10");
-@source inline("bg-[var(--Object-on-Inverse)]/20");
 @source inline("bg-[var(--Overlay-Dark)]");
 @source inline("bg-[var(--Overlay-Light)]");
 @source inline("bg-[var(--Overlay-Medium)]");
@@ -455,7 +456,6 @@
 @source inline("hover:bg-[var(--Hover-Secondary-Button)]");
 @source inline("hover:bg-[var(--Hover-Tertiary-Button)]");
 @source inline("hover:bg-[var(--Object-on-Inverse)]/20");
-@source inline("hover:bg-[var(--Object-on-Inverse)]/30");
 @source inline("hover:bg-[var(--Overlay-Medium)]");
 @source inline("hover:bg-[var(--Primitive-White-Alpha-200)]");
 @source inline("hover:bg-[var(--Primitive-White-Alpha-900)]");
@@ -483,7 +483,6 @@
 @source inline("hover:data-[state=checked]:bg-[var(--Hover-Primary-Button)]");
 @source inline("hover:data-[state=unchecked]:bg-[var(--Object-Disable)]");
 @source inline("hover:no-underline");
-@source inline("hover:opacity-100");
 @source inline("hover:opacity-70");
 @source inline("hover:opacity-80");
 @source inline("hover:opacity-90");
@@ -657,10 +656,8 @@
 @source inline("opacity-40");
 @source inline("opacity-50");
 @source inline("opacity-60");
-@source inline("opacity-70");
 @source inline("opacity-75");
 @source inline("opacity-80");
-@source inline("opacity-90");
 @source inline("origin-(--radix-dropdown-menu-content-transform-origin)");
 @source inline("origin-(--radix-hover-card-content-transform-origin)");
 @source inline("origin-center");
@@ -888,7 +885,6 @@
 @source inline("text-7xl");
 @source inline("text-8xl");
 @source inline("text-[var(--Border-Medium-Emphasis)]");
-@source inline("text-[var(--Brand-Line)]");
 @source inline("text-[var(--Brand-Primary)]");
 @source inline("text-[var(--Categorical-2-Bold)]");
 @source inline("text-[var(--Categorical-9-Bold)]");
@@ -912,7 +908,6 @@
 @source inline("text-[var(--Text-Warning)]");
 @source inline("text-[var(--Text-on-Inverse)]");
 @source inline("text-[var(--Text-on-Inverse)]!");
-@source inline("text-[var(--Text-on-Inverse)]/30");
 @source inline("text-[var(--Text-on-Inverse)]/50");
 @source inline("text-[var(--Text-on-Inverse)]/60");
 @source inline("text-[var(--Text-on-Inverse)]/70");
