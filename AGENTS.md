@@ -1,5 +1,44 @@
 # KSK Design System — 設計ルールブック（Codex向け）
 
+## CLAUDE.md / AGENTS.md の編集ルール
+
+<!-- docs-sync-ignore -->
+このファイルと `CLAUDE.md` は Claude Code 用 / Codex 用の対になる作業手順書で、
+共通で守るべき内容（実装前セルフチェック・セッション開始時に読み込むファイル・
+ローカル二重実装ゲート・このDSについて・最大の特徴・技術スタック・AIモデルの
+使い分け方針・ドキュメント構成・ディレクトリ構成・カラートークン体系・
+クイックスタート・コンポーネント追加時のチェックリスト）は**両ファイルで内容を
+同期させる**こと。
+
+- 見出し名・本文は基本的に同一にする（ツール名など明確にツール固有の1行だけ
+  <!-- docs-sync-ignore --> マーカー（単独行、次の1行を対象から除外）で除外する）
+- Codex 固有の付録（AGENTS.md 末尾の Codex PR Review Guidelines）のような
+  完全にツール固有のブロックは BEGIN/END マーカーコメント（例:
+  末尾が `codex-pr-review-guidelines` のマーカー）で囲み同期対象から除外する
+- 片方だけ編集したら **`node scripts/check-agents-docs-sync.mjs`**（`npm run check` に
+  組み込み済み）を実行し、乖離が無いことを確認する
+- `templates/CLAUDE.md` / `templates/AGENTS.md`（postinstall で配布するテンプレート）も
+  同じ仕組みで同期検査の対象
+
+## 実装前セルフチェック（AI必読・最優先）
+
+UI を書く前に必ず確認すること:
+
+- [ ] 画面の骨格は `contracts/screen-patterns.json` の decisionTree で選んだか
+- [ ] 既存コンポーネントを `src/components/COMPONENT_LOOKUP.md` で確認したか（手書き・再定義は禁止）
+- [ ] 色は semantic token（`var(--Surface-*)` / `var(--Brand-Primary)` 等）か。Tailwind標準色・生 `#hex` は禁止
+- [ ] `border` は色を併記したか（`border-[var(--Border-Low-Emphasis)]` 等）。Tailwind v4 では無色 border は currentColor になり、消費側の濃色テキストで黒ずむ（preset.css の base layer が保険だが明示が原則）
+- [ ] **文脈非依存**か（テキスト要素に `text-[var(--Text-*)]`、サーフェス/オーバーレイに `bg-[var(--Surface-*)]` を明示）。親の継承や currentColor に頼ると消費側の色文脈で崩れる。Storybook ツールバーの **Hostile ctx** を loud にして、文字/アイコンがマゼンタ化・背景が透けないか確認する
+- [ ] typography は `typo-*` クラスか（`font-bold` 等の直書きは禁止）
+- [ ] アイコンは `iconsax-reactjs` か（`lucide-react` / `heroicons` は使わない）
+- [ ] 生タグ（`<button>` / `<input>` / `<a href>`）でなく DS コンポーネントを使ったか
+- [ ] CSS でベンダープレフィックス併記する場合、**`-webkit-` を先・標準形を後**に書いたか（消費側の minifier が同一プロパティとして dedupe し後勝ちのみ残すため。逆順だと Firefox で静かに無効化。`node scripts/check-prefix-order.mjs` が CI で検出）
+- [ ] クラス名は**完全な文字列**で書いたか（`` `bg-${color}` `` のような動的合成は静的抽出できず消費側で CSS が生成されない。分岐は三項演算子か cva variant で。`scripts/generate-source-safelist.mjs` が検出）
+- [ ] `.tsx` 編集後に `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行したか
+- [ ] `FormField` を import する前にどちらか確認したか（react-hook-form の Controller と統合するなら `RhfFormField`＝`ui/form` の `FormField` を index.ts で別名 export したもの。単純な label+error 表示は `patterns/form-field` の `FormField`。迷ったら後者）
+
+---
+
 ## このDSについて
 
 **KSK Design System** は、フリーランスデザイナー / エンジニア / PdM が **複数クライアント案件を1つのDSで高速に回す** ために設計された統合デザインシステムです。
@@ -84,7 +123,7 @@ DS 内部でしか出現しないクラスを消費側で確実に生成させ�
 
 ```bash
 bash scripts/check-drift.sh
-node scripts/generate-component-lookup.mjs
+npm run generate:lookup
 ```
 
 **play 関数のあるコンポーネントを触った後は必ず実行:**
@@ -107,7 +146,7 @@ npm run test:a11y
 ```
 
 axe-core による a11y 機械検証（issue #261）。`@storybook/addon-a11y` の
-afterEach フックが全ストーリー（148件、tags フィルタなし）に対して axe-core を
+afterEach フックが全ストーリー（tags フィルタなし）に対して axe-core を
 実行する（設定は `vitest.a11y.config.ts`）。color-contrast ルールのみ既知の
 トークン債務のため CI では無効化中（`.storybook/preview.ts` 参照、コントラスト自体は
 `scripts/check-contrast.mjs` が担保）。CI では常時実行される。
@@ -135,28 +174,38 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 
 ## 技術スタック
 
-- React 19 + TypeScript / Vite / **Tailwind CSS v4**（`@import "tailwindcss"` 構文）
+- React 19 + TypeScript / Vite / **Tailwind CSS v4**（`@import "tailwindcss"` 構文。`@tailwind base` 等の v3 構文は使わない）
 - shadcn/ui（Radix UI ベース） / CVA（バリアント管理）
-- **iconsax-reactjs**（アイコン。lucide-react や heroicons は使わない）
-- Storybook（ドキュメント）
-
-> **注意**: Tailwind CSS は v4 です。`@tailwind base` 等の v3 構文は使わないこと。
+- **iconsax-reactjs**（アイコン。`lucide-react` / `heroicons` は使わない） / Storybook（ドキュメント）
 
 ---
 
 ## AIモデルの使い分け方針
+
+（同一モデルで実装と検証を兼ねない — 同じバイアスを共有し独立検証にならない）
+
+### Fable 5 が使えるとき
 
 | モデル | 用途 |
 |--------|------|
 | `claude-fable-5` | 最難関の設計・長時間エージェント作業のみ（高コストのため温存） |
 | `claude-opus-4-8` | 通常のUI実装・レビュー・リファクタの既定 |
 
-**検証ループを使う場合:** 実装 = Fable 5 / 検証 = Opus 4.8 のように実装者と検証者で別モデルを使う（同一モデルは同じバイアスを共有し独立検証にならない）。
+**検証ループ:** 実装 = Fable 5 / 検証 = Opus 4.8
 
 **Fable 5 使用時の注意:**
 - thinking は常時オン（パラメータ省略でデフォルトに任せる）
 - refusal 時は `fallbacks` で Opus 4.8 に自動フォールバック
 - 30日データ保持が必須
+
+### Fable 5 が使えないとき（アクセス終了・休止期間）
+
+| モデル | 用途 |
+|--------|------|
+| `claude-opus-4-8` | 設計・UI実装・レビュー・リファクタの既定 |
+| `claude-sonnet-5` | 機械的な一括修正・定型作業（トークン節約） |
+
+**検証ループ:** 実装 = Opus 4.8 / 検証 = Sonnet 5
 
 ---
 
@@ -164,12 +213,16 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 
 | ファイル | 内容 |
 |---------|------|
-| **AGENTS.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート |
+<!-- docs-sync-ignore -->
+| **CLAUDE.md** | 同上（Claude Code用） |
+<!-- docs-sync-ignore -->
+| **AGENTS.md**（本ファイル） | 概要・技術スタック・コマンド・クイックスタート（Codex用。Codex PR Review Guidelines を追記） |
 | **contracts/components.json** | 全コンポーネントの構造化定義（バリアント・アクセシビリティ要件。総数は meta.counts が正本） |
 | **contracts/rules.json** | 禁止パターン・AIアンチパターン・アクセシビリティ要件（正本: rules.json） |
 | **contracts/design-context.json** | `DESIGN.md` の役割・正本ファイル・外部 DESIGN.md 参照方針 |
 | **tokens.json** | カラー・スペーシング・シャドウトークンの機械可読定義 |
-| **src/components/COMPONENT_LOOKUP.md** | 全コンポーネントのバリアント・インポートパス（自動生成） |
+| **contracts/token-hex-cache.json** | semantic トークンのデフォルトテーマ解決済み hex（テーマ依存キーは meta.themeDependentKeys 参照・自動生成） |
+| **src/components/COMPONENT_LOOKUP.md** | 全コンポーネントのバリアント・インポートパス一覧（自動生成） |
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
 | **contracts/screen-patterns.json** | 画面実装前にどのシェル/パターンを使うかを決める decisionTree・crudMatrix |
 | **contracts/composition.json** | 選んだパターン内部の並べ方（骨格構造・余白リズム・カード階層・テキスト階層・CTA優先度） |
@@ -191,11 +244,76 @@ src/
 ├── styles/
 │   ├── primitive.css  # Layer 1: 原色パレット
 │   ├── semantic.css   # Layer 2: 用途別トークン
-│   └── typography.css # typo-* ユーティリティ
+│   ├── typography.css # typo-* ユーティリティ
+│   └── source-safelist.css  # @source safelist（自動生成・手で編集しない / issue #258）
 ├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット
 └── index.ts           # Public API（全コンポーネント）
 ```
+
+---
+
+## コマンド
+
+```bash
+# 開発サーバー（Storybook）
+npm run storybook
+
+# ビルド
+npm run build-storybook
+
+# スクラッチ検出（実装後に必ず実行）
+bash scripts/lint-scratch.sh
+
+# ドリフト検出（コンポーネント追加後に実行）
+bash scripts/check-drift.sh
+
+# COMPONENT_LOOKUP.md 再生成（コンポーネント追加後に実行）
+npm run generate:lookup
+
+# DESIGN.md contract 検査
+npm run lint:design
+
+# @source safelist 再生成（新しい Tailwind クラスを使ったら実行）
+npm run generate:safelist
+
+# 全チェック（tsc + lint + drift + lookup + safelist 一括）
+npm run check
+
+# interaction テスト（Storybook play 関数を playwright chromium で実行）
+npm run test:interaction
+
+# a11y 機械検証（axe-core。全ストーリー対象。issue #261）
+npm run test:a11y
+```
+
+**interaction テストについて（issue #256）:**
+
+- 実体は Storybook の play 関数。`@storybook/addon-vitest` + vitest browser mode（playwright chromium）で
+  ヘッドレス実行する。設定は `vitest.storybook.config.ts`。
+- 対象は `tags: ["interaction"]` を付けたストーリーだけ（全ストーリーのスモークはしない）。
+- 初回のみ `npx playwright install chromium` が必要。**この前提があるため `npm run check` /
+  `check:agent` には含めていない**（CI と、下記に該当する変更をしたときに手で回す）。
+- 押下でレイアウトが沈む・入場アニメーション中に操作不能・フォーカストラップ崩れ、といった
+  v1.48.x で連続した種類の不具合をここで落とす。
+- **play 関数のあるコンポーネント（Button / Dialog / AlertDialog / Sheet / Select /
+  DropdownMenu / Combobox / Tabs / Form / Toast）を触ったら `npm run test:interaction` を回すこと。**
+- ビジュアル回帰（スクリーンショット差分）は未導入。`.claude/skills/audit-pages/SKILL.md` による
+  手動の視覚監査が現状の代替。
+
+**a11y 機械検証について（issue #261）:**
+
+- `@storybook/addon-a11y` の afterEach フック（axe-core）が全ストーリー（tags フィルタなし）に
+  対して実行される。設定は `vitest.a11y.config.ts`、実行は `npm run test:a11y`。CI では常時実行。
+- color-contrast ルールのみ既知のトークン債務（6テーマ×全コンポーネントに及ぶ規模）のため
+  現状無効化（`.storybook/preview.ts` 参照）。コントラスト自体は `scripts/check-contrast.mjs`
+  （`npm run check` 経由）が引き続き担保する。
+- rules.json の `accessibility.requirements` に `machineVerified` / `verifiedBy` を追加済み。
+  axe でカバーできない項目（フォーカスリング視認・タッチターゲット実測・エラー表示の
+  色+アイコン+テキスト3点セット等）は今後も目視レビューが必要。
+- icon-only の `<Button size="icon*">` に `aria-label` が無いパターンは
+  `eslint/icon-button-aria-label.js`（`ksk-a11y/icon-button-aria-label`）で lint 時に検出する
+  （`.stories.tsx` は対象外）。
 
 ---
 
@@ -265,7 +383,7 @@ import { Button, Card, Input, FormField } from "ksk-design-system"
 - [ ] `contracts/components.json` の `meta.counts` を更新
 - [ ] `bash scripts/check-drift.sh` を実行して乖離がないことを確認
 - [ ] Storybook のストーリーファイル（`.stories.tsx`）を作成
-- [ ] `node scripts/generate-component-lookup.mjs` を実行して COMPONENT_LOOKUP.md を更新
+- [ ] `npm run generate:lookup` を実行して COMPONENT_LOOKUP.md を更新
 
 <!-- BEGIN:codex-pr-review-guidelines -->
 ## Codex PR Review Guidelines
