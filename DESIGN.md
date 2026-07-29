@@ -63,6 +63,7 @@ layering:                                          # z-index スケール（src/
   raised: 10
   sticky: 30
   nav: 40
+  floating: 45
   overlay: 50
   modal: 60
   alertOverlay: 900
@@ -197,6 +198,7 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 | `--Motion-Duration-Slower` | 500ms | 進捗のような「じわっと追従」表示専用 |
 | `--Motion-Duration-Sheet-Enter` | 320ms | Sheet の表示・スナップ移動（Emphasized と対） |
 | `--Motion-Duration-Sheet-Settle` | 280ms | Sheet のドラッグ解放後の吸着・閉じ |
+| `--Motion-Duration-Ring` | 400ms | ProgressRing のリング描画 |
 
 | easing | 値 | 用途 |
 |---|---|---|
@@ -253,6 +255,8 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
 - **CoachMark も scrim ごと Modal より上（950/960）** — オンボーディングは Dialog や Sheet を
   開いた状態の上から重ねることがあり、scrim が Modal より下だと「暗転していないモーダルの上に
   説明だけが浮く」状態になる。
+- **Floating(45) が Nav(40) の上** — AppShell は `<main>` の後にボトムナビを描画するので、
+  同じ段だと FAB や一括操作バーが後勝ちのナビに隠れる。
 - **Modal(60) と Alert-Overlay(900) の間が大きく空いている**のは、多段 Sheet が
   `Modal + 段数*20` で積み上がるための予約領域（issue #158）。
 

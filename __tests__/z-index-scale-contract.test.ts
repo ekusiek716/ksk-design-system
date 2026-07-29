@@ -26,11 +26,17 @@ function sheetConst(name: string): number {
 
 describe("z-index スケール contract", () => {
   it("下から上への順序が守られている", () => {
-    const order = ["Base", "Raised", "Sticky", "Nav", "Overlay", "Modal", "Alert-Overlay", "Alert", "Coachmark-Overlay", "Coachmark", "Popover", "Toast", "Tooltip", "SkipLink"]
+    const order = ["Base", "Raised", "Sticky", "Nav", "Floating", "Overlay", "Modal", "Alert-Overlay", "Alert", "Coachmark-Overlay", "Coachmark", "Popover", "Toast", "Tooltip", "SkipLink"]
     const values = order.map(z)
     expect(values).toEqual([...values].sort((a, b) => a - b))
     // 同値の段があると Portal のマウント順で勝敗が決まってしまう
     expect(new Set(values).size).toBe(values.length)
+  })
+
+  it("Floating（FAB / 一括操作バー）は Nav より上", () => {
+    // AppShell は <main> の後にボトムナビを描画するので、同じ段だと後勝ちで隠れる
+    expect(z("Floating")).toBeGreaterThan(z("Nav"))
+    expect(z("Floating")).toBeLessThan(z("Overlay"))
   })
 
   it("Modal は自分の scrim(Overlay) より上", () => {

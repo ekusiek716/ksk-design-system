@@ -28,6 +28,7 @@ describe("motion トークン contract", () => {
     expect(token("Motion-Duration-Slower")).toBe("500ms")
     expect(token("Motion-Duration-Sheet-Enter")).toBe("320ms")
     expect(token("Motion-Duration-Sheet-Settle")).toBe("280ms")
+    expect(token("Motion-Duration-Ring")).toBe("400ms")
   })
 
   it("easing の値が既存実装と一致する", () => {

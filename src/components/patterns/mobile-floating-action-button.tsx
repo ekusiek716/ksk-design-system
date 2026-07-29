@@ -45,7 +45,7 @@ function MobileFloatingActionButton({
       variant="default"
       size={showLabel ? "lg" : "icon-lg"}
       className={cn(
-        "fixed z-[var(--Z-Nav)] shadow-[var(--shadow-lg)] transition-all duration-[var(--Motion-Duration-Base)]",
+        "fixed z-[var(--Z-Floating)] shadow-[var(--shadow-lg)] transition-all duration-[var(--Motion-Duration-Base)]",
         "bottom-[calc(env(safe-area-inset-bottom)_+_var(--ksk-fab-bottom-offset)_+_var(--ksk-fab-keyboard-inset))]",
         placement === "end" && "right-4",
         placement === "start" && "left-4",

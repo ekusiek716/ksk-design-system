@@ -1026,6 +1026,7 @@
 @source inline("z-[var(--Z-Alert-Overlay)]");
 @source inline("z-[var(--Z-Coachmark)]");
 @source inline("z-[var(--Z-Coachmark-Overlay)]");
+@source inline("z-[var(--Z-Floating)]");
 @source inline("z-[var(--Z-Modal)]");
 @source inline("z-[var(--Z-Nav)]");
 @source inline("z-[var(--Z-Overlay)]");

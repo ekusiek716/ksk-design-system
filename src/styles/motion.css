@@ -12,8 +12,8 @@
 
    段階を増やしすぎない方針:
    - duration は 4 段（Fast / Base / Slow / Slower）。
-     Sheet だけは Emphasized カーブと不可分な専用ペアを別に持つ。
-   - easing は 4 種（Standard / Emphasized / Decelerate / Bounce）。
+     Sheet / ProgressRing だけはスケールに丸めると体感が変わる専用値を別に持つ。
+   - easing は 5 種（Standard / Snappy / Emphasized / Decelerate / Bounce）。
    ============================================================= */
 
 :root {
@@ -34,6 +34,12 @@
      Settle : ドラッグ解放後の吸着・閉じ（280ms） */
   --Motion-Duration-Sheet-Enter:  320ms;
   --Motion-Duration-Sheet-Settle: 280ms;
+
+  /* ─── ProgressRing 専用 duration ───
+     リング全周を描き切る尺。スケールの Slow(300ms) と Slower(500ms) の
+     ちょうど中間で、どちらに丸めても体感が変わるため独立トークンにしている
+     （Sheet の 280/320ms と同じ考え方）。 */
+  --Motion-Duration-Ring: 400ms;
 
   /* ─── Easing ───
      Standard   : CSS の `ease-out` キーワードと同一曲線。UI 変化の既定。
@@ -64,7 +70,7 @@
 
    ※ 効くのはトークンを参照している箇所だけ。`duration-200` のような
      直書きや Radix 内蔵アニメーションは対象外なので、コンポーネント側は
-     必ずトークン参照で書くこと（scripts/lint-scratch.sh の W12 が検出）。 */
+     必ずトークン参照で書くこと（scripts/lint-scratch.sh の W13 が検出）。 */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --Motion-Duration-Fast:   0.01ms;
@@ -73,5 +79,6 @@
     --Motion-Duration-Slower: 0.01ms;
     --Motion-Duration-Sheet-Enter:  0.01ms;
     --Motion-Duration-Sheet-Settle: 0.01ms;
+    --Motion-Duration-Ring: 0.01ms;
   }
 }

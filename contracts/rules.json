@@ -594,6 +594,7 @@
         { "token": "var(--Motion-Duration-Slower)",       "value": "500ms", "use": "進捗の追従" },
         { "token": "var(--Motion-Duration-Sheet-Enter)",  "value": "320ms", "use": "Sheet の表示・スナップ" },
         { "token": "var(--Motion-Duration-Sheet-Settle)", "value": "280ms", "use": "Sheet のドラッグ解放後の吸着・閉じ" },
+        { "token": "var(--Motion-Duration-Ring)",         "value": "400ms", "use": "ProgressRing のリング描画" },
         { "token": "var(--Motion-Easing-Standard)",   "value": "cubic-bezier(0, 0, 0.58, 1)",      "use": "既定。CSS の ease-out キーワードと同一曲線" },
         { "token": "var(--Motion-Easing-Snappy)",     "value": "cubic-bezier(0, 0, 0.2, 1)",       "use": "Tailwind の ease-out クラスと同一曲線。Standard より速く抜ける" },
         { "token": "var(--Motion-Easing-Emphasized)", "value": "cubic-bezier(0.32, 0.72, 0, 1)",   "use": "Sheet / Dialog（iOS 風スプリング）" },
@@ -604,11 +605,12 @@
     },
     "zIndex": {
       "rule": "Portal に載る要素の重なりは --Z-* トークンで表す。z-50 一律だと Portal のマウント順（＝開いた順）で勝敗が決まる。z-10 / z-20 のコンポーネント内部の重なりは対象外。",
-      "order": "Sticky < Nav < Overlay < Modal < Alert-Overlay < Alert < Coachmark-Overlay < Coachmark < Popover < Toast < Tooltip < SkipLink",
+      "order": "Sticky < Nav < Floating < Overlay < Modal < Alert-Overlay < Alert < Coachmark-Overlay < Coachmark < Popover < Toast < Tooltip < SkipLink",
       "allowed": [
         { "token": "var(--Z-Raised)",   "value": "10",   "use": "カード内の重なり（画像上のバッジ等）" },
         { "token": "var(--Z-Sticky)",   "value": "30",   "use": "スクロール追従のフィルタバー / サブナビ" },
-        { "token": "var(--Z-Nav)",      "value": "40",   "use": "固定ヘッダ・ボトムタブ・FAB・同意バナー" },
+        { "token": "var(--Z-Nav)",      "value": "40",   "use": "シェルが敷く固定ヘッダ・ボトムタブ" },
+        { "token": "var(--Z-Floating)", "value": "45",   "use": "ナビの上に浮く一時的な操作面（FAB / 一括操作バー / 同意バナー）" },
         { "token": "var(--Z-Overlay)",  "value": "50",   "use": "Dialog / Sheet の scrim" },
         { "token": "var(--Z-Modal)",    "value": "60",   "use": "Dialog / Sheet 本体" },
         { "token": "var(--Z-Alert-Overlay)", "value": "900", "use": "AlertDialog / ConfirmDialog の scrim" },

@@ -136,7 +136,9 @@
      Base    0   … 通常フロー
      Raised  10  … カード内の重なり（画像上のバッジ、カルーセル矢印など）
      Sticky  30  … スクロール追従のフィルタバー / サブナビ
-     Nav     40  … アプリシェルの固定ヘッダ・ボトムタブ・FAB
+     Nav     40  … アプリシェルの固定ヘッダ・ボトムタブ（シェルが敷く固定ナビ）
+     Floating 45 … ナビの上に浮く一時的な操作面（FAB / 一括操作バー / 同意バナー）。
+                   Nav と同じ段だと、シェルがナビを後から描画する構造上ナビに隠れる
      Overlay 50  … Dialog / Sheet の scrim（背面を覆う暗幕）
      Modal   60  … Dialog / Sheet 本体。必ず自分の scrim より上
      Alert-Overlay 900 … AlertDialog / ConfirmDialog の scrim
@@ -177,6 +179,7 @@
   --Z-Raised:   10;
   --Z-Sticky:   30;
   --Z-Nav:      40;
+  --Z-Floating: 45;
   --Z-Overlay:  50;
   --Z-Modal:    60;
   --Z-Alert-Overlay: 900;
