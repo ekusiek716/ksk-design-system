@@ -17,6 +17,13 @@ const chipVariants = cva(
       // 変えずに当たり判定だけを 44px まで広げる。Tabs の pill と同じ
       // 「透明な before 擬似要素」方式（本体の height を触らない＝レイアウトが動かない）。
       // tile(48px) は既に 44px を超えているので不要。
+      //
+      // ⚠️ 置き場所の制約: 擬似要素はチップの外側へはみ出すため、**親が 44px 以上の
+      // 高さを持っていないとクリップされて当たり判定が元に戻る**。特に
+      // `overflow-x-auto` の横スクロール行は要注意で、CSS 仕様上 overflow-y も
+      // auto に落ちる（visible にできない）ため確実にクリップされる。
+      // 横スクロール行に置くときは行側に `min-h-11 items-center` を付けること
+      // （ChipFilterBar / TabsList はそうしている）。
       size: {
         sm: "h-7 px-2.5 typo-label-xs before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
         md: "h-8 px-3 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
