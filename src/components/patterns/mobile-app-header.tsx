@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-interface MobileAppHeaderProps extends React.ComponentProps<"header"> {
+interface MobileAppHeaderProps extends Omit<React.ComponentProps<"header">, "ref"> {
   brand: React.ReactNode
   leading?: React.ReactNode
   status?: React.ReactNode
@@ -9,6 +9,14 @@ interface MobileAppHeaderProps extends React.ComponentProps<"header"> {
   actions?: React.ReactNode
   sticky?: boolean
   bordered?: boolean
+  /**
+   * `<header>`（banner landmark）として描画するか。
+   * `MobileAppShell` の `header` slot に渡すときのみ `false` を指定し、
+   * banner landmark の二重化を避ける（landmark はシェル側の `<header>` が持つ）。
+   * 単独利用・それ以外の合成では常に `true`（既定）で banner landmark を持つ。
+   * @default true
+   */
+  landmark?: boolean
 }
 
 function MobileAppHeader({
@@ -20,11 +28,13 @@ function MobileAppHeader({
   actions,
   sticky = true,
   bordered = true,
+  landmark = true,
   children,
   ...props
 }: MobileAppHeaderProps) {
+  const Tag: React.ElementType = landmark ? "header" : "div"
   return (
-    <header
+    <Tag
       data-slot="mobile-app-header"
       className={cn(
         "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)]",
@@ -68,7 +78,7 @@ function MobileAppHeader({
         </div>
       </div>
       {children}
-    </header>
+    </Tag>
   )
 }
 

@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { MobileAppHeader } from "./mobile-app-header"
 
 type MobileAppShellBottomNavMode = "fixed" | "external" | "inline"
 type MobileAppShellBottomPadding = "none" | "bottom-nav" | "bottom-nav-fab"
@@ -57,17 +58,25 @@ function MobileAppShell({
           className="relative flex min-h-dvh min-w-0 flex-1 flex-col bg-[var(--Surface-Primary)]"
         >
           {header && (
-            // `header` は呼び出し側が渡す任意のノードで、多くの場合それ自体が
-            // <MobileAppHeader>（実体は <header>）。ここを <header> にすると
-            // banner landmark が入れ子・重複してしまう（axe:
-            // landmark-banner-is-top-level / landmark-no-duplicate-banner /
-            // landmark-unique）。レイアウト用の <div> に留める。
-            <div
+            // `header` は呼び出し側が渡す任意のノード。素の JSX（<div> 等）を
+            // 渡すケースでは banner landmark が無くなってしまうため、この
+            // ラッパー自体は <header> のまま維持する。ただし `header` が
+            // <MobileAppHeader>（実体は <header>）のときは banner landmark が
+            // 入れ子・重複してしまう（axe: landmark-banner-is-top-level /
+            // landmark-no-duplicate-banner / landmark-unique）ため、その場合は
+            // MobileAppHeader 側に landmark={false} を注入して <div> 化させ、
+            // banner landmark はこのシェル側 <header> 1つだけに一本化する。
+            <header
               data-slot="mobile-app-shell-header"
               className="sticky top-0 z-40 shrink-0 bg-[var(--Surface-Primary)]"
             >
-              {header}
-            </div>
+              {React.isValidElement(header) && header.type === MobileAppHeader
+                ? React.cloneElement(
+                    header as React.ReactElement<{ landmark?: boolean }>,
+                    { landmark: false }
+                  )
+                : header}
+            </header>
           )}
           <main
             data-slot="mobile-app-shell-main"

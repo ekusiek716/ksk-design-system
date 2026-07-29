@@ -90,7 +90,7 @@ export const Sticky: Story = {
     // （中に <AppHeader>=<header> があり、banner landmark が別ランドマークに
     // 包まれてしまうため。tabIndex だけでフォーカス到達性を満たす）。
     <div
-      className="h-96 overflow-auto bg-[var(--Surface-Secondary)] rounded-lg"
+      className="h-96 overflow-auto bg-[var(--Surface-Secondary)] rounded-lg focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
       tabIndex={0}
     >
       <AppHeader sticky title="スクロールしてください" subtitle="Sticky ヘッダー" />
