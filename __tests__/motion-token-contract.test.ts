@@ -80,6 +80,17 @@ describe("motion トークン contract", () => {
     expect(offenders).toEqual([])
   })
 
+  it("単体 import できる CSS は --Motion-* にフォールバックを持つ", () => {
+    // glass.css は `ksk-design-system/glass` として motion.css 抜きで import できる。
+    // フォールバックが無いと var() が解決できず transition ごと無効になる。
+    const glass = readFileSync("src/styles/glass.css", "utf8")
+    const refs = [...glass.matchAll(/var\(--Motion-[A-Za-z-]+([^)]*)\)/g)]
+    expect(refs.length).toBeGreaterThan(0)
+    for (const m of refs) {
+      expect(m[1].trim(), `フォールバック無し: ${m[0]}`).toMatch(/^,/)
+    }
+  })
+
   it("preset.css が motion.css を読み込んでいる", () => {
     expect(preset).toContain('@import "./styles/motion.css"')
   })

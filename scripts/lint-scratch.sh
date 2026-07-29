@@ -278,7 +278,10 @@ for FILE in $FILES; do
   # smooth-curve コマンド（a.8.8s...）は引き続き除外される。
   MOTION_SECONDS='[[:space:]("'"'"':][[:space:]]*(\.[0-9]+|[0-9]+(\.[0-9]+)?)s([[:space:];,")'"'"']|$)'
   MOTION_EASING_KEYWORDS="${CLASS_START}(ease-in-out|ease-in|ease-out|ease|linear)${CLASS_END}"
-  MOTION_TARGET=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(|${MOTION_EASING_KEYWORDS}|[0-9]+ms|${MOTION_SECONDS}" "$FILE" 2>/dev/null || true)
+  # Tailwind の任意値: duration-[400ms] / duration-[.4s] / delay-[0.2s] 等。
+  # duration-[var(--Motion-...)] は数字始まりでないので当たらない。
+  MOTION_ARBITRARY='(duration|delay)-\[[0-9.]+m?s\]'
+  MOTION_TARGET=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(|${MOTION_EASING_KEYWORDS}|[0-9]+ms|${MOTION_ARBITRARY}|${MOTION_SECONDS}" "$FILE" 2>/dev/null || true)
   # 例外コメントが直前行にあるものを除外する（行内の指定は grep -v で落ちる）
   MATCHES=""
   while IFS= read -r line; do

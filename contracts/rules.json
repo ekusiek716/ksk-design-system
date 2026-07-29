@@ -426,7 +426,7 @@
       "id": "P047",
       "severity": "warning",
       "category": "token",
-      "pattern": "\\b(duration|delay)-\\d+\\b|cubic-bezier\\(|[\\s(\\\"':]\\s*(ease-in-out|ease-in|ease-out|ease|linear)[\\s;,\\\")']|\\d+ms|[\\s(\\\"':]\\s*(\\.\\d+|\\d+(\\.\\d+)?)s[\\s;,\\\")']",
+      "pattern": "\\b(duration|delay)-\\d+\\b|(duration|delay)-\\[[\\d.]+m?s\\]|cubic-bezier\\(|[\\s(\\\"':]\\s*(ease-in-out|ease-in|ease-out|ease|linear)[\\s;,\\\")']|\\d+ms|[\\s(\\\"':]\\s*(\\.\\d+|\\d+(\\.\\d+)?)s[\\s;,\\\")']",
       "excludes": ["ksk-motion-exception", ".stories.", "src/styles/motion.css"],
       "message": "モーション値（ms / 秒 / cubic-bezier / easing キーワード）の直書き禁止",
       "fix": "duration-[var(--Motion-Duration-{Fast,Base,Slow,Slower})] / ease-[var(--Motion-Easing-{Standard,Emphasized,...})] を使用。新規は原則 Standard / Emphasized のみ（他は既存箇所の値保存用）",

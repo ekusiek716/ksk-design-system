@@ -100,6 +100,20 @@ describe("lint-scratch.sh", () => {
     expect(outputOf(result)).not.toContain("モーション値の直書き")
   })
 
+  it("W13: Tailwind の任意値 duration-[0.4s] / duration-[400ms] も検出する", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        return (
+          <>
+            <div className="transition-all duration-[0.4s]" />
+            <div className="transition-all delay-[400ms]" />
+          </>
+        )
+      }
+    `)
+    expect(outputOf(result)).toContain("モーション値の直書き")
+  })
+
   it("W13: Motion トークン参照なら検出しない", () => {
     const result = runLintScratch(`
       export function Example() {
