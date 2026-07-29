@@ -146,7 +146,7 @@ function ImageGallery({
 
       {/* Dots */}
       {indicatorType === "dot" && images.length > 1 && (
-        <div className="flex items-center justify-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
           {images.map((_, i) => (
             <button
               key={i}

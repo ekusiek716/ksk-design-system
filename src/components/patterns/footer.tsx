@@ -71,7 +71,7 @@ function Footer({
 
         {/* Social links */}
         {socialLinks.length > 0 && (
-          <div className="flex gap-3 mb-6">
+          <div className="flex flex-wrap gap-3 mb-6">
             {socialLinks.map((s, i) => {
               const Tag = s.href ? "a" : "button"
               return (

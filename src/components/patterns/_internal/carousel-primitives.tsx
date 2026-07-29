@@ -103,7 +103,7 @@ function carouselControls({
         </>
       )}
       {showDots && total > 1 && (
-        <div className="mt-2 flex items-center justify-center lg:hidden">
+        <div className="mt-2 flex flex-wrap items-center justify-center lg:hidden">
           {Array.from({ length: total }, (_, index) => (
             <button
               key={index}
