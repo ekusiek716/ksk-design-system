@@ -60,7 +60,7 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-[var(--Overlay-Dark)]",
+        "fixed inset-0 z-[var(--Z-Overlay)] bg-[var(--Overlay-Dark)]",
         "data-[state=open]:animate-in data-[state=open]:fade-in-0",
         "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
         className
@@ -186,7 +186,7 @@ function DialogContent({
           // inset-x-* と組み合わせると left/right と transform が競合して
           // SP サイズで左に大きくズレるため使わない。
           // 幅は w-full + max-w-[calc(100%_-_3rem)] (左右 24px) + 480px キャップ。
-          "fixed left-[50%] z-50 w-full max-w-[calc(100%_-_3rem)] sm:max-w-[480px] translate-x-[-50%]",
+          "fixed left-[50%] z-[var(--Z-Modal)] w-full max-w-[calc(100%_-_3rem)] sm:max-w-[480px] translate-x-[-50%]",
           // 縦位置
           position === "top"
             ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh_-_max(env(safe-area-inset-top),2rem)_-_2rem)] overflow-y-auto"

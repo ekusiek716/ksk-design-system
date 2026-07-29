@@ -170,7 +170,7 @@ function ToastViewport() {
       // 常設コンテナを live region にする（トースト要素自身への role="status" 付与は
       // 挿入時に読み上げられない SR があるため、追加を polite で通知する構成）
       aria-live="polite"
-      className="fixed bottom-4 right-4 left-4 sm:left-auto z-50 flex flex-col items-stretch gap-2 sm:w-full sm:max-w-sm"
+      className="fixed bottom-4 right-4 left-4 sm:left-auto z-[var(--Z-Toast)] flex flex-col items-stretch gap-2 sm:w-full sm:max-w-sm"
     >
       {toasts.map((t) => (
         <div

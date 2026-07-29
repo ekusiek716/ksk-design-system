@@ -242,7 +242,7 @@ function ProductCard({
           <img
             src={imageUrl}
             alt={imageAlt ?? name}
-            className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-[var(--Motion-Duration-Base)] group-hover:scale-105"
             loading="lazy"
           />
           {/* タグ表示エリア */}

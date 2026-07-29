@@ -33,6 +33,7 @@ export function ListSkeleton({
   return (
     <div
       data-slot="list-skeleton"
+      role="status"
       className={cn("animate-fade-in px-4 pt-3", className)}
       aria-busy="true"
       aria-label={loadingLabel}
@@ -93,6 +94,7 @@ export function GridSkeleton({
   return (
     <div
       data-slot="grid-skeleton"
+      role="status"
       className={cn("animate-fade-in px-4 pt-3", className)}
       aria-busy="true"
       aria-label={loadingLabel}

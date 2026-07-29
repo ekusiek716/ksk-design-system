@@ -32,7 +32,7 @@ function MarketingShell({
       {header && (
         <header
           data-slot="marketing-header"
-          className="sticky top-0 z-40 h-16 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]/95 backdrop-blur"
+          className="sticky top-0 z-[var(--Z-Nav)] h-16 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]/95 backdrop-blur"
         >
           <Container
             size="fluid"

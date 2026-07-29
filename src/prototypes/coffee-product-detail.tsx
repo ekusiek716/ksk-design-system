@@ -218,7 +218,7 @@ export default function CoffeeProductDetail() {
       </div>
 
       {/* 固定カート追加バー — SP のみ。PC は右カラムのインライン CTA を使う */}
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-4 py-3 @xl:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-[var(--Z-Nav)] border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-4 py-3 @xl:hidden">
         <div className="mx-auto flex max-w-[390px] items-center gap-3">
           <div className="shrink-0">
             <PriceDisplay price={current.member * qty} size="md" />

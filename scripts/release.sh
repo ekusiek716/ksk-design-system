@@ -8,15 +8,35 @@
 #   bash scripts/release.sh major          # 1.34.1 → 2.0.0
 #   bash scripts/release.sh 1.40.0         # 明示指定
 #
+# publish 経路の一本化（issue #259）:
+#   通常の公開経路は npm Trusted Publishing (OIDC) を使う
+#   .github/workflows/publish.yml に一本化した。このスクリプトはもう
+#   npm publish をローカルで実行しない（2FA/OTP 対話・二重 publish リスクの解消）。
+#
 # やること:
 #   1. clean & main 確認、npm run check
-#   2. npm version <level>
-#   3. npm pack で公開物を検証
-#   4. npm publish --access public
-#   5. git push origin main --tags
+#   2. npm version <level> --no-git-tag-version（ローカルタグ・コミットは作らない。
+#      "version" ライフサイクルで scripts/sync-version.mjs は --no-git-tag-version
+#      でも変わらず発火し、contracts/components.json の meta.version・
+#      token-hex-cache を同期して git add する）
+#   3. npm pack で公開物を検証（publish はしない。中身確認のみ）
+#   4. git commit + git push origin main（タグは作らず push もしない）
+#      → publish.yml が version 変更を検知して npm publish
+#      （Trusted Publishing）・タグ作成・GitHub Release を自動実行
+#   5. npm view でレジストリ反映をポーリング確認
 #   6. bash scripts/update-consumers.sh <version>（5 リポ自動 PR）
 #
-# 失敗時は package.json の name 書換を確実に元に戻す（trap）。
+# タグ・GitHub Release の作成は publish.yml に完全委任する。ローカルで
+# `npm version` の既定動作（ローカルタグ作成 + commit）を使うと、
+# `git push --tags` で CI（publish.yml）より先にタグが公開リポジトリに
+# 届いてしまい、publish.yml がタグ既存と判定して GitHub Release の
+# 作成をスキップしてしまう（issue #269 レビュー指摘）。
+#
+# publish.yml が失敗 / 動かない場合でも、ローカルから npm publish する経路は
+# ない（Trusted Publishing に一本化済み・issue #269 レビュー指摘で整合）。
+# break-glass 手順は「publish.yml を workflow_dispatch で再実行する」のみ:
+#   gh workflow run publish.yml --ref main
+# 詳細は PUBLISHING.md の「緊急時（publish.yml が失敗した場合）」を参照。
 # =============================================================
 
 set -euo pipefail
@@ -47,11 +67,18 @@ fi
 echo -e "${CYAN}→ npm run check${NC}"
 npm run check
 
-# ── version bump ─────────────────────────
-echo -e "${CYAN}→ npm version $LEVEL_OR_VERSION${NC}"
-npm version "$LEVEL_OR_VERSION"
+# ── version bump（ローカルタグ・コミットは作らない。タグ/Release は publish.yml に委任） ──
+echo -e "${CYAN}→ npm version $LEVEL_OR_VERSION --no-git-tag-version${NC}"
+npm version "$LEVEL_OR_VERSION" --no-git-tag-version
 VERSION="$(node -p "require('./package.json').version")"
 echo -e "${GREEN}✓ new version: $VERSION${NC}"
+
+# --no-git-tag-version は package.json の commit を作らないため、
+# scripts/sync-version.mjs が git add した変更（package.json 含む）を
+# ここで明示的にコミットする。
+echo -e "${CYAN}→ git commit${NC}"
+git add package.json package-lock.json 2>/dev/null || true
+git commit -m "chore(release): v$VERSION"
 
 # ── tgz 生成 ─────────────────────────
 # v1.35.0 で消費リポすべて新名 (ksk-design-system) に移行済のため、
@@ -76,61 +103,60 @@ rm -rf "$EXTRACT_DIR"
   exit 1
 }
 echo -e "${GREEN}✓ 中身検証 OK${NC}"
+rm -f "$NEW_TGZ"
 
-# ── npm publish ─────────────────────────
-# v1.36.0 以降は npm registry 経由配布。dual tgz は廃止済み。
-# 2FA OTP が必要。手元で完結させたい場合は別途 NPM_TOKEN を使う手もある。
-echo -e "${CYAN}→ npm whoami${NC}"
-WHOAMI="$(npm whoami 2>&1)"
-if [[ "$WHOAMI" == *"401"* ]] || [[ "$WHOAMI" == *"error"* ]]; then
-  echo -e "${RED}✗ npm にログインしていません。'npm login' で認証してください${NC}"
-  exit 1
-fi
-echo -e "${GREEN}✓ logged in as: $WHOAMI${NC}"
+# ── push（タグは作らない・push しない。publish/タグ/Release は publish.yml に一本化） ──
+# ローカルから npm publish もタグ作成もしない。push した package.json の version
+# 変更を .github/workflows/publish.yml が検知し、npm 上の最新版と比較した上で
+# npm publish（OIDC）・`vX.Y.Z` タグ・GitHub Release を CI 側で実行する。
+# ここでローカルタグを push すると、CI より先にタグが公開されて publish.yml が
+# 「タグ既存」と判定し GitHub Release 作成をスキップしてしまうため、意図的に
+# `--tags` を付けない。
+echo -e "${CYAN}→ git push origin main${NC}"
+git push origin main
+PUSHED_SHA="$(git rev-parse HEAD)"
 
-echo -e "${CYAN}→ npm publish --access public${NC}"
-# script コマンドで TTY エミュレートして 2FA URL をキャプチャしつつログ保存
-script -q /tmp/npm-publish-$VERSION.log npm publish --access public < /dev/null &
-PUBLISH_PID=$!
-
-# 認証 URL が出るのを待つ
-for i in {1..30}; do
-  sleep 2
-  if grep -q "Authenticate your account at:" /tmp/npm-publish-$VERSION.log 2>/dev/null; then
-    AUTH_URL="$(grep -oE 'https://www.npmjs.com/auth/cli/[a-f0-9-]+' /tmp/npm-publish-$VERSION.log | head -1)"
-    if [ -n "$AUTH_URL" ]; then
-      echo ""
-      echo -e "${YELLOW}🔑 2FA 認証 URL（ブラウザで開いて承認）:${NC}"
-      echo "    $AUTH_URL"
-      echo ""
-      break
-    fi
+# ── publish.yml の実行を確認 ─────────────────────────
+# gh run list はブランチ指定のみだと「main の最新 run」を返す。GitHub Actions が
+# 今回の push をまだインデックスしていないタイミングだと、直前の（無関係な）
+# publish run を掴んで「成功」と誤判定しかねない（review 指摘 issue #269）。
+# 今回 push した commit SHA (`--commit`) で run が現れるまでポーリングしてから
+# watch することで、確実に今回の push に紐づく run を待つ。
+echo -e "${CYAN}→ publish.yml の実行状況を確認（commit: ${PUSHED_SHA:0:7}）${NC}"
+if command -v gh >/dev/null 2>&1; then
+  RUN_ID=""
+  for i in $(seq 1 20); do
+    RUN_ID="$(gh run list --workflow=publish.yml --commit "$PUSHED_SHA" --limit=1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)"
+    [ -n "$RUN_ID" ] && break
+    sleep 5
+  done
+  if [ -n "$RUN_ID" ]; then
+    echo -e "${CYAN}  run: $RUN_ID (gh run watch $RUN_ID --exit-status)${NC}"
+    gh run watch "$RUN_ID" --exit-status || {
+      echo -e "${RED}✗ publish.yml が失敗しました。'gh run view $RUN_ID --log' でログを確認してください${NC}"
+      exit 1
+    }
+  else
+    echo -e "${YELLOW}⚠️  commit ${PUSHED_SHA:0:7} に紐づく publish.yml の run が見つかりませんでした。GitHub Actions を手動確認してください${NC}"
   fi
-  if grep -q "^+ ksk-design-system@" /tmp/npm-publish-$VERSION.log 2>/dev/null; then
-    break  # OTP 不要で完了したケース
-  fi
-done
-
-# publish 完了を待つ
-wait $PUBLISH_PID 2>/dev/null
-sleep 2
-if grep -q "^+ ksk-design-system@$VERSION" /tmp/npm-publish-$VERSION.log 2>/dev/null; then
-  echo -e "${GREEN}✓ npm publish 成功${NC}"
 else
-  echo -e "${RED}✗ npm publish 失敗。ログ: /tmp/npm-publish-$VERSION.log${NC}"
-  exit 1
+  echo -e "${YELLOW}⚠️  gh コマンドがありません。GitHub Actions の publish.yml を手動確認してください${NC}"
 fi
 
-# レジストリ到達確認
-sleep 3
-REG_VER="$(npm view ksk-design-system version 2>/dev/null)"
-[ "$REG_VER" = "$VERSION" ] || {
-  echo -e "${YELLOW}⚠️  npm registry の最新が ${REG_VER}（期待: ${VERSION}）。CDN 反映遅延の可能性${NC}"
-}
-
-# ── push ─────────────────────────
-echo -e "${CYAN}→ git push origin main --tags${NC}"
-git push origin main --tags
+# ── レジストリ到達確認（publish.yml 完了後にポーリング） ─────────────────
+echo -e "${CYAN}→ npm registry 反映待ち${NC}"
+for i in $(seq 1 20); do
+  REG_VER="$(npm view ksk-design-system version 2>/dev/null || true)"
+  if [ "$REG_VER" = "$VERSION" ]; then
+    echo -e "${GREEN}✓ npm registry に $VERSION が反映されました${NC}"
+    break
+  fi
+  if [ "$i" = 20 ]; then
+    echo -e "${RED}✗ npm registry に $VERSION が反映されませんでした（現在: ${REG_VER:-取得失敗}）${NC}"
+    exit 1
+  fi
+  sleep 5
+done
 
 # ── 消費リポへ配布 ─────────────────────────
 echo -e "${CYAN}→ update-consumers.sh $VERSION（npm registry 経由）${NC}"

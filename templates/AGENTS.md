@@ -5,12 +5,14 @@
 
 # このプロジェクトは ksk-design-system に準拠する
 
+<!-- docs-sync-ignore -->
 Codex（および他の AI エージェント）は UI 作業を始める前に、以下のファイルを**必ず**読み込むこと。
 
 ## 必読ファイル（node_modules 配下）
 
 | ファイル | 内容 |
 |---------|------|
+<!-- docs-sync-ignore -->
 | `node_modules/ksk-design-system/AGENTS.md` | DS 全体のルール・禁止パターン |
 | `node_modules/ksk-design-system/contracts/components.json` | 全コンポーネントの定義・バリアント |
 | `node_modules/ksk-design-system/contracts/rules.json` | 禁止パターン・AIアンチパターン（正本: rules.json） |

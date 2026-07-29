@@ -36,10 +36,11 @@ describe("token-hex-cache", () => {
 
   it("skipped（rgba/color-mix/解決不能）が黙って増えていない", () => {
     const cache = loadCache()
-    // 現状 52 件。rgba・color-mix・White/Gray-Alpha 系の既知の未対応値。
+    // 現状 41 件（issue #263 の死にトークン削除で 52 → 41）。
+    // rgba・color-mix・White/Gray-Alpha 系の既知の未対応値。
     // 新規トークン追加で数が増える分には対応漏れとして許容するが、
     // 上限を大きく超えたら resolve ロジックの劣化 or primitive 参照崩れを疑う。
-    expect(cache.meta.skipped.length).toBeGreaterThanOrEqual(52)
+    expect(cache.meta.skipped.length).toBeGreaterThanOrEqual(41)
     expect(cache.meta.skipped.length).toBeLessThanOrEqual(70)
   })
 
@@ -102,7 +103,6 @@ describe("token-hex-cache", () => {
     const keys: string[] = cache.meta.themeDependentKeys
     // resolve 不能（color-mix）でもテーマ依存であることは変わらない
     expect(keys).toContain("semantic.surface.accent-primary-subtle")
-    expect(keys).toContain("semantic.border.accent-primary-subtle")
     expect(keys).toContain("semanticDark.surface.accent-primary-subtle")
     // skipped 側の値も実際に Brand primitive を参照していることを突合
     const entry = cache.meta.skipped.find(

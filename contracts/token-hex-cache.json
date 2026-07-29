@@ -8,12 +8,10 @@
     "themeDependentKeys": [
       "semantic.surface.accent-primary",
       "semantic.surface.accent-primary-light",
-      "semantic.surface.accent-primary-ultra-light",
       "semantic.surface.accent-primary-subtle",
       "semantic.text.accent-primary",
       "semantic.object.accent-primary",
       "semantic.border.accent-primary",
-      "semantic.border.accent-primary-subtle",
       "semantic.brand.primary",
       "semantic.brand.action",
       "semantic.brand.light",
@@ -25,12 +23,10 @@
       "semantic.focus.high-emphasis",
       "semanticDark.surface.accent-primary",
       "semanticDark.surface.accent-primary-light",
-      "semanticDark.surface.accent-primary-ultra-light",
       "semanticDark.surface.accent-primary-subtle",
       "semanticDark.text.accent-primary",
       "semanticDark.object.accent-primary",
       "semanticDark.border.accent-primary",
-      "semanticDark.border.accent-primary-subtle",
       "semanticDark.brand.primary",
       "semanticDark.brand.action",
       "semanticDark.brand.light",
@@ -52,12 +48,6 @@
         "key": "surface.success-subtle",
         "mode": "semantic",
         "value": "rgba(34, 197, 94, 0.15)",
-        "reason": "rgba"
-      },
-      {
-        "key": "surface.warning-subtle",
-        "mode": "semantic",
-        "value": "rgba(249, 115, 22, 0.15)",
         "reason": "rgba"
       },
       {
@@ -91,12 +81,6 @@
         "reason": "rgba"
       },
       {
-        "key": "text.on-inverse-secondary",
-        "mode": "semantic",
-        "value": "var(--Primitive-White-Alpha-800)",
-        "reason": "unresolvable-var"
-      },
-      {
         "key": "text.on-media-secondary",
         "mode": "semantic",
         "value": "var(--Primitive-White-Alpha-800)",
@@ -115,28 +99,10 @@
         "reason": "box-shadow"
       },
       {
-        "key": "border.accent-primary-subtle",
+        "key": "text.on-inverse-secondary",
         "mode": "semantic",
-        "value": "color-mix(in srgb, var(--Primitive-Brand-500) 30%, transparent)",
-        "reason": "color-mix"
-      },
-      {
-        "key": "border.caution-subtle",
-        "mode": "semantic",
-        "value": "rgba(239, 68, 68, 0.30)",
-        "reason": "rgba"
-      },
-      {
-        "key": "border.success-subtle",
-        "mode": "semantic",
-        "value": "rgba(34, 197, 94, 0.30)",
-        "reason": "rgba"
-      },
-      {
-        "key": "border.info-subtle",
-        "mode": "semantic",
-        "value": "rgba(59, 130, 246, 0.30)",
-        "reason": "rgba"
+        "value": "var(--Primitive-White-Alpha-800)",
+        "reason": "unresolvable-var"
       },
       {
         "key": "overlay.dark",
@@ -166,12 +132,6 @@
         "key": "surface.success-subtle",
         "mode": "semanticDark",
         "value": "rgba(74, 222, 128, 0.20)",
-        "reason": "rgba"
-      },
-      {
-        "key": "surface.warning-subtle",
-        "mode": "semanticDark",
-        "value": "rgba(251, 146, 60, 0.20)",
         "reason": "rgba"
       },
       {
@@ -289,36 +249,6 @@
         "reason": "unresolvable-var"
       },
       {
-        "key": "border.disable",
-        "mode": "semanticDark",
-        "value": "var(--Primitive-White-Alpha-100)",
-        "reason": "unresolvable-var"
-      },
-      {
-        "key": "border.accent-primary-subtle",
-        "mode": "semanticDark",
-        "value": "color-mix(in srgb, var(--Primitive-Brand-400) 40%, transparent)",
-        "reason": "color-mix"
-      },
-      {
-        "key": "border.caution-subtle",
-        "mode": "semanticDark",
-        "value": "rgba(248, 113, 113, 0.40)",
-        "reason": "rgba"
-      },
-      {
-        "key": "border.success-subtle",
-        "mode": "semanticDark",
-        "value": "rgba(74, 222, 128, 0.40)",
-        "reason": "rgba"
-      },
-      {
-        "key": "border.info-subtle",
-        "mode": "semanticDark",
-        "value": "rgba(96, 165, 250, 0.40)",
-        "reason": "rgba"
-      },
-      {
         "key": "hover.tertiary-button",
         "mode": "semanticDark",
         "value": "var(--Primitive-White-Alpha-100)",
@@ -361,19 +291,15 @@
     "surface.secondary": "#F9FAFB",
     "surface.tertiary": "#F3F4F6",
     "surface.quaternary": "#E5E7EB",
-    "surface.disable": "#F3F4F6",
     "surface.inverse": "#111827",
     "surface.accent-primary": "#3B82F6",
     "surface.accent-primary-light": "#EFF6FF",
-    "surface.accent-primary-ultra-light": "#EFF6FF",
     "surface.caution": "#FEF2F2",
     "surface.success": "#F0FDF4",
     "surface.warning": "#FFFBEB",
     "surface.info": "#EFF6FF",
     "surface.caution-strong": "#EF4444",
-    "surface.success-strong": "#22C55E",
-    "surface.warning-strong": "#F97316",
-    "surface.info-strong": "#3B82F6",
+    "surface.disable": "#F3F4F6",
     "text.high-emphasis": "#111827",
     "text.medium-emphasis": "#374151",
     "text.low-emphasis": "#4B5563",
@@ -396,12 +322,10 @@
     "object.success": "#22C55E",
     "object.warning": "#F97316",
     "object.info": "#3B82F6",
-    "object.favorite": "#EF4444",
     "object.rating": "#F59E0B",
     "border.high-emphasis": "#374151",
     "border.medium-emphasis": "#D1D5DB",
     "border.low-emphasis": "#E5E7EB",
-    "border.disable": "#E5E7EB",
     "border.accent-primary": "#3B82F6",
     "border.caution": "#EF4444",
     "border.success": "#22C55E",
@@ -415,16 +339,15 @@
     "brand.google-border": "#DADCE0",
     "brand.apple": "#000000",
     "brand.amazon": "#232F3E",
-    "brand.amazon-accent": "#FF9900",
     "hover.primary-button": "#1D4ED8",
     "hover.secondary-button": "#EFF6FF",
     "hover.tertiary-button": "#F3F4F6",
     "hover.ghost-button": "#F3F4F6",
     "hover.destructive-button": "#B91C1C",
     "active.primary-button": "#1E40AF",
+    "active.destructive-button": "#991B1B",
     "active.secondary-button": "#DBEAFE",
     "active.tertiary-button": "#E5E7EB",
-    "active.destructive-button": "#991B1B",
     "focus.high-emphasis": "#60A5FA",
     "caution.base": "#DC2626",
     "caution.action": "#B91C1C",
@@ -435,7 +358,6 @@
     "brandExternal.googleBorder": "#DADCE0",
     "brandExternal.apple": "#000000",
     "brandExternal.amazon": "#232F3E",
-    "brandExternal.amazonAccent": "#FF9900",
     "categorical.1.base": "#EF4444",
     "categorical.1.subtle": "#FEE2E2",
     "categorical.1.bold": "#B91C1C",
@@ -490,21 +412,16 @@
     "surface.secondary": "#1F2937",
     "surface.tertiary": "#374151",
     "surface.quaternary": "#4B5563",
-    "surface.disable": "#1F2937",
     "surface.inverse": "#FFFFFF",
     "surface.accent-primary": "#3B82F6",
     "surface.accent-primary-light": "#1E3A8A",
-    "surface.accent-primary-ultra-light": "#1E3A8A",
     "surface.caution": "#2d1414",
     "surface.success": "#14532D",
     "surface.warning": "#78350F",
     "surface.info": "#1E3A8A",
     "surface.caution-strong": "#EF4444",
-    "surface.success-strong": "#22C55E",
-    "surface.warning-strong": "#F97316",
-    "surface.info-strong": "#3B82F6",
+    "surface.disable": "#1F2937",
     "text.on-inverse": "#111827",
-    "text.on-inverse-secondary": "#374151",
     "text.on-media": "#FFFFFF",
     "text.accent-primary": "#60A5FA",
     "text.success": "#4ADE80",
@@ -512,13 +429,13 @@
     "text.warning": "#FB923C",
     "text.info": "#60A5FA",
     "text.caution-on-inverse": "#B91C1C",
+    "text.on-inverse-secondary": "#374151",
     "object.on-inverse": "#111827",
     "object.accent-primary": "#60A5FA",
     "object.caution": "#F87171",
     "object.success": "#4ADE80",
     "object.warning": "#FB923C",
     "object.info": "#60A5FA",
-    "object.favorite": "#F87171",
     "object.rating": "#FBBF24",
     "border.accent-primary": "#60A5FA",
     "border.caution": "#F87171",
@@ -533,8 +450,8 @@
     "hover.secondary-button": "#1E3A8A",
     "hover.destructive-button": "#EF4444",
     "active.primary-button": "#2563EB",
-    "active.secondary-button": "#1E40AF",
     "active.destructive-button": "#DC2626",
+    "active.secondary-button": "#1E40AF",
     "focus.high-emphasis": "#60A5FA",
     "caution.base": "#F87171",
     "caution.action": "#EF4444",

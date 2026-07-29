@@ -99,7 +99,7 @@ function SwipeRow({ children, actions = [], side = "right", className }: SwipeRo
         ref={containerRef}
         className={cn(
           "relative bg-[var(--Surface-Primary)] touch-pan-y select-none",
-          !isDragging && "transition-transform duration-200 ease-out"
+          !isDragging && "transition-transform duration-[var(--Motion-Duration-Base)] ease-[var(--Motion-Easing-Snappy)]"
         )}
         style={{ transform: `translateX(${offset}px)` }}
         onPointerDown={handlePointerDown}

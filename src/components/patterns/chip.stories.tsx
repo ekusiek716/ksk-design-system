@@ -4,6 +4,7 @@
  */
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, within } from "storybook/test"
 import { Chip } from "./chip"
 
 const meta: Meta<typeof Chip> = {
@@ -197,5 +198,41 @@ export const TouchSelectionStable: Story = {
         ))}
       </div>
     )
+  },
+}
+
+/**
+ * tile サイズが flex row 内で潰れないことの回帰テスト。
+ *
+ * 由来: `size-12` は width を指定するが flex item の既定 `flex-shrink: 1` +
+ * `min-width: auto` により min-content 幅（9〜19px）まで潰れ、48px の
+ * タッチターゲットが崩れていた（shrink-0 で修正）。
+ */
+export const TileTouchTargetNotShrunk: Story = {
+  tags: ["interaction", "!autodocs"],
+  // w-40(160px) < tile4枚+gap(216px): shrink-0 が無いと必ず潰れる幅にして回帰を検出する
+  render: () => (
+    <div className="flex w-40 gap-2">
+      <Chip data-testid="tile-s" shape="square" size="tile" selected>S</Chip>
+      <Chip data-testid="tile-m" shape="square" size="tile">M</Chip>
+      <Chip data-testid="tile-l" shape="square" size="tile" soldOut>L</Chip>
+      <Chip data-testid="tile-xl" shape="square" size="tile" soldOut>XL</Chip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    for (const id of ["tile-s", "tile-m", "tile-l", "tile-xl"]) {
+      const chip = canvas.getByTestId(id)
+      const rect = chip.getBoundingClientRect()
+      await expect(
+        rect.width,
+        `${id}: flex row 内で幅が潰れている（${rect.width}px）`
+      ).toBeGreaterThanOrEqual(44)
+      await expect(
+        rect.height,
+        `${id}: 高さがタッチターゲット未満（${rect.height}px）`
+      ).toBeGreaterThanOrEqual(44)
+    }
   },
 }

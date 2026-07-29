@@ -84,6 +84,10 @@
       "import": "./src/styles/typography.css",
       "default": "./src/styles/typography.css"
     },
+    "./tokens/motion": {
+      "import": "./src/styles/motion.css",
+      "default": "./src/styles/motion.css"
+    },
     "./tokens/categorical": {
       "import": "./src/styles/categorical.css",
       "default": "./src/styles/categorical.css"
@@ -150,6 +154,8 @@
     "metrics": "node scripts/download-metrics.mjs",
     "generate:lookup": "node scripts/generate-component-lookup.mjs",
     "generate:native-lookup": "node scripts/generate-native-component-lookup.mjs",
+    "generate:safelist": "node scripts/generate-source-safelist.mjs",
+    "lint:safelist": "node scripts/generate-source-safelist.mjs --check",
     "generate:tokens": "node scripts/generate-platform-tokens.mjs",
     "lint:tokens": "node scripts/generate-platform-tokens.mjs --check",
     "lint:token-hex": "node scripts/generate-token-hex-cache.mjs --check",
@@ -163,9 +169,10 @@
     "test:watch": "vitest",
     "test:interaction": "vitest run --config vitest.storybook.config.ts",
     "test:a11y": "vitest run --config vitest.a11y.config.ts",
-    "check": "tsc -p tsconfig.app.json --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && node scripts/check-published-deps.mjs && node scripts/check-css-setup.mjs && bash scripts/check-drift.sh && node scripts/check-screen-contracts.mjs && node scripts/check-docs-drift.mjs && node scripts/check-contrast.mjs && node scripts/check-design-md.mjs && node scripts/check-tailwind-v4.mjs && node scripts/check-prefix-order.mjs && bash scripts/check-responsive.sh && node scripts/generate-component-lookup.mjs --check && node scripts/generate-platform-tokens.mjs --check && node scripts/generate-token-hex-cache.mjs --check && tsc -p tsconfig.native.json --noEmit && node scripts/check-native-parity.mjs && node scripts/generate-native-component-lookup.mjs --check",
+    "check": "tsc -p tsconfig.app.json --noEmit && bash scripts/lint-scratch.sh && bash scripts/check-deps.sh && node scripts/check-published-deps.mjs && node scripts/check-css-setup.mjs && bash scripts/check-drift.sh && node scripts/check-screen-contracts.mjs && node scripts/check-docs-drift.mjs && node scripts/check-agents-docs-sync.mjs && node scripts/check-contrast.mjs && node scripts/check-design-md.mjs && node scripts/check-tailwind-v4.mjs && node scripts/check-prefix-order.mjs && bash scripts/check-responsive.sh && node scripts/generate-component-lookup.mjs --check && node scripts/generate-platform-tokens.mjs --check && node scripts/generate-token-hex-cache.mjs --check && node scripts/generate-source-safelist.mjs --check && tsc -p tsconfig.native.json --noEmit && node scripts/check-native-parity.mjs && node scripts/generate-native-component-lookup.mjs --check",
     "check:agent": "npm run lint && npm run check && npm test && npm run lint:story-reuse",
     "postinstall": "node bin/init.js postinstall",
+    "version": "node scripts/sync-version.mjs",
     "mcp:build": "cd mcp-server && npm install && npm run build",
     "mcp:start": "node mcp-server/dist/index.js"
   },
@@ -188,7 +195,7 @@
     "react-dom": "^18.0.0 || ^19.0.0",
     "react-native": ">=0.74.0",
     "react-native-svg": ">=15.0.0",
-    "tailwindcss": "^4.0.0"
+    "tailwindcss": "^4.1.0"
   },
   "peerDependenciesMeta": {
     "@react-navigation/bottom-tabs": {

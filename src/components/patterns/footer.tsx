@@ -71,7 +71,7 @@ function Footer({
 
         {/* Social links */}
         {socialLinks.length > 0 && (
-          <div className="flex gap-3 mb-6">
+          <div className="flex flex-wrap gap-3 mb-6">
             {socialLinks.map((s, i) => {
               const Tag = s.href ? "a" : "button"
               return (
@@ -79,7 +79,7 @@ function Footer({
                   key={i}
                   href={s.href}
                   aria-label={s.label}
-                  className="w-9 h-9 rounded-full bg-[var(--Object-on-Inverse)]/10 hover:bg-[var(--Object-on-Inverse)]/20 flex items-center justify-center transition-colors"
+                  className="w-9 h-9 shrink-0 rounded-full bg-[var(--Object-on-Inverse)]/10 hover:bg-[var(--Object-on-Inverse)]/20 flex items-center justify-center transition-colors"
                 >
                   {s.icon}
                 </Tag>

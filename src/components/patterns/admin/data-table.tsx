@@ -403,7 +403,7 @@ function ChevronIcon({ open }: { open: boolean }) {
   return (
     <ArrowRight2
       size={16}
-      className={cn("shrink-0 transition-transform duration-200", open && "rotate-90")}
+      className={cn("shrink-0 transition-transform duration-[var(--Motion-Duration-Base)]", open && "rotate-90")}
     />
   )
 }

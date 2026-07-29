@@ -22,7 +22,7 @@ function BulkActions({ selectedCount, onClear, children, className, ...props }: 
     <div
       data-slot="bulk-actions"
       className={cn(
-        "fixed inset-x-0 bottom-6 z-50 mx-auto w-fit max-w-[calc(100%_-_32px)]",
+        "fixed inset-x-0 bottom-6 z-[var(--Z-Floating)] mx-auto w-fit max-w-[calc(100%_-_32px)]",
         "flex items-center gap-3 rounded-full bg-[var(--Surface-Inverse)] px-5 py-3 shadow-[var(--shadow-dialog)]",
         "animate-fade-in-up",
         className
@@ -40,7 +40,7 @@ function BulkActions({ selectedCount, onClear, children, className, ...props }: 
       <div className="h-5 w-px bg-[var(--Text-on-Inverse)]/20 shrink-0" />
 
       {/* アクション群（狭幅では横スクロール。件数/解除ボタンは常時可視を維持） */}
-      <div className="flex items-center gap-2 min-w-0 overflow-x-auto">
+      <div className="flex items-center gap-2 min-w-0 overflow-x-auto [&>*]:shrink-0">
         {children}
       </div>
 

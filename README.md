@@ -37,7 +37,8 @@ Brand 色を差し替えるだけで業種に合わせた配色に切り替わ�
 
 React 19 + TypeScript / Vite / **Tailwind CSS v4** / shadcn/ui（Radix UI）/ CVA / iconsax-reactjs / Storybook
 
-**Peer dependencies**: `react` 18 or 19, `react-dom`, `tailwindcss` ^4
+**Peer dependencies**: `react` 18 or 19, `react-dom`, `tailwindcss` ^4.1（preset が同梱する safelist が
+Tailwind 4.1 で導入された `@source inline()` を使うため）
 
 ## 🚀 使い方
 
@@ -59,6 +60,11 @@ npm install ksk-design-system
 Tailwind CSS v4 は `node_modules` を既定では走査しません。`@source` がないと、
 DS 内部だけで使うレイアウト・サイズ・状態クラスが生成されず、コンポーネントの表示や操作が崩れます。
 consumer 側の Tailwind と DS を同じビルドで処理するため、上記の設定をセットで使用してください。
+
+なお preset には DS 内部ユーティリティの safelist
+（`src/styles/source-safelist.css` / 自動生成）が同梱されており、`@source` を書き忘れても
+DS のクラス CSS は生成されます（issue #258）。ただし consumer 自身のコードは
+consumer 側の走査対象なので、`@source` は引き続き推奨構成です。
 
 ```tsx
 import { Button, Card, Input, FormField } from "ksk-design-system"
@@ -122,7 +128,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     "\\.(css|less|sass|scss)$": "<rootDir>/test/style-mock.cjs",
-    "^ksk-design-system/(preset|styles(?:\\.css)?|glass|tokens/(?:primitive|semantic|typography|categorical)|themes/(?:default|blue|orange|green|violet|cobalt))$":
+    "^ksk-design-system/(preset|styles(?:\\.css)?|glass|tokens/(?:primitive|semantic|typography|categorical|motion)|themes/(?:default|blue|orange|green|violet|cobalt))$":
       "<rootDir>/test/style-mock.cjs",
   },
 }

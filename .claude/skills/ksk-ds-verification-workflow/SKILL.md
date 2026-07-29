@@ -65,6 +65,7 @@ git diff --name-only main -- '*.tsx' | xargs grep -nE '<検証したい pattern>
 | play 関数のあるコンポーネント（Button / Dialog / AlertDialog / Sheet / Select / DropdownMenu / Combobox / Tabs / Form / Toast）を触った | `npm run test:interaction`（初回のみ `npx playwright install chromium`。`npm run check` には含まれない） |
 | UI コンポーネント（`src/components/**`）を追加・修正した | `npm run test:a11y`（axe-core、全ストーリー対象。issue #261。color-contrast は既知のトークン債務のため無効化中 — `.storybook/preview.ts` 参照。rules.json の `accessibility.requirements[].machineVerified` に axe でカバーできる項目/できない項目の対応表あり） |
 | DESIGN.md 変更 | `npm run lint:design` |
+| `.tsx` で新しい Tailwind クラスを使った | `npm run generate:safelist`（`@source` safelist 再生成。`npm run check` の `lint:safelist` が未再生成を検出） |
 | リリース | `bash scripts/release.sh` → 消費側一括は `scripts/bump-consumers.sh`（対象はメモリ ds-consumers.md 参照） |
 
 ## 3. モデル分担（検証ループの運用）
@@ -93,6 +94,12 @@ git diff --name-only main -- '*.tsx' | xargs grep -nE '<検証したい pattern>
 - **アニメーション付き入力はちらつきを疑う**: 高さ・値が変わるフィールドは制御/非制御の混在でちらつく。変更後に実際に入力して確認（DateField, #111）
 - **検証スクリプトに列挙をハードコードしない**: テーマ・コンポーネント一覧はディレクトリ/正本から動的導出。追加時に検証が黙って対象外になるのが最悪の壊れ方（#112）
 - **外部レビュー（CodeRabbit 等）の指摘は severity を rules.json に照らして再判定**: DS の規約と矛盾する提案（Tailwind 標準色への「簡略化」等）は従わない
-- **`pointer-events-none`/`-auto` の親子ペアは consumer の Tailwind v4 `@source` が minified dist をスキャンする際に拾い漏れうる**: DS 内でしか出現しないクラスは consumer 側で CSS 生成されず、子のクリックが不能になる。一度 Calendar（#132/#134）で直しても Toast/MobileAppShell（#138）、Celebration（#143）と同型が他コンポーネントに残っていた。修正時は当該パターンを**リポジトリ全体で横断 grep**し、1箇所ずつ潰さない
+- **`pointer-events-none`/`-auto` の親子ペアは consumer の Tailwind v4 `@source` が minified dist をスキャンする際に拾い漏れうる**: DS 内でしか出現しないクラスは consumer 側で CSS 生成されず、子のクリックが不能になる。一度 Calendar（#132/#134）で直しても Toast/MobileAppShell（#138）、Celebration（#143）と同型が他コンポーネントに残っていた。修正時は当該パターンを**リポジトリ全体で横断 grep**し、1箇所ずつ潰さない。
+  **構造対策済み（#258）**: `scripts/generate-source-safelist.mjs` が src の実装から DS が使う全ユーティリティを抽出し、
+  `@source inline(...)` の safelist（`src/styles/source-safelist.css`）を生成して preset.css に同梱する。
+  消費側の `@source` 設定に関係なく DS 内部クラスの CSS が生成される。ドリフトは `npm run check` が検出。
+  同スクリプトは動的クラス名合成（`` `bg-${x}` `` 等・静的抽出不能）も検出してエラーにする。
+  → 以後、この型のバグを「コンポーネント個別の書き換え」で対症療法しない。safelist に載っているか
+  （`node scripts/generate-source-safelist.mjs --check`）をまず確認する
 - **ラッパーコンポーネントは下位プリミティブの識別属性（`data-slot` 等）を `{...props}` spread で上書きしないか確認する**: BottomSheetFrame/SideDrawerFrame が独自の `data-slot` を渡し `SheetContent` の `data-slot="sheet-content"` を消していた。consumer が `[data-slot="..."]` 前提で書く CSS/`closest()` が丸ごとマッチしなくなる実害があった。フレーム識別は別属性（`data-frame` 等）に分離する（#139）
 - **無色 `border` の currentColor 汚染は cva の variant 個別対応だけでは終わらない**: base に既定色トークンがないコンポーネントが横断的に残っていないか、直した箇所以外も一括点検する（border color, #142）

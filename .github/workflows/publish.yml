@@ -101,15 +101,25 @@ jobs:
           tar -tzf "$TARBALL" | grep -q 'package/src/themes/default.css'
 
       - name: Create git tag + GitHub Release
-        if: steps.version.outputs.publish == 'true'
+        # ゲートを「publish した場合のみ」から「Release がまだ無ければ作る」に変更する
+        # （issue #269 レビュー指摘）。
+        #
+        # 旧ロジックは `if: steps.version.outputs.publish == 'true'` で、npm publish 自体は
+        # 過去の run で成功したがこのステップだけ失敗した場合、再実行すると
+        # 「npm に該当 version が既にある → publish=false」と判定されてこのステップごと
+        # スキップされ、タグ/Release が永久に作られなくなる不具合があった。
+        #
+        # publish の成否に関わらずこのステップ自体は毎回実行し、冪等性は
+        # 「対象タグの GitHub Release が既に存在するか」だけで判定する
+        # （`gh release view` が成功したら何もしない）。tag の有無では分岐しない:
+        # `gh release create` はタグが無ければ対象コミットにタグを作って Release も作り、
+        # タグが既にあればそれを使って Release だけ作るため、
+        # 「タグは存在するが Release だけ無い」状態（旧ロジックがタグ存在だけで
+        # 早期 exit していたために取り残していたケース）もここで解消される。
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="v${{ steps.version.outputs.version }}"
-          if git rev-parse "$TAG" >/dev/null 2>&1 || git ls-remote --tags origin "$TAG" | grep -q "$TAG"; then
-            echo "tag $TAG already exists, skipping"
-            exit 0
-          fi
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "release $TAG already exists, skipping"
             exit 0
