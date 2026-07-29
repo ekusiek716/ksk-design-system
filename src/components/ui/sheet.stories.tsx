@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import {
   Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose,
 } from "./sheet"
@@ -506,5 +507,58 @@ export const NestedSheets: Story = {
         </Sheet>
       </div>
     )
+  },
+}
+
+// ─────────────────────────────────────────────────────────────
+// interaction 回帰テスト（issue #256 / `npm run test:interaction`）
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * 開いた直後にシート内を操作でき、閉じるボタンで閉じることの回帰テスト。
+ *
+ * 由来: v1.48.1 / v1.48.3 の Modal 入場アニメーション系 fix（eba450b, 69c9bf4）。
+ * Web 側では snap の driver が異なるため、ここでは
+ * 「入場アニメーション中に pointer-events が塞がらないか」を回帰点として押さえる。
+ */
+export const OpensAndIsImmediatelyInteractive: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => {
+    const onConfirm = fn()
+    return (
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button data-testid="open">ボトムシートを開く</Button>
+        </SheetTrigger>
+        <SheetContent side="bottom" className="px-5 pt-5 pb-6">
+          <SheetHeader className="mb-4">
+            <SheetTitle>シートタイトル</SheetTitle>
+            <SheetDescription>入場アニメーション直後の操作性を検証します。</SheetDescription>
+          </SheetHeader>
+          <SheetFooter>
+            <Button data-testid="confirm" className="w-full" onClick={onConfirm}>確定</Button>
+            <SheetClose asChild>
+              <Button data-testid="close" variant="secondary" className="w-full">閉じる</Button>
+            </SheetClose>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+
+    const sheet = await body.findByRole("dialog")
+    // 入場アニメーション中でも操作を受け付けること
+    await expect(getComputedStyle(sheet).pointerEvents).not.toBe("none")
+    await userEvent.click(within(sheet).getByTestId("confirm"))
+
+    // 閉じるボタンで閉じ、フォーカスがトリガーに戻る
+    await userEvent.click(within(sheet).getByTestId("close"))
+    await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
+    await expect(canvas.getByTestId("open")).toHaveFocus()
   },
 }

@@ -3,6 +3,7 @@
  * @description モーダルダイアログコンポーネント。トリガーボタン、ヘッダー、説明、フッターアクション付き
  */
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "./dialog"
 import { Button } from "./button"
 import { Checkbox } from "./checkbox"
@@ -217,4 +218,127 @@ export const StackedFooter: Story = {
       </DialogContent>
     </Dialog>
   ),
+}
+
+// ─────────────────────────────────────────────────────────────
+// interaction 回帰テスト（issue #256 / `npm run test:interaction`）
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * 開いた直後にすぐ操作できることの回帰テスト。
+ *
+ * 由来: v1.48.1 `fix(native): Modal 表示前の入口アニメーションで操作不能`(eba450b)。
+ * 入場アニメーションの最中に pointer-events: none が残ると、
+ * 「開いているのに押せない」状態になる。
+ */
+export const OpensAndIsImmediatelyInteractive: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => {
+    const onConfirm = fn()
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button data-testid="open">開く</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>確認</DialogTitle>
+            <DialogDescription>入場アニメーション直後の操作性を検証します。</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button data-testid="confirm" onClick={onConfirm}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+
+    const dialog = await body.findByRole("dialog")
+    // 入場アニメーション中は opacity 0 なので toBeVisible は使わない。
+    // ここで見たいのは「描画されているか」ではなく「操作できるか」。
+    await expect(dialog).toBeInTheDocument()
+
+    // 入場アニメーションの完了を待たずに操作できること。
+    // pointer-events が塞がっていれば userEvent.click がここで失敗する。
+    const confirm = within(dialog).getByTestId("confirm")
+    await expect(getComputedStyle(dialog).pointerEvents).not.toBe("none")
+    await userEvent.click(confirm)
+  },
+}
+
+/** Esc キーで閉じる。 */
+export const ClosesOnEscape: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Esc で閉じる</DialogTitle>
+          <DialogDescription>Escape キーでダイアログが閉じることを検証します。</DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    await expect(await body.findByRole("dialog")).toBeInTheDocument()
+
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
+
+    // 閉じたあとフォーカスがトリガーに戻ること
+    await expect(canvas.getByTestId("open")).toHaveFocus()
+  },
+}
+
+/** フォーカスがダイアログ内にトラップされる。 */
+export const TrapsFocus: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div>
+      <Button data-testid="outside">ダイアログ外のボタン</Button>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button data-testid="open">開く</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>フォーカストラップ</DialogTitle>
+            <DialogDescription>Tab を回してもダイアログ外に出ないことを検証します。</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button data-testid="a">A</Button>
+            <Button data-testid="b">B</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const dialog = await body.findByRole("dialog")
+
+    // 何度 Tab しても、フォーカスは常にダイアログの内側に留まる
+    for (let i = 0; i < 8; i++) {
+      await userEvent.tab()
+      await expect(
+        dialog.contains(document.activeElement),
+        `Tab ${i + 1} 回目でフォーカスがダイアログ外（${document.activeElement?.outerHTML?.slice(0, 80)}）に出た`
+      ).toBe(true)
+    }
+  },
 }

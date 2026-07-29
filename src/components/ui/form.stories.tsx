@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { useForm } from "react-hook-form"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import { Button } from "./button"
 import { Input } from "./input"
 import { Textarea } from "./textarea"
@@ -133,5 +134,78 @@ export const WithSelect: Story = {
         </form>
       </Form>
     )
+  },
+}
+
+// ─────────────────────────────────────────────────────────────
+// interaction 回帰テスト（issue #256 / `npm run test:interaction`）
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * FormField + Input の入力・バリデーションエラー表示の回帰テスト。
+ * エラー時に aria-invalid とエラーメッセージが正しく紐づくこと（a11y）まで見る。
+ */
+export const ShowsValidationErrorAndClearsOnInput: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => {
+    const form = useForm({ defaultValues: { email: "" }, mode: "onSubmit" })
+    return (
+      <Form {...form}>
+        <form
+          className="flex max-w-sm flex-col gap-6 p-6"
+          onSubmit={form.handleSubmit(() => {})}
+        >
+          <FormField
+            control={form.control}
+            name="email"
+            rules={{
+              required: "メールアドレスを入力してください",
+              pattern: { value: /.+@.+\..+/, message: "メールアドレスの形式が正しくありません" },
+            }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>メールアドレス</FormLabel>
+                <FormControl>
+                  <Input placeholder="you@example.com" {...field} />
+                </FormControl>
+                <FormDescription>連絡先として使用します</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit">送信する</Button>
+        </form>
+      </Form>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const input = canvas.getByLabelText("メールアドレス")
+    const submit = canvas.getByRole("button", { name: "送信する" })
+
+    // 初期状態ではエラーなし
+    await expect(input).toHaveAttribute("aria-invalid", "false")
+
+    // 空のまま送信 → required エラー
+    await userEvent.click(submit)
+    const required = await canvas.findByText("メールアドレスを入力してください")
+    await expect(input).toHaveAttribute("aria-invalid", "true")
+    // エラーメッセージが aria-describedby で input に紐づいていること
+    await expect(input.getAttribute("aria-describedby") ?? "").toContain(required.id)
+
+    // 不正な形式 → pattern エラー
+    await userEvent.type(input, "not-an-email")
+    await userEvent.click(submit)
+    await canvas.findByText("メールアドレスの形式が正しくありません")
+
+    // 正しい値を入れるとエラーが消える
+    await userEvent.clear(input)
+    await userEvent.type(input, "keisuke@example.com")
+    await userEvent.click(submit)
+    await waitFor(async () => {
+      await expect(canvas.queryByText("メールアドレスの形式が正しくありません")).toBeNull()
+      await expect(input).toHaveAttribute("aria-invalid", "false")
+    })
+    await expect(input).toHaveValue("keisuke@example.com")
   },
 }

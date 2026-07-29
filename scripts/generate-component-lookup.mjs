@@ -197,7 +197,10 @@ function extractStoryNames(content) {
     const bodyStart = m.index + m[0].length
     const bodyEnd = i + 1 < decls.length ? decls[i + 1].index : content.length
     const body = content.slice(bodyStart, bodyEnd)
-    const nameMatch = body.match(/\bname\s*:\s*["']([^"']+)["']/)
+    // ストーリー名は「ストーリーオブジェクト直下（インデント 2 スペース）の name:」だけを見る。
+    // 深い階層の `name:` は play 関数内の testing-library クエリ
+    // （例: getByRole("tab", { name: "概要" })）なので拾ってはいけない。
+    const nameMatch = body.match(/^ {2}name\s*:\s*["']([^"']+)["']/m)
     return nameMatch ? nameMatch[1] : m[1]
   })
 }

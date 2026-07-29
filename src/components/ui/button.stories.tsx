@@ -4,6 +4,7 @@
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import { Add } from "iconsax-reactjs"
+import { expect, fn, userEvent, within } from "storybook/test"
 import { Button } from "./button"
 
 const meta: Meta<typeof Button> = {
@@ -339,4 +340,173 @@ export const WithIcon: Story = {
       </Button>
     </div>
   ),
+}
+
+// ─────────────────────────────────────────────────────────────
+// interaction 回帰テスト（issue #256 / `npm run test:interaction`）
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * レイアウト（周囲の要素の位置）を動かしてしまう CSS プロパティ。
+ * transform / opacity / color 系は合成のみで済むので対象外。
+ */
+const LAYOUT_AFFECTING = [
+  "margin", "margin-top", "margin-right", "margin-bottom", "margin-left",
+  "padding", "padding-top", "padding-right", "padding-bottom", "padding-left",
+  "top", "right", "bottom", "left", "inset",
+  "border-width", "border-top-width", "border-right-width",
+  "border-bottom-width", "border-left-width",
+  "width", "height", "min-width", "min-height", "max-width", "max-height",
+  "gap", "row-gap", "column-gap", "font-size", "line-height",
+]
+
+/**
+ * 要素にマッチする `:active` の CSS ルールのうち、レイアウトを動かす
+ * プロパティを宣言しているものを列挙する。
+ *
+ * :active は JS から強制できず、userEvent の合成イベントでも成立しないため、
+ * 「押してみて測る」ではなく「押されたときに何が適用されるか」を
+ * スタイルシート側から静的に検証する。
+ */
+function activeRulesThatShiftLayout(el: HTMLElement): string[] {
+  const found: string[] = []
+
+  // Tailwind v4 は `.active\:mt-\[2px\] { &:active { ... } }` のように
+  // ネストして出力するため、親セレクタを引き回して `&` を解決する。
+  const visit = (rules: CSSRuleList, parent: string) => {
+    for (const rule of Array.from(rules)) {
+      const styleRule = rule as CSSStyleRule
+      const selector = styleRule.selectorText
+      const resolved = selector
+        ? parent
+          ? selector.replace(/&/g, `:is(${parent})`)
+          : selector.replace(/&/g, ":scope")
+        : parent
+
+      if ("cssRules" in rule && (rule as CSSGroupingRule).cssRules) {
+        visit((rule as CSSGroupingRule).cssRules, resolved)
+      }
+      if (!selector || !styleRule.style) continue
+      // エスケープされていない `:active` を含むセレクタだけを見る
+      if (!/(^|[^\\]):active\b/.test(resolved)) continue
+
+      // `:active` を外した状態でこの要素にマッチするか
+      const base = resolved.replace(/(^|[^\\]):active\b/g, "$1")
+      let matches: boolean
+      try {
+        matches = base.trim() !== "" && el.matches(base)
+      } catch {
+        continue
+      }
+      if (!matches) continue
+
+      for (const prop of Array.from(styleRule.style)) {
+        if (LAYOUT_AFFECTING.includes(prop)) {
+          found.push(`${resolved} { ${prop}: ${styleRule.style.getPropertyValue(prop)} }`)
+        }
+      }
+    }
+  }
+
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      visit(sheet.cssRules, "")
+    } catch {
+      // cross-origin のスタイルシートは読めないのでスキップ
+    }
+  }
+  return found
+}
+
+/**
+ * 押下（:active）でレイアウトが沈まない / 動かないことの回帰テスト。
+ *
+ * 由来: v1.48.2 `fix(native/Button): elevation="raised" の押下でレイアウトが沈む`(d9a93d5)。
+ * transform（scale 等）の押下演出は許容し、margin / padding / border-width /
+ * top のようにレイアウトボックスを動かす押下スタイルだけを落とす。
+ */
+export const PressDoesNotShiftLayout: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div className="flex flex-col items-start gap-3 p-6">
+      <Button data-testid="press-default">押下テスト（default）</Button>
+      <Button data-testid="press-secondary" variant="secondary">押下テスト（secondary）</Button>
+      <Button data-testid="press-glass" variant="glass">押下テスト（glass）</Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    for (const id of ["press-default", "press-secondary", "press-glass"]) {
+      const btn = canvas.getByTestId(id) as HTMLButtonElement
+      const offenders = activeRulesThatShiftLayout(btn)
+      await expect(
+        offenders,
+        `${id}: 押下時にレイアウトを動かす CSS が適用される → ${offenders.join(" / ")}`
+      ).toEqual([])
+
+      // 押下から離すまでの一連の pointer 操作でクラッシュしないことも確認
+      await userEvent.pointer({ keys: "[MouseLeft>]", target: btn })
+      await userEvent.pointer({ keys: "[/MouseLeft]", target: btn })
+      await expect(btn).toBeVisible()
+    }
+  },
+}
+
+/** disabled / aria-disabled のボタンはクリックしても onClick が発火しない。 */
+export const DisabledIsNotClickable: Story = {
+  tags: ["interaction", "!autodocs"],
+  args: { onClick: fn() },
+  render: (args) => (
+    <div className="flex gap-3 p-6">
+      <Button data-testid="disabled-btn" disabled onClick={args.onClick}>
+        送信する
+      </Button>
+      <Button data-testid="aria-disabled-btn" aria-disabled onClick={args.onClick}>
+        送信する（aria-disabled）
+      </Button>
+    </div>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    const disabled = canvas.getByTestId("disabled-btn") as HTMLButtonElement
+    const ariaDisabled = canvas.getByTestId("aria-disabled-btn") as HTMLButtonElement
+
+    await expect(disabled).toBeDisabled()
+    await expect(ariaDisabled).toHaveAttribute("aria-disabled", "true")
+
+    // disabled は pointer-events:none なのでチェックを外して強制クリックする。
+    // aria-disabled は DOM 上クリック可能だが Button 側で握り潰す実装。
+    await userEvent.click(disabled, { pointerEventsCheck: 0 })
+    await userEvent.click(ariaDisabled, { pointerEventsCheck: 0 })
+
+    // どちらも onClick は発火しない
+    await expect(args.onClick).not.toHaveBeenCalled()
+  },
+}
+
+/** キーボードフォーカスでフォーカスリング（focus-visible）が描画される。 */
+export const FocusRingIsVisible: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div className="p-6">
+      <Button data-testid="focus-btn">フォーカステスト</Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const btn = canvas.getByTestId("focus-btn") as HTMLButtonElement
+
+    btn.focus()
+    await expect(btn).toHaveFocus()
+
+    const style = getComputedStyle(btn)
+    const hasRing =
+      (style.outlineStyle !== "none" && parseFloat(style.outlineWidth || "0") > 0) ||
+      (style.boxShadow !== "none" && style.boxShadow !== "")
+    await expect(
+      hasRing,
+      `フォーカス時にリングが描画されていない outline=${style.outline} boxShadow=${style.boxShadow}`
+    ).toBe(true)
+  },
 }

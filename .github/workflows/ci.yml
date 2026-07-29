@@ -42,6 +42,27 @@ jobs:
       - name: Story reuse lint
         run: npm run lint:story-reuse
 
+      # ── interaction テスト（Storybook play 関数 / issue #256）──
+      # 押下でレイアウトが沈む・入場アニメーション中に操作不能、といった
+      # v1.48.x で連続した種類の不具合をここで落とす。
+      - name: Playwright ブラウザのキャッシュ復元
+        id: playwright-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Playwright chromium のインストール
+        run: npx playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Playwright の OS 依存パッケージのみ導入（キャッシュ命中時）
+        run: npx playwright install-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+
+      - name: Interaction tests (Storybook play / vitest browser)
+        run: npm run test:interaction
+
       - name: Packed package Web consumer install and build
         run: npm run test:consumer:web
 

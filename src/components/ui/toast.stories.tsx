@@ -3,6 +3,7 @@
  * @description トースト通知コンポーネント。default, success, caution, warning, info の全バリアントを網羅
  */
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, userEvent, within } from "storybook/test"
 import { Toaster, useToast, toast } from "./toast"
 import { Button } from "./button"
 
@@ -229,4 +230,53 @@ function FireAndForgetDemo() {
 export const FireAndForget: Story = {
   name: "Fire-and-forget (no <Toaster />)",
   render: () => <FireAndForgetDemo />,
+}
+
+// ─────────────────────────────────────────────────────────────
+// interaction 回帰テスト（issue #256 / `npm run test:interaction`）
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * トーストが表示され、live region 経由でスクリーンリーダーに通知されること。
+ * viewport は常設 + aria-live="polite"、caution だけ role="alert" で割り込む設計。
+ */
+export const AnnouncesViaLiveRegion: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div className="p-6">
+      <Toaster />
+      <Button
+        data-testid="fire"
+        onClick={() => toast.success("保存しました", { description: "変更が反映されました" })}
+      >
+        トーストを出す
+      </Button>
+      <Button
+        data-testid="fire-caution"
+        variant="destructive"
+        onClick={() => toast.caution("エラー")}
+      >
+        caution トースト
+      </Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    // live region はトーストが出る前から常設されていること
+    // （後から挿入された live region は読み上げられない SR があるため）
+    const viewport = body.getByRole("region", { name: "通知" })
+    await expect(viewport).toHaveAttribute("aria-live", "polite")
+
+    await userEvent.click(canvas.getByTestId("fire"))
+    const toastEl = await body.findByText("保存しました")
+    await expect(viewport.contains(toastEl)).toBe(true)
+    await expect(await body.findByText("変更が反映されました")).toBeInTheDocument()
+
+    // caution は割り込み通知として role="alert" が付く
+    await userEvent.click(canvas.getByTestId("fire-caution"))
+    const alert = await body.findByRole("alert")
+    await expect(alert).toHaveTextContent("エラー")
+  },
 }
