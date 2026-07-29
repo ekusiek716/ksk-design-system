@@ -50,3 +50,8 @@ jobs:
 
       - name: Packed package Jest 29 consumer render
         run: npm run test:jest-consumer
+
+      - name: mcp-server build (配布物 ksk-ds-mcp のコンパイル検証)
+        run: |
+          npm ci --prefix mcp-server
+          npm run build --prefix mcp-server
