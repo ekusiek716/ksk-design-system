@@ -4,6 +4,7 @@
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import { Label } from "./label"
+import { Input } from "./input"
 
 const meta: Meta<typeof Label> = {
   title: "Components/Label",
@@ -27,8 +28,9 @@ export const WithRequiredMarker: Story = {
 }
 
 export const DisabledState: Story = {
-  // 無効状態の見た目デモ。inactive UI component は WCAG 1.4.3 の
-  // コントラスト要件対象外だが、axe は label 単体を判定できないため除外する。
+  // 無効状態の見た目デモ。disabled な Input と htmlFor で関連付けており、
+  // ラベルは inactive UI component の一部＝WCAG 1.4.3 のコントラスト要件対象外。
+  // ただし axe は「disabled コントロールのラベル」を exemption 扱いしないため除外する。
   parameters: {
     a11y: { config: { rules: [{ id: "color-contrast", enabled: false }] } },
   },
@@ -37,6 +39,7 @@ export const DisabledState: Story = {
       <Label htmlFor="disabled-input" className="opacity-50 cursor-not-allowed">
         無効なフィールド
       </Label>
+      <Input id="disabled-input" disabled placeholder="入力できません" />
     </div>
   ),
 }

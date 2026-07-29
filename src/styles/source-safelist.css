@@ -28,6 +28,7 @@
 @source inline("@sm:items-center");
 @source inline("@sm:ml-auto");
 @source inline("[&::-webkit-scrollbar]:hidden");
+@source inline("[&:not([data-selected])>button]:text-[var(--Text-Low-Emphasis)]!");
 @source inline("[&>*]:[--card-surface:initial]");
 @source inline("[&>*]:basis-0");
 @source inline("[&>*]:flex");
@@ -46,7 +47,6 @@
 @source inline("[&>button]:rounded-none");
 @source inline("[&>button]:text-[var(--Brand-Primary)]");
 @source inline("[&>button]:text-[var(--Text-High-Emphasis)]!");
-@source inline("[&>button]:text-[var(--Text-Low-Emphasis)]!");
 @source inline("[&>button]:text-[var(--Text-on-Inverse)]");
 @source inline("[&>button]:w-full");
 @source inline("[&>span]:line-clamp-1");

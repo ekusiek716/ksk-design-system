@@ -98,16 +98,18 @@ function CoachMark({
                   <div className="flex items-center justify-between mt-1">
                     {showClose && (
                       <button
+                        type="button"
                         onClick={onClose}
-                        className="typo-label-xs underline underline-offset-2 hover:no-underline"
+                        className="typo-label-xs text-[var(--Text-on-Inverse)] underline underline-offset-2 hover:no-underline"
                       >
                         スキップ
                       </button>
                     )}
                     {onNext && (
                       <button
+                        type="button"
                         onClick={onNext}
-                        className="typo-label-xs bg-[var(--Overlay-Light)] hover:bg-[var(--Overlay-Medium)] px-2.5 py-0.5 rounded-md transition-colors ml-auto"
+                        className="typo-label-xs text-[var(--Text-on-Inverse)] bg-[var(--Overlay-Light)] hover:underline px-2.5 py-0.5 rounded-md ml-auto"
                       >
                         次へ →
                       </button>

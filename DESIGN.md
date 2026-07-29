@@ -140,8 +140,8 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 | 罫線 | `var(--Border-Low-Emphasis)` | `#E5E7EB` |
 | 状態 | `--Success/Warning/Caution/Info-Base` <!-- docs-drift-ignore: --Success/Warning/Caution/Info-Base --> | `#15803D` / `#C2410C` / `#DC2626` / `#2563EB` |
 
-- **状態色の正本**: 上記は `*-Base`（テキスト/アイコン基準＝Primitive **600**）。`tokens.json` を正本とし、本表はその要約。
-  バッジ/ピル等の強調 **fill** は別ロール `--Surface-*-Strong`（Primitive **500**）で、わざと一段明るい。役割が違うだけで矛盾ではない。
+- **状態色の正本**: 上記は `*-Base`。Caution/Info は Primitive **600**、Success/Warning は白文字 AA(4.5:1) 確保のため Primitive **700**（600 だと 3.3〜3.6:1）。`tokens.json` を正本とし、本表はその要約。
+  バッジ/ピル等の強調 **fill** は別ロール `--Surface-*-Strong`（Primitive **500**）で、わざと明るい。役割が違うだけで矛盾ではない。
 - **Dark mode**: `.dark` で Semantic 層が自動反転（コンポーネント側の変更不要）。テーマ差し替え（Brand）と
   light/dark は**直交2軸**。dark の semantic 値は `src/styles/semantic.css` の `.dark` が実装で、`tokens.json` の
   `colors.semanticDark` に機械可読ミラーを持つ（契約テストで同期を保証）。
