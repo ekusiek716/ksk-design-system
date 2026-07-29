@@ -171,7 +171,11 @@ export const Default: StoryObj = {
                   メールアドレス
                 </DataTableHead>
                 <DataTableHead>ステータス</DataTableHead>
-                <DataTableHead />
+                {/* 見た目上は無ラベル（行メニューの列）。axe: empty-table-header 対策で
+                    スクリーンリーダー向けの見出しテキストを sr-only で用意する。 */}
+                <DataTableHead>
+                  <span className="sr-only">操作</span>
+                </DataTableHead>
               </tr>
             </DataTableHeader>
             <DataTableBody>
@@ -566,7 +570,10 @@ export const CellVariants: StoryObj = {
           <DataTableTable>
             <DataTableHeader>
               <tr>
-                <DataTableHead />
+                {/* ドラッグハンドル列。見た目上は無ラベル（axe: empty-table-header 対策）。 */}
+                <DataTableHead>
+                  <span className="sr-only">並べ替え</span>
+                </DataTableHead>
                 <DataTableHead>画像</DataTableHead>
                 <DataTableHead>商品名</DataTableHead>
                 <DataTableHead>ステータス</DataTableHead>
@@ -673,7 +680,9 @@ export const RowClickHitArea: StoryObj = {
         },
         {
           key: "actions",
-          header: "",
+          // 見た目上は無ラベル（操作列）。axe: empty-table-header 対策で
+          // スクリーンリーダー向けの見出しテキストを sr-only で用意する。
+          header: <span className="sr-only">操作</span>,
           width: "action",
           cell: ({ row }) => (
             <Button size="sm" variant="secondary" onClick={() => setActiveUserId(row.id)}>
@@ -874,7 +883,10 @@ export const DragAndDrop: StoryObj = {
           <DataTableTable>
             <DataTableHeader>
               <tr>
-                <DataTableHead className="w-[36px]" />
+                {/* ドラッグハンドル列。見た目上は無ラベル（axe: empty-table-header 対策）。 */}
+                <DataTableHead className="w-[36px]">
+                  <span className="sr-only">並べ替え</span>
+                </DataTableHead>
                 <DataTableHead>名前</DataTableHead>
                 <DataTableHead>メールアドレス</DataTableHead>
                 <DataTableHead>ステータス</DataTableHead>

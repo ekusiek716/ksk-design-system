@@ -100,6 +100,18 @@ Combobox / Tabs / Form / Toast。Storybook の play 関数を playwright chromiu
 `npx playwright install chromium` が必要なため `npm run check` には含まれない。
 CI では常時実行される。
 
+**UI コンポーネントを追加・修正した後は `npm run test:a11y` も実行:**
+
+```bash
+npm run test:a11y
+```
+
+axe-core による a11y 機械検証（issue #261）。`@storybook/addon-a11y` の
+afterEach フックが全ストーリー（148件、tags フィルタなし）に対して axe-core を
+実行する（設定は `vitest.a11y.config.ts`）。color-contrast ルールのみ既知の
+トークン債務のため CI では無効化中（`.storybook/preview.ts` 参照、コントラスト自体は
+`scripts/check-contrast.mjs` が担保）。CI では常時実行される。
+
 エラーが出た場合は修正してから次に進むこと。
 
 ---

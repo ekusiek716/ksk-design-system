@@ -79,7 +79,9 @@ function SocialLoginButton({
             <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" strokeDasharray="30" strokeDashoffset="10" />
           </svg>
         ) : (
-          <SocialIcon platform={config.platform} tone={config.iconTone} size={22} />
+          // ボタン自体に可視テキストラベル（config.label 等）があるため、
+          // アイコンの accessible name は読み上げの二重になる。装飾扱いにする。
+          <SocialIcon platform={config.platform} tone={config.iconTone} size={22} aria-hidden="true" />
         )}
       </span>
       <span className="flex-1 text-center">

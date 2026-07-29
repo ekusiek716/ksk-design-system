@@ -97,9 +97,11 @@ function CategoryScroll({
           shapeClass
         )}
       >
+        {/* item.name は直下の <span> に可視テキストとして既出のため alt は空にし、
+            読み上げの重複を避ける（axe: image-redundant-alt）。 */}
         <img
           src={item.imageUrl}
-          alt={item.name}
+          alt=""
           className="size-full object-cover transition-opacity group-hover:opacity-80"
           loading="lazy"
         />

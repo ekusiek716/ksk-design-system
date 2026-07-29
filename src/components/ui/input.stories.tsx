@@ -14,8 +14,10 @@ export default meta
 
 type Story = StoryObj<typeof Input>
 
+// placeholder/label 無しの素の Input には axe: label 対策で aria-label を明示する
+// （実利用では WithLabel のように <Label> 併記が前提）。
 export const Default: Story = {
-  args: { defaultValue: "テキスト入力" },
+  args: { defaultValue: "テキスト入力", "aria-label": "サンプル" },
 }
 
 export const WithPlaceholder: Story = {
@@ -30,6 +32,7 @@ export const Error: Story = {
   args: {
     defaultValue: "invalid@",
     "aria-invalid": true,
+    "aria-label": "サンプル",
   },
 }
 
@@ -43,5 +46,5 @@ export const WithLabel: Story = {
 }
 
 export const FileInput: Story = {
-  args: { type: "file" },
+  args: { type: "file", "aria-label": "ファイルを選択" },
 }

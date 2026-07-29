@@ -90,8 +90,10 @@ export const WithCharacterCountAndError: Story = {
 export const WithSelect: Story = {
   render: () => (
     <FormField label="カテゴリ" required>
+      {/* FormField の label は htmlFor 未指定だと Radix トリガーに紐付かないため、
+          aria-label で直接アクセシブルネームを補う（axe: button-name）。 */}
       <Select>
-        <SelectTrigger>
+        <SelectTrigger aria-label="カテゴリ">
           <SelectValue placeholder="選択してください" />
         </SelectTrigger>
         <SelectContent>

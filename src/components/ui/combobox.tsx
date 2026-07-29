@@ -81,6 +81,9 @@ function Combobox({
         className="w-[var(--radix-popover-trigger-width)] p-0"
         align="start"
         onOpenAutoFocus={(e) => { e.preventDefault(); inputRef.current?.focus() }}
+        // Popover の中身は role="dialog" を持つが accessible name が無いと
+        // 検出されない（axe: aria-dialog-name）。
+        aria-label={triggerLabel ?? placeholder}
       >
         {/* Search */}
         <div className="flex items-center border-b border-[var(--Border-Low-Emphasis)] px-3 gap-2">
@@ -97,7 +100,11 @@ function Combobox({
           />
         </div>
         {/* List */}
-        <div role="listbox" className="max-h-60 overflow-y-auto p-1">
+        <div
+          role="listbox"
+          aria-label={`${triggerLabel ?? placeholder}の候補`}
+          className="max-h-60 overflow-y-auto p-1"
+        >
           {filtered.length === 0 ? (
             <div className="py-6 text-center typo-body-sm text-[var(--Text-Low-Emphasis)]">{emptyLabel}</div>
           ) : (

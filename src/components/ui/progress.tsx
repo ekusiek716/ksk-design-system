@@ -122,6 +122,8 @@ function Progress({
   autoColor,
   transitionDuration = "sm",
   masked,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
   ...props
 }: ProgressProps) {
   const duration = DURATION_MS[transitionDuration]
@@ -134,6 +136,11 @@ function Progress({
       data-variant={resolvedVariant}
       data-auto-color={autoColor ? "" : undefined}
       data-masked={masked ? "" : undefined}
+      // role="progressbar" は Radix が付与するが accessible name は持たない。
+      // 呼び出し側が aria-label / aria-labelledby を渡さない場合の既定値
+      // （A006 相当・axe: aria-progressbar-name）。
+      aria-label={ariaLabel ?? (ariaLabelledby ? undefined : "進捗")}
+      aria-labelledby={ariaLabelledby}
       className={cn(
         "relative h-2 w-full overflow-hidden rounded-full bg-[var(--Surface-Tertiary)]",
         className,

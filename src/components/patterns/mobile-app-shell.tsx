@@ -57,12 +57,17 @@ function MobileAppShell({
           className="relative flex min-h-dvh min-w-0 flex-1 flex-col bg-[var(--Surface-Primary)]"
         >
           {header && (
-            <header
+            // `header` は呼び出し側が渡す任意のノードで、多くの場合それ自体が
+            // <MobileAppHeader>（実体は <header>）。ここを <header> にすると
+            // banner landmark が入れ子・重複してしまう（axe:
+            // landmark-banner-is-top-level / landmark-no-duplicate-banner /
+            // landmark-unique）。レイアウト用の <div> に留める。
+            <div
               data-slot="mobile-app-shell-header"
               className="sticky top-0 z-40 shrink-0 bg-[var(--Surface-Primary)]"
             >
               {header}
-            </header>
+            </div>
           )}
           <main
             data-slot="mobile-app-shell-main"
