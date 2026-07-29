@@ -1,18 +1,34 @@
 import { spawnSync } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { ImportType, init, parse } from "es-module-lexer"
 
+const rootDir = fileURLToPath(new URL("..", import.meta.url))
 const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
 const webBundlePath = new URL("../dist/index.js", import.meta.url)
-if (!existsSync(webBundlePath)) {
-  // dist/ は git 追跡外のため、fresh checkout では存在しない。
-  // `npm run check` や release.sh を単体で走らせても通るよう、その場でビルドする。
-  console.log("dist/index.js がないため `npm run build:lib` を実行します（dist/ は git 追跡外）")
-  const build = spawnSync("npm", ["run", "build:lib"], {
-    cwd: fileURLToPath(new URL("..", import.meta.url)),
-    stdio: "inherit",
-  })
+
+// dist/ は git 追跡外のため、fresh checkout では存在せず、ローカルでは前回ビルドの
+// 残骸が stale になり得る。ソース（src/ と build 設定）より古い場合は再ビルドして
+// から検証する（stale な bundle を検証しても契約違反を見逃すため）。
+const newestSourceMtime = (path) => {
+  let newest = 0
+  for (const entry of readdirSync(path, { withFileTypes: true })) {
+    if (entry.name === "node_modules" || entry.name.startsWith(".")) continue
+    const full = `${path}/${entry.name}`
+    newest = Math.max(newest, entry.isDirectory() ? newestSourceMtime(full) : statSync(full).mtimeMs)
+  }
+  return newest
+}
+const bundleMtime = existsSync(webBundlePath) ? statSync(webBundlePath).mtimeMs : 0
+const sourceMtime = Math.max(
+  newestSourceMtime(`${rootDir}src`),
+  ...["package.json", "vite.config.lib.ts", "tsconfig.lib.json"].map(
+    (file) => statSync(`${rootDir}${file}`).mtimeMs,
+  ),
+)
+if (bundleMtime < sourceMtime) {
+  console.log("dist/index.js が無いかソースより古いため `npm run build:lib` を実行します（dist/ は git 追跡外）")
+  const build = spawnSync("npm", ["run", "build:lib"], { cwd: rootDir, stdio: "inherit" })
   if (build.status !== 0 || !existsSync(webBundlePath)) {
     console.error("✗ build:lib に失敗し dist/index.js を生成できませんでした")
     process.exit(1)
