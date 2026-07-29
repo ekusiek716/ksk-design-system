@@ -15,14 +15,22 @@
 #
 # やること:
 #   1. clean & main 確認、npm run check
-#   2. npm version <level>（"version" ライフサイクルで scripts/sync-version.mjs が
-#      自動発火し、contracts/components.json の meta.version・token-hex-cache を
-#      同一コミットに同梱する）
+#   2. npm version <level> --no-git-tag-version（ローカルタグ・コミットは作らない。
+#      "version" ライフサイクルで scripts/sync-version.mjs は --no-git-tag-version
+#      でも変わらず発火し、contracts/components.json の meta.version・
+#      token-hex-cache を同期して git add する）
 #   3. npm pack で公開物を検証（publish はしない。中身確認のみ）
-#   4. git push origin main --tags → publish.yml が version 変更を検知して
-#      npm publish（Trusted Publishing）・タグ・GitHub Release を自動実行
+#   4. git commit + git push origin main（タグは作らず push もしない）
+#      → publish.yml が version 変更を検知して npm publish
+#      （Trusted Publishing）・タグ作成・GitHub Release を自動実行
 #   5. npm view でレジストリ反映をポーリング確認
 #   6. bash scripts/update-consumers.sh <version>（5 リポ自動 PR）
+#
+# タグ・GitHub Release の作成は publish.yml に完全委任する。ローカルで
+# `npm version` の既定動作（ローカルタグ作成 + commit）を使うと、
+# `git push --tags` で CI（publish.yml）より先にタグが公開リポジトリに
+# 届いてしまい、publish.yml がタグ既存と判定して GitHub Release の
+# 作成をスキップしてしまう（issue #269 レビュー指摘）。
 #
 # ローカル npm 認証によるフォールバック公開が必要な場合（publish.yml が
 # 利用できない緊急時のみ）は PUBLISHING.md の手動フローを参照。
@@ -56,11 +64,18 @@ fi
 echo -e "${CYAN}→ npm run check${NC}"
 npm run check
 
-# ── version bump ─────────────────────────
-echo -e "${CYAN}→ npm version $LEVEL_OR_VERSION${NC}"
-npm version "$LEVEL_OR_VERSION"
+# ── version bump（ローカルタグ・コミットは作らない。タグ/Release は publish.yml に委任） ──
+echo -e "${CYAN}→ npm version $LEVEL_OR_VERSION --no-git-tag-version${NC}"
+npm version "$LEVEL_OR_VERSION" --no-git-tag-version
 VERSION="$(node -p "require('./package.json').version")"
 echo -e "${GREEN}✓ new version: $VERSION${NC}"
+
+# --no-git-tag-version は package.json の commit を作らないため、
+# scripts/sync-version.mjs が git add した変更（package.json 含む）を
+# ここで明示的にコミットする。
+echo -e "${CYAN}→ git commit${NC}"
+git add package.json package-lock.json 2>/dev/null || true
+git commit -m "chore(release): v$VERSION"
 
 # ── tgz 生成 ─────────────────────────
 # v1.35.0 で消費リポすべて新名 (ksk-design-system) に移行済のため、
@@ -87,12 +102,15 @@ rm -rf "$EXTRACT_DIR"
 echo -e "${GREEN}✓ 中身検証 OK${NC}"
 rm -f "$NEW_TGZ"
 
-# ── push（publish は publish.yml の Trusted Publishing に一本化） ──────
-# ローカルから npm publish は実行しない。push した package.json の version 変更を
-# .github/workflows/publish.yml が検知し、npm 上の最新版と比較した上で
-# npm publish（OIDC）・タグ・GitHub Release を CI 側で実行する。
-echo -e "${CYAN}→ git push origin main --tags${NC}"
-git push origin main --tags
+# ── push（タグは作らない・push しない。publish/タグ/Release は publish.yml に一本化） ──
+# ローカルから npm publish もタグ作成もしない。push した package.json の version
+# 変更を .github/workflows/publish.yml が検知し、npm 上の最新版と比較した上で
+# npm publish（OIDC）・`vX.Y.Z` タグ・GitHub Release を CI 側で実行する。
+# ここでローカルタグを push すると、CI より先にタグが公開されて publish.yml が
+# 「タグ既存」と判定し GitHub Release 作成をスキップしてしまうため、意図的に
+# `--tags` を付けない。
+echo -e "${CYAN}→ git push origin main${NC}"
+git push origin main
 
 # ── publish.yml の実行を確認 ─────────────────────────
 echo -e "${CYAN}→ publish.yml の実行状況を確認${NC}"

@@ -27,7 +27,15 @@ function makeFixture(componentsVersion: string, packageVersion: string) {
 
   writeFileSync(
     join(root, "package.json"),
-    `${JSON.stringify({ name: "fixture", version: packageVersion }, null, 2)}\n`,
+    `${JSON.stringify(
+      {
+        name: "fixture",
+        version: packageVersion,
+        scripts: { version: "node scripts/sync-version.mjs" },
+      },
+      null,
+      2,
+    )}\n`,
   )
 
   writeFileSync(
@@ -139,6 +147,35 @@ describe("scripts/sync-version.mjs", () => {
     }).stdout
     expect(status).toContain("contracts/components.json")
     expect(status).toContain("contracts/token-hex-cache.json")
+  })
+
+  it("npm version --no-git-tag-version 経路でも \"version\" ライフサイクルが発火し追従する（タグ・コミットは作らない）", () => {
+    // issue #269 レビュー指摘: release.sh はローカルタグを作らないよう
+    // `npm version <level> --no-git-tag-version` を使う。npm の "version" ライフサイクル
+    // （sync-version.mjs 呼び出し）が --no-git-tag-version でも変わらず発火することを保証する。
+    const root = makeFixture("1.0.0", "1.0.0")
+
+    const result = spawnSync("npm", ["version", "1.1.0", "--no-git-tag-version"], {
+      cwd: root,
+      encoding: "utf8",
+    })
+
+    expect(result.status).toBe(0)
+
+    const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
+    expect(pkg.version).toBe("1.1.0")
+
+    const components = JSON.parse(readFileSync(join(root, "contracts", "components.json"), "utf8"))
+    expect(components.meta.version).toBe("1.1.0")
+
+    const cache = JSON.parse(readFileSync(join(root, "contracts", "token-hex-cache.json"), "utf8"))
+    expect(cache.meta.version).toBe("1.1.0")
+
+    // --no-git-tag-version はコミット・タグを作らない
+    const tags = spawnSync("git", ["tag"], { cwd: root, encoding: "utf8" }).stdout.trim()
+    expect(tags).toBe("")
+    const log = spawnSync("git", ["log", "--oneline"], { cwd: root, encoding: "utf8" })
+    expect(log.stdout.trim()).toBe("")
   })
 
   it("既に同期済みなら components.json を書き換えない（再実行の冪等性）", () => {

@@ -17,8 +17,10 @@
 ## 最短手順（推奨）
 
 ```bash
-# release branch で package.json / package-lock.json と契約 version を更新
-# PR を main にマージ
+# release branch で package.json / package-lock.json の version を更新し、
+# node scripts/sync-version.mjs を実行して contracts/components.json の
+# meta.version・contracts/token-hex-cache.json を追従させる（issue #259）
+# PR を main にマージ（このブランチではタグは作らない・push もしない）
 RUN_ID="$(gh run list --workflow=publish.yml --branch=main --limit=1 \
   --json databaseId --jq '.[0].databaseId')"
 gh run watch "$RUN_ID" --exit-status
@@ -67,19 +69,33 @@ npm run storybook     # 目視確認（特に新機能のストーリー）
 
 ```bash
 # patch (bug fix)        例: 1.15.2 → 1.15.3
-npm version patch
+npm version patch --no-git-tag-version
 
 # minor (feature add, 互換あり) 例: 1.15.2 → 1.16.0
-npm version minor
+npm version minor --no-git-tag-version
 
 # major (破壊変更)        例: 1.15.2 → 2.0.0
-npm version major
+npm version major --no-git-tag-version
 ```
 
-`npm version` が自動で `package.json` を更新し、`v1.16.0` タグを切る。
-同時に `"version"` ライフサイクル（`scripts/sync-version.mjs`）が発火し、
-`contracts/components.json` の `meta.version` と `contracts/token-hex-cache.json`
-を新バージョンに同期して同一コミットに含める（issue #259）。手動更新は不要。
+**タグ・コミットは作らない（`--no-git-tag-version`）。** タグ・GitHub Release
+の作成は必ず `.github/workflows/publish.yml` に任せる（issue #269 レビュー
+指摘）。ローカルで `npm version` の既定動作（タグ作成 + コミット）を使って
+`git push --tags` すると、CI（publish.yml）より先にタグが公開リポジトリに
+届いてしまい、publish.yml がタグ既存と判定して GitHub Release の作成を
+スキップしてしまう。
+
+`--no-git-tag-version` を付けても `"version"` ライフサイクル
+（`scripts/sync-version.mjs`）は変わらず発火し、`contracts/components.json` の
+`meta.version` と `contracts/token-hex-cache.json` を新バージョンに同期して
+`git add` する（`--no-git-tag-version` が省略するのは git のコミット・タグ
+作成だけ）。手動更新は不要。同期後、`package.json`（および変更されていれば
+`package-lock.json`）を含めて自分でコミットする:
+
+```bash
+git add package.json package-lock.json
+git commit -m "chore(release): vX.Y.Z"
+```
 
 `npm version` を使わない bump 経路（release PR で `package.json` を直接
 書き換える等）の場合は、コミット前に `node scripts/sync-version.mjs` を単体実行する。
@@ -120,8 +136,10 @@ npm pack --dry-run | tail -50
 ### 4. push
 
 ```bash
-git push origin main --tags
+git push origin main
 ```
+
+`--tags` は付けない。タグ・GitHub Release は push 後に publish.yml が作成する。
 
 ### 5. 消費リポへ配布
 
@@ -151,8 +169,9 @@ bash scripts/update-consumers.sh 1.16.0 belle-todo pawly
 # 修正コミット
 git commit -m "fix: 重大なバグの説明"
 
-npm version patch  # sync-version.mjs が自動で追従・git add
-git push origin main --tags  # publish.yml が npm publish を自動実行
+npm version patch --no-git-tag-version  # sync-version.mjs が自動で追従・git add（タグ/コミットは作らない）
+git add package.json && git commit -m "chore(release): vX.Y.Z"
+git push origin main  # --tags なし。publish.yml が npm publish・タグ・GitHub Release を自動実行
 npm view ksk-design-system@<version> version  # 反映確認
 bash scripts/update-consumers.sh <version> <影響リポ...>
 ```
