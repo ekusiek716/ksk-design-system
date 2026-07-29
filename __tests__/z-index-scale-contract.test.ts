@@ -26,7 +26,7 @@ function sheetConst(name: string): number {
 
 describe("z-index スケール contract", () => {
   it("下から上への順序が守られている", () => {
-    const order = ["Base", "Raised", "Sticky", "Nav", "Overlay", "Modal", "Alert-Overlay", "Alert", "Popover", "Toast", "Tooltip", "SkipLink"]
+    const order = ["Base", "Raised", "Sticky", "Nav", "Overlay", "Modal", "Alert-Overlay", "Alert", "Coachmark-Overlay", "Coachmark", "Popover", "Toast", "Tooltip", "SkipLink"]
     const values = order.map(z)
     expect(values).toEqual([...values].sort((a, b) => a - b))
     // 同値の段があると Portal のマウント順で勝敗が決まってしまう
@@ -44,8 +44,13 @@ describe("z-index スケール contract", () => {
     expect(z("Alert")).toBeGreaterThan(z("Alert-Overlay"))
   })
 
+  it("CoachMark は scrim ごと Modal より上（暗転していないモーダルの上に説明だけ浮かせない）", () => {
+    expect(z("Coachmark-Overlay")).toBeGreaterThan(z("Modal"))
+    expect(z("Coachmark")).toBeGreaterThan(z("Coachmark-Overlay"))
+  })
+
   it("Popover / Toast は Modal より上（モーダル内から開く・モーダル上で読ませる）", () => {
-    expect(z("Popover")).toBeGreaterThan(z("Alert"))
+    expect(z("Popover")).toBeGreaterThan(z("Coachmark"))
     expect(z("Toast")).toBeGreaterThan(z("Modal"))
     expect(z("Toast")).toBeGreaterThan(z("Popover"))
   })
@@ -76,5 +81,12 @@ describe("z-index スケール contract", () => {
     const dialog = readFileSync("src/components/ui/dialog.tsx", "utf8")
     expect(dialog).toContain("z-[var(--Z-Overlay)]")
     expect(dialog).toContain("z-[var(--Z-Modal)]")
+    // CoachMark は scrim（fallback overlay と boxShadow スポットライトの両方）と
+    // 吹き出しが対で Modal より上に居る必要がある
+    const coachOverlay = readFileSync("src/components/patterns/coach-mark-overlay.tsx", "utf8")
+    expect(coachOverlay).toContain("z-[var(--Z-Coachmark-Overlay)]")
+    expect(coachOverlay).not.toMatch(/zIndex:\s*\d+/)
+    const coachMark = readFileSync("src/components/ui/coach-mark.tsx", "utf8")
+    expect(coachMark).toContain("z-[var(--Z-Coachmark)]")
   })
 })

@@ -67,6 +67,8 @@ layering:                                          # z-index スケール（src/
   modal: 60
   alertOverlay: 900
   alert: 910
+  coachmarkOverlay: 950
+  coachmark: 960
   popover: 1000
   toast: 1100
   tooltip: 1200
@@ -231,7 +233,9 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
 | `--Z-Modal` | 60 | Dialog / Sheet 本体。必ず自分の scrim より上 |
 | `--Z-Alert-Overlay` | 900 | AlertDialog / ConfirmDialog の scrim |
 | `--Z-Alert` | 910 | AlertDialog / ConfirmDialog 本体 |
-| `--Z-Popover` | 1000 | Select / Popover / DropdownMenu / HoverCard / CoachMark |
+| `--Z-Coachmark-Overlay` | 950 | CoachMarkOverlay の scrim / スポットライト |
+| `--Z-Coachmark` | 960 | CoachMark の吹き出し |
+| `--Z-Popover` | 1000 | Select / Popover / DropdownMenu / HoverCard |
 | `--Z-Toast` | 1100 | 通知・Celebration。Modal 表示中でも読める |
 | `--Z-Tooltip` | 1200 | 補助情報。他の何かの上に出るのが役目 |
 | `--Z-SkipLink` | 1300 | キーボード操作の最初の逃げ道。何にも隠されてはいけない |
@@ -246,6 +250,9 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
   *中から* 開かれる割り込み確認。Modal と同じ段に置くと自分の scrim が親コンテンツの下に潜り、
   親が暗転しないまま確認だけが浮く（どの操作を確認しているのか分からない状態になる）。
   逆に Alert から Dialog / Sheet を開くフローは想定しない（Alert は終端の確認）。
+- **CoachMark も scrim ごと Modal より上（950/960）** — オンボーディングは Dialog や Sheet を
+  開いた状態の上から重ねることがあり、scrim が Modal より下だと「暗転していないモーダルの上に
+  説明だけが浮く」状態になる。
 - **Modal(60) と Alert-Overlay(900) の間が大きく空いている**のは、多段 Sheet が
   `Modal + 段数*20` で積み上がるための予約領域（issue #158）。
 

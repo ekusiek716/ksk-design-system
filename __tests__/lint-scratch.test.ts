@@ -41,6 +41,29 @@ describe("lint-scratch.sh", () => {
     expect(outputOf(result)).toContain("モーション値の直書き")
   })
 
+  it("W13: 秒単位のモーション値を検出する", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        const s = { transition: "stroke-dashoffset 0.4s ease" }
+        return <div style={s} />
+      }
+    `)
+    expect(outputOf(result)).toContain("モーション値の直書き")
+  })
+
+  it("[回帰] W13: SVG path の smooth-curve コマンド（a.8.8s...）を秒数と誤検知しない", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        return (
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2a.8.8 0 0 1 .8.8s0 1-.8 1" />
+          </svg>
+        )
+      }
+    `)
+    expect(outputOf(result)).not.toContain("モーション値の直書き")
+  })
+
   it("W13: Motion トークン参照なら検出しない", () => {
     const result = runLintScratch(`
       export function Example() {

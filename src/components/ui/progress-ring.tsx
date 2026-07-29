@@ -72,7 +72,11 @@ function ProgressRing({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
-          style={{ transition: "stroke-dashoffset 0.4s ease" }}
+          // 0.4s ease → Motion トークンへ。Slow(300ms) と Slower(500ms) の中間だったが、
+          // リング全周を描き切る動きなので「大きい変化」側の Slower に寄せる。
+          style={{
+            transition: "stroke-dashoffset var(--Motion-Duration-Slower) var(--Motion-Easing-Standard)",
+          }}
         />
       </svg>
       {showLabel && (

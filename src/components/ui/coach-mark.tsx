@@ -74,7 +74,7 @@ function CoachMark({
             side={sideMap[placement]}
             sideOffset={8}
             className={cn(
-              "z-[var(--Z-Popover)] max-w-[240px] rounded-lg px-3 py-2 typo-body-sm leading-relaxed shadow-[var(--shadow-tooltip)]",
+              "z-[var(--Z-Coachmark)] max-w-[240px] rounded-lg px-3 py-2 typo-body-sm leading-relaxed shadow-[var(--shadow-tooltip)]",
               "data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0",
               "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
               variant === "brand"

@@ -426,9 +426,9 @@
       "id": "P047",
       "severity": "warning",
       "category": "token",
-      "pattern": "\\b(duration|delay)-\\d+\\b|cubic-bezier\\(|\\bease-out\\b|\\d+ms",
+      "pattern": "\\b(duration|delay)-\\d+\\b|cubic-bezier\\(|\\bease-out\\b|\\d+ms|[\\s(](\\.\\d+|\\d+(\\.\\d+)?)s[\\s;,\")']",
       "excludes": ["ksk-motion-exception", ".stories.", "src/styles/motion.css"],
-      "message": "モーション値（ms / cubic-bezier / 素の ease-out）の直書き禁止",
+      "message": "モーション値（ms / 秒 / cubic-bezier / 素の ease-out）の直書き禁止",
       "fix": "duration-[var(--Motion-Duration-{Fast,Base,Slow,Slower})] / ease-[var(--Motion-Easing-{Standard,Snappy,Emphasized,Decelerate,Bounce})] を使用",
       "note": "Tailwind クラスだけでなくインライン style の生 ms（style={{ transition: \"height 200ms ease-out\" }} 等）も対象。prefers-reduced-motion の一括制御はトークン参照している箇所にしか効かない。celebration の 360/600/1400ms のような演出専用の尺は行内か直前行の ksk-motion-exception コメントで除外する。トークン参照を含む行を一律スキップしないこと（animate-[pop_360ms_var(--Motion-Easing-Bounce)_both] のような混在行を見逃す）"
     },
@@ -604,7 +604,7 @@
     },
     "zIndex": {
       "rule": "Portal に載る要素の重なりは --Z-* トークンで表す。z-50 一律だと Portal のマウント順（＝開いた順）で勝敗が決まる。z-10 / z-20 のコンポーネント内部の重なりは対象外。",
-      "order": "Sticky < Nav < Overlay < Modal < Alert-Overlay < Alert < Popover < Toast < Tooltip < SkipLink",
+      "order": "Sticky < Nav < Overlay < Modal < Alert-Overlay < Alert < Coachmark-Overlay < Coachmark < Popover < Toast < Tooltip < SkipLink",
       "allowed": [
         { "token": "var(--Z-Raised)",   "value": "10",   "use": "カード内の重なり（画像上のバッジ等）" },
         { "token": "var(--Z-Sticky)",   "value": "30",   "use": "スクロール追従のフィルタバー / サブナビ" },
@@ -613,7 +613,9 @@
         { "token": "var(--Z-Modal)",    "value": "60",   "use": "Dialog / Sheet 本体" },
         { "token": "var(--Z-Alert-Overlay)", "value": "900", "use": "AlertDialog / ConfirmDialog の scrim" },
         { "token": "var(--Z-Alert)",    "value": "910",  "use": "AlertDialog / ConfirmDialog 本体。Dialog / Sheet の中から開く割り込み確認なので Modal より上" },
-        { "token": "var(--Z-Popover)",  "value": "1000", "use": "Select / Popover / DropdownMenu / HoverCard / CoachMark" },
+        { "token": "var(--Z-Coachmark-Overlay)", "value": "950", "use": "CoachMarkOverlay の scrim / スポットライト" },
+        { "token": "var(--Z-Coachmark)", "value": "960", "use": "CoachMark の吹き出し" },
+        { "token": "var(--Z-Popover)",  "value": "1000", "use": "Select / Popover / DropdownMenu / HoverCard" },
         { "token": "var(--Z-Toast)",    "value": "1100", "use": "通知・Celebration" },
         { "token": "var(--Z-Tooltip)",  "value": "1200", "use": "Tooltip" },
         { "token": "var(--Z-SkipLink)", "value": "1300", "use": "SkipLink（何にも隠されてはいけない）" }

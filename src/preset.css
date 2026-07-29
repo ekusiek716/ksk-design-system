@@ -141,7 +141,9 @@
      Modal   60  … Dialog / Sheet 本体。必ず自分の scrim より上
      Alert-Overlay 900 … AlertDialog / ConfirmDialog の scrim
      Alert   910 … AlertDialog / ConfirmDialog 本体
-     Popover 1000 … Select / Popover / DropdownMenu / HoverCard / CoachMark。
+     Coachmark-Overlay 950 … CoachMarkOverlay の scrim / スポットライト
+     Coachmark 960 … CoachMark の吹き出し
+     Popover 1000 … Select / Popover / DropdownMenu / HoverCard。
                     Modal の中から開くので Modal より上
      Toast   1100 … 通知。Modal 表示中でも読めるよう Modal / Popover より上
      Tooltip 1200 … 補助情報。他の何かの上に出るのが役目なので実質最上位
@@ -153,6 +155,12 @@
    ここを 40 段ぶん空けておくことで、多段 Sheet が Alert 以上の層を
    突き抜けない。この 3 定数は下の :root と対で維持すること
    （__tests__/z-index-scale-contract.test.ts が一致を検査する）。
+
+   CoachMark も同じ理由で専用の 950/960。オンボーディングは Dialog や Sheet を
+   開いた状態の上から重ねることがあり、scrim が Modal より下だと「暗転していない
+   モーダルの上に説明だけが浮く」状態になる。scrim / スポットライトと吹き出しを
+   対で持つのは、スポットライト（boxShadow で周囲を暗くする矩形）が scrim の
+   役割を兼ねるため。
 
    AlertDialog / ConfirmDialog が Modal(60) ではなく専用の 900/910 に居るのは、
    これらが「Dialog や Sheet の中から開かれる割り込み確認」だから。Modal と同じ段だと
@@ -173,6 +181,8 @@
   --Z-Modal:    60;
   --Z-Alert-Overlay: 900;
   --Z-Alert:    910;
+  --Z-Coachmark-Overlay: 950;
+  --Z-Coachmark: 960;
   --Z-Popover:  1000;
   --Z-Toast:    1100;
   --Z-Tooltip:  1200;

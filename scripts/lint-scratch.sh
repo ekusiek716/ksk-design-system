@@ -265,10 +265,14 @@ for FILE in $FILES; do
   #         (0,0,0.58,1) と別物なので、どちらもトークン経由にしないと取り違える）
   #     - インライン style の生 ms: style={{ transition: "height 200ms ..." }} や
   #       `transform ${x}ms ...` のようなテンプレート文字列
+  #     - 秒単位の指定: "stroke-dashoffset 0.4s ease" / ".5s"
+  #       前後に区切り文字を要求して SVG path の `a.8.8s...`（s は滑らかな曲線コマンド）
+  #       を誤検出しないようにしている
   #
   #   演出専用の尺（celebration の 360/600/1400ms 等）は行内か直前行に
   #   `ksk-motion-exception` を書いて除外する。
-  MOTION_TARGET=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(|${CLASS_START}ease-out${CLASS_END}|[0-9]+ms" "$FILE" 2>/dev/null || true)
+  MOTION_SECONDS='[[:space:](](\.[0-9]+|[0-9]+(\.[0-9]+)?)s([[:space:];,")'"'"']|$)'
+  MOTION_TARGET=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(|${CLASS_START}ease-out${CLASS_END}|[0-9]+ms|${MOTION_SECONDS}" "$FILE" 2>/dev/null || true)
   # 例外コメントが直前行にあるものを除外する（行内の指定は grep -v で落ちる）
   MATCHES=""
   while IFS= read -r line; do
