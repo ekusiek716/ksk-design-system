@@ -128,7 +128,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     "\\.(css|less|sass|scss)$": "<rootDir>/test/style-mock.cjs",
-    "^ksk-design-system/(preset|styles(?:\\.css)?|glass|tokens/(?:primitive|semantic|typography|categorical)|themes/(?:default|blue|orange|green|violet|cobalt))$":
+    "^ksk-design-system/(preset|styles(?:\\.css)?|glass|tokens/(?:primitive|semantic|typography|categorical|motion)|themes/(?:default|blue|orange|green|violet|cobalt))$":
       "<rootDir>/test/style-mock.cjs",
   },
 }

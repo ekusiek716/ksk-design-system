@@ -16,9 +16,13 @@ const chipVariants = cva(
       // Chip は常にインタラクティブ（button / a）なので、44px のタッチターゲットを
       // 縦横とも満たす必要がある。縦横で手法を変えているのは意図的:
       //
-      // - 縦: 透明な before 擬似要素で 44px に広げる（Tabs の pill と同じ）。
-      //   本体の height(28/32/36px)を触らないので見た目もレイアウトも動かない。
-      //   行方向には隣接要素が無いので、はみ出しても他の当たり判定と競合しない。
+      // - 縦: 透明な before 擬似要素で 44px に広げ、**同じ高さぶんの縦 margin で
+      //   場所も予約する**（my-2/my-1.5/my-1 で margin box をちょうど 44px にする）。
+      //   height(28/32/36px)は触らないので見た目のピルは変わらないが、
+      //   flex-wrap で折り返したときに隣の行の当たり判定と重ならない。
+      //   margin を付けずに擬似要素だけ広げると、`flex-wrap gap-2` の md チップは
+      //   行間 40px に対し当たり判定 44px となり 4px 重なって誤タップになる。
+      //   横 margin は付けない（付けるとチップ同士の見た目の間隔まで広がるため）。
       // - 横: 擬似要素ではなく本体に min-w-11 を効かせる。横は gap-2(8px) しか
       //   間隔が無く、擬似要素で広げると隣のチップの当たり判定と重なって
       //   誤タップになる（WCAG 2.5.8 のターゲット非重複にも反する）。
@@ -35,9 +39,10 @@ const chipVariants = cva(
       // 横スクロール行に置くときは行側に `min-h-11 items-center` を付けること
       // （ChipFilterBar / TabsList はそうしている）。
       size: {
-        sm: "h-7 min-w-11 px-2.5 typo-label-xs before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
-        md: "h-8 min-w-11 px-3 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
-        lg: "h-9 min-w-11 px-4 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
+        // my-* は「44px - 本体の高さ」の半分。28+8*2 / 32+6*2 / 36+4*2 = いずれも 44px。
+        sm: "h-7 my-2 min-w-11 px-2.5 typo-label-xs before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
+        md: "h-8 my-1.5 min-w-11 px-3 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
+        lg: "h-9 my-1 min-w-11 px-4 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
         tile: "size-12 typo-body-md",
       },
       shape: {
