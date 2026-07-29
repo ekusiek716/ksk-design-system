@@ -123,10 +123,10 @@ const SidebarContent = ({ collapsed, onToggle }: SidebarContentProps) => (
       <Avatar className="size-8">
         {/*
           イニシャルは円の 44%（32px × 0.44 ≒ 14px = typo-label-md）（#253-3）。
-          AvatarFallback の既定は typo-label-sm(12px = 37%) で、typo-* 同士は
-          twMerge の解決対象外のため CSS 順で既定が勝つ。上書きには `!` を付ける。
+          AvatarFallback の既定は typo-label-sm(12px = 37%)。cn() が typo-* を
+          classGroup として認識するため（#257）、通常の className 上書きで確実に勝つ。
         */}
-        <AvatarFallback className="typo-label-md!">KO</AvatarFallback>
+        <AvatarFallback className="typo-label-md">KO</AvatarFallback>
       </Avatar>
       {!collapsed && (
         <div className="min-w-0">

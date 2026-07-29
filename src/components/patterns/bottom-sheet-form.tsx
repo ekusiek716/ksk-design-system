@@ -56,8 +56,9 @@ function BottomSheetForm({
         className={cn("p-0 rounded-t-[32px] max-h-[90dvh] flex flex-col", className)}
       >
         <SheetHeader className="px-5 pt-6 shrink-0">
-          {/* SheetTitle 既定の typo-heading-lg を上書きするため ! が必要 */}
-          <SheetTitle className="typo-heading-3xl!">{title}</SheetTitle>
+          {/* SheetTitle 既定の typo-heading-lg を上書き。cn() が typo-* を classGroup として
+              認識するため（#257）、通常の className 上書きで確実に勝つ。 */}
+          <SheetTitle className="typo-heading-3xl">{title}</SheetTitle>
           {description && <SheetDescription>{description}</SheetDescription>}
         </SheetHeader>
 
