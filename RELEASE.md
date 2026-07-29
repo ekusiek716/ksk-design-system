@@ -63,7 +63,9 @@ GitHub Release の作成をスキップしてしまう。そのため:
 
 1. main で直接修正（or hotfix ブランチ）
 2. `npm version patch --no-git-tag-version`（`sync-version.mjs` が自動で追従・git add まで実行）
-3. `git add package.json` して修正コミットにまとめる
+3. `git add package.json package-lock.json` して修正コミットにまとめる
+   （`npm version` は `--no-git-tag-version` でも `package-lock.json` を更新するため、
+   ステージし忘れると `npm ci` が古い依存スナップショットを使ってしまう）
 4. `git push origin main`（`--tags` は付けない）→ `.github/workflows/publish.yml` の
    Trusted Publishing が npm publish・タグ・GitHub Release 作成を自動実行
 5. 公開を確認: `npm view ksk-design-system@<version> version` →

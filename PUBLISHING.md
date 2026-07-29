@@ -21,8 +21,19 @@
 # node scripts/sync-version.mjs を実行して contracts/components.json の
 # meta.version・contracts/token-hex-cache.json を追従させる（issue #259）
 # PR を main にマージ（このブランチではタグは作らない・push もしない）
-RUN_ID="$(gh run list --workflow=publish.yml --branch=main --limit=1 \
-  --json databaseId --jq '.[0].databaseId')"
+
+# マージ後の main HEAD の commit SHA に紐づく run が出るまで待ってから watch する。
+# --branch=main --limit=1 だけだと GitHub Actions のインデックス遅延時に
+# 直前の（無関係な）run を掴んで誤って「成功」判定してしまうため（issue #269 レビュー指摘）、
+# 必ず --commit で今回の SHA を指定する。
+MERGE_SHA="$(git rev-parse origin/main)"
+RUN_ID=""
+for i in $(seq 1 20); do
+  RUN_ID="$(gh run list --workflow=publish.yml --commit "$MERGE_SHA" --limit=1 \
+    --json databaseId --jq '.[0].databaseId')"
+  [ -n "$RUN_ID" ] && break
+  sleep 5
+done
 gh run watch "$RUN_ID" --exit-status
 ```
 
@@ -170,7 +181,7 @@ bash scripts/update-consumers.sh 1.16.0 belle-todo pawly
 git commit -m "fix: 重大なバグの説明"
 
 npm version patch --no-git-tag-version  # sync-version.mjs が自動で追従・git add（タグ/コミットは作らない）
-git add package.json && git commit -m "chore(release): vX.Y.Z"
+git add package.json package-lock.json && git commit -m "chore(release): vX.Y.Z"
 git push origin main  # --tags なし。publish.yml が npm publish・タグ・GitHub Release を自動実行
 npm view ksk-design-system@<version> version  # 反映確認
 bash scripts/update-consumers.sh <version> <影響リポ...>
@@ -208,6 +219,24 @@ v1.36.0 以降は npm registry 経由配布。公開経路は
 （issue #259）。長寿命の `NPM_TOKEN` やローカルの `npm login` は不要で、
 `scripts/release.sh` を含めローカルから `npm publish` を直接実行する経路はない。
 push 後は publish.yml の完了を待ち、レジストリ反映を確認してから consumers へ配布する。
+
+## 緊急時（publish.yml が失敗した場合）
+
+**ローカルから `npm publish` する break-glass 経路は用意していない**
+（`scripts/release.sh` と本ドキュメントの記述を issue #269 レビューで統一）。
+publish.yml が失敗・スタックした場合の実行可能な手順は次の2つのみ:
+
+1. **workflow_dispatch で再実行する**（推奨）:
+   ```bash
+   gh workflow run publish.yml --ref main
+   # または GitHub Actions の UI から Publish workflow → Run workflow
+   ```
+   `package.json` の version が npm 上の最新版より新しければ、再実行のたびに
+   `npm publish` を試みる（`publish.yml` 内の version 比較ロジックが冪等性を担保）。
+2. 失敗の原因（OIDC 設定・npm 側障害等）を取り除いてから 1 を実行する。
+
+それでも解消しない場合は、npm 側の障害か Trusted Publishing 設定（npmjs.com の
+Trusted Publisher 登録）を疑い、対応後に再度 workflow_dispatch で実行する。
 
 ## 関連
 

@@ -32,8 +32,11 @@
 # 届いてしまい、publish.yml がタグ既存と判定して GitHub Release の
 # 作成をスキップしてしまう（issue #269 レビュー指摘）。
 #
-# ローカル npm 認証によるフォールバック公開が必要な場合（publish.yml が
-# 利用できない緊急時のみ）は PUBLISHING.md の手動フローを参照。
+# publish.yml が失敗 / 動かない場合でも、ローカルから npm publish する経路は
+# ない（Trusted Publishing に一本化済み・issue #269 レビュー指摘で整合）。
+# break-glass 手順は「publish.yml を workflow_dispatch で再実行する」のみ:
+#   gh workflow run publish.yml --ref main
+# 詳細は PUBLISHING.md の「緊急時（publish.yml が失敗した場合）」を参照。
 # =============================================================
 
 set -euo pipefail
@@ -111,12 +114,22 @@ rm -f "$NEW_TGZ"
 # `--tags` を付けない。
 echo -e "${CYAN}→ git push origin main${NC}"
 git push origin main
+PUSHED_SHA="$(git rev-parse HEAD)"
 
 # ── publish.yml の実行を確認 ─────────────────────────
-echo -e "${CYAN}→ publish.yml の実行状況を確認${NC}"
+# gh run list はブランチ指定のみだと「main の最新 run」を返す。GitHub Actions が
+# 今回の push をまだインデックスしていないタイミングだと、直前の（無関係な）
+# publish run を掴んで「成功」と誤判定しかねない（review 指摘 issue #269）。
+# 今回 push した commit SHA (`--commit`) で run が現れるまでポーリングしてから
+# watch することで、確実に今回の push に紐づく run を待つ。
+echo -e "${CYAN}→ publish.yml の実行状況を確認（commit: ${PUSHED_SHA:0:7}）${NC}"
 if command -v gh >/dev/null 2>&1; then
-  sleep 5
-  RUN_ID="$(gh run list --workflow=publish.yml --branch=main --limit=1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)"
+  RUN_ID=""
+  for i in $(seq 1 20); do
+    RUN_ID="$(gh run list --workflow=publish.yml --commit "$PUSHED_SHA" --limit=1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)"
+    [ -n "$RUN_ID" ] && break
+    sleep 5
+  done
   if [ -n "$RUN_ID" ]; then
     echo -e "${CYAN}  run: $RUN_ID (gh run watch $RUN_ID --exit-status)${NC}"
     gh run watch "$RUN_ID" --exit-status || {
@@ -124,7 +137,7 @@ if command -v gh >/dev/null 2>&1; then
       exit 1
     }
   else
-    echo -e "${YELLOW}⚠️  publish.yml の run が見つかりませんでした。GitHub Actions を手動確認してください${NC}"
+    echo -e "${YELLOW}⚠️  commit ${PUSHED_SHA:0:7} に紐づく publish.yml の run が見つかりませんでした。GitHub Actions を手動確認してください${NC}"
   fi
 else
   echo -e "${YELLOW}⚠️  gh コマンドがありません。GitHub Actions の publish.yml を手動確認してください${NC}"
