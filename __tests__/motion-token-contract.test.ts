@@ -31,7 +31,10 @@ describe("motion トークン contract", () => {
   })
 
   it("easing の値が既存実装と一致する", () => {
-    expect(token("Motion-Easing-Standard")).toBe("cubic-bezier(0, 0, 0.2, 1)")
+    // Standard = CSS の `ease-out` キーワード / Snappy = Tailwind の `ease-out` クラス。
+    // 別曲線なので統合しない（統合すると片方の体感が変わる）。
+    expect(token("Motion-Easing-Standard")).toBe("cubic-bezier(0, 0, 0.58, 1)")
+    expect(token("Motion-Easing-Snappy")).toBe("cubic-bezier(0, 0, 0.2, 1)")
     expect(token("Motion-Easing-Emphasized")).toBe("cubic-bezier(0.32, 0.72, 0, 1)")
     expect(token("Motion-Easing-Decelerate")).toBe("cubic-bezier(0.16, 1, 0.3, 1)")
     expect(token("Motion-Easing-Bounce")).toBe("cubic-bezier(0.34, 1.56, 0.64, 1)")
@@ -48,6 +51,20 @@ describe("motion トークン contract", () => {
     }
     // 0 ではなく 0.01ms —— transitionend / animationend を待つ実装を止めないため
     expect(reduced).not.toMatch(/--Motion-Duration-[A-Za-z-]+:\s*0(ms)?;/)
+  })
+
+  it("素の ease-out / cubic-bezier がコンポーネントに残っていない", async () => {
+    // 「2 種類の ease-out」を取り違えると体感が静かに変わるため、
+    // 曲線は必ずトークン経由で指定する。
+    const { globSync } = await import("node:fs")
+    const files = globSync("src/{components,lib}/**/*.{ts,tsx}").filter(
+      (f) => !f.includes(".stories.")
+    )
+    const offenders = files.filter((f) => {
+      const src = readFileSync(f, "utf8")
+      return /(?<!--Motion-Easing-)\bease-out\b/.test(src) || /cubic-bezier\(/.test(src)
+    })
+    expect(offenders).toEqual([])
   })
 
   it("preset.css が motion.css を読み込んでいる", () => {

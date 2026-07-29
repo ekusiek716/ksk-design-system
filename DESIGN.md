@@ -65,6 +65,8 @@ layering:                                          # z-index スケール（src/
   nav: 40
   overlay: 50
   modal: 60
+  alertOverlay: 900
+  alert: 910
   popover: 1000
   toast: 1100
   tooltip: 1200
@@ -196,12 +198,17 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 
 | easing | 値 | 用途 |
 |---|---|---|
-| `--Motion-Easing-Standard` | `cubic-bezier(0,0,0.2,1)` | ease-out 相当。ほぼ全ての UI 変化の既定 |
+| `--Motion-Easing-Standard` | `cubic-bezier(0,0,0.58,1)` | CSS の `ease-out` キーワードと同一曲線。UI 変化の既定 |
+| `--Motion-Easing-Snappy` | `cubic-bezier(0,0,0.2,1)` | Tailwind の `ease-out` クラスと同一曲線。Standard より速く抜ける |
 | `--Motion-Easing-Emphasized` | `cubic-bezier(0.32,0.72,0,1)` | iOS 風スプリング。Sheet / Dialog の展開・ドラッグ |
 | `--Motion-Easing-Decelerate` | `cubic-bezier(0.16,1,0.3,1)` | 強い減速。celebration の紙吹雪 |
 | `--Motion-Easing-Bounce` | `cubic-bezier(0.34,1.56,0.64,1)` | 行き過ぎて戻る。Button 押下など触感を出す箇所限定 |
 
 - 控えめが基本。バウンドや派手な動きはしない。
+- **`ease-out` は 2 種類あることに注意**。CSS キーワードの `ease-out` は `cubic-bezier(0,0,0.58,1)`、
+  Tailwind の `ease-out` クラスは `cubic-bezier(0,0,0.2,1)` にリマップされている。
+  トークン化ではどちらにも寄せず Standard / Snappy として両方を名前付きで保持し、
+  各箇所を元の曲線に 1:1 で対応させた（体感を変えないため）。新規実装では原則 Standard を使う。
 - `prefers-reduced-motion: reduce` では duration トークン側が 0.01ms に落ちるため、
   トークンを参照していれば個別対応は不要。逆に `duration-200` のような直書きは
   この一括制御から漏れる。
@@ -222,6 +229,8 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
 | `--Z-Nav` | 40 | アプリシェルの固定ヘッダ・ボトムタブ・FAB・同意バナー |
 | `--Z-Overlay` | 50 | Dialog / Sheet の scrim（暗幕） |
 | `--Z-Modal` | 60 | Dialog / Sheet 本体。必ず自分の scrim より上 |
+| `--Z-Alert-Overlay` | 900 | AlertDialog / ConfirmDialog の scrim |
+| `--Z-Alert` | 910 | AlertDialog / ConfirmDialog 本体 |
 | `--Z-Popover` | 1000 | Select / Popover / DropdownMenu / HoverCard / CoachMark |
 | `--Z-Toast` | 1100 | 通知・Celebration。Modal 表示中でも読める |
 | `--Z-Tooltip` | 1200 | 補助情報。他の何かの上に出るのが役目 |
@@ -233,7 +242,11 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
 - **Toast > Modal / Popover** — 保存完了やエラーは、モーダルを開いたままでも読めなければ意味がない。
 - **Tooltip > Toast** — Tooltip は「何かの上に補足を出す」のが役目なので実質最上位。
 - **SkipLink が最上位** — フォーカスした瞬間に必ず見えないと、キーボード利用者の逃げ道が消える。
-- **Modal(60) と Popover(1000) の間が大きく空いている**のは、多段 Sheet が
+- **AlertDialog / ConfirmDialog は Modal より上（900/910）** — これらは Dialog や Sheet の
+  *中から* 開かれる割り込み確認。Modal と同じ段に置くと自分の scrim が親コンテンツの下に潜り、
+  親が暗転しないまま確認だけが浮く（どの操作を確認しているのか分からない状態になる）。
+  逆に Alert から Dialog / Sheet を開くフローは想定しない（Alert は終端の確認）。
+- **Modal(60) と Alert-Overlay(900) の間が大きく空いている**のは、多段 Sheet が
   `Modal + 段数*20` で積み上がるための予約領域（issue #158）。
 
 `z-10` / `z-20` のような小さい素の値は「コンポーネント内部の重なり」用途で、

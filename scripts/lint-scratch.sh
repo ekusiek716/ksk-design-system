@@ -254,14 +254,38 @@ for FILE in $FILES; do
     WARNINGS=$((WARNINGS + 1))
   fi
 
-  # W13. モーション値の直書き（duration-200 / 300ms / cubic-bezier）
+  # W13. モーション値の直書き
   # → src/styles/motion.css の --Motion-* トークンを使う。
   #   トークン参照していないと prefers-reduced-motion の一括制御からも漏れる。
-  #   演出専用の尺（celebration 等）は "Motion" を含む例外コメントを近傍に書く運用。
-  MATCHES=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(" "$FILE" 2>/dev/null \
-    | grep -Ev "var\(--Motion-|$COMMENT_LINE" || true)
+  #
+  #   検出対象:
+  #     - Tailwind クラス: duration-200 / delay-150
+  #     - 生の曲線: cubic-bezier(...) / CSS キーワードの ease-out
+  #       （Tailwind の ease-out クラスは cubic-bezier(0,0,0.2,1)、CSS キーワードは
+  #         (0,0,0.58,1) と別物なので、どちらもトークン経由にしないと取り違える）
+  #     - インライン style の生 ms: style={{ transition: "height 200ms ..." }} や
+  #       `transform ${x}ms ...` のようなテンプレート文字列
+  #
+  #   演出専用の尺（celebration の 360/600/1400ms 等）は行内か直前行に
+  #   `ksk-motion-exception` を書いて除外する。
+  MOTION_TARGET=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(|${CLASS_START}ease-out${CLASS_END}|[0-9]+ms" "$FILE" 2>/dev/null || true)
+  # 例外コメントが直前行にあるものを除外する（行内の指定は grep -v で落ちる）
+  MATCHES=""
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    LN=$(echo "$line" | cut -d: -f1)
+    PREV=$(sed -n "$((LN > 1 ? LN - 1 : 1))p" "$FILE" 2>/dev/null)
+    echo "$PREV" | grep -q 'ksk-motion-exception' && continue
+    MATCHES="${MATCHES}${line}\n"
+  # 注意: 「var(--Motion-* を含む行は一律スキップ」にしないこと。
+  # `animate-[pop_360ms_var(--Motion-Easing-Bounce)_both]` のようにトークン参照と
+  # 生 ms が同居する行を素通ししてしまう。除外は ksk-motion-exception の明示だけに絞る。
+  done < <(printf "%s\n" "$MOTION_TARGET" \
+    | grep -Ev "ksk-motion-exception|$COMMENT_LINE" \
+    | grep -Ev "^[0-9]+:[[:space:]]*\*" || true)
+  MATCHES=$(printf "%b" "$MATCHES" | sed '/^[[:space:]]*$/d')
   if [ -n "$MATCHES" ]; then
-    echo -e "${YELLOW}⚠️  $FILE: モーション値の直書き → duration-[var(--Motion-Duration-*)] / ease-[var(--Motion-Easing-*)] を使う${NC}"
+    echo -e "${YELLOW}⚠️  $FILE: モーション値の直書き → duration-[var(--Motion-Duration-*)] / ease-[var(--Motion-Easing-*)] を使う（演出専用の尺は ksk-motion-exception コメントで除外）${NC}"
     echo "$MATCHES" | head -3
     WARNINGS=$((WARNINGS + 1))
   fi

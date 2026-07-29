@@ -2,7 +2,7 @@
   "meta": {
     "name": "KSK Design System — Rules Contracts",
     "version": "1.1.0",
-    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン46件・AIアンチパターン10件。"
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン48件・AIアンチパターン10件。"
   },
   "prohibited": [
     {
@@ -199,7 +199,7 @@
       "category": "layout",
       "pattern": "z-\\[9999\\]|z-\\[999\\]",
       "message": "過剰な z-index 禁止",
-      "fix": "z-50 を使用"
+      "fix": "z-[var(--Z-*)] の重なり層トークンを使用（P048 参照）"
     },
     {
       "id": "P023",
@@ -426,11 +426,11 @@
       "id": "P047",
       "severity": "warning",
       "category": "token",
-      "pattern": "\\b(duration|delay)-\\d+\\b|cubic-bezier\\(",
-      "excludes": ["var(--Motion-", ".stories.", "src/styles/motion.css"],
-      "message": "モーション値（ms / cubic-bezier）の直書き禁止",
-      "fix": "duration-[var(--Motion-Duration-{Fast,Base,Slow,Slower})] / ease-[var(--Motion-Easing-{Standard,Emphasized,Decelerate,Bounce})] を使用",
-      "note": "prefers-reduced-motion の一括制御はトークン参照している箇所にしか効かない。celebration の 360/600/1400ms のような演出専用の尺は理由コメント付きで直書きしてよい"
+      "pattern": "\\b(duration|delay)-\\d+\\b|cubic-bezier\\(|\\bease-out\\b|\\d+ms",
+      "excludes": ["ksk-motion-exception", ".stories.", "src/styles/motion.css"],
+      "message": "モーション値（ms / cubic-bezier / 素の ease-out）の直書き禁止",
+      "fix": "duration-[var(--Motion-Duration-{Fast,Base,Slow,Slower})] / ease-[var(--Motion-Easing-{Standard,Snappy,Emphasized,Decelerate,Bounce})] を使用",
+      "note": "Tailwind クラスだけでなくインライン style の生 ms（style={{ transition: \"height 200ms ease-out\" }} 等）も対象。prefers-reduced-motion の一括制御はトークン参照している箇所にしか効かない。celebration の 360/600/1400ms のような演出専用の尺は行内か直前行の ksk-motion-exception コメントで除外する。トークン参照を含む行を一律スキップしないこと（animate-[pop_360ms_var(--Motion-Easing-Bounce)_both] のような混在行を見逃す）"
     },
     {
       "id": "P048",
@@ -594,7 +594,8 @@
         { "token": "var(--Motion-Duration-Slower)",       "value": "500ms", "use": "進捗の追従" },
         { "token": "var(--Motion-Duration-Sheet-Enter)",  "value": "320ms", "use": "Sheet の表示・スナップ" },
         { "token": "var(--Motion-Duration-Sheet-Settle)", "value": "280ms", "use": "Sheet のドラッグ解放後の吸着・閉じ" },
-        { "token": "var(--Motion-Easing-Standard)",   "value": "cubic-bezier(0, 0, 0.2, 1)",       "use": "既定（ease-out 相当）" },
+        { "token": "var(--Motion-Easing-Standard)",   "value": "cubic-bezier(0, 0, 0.58, 1)",      "use": "既定。CSS の ease-out キーワードと同一曲線" },
+        { "token": "var(--Motion-Easing-Snappy)",     "value": "cubic-bezier(0, 0, 0.2, 1)",       "use": "Tailwind の ease-out クラスと同一曲線。Standard より速く抜ける" },
         { "token": "var(--Motion-Easing-Emphasized)", "value": "cubic-bezier(0.32, 0.72, 0, 1)",   "use": "Sheet / Dialog（iOS 風スプリング）" },
         { "token": "var(--Motion-Easing-Decelerate)", "value": "cubic-bezier(0.16, 1, 0.3, 1)",    "use": "強い減速（celebration）" },
         { "token": "var(--Motion-Easing-Bounce)",     "value": "cubic-bezier(0.34, 1.56, 0.64, 1)","use": "行き過ぎて戻る（Button 押下）" }
@@ -603,19 +604,21 @@
     },
     "zIndex": {
       "rule": "Portal に載る要素の重なりは --Z-* トークンで表す。z-50 一律だと Portal のマウント順（＝開いた順）で勝敗が決まる。z-10 / z-20 のコンポーネント内部の重なりは対象外。",
-      "order": "Sticky < Nav < Overlay < Modal < Popover < Toast < Tooltip < SkipLink",
+      "order": "Sticky < Nav < Overlay < Modal < Alert-Overlay < Alert < Popover < Toast < Tooltip < SkipLink",
       "allowed": [
         { "token": "var(--Z-Raised)",   "value": "10",   "use": "カード内の重なり（画像上のバッジ等）" },
         { "token": "var(--Z-Sticky)",   "value": "30",   "use": "スクロール追従のフィルタバー / サブナビ" },
         { "token": "var(--Z-Nav)",      "value": "40",   "use": "固定ヘッダ・ボトムタブ・FAB・同意バナー" },
         { "token": "var(--Z-Overlay)",  "value": "50",   "use": "Dialog / Sheet の scrim" },
         { "token": "var(--Z-Modal)",    "value": "60",   "use": "Dialog / Sheet 本体" },
+        { "token": "var(--Z-Alert-Overlay)", "value": "900", "use": "AlertDialog / ConfirmDialog の scrim" },
+        { "token": "var(--Z-Alert)",    "value": "910",  "use": "AlertDialog / ConfirmDialog 本体。Dialog / Sheet の中から開く割り込み確認なので Modal より上" },
         { "token": "var(--Z-Popover)",  "value": "1000", "use": "Select / Popover / DropdownMenu / HoverCard / CoachMark" },
         { "token": "var(--Z-Toast)",    "value": "1100", "use": "通知・Celebration" },
         { "token": "var(--Z-Tooltip)",  "value": "1200", "use": "Tooltip" },
         { "token": "var(--Z-SkipLink)", "value": "1300", "use": "SkipLink（何にも隠されてはいけない）" }
       ],
-      "note": "Modal(60) と Popover(1000) の間は多段 Sheet（Modal + 段数*20、issue #158）の予約領域"
+      "note": "Modal(60) と Alert-Overlay(900) の間は多段 Sheet（Modal + 段数*20、issue #158）の予約領域"
     }
   },
   "writing": {

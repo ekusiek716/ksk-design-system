@@ -109,7 +109,8 @@ function CelebrationDialog({
               <span
                 className={
                   !reducedMotion && emojiAnimation === "bounce"
-                    ? "relative flex items-center justify-center typo-display-lg leading-none animate-[celebration-emoji-pop_600ms_ease-out_200ms_both]"
+                    // ksk-motion-exception: 祝祭演出専用の尺
+                    ? "relative flex items-center justify-center typo-display-lg leading-none animate-[celebration-emoji-pop_600ms_var(--Motion-Easing-Standard)_200ms_both]"
                     : "relative flex items-center justify-center typo-display-lg leading-none"
                 }
               >

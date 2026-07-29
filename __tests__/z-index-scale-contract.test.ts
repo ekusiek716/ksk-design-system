@@ -26,7 +26,7 @@ function sheetConst(name: string): number {
 
 describe("z-index スケール contract", () => {
   it("下から上への順序が守られている", () => {
-    const order = ["Base", "Raised", "Sticky", "Nav", "Overlay", "Modal", "Popover", "Toast", "Tooltip", "SkipLink"]
+    const order = ["Base", "Raised", "Sticky", "Nav", "Overlay", "Modal", "Alert-Overlay", "Alert", "Popover", "Toast", "Tooltip", "SkipLink"]
     const values = order.map(z)
     expect(values).toEqual([...values].sort((a, b) => a - b))
     // 同値の段があると Portal のマウント順で勝敗が決まってしまう
@@ -37,8 +37,15 @@ describe("z-index スケール contract", () => {
     expect(z("Modal")).toBeGreaterThan(z("Overlay"))
   })
 
+  it("AlertDialog は自分の scrim ごと Modal より上（親 Dialog / Sheet を暗転させる）", () => {
+    // Alert と同じ段だと自分の scrim が親コンテンツの下に潜り、
+    // 親が暗転しないまま確認だけが浮く。
+    expect(z("Alert-Overlay")).toBeGreaterThan(z("Modal"))
+    expect(z("Alert")).toBeGreaterThan(z("Alert-Overlay"))
+  })
+
   it("Popover / Toast は Modal より上（モーダル内から開く・モーダル上で読ませる）", () => {
-    expect(z("Popover")).toBeGreaterThan(z("Modal"))
+    expect(z("Popover")).toBeGreaterThan(z("Alert"))
     expect(z("Toast")).toBeGreaterThan(z("Modal"))
     expect(z("Toast")).toBeGreaterThan(z("Popover"))
   })
@@ -55,10 +62,19 @@ describe("z-index スケール contract", () => {
     expect(sheetConst("SHEET_CONTENT_BASE_Z")).toBe(z("Modal"))
   })
 
-  it("多段 Sheet を現実的な段数まで積んでも Popover 層を突き抜けない", () => {
+  it("多段 Sheet を現実的な段数まで積んでも Alert 層を突き抜けない", () => {
     const step = sheetConst("SHEET_STACK_STEP")
     const MAX_REALISTIC_NESTING = 8
     const topmost = z("Modal") + MAX_REALISTIC_NESTING * step
-    expect(topmost).toBeLessThan(z("Popover"))
+    expect(topmost).toBeLessThan(z("Alert-Overlay"))
+  })
+
+  it("AlertDialog / Dialog / Sheet が正しいトークンを参照している", () => {
+    const alert = readFileSync("src/components/ui/alert-dialog.tsx", "utf8")
+    expect(alert).toContain("z-[var(--Z-Alert-Overlay)]")
+    expect(alert).toContain("z-[var(--Z-Alert)]")
+    const dialog = readFileSync("src/components/ui/dialog.tsx", "utf8")
+    expect(dialog).toContain("z-[var(--Z-Overlay)]")
+    expect(dialog).toContain("z-[var(--Z-Modal)]")
   })
 })

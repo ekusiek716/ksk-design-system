@@ -58,7 +58,7 @@ function CollapsibleChipField<K extends string>({
 
   // 折りたたみ/展開で chip の折り返し行数が変わると行エリアの高さが一瞬でガクッと
   // 変わって見える。展開状態が切り替わった直後に前後の実測高さを取り、
-  // height を 200ms ease-out（DS の入場モーション基準）でアニメーションさせる。
+  // height を --Motion-Duration-Base + --Motion-Easing-Standard（DS の入場モーション基準）でアニメーションさせる。
   // prefers-reduced-motion 時はアニメーションしない。
   const rowRef = React.useRef<HTMLDivElement>(null)
   const prevHeightRef = React.useRef<number | null>(null)

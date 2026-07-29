@@ -139,18 +139,26 @@
      Nav     40  … アプリシェルの固定ヘッダ・ボトムタブ・FAB
      Overlay 50  … Dialog / Sheet の scrim（背面を覆う暗幕）
      Modal   60  … Dialog / Sheet 本体。必ず自分の scrim より上
+     Alert-Overlay 900 … AlertDialog / ConfirmDialog の scrim
+     Alert   910 … AlertDialog / ConfirmDialog 本体
      Popover 1000 … Select / Popover / DropdownMenu / HoverCard / CoachMark。
                     Modal の中から開くので Modal より上
      Toast   1100 … 通知。Modal 表示中でも読めるよう Modal / Popover より上
      Tooltip 1200 … 補助情報。他の何かの上に出るのが役目なので実質最上位
      SkipLink 1300 … キーボード操作の最初の逃げ道。何にも隠されてはいけない
 
-   Modal(60) と Popover(1000) の間が大きく空いているのは意図的。
+   Modal(60) と Alert-Overlay(900) の間が大きく空いているのは意図的。
    Sheet はネストすると `Overlay + level*20` / `Modal + level*20` で段を積む
    （src/components/ui/sheet.tsx の SHEET_*_BASE_Z / SHEET_STACK_STEP、issue #158）。
-   ここを 40 段ぶん空けておくことで、多段 Sheet が Popover 以上の層を
+   ここを 40 段ぶん空けておくことで、多段 Sheet が Alert 以上の層を
    突き抜けない。この 3 定数は下の :root と対で維持すること
    （__tests__/z-index-scale-contract.test.ts が一致を検査する）。
+
+   AlertDialog / ConfirmDialog が Modal(60) ではなく専用の 900/910 に居るのは、
+   これらが「Dialog や Sheet の中から開かれる割り込み確認」だから。Modal と同じ段だと
+   自分の scrim が親コンテンツの下に潜り、親が暗転しないまま確認だけが浮く
+   （＝どの操作を確認しているのか分からない状態になる）。逆に Alert から
+   Dialog / Sheet を開くフローは想定していない（Alert は終端の確認）。
 
    z-10 / z-20 など小さい素の値は「コンポーネント内部の重なり」用途で、
    このグローバルスケールの対象外（カード内のバッジ、カルーセル矢印など）。
@@ -163,6 +171,8 @@
   --Z-Nav:      40;
   --Z-Overlay:  50;
   --Z-Modal:    60;
+  --Z-Alert-Overlay: 900;
+  --Z-Alert:    910;
   --Z-Popover:  1000;
   --Z-Toast:    1100;
   --Z-Tooltip:  1200;

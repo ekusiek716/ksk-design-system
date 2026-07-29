@@ -249,8 +249,8 @@ function Celebration({
                   width: piece.size,
                   height: Math.max(4, piece.size - 2),
                   backgroundColor: piece.color,
-                  // duration / delay は粒ごとにばらつかせる演出値のためトークン化しない（意図的な例外）。
-                  // カーブだけは Motion トークン（Decelerate）を参照する。
+                  // ksk-motion-exception: duration / delay は粒ごとにばらつかせる演出値のため
+                  // トークン化しない。カーブだけは Motion トークン（Decelerate）を参照する。
                   animation: `celebration-confetti-burst ${piece.duration}ms var(--Motion-Easing-Decelerate) ${piece.delay}ms forwards`,
                   "--celebration-burst-x": `${piece.finalX}px`,
                   "--celebration-burst-y": `${piece.finalY}px`,
@@ -284,7 +284,7 @@ function Celebration({
           style={{ pointerEvents: "auto" }}
           className={cn(
             "relative z-[1] mx-4 flex max-w-sm flex-col items-center rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] px-6 py-5 text-center shadow-[var(--shadow-dialog)]",
-            // 360ms / 600ms は祝祭演出専用の尺（Motion スケールから意図的に外す）。カーブはトークン参照。
+            // ksk-motion-exception: 360ms は祝祭演出専用の尺（Motion スケールから意図的に外す）。カーブはトークン参照。
             !reducedMotion && "animate-[celebration-pop_360ms_var(--Motion-Easing-Bounce)_both]",
             canTapDismiss && "cursor-pointer",
           )}
@@ -295,7 +295,8 @@ function Celebration({
                 "typo-display-lg mb-3 leading-none",
                 !reducedMotion &&
                   emojiAnimation === "bounce" &&
-                  "animate-[celebration-emoji-pop_600ms_ease-out_200ms_both]",
+                  // ksk-motion-exception: 600ms / 200ms delay は祝祭演出専用の尺
+                  "animate-[celebration-emoji-pop_600ms_var(--Motion-Easing-Standard)_200ms_both]",
               )}
               aria-hidden="true"
             >

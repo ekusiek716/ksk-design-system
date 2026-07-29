@@ -30,6 +30,8 @@ UI を書く前に必ず確認すること:
 - [ ] `border` は色を併記したか（`border-[var(--Border-Low-Emphasis)]` 等）。Tailwind v4 では無色 border は currentColor になり、消費側の濃色テキストで黒ずむ（preset.css の base layer が保険だが明示が原則）
 - [ ] **文脈非依存**か（テキスト要素に `text-[var(--Text-*)]`、サーフェス/オーバーレイに `bg-[var(--Surface-*)]` を明示）。親の継承や currentColor に頼ると消費側の色文脈で崩れる。Storybook ツールバーの **Hostile ctx** を loud にして、文字/アイコンがマゼンタ化・背景が透けないか確認する
 - [ ] typography は `typo-*` クラスか（`font-bold` 等の直書きは禁止）
+- [ ] アニメーションは `duration-[var(--Motion-Duration-*)]` / `ease-[var(--Motion-Easing-*)]` か（`duration-200` や生 `cubic-bezier` の直書きは禁止。トークン参照でないと `prefers-reduced-motion` の一括制御から漏れる）
+- [ ] 重なり順は `z-[var(--Z-*)]` か（`z-50` 一律だと Portal のマウント順で勝敗が決まる。`z-10` / `z-20` のコンポーネント内部の重なりは対象外。順序は DESIGN.md の Layering 節）
 - [ ] アイコンは `iconsax-reactjs` か（`lucide-react` / `heroicons` は使わない）
 - [ ] 生タグ（`<button>` / `<input>` / `<a href>`）でなく DS コンポーネントを使ったか
 - [ ] CSS でベンダープレフィックス併記する場合、**`-webkit-` を先・標準形を後**に書いたか（消費側の minifier が同一プロパティとして dedupe し後勝ちのみ残すため。逆順だと Firefox で静かに無効化。`node scripts/check-prefix-order.mjs` が CI で検出）
