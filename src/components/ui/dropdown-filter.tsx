@@ -93,7 +93,7 @@ function DropdownFilter<K extends string = string>({
         {displayLabel}
         <svg
           aria-hidden
-          className={cn("w-3 h-3 transition-transform duration-200", open && "rotate-180")}
+          className={cn("w-3 h-3 shrink-0 transition-transform duration-200", open && "rotate-180")}
           viewBox="0 0 12 12"
           fill="none"
         >

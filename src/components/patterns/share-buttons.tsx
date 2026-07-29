@@ -236,7 +236,7 @@ function ShareButtons({
               type="button"
               onClick={() => void handleClick(p)}
               aria-label={meta.label}
-              className="flex min-h-11 flex-col items-center gap-2 rounded-lg cursor-pointer focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+              className="flex min-h-11 shrink-0 flex-col items-center gap-2 rounded-lg cursor-pointer focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
             >
               <span className={cn(
                 "size-12 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 active:scale-95",

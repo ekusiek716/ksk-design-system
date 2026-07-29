@@ -111,7 +111,7 @@ function carouselControls({
               onClick={() => onGoTo(index)}
               aria-label={`スライド ${index + 1}`}
               aria-current={index === active ? "true" : undefined}
-              className="flex size-11 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
             >
               <span
                 aria-hidden="true"

@@ -153,7 +153,7 @@ function ImageGallery({
               onClick={() => setActive(i)}
               aria-label={imageLabel(i)}
               className={cn(
-                "rounded-full transition-all",
+                "shrink-0 rounded-full transition-all",
                 i === active
                   ? "w-4 h-1.5 bg-[var(--Brand-Primary)]"
                   : "w-1.5 h-1.5 bg-[var(--Border-Medium-Emphasis)] hover:bg-[var(--Text-Low-Emphasis)]"

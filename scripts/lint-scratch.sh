@@ -22,7 +22,8 @@ WARNINGS=0
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CLASS_START='(^|[^[:alnum:]_-])'
 CLASS_END='($|[^[:alnum:]_-])'
-COMMENT_LINE='(^|:)[[:space:]]*//|/\*'
+# JSDoc 継続行（`* ...`）も除外する（doc コメント中の `<header>` 等を実タグと誤検知しない）
+COMMENT_LINE='(^|:)[[:space:]]*//|/\*|(^|:)[[:space:]]*\*'
 
 # 色・typo 系の検出を severity 付きで報告する。
 # DS 本体(ui/patterns/icons)は段階導入として WARNING（CI は落とさない）、
