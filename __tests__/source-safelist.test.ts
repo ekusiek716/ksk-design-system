@@ -11,7 +11,8 @@
  * （src の実装との一致は `node scripts/generate-source-safelist.mjs --check` が担当）
  */
 import { describe, it, expect } from "vitest"
-import { readFileSync } from "node:fs"
+import { execFileSync } from "node:child_process"
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
 const ROOT = process.cwd()
@@ -52,6 +53,27 @@ describe("@source safelist の同梱（issue #258）", () => {
   it("`@source inline()` を壊す文字（波括弧・二重引用符）を含む候補が無い", () => {
     expect(entries.filter((e) => /[{}"]/.test(e))).toEqual([])
   })
+
+  it("生成物が存在しない状態からブートストラップできる（自己参照で throw しない）", () => {
+    // preset.css は生成物を @import しているため、CSS ローダーが素直に読むと
+    // 初回生成時（ファイル未作成）に readFileSync が throw して生成に到達できない。
+    // 生成対象ファイル自身を読み込み対象から外していることの回帰テスト。
+    const absolute = join(ROOT, SAFELIST_PATH)
+    const backup = readFileSync(absolute, "utf8")
+    try {
+      rmSync(absolute)
+      expect(existsSync(absolute)).toBe(false)
+      execFileSync(process.execPath, ["scripts/generate-source-safelist.mjs"], {
+        cwd: ROOT,
+        stdio: "pipe",
+      })
+      expect(existsSync(absolute)).toBe(true)
+      // 前回の生成結果が入力に混ざらない = 生成は src の実装だけに依存する
+      expect(readFileSync(absolute, "utf8")).toBe(backup)
+    } finally {
+      writeFileSync(absolute, backup)
+    }
+  }, 60_000)
 
   it("生成物は手書き禁止であることを明示している", () => {
     expect(safelist).toContain("自動生成")

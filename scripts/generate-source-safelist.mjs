@@ -56,7 +56,15 @@ async function loadDesignSystem() {
   return __unstable__loadDesignSystem(css, {
     base: join(ROOT, "src"),
     loadStylesheet: async (id, base) => {
-      const resolve = (p) => ({ path: p, base: dirname(p), content: readFileSync(p, "utf8") })
+      const resolve = (p) => ({
+        path: p,
+        base: dirname(p),
+        // 生成対象ファイル自身は読み込まない。preset.css がこれを @import しているため、
+        // 素直に読むと (1) 初回生成時（ファイル未作成）に throw して --check の欠損診断にも
+        // writeFileSync にも到達できない (2) 前回の生成結果が入力に混ざる、の2つの問題が出る。
+        // 常に空として扱えばブートストラップ可能で、生成は src の実装だけに依存する。
+        content: p === OUT_PATH ? "" : readFileSync(p, "utf8"),
+      })
       if (id === "tailwindcss") return resolve(join(ROOT, "node_modules/tailwindcss/index.css"))
       if (id === "tw-animate-css") return resolve(join(ROOT, "node_modules/tw-animate-css/dist/tw-animate.css"))
       if (id.startsWith("tailwindcss/")) return resolve(join(ROOT, "node_modules", id))
