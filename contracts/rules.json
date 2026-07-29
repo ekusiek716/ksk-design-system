@@ -426,7 +426,7 @@
       "id": "P047",
       "severity": "warning",
       "category": "token",
-      "pattern": "\\b(duration|delay)-\\d+\\b|cubic-bezier\\(|\\bease-out\\b|\\d+ms|[\\s(](\\.\\d+|\\d+(\\.\\d+)?)s[\\s;,\")']",
+      "pattern": "\\b(duration|delay)-\\d+\\b|cubic-bezier\\(|\\bease-out\\b|\\d+ms|[\\s(\\\"':]\\s*(\\.\\d+|\\d+(\\.\\d+)?)s[\\s;,\\\")']",
       "excludes": ["ksk-motion-exception", ".stories.", "src/styles/motion.css"],
       "message": "モーション値（ms / 秒 / cubic-bezier / 素の ease-out）の直書き禁止",
       "fix": "duration-[var(--Motion-Duration-{Fast,Base,Slow,Slower})] / ease-[var(--Motion-Easing-{Standard,Snappy,Emphasized,Decelerate,Bounce})] を使用",

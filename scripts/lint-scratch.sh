@@ -271,7 +271,10 @@ for FILE in $FILES; do
   #
   #   演出専用の尺（celebration の 360/600/1400ms 等）は行内か直前行に
   #   `ksk-motion-exception` を書いて除外する。
-  MOTION_SECONDS='[[:space:](](\.[0-9]+|[0-9]+(\.[0-9]+)?)s([[:space:];,")'"'"']|$)'
+  # 先頭は「空白 / ( / 引用符 / : 」を許す（transitionDuration: "0.4s" のような
+  # 宣言のみの値も拾うため）。数字や '.' の直後は許さないので、SVG path の
+  # smooth-curve コマンド（a.8.8s...）は引き続き除外される。
+  MOTION_SECONDS='[[:space:]("'"'"':][[:space:]]*(\.[0-9]+|[0-9]+(\.[0-9]+)?)s([[:space:];,")'"'"']|$)'
   MOTION_TARGET=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(|${CLASS_START}ease-out${CLASS_END}|[0-9]+ms|${MOTION_SECONDS}" "$FILE" 2>/dev/null || true)
   # 例外コメントが直前行にあるものを除外する（行内の指定は grep -v で落ちる）
   MATCHES=""

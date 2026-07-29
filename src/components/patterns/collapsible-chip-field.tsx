@@ -89,16 +89,19 @@ function CollapsibleChipField<K extends string>({
   }, [expanded, visible.length])
 
   // 「label は 1 行目の chip と縦センター」。展開して多数の chip が折り返しても
-  // label は最上行 chip と垂直中央が合うように、leading-[36px]（chip 行の
-  // min-h=36px）で label の line-height を行高に合わせ、親 flex は items-start にする。
+  // label は最上行 chip と垂直中央が合うように、leading-[44px]（chip 行の
+  // min-h=44px）で label の line-height を行高に合わせ、親 flex は items-start にする。
+  // 44px は Chip(md) の margin box の高さ。Chip は見た目 32px のピルの上下に
+  // my-1.5 を持ち 44px のタッチターゲットを予約するので、行高もそれに揃える
+  // （36px のままだと label が chip より 4px 上にずれる）。
   const leading = label ? (
     <span
-      className="typo-label-sm text-[var(--Text-Medium-Emphasis)] flex-shrink-0 w-20 whitespace-nowrap leading-[36px]"
+      className="typo-label-sm text-[var(--Text-Medium-Emphasis)] flex-shrink-0 w-20 whitespace-nowrap leading-[44px]"
     >
       {label}
     </span>
   ) : (
-    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center" style={{ height: 36 }}>
+    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center" style={{ height: 44 }}>
       {icon}
     </div>
   )
@@ -106,7 +109,7 @@ function CollapsibleChipField<K extends string>({
   return (
     <div data-slot="collapsible-chip-field" className="flex items-start gap-4 py-3">
       {leading}
-      <div ref={rowRef} className="flex gap-2 flex-1 flex-wrap min-h-[36px] items-center">
+      <div ref={rowRef} className="flex gap-2 flex-1 flex-wrap min-h-11 items-center">
         {visible.map((key) => (
           <Chip
             key={key}

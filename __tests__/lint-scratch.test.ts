@@ -51,6 +51,15 @@ describe("lint-scratch.sh", () => {
     expect(outputOf(result)).toContain("モーション値の直書き")
   })
 
+  it("W13: 宣言のみの秒指定（transitionDuration の値だけ）も検出する", () => {
+    const result = runLintScratch(`
+      export function Example() {
+        return <div style={{ transitionDuration: "0.4s" }} />
+      }
+    `)
+    expect(outputOf(result)).toContain("モーション値の直書き")
+  })
+
   it("[回帰] W13: SVG path の smooth-curve コマンド（a.8.8s...）を秒数と誤検知しない", () => {
     const result = runLintScratch(`
       export function Example() {
