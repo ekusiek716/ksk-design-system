@@ -35,7 +35,9 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
  * 6. ヘッダーと本文はいずれも `Container size="fluid"`（gutter 24px）を通すため
  *    左の面が揃う。片側だけ水平 padding を上書きすると基準線が二重になる。
  * 7. サイドナビ項目は縦 padding 12px = 項目高 44px（`h-11`）を確保する。
- *    20px アイコン + 24px でちょうど WCAG 2.5.5 のターゲットサイズ最小値に乗る。
+ *    20px アイコン + 24px でちょうど 44px に乗る。44×44 は本 DS のポリシー
+ *    （WCAG 2.5.5 Target Size (Enhanced) = AAA 相当）で、AA の最小要件は
+ *    2.5.8 Target Size (Minimum) の 24×24 であることに注意。
  */
 function AdminShell({
   className,
@@ -62,7 +64,24 @@ function AdminShell({
           sidebarWidth
         )}
       >
-        <ScrollArea className="flex-1">{sidebar}</ScrollArea>
+        {/*
+          Radix ScrollArea の viewport 直下ラッパーは inline style の display:table +
+          auto height。そのままだと sidebar 側の h-full が解決できず（% height は
+          親の height:auto に対して解決不能）、ナビが短いときにフッターが下端へ
+          落ちない。ラッパーを min-h-full の縦 flex に矯正し、slot 直下が
+          `flex grow flex-col` + `mt-auto` でフッターを下端に置けるようにする。
+          display は inline style を上書きする必要があるため `!` を付ける。
+        */}
+        <ScrollArea
+          className={cn(
+            "flex-1",
+            "[&_[data-radix-scroll-area-viewport]>div]:flex!",
+            "[&_[data-radix-scroll-area-viewport]>div]:min-h-full",
+            "[&_[data-radix-scroll-area-viewport]>div]:flex-col"
+          )}
+        >
+          {sidebar}
+        </ScrollArea>
       </aside>
       <div className="flex flex-1 flex-col min-w-0">
         {header && (
