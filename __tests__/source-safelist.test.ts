@@ -14,6 +14,13 @@ import { describe, it, expect } from "vitest"
 import { execFileSync } from "node:child_process"
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
+import {
+  formatInlineSource,
+  UNSUPPORTED_BRACE,
+  UNSUPPORTED_BOTH_QUOTES,
+  UNSUPPORTED_HELP,
+  // @ts-expect-error — .mjs の純関数モジュール（型定義なし）
+} from "../scripts/lib/source-safelist-format.mjs"
 
 const ROOT = process.cwd()
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8")
@@ -50,8 +57,66 @@ describe("@source safelist の同梱（issue #258）", () => {
     expect(entries).toContain("pointer-events-auto")
   })
 
-  it("`@source inline()` を壊す文字（波括弧・二重引用符）を含む候補が無い", () => {
-    expect(entries.filter((e) => /[{}"]/.test(e))).toEqual([])
+  it("`@source inline()` を壊す文字（波括弧）を含む候補が無い", () => {
+    expect(entries.filter((e) => /[{}]/.test(e))).toEqual([])
+  })
+
+  it("動的クラス検出の走査対象が Scanner の走査対象と一致している（src/lib・index.ts も見る）", () => {
+    const script = read("scripts/generate-source-safelist.mjs")
+    // SOURCE_SPECS 1 箇所から Scanner sources と検査対象ファイルの両方を導出している
+    expect(script).toContain("SCANNER_SOURCES")
+    expect(script).toContain("SOURCE_SPECS.flatMap")
+    expect(script).toContain("const files = sourceFiles()")
+    expect(script).not.toContain('collectFiles(join(ROOT, "src/components")')
+  })
+})
+
+/**
+ * `@source inline()` に表現できない候補を黙って捨てると、safelist から漏れて
+ * #258 と同型の欠落（消費側でだけ CSS が生成されない）が静かに再発する。
+ * 現在の src には該当クラスが無いため、fixture で分類ロジックを直接検証する。
+ */
+describe("safelist に載せられない候補の扱い（fixture）", () => {
+  it("通常のユーティリティは二重引用符で囲む", () => {
+    expect(formatInlineSource("pointer-events-auto")).toEqual({
+      ok: true,
+      line: '@source inline("pointer-events-auto");',
+    })
+  })
+
+  it("二重引用符を含む候補は単一引用符で囲んで載せる（黙殺しない）", () => {
+    // Tailwind の CSS パーサは単一引用符の文字列も受け付ける（実測確認済み）
+    expect(formatInlineSource(`content-["x"]`)).toEqual({
+      ok: true,
+      line: `@source inline('content-["x"]');`,
+    })
+  })
+
+  it("単一引用符を含む候補は二重引用符で囲んで載せる", () => {
+    expect(formatInlineSource(`content-['x']`)).toEqual({
+      ok: true,
+      line: `@source inline("content-['x']");`,
+    })
+  })
+
+  it("波括弧を含む候補は表現不能として報告する（ブレース展開で解釈されるため）", () => {
+    const result = formatInlineSource(`content-['{']`)
+    expect(result.ok).toBe(false)
+    expect(result).toMatchObject({ reason: UNSUPPORTED_BRACE })
+    expect(UNSUPPORTED_HELP[UNSUPPORTED_BRACE]).toBeTruthy()
+  })
+
+  it("両方の引用符を含む候補は表現不能として報告する", () => {
+    const result = formatInlineSource(`content-['a"b']`)
+    expect(result.ok).toBe(false)
+    expect(result).toMatchObject({ reason: UNSUPPORTED_BOTH_QUOTES })
+    expect(UNSUPPORTED_HELP[UNSUPPORTED_BOTH_QUOTES]).toBeTruthy()
+  })
+
+  it("表現不能な候補があると生成スクリプトは exit 1 になる（黙って除外しない）", () => {
+    const script = read("scripts/generate-source-safelist.mjs")
+    expect(script).toContain("unsupported.length > 0")
+    expect(script).toContain("UNSUPPORTED_HELP[reason]")
   })
 
   it("生成物が存在しない状態からブートストラップできる（自己参照で throw しない）", () => {

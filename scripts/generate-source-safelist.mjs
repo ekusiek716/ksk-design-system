@@ -17,10 +17,12 @@
  *   生成して preset.css から読み込む。消費側は preset を @import するだけなので
  *   **消費側の設定変更なしに** DS 内部クラスの生成が保証される。
  *
- * 追加のガード:
- *   `bg-${x}` のような動的クラス名合成は静的抽出では原理的に拾えないため、
- *   safelist に載らない。DS の実ユーティリティ接頭辞を使った動的合成を検出して
- *   エラーにする（--check / 生成の両方で検査）。
+ * 追加のガード（いずれも「黙って safelist から漏れる」ことを防ぐ）:
+ *   - `bg-${x}` のような動的クラス名合成は静的抽出では原理的に拾えないため、
+ *     safelist に載らない。DS の実ユーティリティ接頭辞を使った動的合成を検出してエラーにする。
+ *   - `@source inline()` の構文上どうしても表現できないユーティリティ（波括弧を含む等）は
+ *     除外せず生成失敗にし、該当クラスと対処法を表示する。
+ *   どちらも --check / 生成の両方で検査する。
  *
  * Usage:
  *   node scripts/generate-source-safelist.mjs          # 生成
@@ -31,6 +33,7 @@ import { dirname, join, relative } from "node:path"
 import { fileURLToPath } from "node:url"
 import { Scanner } from "@tailwindcss/oxide"
 import { __unstable__loadDesignSystem } from "tailwindcss"
+import { formatInlineSource, UNSUPPORTED_HELP } from "./lib/source-safelist-format.mjs"
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
 const OUT_PATH = join(ROOT, "src/styles/source-safelist.css")
@@ -39,17 +42,41 @@ const CHECK = process.argv.includes("--check")
 /**
  * 走査対象 = dist に同梱される Web 側ソース。
  * .stories.tsx / src/native（RN。Tailwind を使わない）/ prototypes は除外する。
+ *
+ * クラス抽出（Scanner）と動的クラス名合成の検査は**同じ対象**でなければならない。
+ * 片方だけを見ていると、配布されるのに検査されないファイルが生まれる（issue #258 のレビュー指摘）。
+ * そのため Scanner 用の sources と、検査用のファイル収集を 1 つの定義から導出する。
  */
-const SOURCES = [
-  { base: join(ROOT, "src/components"), pattern: "**/*.{ts,tsx}", negated: false },
-  { base: join(ROOT, "src/components"), pattern: "**/*.stories.tsx", negated: true },
-  { base: join(ROOT, "src/lib"), pattern: "**/*.ts", negated: false },
-  { base: join(ROOT, "src"), pattern: "class-names.ts", negated: false },
-  { base: join(ROOT, "src"), pattern: "index.ts", negated: false },
+const SOURCE_SPECS = [
+  {
+    dir: "src/components",
+    recursive: true,
+    scannerPatterns: [
+      { pattern: "**/*.{ts,tsx}", negated: false },
+      { pattern: "**/*.stories.tsx", negated: true },
+    ],
+    matches: (name) => /\.tsx?$/.test(name) && !name.endsWith(".stories.tsx"),
+  },
+  {
+    dir: "src/lib",
+    recursive: true,
+    scannerPatterns: [{ pattern: "**/*.ts", negated: false }],
+    matches: (name) => name.endsWith(".ts"),
+  },
+  {
+    dir: "src",
+    recursive: false,
+    scannerPatterns: [
+      { pattern: "class-names.ts", negated: false },
+      { pattern: "index.ts", negated: false },
+    ],
+    matches: (name) => name === "class-names.ts" || name === "index.ts",
+  },
 ]
 
-/** `@source inline()` に安全に書けない候補（波括弧はブレース展開、二重引用符は区切り） */
-const UNSAFE = /[{}"]/
+const SCANNER_SOURCES = SOURCE_SPECS.flatMap(({ dir, scannerPatterns }) =>
+  scannerPatterns.map(({ pattern, negated }) => ({ base: join(ROOT, dir), pattern, negated })),
+)
 
 async function loadDesignSystem() {
   const css = readFileSync(join(ROOT, "src/index.css"), "utf8")
@@ -100,18 +127,28 @@ function utilityPrefixes(utilities) {
   return prefixes
 }
 
-function collectFiles(dir, filter) {
+function collectFiles(dir, filter, recursive) {
   const out = []
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry)
-    if (statSync(full).isDirectory()) out.push(...collectFiles(full, filter))
-    else if (filter(entry)) out.push(full)
+    if (statSync(full).isDirectory()) {
+      if (recursive) out.push(...collectFiles(full, filter, recursive))
+    } else if (filter(entry)) {
+      out.push(full)
+    }
   }
   return out
 }
 
+/** 検査対象ファイル = Scanner の走査対象と同一（SOURCE_SPECS から導出） */
+function sourceFiles() {
+  return SOURCE_SPECS.flatMap(({ dir, matches, recursive }) =>
+    collectFiles(join(ROOT, dir), matches, recursive),
+  )
+}
+
 function findDynamicClassComposition(prefixes) {
-  const files = collectFiles(join(ROOT, "src/components"), (n) => /\.tsx?$/.test(n) && !n.endsWith(".stories.tsx"))
+  const files = sourceFiles()
   const violations = []
   for (const file of files) {
     const lines = readFileSync(file, "utf8").split("\n")
@@ -129,13 +166,29 @@ function findDynamicClassComposition(prefixes) {
 
 /* ─── 生成 ─────────────────────────────────────────────── */
 const designSystem = await loadDesignSystem()
-const scanned = new Scanner({ sources: SOURCES }).scan()
-const utilities = filterValid(designSystem, scanned)
+const scanned = new Scanner({ sources: SCANNER_SOURCES }).scan()
+const utilities = filterValid(designSystem, scanned).sort()
 
-const safe = utilities.filter((u) => !UNSAFE.test(u)).sort()
-const skipped = utilities.filter((u) => UNSAFE.test(u)).sort()
+// 表現不能な候補を黙って捨てない。捨てると safelist から漏れ、#258 と同型の
+// 「消費側でだけ CSS が生成されない」欠落が静かに再発する。
+const lines = []
+const unsupported = []
+for (const u of utilities) {
+  const result = formatInlineSource(u)
+  if (result.ok) lines.push(result.line)
+  else unsupported.push({ candidate: u, reason: result.reason })
+}
 
-const dynamic = findDynamicClassComposition(utilityPrefixes(safe))
+if (unsupported.length > 0) {
+  console.error(`✗ safelist に載せられないユーティリティが ${unsupported.length} 件あります（黙って除外すると消費側で CSS が生成されません）`)
+  for (const { candidate, reason } of unsupported) {
+    console.error(`  ${candidate}`)
+    console.error(`    → ${UNSUPPORTED_HELP[reason]}`)
+  }
+  process.exit(1)
+}
+
+const dynamic = findDynamicClassComposition(utilityPrefixes(utilities))
 if (dynamic.length > 0) {
   console.error("✗ 動的なクラス名合成を検出しました（静的抽出できず消費側で CSS が生成されません）")
   for (const v of dynamic) console.error(`  ${v}`)
@@ -155,15 +208,7 @@ const header = `/* =============================================================
    ============================================================= */
 `
 
-const body = safe.map((u) => `@source inline("${u}");`).join("\n")
-const note =
-  skipped.length > 0
-    ? `\n\n/* @source inline() に安全に書けないため除外（${skipped.length} 件・波括弧/二重引用符を含む）:\n${skipped
-        .map((u) => `     ${u}`)
-        .join("\n")}\n   これらは消費側の @source によるスキャンに依存する。 */\n`
-    : "\n"
-
-const output = `${header}\n${body}\n${note}`
+const output = `${header}\n${lines.join("\n")}\n`
 
 if (CHECK) {
   let existing
@@ -188,9 +233,9 @@ if (CHECK) {
     }
     process.exit(1)
   }
-  console.log(`✓ src/styles/source-safelist.css は最新です（safelist: ${safe.length} 件 / 除外: ${skipped.length} 件）`)
+  console.log(`✓ src/styles/source-safelist.css は最新です（safelist: ${lines.length} 件）`)
   process.exit(0)
 }
 
 writeFileSync(OUT_PATH, output)
-console.log(`✓ src/styles/source-safelist.css を生成しました（safelist: ${safe.length} 件 / 除外: ${skipped.length} 件）`)
+console.log(`✓ src/styles/source-safelist.css を生成しました（safelist: ${lines.length} 件）`)

@@ -135,9 +135,9 @@ src/
 ├── styles/
 │   ├── primitive.css  # Layer 1: 原色パレット
 │   ├── semantic.css   # Layer 2: 用途別トークン
-│   └── typography.css # typo-* ユーティリティ
-├── themes/            # default / orange / green / violet / blue
+│   ├── typography.css # typo-* ユーティリティ
 │   └── source-safelist.css  # @source safelist（自動生成・手で編集しない / issue #258）
+├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット
 └── index.ts           # Public API（全コンポーネント）
 ```
