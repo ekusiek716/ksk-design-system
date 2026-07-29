@@ -233,6 +233,13 @@ publish.yml が失敗・スタックした場合の実行可能な手順は次�
    ```
    `package.json` の version が npm 上の最新版より新しければ、再実行のたびに
    `npm publish` を試みる（`publish.yml` 内の version 比較ロジックが冪等性を担保）。
+   npm publish 自体は既に成功していてタグ / GitHub Release 作成だけが失敗した
+   場合でも、再実行は復旧手段として機能する: `Create git tag + GitHub Release`
+   ステップは「publish した場合のみ」ではなく「対象タグの GitHub Release が
+   まだ無ければ作る」でゲートしているため、npm 側は publish 済み（＝再実行時は
+   `publish=false`）でも Release が無ければこのステップは実行され、作成される
+   （issue #269 レビュー指摘。旧ロジックは publish=false だとこのステップごと
+   スキップされ、タグ/Release が永久に作られなかった）。
 2. 失敗の原因（OIDC 設定・npm 側障害等）を取り除いてから 1 を実行する。
 
 それでも解消しない場合は、npm 側の障害か Trusted Publishing 設定（npmjs.com の
