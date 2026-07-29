@@ -73,7 +73,7 @@ function CollapsibleChipField<K extends string>({
     el.style.height = `${prev}px`
     el.style.overflow = "hidden"
     void el.offsetHeight // reflow を挟んで transition を効かせる
-    el.style.transition = "height 200ms ease-out"
+    el.style.transition = "height var(--Motion-Duration-Base) var(--Motion-Easing-Standard)"
     el.style.height = `${next}px`
     const done = () => {
       el.style.height = ""

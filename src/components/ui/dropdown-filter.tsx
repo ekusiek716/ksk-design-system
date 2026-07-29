@@ -81,7 +81,7 @@ function DropdownFilter<K extends string = string>({
         aria-expanded={open}
         aria-haspopup="listbox"
         className={cn(
-          "h-9 rounded-full px-4 typo-label-sm flex items-center gap-1.5 transition-all duration-200",
+          "h-9 rounded-full px-4 typo-label-sm flex items-center gap-1.5 transition-all duration-[var(--Motion-Duration-Base)]",
           isActive
             ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
             : "bg-[var(--Surface-Primary)] border border-[var(--Border-Low-Emphasis)] text-[var(--Text-Medium-Emphasis)]"
@@ -93,7 +93,7 @@ function DropdownFilter<K extends string = string>({
         {displayLabel}
         <svg
           aria-hidden
-          className={cn("w-3 h-3 transition-transform duration-200", open && "rotate-180")}
+          className={cn("w-3 h-3 transition-transform duration-[var(--Motion-Duration-Base)]", open && "rotate-180")}
           viewBox="0 0 12 12"
           fill="none"
         >
@@ -106,12 +106,12 @@ function DropdownFilter<K extends string = string>({
           <button
             type="button"
             aria-label="閉じる"
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-[var(--Z-Overlay)]"
             onClick={() => setOpen(false)}
           />
           <ul
             role="listbox"
-            className="fixed z-50 bg-[var(--Surface-Primary)] border border-[var(--Border-Low-Emphasis)] rounded-2xl shadow-[var(--shadow-lg)] py-1 max-h-[60vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-150"
+            className="fixed z-[var(--Z-Popover)] bg-[var(--Surface-Primary)] border border-[var(--Border-Low-Emphasis)] rounded-2xl shadow-[var(--shadow-lg)] py-1 max-h-[60vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-[var(--Motion-Duration-Fast)]"
             style={{ top: pos.top, left: Math.min(pos.left, (typeof window !== "undefined" ? window.innerWidth : 375) - 200), width: 200 }}
           >
             {!hideAll && (

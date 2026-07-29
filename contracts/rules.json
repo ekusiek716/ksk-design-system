@@ -421,6 +421,26 @@
       "message": "default Card 直下の子に縦 margin / space-y を足すと gap-6 と二重がけになる",
       "fix": "Card 直下の縦間隔は Card の gap-6 に任せる。余白を自前管理するメディア構成は variant=\"media\" を使用",
       "note": "公開 CLI とリポジトリ内 lint は共通の TypeScript AST 検査で、全 direct child・条件分岐・Fragment・入れ子 Card を検査する。別 CSS ファイルや実行時に組み立てる className の margin は検出できない"
+    },
+    {
+      "id": "P047",
+      "severity": "warning",
+      "category": "token",
+      "pattern": "\\b(duration|delay)-\\d+\\b|cubic-bezier\\(",
+      "excludes": ["var(--Motion-", ".stories.", "src/styles/motion.css"],
+      "message": "モーション値（ms / cubic-bezier）の直書き禁止",
+      "fix": "duration-[var(--Motion-Duration-{Fast,Base,Slow,Slower})] / ease-[var(--Motion-Easing-{Standard,Emphasized,Decelerate,Bounce})] を使用",
+      "note": "prefers-reduced-motion の一括制御はトークン参照している箇所にしか効かない。celebration の 360/600/1400ms のような演出専用の尺は理由コメント付きで直書きしてよい"
+    },
+    {
+      "id": "P048",
+      "severity": "warning",
+      "category": "token",
+      "pattern": "\\bz-(30|40|50|\\[999\\]|\\[9999\\])\\b",
+      "excludes": ["var(--Z-", ".stories."],
+      "message": "グローバルな重なり層に素の z-index を使わない",
+      "fix": "z-[var(--Z-{Sticky,Nav,Overlay,Modal,Popover,Toast,Tooltip,SkipLink})] を使用",
+      "note": "z-50 一律だと Portal のマウント順（＝開いた順）で勝敗が決まる。z-10 / z-20 のコンポーネント内部の重なりは対象外"
     }
   ],
   "aiPatterns": {
@@ -564,6 +584,38 @@
         { "token": "var(--shadow-dialog)",  "use": "Dialog・Modal" },
         { "token": "var(--shadow-tooltip)", "use": "Tooltip" }
       ]
+    },
+    "motion": {
+      "rule": "duration / easing は src/styles/motion.css の semantic トークンのみ。生の ms・cubic-bezier は禁止（prefers-reduced-motion の一括制御から漏れる）。",
+      "allowed": [
+        { "token": "var(--Motion-Duration-Fast)",         "value": "150ms", "use": "マイクロ（fade / scale / 色変化）" },
+        { "token": "var(--Motion-Duration-Base)",         "value": "200ms", "use": "標準。入場・退場・レイアウト変化" },
+        { "token": "var(--Motion-Duration-Slow)",         "value": "300ms", "use": "大きい要素・押下バウンス・画像" },
+        { "token": "var(--Motion-Duration-Slower)",       "value": "500ms", "use": "進捗の追従" },
+        { "token": "var(--Motion-Duration-Sheet-Enter)",  "value": "320ms", "use": "Sheet の表示・スナップ" },
+        { "token": "var(--Motion-Duration-Sheet-Settle)", "value": "280ms", "use": "Sheet のドラッグ解放後の吸着・閉じ" },
+        { "token": "var(--Motion-Easing-Standard)",   "value": "cubic-bezier(0, 0, 0.2, 1)",       "use": "既定（ease-out 相当）" },
+        { "token": "var(--Motion-Easing-Emphasized)", "value": "cubic-bezier(0.32, 0.72, 0, 1)",   "use": "Sheet / Dialog（iOS 風スプリング）" },
+        { "token": "var(--Motion-Easing-Decelerate)", "value": "cubic-bezier(0.16, 1, 0.3, 1)",    "use": "強い減速（celebration）" },
+        { "token": "var(--Motion-Easing-Bounce)",     "value": "cubic-bezier(0.34, 1.56, 0.64, 1)","use": "行き過ぎて戻る（Button 押下）" }
+      ],
+      "exceptions": "celebration の 360ms / 600ms / 1400ms のような演出専用の尺は、意図的にスケール外として直書きし理由をコメントで残す"
+    },
+    "zIndex": {
+      "rule": "Portal に載る要素の重なりは --Z-* トークンで表す。z-50 一律だと Portal のマウント順（＝開いた順）で勝敗が決まる。z-10 / z-20 のコンポーネント内部の重なりは対象外。",
+      "order": "Sticky < Nav < Overlay < Modal < Popover < Toast < Tooltip < SkipLink",
+      "allowed": [
+        { "token": "var(--Z-Raised)",   "value": "10",   "use": "カード内の重なり（画像上のバッジ等）" },
+        { "token": "var(--Z-Sticky)",   "value": "30",   "use": "スクロール追従のフィルタバー / サブナビ" },
+        { "token": "var(--Z-Nav)",      "value": "40",   "use": "固定ヘッダ・ボトムタブ・FAB・同意バナー" },
+        { "token": "var(--Z-Overlay)",  "value": "50",   "use": "Dialog / Sheet の scrim" },
+        { "token": "var(--Z-Modal)",    "value": "60",   "use": "Dialog / Sheet 本体" },
+        { "token": "var(--Z-Popover)",  "value": "1000", "use": "Select / Popover / DropdownMenu / HoverCard / CoachMark" },
+        { "token": "var(--Z-Toast)",    "value": "1100", "use": "通知・Celebration" },
+        { "token": "var(--Z-Tooltip)",  "value": "1200", "use": "Tooltip" },
+        { "token": "var(--Z-SkipLink)", "value": "1300", "use": "SkipLink（何にも隠されてはいけない）" }
+      ],
+      "note": "Modal(60) と Popover(1000) の間は多段 Sheet（Modal + 段数*20、issue #158）の予約領域"
     }
   },
   "writing": {

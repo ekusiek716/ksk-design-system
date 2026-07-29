@@ -20,7 +20,6 @@
   --Surface-Inverse:               var(--Primitive-Gray-900);
   --Surface-Accent-Primary:        var(--Primitive-Brand-500);
   --Surface-Accent-Primary-Light:  var(--Primitive-Brand-50);
-  --Surface-Accent-Primary-Ultra-Light: var(--Primitive-Brand-50);
   --Surface-Caution:               var(--Primitive-Red-50);
   --Surface-Success:               var(--Primitive-Green-50);
   --Surface-Warning:               var(--Primitive-Amber-50);
@@ -32,16 +31,12 @@
      既存 Surface-Caution は据え置きで後方互換維持。 */
   --Surface-Caution-Subtle:        rgba(239, 68, 68, 0.15);   /* Red-500 @ 15% */
   --Surface-Success-Subtle:        rgba(34, 197, 94, 0.15);   /* Green-500 @ 15% */
-  --Surface-Warning-Subtle:        rgba(249, 115, 22, 0.15);  /* Orange-500 @ 15% */
   --Surface-Info-Subtle:           rgba(59, 130, 246, 0.15);  /* Blue-500 @ 15% */
   --Surface-Accent-Primary-Subtle: color-mix(in srgb, var(--Primitive-Brand-500) 15%, transparent);
 
   /* Strong 階層: fill 全開（Primitive-500 そのまま）。
      主にバッジ・ピル・通知ドットなど「強調 fill」用途。 */
   --Surface-Caution-Strong:        var(--Primitive-Red-500);
-  --Surface-Success-Strong:        var(--Primitive-Green-500);
-  --Surface-Warning-Strong:        var(--Primitive-Orange-500);
-  --Surface-Info-Strong:           var(--Primitive-Blue-500);
 
   /* 動画視聴コンテキスト専用 — テーマに依存しない常時黒オーバーレイ。
      trailer-feed / video-player のような「常に暗背景の動画 UX」で、
@@ -79,7 +74,6 @@
   --Object-Success:         var(--Primitive-Green-500);
   --Object-Warning:         var(--Primitive-Orange-500);
   --Object-Info:            var(--Primitive-Blue-500);
-  --Object-Favorite:        var(--Primitive-Red-500);
   /* レーティング/評価用 — Warning と意味的に分離。
      ★ の塗りや 4.5/5.0 などのレーティング表示で使用。 */
   --Object-Rating:          var(--Primitive-Amber-500);
@@ -88,21 +82,11 @@
   --Border-High-Emphasis:   var(--Primitive-Gray-700);
   --Border-Medium-Emphasis: var(--Primitive-Gray-300);
   --Border-Low-Emphasis:    var(--Primitive-Gray-200);
-  --Border-Disable:         var(--Primitive-Gray-200);
   --Border-Accent-Primary:  var(--Primitive-Brand-500);
   --Border-Caution:         var(--Primitive-Red-500);
   --Border-Success:         var(--Primitive-Green-500);
   --Border-Warning:         var(--Primitive-Orange-500);
   --Border-Info:            var(--Primitive-Blue-500);
-  /* Border の Subtle 階層 — `/30` 的な薄い枠線が必要なときに。
-     Tailwind の `/N` opacity modifier は CSS variable に対しては
-     <alpha-value> プレースホルダ前提なので、明示的な Subtle トークンを
-     提供することで「border-[var(--Border-Accent-Primary)]/30」のような
-     不安定な書き方を避けられる。 */
-  --Border-Accent-Primary-Subtle: color-mix(in srgb, var(--Primitive-Brand-500) 30%, transparent);
-  --Border-Caution-Subtle:  rgba(239, 68, 68, 0.30);
-  --Border-Success-Subtle:  rgba(34, 197, 94, 0.30);
-  --Border-Info-Subtle:     rgba(59, 130, 246, 0.30);
 
   /* ─── Brand ─── */
   --Brand-Primary:           var(--Primitive-Brand-600);
@@ -118,7 +102,6 @@
   --Brand-Google-Border:     #DADCE0; /* Google ボタンの罫線（Google 推奨グレー） */
   --Brand-Apple:             #000000;
   --Brand-Amazon:            #232F3E;
-  --Brand-Amazon-Accent:     #FF9900;
 
   /* ─── Interactive States ─── */
   --Hover-Primary-Button:    var(--Primitive-Brand-700);
@@ -157,7 +140,6 @@
   --Surface-Inverse:               var(--Primitive-White);
   --Surface-Accent-Primary:        var(--Primitive-Brand-500);
   --Surface-Accent-Primary-Light:  var(--Primitive-Brand-900);
-  --Surface-Accent-Primary-Ultra-Light: var(--Primitive-Brand-900);
   --Surface-Caution:               #2d1414; /* Red-900(#7F1D1D)より彩度を落とした暗赤色 */
   --Surface-Success:               var(--Primitive-Green-900);
   --Surface-Warning:               var(--Primitive-Amber-900);
@@ -167,14 +149,10 @@
      暗背景上でも視認できる中強度 fill。 */
   --Surface-Caution-Subtle:        rgba(248, 113, 113, 0.20);  /* Red-400 @ 20% */
   --Surface-Success-Subtle:        rgba(74, 222, 128, 0.20);   /* Green-400 @ 20% */
-  --Surface-Warning-Subtle:        rgba(251, 146, 60, 0.20);   /* Orange-400 @ 20% */
   --Surface-Info-Subtle:           rgba(96, 165, 250, 0.20);   /* Blue-400 @ 20% */
   --Surface-Accent-Primary-Subtle: color-mix(in srgb, var(--Primitive-Brand-400) 20%, transparent);
 
   --Surface-Caution-Strong:        var(--Primitive-Red-500);
-  --Surface-Success-Strong:        var(--Primitive-Green-500);
-  --Surface-Warning-Strong:        var(--Primitive-Orange-500);
-  --Surface-Info-Strong:           var(--Primitive-Blue-500);
 
   /* VideoOverlay はテーマ非依存（常に黒）— Light モードと同じ値。 */
   --Surface-VideoOverlay-Light:    rgba(0, 0, 0, 0.40);
@@ -207,22 +185,16 @@
   --Object-Success:         var(--Primitive-Green-400);
   --Object-Warning:         var(--Primitive-Orange-400);
   --Object-Info:            var(--Primitive-Blue-400);
-  --Object-Favorite:        var(--Primitive-Red-400);
   --Object-Rating:          var(--Primitive-Amber-400);
 
   --Border-High-Emphasis:   var(--Primitive-White-Alpha-500);
   --Border-Medium-Emphasis: var(--Primitive-White-Alpha-300);
   --Border-Low-Emphasis:    var(--Primitive-White-Alpha-200);
-  --Border-Disable:         var(--Primitive-White-Alpha-100);
   --Border-Accent-Primary:  var(--Primitive-Brand-400);
   --Border-Caution:         var(--Primitive-Red-400);
   --Border-Success:         var(--Primitive-Green-400);
   --Border-Warning:         var(--Primitive-Orange-400);
   --Border-Info:            var(--Primitive-Blue-400);
-  --Border-Accent-Primary-Subtle: color-mix(in srgb, var(--Primitive-Brand-400) 40%, transparent);
-  --Border-Caution-Subtle:  rgba(248, 113, 113, 0.40);
-  --Border-Success-Subtle:  rgba(74, 222, 128, 0.40);
-  --Border-Info-Subtle:     rgba(96, 165, 250, 0.40);
 
   --Brand-Primary:           var(--Primitive-Brand-400);
   --Brand-Action:            var(--Primitive-Brand-300);

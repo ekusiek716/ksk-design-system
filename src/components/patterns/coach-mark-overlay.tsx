@@ -168,7 +168,7 @@ export function CoachMarkOverlay({
       {/* spotlight が無いとき (対象要素未発見) のフォールバック overlay */}
       {!hasSpotlight && (
         <div
-          className="fixed inset-0 bg-black/55 z-50 pointer-events-none"
+          className="fixed inset-0 bg-black/55 z-[var(--Z-Overlay)] pointer-events-none"
           aria-hidden="true"
         />
       )}

@@ -191,7 +191,8 @@ src/
 ├── styles/
 │   ├── primitive.css  # Layer 1: 原色パレット
 │   ├── semantic.css   # Layer 2: 用途別トークン
-│   └── typography.css # typo-* ユーティリティ
+│   ├── typography.css # typo-* ユーティリティ
+│   └── motion.css     # duration / easing トークン（--Motion-*）
 ├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット
 └── index.ts           # Public API（全コンポーネント）
@@ -224,6 +225,16 @@ Layer 3 — Bridge     : --primary / --secondary 等        （shadcn/ui 互換�
 `var(--Categorical-{1..16})`（ドット/アイコン）/ `-Subtle`（背景ティント）/ `-Bold`（文字・ラベル）。
 Brand に連動しない固定値で、カレンダー予定ドット・カテゴリ chip・グラフ系列など「N 番目のカテゴリ」を色で区別する用途専用。
 文字には必ず `-Bold` を使う（base は明色相だと白背景でコントラスト不足）。詳細・WCAG/CVD 注記は `src/styles/categorical.css`。
+
+**モーション（`src/styles/motion.css`）:**
+`duration-[var(--Motion-Duration-{Fast,Base,Slow,Slower})]` /
+`ease-[var(--Motion-Easing-{Standard,Emphasized,Decelerate,Bounce})]`。
+生の `duration-200` / `cubic-bezier(...)` は禁止（`prefers-reduced-motion` の一括制御から漏れる）。
+
+**重なり順（`src/preset.css`）:**
+`z-[var(--Z-{Sticky,Nav,Overlay,Modal,Popover,Toast,Tooltip,SkipLink})]`。
+`z-50` 一律だと Portal のマウント順で勝敗が決まる。`z-10` / `z-20` のコンポーネント内部の重なりは対象外。
+いずれも詳細は DESIGN.md の Motion / Layering 節。
 
 ---
 

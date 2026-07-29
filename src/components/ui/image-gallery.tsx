@@ -84,7 +84,7 @@ function ImageGallery({
             key={active}
             src={current.src}
             alt={current.alt ?? imageLabel(active)}
-            className="w-full h-full object-cover transition-opacity duration-200"
+            className="w-full h-full object-cover transition-opacity duration-[var(--Motion-Duration-Base)]"
           />
         )}
 

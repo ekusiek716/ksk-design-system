@@ -38,7 +38,7 @@ function MobileAppHeader({
       data-slot="mobile-app-header"
       className={cn(
         "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)]",
-        sticky && "sticky top-0 z-40",
+        sticky && "sticky top-0 z-[var(--Z-Nav)]",
         bordered && "border-b border-[var(--Border-Low-Emphasis)]",
         className
       )}

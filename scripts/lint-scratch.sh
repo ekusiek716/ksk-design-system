@@ -245,11 +245,23 @@ for FILE in $FILES; do
     WARNINGS=$((WARNINGS + 1))
   fi
 
-  # W8. 過剰な z-index
-  MATCHES=$(grep -nE "${CLASS_START}(z-\[9999\]|z-\[999\])${CLASS_END}" "$FILE" 2>/dev/null \
+  # W8. 素の z-index（グローバル重なり層は --Z-* トークンで表す）
+  MATCHES=$(grep -nE "${CLASS_START}(z-\[9999\]|z-\[999\]|z-30|z-40|z-50)${CLASS_END}" "$FILE" 2>/dev/null \
     | grep -Ev "$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
-    echo -e "${YELLOW}⚠️  $FILE: 過剰なz-index → z-50を使う${NC}"
+    echo -e "${YELLOW}⚠️  $FILE: 素の z-index → z-[var(--Z-Sticky|Nav|Overlay|Modal|Popover|Toast|Tooltip|SkipLink)] を使う（DESIGN.md の Layering 節）${NC}"
+    echo "$MATCHES" | head -3
+    WARNINGS=$((WARNINGS + 1))
+  fi
+
+  # W13. モーション値の直書き（duration-200 / 300ms / cubic-bezier）
+  # → src/styles/motion.css の --Motion-* トークンを使う。
+  #   トークン参照していないと prefers-reduced-motion の一括制御からも漏れる。
+  #   演出専用の尺（celebration 等）は "Motion" を含む例外コメントを近傍に書く運用。
+  MATCHES=$(grep -nE "${CLASS_START}(duration|delay)-[0-9]+${CLASS_END}|cubic-bezier\(" "$FILE" 2>/dev/null \
+    | grep -Ev "var\(--Motion-|$COMMENT_LINE" || true)
+  if [ -n "$MATCHES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE: モーション値の直書き → duration-[var(--Motion-Duration-*)] / ease-[var(--Motion-Easing-*)] を使う${NC}"
     echo "$MATCHES" | head -3
     WARNINGS=$((WARNINGS + 1))
   fi

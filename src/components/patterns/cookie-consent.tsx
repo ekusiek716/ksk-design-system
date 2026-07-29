@@ -139,7 +139,7 @@ export function CookieConsent({
       aria-modal="false"
       aria-label={resolved.ariaLabel}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]",
+        "fixed inset-x-0 bottom-0 z-[var(--Z-Nav)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]",
         className,
       )}
     >

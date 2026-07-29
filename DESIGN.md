@@ -52,10 +52,23 @@ elevation:                                          # 影色は neutral（Gray-9
   md: "0 0 8px rgba(20, 20, 20, 0.08)"
   lg: "0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12)"
   dialog: "0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2)"
-motion:
-  microIn: "150ms ease-out"                       # fade-in / scale-in
-  enter: "200ms ease-out"                          # fade-in-up / slide-in
-  sheetSpring: "280ms cubic-bezier(0.32,0.72,0,1)" # Sheet / Dialog のドラッグ・展開
+motion:                                            # 実体は var(--Motion-*)（src/styles/motion.css）
+  microIn: "150ms ease-out"                        # --Motion-Duration-Fast  / fade-in / scale-in
+  enter: "200ms ease-out"                          # --Motion-Duration-Base  / fade-in-up / slide-in
+  slow: "300ms ease-out"                           # --Motion-Duration-Slow  / 面積の大きい変化・押下バウンス
+  slower: "500ms ease-out"                         # --Motion-Duration-Slower / 進捗の追従
+  sheetSpring: "280ms cubic-bezier(0.32,0.72,0,1)" # --Motion-Duration-Sheet-Settle + --Motion-Easing-Emphasized
+  sheetEnter: "320ms cubic-bezier(0.32,0.72,0,1)"  # --Motion-Duration-Sheet-Enter + --Motion-Easing-Emphasized
+layering:                                          # z-index スケール（src/preset.css の --Z-*）
+  raised: 10
+  sticky: 30
+  nav: 40
+  overlay: 50
+  modal: 60
+  popover: 1000
+  toast: 1100
+  tooltip: 1200
+  skipLink: 1300
 components:
   button:
     background: "{colors.primary}"
@@ -169,10 +182,62 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 
 ## Motion
 
-- マイクロ(出現/スケール): **150ms ease-out**。
-- 入場(fade-up/slide): **200ms ease-out**。
-- Sheet/Dialog の展開・ドラッグ: **cubic-bezier(0.32, 0.72, 0, 1)（iOS 風スプリング）**。
-- 控えめが基本。バウンドや派手な動きはしない。`prefers-reduced-motion` を尊重。
+生の ms 値 / cubic-bezier は直書きせず、`src/styles/motion.css` の semantic トークンを参照する
+（`duration-[var(--Motion-Duration-Base)]` / `ease-[var(--Motion-Easing-Emphasized)]`）。
+
+| duration | 値 | 用途 |
+|---|---|---|
+| `--Motion-Duration-Fast` | 150ms | マイクロ（fade / scale / 色変化） |
+| `--Motion-Duration-Base` | 200ms | 標準。入場・退場・レイアウト変化の既定 |
+| `--Motion-Duration-Slow` | 300ms | 面積の大きい要素・押下バウンス・画像トランジション |
+| `--Motion-Duration-Slower` | 500ms | 進捗のような「じわっと追従」表示専用 |
+| `--Motion-Duration-Sheet-Enter` | 320ms | Sheet の表示・スナップ移動（Emphasized と対） |
+| `--Motion-Duration-Sheet-Settle` | 280ms | Sheet のドラッグ解放後の吸着・閉じ |
+
+| easing | 値 | 用途 |
+|---|---|---|
+| `--Motion-Easing-Standard` | `cubic-bezier(0,0,0.2,1)` | ease-out 相当。ほぼ全ての UI 変化の既定 |
+| `--Motion-Easing-Emphasized` | `cubic-bezier(0.32,0.72,0,1)` | iOS 風スプリング。Sheet / Dialog の展開・ドラッグ |
+| `--Motion-Easing-Decelerate` | `cubic-bezier(0.16,1,0.3,1)` | 強い減速。celebration の紙吹雪 |
+| `--Motion-Easing-Bounce` | `cubic-bezier(0.34,1.56,0.64,1)` | 行き過ぎて戻る。Button 押下など触感を出す箇所限定 |
+
+- 控えめが基本。バウンドや派手な動きはしない。
+- `prefers-reduced-motion: reduce` では duration トークン側が 0.01ms に落ちるため、
+  トークンを参照していれば個別対応は不要。逆に `duration-200` のような直書きは
+  この一括制御から漏れる。
+- celebration の 360ms / 600ms / 1400ms など祝祭演出専用の尺は、意図的にスケールから
+  外して直書きし、その旨をコード内にコメントで残している。
+
+## Layering（z-index）
+
+Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の親子関係を失うため、
+`z-50` を一律に振ると勝敗が Portal のマウント順＝開いた順に依存する。意味ごとに段を分け、
+`z-[var(--Z-Modal)]` の形で参照する（定義は `src/preset.css`）。
+
+| token | 値 | 用途 |
+|---|---|---|
+| `--Z-Base` | 0 | 通常フロー |
+| `--Z-Raised` | 10 | カード内の重なり（画像上のバッジ、カルーセル矢印） |
+| `--Z-Sticky` | 30 | スクロール追従のフィルタバー / サブナビ / 背後の装飾帯 |
+| `--Z-Nav` | 40 | アプリシェルの固定ヘッダ・ボトムタブ・FAB・同意バナー |
+| `--Z-Overlay` | 50 | Dialog / Sheet の scrim（暗幕） |
+| `--Z-Modal` | 60 | Dialog / Sheet 本体。必ず自分の scrim より上 |
+| `--Z-Popover` | 1000 | Select / Popover / DropdownMenu / HoverCard / CoachMark |
+| `--Z-Toast` | 1100 | 通知・Celebration。Modal 表示中でも読める |
+| `--Z-Tooltip` | 1200 | 補助情報。他の何かの上に出るのが役目 |
+| `--Z-SkipLink` | 1300 | キーボード操作の最初の逃げ道。何にも隠されてはいけない |
+
+重なり順の意図:
+
+- **Popover > Modal** — Select や DropdownMenu は Modal の中から開くため。
+- **Toast > Modal / Popover** — 保存完了やエラーは、モーダルを開いたままでも読めなければ意味がない。
+- **Tooltip > Toast** — Tooltip は「何かの上に補足を出す」のが役目なので実質最上位。
+- **SkipLink が最上位** — フォーカスした瞬間に必ず見えないと、キーボード利用者の逃げ道が消える。
+- **Modal(60) と Popover(1000) の間が大きく空いている**のは、多段 Sheet が
+  `Modal + 段数*20` で積み上がるための予約領域（issue #158）。
+
+`z-10` / `z-20` のような小さい素の値は「コンポーネント内部の重なり」用途で、
+このグローバルスケールの対象外。
 
 ## Components
 

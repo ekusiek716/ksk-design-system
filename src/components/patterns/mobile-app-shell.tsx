@@ -68,7 +68,7 @@ function MobileAppShell({
             // banner landmark はこのシェル側 <header> 1つだけに一本化する。
             <header
               data-slot="mobile-app-shell-header"
-              className="sticky top-0 z-40 shrink-0 bg-[var(--Surface-Primary)]"
+              className="sticky top-0 z-[var(--Z-Nav)] shrink-0 bg-[var(--Surface-Primary)]"
             >
               {React.isValidElement(header) && header.type === MobileAppHeader
                 ? React.cloneElement(
@@ -99,7 +99,7 @@ function MobileAppShell({
           {bottomNav && bottomNavMode === "fixed" && (
             <footer
               data-slot="mobile-app-shell-bottom-nav-fixed"
-              className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full pb-[env(safe-area-inset-bottom)] lg:hidden"
+              className="fixed inset-x-0 bottom-0 z-[var(--Z-Nav)] mx-auto w-full pb-[env(safe-area-inset-bottom)] lg:hidden"
               style={centeredPreview ? { maxWidth } : undefined}
             >
               {bottomNav}

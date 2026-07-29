@@ -13,10 +13,14 @@ const chipVariants = cva(
         accent: "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)] disabled:bg-[var(--Surface-Secondary)] disabled:text-[var(--Text-Disable)] disabled:hover:bg-[var(--Surface-Secondary)]",
         outline: "border border-[var(--Border-Medium-Emphasis)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)] disabled:text-[var(--Text-Disable)]",
       },
+      // Chip は常にインタラクティブ（button / a）なので、見た目の高さ(28/32/36px)を
+      // 変えずに当たり判定だけを 44px まで広げる。Tabs の pill と同じ
+      // 「透明な before 擬似要素」方式（本体の height を触らない＝レイアウトが動かない）。
+      // tile(48px) は既に 44px を超えているので不要。
       size: {
-        sm: "h-7 px-2.5 typo-label-xs",
-        md: "h-8 px-3 typo-label-sm",
-        lg: "h-9 px-4 typo-label-sm",
+        sm: "h-7 px-2.5 typo-label-xs before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
+        md: "h-8 px-3 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
+        lg: "h-9 px-4 typo-label-sm before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
         tile: "size-12 typo-body-md",
       },
       shape: {
@@ -143,10 +147,13 @@ function Chip({
     "border border-[var(--Text-Disable)] bg-[var(--Surface-Secondary)]! text-[var(--Text-Disable)]! cursor-not-allowed"
 
   // × は本体ラベルに寄せる（独立した w-8 の正方形セルにしない）。tile のみ従来の固定幅。
+  // × も独立したタップ対象なので、本体と同じく透明 before 擬似要素で 44px まで拡張する。
+  const removeTouchTarget =
+    "before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']"
   const removeButtonSize = {
-    sm: "h-7 pl-0.5 pr-2",
-    md: "h-8 pl-0.5 pr-2.5",
-    lg: "h-9 pl-1 pr-3",
+    sm: `h-7 pl-0.5 pr-2 ${removeTouchTarget}`,
+    md: `h-8 pl-0.5 pr-2.5 ${removeTouchTarget}`,
+    lg: `h-9 pl-1 pr-3 ${removeTouchTarget}`,
     tile: "h-12 w-8",
   }[actualSize]
 
@@ -200,7 +207,7 @@ function Chip({
             onRemove?.()
           }}
           className={cn(
-            "inline-flex shrink-0 items-center justify-center touch-manipulation [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
+            "relative inline-flex shrink-0 items-center justify-center touch-manipulation [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50",
             // 仕切り線なし・本体と同じ面色を継ぎ目なく延長。ホバー時のみ × 側を強調。
             !selected && variant === "filled" && "bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Tertiary)] hover:text-[var(--Text-High-Emphasis)]",
             !selected && variant === "accent" && "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)]",

@@ -476,7 +476,7 @@
  *   }}
  */
 .glass-interactive {
-  transition: transform 150ms ease-out;
+  transition: transform var(--Motion-Duration-Fast) var(--Motion-Easing-Standard);
 }
 .glass-interactive:active {
   transform: scale(0.97);

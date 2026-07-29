@@ -1,0 +1,67 @@
+/* =============================================================
+   KSK Design System — Motion Tokens
+
+   動きの「速さ」と「加減速カーブ」の semantic トークン。
+   色と同じく、コンポーネントは生の ms 値 / cubic-bezier を直書きせず
+   このレイヤーを参照する。
+
+   使い方（Tailwind v4）:
+     duration-[var(--Motion-Duration-Base)]
+     ease-[var(--Motion-Easing-Emphasized)]
+   Tailwind を使わない consumer は素の CSS から var() で参照できる。
+
+   段階を増やしすぎない方針:
+   - duration は 4 段（Fast / Base / Slow / Slower）。
+     Sheet だけは Emphasized カーブと不可分な専用ペアを別に持つ。
+   - easing は 4 種（Standard / Emphasized / Decelerate / Bounce）。
+   ============================================================= */
+
+:root {
+  /* ─── Duration スケール ───
+     Fast   : マイクロ（fade / scale / 色変化）。DESIGN.md motion.microIn。
+     Base   : 標準。入場・退場・レイアウト変化の既定。DESIGN.md motion.enter。
+     Slow   : 面積の大きい要素・強調したい変化（画像トランジション、押下バウンス）。
+     Slower : 進捗のような「じわっと追従させる」表示専用。 */
+  --Motion-Duration-Fast:   150ms;
+  --Motion-Duration-Base:   200ms;
+  --Motion-Duration-Slow:   300ms;
+  --Motion-Duration-Slower: 500ms;
+
+  /* ─── Sheet 専用 duration ───
+     --Motion-Easing-Emphasized（iOS 風スプリング）と対で調律された値。
+     スケールの Slow(300ms) に丸めると体感が変わるため独立トークンにしている。
+     Enter  : 表示・スナップ移動（320ms）
+     Settle : ドラッグ解放後の吸着・閉じ（280ms） */
+  --Motion-Duration-Sheet-Enter:  320ms;
+  --Motion-Duration-Sheet-Settle: 280ms;
+
+  /* ─── Easing ───
+     Standard   : ease-out 相当。ほぼ全ての UI 変化の既定。
+     Emphasized : iOS 風スプリング。Sheet / Dialog の展開・ドラッグ。
+     Decelerate : 強い減速。celebration の紙吹雪など「投げて止まる」動き。
+     Bounce     : 行き過ぎて戻る。Button 押下など触感を出したい箇所限定。 */
+  --Motion-Easing-Standard:   cubic-bezier(0, 0, 0.2, 1);
+  --Motion-Easing-Emphasized: cubic-bezier(0.32, 0.72, 0, 1);
+  --Motion-Easing-Decelerate: cubic-bezier(0.16, 1, 0.3, 1);
+  --Motion-Easing-Bounce:     cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─── prefers-reduced-motion 一括制御 ───
+   duration トークンを 0 近傍に落とすことで、トークンを参照している
+   全コンポーネントのアニメーションを一箇所で無効化する。
+   0 ではなく 0.01ms にしているのは、transitionend / animationend を
+   待つ実装（Sheet の閉じ処理など）が発火しなくなるのを避けるため。
+
+   ※ 効くのはトークンを参照している箇所だけ。`duration-200` のような
+     直書きや Radix 内蔵アニメーションは対象外なので、コンポーネント側は
+     必ずトークン参照で書くこと（scripts/lint-scratch.sh の W12 が検出）。 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --Motion-Duration-Fast:   0.01ms;
+    --Motion-Duration-Base:   0.01ms;
+    --Motion-Duration-Slow:   0.01ms;
+    --Motion-Duration-Slower: 0.01ms;
+    --Motion-Duration-Sheet-Enter:  0.01ms;
+    --Motion-Duration-Sheet-Settle: 0.01ms;
+  }
+}

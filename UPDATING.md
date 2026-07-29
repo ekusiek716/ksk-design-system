@@ -107,6 +107,57 @@ DS 内部だけで使われるクラス（`pointer-events-auto` 等）につい�
 > このため次のリリース以降、peerDependencies は `tailwindcss@^4.1.0` となる。
 > 4.0.x を使っている場合は、DS を上げる前に `npm install -D tailwindcss@^4.1` で Tailwind を先に上げること。
 
+### 削除された semantic トークン（issue #263）
+
+DS 内で 1 箇所も使われていない semantic カラートークン 12 件を削除した。
+DS のコンポーネントを使うだけなら影響はないが、**消費側が `var(--...)` で直接参照していた場合、
+その指定は無効化される**（Tailwind v4 では未定義の CSS 変数は空文字として扱われ、色が抜ける）。
+
+削除したトークン:
+
+| カテゴリ | トークン |
+|---|---|
+<!-- docs-drift-ignore -->
+| Surface | `--Surface-Accent-Primary-Ultra-Light` / `--Surface-Warning-Subtle` / `--Surface-Success-Strong` / `--Surface-Warning-Strong` / `--Surface-Info-Strong` |
+<!-- docs-drift-ignore -->
+| Object | `--Object-Favorite` |
+<!-- docs-drift-ignore -->
+| Border | `--Border-Disable` / `--Border-Accent-Primary-Subtle` / `--Border-Caution-Subtle` / `--Border-Success-Subtle` / `--Border-Info-Subtle` |
+<!-- docs-drift-ignore -->
+| Brand | `--Brand-Amazon-Accent` |
+
+移行先の目安:
+
+<!-- docs-drift-ignore -->
+- `--Surface-Accent-Primary-Ultra-Light` → `--Surface-Accent-Primary-Light`（元々同値）
+<!-- docs-drift-ignore -->
+- `--Surface-*-Strong` / `--Surface-Warning-Subtle` → `--Object-{Success,Warning,Info}` を背景に使うか、`--Surface-{Success,Warning,Info}`
+<!-- docs-drift-ignore -->
+- `--Object-Favorite` → `--Object-Caution`（元々同値）
+<!-- docs-drift-ignore -->
+- `--Border-Disable` → `--Border-Low-Emphasis`（元々同値）
+- `--Border-*-Subtle` → `--Border-{Caution,Success,Info,Accent-Primary}`
+
+自分のコードに残っていないかは `grep -rn "Surface-Warning-Strong\|Border-Caution-Subtle\|Object-Favorite" src` のように確認する。
+
+なお `--Surface-Disable` / `--Text-on-Inverse-Secondary` / `--Active-Secondary-Button` /
+`--Active-Tertiary-Button` / `--Caution-Action` は「未参照に見えて実際は React Native 側の
+トークン API から使われている」ため**削除していない**。
+
+### 追加されたトークン（issue #263）
+
+- **モーション**: `--Motion-Duration-{Fast,Base,Slow,Slower,Sheet-Enter,Sheet-Settle}` /
+  `--Motion-Easing-{Standard,Emphasized,Decelerate,Bounce}`（`src/styles/motion.css`）。
+  値は既存実装の実測値をそのまま移したもので、**見た目・体感は変わらない**。
+  `prefers-reduced-motion: reduce` のときトークン側が 0.01ms に落ちるため、
+  `duration-[var(--Motion-Duration-Base)]` で書いた箇所は自動でアニメーションが止まる。
+- **z-index**: `--Z-{Base,Raised,Sticky,Nav,Overlay,Modal,Popover,Toast,Tooltip,SkipLink}`（`src/preset.css`）。
+  従来 `z-50` 一律だった Portal 系（Dialog / Sheet / Popover / Toast / Tooltip 等）が
+  意味ごとの段に分かれた。消費側が `z-50` の独自オーバーレイを DS の Dialog の上に
+  重ねていた場合は、`z-[var(--Z-Modal)]` 以上に読み替えが必要になることがある。
+
+詳細は [DESIGN.md](./DESIGN.md) の Motion / Layering 節を参照。
+
 ## 5. していい・ダメ早見表
 
 | していい | ダメ |

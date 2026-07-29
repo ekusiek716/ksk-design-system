@@ -55,7 +55,7 @@ function ChipFilterBar({
       <div
         className={cn(
           "flex gap-2 overflow-x-auto scrollbar-hide",
-          sticky && "sticky z-30 bg-[var(--Surface-Primary)] py-2"
+          sticky && "sticky z-[var(--Z-Sticky)] bg-[var(--Surface-Primary)] py-2"
         )}
         style={sticky ? { top: stickyOffset } : undefined}
       >

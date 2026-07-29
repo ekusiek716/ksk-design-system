@@ -426,10 +426,10 @@ function SheetPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.P
 // ============================================================================
 // Nested-sheet z-index stacking (#158)
 // ----------------------------------------------------------------------------
-// Overlay (z-40) / Content (z-50) were fixed constants shared by every Sheet
+// Overlay (--Z-Overlay) / Content (--Z-Modal) were fixed constants shared by every Sheet
 // instance. When a second Sheet opens on top of a first (e.g. a detail sheet
-// triggering a confirm sheet), both overlays render at the same z-40 and both
-// contents at the same z-50 — DOM order then decides who wins, and a
+// triggering a confirm sheet), both overlays render at the same --Z-Overlay and both
+// contents at the same --Z-Modal — DOM order then decides who wins, and a
 // full-screen lower content can end up covering the upper sheet's overlay so
 // it never visually dims.
 //
@@ -444,12 +444,18 @@ function SheetPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.P
 // mount and releases it on unmount; levels are recompacted so they always run
 // 0..n-1 with no gaps, keeping the z-index formula stable even if sheets close
 // out of order. z-index = base + level * STACK_STEP, applied via inline style
-// so it always wins over the Tailwind z-40/50 utility classes (same
+// so it always wins over the Tailwind z-[var(--Z-Overlay)] / z-[var(--Z-Modal)] utility classes (same
 // specificity would otherwise leave DOM order as the tiebreaker again).
 // ============================================================================
 
-const SHEET_OVERLAY_BASE_Z = 40
-const SHEET_CONTENT_BASE_Z = 50
+// preset.css の --Z-Overlay / --Z-Modal と同じ値。インラインの数値 z-index を
+// 算術で積むため CSS 変数のままでは扱えず、ここに数値で持つ。
+// ズレると多段 Sheet の重なりが壊れるので __tests__/z-index-scale-contract.test.ts で
+// preset.css との一致を検査している。
+const SHEET_OVERLAY_BASE_Z = 50
+const SHEET_CONTENT_BASE_Z = 60
+// 1 段あたりの加算。--Z-Modal(60) と --Z-Popover(1000) の間に 40 段ぶんの余白を
+// 確保してあるため、現実的なネスト段数では Popover 以上の層を突き抜けない。
 const SHEET_STACK_STEP = 20
 
 const sheetStackOpenIds: string[] = []
@@ -551,8 +557,8 @@ interface SheetOverlayProps extends React.ComponentProps<typeof DialogPrimitive.
   opacity?: number
   /**
    * ネスト段数(0=最初に開いたシート)。指定時は z-index を
-   * `40 + stackLevel*20` で上書きする（#158: 多段 Sheet の overlay 暗転対策）。
-   * 未指定時は従来通り z-40 固定。
+   * `--Z-Overlay + stackLevel*20` で上書きする（#158: 多段 Sheet の overlay 暗転対策）。
+   * 未指定時は --Z-Overlay 固定。
    */
   stackLevel?: number
   /**
@@ -578,11 +584,11 @@ function SheetOverlay({
     <DialogPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        // Overlay sits *under* SheetContent (z-50). Using z-40 prevents
+        // Overlay sits *under* SheetContent (--Z-Modal). Using --Z-Overlay prevents
         // the glass scrim from covering the sheet content. When resolvedZ is
         // set (stackLevel/zIndex prop) the inline style below overrides this
         // base value per-instance (#158 nested sheets).
-        "fixed inset-0 z-40",
+        "fixed inset-0 z-[var(--Z-Overlay)]",
         // For "glass" sheets, the sheet itself provides the frosted-glass
         // visual via its own backdrop-filter. Doubling that with a blurred
         // overlay washes out the sheet completely. Use a subtle dark scrim
@@ -591,7 +597,7 @@ function SheetOverlay({
         // When opacity is not controlled, fall back to a simple opacity
         // transition (no fade-in-0 keyframes which can leave the layer
         // permanently at opacity 0 in some Tailwind / animate plugin combos).
-        !controlled && "transition-opacity duration-200",
+        !controlled && "transition-opacity duration-[var(--Motion-Duration-Base)]",
         className
       )}
       style={{
@@ -616,15 +622,15 @@ function SheetDragIndicator() {
 const sheetVariants = cva(
   // ksk-squircle: 角丸のあるシート（bottom / float 等）の角を連続曲率にする。
   // radius 0 の side（top / left / right の平辺）では no-op。
-  "fixed z-50 ksk-squircle text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)] transition ease-in-out",
+  "fixed z-[var(--Z-Modal)] ksk-squircle text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)] transition ease-in-out",
   {
     variants: {
       side: {
         top: [
           "inset-x-0 top-0 border-b border-[var(--Border-Low-Emphasis)]",
           "bg-[var(--Surface-Primary)]",
-          "data-[state=open]:animate-in data-[state=open]:slide-in-from-top data-[state=open]:duration-200",
-          "data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=closed]:duration-150",
+          "data-[state=open]:animate-in data-[state=open]:slide-in-from-top data-[state=open]:duration-[var(--Motion-Duration-Base)]",
+          "data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=closed]:duration-[var(--Motion-Duration-Fast)]",
         ].join(" "),
         bottom: [
           "inset-x-0 bottom-0 rounded-t-[var(--Radius-Sheet)]",
@@ -1310,7 +1316,7 @@ function SwipeToCloseBottomSheet({
           transform: `translate3d(0, ${dragY}px, 0)`,
           transition: dragging || !everDragged
             ? "none"
-            : "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
+            : "transform var(--Motion-Duration-Sheet-Settle) var(--Motion-Easing-Emphasized)",
           willChange: "transform",
           zIndex: contentZIndex,
         }}
@@ -1606,7 +1612,7 @@ function SwipeToCloseSideDrawer({
           transform: `translate3d(${closeAxisTranslate(dragDist, side)}px, 0, 0)`,
           transition: dragging || !everDragged
             ? "none"
-            : "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
+            : "transform var(--Motion-Duration-Sheet-Settle) var(--Motion-Easing-Emphasized)",
           willChange: "transform",
           zIndex: contentZIndex,
         }}
@@ -1842,7 +1848,7 @@ function SnapBottomSheetContent({
         data-snap-active={activeSnapPoint ?? undefined}
         onKeyDown={onKeyDown}
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 flex flex-col",
+          "fixed inset-x-0 bottom-0 z-[var(--Z-Modal)] flex flex-col",
           "bg-[var(--Surface-Primary)] rounded-t-[var(--Radius-Sheet)] shadow-[var(--shadow-dialog)]",
           // Suppress Radix open/close fade — we manage transform ourselves
           "data-[state=open]:animate-none data-[state=closed]:animate-none",
@@ -1855,7 +1861,7 @@ function SnapBottomSheetContent({
           transform,
           transition: dragging
             ? "none"
-            : "transform 320ms cubic-bezier(0.32, 0.72, 0, 1)",
+            : "transform var(--Motion-Duration-Sheet-Enter) var(--Motion-Easing-Emphasized)",
           willChange: "transform",
           touchAction: "none",
           zIndex: contentZIndex,
@@ -1897,7 +1903,7 @@ function SnapBottomSheetContent({
             maxHeight: `calc(${activeRatio * 100}svh - 22px)`,
             transition: dragging
               ? "none"
-              : "max-height 320ms cubic-bezier(0.32, 0.72, 0, 1)",
+              : "max-height var(--Motion-Duration-Sheet-Enter) var(--Motion-Easing-Emphasized)",
           }}
         >
           {children}

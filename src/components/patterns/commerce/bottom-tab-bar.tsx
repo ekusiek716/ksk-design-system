@@ -174,7 +174,7 @@ function BottomTabBarDefault({
       data-keyboard-open={keyboardState.isKeyboardOpen || undefined}
       aria-label="メインナビゲーション"
       className={cn(
-        "fixed inset-x-0 z-50 transition-all duration-200",
+        "fixed inset-x-0 z-[var(--Z-Nav)] transition-all duration-[var(--Motion-Duration-Base)]",
         keyboardState.keyboardBehavior === "lift"
           ? "bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]"
           : "bottom-0",
@@ -296,14 +296,14 @@ function BottomTabBarPill({
     <>
       {/* Scroll edge effect（iOS 26）: バー背後の帯に progressive blur を敷き、
           下を通過するコンテンツがバー付近で徐々にぼけて溶けるようにする。
-          バー本体(z-50)の下・コンテンツの上に挟む装飾層 */}
+          バー本体(--Z-Nav)の下・コンテンツの上に挟む装飾層 */}
       {scrollEdge && (
         <div
           aria-hidden="true"
           className={cn(
-            "inset-x-0 bottom-0 z-40 h-28 lg:hidden",
+            "inset-x-0 bottom-0 z-[var(--Z-Sticky)] h-28 lg:hidden",
             "glass-scroll-edge-bottom",
-            "transition-opacity duration-200",
+            "transition-opacity duration-[var(--Motion-Duration-Base)]",
             pillPosition === "fixed" ? "fixed" : "absolute",
             keyboardState.shouldHide && "opacity-0"
           )}
@@ -315,7 +315,7 @@ function BottomTabBarPill({
       data-keyboard-open={keyboardState.isKeyboardOpen || undefined}
       aria-label="メインナビゲーション"
       className={cn(
-        "z-50 lg:hidden transition-all duration-200",
+        "z-[var(--Z-Nav)] lg:hidden transition-all duration-[var(--Motion-Duration-Base)]",
         pillPosition === "fixed" ? "fixed" : "absolute",
         // 位置: 画面下部に余白を持ってフロート
         keyboardState.keyboardBehavior === "lift"
@@ -353,7 +353,7 @@ function BottomTabBarPill({
           className={cn(
             "absolute left-0 top-0 rounded-full pointer-events-none",
             platterAnimated &&
-              "transition-[transform,width,height] duration-200 ease-out motion-reduce:transition-none",
+              "transition-[transform,width,height] duration-[var(--Motion-Duration-Base)] ease-out motion-reduce:transition-none",
             platterSurfaceClass(tone)
           )}
           style={{
@@ -433,7 +433,7 @@ function NavItem({
       className={cn(
         "relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-full",
         // iOS 26 のガラスは押下で沈む（ゲル感）。opacity だけでなく scale も入れる
-        "transition-[transform,opacity] duration-150 active:scale-95 active:opacity-80",
+        "transition-[transform,opacity] duration-[var(--Motion-Duration-Fast)] active:scale-95 active:opacity-80",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
         compact ? (isLabelVisible ? "h-full min-w-0 flex-1 px-2 py-1" : "h-full w-14") : "min-w-0 flex-1 pb-1 pt-1",
         // 影は上端のインセットハイライト 1 枚のみ。外側ドロップシャドウを足すと
@@ -502,7 +502,7 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
         // .glass-specular = エッジの屈折リム）。テーマ・reduced-transparency
         // フォールバックは glass.css 側で面倒を見る
         "glass-accent glass-specular text-[var(--Text-on-Inverse)]",
-        "typo-label-sm transition-transform duration-150 active:scale-[0.96]",
+        "typo-label-sm transition-transform duration-[var(--Motion-Duration-Fast)] active:scale-[0.96]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
       )}
       aria-label={item.ariaLabel ?? item.label}

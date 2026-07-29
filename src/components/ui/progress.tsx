@@ -23,11 +23,13 @@ const VARIANT_INDICATOR_BG: Record<ProgressVariant, string> = {
   caution: "bg-[var(--Object-Caution)]",
 }
 
-const DURATION_MS: Record<ProgressDuration, number> = {
-  none: 0,
-  sm: 150,
-  md: 300,
-  lg: 500,
+// Motion トークン参照（src/styles/motion.css）。値は従来どおり sm=150ms / md=300ms / lg=500ms。
+// prefers-reduced-motion 時はトークン側が 0.01ms に落ちるので、ここで分岐する必要はない。
+const DURATION_TOKEN: Record<ProgressDuration, string | null> = {
+  none: null,
+  sm: "var(--Motion-Duration-Fast)",
+  md: "var(--Motion-Duration-Slow)",
+  lg: "var(--Motion-Duration-Slower)",
 }
 
 const DEFAULT_AUTO_COLOR: ProgressAutoColorConfig = {
@@ -126,7 +128,7 @@ function Progress({
   "aria-labelledby": ariaLabelledby,
   ...props
 }: ProgressProps) {
-  const duration = DURATION_MS[transitionDuration]
+  const duration = DURATION_TOKEN[transitionDuration]
   // masked 時は autoColor による色分岐も value に依存するため使わない（バー幅だけでなく色からの逆算も防ぐ）。
   const resolvedVariant = masked ? variant : getAutoProgressVariant(value, variant, autoColor)
   const displayValue = resolveProgressDisplayValue(value, masked)
@@ -152,7 +154,7 @@ function Progress({
         className={cn("h-full w-full flex-1", VARIANT_INDICATOR_BG[resolvedVariant])}
         style={{
           transform: `translateX(-${100 - displayValue}%)`,
-          transition: duration === 0 ? "none" : `transform ${duration}ms ease-out`,
+          transition: duration === null ? "none" : `transform ${duration} var(--Motion-Easing-Standard)`,
         }}
       />
     </ProgressPrimitive.Root>
