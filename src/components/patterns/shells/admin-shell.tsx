@@ -38,6 +38,11 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
  *    20px アイコン + 24px でちょうど 44px に乗る。44×44 は本 DS のポリシー
  *    （WCAG 2.5.5 Target Size (Enhanced) = AAA 相当）で、AA の最小要件は
  *    2.5.8 Target Size (Minimum) の 24×24 であることに注意。
+ * 8. `sidebar` slot の直下は `flex grow flex-col` にし、フッターは `mt-auto` で
+ *    下端へ落とす。`h-full` は使わない — slot は Radix ScrollArea の viewport
+ *    ラッパー（height:auto）配下に入るため % height が解決されず、フッターが
+ *    下端に来ない。shell 側はそのラッパーを min-h-full の縦 flex に矯正して
+ *    `grow` が効く状態を用意している。
  */
 function AdminShell({
   className,

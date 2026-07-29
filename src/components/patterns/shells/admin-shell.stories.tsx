@@ -31,7 +31,7 @@ const meta: Meta<typeof AdminShell> = {
           "- シェルヘッダーにページタイトルを複製しない。パンくず・グローバル操作を置き、置くものが無ければ header を省略する。",
           '- ヘッダーと本文は同じ `Container size="fluid"`（gutter 24px）で左の面が揃う。片方だけ padding を上書きしない。',
           "- サイドナビ項目は 44px（`h-11`）。44×44 は本 DS のポリシー（WCAG 2.5.5 Target Size (Enhanced) = AAA 相当。AA の最小要件は 2.5.8 の 24×24）。",
-          "- サイドバー slot の最上位を `flex h-full flex-col` にすると、フッターを `mt-auto` で下端に置ける（shell 側で ScrollArea viewport に min-h-full を通している）。",
+          "- サイドバー slot の最上位は `flex grow flex-col` にする。フッターは `mt-auto` で下端に落ちる。`h-full` は Radix ScrollArea の viewport ラッパー（height:auto）に対して解決されず効かないので使わない。",
         ].join("\n"),
       },
     },

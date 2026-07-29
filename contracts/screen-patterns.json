@@ -63,8 +63,8 @@
       "group": "admin",
       "purpose": "サイドバー + テーブル中心の管理画面。大量データの一覧・絞り込み・一括操作を行う。",
       "dsComponents": ["AdminShell", "DataTable", "SearchPanel", "StatusTabs", "BulkActions", "ChartControls", "KebabMenu", "NotificationList", "ImageUploader"],
-      "dsComponentsNote": "AdminShell の sidebar/header slot を必ず埋める。テーブル本体は DataTable の Cell API（DataTableActionCell 等）を使い、生 <table> やセル div を書かない。",
-      "navigation": { "globalNav": true, "breadcrumb": true, "header": true },
+      "dsComponentsNote": "AdminShell の sidebar slot は必ず埋める。header slot は任意で、置く場合は Breadcrumb（現在地）やグローバル操作を入れる。ページタイトルの複製は禁止（ページ名の正は本文の SectionHeader）で、置くものが無ければ header を渡さずヘッダーバーごと省略する。テーブル本体は DataTable の Cell API（DataTableActionCell 等）を使い、生 <table> やセル div を書かない。",
+      "navigation": { "globalNav": true, "breadcrumb": true, "header": "optional" },
       "crud": ["create", "read", "update", "delete"],
       "whenToUse": [
         "多数のレコードを一覧・検索・一括操作する管理画面",
