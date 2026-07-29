@@ -29,7 +29,9 @@ export const CustomLabel: Story = {
   render: () => (
     <div className="flex items-center gap-6">
       <ProgressRing value={3} size="xl" label={<span className="flex flex-col items-center"><span className="typo-label-lg">3</span><span className="typo-label-xs text-[var(--Text-Medium-Emphasis)]">/ 10</span></span>} />
-      <ProgressRing value={100} size="xl" label="✓" />
+      {/* "✓" は視覚的な記号で、そのまま読み上げても意味が通らないため
+          aria-label で正しいアクセシブルネームを明示する。 */}
+      <ProgressRing value={100} size="xl" label="✓" aria-label="アップロード完了" />
     </div>
   ),
 }
