@@ -1066,7 +1066,9 @@ function DataTableAvatarCell({
     >
       <div className="flex items-center gap-3">
         <Avatar className="size-8">
-          {src && <AvatarImage src={src} alt={title} />}
+          {/* title は隣接する <span> に可視テキストとして既出のため alt は空にし、
+              読み上げの重複を避ける（axe: image-redundant-alt）。 */}
+          {src && <AvatarImage src={src} alt="" />}
           <AvatarFallback>{fallback ?? title.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col min-w-0">
@@ -1106,9 +1108,11 @@ function DataTableImageCell({
       {...props}
     >
       <div className="flex items-center gap-3">
+        {/* title は隣接する <span> に可視テキストとして既出のため、既定 alt は
+            空にする（axe: image-redundant-alt）。追加情報がある場合のみ alt を明示。 */}
         <img
           src={src}
-          alt={alt ?? title ?? ""}
+          alt={alt ?? ""}
           className="shrink-0 rounded-lg object-cover"
           style={{ width: imageSize, height: imageSize }}
         />
@@ -1158,6 +1162,7 @@ function DataTableCheckboxCell({
   sticky,
   stickyOffset,
   style,
+  "aria-label": ariaLabel,
   ...props
 }: DataTableCheckboxCellProps) {
   const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset, Element === "th") : null
@@ -1168,9 +1173,13 @@ function DataTableCheckboxCell({
       style={stickyProps ? { ...stickyProps.style, ...style } : style}
       {...props}
     >
+      {/* aria-label は th/td ではなく実際に role="checkbox" を持つ内側の
+          Checkbox に渡す必要がある（axe: button-name）。既定値も用意し、
+          呼び出し側が渡し忘れても無名の checkbox にならないようにする。 */}
       <Checkbox
         checked={indeterminate ? "indeterminate" : checked}
         onCheckedChange={(v) => onCheckedChange?.(v === true)}
+        aria-label={ariaLabel ?? (Element === "th" ? "すべて選択" : "行を選択")}
       />
     </Element>
   )
@@ -1232,6 +1241,8 @@ interface DataTableInputCellProps
   value?: string
   onChange?: (value: string) => void
   placeholder?: string
+  /** input の aria-label。省略時は placeholder、それも無ければ「入力」。 */
+  "aria-label"?: string
 }
 
 function DataTableInputCell({
@@ -1243,6 +1254,7 @@ function DataTableInputCell({
   sticky,
   stickyOffset,
   style,
+  "aria-label": ariaLabel,
   ...props
 }: DataTableInputCellProps) {
   const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
@@ -1263,6 +1275,7 @@ function DataTableInputCell({
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
+        aria-label={ariaLabel ?? placeholder ?? "入力"}
         className={cn(
           "w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 typo-body-md text-[var(--Text-High-Emphasis)]",
           "hover:border-[var(--Border-Low-Emphasis)]",
@@ -1286,6 +1299,8 @@ interface DataTableSelectCellProps
   contentPosition?: DataTableSelectContentPosition
   triggerClassName?: string
   contentClassName?: string
+  /** SelectTrigger の aria-label。省略時は placeholder、それも無ければ「選択」。 */
+  "aria-label"?: string
 }
 
 function DataTableSelectCell({
@@ -1301,6 +1316,7 @@ function DataTableSelectCell({
   contentPosition = "popper",
   triggerClassName,
   contentClassName,
+  "aria-label": ariaLabel,
   ...props
 }: DataTableSelectCellProps) {
   const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
@@ -1323,6 +1339,7 @@ function DataTableSelectCell({
             width === "flex" && "w-full",
             triggerClassName
           )}
+          aria-label={ariaLabel ?? placeholder ?? "選択"}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

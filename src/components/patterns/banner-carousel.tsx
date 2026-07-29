@@ -66,8 +66,15 @@ function BannerCarousel({
         </div>
       )}
 
-      {/* Scroll strip */}
-      <div className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1">
+      {/* Scroll strip。項目が href/onClick 無し(div)構成のときは中に focusable な
+          要素が無いため、キーボードで横スクロールできるようにする
+          （axe: scrollable-region-focusable）。 */}
+      <div
+        className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1"
+        tabIndex={0}
+        role="region"
+        aria-label="バナー一覧"
+      >
         {items.map((item, i) => {
           const background = item.gradient ?? DEFAULT_BACKGROUNDS[i % DEFAULT_BACKGROUNDS.length]
           // href があれば a、onClick だけなら button（キーボード操作可）、どちらも無ければ div

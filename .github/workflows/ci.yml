@@ -63,6 +63,13 @@ jobs:
       - name: Interaction tests (Storybook play / vitest browser)
         run: npm run test:interaction
 
+      # ── a11y 機械検証（axe-core / issue #261）──
+      # addon-a11y の afterEach フックが全ストーリーに対して axe-core を実行する
+      # （vitest.a11y.config.ts、tags フィルタなし）。Playwright chromium は
+      # 上の interaction テストのステップで導入済み。
+      - name: a11y tests (axe-core via Storybook / vitest browser)
+        run: npm run test:a11y
+
       - name: Packed package Web consumer install and build
         run: npm run test:consumer:web
 

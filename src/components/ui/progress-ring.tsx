@@ -40,6 +40,7 @@ function ProgressRing({
       aria-valuenow={clamped}
       aria-valuemin={0}
       aria-valuemax={100}
+      aria-label={typeof label === "string" ? label : "進捗"}
     >
       <svg width={px} height={px} className="-rotate-90">
         {/* Track */}

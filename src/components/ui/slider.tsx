@@ -18,6 +18,8 @@ function Slider({
   value,
   min = 0,
   max = 100,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
   ...props
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
   const _values = React.useMemo(
@@ -56,6 +58,21 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
+          // role="slider" の実体はこの Thumb 側。呼び出し側が aria-label /
+          // aria-labelledby を渡さない場合の既定値（axe: aria-input-field-name）。
+          // 2ハンドル（range）のときは既定ラベルに開始/終了を付けて区別する。
+          aria-label={
+            ariaLabel
+              ? _values.length > 1
+                ? `${ariaLabel}（${index === 0 ? "開始" : "終了"}）`
+                : ariaLabel
+              : ariaLabelledby
+                ? undefined
+                : _values.length > 1
+                  ? `スライダー（${index === 0 ? "開始" : "終了"}）`
+                  : "スライダー"
+          }
+          aria-labelledby={ariaLabelledby}
           className="block size-5 shrink-0 rounded-full border-2 border-[var(--Brand-Primary)] bg-[var(--Surface-Primary)] shadow-[var(--shadow-sm)] ring-[var(--Brand-Primary)]/20 transition-[color,box-shadow,transform] hover:ring-4 hover:scale-125 focus-visible:ring-4 focus-visible:outline-hidden active:scale-110 active:ring-6 active:shadow-[var(--shadow-md)] disabled:pointer-events-none disabled:opacity-50"
         />
       ))}

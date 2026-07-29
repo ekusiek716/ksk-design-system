@@ -5,7 +5,9 @@ import { cn } from "@/lib/utils"
 function ScrollArea({ className, children, ...props }: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
   return (
     <ScrollAreaPrimitive.Root data-slot="scroll-area" className={cn("relative overflow-hidden", className)} {...props}>
-      <ScrollAreaPrimitive.Viewport className="size-full rounded-[inherit]">
+      {/* 実際にスクロールする要素はここ。キーボードでフォーカス・矢印キー操作
+          できるようにする（axe: scrollable-region-focusable）。 */}
+      <ScrollAreaPrimitive.Viewport className="size-full rounded-[inherit]" tabIndex={0}>
         {children}
       </ScrollAreaPrimitive.Viewport>
       <ScrollBar />

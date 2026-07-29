@@ -1232,5 +1232,16 @@ export default meta
 
 export const UIKit: StoryObj = {
   name: "UI Kit（ショーケース）",
+  parameters: {
+    // このページは 1 画面に大量のコンポーネントを見た目確認用に並べた
+    // ギャラリーで、実際に配布されるスクリーンではない
+    // （Foundation 系ページと同じ位置づけ。foundation-*.stories.tsx 参照）。
+    // 個別の <Switch>/<Checkbox>/<Select> 等はラベル無しの「見た目サンプル」
+    // として並んでおり、見出しレベルも装飾セクションの都合で意図的に
+    // 非連番。各コンポーネント自体の a11y は個別ストーリー
+    // （switch.stories.tsx 等）側で検証済みのため、このギャラリー特有の
+    // 誤検知はここで無効化する。
+    a11y: { test: "off" },
+  },
   render: () => <Showcase />,
 }

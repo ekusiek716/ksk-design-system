@@ -168,6 +168,9 @@ npm run check
 
 # interaction テスト（Storybook play 関数を playwright chromium で実行）
 npm run test:interaction
+
+# a11y 機械検証（axe-core。全ストーリー対象。issue #261）
+npm run test:a11y
 ```
 
 **interaction テストについて（issue #256）:**
@@ -183,6 +186,20 @@ npm run test:interaction
   DropdownMenu / Combobox / Tabs / Form / Toast）を触ったら `npm run test:interaction` を回すこと。**
 - ビジュアル回帰（スクリーンショット差分）は未導入。`.claude/skills/audit-pages/SKILL.md` による
   手動の視覚監査が現状の代替。
+
+**a11y 機械検証について（issue #261）:**
+
+- `@storybook/addon-a11y` の afterEach フック（axe-core）が全ストーリー（tags フィルタなし）に
+  対して実行される。設定は `vitest.a11y.config.ts`、実行は `npm run test:a11y`。CI では常時実行。
+- color-contrast ルールのみ既知のトークン債務（6テーマ×全コンポーネントに及ぶ規模）のため
+  現状無効化（`.storybook/preview.ts` 参照）。コントラスト自体は `scripts/check-contrast.mjs`
+  （`npm run check` 経由）が引き続き担保する。
+- rules.json の `accessibility.requirements` に `machineVerified` / `verifiedBy` を追加済み。
+  axe でカバーできない項目（フォーカスリング視認・タッチターゲット実測・エラー表示の
+  色+アイコン+テキスト3点セット等）は今後も目視レビューが必要。
+- icon-only の `<Button size="icon*">` に `aria-label` が無いパターンは
+  `eslint/icon-button-aria-label.js`（`ksk-a11y/icon-button-aria-label`）で lint 時に検出する
+  （`.stories.tsx` は対象外）。
 
 ---
 

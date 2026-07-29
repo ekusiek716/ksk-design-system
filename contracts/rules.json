@@ -500,19 +500,20 @@
   },
   "accessibility": {
     "wcag": "2.1 AA",
+    "_machineVerifiedNote": "machineVerified: 自動検査（axe-core 経由の npm run test:a11y、または独立した lint/script）で担保できるか。verifiedBy: 実際に担保している仕組み。false の項目は今後も目視/レビューでの確認が必要（issue #261）。",
     "requirements": [
-      { "id": "A001", "rule": "通常テキストのコントラスト比 4.5:1 以上" },
-      { "id": "A002", "rule": "大テキスト（18px+ bold）のコントラスト比 3:1 以上" },
-      { "id": "A003", "rule": "UI 要素・アイコンのコントラスト比 3:1 以上" },
-      { "id": "A004", "rule": "タッチターゲット最小 44×44px（WCAG 2.5.5 AAA）" },
-      { "id": "A005", "rule": "フォーカスリング必須: focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50" },
-      { "id": "A006", "rule": "アイコンボタンに aria-label 必須" },
-      { "id": "A007", "rule": "フォーム入力に <Label> 必須（placeholder のみ禁止）" },
-      { "id": "A008", "rule": "エラー表示は 色 + アイコン + テキスト の3点セット必須（色のみ禁止）" },
-      { "id": "A009", "rule": "ステータス区別は 色 + アイコン + テキスト（色のみ禁止）" },
-      { "id": "A010", "rule": "<div onClick> 禁止: 操作可能要素は必ず <button> / <Button>" },
-      { "id": "A011", "rule": "<img> に alt 属性必須（装飾画像は alt=\"\"）" },
-      { "id": "A012", "rule": "モーダルは <Dialog> を使用し、フォーカストラップを保証" }
+      { "id": "A001", "rule": "通常テキストのコントラスト比 4.5:1 以上", "machineVerified": true, "verifiedBy": "scripts/check-contrast.mjs（axe の color-contrast ルールは既知のトークン債務のため CI では無効化。.storybook/preview.ts 参照）" },
+      { "id": "A002", "rule": "大テキスト（18px+ bold）のコントラスト比 3:1 以上", "machineVerified": true, "verifiedBy": "scripts/check-contrast.mjs（axe の color-contrast ルールは既知のトークン債務のため CI では無効化）" },
+      { "id": "A003", "rule": "UI 要素・アイコンのコントラスト比 3:1 以上", "machineVerified": false, "verifiedBy": "manual review（axe の color-contrast は無効化中。scripts/check-contrast.mjs はテキスト用ペアのみが対象）" },
+      { "id": "A004", "rule": "タッチターゲット最小 44×44px（WCAG 2.5.5 AAA）", "machineVerified": false, "verifiedBy": "manual review（axe の target-size は既定無効・実測が必要なため未採用）" },
+      { "id": "A005", "rule": "フォーカスリング必須: focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50", "machineVerified": false, "verifiedBy": "manual review（フォーカスリングの視覚的な確認は axe では検出できない）" },
+      { "id": "A006", "rule": "アイコンボタンに aria-label 必須", "machineVerified": true, "verifiedBy": "axe(button-name) + eslint(ksk-a11y/icon-button-aria-label)" },
+      { "id": "A007", "rule": "フォーム入力に <Label> 必須（placeholder のみ禁止）", "machineVerified": true, "verifiedBy": "axe(label)" },
+      { "id": "A008", "rule": "エラー表示は 色 + アイコン + テキスト の3点セット必須（色のみ禁止）", "machineVerified": false, "verifiedBy": "manual review（意味的な組み合わせの判断は axe では不可）" },
+      { "id": "A009", "rule": "ステータス区別は 色 + アイコン + テキスト（色のみ禁止）", "machineVerified": false, "verifiedBy": "manual review（意味的な組み合わせの判断は axe では不可）" },
+      { "id": "A010", "rule": "<div onClick> 禁止: 操作可能要素は必ず <button> / <Button>", "machineVerified": false, "verifiedBy": "manual review（axe は role 有無しか見ず onClick の意図までは判定できない）" },
+      { "id": "A011", "rule": "<img> に alt 属性必須（装飾画像は alt=\"\"）", "machineVerified": true, "verifiedBy": "axe(image-alt)" },
+      { "id": "A012", "rule": "モーダルは <Dialog> を使用し、フォーカストラップを保証", "machineVerified": true, "verifiedBy": "interaction test（play 関数、npm run test:interaction。axe 自体はフォーカストラップの挙動までは検証しない）" }
     ]
   },
   "typography": {

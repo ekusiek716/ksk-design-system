@@ -30,6 +30,16 @@ const rows = [
 ]
 
 export const ScrollableWithFooter: Story = {
+  parameters: {
+    // Screen の <main> は tabIndex={-1} + id 付きのスキップリンク遷移先という
+    // 意図的な設計（WAI-ARIA APG のスキップリンクパターン）。Tab キーでの
+    // 到達を増やさないため常時 focusable（tabIndex=0）にはしない。
+    // このストーリーの中身（チェックリスト表示）自体に focusable な要素が
+    // 無いため axe の scrollable-region-focusable が誤検知するが、実際の
+    // 画面ではリスト行がボタン/リンク等の focusable 要素になるのが通常で、
+    // その場合はこの警告は出ない。個別ストーリーの誤検知として無効化する。
+    a11y: { config: { rules: [{ id: "scrollable-region-focusable", enabled: false }] } },
+  },
   render: () => (
     <Screen
       footer={<Button className="w-full" size="xl">準備をはじめる</Button>}

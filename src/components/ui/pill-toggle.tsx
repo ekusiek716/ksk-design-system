@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface PillToggleOption<T extends string = string> {
   label: string
@@ -50,6 +50,13 @@ function PillToggle<T extends string = string>({
           </TabsTrigger>
         ))}
       </TabsList>
+      {/* PillToggle はパネル切り替えを行わない（値トグル専用）が、Radix Tabs は
+          アクティブな trigger に aria-controls で存在しない id を指してしまう
+          （TabsContent が無いため）。空の TabsContent を用意して参照先を実在させる
+          （axe: aria-valid-attr-value）。 */}
+      {options.map((opt) => (
+        <TabsContent key={opt.value} value={opt.value} className="hidden" />
+      ))}
     </Tabs>
   )
 }
