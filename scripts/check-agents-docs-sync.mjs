@@ -81,11 +81,15 @@ function requireDoc(relPath) {
 
 // ─── H1/H2 単位でセクションに分割し、見出しテキストをキーにした Map を返す ───
 // H3 はネストした内容としてそのまま H2 セクションの本文に含める。
-function splitSections(text) {
+// fenced code block（```）の中身は見出し判定の対象外（プレーンテキスト扱い）にする。
+// 同名 H2 の重複はドキュメント構造として不正なため即エラーにする（重複した2つ目以降を
+// 静かに上書きすると、途中の出現に対する drift が比較から漏れて素通りしてしまうため）。
+function splitSections(text, relPath) {
   const lines = stripIgnoredLines(text).split(/\r?\n/)
   const sections = new Map()
   let currentKey = null
   let buf = []
+  let inFence = false
   const flush = () => {
     if (currentKey !== null) {
       const body = buf.join("\n").trim()
@@ -94,8 +98,20 @@ function splitSections(text) {
     buf = []
   }
   for (const line of lines) {
+    if (/^\s*(```|~~~)/.test(line)) {
+      inFence = !inFence
+      if (currentKey !== null) buf.push(line)
+      continue
+    }
+    if (inFence) {
+      if (currentKey !== null) buf.push(line)
+      continue
+    }
     const m = line.match(/^(##)\s+(.+?)\s*$/)
     if (m) {
+      if (sections.has(m[2])) {
+        error(`${relPath}: 見出し「## ${m[2]}」が重複しています（ドキュメント構造として不正）`)
+      }
       flush()
       currentKey = m[2]
       continue
@@ -132,8 +148,8 @@ function checkPairByHeadings(pathA, pathB) {
   const textB = requireDoc(pathB)
   if (textA === null || textB === null) return
 
-  const secA = splitSections(textA)
-  const secB = splitSections(textB)
+  const secA = splitSections(textA, pathA)
+  const secB = splitSections(textB, pathB)
   const allHeadings = new Set([...secA.keys(), ...secB.keys()])
 
   for (const heading of allHeadings) {
