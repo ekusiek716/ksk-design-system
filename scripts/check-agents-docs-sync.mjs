@@ -31,7 +31,6 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
 
 const RED = "\x1b[0;31m"
 const GREEN = "\x1b[0;32m"
-const CYAN = "\x1b[0;36m"
 const NC = "\x1b[0m"
 
 let errors = 0
@@ -40,7 +39,6 @@ const error = (msg) => {
   errors += 1
 }
 const ok = (msg) => console.log(`${GREEN}[OK]${NC}    ${msg}`)
-const info = (msg) => console.log(`${CYAN}[INFO]${NC}  ${msg}`)
 
 console.log("🔍 KSK Design System — CLAUDE.md / AGENTS.md 内容同期検査")
 console.log("=======================================")
@@ -69,6 +67,16 @@ function loadDoc(relPath) {
   if (!existsSync(full)) return null
   const raw = readFileSync(full, "utf8")
   return stripToolOnlyBlocks(raw)
+}
+
+// ファイル欠損は必ずエラー（exit 1）。片方だけ削除されて同期チェックが
+// 素通りする事故を防ぐ。
+function requireDoc(relPath) {
+  const text = loadDoc(relPath)
+  if (text === null) {
+    error(`${relPath} が存在しません`)
+  }
+  return text
 }
 
 // ─── H1/H2 単位でセクションに分割し、見出しテキストをキーにした Map を返す ───
@@ -102,22 +110,6 @@ function splitSections(text) {
   return sections
 }
 
-// 同期必須の見出し（存在すれば内容一致・欠落は許容しない）
-const REQUIRED_SHARED_HEADINGS = [
-  "実装前セルフチェック（AI必読・最優先）",
-  "必須: セッション開始時に読み込むファイル",
-  "必須: ファイル編集後に実行するコマンド",
-  "このDSについて",
-  "最大の特徴: マルチテーマ対応",
-  "技術スタック",
-  "AIモデルの使い分け方針",
-  "ドキュメント構成",
-  "ディレクトリ構成",
-  "カラートークン体系（3層構造）",
-  "クイックスタート（新規クライアント案件）",
-  "コンポーネント追加時のチェックリスト",
-]
-
 function firstDiffLine(a, b) {
   const la = a.split("\n")
   const lb = b.split("\n")
@@ -130,20 +122,23 @@ function firstDiffLine(a, b) {
   return null
 }
 
+// 同期必須の見出しは固定リストとして持たず、両ファイルの見出し集合の
+// 和集合から動的に導出する。新セクションを片方だけに追加した場合も、
+// このスクリプトへの登録漏れなしに即座に検出される。
+// ツール固有で意図的に共有しない見出しは、BEGIN/END マーカーで囲んで
+// splitSections に渡す前に除去すること（Codex PR Review Guidelines 等）。
 function checkPairByHeadings(pathA, pathB) {
-  const textA = loadDoc(pathA)
-  const textB = loadDoc(pathB)
-  if (textA === null || textB === null) {
-    info(`${pathA} / ${pathB}: 片方または両方が存在しないためスキップ`)
-    return
-  }
+  const textA = requireDoc(pathA)
+  const textB = requireDoc(pathB)
+  if (textA === null || textB === null) return
+
   const secA = splitSections(textA)
   const secB = splitSections(textB)
+  const allHeadings = new Set([...secA.keys(), ...secB.keys()])
 
-  for (const heading of REQUIRED_SHARED_HEADINGS) {
+  for (const heading of allHeadings) {
     const inA = secA.has(heading)
     const inB = secB.has(heading)
-    if (!inA && !inB) continue // どちらにも無い＝対象外
     if (inA !== inB) {
       error(`「## ${heading}」が ${inA ? pathB : pathA} に存在しません`)
       continue
@@ -160,16 +155,13 @@ function checkPairByHeadings(pathA, pathB) {
       )
     }
   }
-  ok(`${pathA} <-> ${pathB}: 見出し単位の内容同期チェック完了`)
+  ok(`${pathA} <-> ${pathB}: 見出し単位の内容同期チェック完了（${allHeadings.size} 見出しを比較）`)
 }
 
 function checkPairWhole(pathA, pathB) {
-  const textA = loadDoc(pathA)
-  const textB = loadDoc(pathB)
-  if (textA === null || textB === null) {
-    info(`${pathA} / ${pathB}: 片方または両方が存在しないためスキップ`)
-    return
-  }
+  const textA = requireDoc(pathA)
+  const textB = requireDoc(pathB)
+  if (textA === null || textB === null) return
   // H1 タイトル行は除外して比較する
   const withoutH1 = (t) =>
     stripIgnoredLines(t)

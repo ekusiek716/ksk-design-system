@@ -253,6 +253,70 @@ src/
 
 ---
 
+## コマンド
+
+```bash
+# 開発サーバー（Storybook）
+npm run storybook
+
+# ビルド
+npm run build-storybook
+
+# スクラッチ検出（実装後に必ず実行）
+bash scripts/lint-scratch.sh
+
+# ドリフト検出（コンポーネント追加後に実行）
+bash scripts/check-drift.sh
+
+# COMPONENT_LOOKUP.md 再生成（コンポーネント追加後に実行）
+npm run generate:lookup
+
+# DESIGN.md contract 検査
+npm run lint:design
+
+# @source safelist 再生成（新しい Tailwind クラスを使ったら実行）
+npm run generate:safelist
+
+# 全チェック（tsc + lint + drift + lookup + safelist 一括）
+npm run check
+
+# interaction テスト（Storybook play 関数を playwright chromium で実行）
+npm run test:interaction
+
+# a11y 機械検証（axe-core。全ストーリー対象。issue #261）
+npm run test:a11y
+```
+
+**interaction テストについて（issue #256）:**
+
+- 実体は Storybook の play 関数。`@storybook/addon-vitest` + vitest browser mode（playwright chromium）で
+  ヘッドレス実行する。設定は `vitest.storybook.config.ts`。
+- 対象は `tags: ["interaction"]` を付けたストーリーだけ（全ストーリーのスモークはしない）。
+- 初回のみ `npx playwright install chromium` が必要。**この前提があるため `npm run check` /
+  `check:agent` には含めていない**（CI と、下記に該当する変更をしたときに手で回す）。
+- 押下でレイアウトが沈む・入場アニメーション中に操作不能・フォーカストラップ崩れ、といった
+  v1.48.x で連続した種類の不具合をここで落とす。
+- **play 関数のあるコンポーネント（Button / Dialog / AlertDialog / Sheet / Select /
+  DropdownMenu / Combobox / Tabs / Form / Toast）を触ったら `npm run test:interaction` を回すこと。**
+- ビジュアル回帰（スクリーンショット差分）は未導入。`.claude/skills/audit-pages/SKILL.md` による
+  手動の視覚監査が現状の代替。
+
+**a11y 機械検証について（issue #261）:**
+
+- `@storybook/addon-a11y` の afterEach フック（axe-core）が全ストーリー（tags フィルタなし）に
+  対して実行される。設定は `vitest.a11y.config.ts`、実行は `npm run test:a11y`。CI では常時実行。
+- color-contrast ルールのみ既知のトークン債務（6テーマ×全コンポーネントに及ぶ規模）のため
+  現状無効化（`.storybook/preview.ts` 参照）。コントラスト自体は `scripts/check-contrast.mjs`
+  （`npm run check` 経由）が引き続き担保する。
+- rules.json の `accessibility.requirements` に `machineVerified` / `verifiedBy` を追加済み。
+  axe でカバーできない項目（フォーカスリング視認・タッチターゲット実測・エラー表示の
+  色+アイコン+テキスト3点セット等）は今後も目視レビューが必要。
+- icon-only の `<Button size="icon*">` に `aria-label` が無いパターンは
+  `eslint/icon-button-aria-label.js`（`ksk-a11y/icon-button-aria-label`）で lint 時に検出する
+  （`.stories.tsx` は対象外）。
+
+---
+
 ## カラートークン体系（3層構造）
 
 ```
