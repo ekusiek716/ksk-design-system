@@ -3,8 +3,9 @@
 `ksk-design-system` のリリース・配布手順。
 
 > **配布方式**: v1.36.0 以降は npm レジストリ経由で配布する。
-> `npm publish --access public` で公開し、各消費リポジトリの
-> `package.json` は `ksk-design-system@X.Y.Z` を参照する。
+> 公開経路は `.github/workflows/publish.yml` の Trusted Publishing (OIDC) に
+> 一本化しており、`main` への version 変更 push が公開の唯一のトリガー。
+> 各消費リポジトリの `package.json` は `ksk-design-system@X.Y.Z` を参照する。
 > 対象の消費リポ一覧は `scripts/update-consumers.sh` の `DEFAULT_REPOS` が正本
 > （単体リポ・monorepo が混在し、`~/LocalDev/` と `~/LocalDev/Examination/` 配下にまたがる）。
 
@@ -16,10 +17,23 @@
 ## 最短手順（推奨）
 
 ```bash
-# release branch で package.json / package-lock.json と契約 version を更新
-# PR を main にマージ
-RUN_ID="$(gh run list --workflow=publish.yml --branch=main --limit=1 \
-  --json databaseId --jq '.[0].databaseId')"
+# release branch で package.json / package-lock.json の version を更新し、
+# node scripts/sync-version.mjs を実行して contracts/components.json の
+# meta.version・contracts/token-hex-cache.json を追従させる（issue #259）
+# PR を main にマージ（このブランチではタグは作らない・push もしない）
+
+# マージ後の main HEAD の commit SHA に紐づく run が出るまで待ってから watch する。
+# --branch=main --limit=1 だけだと GitHub Actions のインデックス遅延時に
+# 直前の（無関係な）run を掴んで誤って「成功」判定してしまうため（issue #269 レビュー指摘）、
+# 必ず --commit で今回の SHA を指定する。
+MERGE_SHA="$(git rev-parse origin/main)"
+RUN_ID=""
+for i in $(seq 1 20); do
+  RUN_ID="$(gh run list --workflow=publish.yml --commit "$MERGE_SHA" --limit=1 \
+    --json databaseId --jq '.[0].databaseId')"
+  [ -n "$RUN_ID" ] && break
+  sleep 5
+done
 gh run watch "$RUN_ID" --exit-status
 ```
 
@@ -40,8 +54,9 @@ bash scripts/update-consumers.sh <version>
 ```
 
 PR では `npm run check`、`npm test`、`npm pack --dry-run` を通してからマージする。
-ローカル認証による手動公開が必要な場合だけ `bash scripts/release.sh <version>` を
-フォールバックとして使う。
+ローカルでワンライナーとして回したい場合は `bash scripts/release.sh <version>` を使う
+（version bump・push・publish.yml 完了待ち・consumers 配布まで一括。publish 自体は
+このスクリプトもローカルでは行わず、push 後に publish.yml の Trusted Publishing に委ねる）。
 
 > v1.35.0 で旧名 `@ksk/design-system` 互換 tgz の生成は廃止。
 > 消費5リポ + todo-shared が新名 `ksk-design-system` に移行済。
@@ -65,27 +80,51 @@ npm run storybook     # 目視確認（特に新機能のストーリー）
 
 ```bash
 # patch (bug fix)        例: 1.15.2 → 1.15.3
-npm version patch
+npm version patch --no-git-tag-version
 
 # minor (feature add, 互換あり) 例: 1.15.2 → 1.16.0
-npm version minor
+npm version minor --no-git-tag-version
 
 # major (破壊変更)        例: 1.15.2 → 2.0.0
-npm version major
+npm version major --no-git-tag-version
 ```
 
-`npm version` が自動で `package.json` を更新し、`v1.16.0` タグを切る。
+**タグ・コミットは作らない（`--no-git-tag-version`）。** タグ・GitHub Release
+の作成は必ず `.github/workflows/publish.yml` に任せる（issue #269 レビュー
+指摘）。ローカルで `npm version` の既定動作（タグ作成 + コミット）を使って
+`git push --tags` すると、CI（publish.yml）より先にタグが公開リポジトリに
+届いてしまい、publish.yml がタグ既存と判定して GitHub Release の作成を
+スキップしてしまう。
+
+`--no-git-tag-version` を付けても `"version"` ライフサイクル
+（`scripts/sync-version.mjs`）は変わらず発火し、`contracts/components.json` の
+`meta.version` と `contracts/token-hex-cache.json` を新バージョンに同期して
+`git add` する（`--no-git-tag-version` が省略するのは git のコミット・タグ
+作成だけ）。手動更新は不要。同期後、`package.json`（および変更されていれば
+`package-lock.json`）を含めて自分でコミットする:
+
+```bash
+git add package.json package-lock.json
+git commit -m "chore(release): vX.Y.Z"
+```
+
+`npm version` を使わない bump 経路（release PR で `package.json` を直接
+書き換える等）の場合は、コミット前に `node scripts/sync-version.mjs` を単体実行する。
+
 `dist/` の再ビルド・コミットはこの version bump のタイミングでのみ行う。
 
-### 3. pack / publish
+### 3. pack で中身確認（publish はしない）
 
 ```bash
 npm pack --dry-run
-npm publish --access public
 ```
 
-`prepack` フックで `npm run build:lib` が自動実行され、公開パッケージに入る
-`dist/` / `contracts/` / `tokens.json` / docs の中身が更新される。
+公開経路は `.github/workflows/publish.yml` の Trusted Publishing に一本化した
+（下記「npm 公開について」参照）。ローカルから `npm publish` を直接実行する
+経路は廃止した。ここでは `npm pack --dry-run` で公開物の中身だけ確認する。
+実際の publish は次の push で CI が行う。`prepack` フックで `npm run build:lib`
+が自動実行され、公開パッケージに入る `dist/` / `contracts/` / `tokens.json` /
+docs の中身が更新される。
 
 中身を確認したい場合:
 
@@ -108,8 +147,10 @@ npm pack --dry-run | tail -50
 ### 4. push
 
 ```bash
-git push origin main --tags
+git push origin main
 ```
+
+`--tags` は付けない。タグ・GitHub Release は push 後に publish.yml が作成する。
 
 ### 5. 消費リポへ配布
 
@@ -139,9 +180,10 @@ bash scripts/update-consumers.sh 1.16.0 belle-todo pawly
 # 修正コミット
 git commit -m "fix: 重大なバグの説明"
 
-npm version patch
-npm publish --access public
-git push origin main --tags
+npm version patch --no-git-tag-version  # sync-version.mjs が自動で追従・git add（タグ/コミットは作らない）
+git add package.json package-lock.json && git commit -m "chore(release): vX.Y.Z"
+git push origin main  # --tags なし。publish.yml が npm publish・タグ・GitHub Release を自動実行
+npm view ksk-design-system@<version> version  # 反映確認
 bash scripts/update-consumers.sh <version> <影響リポ...>
 ```
 
@@ -163,19 +205,45 @@ bash scripts/update-consumers.sh <version> <影響リポ...>
 ## 注意
 
 - 配布前に必ず `npm pack --dry-run` で中身確認
-- 通常公開は Trusted Publishing (OIDC) を使う。`npm login` は
-  `scripts/release.sh` でローカル公開へフォールバックする場合のみ必要
+- 公開経路は `.github/workflows/publish.yml` の Trusted Publishing (OIDC) に一本化。
+  `scripts/release.sh` を含め、ローカルから `npm publish` を直接叩く経路はない
+  （`npm login` / `NPM_TOKEN` は不要）
 - `package.json#exports` を変更したら必ず利用側プロジェクトでの import を試す
 - 金曜午後のリリースは厳禁（週末に障害対応できない）
 - メジャーリリースは月初の月曜が望ましい（フィードバック収集期間が取れる）
 
 ## npm 公開について
 
-v1.36.0 以降は npm registry 経由配布。通常公開は
-`.github/workflows/publish.yml` と npm Trusted Publishing (OIDC) を使うため、
-長寿命の `NPM_TOKEN` やローカルの `npm login` は不要。
-workflow が利用できない緊急時だけ、`scripts/release.sh` のローカル公開へ
-フォールバックする。
+v1.36.0 以降は npm registry 経由配布。公開経路は
+`.github/workflows/publish.yml` と npm Trusted Publishing (OIDC) に一本化した
+（issue #259）。長寿命の `NPM_TOKEN` やローカルの `npm login` は不要で、
+`scripts/release.sh` を含めローカルから `npm publish` を直接実行する経路はない。
+push 後は publish.yml の完了を待ち、レジストリ反映を確認してから consumers へ配布する。
+
+## 緊急時（publish.yml が失敗した場合）
+
+**ローカルから `npm publish` する break-glass 経路は用意していない**
+（`scripts/release.sh` と本ドキュメントの記述を issue #269 レビューで統一）。
+publish.yml が失敗・スタックした場合の実行可能な手順は次の2つのみ:
+
+1. **workflow_dispatch で再実行する**（推奨）:
+   ```bash
+   gh workflow run publish.yml --ref main
+   # または GitHub Actions の UI から Publish workflow → Run workflow
+   ```
+   `package.json` の version が npm 上の最新版より新しければ、再実行のたびに
+   `npm publish` を試みる（`publish.yml` 内の version 比較ロジックが冪等性を担保）。
+   npm publish 自体は既に成功していてタグ / GitHub Release 作成だけが失敗した
+   場合でも、再実行は復旧手段として機能する: `Create git tag + GitHub Release`
+   ステップは「publish した場合のみ」ではなく「対象タグの GitHub Release が
+   まだ無ければ作る」でゲートしているため、npm 側は publish 済み（＝再実行時は
+   `publish=false`）でも Release が無ければこのステップは実行され、作成される
+   （issue #269 レビュー指摘。旧ロジックは publish=false だとこのステップごと
+   スキップされ、タグ/Release が永久に作られなかった）。
+2. 失敗の原因（OIDC 設定・npm 側障害等）を取り除いてから 1 を実行する。
+
+それでも解消しない場合は、npm 側の障害か Trusted Publishing 設定（npmjs.com の
+Trusted Publisher 登録）を疑い、対応後に再度 workflow_dispatch で実行する。
 
 ## 関連
 

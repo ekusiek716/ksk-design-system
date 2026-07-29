@@ -25,15 +25,56 @@ T-0   全消費リポへ配布 (update-consumers.sh)、リリースノート公�
 T+1w  次の patch で旧 API を完全削除
 ```
 
+## version bump の自動同期（issue #259）
+
+`npm version <level>` を実行すると npm の `"version"` ライフサイクルで
+`scripts/sync-version.mjs` が自動発火し、以下を同期する:
+
+- `contracts/components.json` の `meta.version` を新バージョンに更新
+- `contracts/token-hex-cache.json` の再生成
+
+この lifecycle は `--no-git-tag-version` を付けても変わらず発火する
+（`--no-git-tag-version` が省略するのは git のコミット・タグ作成だけ）。
+`npm version` を使わない手動 bump（release PR で `package.json` の version を
+直接書き換える方式など）の場合は、コミット前に単体実行すること:
+
+```bash
+node scripts/sync-version.mjs
+```
+
+変更があったファイルは自動で `git add` される（コミットは自分で行う）。
+
+**タグ・GitHub Release の作成は必ず publish.yml に任せ、ローカルでは作らない
+（issue #269 レビュー指摘）。** `npm version` の既定動作（ローカルタグ作成 +
+コミット）をそのまま使って `git push --tags` すると、publish.yml（CI）より
+先にタグが公開リポジトリに届いてしまい、publish.yml がタグ既存と判定して
+GitHub Release の作成をスキップしてしまう。そのため:
+
+- ローカルでは `npm version <level> --no-git-tag-version` を使う（タグ・コミットなし）
+- `sync-version.mjs` が git add した変更 + `package.json` を自分でコミット
+- `git push origin main`（`--tags` は付けない）
+- タグ・GitHub Release は push 後に publish.yml が作成する
+
+`scripts/release.sh` はこのフローをすでに組み込み済み。
+
 ## ホットフィックス手順
 
 本番障害が発生したら:
 
 1. main で直接修正（or hotfix ブランチ）
-2. `npm version patch`
-3. `npm publish --access public` → `bash scripts/update-consumers.sh <version> <影響リポ...>`
-4. 影響範囲・原因・修正内容を「ホットフィックス履歴」に記録
-5. ポストモーテムを Issue / wiki に書く
+2. `npm version patch --no-git-tag-version`（`sync-version.mjs` が自動で追従・git add まで実行）
+3. `git add package.json package-lock.json` して修正コミットにまとめる
+   （`npm version` は `--no-git-tag-version` でも `package-lock.json` を更新するため、
+   ステージし忘れると `npm ci` が古い依存スナップショットを使ってしまう）
+4. `git push origin main`（`--tags` は付けない）→ `.github/workflows/publish.yml` の
+   Trusted Publishing が npm publish・タグ・GitHub Release 作成を自動実行
+5. 公開を確認: `npm view ksk-design-system@<version> version` →
+   `bash scripts/update-consumers.sh <version> <影響リポ...>`
+6. 影響範囲・原因・修正内容を「ホットフィックス履歴」に記録
+7. ポストモーテムを Issue / wiki に書く
+
+ローカルから `npm publish` を直接叩く経路は廃止した（publish.yml への一本化。
+下記参照）。
 
 ## ホットフィックス履歴
 
