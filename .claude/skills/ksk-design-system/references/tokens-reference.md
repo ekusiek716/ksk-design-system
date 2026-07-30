@@ -27,6 +27,7 @@ Layer 3 Bridge     --primary 等 shadcn 互換         ← shadcn 移植コー�
 | Text | `--Text-High/Medium/Low-Emphasis` <!-- docs-drift-ignore: --Text-High/Medium/Low-Emphasis --> / `--Text-Disable` | 文字の強弱 |
 | | `--Text-on-Inverse` / `--Text-on-Media` | 反転面 / 画像上の白文字 |
 | | `--Text-Accent-Primary` / `--Text-{Success,Caution,Warning,Info}` | 色付き文字（コントラスト確保済み 600–700系） |
+| | `--Text-Caution-on-Inverse` | Surface-Inverse（暗色ツールバー等）上の destructive 文字（Red-400。Text-Caution は暗背景で 2.7:1 しか出ない） |
 | Object | `--Object-High/Medium/Low-Emphasis` <!-- docs-drift-ignore: --Object-High/Medium/Low-Emphasis --> / `--Object-Disable` | アイコン・図形 |
 | | `--Object-{Caution,Success,Warning,Info}` / `--Object-Rating` | 状態アイコン / ★ |
 | Border | `--Border-Low-Emphasis`（区切り・淡カード） / `--Border-Medium-Emphasis`（入力・強調） / `--Border-High-Emphasis` | 罫線3段 |
