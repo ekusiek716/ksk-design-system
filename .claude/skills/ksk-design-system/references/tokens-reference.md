@@ -35,14 +35,14 @@ Layer 3 Bridge     --primary 等 shadcn 互換         ← shadcn 移植コー�
 | Hover/Active | `--Hover-Primary-Button` 等（600→700→800 の段階） | ボタン状態はこのトークンで（自前で暗くしない） |
 | Focus | `--Focus-High-Emphasis`（Brand-400） | フォーカスリング専用 |
 | Overlay | `--Overlay-Dark/Medium/Light` | モーダル背景等 |
-| 状態基準 | `--Caution-Base` / `--Success-Base` / `--Warning-Base` / `--Info-Base`（600系） | テキスト/アイコン基準の状態色 |
+| 状態基準 | `--Caution-Base` / `--Info-Base`（600系）、`--Success-Base` / `--Warning-Base`（700系。白文字 AA 4.5:1 確保のため） | テキスト/アイコン基準の状態色 |
 
 ### 使い分けの決まり文句
 
 - 白背景 → `bg-[var(--Surface-Primary)]`、薄灰の区画 → `bg-[var(--Surface-Secondary)]`
 - 本文 → `text-[var(--Text-High-Emphasis)]`、補足 → `-Medium`、プレースホルダ的 → `-Low`
 - 区切り線・カード枠 → `border-[var(--Border-Low-Emphasis)]`、入力枠 → `-Medium-Emphasis`
-- エラー文字 → `text-[var(--Text-Caution)]`（Red-600。`--Caution-Base` と同値だが text 用ロールを優先）
+- エラー文字 → `text-[var(--Text-Caution)]`（Red-700。淡背景 Surface-Caution 上でも AA。fill 用の `--Caution-Base`=Red-600 とは別値）
 
 ### Categorical（質的パレット・テーマ非依存）
 
