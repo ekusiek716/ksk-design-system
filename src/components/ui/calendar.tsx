@@ -52,7 +52,12 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         range_middle:
           "bg-[var(--Brand-Ultra-Light)] [&>button]:bg-transparent! [&>button]:text-[var(--Text-High-Emphasis)]! [&>button]:rounded-none [&>button]:hover:bg-[var(--Brand-Ultra-Light)]!",
         today: "[&>button]:text-[var(--Brand-Primary)]",
-        outside: "opacity-30",
+        // opacity-30 だと白背景で ≈1.9:1 と AA 未達（アクティブなボタンなので
+        // 1.4.3 の inactive 例外は適用不可）。色トークンで減衰させる。
+        // `!` は today（Brand-Primary 文字）が outside 側にも当たるケースの上書き。
+        // :not([data-selected]) は隣月の選択日（selected+outside 複合）で
+        // selected 側の白文字 on Brand を殺さないためのガード。
+        outside: "[&:not([data-selected])>button]:text-[var(--Text-Low-Emphasis)]!",
         disabled: "text-[var(--Text-Low-Emphasis)] opacity-50",
         hidden: "invisible",
         ...classNames,

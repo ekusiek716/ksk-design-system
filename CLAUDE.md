@@ -139,9 +139,9 @@ npm run test:a11y
 
 axe-core による a11y 機械検証（issue #261）。`@storybook/addon-a11y` の
 afterEach フックが全ストーリー（tags フィルタなし）に対して axe-core を
-実行する（設定は `vitest.a11y.config.ts`）。color-contrast ルールのみ既知の
-トークン債務のため CI では無効化中（`.storybook/preview.ts` 参照、コントラスト自体は
-`scripts/check-contrast.mjs` が担保）。CI では常時実行される。
+実行する（設定は `vitest.a11y.config.ts`）。color-contrast ルールも有効
+（AA 未達トークンの darken と opacity 減衰の廃止により全ストーリー通過。
+トークンペアの正本チェックは `scripts/check-contrast.mjs`）。CI では常時実行される。
 
 エラーが出た場合は修正してから次に進むこと。
 
@@ -308,9 +308,11 @@ npm run test:a11y
 
 - `@storybook/addon-a11y` の afterEach フック（axe-core）が全ストーリー（tags フィルタなし）に
   対して実行される。設定は `vitest.a11y.config.ts`、実行は `npm run test:a11y`。CI では常時実行。
-- color-contrast ルールのみ既知のトークン債務（6テーマ×全コンポーネントに及ぶ規模）のため
-  現状無効化（`.storybook/preview.ts` 参照）。コントラスト自体は `scripts/check-contrast.mjs`
-  （`npm run check` 経由）が引き続き担保する。
+- color-contrast ルールも有効（全ストーリー対象）。当初はトークン債務のため無効化していたが、
+  AA 未達トークンの darken（Success/Warning-Base・Text-Caution/Warning・Text-Low-Emphasis）と
+  opacity 減衰の廃止で解消済み。無効状態デモ等 WCAG 1.4.3 の inactive 例外だけ、ストーリー側で
+  理由コメント付きの rule 除外を許可（`.storybook/preview.ts` 参照）。トークンペアの正本チェックは
+  `scripts/check-contrast.mjs`（`npm run check` 経由）。
 - rules.json の `accessibility.requirements` に `machineVerified` / `verifiedBy` を追加済み。
   axe でカバーできない項目（フォーカスリング視認・タッチターゲット実測・エラー表示の
   色+アイコン+テキスト3点セット等）は今後も目視レビューが必要。

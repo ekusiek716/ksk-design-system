@@ -24,12 +24,16 @@ interface BannerCarouselProps {
   className?: string
 }
 
+// キャプション（Text-on-Inverse）を載せるため -Bold を使う。
+// base（500 相当）は amber/teal 等で白文字が 2.1〜3.7:1 と AA 未達。
+// -Bold はダークモードで 300 相当の明色に反転するが、文字側も
+// Text-on-Inverse（dark では Gray-900）が連動して反転するため両モードで AA。
 const DEFAULT_BACKGROUNDS = [
-  "var(--Categorical-10)",
-  "var(--Categorical-6)",
-  "var(--Categorical-13)",
-  "var(--Categorical-3)",
-  "var(--Categorical-11)",
+  "var(--Categorical-10-Bold)",
+  "var(--Categorical-6-Bold)",
+  "var(--Categorical-13-Bold)",
+  "var(--Categorical-3-Bold)",
+  "var(--Categorical-11-Bold)",
 ]
 
 const ASPECT: Record<string, string> = {
@@ -97,7 +101,9 @@ function BannerCarousel({
                 "hover:opacity-95 active:scale-[.98] transition-transform",
                 ASPECT[itemAspectRatio] ?? "aspect-[2/1]",
                 item.href && "block",
-                !item.imageSrc && "text-[var(--Text-on-Media)]"
+                // 既定背景（-Bold: ダークで明色化）は連動して反転する Text-on-Inverse、
+                // 消費側指定の gradient は明暗不明のため常時白 + 影の Text-on-Media を維持
+                !item.imageSrc && (item.gradient ? "text-[var(--Text-on-Media)]" : "text-[var(--Text-on-Inverse)]")
               )}
             >
               {item.imageSrc && (
@@ -108,13 +114,15 @@ function BannerCarousel({
                   style={{ position: "absolute" }}
                 />
               )}
+              {/* 画像・消費側 gradient は常時白（Text-on-Media）、既定の -Bold fill は
+                  ダークモードで fill が明色化するのに合わせて反転する Text-on-Inverse */}
               {(item.caption || item.subCaption) && (
                 <div className="relative z-10">
                   {item.caption && (
-                    <p className="typo-label-xs leading-snug text-[var(--Text-on-Media)]">{item.caption}</p>
+                    <p className={cn("typo-label-xs leading-snug", item.imageSrc || item.gradient ? "text-[var(--Text-on-Media)]" : "text-[var(--Text-on-Inverse)]")}>{item.caption}</p>
                   )}
                   {item.subCaption && (
-                    <p className="typo-label-xs opacity-75 mt-0.5 text-[var(--Text-on-Media)]">{item.subCaption}</p>
+                    <p className={cn("typo-label-xs mt-0.5", item.imageSrc || item.gradient ? "text-[var(--Text-on-Media)]" : "text-[var(--Text-on-Inverse)]")}>{item.subCaption}</p>
                   )}
                 </div>
               )}

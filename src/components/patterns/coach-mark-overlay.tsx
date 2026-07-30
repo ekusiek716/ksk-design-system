@@ -180,7 +180,7 @@ export function CoachMarkOverlay({
         content={
           <div className={cn("max-w-xs")} style={{ maxWidth }}>
             <p className="typo-label-md text-[var(--Text-on-Inverse)] mb-1">{step.title}</p>
-            <p className="typo-body-sm text-[var(--Text-on-Inverse)] opacity-90 whitespace-pre-line">
+            <p className="typo-body-sm text-[var(--Text-on-Inverse)] whitespace-pre-line">
               {step.desc}
             </p>
           </div>

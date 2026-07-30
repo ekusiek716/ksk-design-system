@@ -49,7 +49,10 @@
   /* ─── Text（テキスト） ─── */
   --Text-High-Emphasis:    var(--Primitive-Gray-900);
   --Text-Medium-Emphasis:  var(--Primitive-Gray-700);
-  --Text-Low-Emphasis:     var(--Primitive-Gray-500);
+  /* Low-Emphasis は Gray-600。Gray-500 だと白背景では AA(4.83:1) だが、
+     Surface-Tertiary / Brand-50 / Categorical-Subtle 等の淡色背景に載った
+     瞬間に 3.9〜4.45:1 へ落ちて AA 未達になる（axe 実測, issue #261 派生）。 */
+  --Text-Low-Emphasis:     var(--Primitive-Gray-600);
   --Text-Disable:          var(--Primitive-Gray-400);
   --Text-on-Inverse:       var(--Primitive-White);
   --Text-on-Inverse-Secondary: var(--Primitive-White-Alpha-800);
@@ -59,9 +62,15 @@
   --Text-Shadow-on-Image:  0 2px 8px rgba(0, 0, 0, 0.45);
   --Text-Accent-Primary:   var(--Primitive-Brand-600);
   --Text-Success:          var(--Primitive-Green-700);
-  --Text-Caution:          var(--Primitive-Red-600);
-  --Text-Warning:          var(--Primitive-Orange-600);
+  /* Caution/Warning テキストは 700。600 だと Surface-Caution(Red-50) 上で
+     4.41:1、Surface-Warning(Amber-50) 上で 3.43:1 と AA 未達（axe 実測）。 */
+  --Text-Caution:          var(--Primitive-Red-700);
+  --Text-Warning:          var(--Primitive-Orange-700);
   --Text-Info:             var(--Primitive-Blue-600);
+  /* Surface-Inverse（暗色ツールバー等）上の destructive テキスト用。
+     Text-Caution(Red-700) は暗背景で 2.7:1 しか出ないため専用トークンを分離。
+     Red-400 は Gray-900 上で 6.41:1（AA）。 */
+  --Text-Caution-on-Inverse: var(--Primitive-Red-400);
 
   /* ─── Object（アイコン・UI要素） ─── */
   --Object-High-Emphasis:   var(--Primitive-Gray-900);
@@ -125,8 +134,10 @@
   /* ─── Semantic Functional ─── */
   --Caution-Base:    var(--Primitive-Red-600);
   --Caution-Action:  var(--Primitive-Red-700);
-  --Success-Base:    var(--Primitive-Green-600);
-  --Warning-Base:    var(--Primitive-Orange-600);
+  /* Success/Warning の fill は 700。600 だと Text-on-Inverse(白) が
+     3.29:1 / 3.55:1 と AA 未達（Badge success/warning 等の axe 実測）。 */
+  --Success-Base:    var(--Primitive-Green-700);
+  --Warning-Base:    var(--Primitive-Orange-700);
   --Info-Base:       var(--Primitive-Blue-600);
 }
 
@@ -174,6 +185,8 @@
   --Text-Caution:          var(--Primitive-Red-400);
   --Text-Warning:          var(--Primitive-Orange-400);
   --Text-Info:             var(--Primitive-Blue-400);
+  /* Dark では Surface-Inverse が白になるため、その上の destructive は濃赤。 */
+  --Text-Caution-on-Inverse: var(--Primitive-Red-700);
 
   --Object-High-Emphasis:   var(--Primitive-White-Alpha-1000);
   --Object-Medium-Emphasis: var(--Primitive-White-Alpha-700);

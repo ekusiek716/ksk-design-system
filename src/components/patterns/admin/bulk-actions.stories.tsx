@@ -38,7 +38,7 @@ export const ManySelected: Story = {
         <Button variant="ghost-inverse" size="sm" className="rounded-full">
           一括ステータス変更
         </Button>
-        <Button variant="ghost-inverse" size="sm" className="rounded-full text-[var(--Text-Caution)]">
+        <Button variant="ghost-inverse" size="sm" className="rounded-full text-[var(--Text-Caution-on-Inverse)]">
           一括削除
         </Button>
       </BulkActions>

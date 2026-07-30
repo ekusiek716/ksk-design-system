@@ -104,7 +104,7 @@ function Footer({
 
         {/* Copyright */}
         {copyright && (
-          <p className="typo-body-xs text-[var(--Text-on-Inverse)]/30 border-t border-[var(--Object-on-Inverse)]/10 pt-4">
+          <p className="typo-body-xs text-[var(--Text-on-Inverse)]/60 border-t border-[var(--Object-on-Inverse)]/10 pt-4">
             {copyright}
           </p>
         )}
