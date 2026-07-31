@@ -164,6 +164,26 @@ describe("動的クラス名合成の検出（fixture）", () => {
     ])
   })
 
+  it("同一行の違反は走査方式ではなくソース上の順序で返す", () => {
+    const source = 'const a = "text-" + tone; const b = `bg-${color}`\n'
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([
+      { line: 1, prefix: "text-" },
+      { line: 1, prefix: "bg-" },
+    ])
+  })
+
+  it("テンプレートリテラルのraw textにある記法例は誤検出しない", () => {
+    const source = 'const help = `Use "bg-" + color instead`\n'
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([])
+  })
+
+  it("テンプレートリテラルの式内にある通常文字列連結は検出する", () => {
+    const source = 'const c = `${"bg-" + color}`\n'
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([
+      { line: 1, prefix: "bg-" },
+    ])
+  })
+
   it("通常文字列の連結でも utility 接頭辞でなければ誤検出しない", () => {
     const source = ['const url = "https://" + host', 'const key = "separator-" + index', ""].join("\n")
     expect(findDynamicClassComposition(source, prefixes)).toEqual([])
