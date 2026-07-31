@@ -328,8 +328,7 @@
 @source inline("duration-[var(--Motion-Duration-Fast)]");
 @source inline("duration-[var(--Motion-Duration-Slow)]");
 @source inline("ease-[var(--Motion-Easing-Bounce)]");
-@source inline("ease-[var(--Motion-Easing-InOut)]");
-@source inline("ease-[var(--Motion-Easing-Snappy)]");
+@source inline("ease-[var(--Motion-Easing-Standard)]");
 @source inline("fade-in-0");
 @source inline("file:bg-transparent");
 @source inline("file:border-0");
@@ -698,8 +697,6 @@
 @source inline("pb-[max(1rem,env(safe-area-inset-bottom))]");
 @source inline("peer-disabled:cursor-not-allowed");
 @source inline("peer-disabled:opacity-50");
-@source inline("pl-0.5");
-@source inline("pl-1");
 @source inline("pl-10");
 @source inline("pl-2.5");
 @source inline("pl-3");

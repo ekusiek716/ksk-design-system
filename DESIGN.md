@@ -59,7 +59,7 @@ motion:                                            # 実体は var(--Motion-*)�
   slower: "500ms ease-out"                         # --Motion-Duration-Slower / 進捗の追従
   sheetSpring: "280ms cubic-bezier(0.32,0.72,0,1)" # --Motion-Duration-Sheet-Settle + --Motion-Easing-Emphasized
   sheetEnter: "320ms cubic-bezier(0.32,0.72,0,1)"  # --Motion-Duration-Sheet-Enter + --Motion-Easing-Emphasized
-  ring: "400ms ease"                               # --Motion-Duration-Ring + --Motion-Easing-Default（ProgressRing）
+  ring: "400ms ease-out"                           # --Motion-Duration-Ring + --Motion-Easing-Standard（ProgressRing）
 layering:                                          # z-index スケール（src/preset.css の --Z-*）
   raised: 10
   sticky: 30
@@ -204,22 +204,17 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 | easing | 値 | 用途 |
 |---|---|---|
 | `--Motion-Easing-Standard` | `cubic-bezier(0,0,0.58,1)` | CSS の `ease-out` キーワードと同一曲線。UI 変化の既定 |
-| `--Motion-Easing-Snappy` | `cubic-bezier(0,0,0.2,1)` | Tailwind の `ease-out` クラスと同一曲線。Standard より速く抜ける |
-| `--Motion-Easing-Default` | `cubic-bezier(0.25,0.1,0.25,1)` | CSS の `ease` キーワードと同一曲線 |
-| `--Motion-Easing-InOut` | `cubic-bezier(0.4,0,0.2,1)` | Tailwind の `ease-in-out` クラスと同一曲線 |
 | `--Motion-Easing-Emphasized` | `cubic-bezier(0.32,0.72,0,1)` | iOS 風スプリング。Sheet / Dialog の展開・ドラッグ |
 | `--Motion-Easing-Accelerate` | `cubic-bezier(0.42,0,1,1)` | 加速。CSS の `ease-in`。落下する紙吹雪 |
 | `--Motion-Easing-Decelerate` | `cubic-bezier(0.16,1,0.3,1)` | 強い減速。celebration の紙吹雪 |
 | `--Motion-Easing-Bounce` | `cubic-bezier(0.34,1.56,0.64,1)` | 行き過ぎて戻る。Button 押下など触感を出す箇所限定 |
 
 - 控えめが基本。バウンドや派手な動きはしない。
-- **`ease-out` は 2 種類あることに注意**。CSS キーワードの `ease-out` は `cubic-bezier(0,0,0.58,1)`、
-  Tailwind の `ease-out` クラスは `cubic-bezier(0,0,0.2,1)` にリマップされている。
-- easing が 8 種あるのは、トークン化が「既存コードに 8 本の異なるカーブが実在した」ことを
-  可視化した結果。値を保存する方針で全部に名前を付け、各箇所を元の曲線へ 1:1 で移した。
-  **何本に整理するかは体感が変わる設計判断なので別途扱う。**
-  新規実装では原則 **Standard**（通常）/ **Emphasized**（Sheet・Dialog）だけを使い、
-  Snappy / Default / InOut は既存箇所の値保存用と考える。
+- 実カーブは5種類。通常UIは **Standard**、Sheet / Dialogは **Emphasized**。
+  Accelerate / Decelerate は方向性を持つcelebration、Bounceは触感を意図した操作だけに使う。
+- `--Motion-Easing-Snappy` / `--Motion-Easing-Default` / `--Motion-Easing-InOut` は
+  consumer互換のdeprecated aliasとして
+  Standardへ解決する。新規コードでは使用せず、v2まで削除しない。
 - `prefers-reduced-motion: reduce` では duration トークン側が 0.01ms に落ちるため、
   トークンを参照していれば個別対応は不要。逆に `duration-200` のような直書きは
   この一括制御から漏れる。

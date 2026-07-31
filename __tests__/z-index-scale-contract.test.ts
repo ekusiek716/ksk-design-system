@@ -84,6 +84,8 @@ describe("z-index スケール contract", () => {
     const alert = readFileSync("src/components/ui/alert-dialog.tsx", "utf8")
     expect(alert).toContain("z-[var(--Z-Alert-Overlay)]")
     expect(alert).toContain("z-[var(--Z-Alert)]")
+    // controlled openでもpaint前に既存Popoverを閉じ、1フレームのstale layerを出さない。
+    expect(alert).toContain("useIsomorphicLayoutEffect(() =>")
     const dialog = readFileSync("src/components/ui/dialog.tsx", "utf8")
     expect(dialog).toContain("z-[var(--Z-Overlay)]")
     expect(dialog).toContain("z-[var(--Z-Modal)]")

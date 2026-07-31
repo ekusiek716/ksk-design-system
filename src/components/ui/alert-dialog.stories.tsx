@@ -1,3 +1,4 @@
+import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import {
@@ -20,6 +21,11 @@ import {
   DialogTitle,
   DialogDescription,
 } from "./dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "./popover"
 
 const meta = {
   title: "Components/AlertDialog",
@@ -231,5 +237,76 @@ export const NestedInDialog: Story = {
     await waitFor(() => expect(body.queryByRole("alertdialog")).toBeNull())
     // 親 Dialog は開いたまま残る
     await expect(body.queryByRole("dialog")).not.toBeNull()
+  },
+}
+
+export const PopoverCoordination: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [popoverOpen, setPopoverOpen] = React.useState(false)
+    const [alertOpen, setAlertOpen] = React.useState(false)
+
+    return (
+      <div className="flex gap-3">
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button data-testid="open-stale-popover">補助メニューを開く</Button>
+          </PopoverTrigger>
+          <PopoverContent data-testid="stale-popover" aria-label="補助メニュー">
+            Alertを開くと閉じる既存Popover
+          </PopoverContent>
+        </Popover>
+
+        <Button variant="destructive" data-testid="open-coordinated-alert" onClick={() => setAlertOpen(true)}>
+          確認を開く
+        </Button>
+
+        <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>変更を確定しますか？</AlertDialogTitle>
+              <AlertDialogDescription>
+                既存Popoverは閉じ、確認内で後から開くPopoverは前面に表示します。
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="secondary" data-testid="open-nested-popover">
+                  詳細を確認
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent data-testid="nested-popover" aria-label="確認の詳細">
+                AlertDialog内で開いたPopover
+              </PopoverContent>
+            </Popover>
+            <AlertDialogFooter>
+              <AlertDialogCancel>キャンセル</AlertDialogCancel>
+              <AlertDialogAction>確定する</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open-stale-popover"))
+    await body.findByTestId("stale-popover")
+    await userEvent.click(canvas.getByTestId("open-coordinated-alert"))
+
+    const alert = await body.findByRole("alertdialog")
+    await waitFor(() =>
+      expect(
+        document.querySelector('[data-testid="stale-popover"][data-state="open"]')
+      ).toBeNull()
+    )
+
+    await userEvent.click(within(alert).getByTestId("open-nested-popover"))
+    const nestedPopover = await body.findByTestId("nested-popover")
+    await expect(Number(getComputedStyle(nestedPopover).zIndex)).toBeGreaterThan(
+      Number(getComputedStyle(alert).zIndex)
+    )
   },
 }

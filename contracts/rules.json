@@ -596,13 +596,15 @@
         { "token": "var(--Motion-Duration-Sheet-Settle)", "value": "280ms", "use": "Sheet のドラッグ解放後の吸着・閉じ" },
         { "token": "var(--Motion-Duration-Ring)",         "value": "400ms", "use": "ProgressRing のリング描画" },
         { "token": "var(--Motion-Easing-Standard)",   "value": "cubic-bezier(0, 0, 0.58, 1)",      "use": "既定。CSS の ease-out キーワードと同一曲線" },
-        { "token": "var(--Motion-Easing-Snappy)",     "value": "cubic-bezier(0, 0, 0.2, 1)",       "use": "Tailwind の ease-out クラスと同一曲線。Standard より速く抜ける" },
-        { "token": "var(--Motion-Easing-Default)",    "value": "cubic-bezier(0.25, 0.1, 0.25, 1)", "use": "CSS の ease キーワードと同一曲線" },
-        { "token": "var(--Motion-Easing-InOut)",      "value": "cubic-bezier(0.4, 0, 0.2, 1)",     "use": "Tailwind の ease-in-out クラスと同一曲線" },
         { "token": "var(--Motion-Easing-Emphasized)", "value": "cubic-bezier(0.32, 0.72, 0, 1)",   "use": "Sheet / Dialog（iOS 風スプリング）" },
         { "token": "var(--Motion-Easing-Accelerate)", "value": "cubic-bezier(0.42, 0, 1, 1)",      "use": "加速（CSS の ease-in）。落下する紙吹雪" },
         { "token": "var(--Motion-Easing-Decelerate)", "value": "cubic-bezier(0.16, 1, 0.3, 1)",    "use": "強い減速（celebration）" },
         { "token": "var(--Motion-Easing-Bounce)",     "value": "cubic-bezier(0.34, 1.56, 0.64, 1)","use": "行き過ぎて戻る（Button 押下）" }
+      ],
+      "deprecatedAliases": [
+        { "token": "var(--Motion-Easing-Snappy)", "resolvesTo": "var(--Motion-Easing-Standard)" },
+        { "token": "var(--Motion-Easing-Default)", "resolvesTo": "var(--Motion-Easing-Standard)" },
+        { "token": "var(--Motion-Easing-InOut)", "resolvesTo": "var(--Motion-Easing-Standard)" }
       ],
       "exceptions": "celebration の 360ms / 600ms / 1400ms のような演出専用の尺は、意図的にスケール外として直書きし理由をコメントで残す"
     },
@@ -625,7 +627,7 @@
         { "token": "var(--Z-Tooltip)",  "value": "1200", "use": "Tooltip" },
         { "token": "var(--Z-SkipLink)", "value": "1300", "use": "SkipLink（何にも隠されてはいけない）" }
       ],
-      "note": "Modal(60) と Alert-Overlay(900) の間は多段 Sheet（Modal + 段数*20、issue #158）の予約領域"
+      "note": "Modal(60) と Alert-Overlay(900) の間は多段 Sheet（Modal + 段数*20、issue #158）の予約領域。PopoverはAlert内の選択UIを隠さないためAlertより上を維持し、AlertDialog open時に既存Popoverを閉じてstale layerを防ぐ"
     }
   },
   "writing": {
