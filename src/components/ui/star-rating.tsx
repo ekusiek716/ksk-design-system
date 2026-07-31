@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Button } from "./button"
 import { cn } from "@/lib/utils"
 
 interface StarRatingProps {
@@ -119,11 +120,9 @@ function StarRating({
         const filled = display >= starValue
         const half = !filled && display >= starValue - 0.5
         const starClassName = cn(
-          "rounded-full transition-colors text-[var(--Brand-Primary)]",
+          "transition-colors text-[var(--Brand-Primary)]",
           STAR_SIZE[size],
-          interactive
-            ? "cursor-pointer hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
-            : "cursor-default pointer-events-none",
+          !interactive && "cursor-default pointer-events-none",
           !filled && !half && "text-[var(--Border-Medium-Emphasis)]"
         )
 
@@ -139,12 +138,14 @@ function StarRating({
         }
 
         return (
-          <button
+          <Button
             key={i}
             ref={(node) => {
               starRefs.current[i] = node
             }}
             type="button"
+            variant="ghost"
+            size="icon-xl"
             role="radio"
             aria-checked={value === starValue}
             aria-label={`${starValue}点`}
@@ -153,14 +154,17 @@ function StarRating({
             onKeyDown={(event) => selectByKeyboard(event, starValue)}
             onMouseEnter={() => setHovered(starValue)}
             onMouseLeave={() => setHovered(null)}
-            className={starClassName}
+            className={cn(
+              "shrink-0 text-[var(--Brand-Primary)]",
+              !filled && !half && "text-[var(--Border-Medium-Emphasis)]",
+            )}
           >
             <StarIcon
               filled={filled}
               half={half}
-              className="size-full"
+              className={STAR_SIZE[size]}
             />
-          </button>
+          </Button>
         )
       })}
       {showLabel && (

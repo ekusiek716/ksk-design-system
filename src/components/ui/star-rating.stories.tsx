@@ -25,9 +25,12 @@ export const Interactive: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const radios = canvas.getAllByRole("radio")
+    const firstRect = radios[0].getBoundingClientRect()
 
     await expect(radios[2]).toHaveAttribute("tabindex", "0")
     await expect(radios[0]).toHaveAttribute("tabindex", "-1")
+    await expect(firstRect.width).toBeGreaterThanOrEqual(44)
+    await expect(firstRect.height).toBeGreaterThanOrEqual(44)
 
     radios[2].focus()
     await userEvent.keyboard("{ArrowRight}")
@@ -41,6 +44,18 @@ export const Interactive: Story = {
     await userEvent.keyboard("{End}")
     await expect(radios[4]).toHaveFocus()
     await expect(radios[4]).toHaveAttribute("aria-checked", "true")
+
+    await userEvent.keyboard("{ArrowRight}")
+    await expect(radios[4]).toHaveFocus()
+
+    await userEvent.keyboard("{ArrowLeft}")
+    await expect(radios[3]).toHaveFocus()
+
+    await userEvent.keyboard("{ArrowUp}")
+    await expect(radios[2]).toHaveFocus()
+
+    await userEvent.keyboard("{ArrowDown}")
+    await expect(radios[3]).toHaveFocus()
   },
 }
 
