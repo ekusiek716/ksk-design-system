@@ -61,6 +61,49 @@ export const DesktopFloating: Story = {
   render: () => <FrameExample preset="desktop-floating" />,
 }
 
+export const GlassSnap: Story = {
+  name: "Glass — mobile snap",
+  parameters: { layout: "fullscreen" },
+  render: () => {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <div
+        data-glass-backdrop="dark"
+        className="flex min-h-screen items-center justify-center bg-[var(--Surface-Inverse)] p-6"
+      >
+        <Sheet
+          open={open}
+          onOpenChange={setOpen}
+          snapPoints={[0.45, 0.9]}
+        >
+          <SheetTrigger asChild>
+            <Button variant="secondary">glass snapを開く</Button>
+          </SheetTrigger>
+          <BottomSheetFrame surface="glass">
+            <DetailSheetScaffold
+              header={
+                <DetailSheetHeader
+                  title="動画を絞り込む"
+                  description="side=bottom のsnap挙動を保ったglass surfaceです。"
+                />
+              }
+              footer={
+                <KeyboardAwareSheetFooter surface="glass">
+                  <Button className="w-full">適用する</Button>
+                </KeyboardAwareSheetFooter>
+              }
+            >
+              <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+                背景の動画を隠しすぎず、操作領域の可読性を保ちます。
+              </p>
+            </DetailSheetScaffold>
+          </BottomSheetFrame>
+        </Sheet>
+      </div>
+    )
+  },
+}
+
 /**
  * iOS ページシート風 preset（#159）。App Store の詳細画面のように、上端に
  * 常時 ~2rem のギャップを残し、背後の暗転と上角丸がわずかに覗く。

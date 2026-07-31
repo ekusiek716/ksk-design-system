@@ -1,7 +1,10 @@
 import { cn } from "@/lib/utils"
 import { SheetContent, type SheetContentProps } from "../ui/sheet"
+import { sheetSurfaceClasses, type SheetSurface } from "./sheet-surface"
 
 interface SideDrawerFrameProps extends Omit<SheetContentProps, "side" | "padding"> {
+  /** visual surface。既定値 "default" は従来表示を維持する。 */
+  surface?: SheetSurface
   /**
    * どちらの端から出すか。既定 "right"（PC の詳細ドロワーの定番）。
    * `swipeToClose` を付けると side に追従した方向（right→右ドラッグ /
@@ -25,16 +28,20 @@ const drawerRecipe = "h-full w-full max-w-md flex flex-col overflow-hidden"
 function SideDrawerFrame({
   className,
   side = "right",
+  surface = "default",
   children,
+  glassOverlay,
   ...props
 }: SideDrawerFrameProps) {
   return (
     <SheetContent
       data-frame="side-drawer-frame"
       data-side={side}
+      data-surface={surface}
       side={side}
       padding={false}
-      className={cn(drawerRecipe, className)}
+      glassOverlay={glassOverlay ?? surface === "glass"}
+      className={cn(drawerRecipe, sheetSurfaceClasses[surface], className)}
       {...props}
     >
       {children}
@@ -43,4 +50,4 @@ function SideDrawerFrame({
 }
 
 export { SideDrawerFrame }
-export type { SideDrawerFrameProps }
+export type { SideDrawerFrameProps, SheetSurface }

@@ -1,10 +1,13 @@
 import { cn } from "@/lib/utils"
 import { SheetContent, type SheetContentProps } from "../ui/sheet"
+import { sheetSurfaceClasses, type SheetSurface } from "./sheet-surface"
 
 type BottomSheetFramePreset = "mobile-full" | "mobile-form" | "mobile-page" | "desktop-floating"
 
 interface BottomSheetFrameProps extends Omit<SheetContentProps, "side" | "padding"> {
   preset?: BottomSheetFramePreset
+  /** 見た目だけを glass に切り替える。snap mode の side="bottom" は維持する。 */
+  surface?: SheetSurface
 }
 
 const presetClasses: Record<BottomSheetFramePreset, string> = {
@@ -41,16 +44,20 @@ const presetClasses: Record<BottomSheetFramePreset, string> = {
 function BottomSheetFrame({
   className,
   preset = "mobile-full",
+  surface = "default",
   children,
+  glassOverlay,
   ...props
 }: BottomSheetFrameProps) {
   return (
     <SheetContent
       data-frame="bottom-sheet-frame"
       data-preset={preset}
+      data-surface={surface}
       side="bottom"
       padding={false}
-      className={cn(presetClasses[preset], className)}
+      glassOverlay={glassOverlay ?? surface === "glass"}
+      className={cn(presetClasses[preset], sheetSurfaceClasses[surface], className)}
       {...props}
     >
       {children}
@@ -59,4 +66,4 @@ function BottomSheetFrame({
 }
 
 export { BottomSheetFrame }
-export type { BottomSheetFramePreset, BottomSheetFrameProps }
+export type { BottomSheetFramePreset, BottomSheetFrameProps, SheetSurface }

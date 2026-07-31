@@ -359,12 +359,14 @@
 @source inline("focus-visible:ring-inset");
 @source inline("focus-visible:ring-offset-2");
 @source inline("focus-visible:ring-offset-transparent");
+@source inline("focus-visible:rounded-sm");
 @source inline("focus-within:border-[var(--Border-Accent-Primary)]");
 @source inline("focus-within:relative");
 @source inline("focus-within:ring-[3px]");
 @source inline("focus-within:ring-[var(--Focus-High-Emphasis)]/50");
 @source inline("focus-within:z-20");
 @source inline("focus:bg-[var(--Surface-Secondary)]");
+@source inline("focus:outline-none");
 @source inline("focus:text-[var(--Text-High-Emphasis)]");
 @source inline("focus:translate-y-0");
 @source inline("font-black");
