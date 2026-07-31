@@ -28,6 +28,7 @@ import * as React from "react"
 import { Sheet } from "../src/components/ui/sheet"
 import { BottomSheetFrame } from "../src/components/patterns/bottom-sheet-frame"
 import { SideDrawerFrame } from "../src/components/patterns/side-drawer-frame"
+import { KeyboardAwareSheetFooter } from "../src/components/patterns/keyboard-aware-sheet-footer"
 
 let container: HTMLElement | null = null
 let root: Root | null = null
@@ -85,5 +86,57 @@ describe("SideDrawerFrame — data-slot / data-frame（Issue #139）", () => {
     expect(el).not.toBeNull()
     expect(el!.getAttribute("data-frame")).toBe("side-drawer-frame")
     expect(el!.getAttribute("data-slot")).toBe("sheet-content")
+  })
+})
+
+describe("Sheet frame surface（Issue #284）", () => {
+  it("BottomSheetFrame surface=glass は snap modeを維持してglass素材を付ける", () => {
+    mount(
+      <Sheet open snapPoints={[0.4, 0.9]}>
+        <BottomSheetFrame surface="glass">content</BottomSheetFrame>
+      </Sheet>
+    )
+
+    const el = document.querySelector<HTMLElement>('[data-slot="sheet-content"]')
+    expect(el?.hasAttribute("data-snap-active")).toBe(true)
+    expect(el?.getAttribute("data-surface")).toBe("glass")
+    expect(el?.classList.contains("glass-strong")).toBe(true)
+  })
+
+  it("SideDrawerFrame surface=glass はglass素材を付ける", () => {
+    mount(
+      <Sheet open>
+        <SideDrawerFrame surface="glass">content</SideDrawerFrame>
+      </Sheet>
+    )
+
+    const el = document.querySelector<HTMLElement>('[data-slot="sheet-content"]')
+    expect(el?.getAttribute("data-surface")).toBe("glass")
+    expect(el?.classList.contains("glass-strong")).toBe(true)
+  })
+
+  it("既定surfaceは従来の不透明surfaceを維持する", () => {
+    mount(
+      <Sheet open>
+        <BottomSheetFrame>content</BottomSheetFrame>
+      </Sheet>
+    )
+
+    const el = document.querySelector<HTMLElement>('[data-slot="sheet-content"]')
+    expect(el?.getAttribute("data-surface")).toBe("default")
+    expect(el?.classList.contains("glass-strong")).toBe(false)
+  })
+
+  it("KeyboardAwareSheetFooter はsafe-area recipeを保ったままglass化する", () => {
+    mount(
+      <KeyboardAwareSheetFooter surface="glass">actions</KeyboardAwareSheetFooter>
+    )
+
+    const el = document.querySelector<HTMLElement>(
+      '[data-slot="keyboard-aware-sheet-footer"]'
+    )
+    expect(el?.getAttribute("data-surface")).toBe("glass")
+    expect(el?.classList.contains("glass-strong")).toBe(true)
+    expect(el?.className).toContain("safe-area-inset-bottom")
   })
 })
