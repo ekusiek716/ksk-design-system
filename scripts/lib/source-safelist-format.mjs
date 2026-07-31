@@ -36,7 +36,64 @@ export function formatInlineSource(candidate) {
 }
 
 /**
- * 動的クラス名合成（`` `bg-${color}` `` 等）をソース全体から検出する。
+ * 通常文字列の走査前に、テンプレートリテラルの raw text だけを空白化する。
+ * `${...}` の式は同じ index のまま復元し、式内の `"bg-" + color` は検査する。
+ */
+function maskTemplateLiteralRawText(source) {
+  const masked = [...source]
+  const mask = (index) => {
+    if (masked[index] !== "\n") masked[index] = " "
+  }
+
+  for (const literal of source.matchAll(/`(?:[^`\\]|\\[\s\S])*`/g)) {
+    const start = literal.index
+    const end = start + literal[0].length
+    for (let index = start; index < end; index += 1) mask(index)
+
+    for (let index = start + 1; index < end - 1; index += 1) {
+      if (source[index] !== "$" || source[index + 1] !== "{") continue
+      let depth = 1
+      let quote = null
+      let escaped = false
+      const expressionStart = index + 2
+      let cursor = expressionStart
+
+      for (; cursor < end - 1 && depth > 0; cursor += 1) {
+        const char = source[cursor]
+        if (escaped) {
+          escaped = false
+          continue
+        }
+        if (char === "\\") {
+          escaped = true
+          continue
+        }
+        if (quote) {
+          if (char === quote) quote = null
+          continue
+        }
+        if (char === '"' || char === "'") {
+          quote = char
+          continue
+        }
+        if (char === "{") depth += 1
+        if (char === "}") depth -= 1
+      }
+
+      const expressionEnd = depth === 0 ? cursor - 1 : cursor
+      for (let restore = expressionStart; restore < expressionEnd; restore += 1) {
+        masked[restore] = source[restore]
+      }
+      index = cursor - 1
+    }
+  }
+
+  return masked.join("")
+}
+
+/**
+ * 動的クラス名合成（`` `bg-${color}` `` / `"bg-" + color` /
+ * `"bg-".concat(color)` 等）をソース全体から検出する。
  *
  * 行単位で見ると、複数行テンプレートリテラルの途中行
  * （その行にバッククォートが無い）を取りこぼす。ファイル内容全体から
@@ -52,16 +109,38 @@ export function formatInlineSource(candidate) {
 export function findDynamicClassComposition(source, prefixes) {
   const stripped = stripComments(source)
   const violations = []
+  const addViolation = (index, prefix) => {
+    const line = stripped.slice(0, index).split("\n").length
+    violations.push({ index, line, prefix })
+  }
+
   // バッククォート文字列（改行を含みうる）。`\\[\s\S]` でエスケープを飛ばす。
   for (const literal of stripped.matchAll(/`(?:[^`\\]|\\[\s\S])*`/g)) {
     for (const hit of literal[0].matchAll(/([a-z][a-z0-9-]*-)\$\{/g)) {
       if (!prefixes.has(hit[1])) continue
       const index = literal.index + hit.index
-      const line = stripped.slice(0, index).split("\n").length
-      violations.push({ line, prefix: hit[1] })
+      addViolation(index, hit[1])
     }
   }
-  return violations
+
+  // 通常の文字列リテラルの直後に + / .concat( が続く場合も動的合成になる。
+  // 実際に Scanner が収集した utility 接頭辞だけに絞り、URL や一般文字列の
+  // 連結は誤検出しない。
+  const normalStringSource = maskTemplateLiteralRawText(stripped)
+  for (const literal of normalStringSource.matchAll(/(["'])(?:\\[\s\S]|(?!\1)[^\\])*\1/g)) {
+    const after = normalStringSource.slice(literal.index + literal[0].length)
+    if (!/^\s*(?:\+|\.concat\s*\()/.test(after)) continue
+
+    const content = literal[0].slice(1, -1)
+    const hit = content.match(/([a-z][a-z0-9-]*-)$/)
+    if (!hit || !prefixes.has(hit[1])) continue
+    addViolation(literal.index + 1 + content.length - hit[1].length, hit[1])
+  }
+
+  // ソース順で安定した診断にする。テンプレートリテラルと通常文字列の
+  // 走査を分けても、複数違反の表示順がコード上の順序からずれない。
+  violations.sort((a, b) => a.index - b.index)
+  return violations.map(({ line, prefix }) => ({ line, prefix }))
 }
 
 /** 表現不能な理由ごとの対処法（生成失敗時にそのまま表示する） */
