@@ -79,6 +79,7 @@ export const Selected: Story = {
 }
 
 export const Removable: Story = {
+  tags: ["interaction"],
   render: () => (
     <div className="flex gap-2">
       <Chip removable onRemove={() => alert("削除: React")}>React</Chip>
@@ -86,6 +87,15 @@ export const Removable: Story = {
       <Chip removable onRemove={() => alert("削除: Tailwind")}>Tailwind</Chip>
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const removeButtons = canvas.getAllByRole("button", { name: /^削除:/ })
+
+    for (const button of removeButtons) {
+      await expect(button.getBoundingClientRect().width).toBeGreaterThanOrEqual(44)
+      await expect(getComputedStyle(button, "::before").minHeight).toBe("44px")
+    }
+  },
 }
 
 export const SquareShape: Story = {

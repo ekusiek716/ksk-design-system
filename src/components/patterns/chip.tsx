@@ -172,18 +172,16 @@ function Chip({
   const soldOutStyles = isSoldOut &&
     "border border-[var(--Text-Disable)] bg-[var(--Surface-Secondary)]! text-[var(--Text-Disable)]! cursor-not-allowed"
 
-  // × は本体ラベルに寄せる（独立した w-8 の正方形セルにしない）。tile のみ従来の固定幅。
+  // × は独立した操作なのでA004の横44pxを優先する。ラベルとの密度は少し下がるが、
+  // 32px幅のまま見た目だけ寄せるより、運動障害・片手操作時の誤タップを防ぐ。
   // × も独立したタップ対象なので、縦は本体と同じく透明 before 擬似要素で 44px に拡張する。
-  // 横は本体のように min-w-11 を効かせない: × は本体ラベルに寄せた副次アクションで、
-  // 44px 幅にするとチップの大半が × になり主アクション（チップ本体）が押しにくくなる。
-  // 現状 32px 幅 × 44px の当たり判定で、WCAG 2.5.8 (AA) の 24px 最小サイズは満たす。
   const removeTouchTarget =
     "before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']"
   const removeButtonSize = {
-    sm: `h-7 pl-0.5 pr-2 ${removeTouchTarget}`,
-    md: `h-8 pl-0.5 pr-2.5 ${removeTouchTarget}`,
-    lg: `h-9 pl-1 pr-3 ${removeTouchTarget}`,
-    tile: "h-12 w-8",
+    sm: `h-7 w-11 ${removeTouchTarget}`,
+    md: `h-8 w-11 ${removeTouchTarget}`,
+    lg: `h-9 w-11 ${removeTouchTarget}`,
+    tile: "h-12 w-11",
   }[actualSize]
 
   const removeButtonShape =

@@ -1,8 +1,12 @@
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { notifyAlertDialogOpening } from "@/lib/layer-coordination"
 import { buttonVariants } from "./button"
 import type { ButtonProps } from "./button"
+
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
 
 /**
  * AlertDialog — 確認ダイアログ（破壊的アクションの二段階確認に使用）
@@ -28,9 +32,40 @@ import type { ButtonProps } from "./button"
  */
 
 function AlertDialog({
+  open,
+  defaultOpen,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
+  const notifiedOpenRef = React.useRef(false)
+
+  useIsomorphicLayoutEffect(() => {
+    const externallyOpen = open === true || (open === undefined && defaultOpen === true)
+    if (externallyOpen && !notifiedOpenRef.current) {
+      notifyAlertDialogOpening()
+      notifiedOpenRef.current = true
+    }
+    if (open === false) notifiedOpenRef.current = false
+  }, [defaultOpen, open])
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen && !notifiedOpenRef.current) {
+      notifyAlertDialogOpening()
+      notifiedOpenRef.current = true
+    }
+    if (!nextOpen) notifiedOpenRef.current = false
+    onOpenChange?.(nextOpen)
+  }
+
+  return (
+    <AlertDialogPrimitive.Root
+      data-slot="alert-dialog"
+      open={open}
+      defaultOpen={defaultOpen}
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
+  )
 }
 
 function AlertDialogTrigger({

@@ -1,9 +1,42 @@
 import * as React from "react"
 import { Popover as PopoverPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { subscribeToAlertDialogOpening } from "@/lib/layer-coordination"
 
-function Popover({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />
+function Popover({
+  open,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: React.ComponentProps<typeof PopoverPrimitive.Root>) {
+  const controlled = open !== undefined
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false)
+  const actualOpen = controlled ? open : internalOpen
+
+  const handleOpenChange = React.useCallback(
+    (nextOpen: boolean) => {
+      if (!controlled) setInternalOpen(nextOpen)
+      onOpenChange?.(nextOpen)
+    },
+    [controlled, onOpenChange]
+  )
+
+  React.useEffect(
+    () =>
+      subscribeToAlertDialogOpening(() => {
+        if (actualOpen) handleOpenChange(false)
+      }),
+    [actualOpen, handleOpenChange]
+  )
+
+  return (
+    <PopoverPrimitive.Root
+      data-slot="popover"
+      open={actualOpen}
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
+  )
 }
 
 function PopoverTrigger({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {

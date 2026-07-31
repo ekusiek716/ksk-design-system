@@ -753,7 +753,7 @@
     {
       "name": "AlertDialog",
       "path": "src/components/ui/alert-dialog.tsx",
-      "description": "「アクションを止める」割り込み確認の基盤(role=alertdialog)。破壊的アクションの二段階確認に使用。中央表示・オーバーレイ外クリックでは閉じない（明示的に選ばせる）。タスク面の中央モーダルは Dialog を使う。",
+      "description": "「アクションを止める」割り込み確認の基盤(role=alertdialog)。破壊的アクションの二段階確認に使用。中央表示・オーバーレイ外クリックでは閉じない（明示的に選ばせる）。開く瞬間に既存Popoverを閉じ、AlertDialog内で後から開くPopoverは専用z-indexで前面に表示する。タスク面の中央モーダルは Dialog を使う。",
       "variants": [
         "default",
         "sm"
@@ -765,7 +765,8 @@
       ],
       "rules": [
         "Action に variant=destructive でデストラクティブCTA",
-        "Cancel は variant=tertiary デフォルト"
+        "Cancel は variant=tertiary デフォルト",
+        "AlertDialog open時は既存Popoverを閉じ、stale layerを確認面の上に残さない"
       ]
     },
     {
@@ -1210,7 +1211,8 @@
         "href を渡すと <a> でレンダリング",
         "shape=pill (既定) / square、size=tile は正方形タイル",
         "touch device では selected 切替時の color transition を走らせない",
-        "Android tap highlight は DS 側で抑制するため consumer CSS で上書きしない"
+        "Android tap highlight は DS 側で抑制するため consumer CSS で上書きしない",
+        "removable の削除ボタンは横44px + 縦44px hit areaを確保する"
       ]
     },
     {

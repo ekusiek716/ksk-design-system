@@ -353,7 +353,7 @@ function BottomTabBarPill({
           className={cn(
             "absolute left-0 top-0 rounded-full pointer-events-none",
             platterAnimated &&
-              "transition-[transform,width,height] duration-[var(--Motion-Duration-Base)] ease-[var(--Motion-Easing-Snappy)] motion-reduce:transition-none",
+              "transition-[transform,width,height] duration-[var(--Motion-Duration-Base)] ease-[var(--Motion-Easing-Standard)] motion-reduce:transition-none",
             platterSurfaceClass(tone)
           )}
           style={{

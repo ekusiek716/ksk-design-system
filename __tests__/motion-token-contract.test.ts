@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest"
 /**
  * モーショントークン（src/styles/motion.css）の不変条件。issue #263。
  *
- * 目的は「体感が勝手に変わらないこと」。既存実装の実測値をそのまま
- * トークンに移した経緯があるため、値そのものを固定して回帰を防ぐ。
+ * 目的は「体感が勝手に増殖しないこと」。通常UIをStandardへ統合し、
+ * 方向性・触感を持つ表現だけを専用カーブとして固定する。
  */
 
 const motion = readFileSync("src/styles/motion.css", "utf8")
@@ -31,17 +31,25 @@ describe("motion トークン contract", () => {
     expect(token("Motion-Duration-Ring")).toBe("400ms")
   })
 
-  it("easing の値が既存実装と一致する", () => {
-    // Standard = CSS の `ease-out` キーワード / Snappy = Tailwind の `ease-out` クラス。
-    // 別曲線なので統合しない（統合すると片方の体感が変わる）。
+  it("easing は5つの実カーブに限定し、旧名はStandard aliasにする", () => {
     expect(token("Motion-Easing-Standard")).toBe("cubic-bezier(0, 0, 0.58, 1)")
-    expect(token("Motion-Easing-Snappy")).toBe("cubic-bezier(0, 0, 0.2, 1)")
-    expect(token("Motion-Easing-Default")).toBe("cubic-bezier(0.25, 0.1, 0.25, 1)")
-    expect(token("Motion-Easing-InOut")).toBe("cubic-bezier(0.4, 0, 0.2, 1)")
     expect(token("Motion-Easing-Accelerate")).toBe("cubic-bezier(0.42, 0, 1, 1)")
     expect(token("Motion-Easing-Emphasized")).toBe("cubic-bezier(0.32, 0.72, 0, 1)")
     expect(token("Motion-Easing-Decelerate")).toBe("cubic-bezier(0.16, 1, 0.3, 1)")
     expect(token("Motion-Easing-Bounce")).toBe("cubic-bezier(0.34, 1.56, 0.64, 1)")
+    expect(token("Motion-Easing-Snappy")).toBe("var(--Motion-Easing-Standard)")
+    expect(token("Motion-Easing-Default")).toBe("var(--Motion-Easing-Standard)")
+    expect(token("Motion-Easing-InOut")).toBe("var(--Motion-Easing-Standard)")
+    expect(new Set([...rootBlock.matchAll(/cubic-bezier\([^)]+\)/g)].map((m) => m[0])).size).toBe(5)
+  })
+
+  it("コンポーネントはdeprecated easing aliasを使わない", async () => {
+    const { globSync } = await import("node:fs")
+    const files = globSync("src/{components,lib}/**/*.{ts,tsx}")
+    const offenders = files.filter((file) =>
+      /Motion-Easing-(Snappy|Default|InOut)/.test(readFileSync(file, "utf8"))
+    )
+    expect(offenders).toEqual([])
   })
 
   it("prefers-reduced-motion で全 duration が 0 近傍に落ちる", () => {
