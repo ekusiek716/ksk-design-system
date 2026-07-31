@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.48.3",
+    "version": "1.49.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 67,
@@ -896,7 +896,9 @@
       "path": "src/components/ui/form.tsx",
       "description": "react-hook-form 統合フォームラッパー。FormProvider + Controller のラッパー群。FormField / FormItem / FormLabel / FormControl / FormDescription / FormMessage で構成。",
       "usageNote": "この FormField は patterns/form-field.tsx の非 RHF 版 FormField と同名のため、index.ts では `RhfFormField` として export される。react-hook-form の Controller が必要なフォームはこちらを使う。迷ったら patterns 版 FormField（非 RHF）を使う。",
-      "aliases": ["RhfFormField"],
+      "aliases": [
+        "RhfFormField"
+      ],
       "accessibility": [
         "aria-describedby 自動付与",
         "aria-invalid でエラー状態",
