@@ -149,6 +149,31 @@ describe("動的クラス名合成の検出（fixture）", () => {
     ])
   })
 
+  it("文字列リテラルを + で連結する動的クラスを検出する", () => {
+    const source = ['const a = "bg-" + color', "const b = 'text-' + tone", ""].join("\n")
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([
+      { line: 1, prefix: "bg-" },
+      { line: 2, prefix: "text-" },
+    ])
+  })
+
+  it(".concat() で連結する動的クラスを検出する", () => {
+    const source = ['const c = "pointer-events-".concat(state)', ""].join("\n")
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([
+      { line: 1, prefix: "pointer-events-" },
+    ])
+  })
+
+  it("通常文字列の連結でも utility 接頭辞でなければ誤検出しない", () => {
+    const source = ['const url = "https://" + host', 'const key = "separator-" + index', ""].join("\n")
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([])
+  })
+
+  it("コメント内の通常文字列連結は誤検出しない", () => {
+    const source = ['// NG: "bg-" + color', "/* 'text-'.concat(tone) */", ""].join("\n")
+    expect(findDynamicClassComposition(source, prefixes)).toEqual([])
+  })
+
   it("ユーティリティ接頭辞でない補間は誤検出しない（React の key など）", () => {
     const source = "<Sep key={`separator-${index}`} />\n"
     expect(findDynamicClassComposition(source, prefixes)).toEqual([])
