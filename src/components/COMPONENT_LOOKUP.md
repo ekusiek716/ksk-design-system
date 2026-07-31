@@ -61,7 +61,7 @@
 | Section | `@/components/ui/section` | **spacing**: `sm`, `md`, `lg`, `xl`<br>**background**: `none`, `subtle`, `accent-subtle` | FullBleedBandWithContainedContent |
 | Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
-| Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass` | BottomSheet, FloatSheet, RightSheet, A11yOptions, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158), OpensAndIsImmediatelyInteractive |
+| Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass` | BottomSheet, FloatSheet, RightSheet, A11yOptions, TitleAutoFocusAppearance, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158), OpensAndIsImmediatelyInteractive |
 | Skeleton, SkeletonText | `@/components/ui/skeleton` | — | CardSkeleton, TextSkeleton, SkeletonText (5 lines) |
 | SkipLink | `@/components/ui/skip-link` | — | Default |
 | Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Range — 最小値/最大値を別々にラベル付け, Disabled |
@@ -105,7 +105,7 @@
 | BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
 | Banner | `@/components/patterns/banner` | **variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants |
 | BottomSheetForm | `@/components/patterns/bottom-sheet-form` | — | Default, WithLoading |
-| BottomSheetFrame | `@/components/patterns/bottom-sheet-frame` | — | MobileFull, MobileForm, DesktopFloating, MobilePage, KeyboardHideFallback, swipeToClose + DetailSheetScaffold (#164) |
+| BottomSheetFrame | `@/components/patterns/bottom-sheet-frame` | — | MobileFull, MobileForm, DesktopFloating, Glass — mobile snap, MobilePage, KeyboardHideFallback, swipeToClose + DetailSheetScaffold (#164) |
 | CategoryNav | `@/components/patterns/category-nav` | — | Default, WithSelection |
 | CategoryScroll | `@/components/patterns/category-scroll` | — | Default, CircleShape, GridLayout |
 | CelebrationDialog | `@/components/patterns/celebration-dialog` | — | Basic, Bounce Emoji / Auto Dismiss, Iconsax Badge（emoji の代わり）, Custom Confetti Colors |
@@ -130,7 +130,7 @@
 | Footer | `@/components/patterns/footer` | — | Default, Minimal |
 | FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
-| KeyboardAwareSheetFooter | `@/components/patterns/keyboard-aware-sheet-footer` | — | Fixed, HideWhenKeyboardOpen |
+| KeyboardAwareSheetFooter | `@/components/patterns/keyboard-aware-sheet-footer` | — | Fixed, HideWhenKeyboardOpen, Glass |
 | ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot |
 | ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | Default, WithoutFilter, FewRows |
 | MediaActionCluster | `@/components/patterns/media-action-cluster` | — | Vertical, Horizontal, Auto orientation, No auto-hide |
@@ -151,7 +151,7 @@
 | SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
 | SettingsSection, SettingsListRow | `@/components/patterns/settings-section` | — | Group, Card, Danger |
 | ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders, With onShare tracking |
-| SideDrawerFrame | `@/components/patterns/side-drawer-frame` | — | RightDrawer, LeftDrawer, RightDrawer — swipeToClose, LeftDrawer — swipeToClose |
+| SideDrawerFrame | `@/components/patterns/side-drawer-frame` | — | RightDrawer, LeftDrawer, RightDrawer — swipeToClose, LeftDrawer — swipeToClose, Glass |
 | SimplePagination | `@/components/patterns/simple-pagination` | — | アイテム数指定 (items), ページ数指定 (pages), compact (モバイル省略表示), 境界での disabled, 0 件 |
 | StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, Variants, Interactive, MultipleCards |
 | StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |

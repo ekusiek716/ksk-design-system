@@ -345,7 +345,7 @@
     {
       "name": "Sheet",
       "path": "src/components/ui/sheet.tsx",
-      "description": "サイドパネル・ボトムシート。フィルター・メニュー・補助入力に使用。モーダルより軽いコンテキストに。snapPoints でスナップ式、swipeToClose で下スワイプ閉じを有効化。autoFocus / restoreFocusOnClose / closeOnEsc / bodyScrollLock でフォーカス・スクロール挙動を制御可能。 多段（シートの上にシート）では open 順に overlay/content の z-index が自動繰り上げされ、zIndex / overlayClassName で上書き可能。",
+      "description": "サイドパネル・ボトムシート。フィルター・メニュー・補助入力に使用。モーダルより軽いコンテキストに。snapPoints でスナップ式、swipeToClose で下スワイプ閉じを有効化。autoFocus / restoreFocusOnClose / closeOnEsc / bodyScrollLock でフォーカス・スクロール挙動を制御可能。autoFocus=title はUA依存のoutlineを出さず、キーボード時はDS focus ringを表示する。多段（シートの上にシート）では open 順に overlay/content の z-index が自動繰り上げされ、zIndex / overlayClassName で上書き可能。",
       "subcomponents": [
         "SheetTrigger",
         "SheetContent",
@@ -361,7 +361,7 @@
         "swipeToClose は side=bottom / bottom-glass のみ有効",
         "swipeToClose mode は max-h-[90dvh] を自動付与し、viewport 外にはみ出さない",
         "autoFocus は first-input / title / ref / false を指定可能",
-        "description prop は sr-only description を自動生成する"
+        "description prop はRadix管理IDの sr-only description を自動生成する"
       ],
       "variants": {
         "side": [
@@ -1419,18 +1419,20 @@
     {
       "name": "KeyboardAwareSheetFooter",
       "path": "src/components/patterns/keyboard-aware-sheet-footer.tsx",
-      "description": "Sheet 内 CTA footer の keyboard / safe-area 対応。fixed / hide / scroll の挙動を宣言し、visualViewport の keyboard inset を消費する。useFocusedInputComfortScroll helper も同梱。",
+      "description": "Sheet 内 CTA footer の keyboard / safe-area 対応。fixed / hide / scroll の挙動と default / glass のsurfaceを宣言し、visualViewport の keyboard inset を消費する。useFocusedInputComfortScroll helper も同梱。",
       "variants": [
         "fixed",
         "hide",
-        "scroll"
+        "scroll",
+        "surface: default / glass"
       ],
       "features": [
         "visualViewport keyboard inset",
         "safe-area bottom",
         "hide-while-keyboard",
         "scroll-content mode",
-        "focused-input comfort scroll helper"
+        "focused-input comfort scroll helper",
+        "glass surface with scroll-content mask"
       ],
       "rules": [
         "Sheet 内の footer CTA は画面別 CSS ではなく KeyboardAwareSheetFooter を使う",
@@ -1913,17 +1915,19 @@
     {
       "name": "BottomSheetFrame",
       "path": "src/components/patterns/bottom-sheet-frame.tsx",
-      "description": "SheetContent の responsive outer frame preset。mobile-full / mobile-page（iOS ページシート風・上端 2rem ギャップ）/ mobile-form / desktop-floating を宣言し、DetailSheetScaffold と KeyboardAwareSheetFooter を内側で合成する。",
+      "description": "SheetContent の responsive outer frame preset。mobile-full / mobile-page（iOS ページシート風・上端 2rem ギャップ）/ mobile-form / desktop-floating と default / glass のsurfaceを宣言し、DetailSheetScaffold と KeyboardAwareSheetFooter を内側で合成する。glassでもsnap用のside=bottomを維持する。",
       "variants": [
         "mobile-full",
         "mobile-page",
         "mobile-form",
-        "desktop-floating"
+        "desktop-floating",
+        "surface: default / glass"
       ],
       "features": [
         "safe-area-aware max height",
         "scroll-container composition",
-        "desktop floating width"
+        "desktop floating width",
+        "glass surface without changing snap behavior"
       ],
       "rules": [
         "長い SheetContent className recipe を consumer 側に重複させず BottomSheetFrame preset を使う",
@@ -1933,15 +1937,17 @@
     {
       "name": "SideDrawerFrame",
       "path": "src/components/patterns/side-drawer-frame.tsx",
-      "description": "SheetContent(side=right/left) の詳細ドロワー outer frame preset。全高・padding無し・flex縦・幅md を1つの口でまとめる。PC の右詳細ドロワー用（モバイルの下部シートは BottomSheetFrame）。swipeToClose は side に追従した方向で閉じる。",
+      "description": "SheetContent(side=right/left) の詳細ドロワー outer frame preset。全高・padding無し・flex縦・幅md と default / glass のsurfaceを1つの口でまとめる。PC の右詳細ドロワー用（モバイルの下部シートは BottomSheetFrame）。swipeToClose は side に追従した方向で閉じる。",
       "variants": [
         "left",
-        "right"
+        "right",
+        "surface: default / glass"
       ],
       "features": [
         "full-height side drawer",
         "flex column scroll composition",
-        "side-following swipe-to-close"
+        "side-following swipe-to-close",
+        "glass surface"
       ],
       "rules": [
         "詳細ドロワーの className 上書き（p-0 w-full max-w-md flex flex-col overflow-hidden）を consumer 側に重複させず SideDrawerFrame を使う",

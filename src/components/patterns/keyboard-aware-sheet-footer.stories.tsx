@@ -39,3 +39,17 @@ export const HideWhenKeyboardOpen: Story = {
     </div>
   ),
 }
+
+export const Glass: Story = {
+  parameters: { backgrounds: { default: "dark" } },
+  render: () => (
+    <div
+      data-glass-backdrop="dark"
+      className="max-w-md bg-[var(--Surface-Inverse)] pt-24"
+    >
+      <KeyboardAwareSheetFooter surface="glass">
+        <Button className="w-full">絞り込みを適用する</Button>
+      </KeyboardAwareSheetFooter>
+    </div>
+  ),
+}

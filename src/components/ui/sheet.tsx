@@ -789,7 +789,6 @@ function SheetContent({
   overlayClassName,
   ...props
 }: SheetContentProps) {
-  const autoDescId = React.useId()
   const contentRef = React.useRef<HTMLDivElement>(null)
   const restoreFocusRef = React.useRef<HTMLElement | null>(null)
   // body scroll lock は Radix (modal Dialog) の react-remove-scroll が
@@ -813,7 +812,6 @@ function SheetContent({
   const [stackLevel, setStackLevel] = React.useState(0)
   const resolvedContentZ = zIndex ?? SHEET_CONTENT_BASE_Z + stackLevel * SHEET_STACK_STEP
   const hasInternalDesc = description != null && description !== false
-  const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
   const snapCtx = React.useContext(SheetSnapContext)
   // The drag indicator is an iOS HIG "this can be dragged" affordance.
   // Auto-rendered in two cases:
@@ -940,6 +938,10 @@ function SheetContent({
   const keyboardStyle = isBottomAnchored
     ? resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false)
     : undefined
+  const {
+    "aria-describedby": ariaDescribedBy,
+    ...contentProps
+  } = props
 
   return (
     <SheetPortal container={container}>
@@ -949,20 +951,20 @@ function SheetContent({
         data-slot="sheet-content"
         data-side={side}
         className={cn(sheetVariants({ side }), padding && "p-6", className)}
-        {...props}
+        {...contentProps}
         style={{
           ...props.style,
           ...keyboardStyle,
           zIndex: resolvedContentZ,
         }}
-        aria-describedby={ariaDescribedBy}
+        {...(!hasInternalDesc && { "aria-describedby": ariaDescribedBy })}
         onOpenAutoFocus={handleOpenAutoFocus}
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
         <SheetStackRegistrar onLevelChange={setStackLevel} />
         {hasInternalDesc && (
-          <DialogPrimitive.Description id={autoDescId} className="sr-only">
+          <DialogPrimitive.Description className="sr-only">
             {description}
           </DialogPrimitive.Description>
         )}
@@ -1049,9 +1051,11 @@ function SwipeToCloseBottomSheet({
   style,
   ...props
 }: SwipeToCloseBottomSheetProps) {
-  const autoDescId = React.useId()
   const hasInternalDesc = description != null && description !== false
-  const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
+  const {
+    "aria-describedby": ariaDescribedBy,
+    ...contentProps
+  } = props
   const rootCtx = React.useContext(SheetRootContext)
   const [dragY, setDragY] = React.useState(0)
   const [dragging, setDragging] = React.useState(false)
@@ -1320,7 +1324,7 @@ function SwipeToCloseBottomSheet({
           willChange: "transform",
           zIndex: contentZIndex,
         }}
-        {...props}
+        {...contentProps}
         // Full-surface swipe-to-close: handlers live on the content root so a
         // downward swipe anywhere can dismiss. onPointerMove gates on scroll
         // position so it never steals the content's own scroll gesture.
@@ -1328,7 +1332,7 @@ function SwipeToCloseBottomSheet({
         onPointerMove={onPointerMove}
         onPointerUp={finishDrag}
         onPointerCancel={finishDrag}
-        aria-describedby={ariaDescribedBy}
+        {...(!hasInternalDesc && { "aria-describedby": ariaDescribedBy })}
         onOpenAutoFocus={handleOpenAutoFocus}
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
@@ -1337,7 +1341,7 @@ function SwipeToCloseBottomSheet({
           <SheetStackRegistrar onLevelChange={onStackLevelChange} />
         )}
         {hasInternalDesc && (
-          <DialogPrimitive.Description id={autoDescId} className="sr-only">
+          <DialogPrimitive.Description className="sr-only">
             {description}
           </DialogPrimitive.Description>
         )}
@@ -1417,9 +1421,11 @@ function SwipeToCloseSideDrawer({
   style,
   ...props
 }: SwipeToCloseSideDrawerProps) {
-  const autoDescId = React.useId()
   const hasInternalDesc = description != null && description !== false
-  const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
+  const {
+    "aria-describedby": ariaDescribedBy,
+    ...contentProps
+  } = props
   const rootCtx = React.useContext(SheetRootContext)
   const [dragDist, setDragDist] = React.useState(0)
   const [dragging, setDragging] = React.useState(false)
@@ -1616,12 +1622,12 @@ function SwipeToCloseSideDrawer({
           willChange: "transform",
           zIndex: contentZIndex,
         }}
-        {...props}
+        {...contentProps}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={finishDrag}
         onPointerCancel={finishDrag}
-        aria-describedby={ariaDescribedBy}
+        {...(!hasInternalDesc && { "aria-describedby": ariaDescribedBy })}
         onOpenAutoFocus={handleOpenAutoFocus}
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
@@ -1630,7 +1636,7 @@ function SwipeToCloseSideDrawer({
           <SheetStackRegistrar onLevelChange={onStackLevelChange} />
         )}
         {hasInternalDesc && (
-          <DialogPrimitive.Description id={autoDescId} className="sr-only">
+          <DialogPrimitive.Description className="sr-only">
             {description}
           </DialogPrimitive.Description>
         )}
@@ -1689,9 +1695,11 @@ function SnapBottomSheetContent({
   style,
   ...props
 }: SnapBottomSheetContentProps) {
-  const autoDescId = React.useId()
   const hasInternalDesc = description != null && description !== false
-  const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
+  const {
+    "aria-describedby": ariaDescribedBy,
+    ...contentProps
+  } = props
   const {
     snapRatios,
     activeSnapPoint,
@@ -1866,8 +1874,8 @@ function SnapBottomSheetContent({
           touchAction: "none",
           zIndex: contentZIndex,
         }}
-        {...props}
-        aria-describedby={ariaDescribedBy}
+        {...contentProps}
+        {...(!hasInternalDesc && { "aria-describedby": ariaDescribedBy })}
         onOpenAutoFocus={handleOpenAutoFocus}
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
@@ -1876,7 +1884,7 @@ function SnapBottomSheetContent({
           <SheetStackRegistrar onLevelChange={onStackLevelChange} />
         )}
         {hasInternalDesc && (
-          <DialogPrimitive.Description id={autoDescId} className="sr-only">
+          <DialogPrimitive.Description className="sr-only">
             {description}
           </DialogPrimitive.Description>
         )}
@@ -1946,7 +1954,17 @@ function SheetFooter({
 }
 
 function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
-  return <DialogPrimitive.Title data-slot="sheet-title" className={cn("typo-heading-lg text-[var(--Text-High-Emphasis)]", className)} {...props} />
+  return (
+    <DialogPrimitive.Title
+      data-slot="sheet-title"
+      className={cn(
+        "typo-heading-lg text-[var(--Text-High-Emphasis)]",
+        "focus:outline-none focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
 function SheetDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>) {

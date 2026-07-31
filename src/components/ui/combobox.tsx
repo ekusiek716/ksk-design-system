@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+import { Label } from "./label"
 import { cn } from "@/lib/utils"
 
 export interface ComboboxOption {
@@ -35,6 +36,7 @@ function Combobox({
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const searchInputId = React.useId()
 
   const selected = options.find((o) => o.value === value)
 
@@ -87,11 +89,15 @@ function Combobox({
       >
         {/* Search */}
         <div className="flex items-center border-b border-[var(--Border-Low-Emphasis)] px-3 gap-2">
+          <Label htmlFor={searchInputId} className="sr-only">
+            {searchPlaceholder}
+          </Label>
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="text-[var(--Object-Low-Emphasis)] shrink-0" aria-hidden>
             <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
             <path d="M11 11L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
           <input
+            id={searchInputId}
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}

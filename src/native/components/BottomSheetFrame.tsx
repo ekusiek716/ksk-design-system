@@ -1,11 +1,14 @@
 import React from "react"
 import { ScrollView, View, type StyleProp, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { GlassView } from "./GlassView"
 
 export type BottomSheetFramePreset = "mobile-full" | "mobile-form" | "desktop-floating"
+export type SheetSurface = "default" | "glass"
 
 export interface BottomSheetFrameProps {
   preset?: BottomSheetFramePreset
+  surface?: SheetSurface
   header?: React.ReactNode
   footer?: React.ReactNode
   scrollable?: boolean
@@ -16,6 +19,7 @@ export interface BottomSheetFrameProps {
 
 export function BottomSheetFrame({
   preset = "mobile-full",
+  surface = "default",
   header,
   footer,
   scrollable = true,
@@ -25,6 +29,8 @@ export function BottomSheetFrame({
 }: BottomSheetFrameProps) {
   const { theme, scales } = useTheme()
   const maxHeight = preset === "mobile-form" ? 520 : preset === "desktop-floating" ? 620 : 720
+  const borderRadius =
+    preset === "mobile-full" ? scales.borderRadius["2xl"] : scales.borderRadius.xl
   const body = scrollable ? (
     <ScrollView style={[{ flex: 1 }, bodyStyle]}>
       {children}
@@ -33,22 +39,32 @@ export function BottomSheetFrame({
     <View style={[{ flex: 1 }, bodyStyle]}>{children}</View>
   )
 
-  return (
-    <View
-      style={[
-        {
-          maxHeight,
-          minHeight: preset === "mobile-full" ? 360 : undefined,
-          overflow: "hidden",
-          borderRadius: preset === "mobile-full" ? scales.borderRadius["2xl"] : scales.borderRadius.xl,
-          backgroundColor: theme.surface.primary,
-        },
-        style,
-      ]}
-    >
+  const content = (
+    <>
       {header}
       {body}
       {footer}
-    </View>
+    </>
   )
+  const frameStyle: ViewStyle = {
+    maxHeight,
+    minHeight: preset === "mobile-full" ? 360 : undefined,
+    overflow: "hidden",
+    borderRadius,
+    backgroundColor: surface === "glass" ? "transparent" : theme.surface.primary,
+  }
+
+  if (surface === "glass") {
+    return (
+      <GlassView
+        intensity="thick"
+        borderRadius={borderRadius}
+        style={[frameStyle, style]}
+      >
+        {content}
+      </GlassView>
+    )
+  }
+
+  return <View style={[frameStyle, style]}>{content}</View>
 }

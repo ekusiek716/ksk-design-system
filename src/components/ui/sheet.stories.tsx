@@ -114,6 +114,46 @@ export const A11yOptions: Story = {
   ),
 }
 
+export const TitleAutoFocusAppearance: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button data-testid="title-focus-trigger">タイトルへフォーカス</Button>
+      </SheetTrigger>
+      <SheetContent
+        autoFocus="title"
+        description="タイトルへの初期フォーカス表示を確認するシートです。"
+      >
+        <SheetHeader>
+          <SheetTitle>フォーカス表示</SheetTitle>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByTestId("title-focus-trigger")
+
+    await userEvent.click(trigger)
+    await waitFor(() =>
+      expect(document.activeElement?.getAttribute("data-slot")).toBe("sheet-title")
+    )
+    const title = document.activeElement as HTMLElement
+    expect(title).toHaveTextContent("フォーカス表示")
+    expect(window.getComputedStyle(title).outlineStyle).toBe("none")
+
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => expect(trigger).toHaveFocus())
+    await userEvent.keyboard("{Enter}")
+    await waitFor(() =>
+      expect(document.activeElement?.getAttribute("data-slot")).toBe("sheet-title")
+    )
+    const reopenedTitle = document.activeElement as HTMLElement
+    expect(reopenedTitle).toHaveClass("focus-visible:ring-[3px]")
+  },
+}
+
 // ─── Liquid Glass variants ────────────────────────────────────────────────────
 
 export const FloatGlass: Story = {

@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
+import { sheetSurfaceClasses, type SheetSurface } from "./sheet-surface"
 
 type KeyboardAwareSheetFooterBehavior = "fixed" | "hide" | "scroll"
 
@@ -13,6 +14,8 @@ interface FocusComfortScrollOptions {
 interface KeyboardAwareSheetFooterProps extends React.ComponentProps<"div"> {
   behavior?: KeyboardAwareSheetFooterBehavior
   hideWhenInputFocused?: boolean
+  /** safe-area / keyboard behavior を保ったまま背景素材だけを切り替える。 */
+  surface?: SheetSurface
 }
 
 function useFocusedInputComfortScroll<T extends HTMLElement = HTMLDivElement>({
@@ -47,6 +50,7 @@ function KeyboardAwareSheetFooter({
   className,
   behavior = "fixed",
   hideWhenInputFocused = behavior === "hide",
+  surface = "default",
   style,
   children,
   ...props
@@ -59,10 +63,12 @@ function KeyboardAwareSheetFooter({
       data-slot="keyboard-aware-sheet-footer"
       data-behavior={behavior}
       data-keyboard-open={isKeyboardOpen || undefined}
+      data-surface={surface}
       className={cn(
         "shrink-0 bg-[var(--Surface-Primary)] px-5 pt-3",
         "border-t border-[var(--Border-Low-Emphasis)]",
         "pb-[max(1rem,env(safe-area-inset-bottom))]",
+        sheetSurfaceClasses[surface],
         behavior === "fixed" && "sticky bottom-[var(--ksk-keyboard-inset)] z-10",
         behavior === "hide" && "sticky bottom-[var(--ksk-keyboard-inset)] z-10 transition-all duration-[var(--Motion-Duration-Base)]",
         behavior === "scroll" && "relative",
@@ -85,4 +91,5 @@ export type {
   FocusComfortScrollOptions,
   KeyboardAwareSheetFooterBehavior,
   KeyboardAwareSheetFooterProps,
+  SheetSurface,
 }

@@ -16,9 +16,11 @@ type Story = StoryObj<typeof SideDrawerFrame>
 function DrawerExample({
   side,
   swipeToClose,
+  surface,
 }: {
   side: "left" | "right"
   swipeToClose?: boolean
+  surface?: "default" | "glass"
 }) {
   const [open, setOpen] = React.useState(false)
   return (
@@ -26,7 +28,7 @@ function DrawerExample({
       <SheetTrigger asChild>
         <Button>{side === "right" ? "右" : "左"}詳細ドロワーを開く</Button>
       </SheetTrigger>
-      <SideDrawerFrame side={side} swipeToClose={swipeToClose}>
+      <SideDrawerFrame side={side} swipeToClose={swipeToClose} surface={surface}>
         <DetailSheetScaffold
           header={
             <DetailSheetHeader
@@ -79,4 +81,19 @@ export const RightDrawerSwipeToClose: Story = {
 export const LeftDrawerSwipeToClose: Story = {
   name: "LeftDrawer — swipeToClose",
   render: () => <DrawerExample side="left" swipeToClose />,
+}
+
+export const Glass: Story = {
+  parameters: {
+    layout: "fullscreen",
+    backgrounds: { default: "dark" },
+  },
+  render: () => (
+    <div
+      data-glass-backdrop="dark"
+      className="flex min-h-screen items-center justify-center bg-[var(--Surface-Inverse)] p-6"
+    >
+      <DrawerExample side="right" surface="glass" />
+    </div>
+  ),
 }

@@ -130,7 +130,12 @@ export {
   type PromptSlotStatus,
 } from "./PromptCoordinator"
 export { BottomSheetForm, type BottomSheetFormProps } from "./BottomSheetForm"
-export { BottomSheetFrame, type BottomSheetFramePreset, type BottomSheetFrameProps } from "./BottomSheetFrame"
+export {
+  BottomSheetFrame,
+  type BottomSheetFramePreset,
+  type BottomSheetFrameProps,
+  type SheetSurface,
+} from "./BottomSheetFrame"
 export { ReviewOverlay, type ReviewOverlayProps } from "./ReviewOverlay"
 export { CoachMark, type CoachMarkProps } from "./CoachMark"
 export { CoachMarkOverlay, type CoachMarkOverlayProps } from "./CoachMarkOverlay"

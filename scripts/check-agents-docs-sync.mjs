@@ -178,15 +178,11 @@ function checkPairWhole(pathA, pathB) {
   const textA = requireDoc(pathA)
   const textB = requireDoc(pathB)
   if (textA === null || textB === null) return
-  // H1 タイトル行は除外して比較する
-  const withoutH1 = (t) =>
-    stripIgnoredLines(t)
-      .split(/\r?\n/)
-      .filter((l) => !/^#\s+/.test(l))
-      .join("\n")
-      .trim()
-  const a = withoutH1(textA)
-  const b = withoutH1(textB)
+  // templates は H1 を含む全文を同期する。ツール固有の1行だけを変える場合は
+  // 他の行と同様に docs-sync-ignore を明示し、タイトル差分を黙って捨てない。
+  const normalizeWhole = (t) => stripIgnoredLines(t).trim()
+  const a = normalizeWhole(textA)
+  const b = normalizeWhole(textB)
   if (a !== b) {
     const diff = firstDiffLine(a, b)
     error(
