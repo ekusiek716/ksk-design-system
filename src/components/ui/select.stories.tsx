@@ -88,14 +88,6 @@ export const DisabledSelect: Story = {
 /** 開いて選択でき、選んだ値がトリガーに反映される。 */
 export const OpensAndSelectsOption: Story = {
   tags: ["interaction", "!autodocs"],
-  parameters: {
-    // play 関数実行後、axe が Radix のクローズアニメーション途中の過渡的な
-    // DOM（閉じかけの aria-hidden ラッパーに残るフォーカス可能要素の残骸、
-    // まだアンマウントされていない listbox 等）を検査してしまい誤検知になる。
-    // 開閉の正しさ自体は上の play 関数のアサーションで担保済みのため、
-    // このストーリーでは a11y テストを無効化する。
-    a11y: { test: "off" },
-  },
   render: () => (
     <Select>
       <SelectTrigger className="w-[240px]" data-testid="trigger" aria-label="カテゴリを選択">
@@ -123,17 +115,13 @@ export const OpensAndSelectsOption: Story = {
 
     await waitFor(() => expect(trigger).toHaveTextContent("開発"))
     await expect(trigger).toHaveAttribute("aria-expanded", "false")
+    await waitFor(() => expect(body.queryByRole("listbox")).not.toBeInTheDocument())
   },
 }
 
 /** キーボードだけで開いて選択できる。 */
 export const SelectsWithKeyboard: Story = {
   tags: ["interaction", "!autodocs"],
-  parameters: {
-    // OpensAndSelectsOption と同じ理由（Radix クローズアニメーション途中の
-    // 過渡的 DOM を axe が誤検知するため）で a11y テストを無効化する。
-    a11y: { test: "off" },
-  },
   render: () => (
     <Select>
       <SelectTrigger className="w-[240px]" data-testid="trigger" aria-label="カテゴリを選択">
@@ -148,6 +136,7 @@ export const SelectsWithKeyboard: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
+    const body = within(document.body)
     const trigger = canvas.getByTestId("trigger")
 
     trigger.focus()
@@ -161,5 +150,6 @@ export const SelectsWithKeyboard: Story = {
 
     await waitFor(() => expect(trigger).toHaveAttribute("aria-expanded", "false"))
     await expect(trigger.textContent).not.toBe("カテゴリを選択")
+    await waitFor(() => expect(body.queryByRole("listbox")).not.toBeInTheDocument())
   },
 }

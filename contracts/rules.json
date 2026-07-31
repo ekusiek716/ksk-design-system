@@ -527,13 +527,13 @@
       { "id": "A003", "rule": "UI 要素・アイコンのコントラスト比 3:1 以上", "machineVerified": false, "verifiedBy": "manual review（axe(color-contrast) はテキストのみ対象で、非テキスト 1.4.11 は検査しない。scripts/check-contrast.mjs もテキスト用ペアのみが対象）" },
       { "id": "A004", "rule": "タッチターゲット最小 44×44px（WCAG 2.5.5 AAA）", "machineVerified": false, "verifiedBy": "manual review（axe の target-size は既定無効・実測が必要なため未採用）" },
       { "id": "A005", "rule": "フォーカスリング必須: focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50", "machineVerified": false, "verifiedBy": "manual review（フォーカスリングの視覚的な確認は axe では検出できない）" },
-      { "id": "A006", "rule": "アイコンボタンに aria-label 必須", "machineVerified": true, "verifiedBy": "axe(button-name) + eslint(ksk-a11y/icon-button-aria-label)" },
-      { "id": "A007", "rule": "フォーム入力に <Label> 必須（placeholder のみ禁止）", "machineVerified": true, "verifiedBy": "axe(label)" },
+      { "id": "A006", "rule": "アイコンボタンに aria-label 必須", "machineVerified": "partial", "verifiedBy": "axe(button-name、Storybookで描画されるケース) + eslint(ksk-a11y/icon-button-aria-label、明示された非空の aria-label / aria-labelledby を静的検査)。動的値が実行時に空になるケースと未導入consumerはmanual review" },
+      { "id": "A007", "rule": "フォーム入力に <Label> 必須（placeholder のみ禁止）", "machineVerified": "partial", "verifiedBy": "axe(label) は accessible name の有無を検証するが、<Label> 要素の使用や placeholder-only 禁止までは保証しないためmanual reviewを併用" },
       { "id": "A008", "rule": "エラー表示は 色 + アイコン + テキスト の3点セット必須（色のみ禁止）", "machineVerified": false, "verifiedBy": "manual review（意味的な組み合わせの判断は axe では不可）" },
       { "id": "A009", "rule": "ステータス区別は 色 + アイコン + テキスト（色のみ禁止）", "machineVerified": false, "verifiedBy": "manual review（意味的な組み合わせの判断は axe では不可）" },
       { "id": "A010", "rule": "<div onClick> 禁止: 操作可能要素は必ず <button> / <Button>", "machineVerified": false, "verifiedBy": "manual review（axe は role 有無しか見ず onClick の意図までは判定できない）" },
       { "id": "A011", "rule": "<img> に alt 属性必須（装飾画像は alt=\"\"）", "machineVerified": true, "verifiedBy": "axe(image-alt)" },
-      { "id": "A012", "rule": "モーダルは <Dialog> を使用し、フォーカストラップを保証", "machineVerified": true, "verifiedBy": "interaction test（play 関数、npm run test:interaction。axe 自体はフォーカストラップの挙動までは検証しない）" }
+      { "id": "A012", "rule": "モーダルは <Dialog> を使用し、フォーカストラップを保証", "machineVerified": "partial", "verifiedBy": "対象コンポーネントのinteraction test（play 関数、npm run test:interaction）でフォーカストラップを検証。すべてのモーダル実装がDialogを使うことはmanual review" }
     ]
   },
   "typography": {

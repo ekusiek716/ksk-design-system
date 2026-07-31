@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Button } from "./button"
 import { cn } from "@/lib/utils"
 
 interface StarRatingProps {
@@ -12,10 +13,10 @@ interface StarRatingProps {
 }
 
 const STAR_SIZE = {
-  sm: "w-4 h-4",
-  md: "w-5 h-5",
-  lg: "w-6 h-6",
-  xl: "w-8 h-8",
+  sm: "size-4",
+  md: "size-5",
+  lg: "size-6",
+  xl: "size-8",
 } as const
 
 const LABEL_SIZE = {
@@ -69,8 +70,40 @@ function StarRating({
   className,
 }: StarRatingProps) {
   const [hovered, setHovered] = React.useState<number | null>(null)
+  const starRefs = React.useRef<Array<HTMLButtonElement | null>>([])
   const interactive = !!onChange
   const display = hovered ?? value
+  const selectedValue =
+    Number.isInteger(value) && value >= 1 && value <= max ? value : 1
+
+  const selectByKeyboard = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    currentValue: number,
+  ) => {
+    let nextValue: number
+    switch (event.key) {
+      case "ArrowLeft":
+      case "ArrowUp":
+        nextValue = Math.max(1, currentValue - 1)
+        break
+      case "ArrowRight":
+      case "ArrowDown":
+        nextValue = Math.min(max, currentValue + 1)
+        break
+      case "Home":
+        nextValue = 1
+        break
+      case "End":
+        nextValue = max
+        break
+      default:
+        return
+    }
+
+    event.preventDefault()
+    onChange?.(nextValue)
+    starRefs.current[nextValue - 1]?.focus()
+  }
 
   return (
     <div
@@ -80,7 +113,7 @@ function StarRating({
       // role なし div への aria-label は無効）。
       role={interactive ? "radiogroup" : "img"}
       aria-label={interactive ? "評価" : `${value}/${max}点`}
-      className={cn("inline-flex items-center gap-0.5", className)}
+      className={cn("inline-flex items-center gap-1", className)}
     >
       {Array.from({ length: max }, (_, i) => {
         const starValue = i + 1
@@ -89,9 +122,7 @@ function StarRating({
         const starClassName = cn(
           "transition-colors text-[var(--Brand-Primary)]",
           STAR_SIZE[size],
-          interactive
-            ? "cursor-pointer hover:scale-110 transition-transform"
-            : "cursor-default pointer-events-none",
+          !interactive && "cursor-default pointer-events-none",
           !filled && !half && "text-[var(--Border-Medium-Emphasis)]"
         )
 
@@ -101,29 +132,39 @@ function StarRating({
         if (!interactive) {
           return (
             <span key={i} aria-hidden="true" className={starClassName}>
-              <StarIcon filled={filled} half={half} className="w-full h-full" />
+              <StarIcon filled={filled} half={half} className="size-full" />
             </span>
           )
         }
 
         return (
-          <button
+          <Button
             key={i}
+            ref={(node) => {
+              starRefs.current[i] = node
+            }}
             type="button"
+            variant="ghost"
+            size="icon-xl"
             role="radio"
             aria-checked={value === starValue}
             aria-label={`${starValue}点`}
+            tabIndex={starValue === selectedValue ? 0 : -1}
             onClick={() => onChange?.(starValue)}
+            onKeyDown={(event) => selectByKeyboard(event, starValue)}
             onMouseEnter={() => setHovered(starValue)}
             onMouseLeave={() => setHovered(null)}
-            className={starClassName}
+            className={cn(
+              "shrink-0 text-[var(--Brand-Primary)]",
+              !filled && !half && "text-[var(--Border-Medium-Emphasis)]",
+            )}
           >
             <StarIcon
               filled={filled}
               half={half}
-              className="w-full h-full"
+              className={STAR_SIZE[size]}
             />
-          </button>
+          </Button>
         )
       })}
       {showLabel && (
