@@ -192,17 +192,17 @@ function ControlsPanel() {
         <div>
           <GroupLabel>Switch</GroupLabel>
           <Row>
-            <Switch checked={on} onCheckedChange={setOn} />
-            <Switch checked={!on} onCheckedChange={(v) => setOn(!v)} />
-            <Switch disabled />
+            <Switch aria-label="有効なスイッチ" checked={on} onCheckedChange={setOn} />
+            <Switch aria-label="無効なスイッチ" checked={!on} onCheckedChange={(v) => setOn(!v)} />
+            <Switch aria-label="操作できないスイッチ" disabled />
           </Row>
         </div>
         <div>
           <GroupLabel>Checkbox</GroupLabel>
           <Row>
-            <Checkbox checked={checked} onCheckedChange={(v) => setChecked(v === true)} />
-            <Checkbox checked={false} />
-            <Checkbox checked disabled />
+            <Checkbox aria-label="選択済み" checked={checked} onCheckedChange={(v) => setChecked(v === true)} />
+            <Checkbox aria-label="未選択" checked={false} />
+            <Checkbox aria-label="操作できない選択肢" checked disabled />
           </Row>
         </div>
         <div>
@@ -264,7 +264,7 @@ function SelectsPanel() {
       <div>
         <GroupLabel>Select</GroupLabel>
         <Select defaultValue="tokyo">
-          <SelectTrigger>
+          <SelectTrigger aria-label="地域を選択">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -371,7 +371,12 @@ function NavigationPanel() {
       </div>
       <div>
         <GroupLabel>Pagination</GroupLabel>
-        <SimplePagination page={page} totalPages={10} onPageChange={setPage} />
+        <SimplePagination
+          aria-label="簡易ページネーション"
+          page={page}
+          totalPages={10}
+          onPageChange={setPage}
+        />
       </div>
       <div>
         <GroupLabel>Dropdown Filter</GroupLabel>
@@ -1047,10 +1052,10 @@ function Showcase() {
             <CategoryScroll
               title="カテゴリ"
               items={[
-                { name: "新着", href: "#", imageUrl: "https://picsum.photos/seed/s1/80" },
-                { name: "セール", href: "#", imageUrl: "https://picsum.photos/seed/s2/80" },
-                { name: "人気", href: "#", imageUrl: "https://picsum.photos/seed/s3/80" },
-                { name: "限定", href: "#", imageUrl: "https://picsum.photos/seed/s4/80" },
+                { name: "新着", href: "#new", imageUrl: "https://picsum.photos/seed/s1/80" },
+                { name: "セール", href: "#sale", imageUrl: "https://picsum.photos/seed/s2/80" },
+                { name: "人気", href: "#popular", imageUrl: "https://picsum.photos/seed/s3/80" },
+                { name: "限定", href: "#limited", imageUrl: "https://picsum.photos/seed/s4/80" },
               ]}
             />
           </div>
@@ -1084,7 +1089,7 @@ function Showcase() {
 
         {/* 37 Pagination (full) */}
         <Panel no="37" title="Pagination">
-          <Pagination>
+          <Pagination aria-label="ページ番号ナビゲーション">
             <PaginationContent>
               <PaginationItem><PaginationPrevious href="#" /></PaginationItem>
               <PaginationItem><PaginationLink href="#">1</PaginationLink></PaginationItem>
@@ -1175,6 +1180,7 @@ function Showcase() {
 
         {/* 44 Footer */}
         <Panel no="44" title="Footer" span={2}>
+          <h3 className="sr-only">フッターのリンク</h3>
           <Footer
             linkGroups={[
               { title: "サービス", links: [{ label: "機能", href: "#" }, { label: "料金", href: "#" }] },
@@ -1232,16 +1238,5 @@ export default meta
 
 export const UIKit: StoryObj = {
   name: "UI Kit（ショーケース）",
-  parameters: {
-    // このページは 1 画面に大量のコンポーネントを見た目確認用に並べた
-    // ギャラリーで、実際に配布されるスクリーンではない
-    // （Foundation 系ページと同じ位置づけ。foundation-*.stories.tsx 参照）。
-    // 個別の <Switch>/<Checkbox>/<Select> 等はラベル無しの「見た目サンプル」
-    // として並んでおり、見出しレベルも装飾セクションの都合で意図的に
-    // 非連番。各コンポーネント自体の a11y は個別ストーリー
-    // （switch.stories.tsx 等）側で検証済みのため、このギャラリー特有の
-    // 誤検知はここで無効化する。
-    a11y: { test: "off" },
-  },
   render: () => <Showcase />,
 }

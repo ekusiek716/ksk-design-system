@@ -27,17 +27,30 @@ function literalSize(node) {
   return null
 }
 
-function hasAttr(openingElement, names) {
+function hasNonEmptyAccessibleName(openingElement) {
   return openingElement.attributes.some((attr) => {
     if (attr.type !== "JSXAttribute") return false
     const name = attr.name?.name
-    return names.includes(name)
-  })
-}
+    if (name !== "aria-label" && name !== "aria-labelledby") return false
+    if (attr.value === null) return false
 
-/** aria-label / aria-labelledby がスプレッド経由で来ている可能性がある場合は誤検知を避けて見逃す。 */
-function hasSpread(openingElement) {
-  return openingElement.attributes.some((attr) => attr.type === "JSXSpreadAttribute")
+    if (attr.value.type === "Literal") {
+      return typeof attr.value.value === "string" && attr.value.value.trim().length > 0
+    }
+
+    if (attr.value.type !== "JSXExpressionContainer") return false
+    const expression = attr.value.expression
+    if (expression.type === "Literal") {
+      return typeof expression.value === "string" && expression.value.trim().length > 0
+    }
+    if (expression.type === "TemplateLiteral" && expression.expressions.length === 0) {
+      return expression.quasis.some((quasi) => quasi.value.cooked?.trim())
+    }
+
+    // 識別子・関数呼び出し等の値は静的には確定できないため許可する。
+    // 実レンダリング時の空値は axe(button-name) が補完して検出する。
+    return expression.type !== "JSXEmptyExpression"
+  })
 }
 
 /** @type {import('eslint').Rule.RuleModule} */
@@ -71,8 +84,9 @@ const iconButtonAriaLabel = {
         const size = literalSize(sizeAttr.value)
         if (!size || !ICON_SIZE.test(size)) return
 
-        if (hasSpread(node)) return
-        if (hasAttr(node, ["aria-label", "aria-labelledby"])) return
+        // spread props に accessible name が含まれるとは証明できないため、
+        // 明示された非空の aria-label / aria-labelledby だけを合格にする。
+        if (hasNonEmptyAccessibleName(node)) return
 
         context.report({ node, messageId: "missingAriaLabel" })
       },

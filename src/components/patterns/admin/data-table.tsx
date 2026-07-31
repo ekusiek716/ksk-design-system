@@ -1084,13 +1084,26 @@ function DataTableAvatarCell({
 
 // ─── 9. DataTableImageCell ───
 
-interface DataTableImageCellProps extends React.ComponentProps<"td"> {
+interface DataTableImageCellBaseProps {
   src: string
-  alt?: string
-  title?: string
   caption?: string
   imageSize?: number
 }
+
+type DataTableImageCellProps = React.ComponentProps<"td"> &
+  DataTableImageCellBaseProps &
+  (
+    | {
+        /** 可視タイトルが画像の代替になるため、追加情報が必要な場合のみ指定する */
+        title: string
+        alt?: string
+      }
+    | {
+        /** 可視タイトルが無い画像は、装飾なら空文字、内容画像なら代替テキストを明示する */
+        title?: undefined
+        alt: string
+      }
+  )
 
 function DataTableImageCell({
   className,
