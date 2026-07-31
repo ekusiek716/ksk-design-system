@@ -56,14 +56,6 @@ if [ "$(git branch --show-current)" != "main" ]; then
   exit 1
 fi
 
-# 曜日チェック（金曜・休前日のリリースは禁止 — RELEASE.md に従う）
-DOW="$(date +%u)"  # 1=月 .. 7=日
-if [ "$DOW" = "5" ]; then
-  echo -e "${YELLOW}⚠️  今日は金曜です。週末に障害対応できない場合はリリース禁止 (RELEASE.md)。${NC}"
-  read -p "それでも続けますか? (yes/no): " ans
-  [ "$ans" = "yes" ] || { echo "中止"; exit 1; }
-fi
-
 echo -e "${CYAN}→ npm run check${NC}"
 npm run check
 

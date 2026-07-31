@@ -209,7 +209,6 @@ bash scripts/update-consumers.sh <version> <影響リポ...>
   `scripts/release.sh` を含め、ローカルから `npm publish` を直接叩く経路はない
   （`npm login` / `NPM_TOKEN` は不要）
 - `package.json#exports` を変更したら必ず利用側プロジェクトでの import を試す
-- 金曜午後のリリースは厳禁（週末に障害対応できない）
 - メジャーリリースは月初の月曜が望ましい（フィードバック収集期間が取れる）
 
 ## npm 公開について
