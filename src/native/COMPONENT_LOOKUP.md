@@ -4,7 +4,7 @@
 
 React Native / Expo consumer は、新規 UI を作る前にこの一覧で既存コンポーネントを確認してください。すべて `ksk-design-system/native/ui` から import します。
 
-- Public native component exports: 148
+- Public native component exports: 149
 - Import: `import { Button, Screen } from "ksk-design-system/native/ui"`
 
 | Component | Source | Section |
@@ -12,6 +12,7 @@ React Native / Expo consumer は、新規 UI を作る前にこの一覧で既�
 | `Badge` | `src/native/components/Badge.tsx` | Base |
 | `Button` | `src/native/components/Button.tsx` | Base |
 | `Card` | `src/native/components/Card.tsx` | Base |
+| `CardHeader` | `src/native/components/CardHeader.tsx` | Base |
 | `FloatingTabBar` | `src/native/components/FloatingTabBar.tsx` | Base |
 | `GlassView` | `src/native/components/GlassView.tsx` | Base |
 | `GradientSurface` | `src/native/components/GradientSurface.tsx` | Base |
