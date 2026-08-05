@@ -41,3 +41,22 @@ export const WithMeta: Story = {
     </QuickActionGrid>
   ),
 }
+
+/** issue #293: 狭いタイルで長い meta と 2 行 description を併用しても description が潰れない */
+export const NarrowWithLongMeta: Story = {
+  render: () => (
+    <QuickActionGrid className="max-w-sm" columns={2}>
+      <ActionTile
+        label="丸テーブル"
+        description="親族・友人をバランスよく配置できる定番レイアウト"
+        meta="登録ゲスト数におすすめ"
+        selected
+      />
+      <ActionTile
+        label="長テーブル"
+        description="カジュアルな少人数パーティー向け"
+        meta="〜30名"
+      />
+    </QuickActionGrid>
+  ),
+}

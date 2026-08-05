@@ -384,6 +384,7 @@
 @source inline("gap-4");
 @source inline("gap-6");
 @source inline("gap-8");
+@source inline("gap-x-2");
 @source inline("gap-x-4");
 @source inline("gap-y-1");
 @source inline("grid");
@@ -624,6 +625,7 @@
 @source inline("min-w-[18px]");
 @source inline("min-w-[200px]");
 @source inline("min-w-[240px]");
+@source inline("min-w-[60%]");
 @source inline("min-w-[78px]");
 @source inline("min-w-[8rem]");
 @source inline("min-w-[var(--radix-select-trigger-width)]");
