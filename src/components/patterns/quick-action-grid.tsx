@@ -90,14 +90,14 @@ function ActionTile({
         {loading && <Spinner size="sm" label="処理中" />}
       </span>
       {(description || meta) && (
-        <span className="flex w-full items-end justify-between gap-2">
+        <span className="flex w-full flex-wrap items-end justify-between gap-x-2 gap-y-1">
           {description && (
-            <span className="typo-body-sm min-w-0 text-[var(--Text-Medium-Emphasis)]">
+            <span className="typo-body-sm min-w-[60%] flex-1 text-[var(--Text-Medium-Emphasis)]">
               {description}
             </span>
           )}
           {meta && (
-            <span className="typo-label-sm shrink-0 text-[var(--Text-Low-Emphasis)]">
+            <span className="typo-label-sm ml-auto shrink-0 text-[var(--Text-Low-Emphasis)]">
               {meta}
             </span>
           )}
