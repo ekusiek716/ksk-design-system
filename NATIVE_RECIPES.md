@@ -237,3 +237,101 @@ const POLICY_SECTIONS = [
   <Prose sections={POLICY_SECTIONS} />
 </DocumentScreen>
 ```
+
+## Tappable icon buttons
+
+押せる円形/角丸アイコンは `IconButton` を使います。`IconBadge` は装飾専用（非タップ）なので、ヘッダの設定ギア・カード右上の閉じる・一覧行のアクションを `Button` + `containerStyle` で自作しないでください。Web 側の相当物は `<Button size="icon">` です。
+
+`accessibilityLabel` は必須（型で強制）。視覚サイズが 44pt 未満の `size="sm"` でも、実タップ領域は `hitSlop` で 44pt 以上が確保されます。`icon` に関数を渡すと variant/tone/size から解決済みの色とサイズを受け取れるため、consumer 側で色をハードコードしません。
+
+```tsx
+import { IconButton } from "ksk-design-system/native/ui"
+
+// ヘッダの設定ギア（薄いサーフェス背景）
+<IconButton
+  accessibilityLabel="設定"
+  variant="tertiary"
+  size="sm"
+  icon={({ color, size }) => <SettingIcon color={color} size={size} />}
+  onPress={() => navigation.navigate("Settings")}
+/>
+
+// カード右上の閉じる（地の上、背景なし）
+<IconButton
+  accessibilityLabel={`${offer.title}の提案を閉じる`}
+  variant="ghost"
+  icon={({ color, size }) => <CloseIcon color={color} size={size} />}
+  onPress={dismiss}
+/>
+```
+
+`variant` は `ghost`（既定・背景なし）/ `tertiary`（薄いサーフェス背景）/ `outline`（境界線）/ `primary`（ブランド色の塗り）で、名前は `Button` の variant 語彙に揃えています。`tone` は `neutral` / `accent` / `caution`（`primary` では無視）、`shape` は `circle`（既定）/ `square` です。
+
+## Controlled disclosure (Collapsible / Accordion)
+
+`Collapsible` と `Accordion` は制御・非制御の両対応です。外部 state（他セクションとの排他、解答表示との連動、アナリティクス送信）と同期したいときは `open` / `openKeys` を渡します。渡している間は内部 state を無視するため、二重管理になりません。
+
+トグル右端の `trailing` スロットは開閉状態を受け取る関数も渡せるので、「表示する / 閉じる」のラベル切り替えを consumer 側で自作しなくて済みます。
+
+```tsx
+import { Accordion, Collapsible } from "ksk-design-system/native/ui"
+
+const [open, setOpen] = useState(false)
+
+<Collapsible
+  title="他の選択肢はなぜ違う？"
+  open={open}
+  onOpenChange={setOpen}
+  trailing={(isOpen) => (isOpen ? "閉じる" : "表示する")}
+>
+  <Text variant="body.md">{otherWrongChoices.map((c) => c.whyWrong).join("\n")}</Text>
+</Collapsible>
+
+<Accordion
+  type="multiple"
+  openKeys={openSections}
+  onOpenChange={setOpenSections}
+  items={[
+    { key: "field", title: "分野別の正答率", content: <Text variant="body.md">分野別の内訳</Text>, trailing: (o) => (o ? "閉じる" : "表示する") },
+  ]}
+/>
+```
+
+`defaultOpen` / `defaultOpenKeys` だけを渡した場合は従来どおり非制御で動きます。
+
+## Composed accessibility labels
+
+`ListItem` / `ActionTile` / `EmptyState` / `ErrorState` は `AccessibilityProps` を継承しているため、`accessibilityLabel` / `accessibilityHint` をそのまま渡せます。「タイトル＋状態」を合成した読み上げラベル（例: 「模試2（要解放）」）を付けたいときに使います。
+
+```tsx
+<ListItem
+  title="模試2"
+  description="未受験"
+  accessibilityLabel="模試2（要解放）"
+  accessibilityHint="タップで解放画面へ移動します"
+  onPress={openPaywall}
+/>
+```
+
+`EmptyState` / `ErrorState` では、ラベル指定時に icon / title / description だけが1要素にまとまり、`action` のボタンは個別にフォーカスできる位置に残ります。
+
+## Japanese calendars
+
+`Calendar` は日本のカレンダー慣習に必要な表現を prop で持ちます。曜日の色分け（日=赤 / 土=青）は既存の見た目を変えないよう opt-in（`weekendTone`）です。
+
+```tsx
+import { Calendar } from "ksk-design-system/native/ui"
+
+<Calendar
+  value={examDate}
+  onChange={setExamDate}
+  weekendTone           // 日=赤 / 土=青
+  todayEmphasis="dot"   // "ring"（既定）| "dot" | "none"
+  disablePast           // 今日より前を選択不可（minDate と併用時は遅い方が効く）
+  dayAccessibilityLabel={(day) =>
+    `${day.date.getFullYear()}年${day.date.getMonth() + 1}月${day.date.getDate()}日を受験日に設定`
+  }
+/>
+```
+
+セルの見た目を丸ごと差し替えたい場合は `renderDay` を使います。`renderDay` は `{ date, weekday, selected, today, disabled, tone }` を受け取ります（タップ・読み上げ・選択不可制御は DS 側が持ったままです）。月移動ボタンは `minDate` / `maxDate` / `disablePast` の範囲外へは自動で disabled になります。

@@ -1,12 +1,24 @@
 import React from "react"
-import { Pressable, Text as RNText, View, type StyleProp, type ViewStyle } from "react-native"
+import {
+  Pressable,
+  Text as RNText,
+  View,
+  type AccessibilityProps,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { Spinner } from "./Spinner"
 
 export type ActionTileVariant = "neutral" | "selected" | "success" | "info" | "caution"
 
-export interface ActionTileProps {
+/**
+ * `AccessibilityProps` を継承しているため `accessibilityLabel` /
+ * `accessibilityHint` をそのまま渡せる（issue #298①）。label + meta を
+ * 合成した読み上げラベル（例: 「模試2（要解放）」）を consumer 側で付けられる。
+ */
+export interface ActionTileProps extends AccessibilityProps {
   icon?: React.ReactNode
   emoji?: React.ReactNode
   label: React.ReactNode
@@ -60,6 +72,9 @@ export function ActionTile({
   variant = selected ? "selected" : "neutral",
   onPress,
   style,
+  accessibilityRole,
+  accessibilityState,
+  ...accessibilityProps
 }: ActionTileProps) {
   const { theme, scales } = useTheme()
   const isDisabled = disabled || loading
@@ -69,8 +84,14 @@ export function ActionTile({
     <Pressable
       onPress={onPress}
       disabled={isDisabled}
-      accessibilityRole="button"
-      accessibilityState={{ disabled: isDisabled, selected, busy: loading }}
+      accessibilityRole={accessibilityRole ?? "button"}
+      accessibilityState={{
+        disabled: isDisabled,
+        selected,
+        busy: loading,
+        ...accessibilityState,
+      }}
+      {...accessibilityProps}
       style={({ pressed }) => [
         {
           minHeight: 96,
