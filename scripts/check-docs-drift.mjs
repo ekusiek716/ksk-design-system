@@ -168,7 +168,7 @@ const WHITELIST = new Set(
     "Anthropic Fable Opus Sonnet Haiku " +
     "ActivityIndicator ScrollView FlatList SectionList TouchableOpacity TouchableHighlight " +
     "SafeAreaView StyleSheet Animated Dimensions Platform StatusBar KeyboardAvoidingView Pressable " +
-    "TextInput View Image Modal Switch Notion"
+    "TextInput View Image Modal Switch Notion AccessibilityProps"
   ).split(/\s+/),
 )
 

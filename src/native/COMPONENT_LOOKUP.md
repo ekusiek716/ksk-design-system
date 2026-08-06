@@ -4,7 +4,7 @@
 
 React Native / Expo consumer は、新規 UI を作る前にこの一覧で既存コンポーネントを確認してください。すべて `ksk-design-system/native/ui` から import します。
 
-- Public native component exports: 149
+- Public native component exports: 150
 - Import: `import { Button, Screen } from "ksk-design-system/native/ui"`
 
 | Component | Source | Section |
@@ -117,6 +117,7 @@ React Native / Expo consumer は、新規 UI を作る前にこの一覧で既�
 | `Footer` | `src/native/components/Footer.tsx` | Phase 6: Patterns (汎用) |
 | `GridSkeleton` | `src/native/components/ListSkeletons.tsx` | Phase 6: Patterns (汎用) |
 | `IconBadge` | `src/native/components/IconBadge.tsx` | Phase 6: Patterns (汎用) |
+| `IconButton` | `src/native/components/IconButton.tsx` | Phase 6: Patterns (汎用) |
 | `ImageAttachmentPicker` | `src/native/components/CompactFilePicker.tsx` | Phase 6: Patterns (汎用) |
 | `ImageGallery` | `src/native/components/ImageGallery.tsx` | Phase 6: Patterns (汎用) |
 | `ListItem` | `src/native/components/ListItem.tsx` | Phase 6: Patterns (汎用) |

@@ -46,6 +46,7 @@ import {
   SearchBar,
   ListItem,
   EmptyState,
+  IconButton,
   SectionHeader,
   ProgressSteps,
   // Phase 7
@@ -455,7 +456,60 @@ function NewComponentsShowcase() {
           current={2}
         />
         <View style={{ height: scales.spacing.scale[3] }} />
-        <EmptyState title="まだ何もありません" description="新しい記事が公開されると表示されます。" />
+        <EmptyState
+          title="まだ何もありません"
+          description="新しい記事が公開されると表示されます。"
+          accessibilityLabel="お気に入りはまだありません。新しい記事が公開されると表示されます"
+        />
+      </Section>
+
+      <Section title="#298: IconButton（タップ可能な円形アイコンボタン）">
+        <Stack direction="row" wrap gap={3} align="center">
+          <IconButton
+            accessibilityLabel="設定"
+            variant="tertiary"
+            size="sm"
+            icon={({ color, size }) => (
+              <Text style={{ color, fontSize: size }}>⚙</Text>
+            )}
+            onPress={() => {}}
+          />
+          <IconButton
+            accessibilityLabel="閉じる"
+            variant="ghost"
+            icon={({ color, size }) => <Text style={{ color, fontSize: size }}>×</Text>}
+            onPress={() => {}}
+          />
+          <IconButton
+            accessibilityLabel="お気に入りに追加"
+            variant="outline"
+            tone="accent"
+            icon={({ color, size }) => <Text style={{ color, fontSize: size }}>♥</Text>}
+            onPress={() => {}}
+          />
+          <IconButton
+            accessibilityLabel="追加"
+            variant="primary"
+            size="lg"
+            icon={({ color, size }) => <Text style={{ color, fontSize: size }}>＋</Text>}
+            onPress={() => {}}
+          />
+          <IconButton
+            accessibilityLabel="削除"
+            variant="outline"
+            tone="caution"
+            shape="square"
+            icon={({ color, size }) => <Text style={{ color, fontSize: size }}>🗑</Text>}
+            onPress={() => {}}
+          />
+          <IconButton
+            accessibilityLabel="同期中"
+            variant="tertiary"
+            loading
+            icon={null}
+            onPress={() => {}}
+          />
+        </Stack>
       </Section>
 
       <Section title="Commerce: PriceDisplay / RatingDisplay">
@@ -507,6 +561,9 @@ function AllRestShowcase() {
   const [checkGroup, setCheckGroup] = React.useState<string[]>(['email']);
   const [agTxt, setAgTxt] = React.useState('');
   const [qty, setQty] = React.useState(1);
+  // issue #298: 制御 Collapsible / Accordion のデモ用
+  const [whyWrongOpen, setWhyWrongOpen] = React.useState(false);
+  const [breakdownKeys, setBreakdownKeys] = React.useState<string[]>(['field']);
 
   const target = React.useMemo(() => new Date(Date.now() + 1000 * 60 * 60 * 2.5), []);
 
@@ -740,6 +797,19 @@ function AllRestShowcase() {
       <Section title="Phase 4 追加: Calendar / DatePicker / TimePicker">
         <Calendar value={calDate} onChange={setCalDate} />
         <View style={{ height: scales.spacing.scale[3] }} />
+        <Text variant="label.sm">#298: weekendTone / todayEmphasis=dot / disablePast</Text>
+        <View style={{ height: scales.spacing.scale[2] }} />
+        <Calendar
+          value={calDate}
+          onChange={setCalDate}
+          weekendTone
+          todayEmphasis="dot"
+          disablePast
+          dayAccessibilityLabel={(info) =>
+            `${info.date.getFullYear()}年${info.date.getMonth() + 1}月${info.date.getDate()}日を受験日に設定`
+          }
+        />
+        <View style={{ height: scales.spacing.scale[3] }} />
         <Stack direction="row" wrap gap={2}>
           <View style={{ flex: 1, minWidth: 140 }}>
             <DatePicker value={date} onChange={setDate} />
@@ -762,6 +832,43 @@ function AllRestShowcase() {
         <Collapsible title="詳細を見る">
           <Text variant="body.md">折りたたみ可能なエリア</Text>
         </Collapsible>
+        <View style={{ height: scales.spacing.scale[3] }} />
+        <Text variant="label.sm">#298: 制御 Collapsible（open + onOpenChange + trailing）</Text>
+        <View style={{ height: scales.spacing.scale[2] }} />
+        <Collapsible
+          title="他の選択肢はなぜ違う？"
+          open={whyWrongOpen}
+          onOpenChange={setWhyWrongOpen}
+          trailing={(open) => (open ? '閉じる' : '表示する')}
+        >
+          <Text variant="body.md">外部 state と同期した折りたたみ。</Text>
+        </Collapsible>
+        <View style={{ height: scales.spacing.scale[2] }} />
+        <Button variant="tertiary" onPress={() => setWhyWrongOpen((v) => !v)}>
+          外から開閉する（現在: {whyWrongOpen ? '開' : '閉'}）
+        </Button>
+        <View style={{ height: scales.spacing.scale[3] }} />
+        <Text variant="label.sm">#298: 制御 Accordion（openKeys + onOpenChange）</Text>
+        <View style={{ height: scales.spacing.scale[2] }} />
+        <Accordion
+          type="multiple"
+          openKeys={breakdownKeys}
+          onOpenChange={setBreakdownKeys}
+          items={[
+            {
+              key: 'field',
+              title: '分野別の正答率',
+              content: <Text variant="body.md">分野別の内訳。</Text>,
+              trailing: (open) => (open ? '閉じる' : '表示する'),
+            },
+            {
+              key: 'time',
+              title: '設問ごとの所要時間',
+              content: <Text variant="body.md">時間の内訳。</Text>,
+              trailing: (open) => (open ? '閉じる' : '表示する'),
+            },
+          ]}
+        />
         <View style={{ height: scales.spacing.scale[3] }} />
         <ScrollArea maxHeight={100} bordered>
           {Array.from({ length: 12 }).map((_, i) => (

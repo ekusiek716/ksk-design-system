@@ -11,5 +11,5 @@
     "noEmit": true,
     "types": []
   },
-  "include": ["src/native", "src/tokens/native"]
+  "include": ["src/native", "src/tokens/native", "test/types-native"]
 }

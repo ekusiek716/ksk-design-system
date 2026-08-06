@@ -157,7 +157,13 @@ export {
   type TabsTriggerProps,
   type TabsContentProps,
 } from "./Tabs"
-export { Calendar, type CalendarProps } from "./Calendar"
+export {
+  Calendar,
+  type CalendarDayInfo,
+  type CalendarProps,
+  type CalendarTodayEmphasis,
+  type CalendarWeekdayTone,
+} from "./Calendar"
 export { DatePicker, type DatePickerProps } from "./DatePicker"
 export { DateField, type DateFieldProps } from "./DateField"
 export { TimePicker, type TimePickerProps, type TimeValue } from "./TimePicker"
@@ -213,6 +219,15 @@ export {
   type IconBadgeRenderProps,
   type IconBadgeSize,
 } from "./IconBadge"
+export {
+  IconButton,
+  type IconButtonProps,
+  type IconButtonRenderProps,
+  type IconButtonShape,
+  type IconButtonSize,
+  type IconButtonTone,
+  type IconButtonVariant,
+} from "./IconButton"
 export { SectionHeader, type SectionHeaderProps } from "./SectionHeader"
 export { StickyActionBar, type StickyActionBarProps } from "./StickyActionBar"
 export { SwipeRow, type SwipeRowProps, type SwipeAction } from "./SwipeRow"

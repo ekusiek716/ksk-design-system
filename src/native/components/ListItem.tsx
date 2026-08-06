@@ -1,9 +1,15 @@
 import React from "react"
-import { Pressable, View, Text as RNText } from "react-native"
+import { Pressable, View, Text as RNText, type AccessibilityProps } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 
-export interface ListItemProps {
+/**
+ * `AccessibilityProps` を継承しているため、`accessibilityLabel` /
+ * `accessibilityHint` / `accessibilityState` / `accessibilityRole` を
+ * そのまま渡せる（issue #298①）。`accessibilityLabel` を渡すと行全体が
+ * 1つの読み上げ要素にまとまり、title/description の断片読みを防げる。
+ */
+export interface ListItemProps extends AccessibilityProps {
   leading?: React.ReactNode
   title: React.ReactNode
   description?: React.ReactNode
@@ -21,6 +27,11 @@ export function ListItem({
   showChevron,
   onPress,
   disabled,
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityRole,
+  accessibilityState,
+  ...accessibilityProps
 }: ListItemProps) {
   const { theme, scales } = useTheme()
   const inner = (pressed = false) => (
@@ -60,10 +71,44 @@ export function ListItem({
   )
   if (onPress) {
     return (
-      <Pressable disabled={disabled} onPress={onPress}>
+      <Pressable
+        disabled={disabled}
+        onPress={onPress}
+        accessibilityRole={accessibilityRole ?? "button"}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={{ disabled: Boolean(disabled), ...accessibilityState }}
+        {...accessibilityProps}
+      >
         {({ pressed }) => inner(pressed)}
       </Pressable>
     )
   }
-  return inner(false)
+
+  const hasAccessibilityProps =
+    accessibilityLabel !== undefined ||
+    accessibilityHint !== undefined ||
+    accessibilityRole !== undefined ||
+    accessibilityState !== undefined ||
+    Object.keys(accessibilityProps).length > 0
+
+  // 非タップ行は a11y prop が来たときだけラッパを足す（未指定なら従来どおりの
+  // ツリー構造・読み上げ挙動を保つ＝非破壊）。label / hint 指定時は行全体を
+  // 1要素にまとめる（accessible が無いと hint は読み上げられない）。
+  if (!hasAccessibilityProps) return inner(false)
+
+  return (
+    <View
+      accessible={
+        accessibilityLabel !== undefined || accessibilityHint !== undefined ? true : undefined
+      }
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={accessibilityState}
+      {...accessibilityProps}
+    >
+      {inner(false)}
+    </View>
+  )
 }
