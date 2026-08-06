@@ -348,3 +348,32 @@ import { Calendar } from "ksk-design-system/native/ui"
 ```
 
 セルの見た目を丸ごと差し替えたい場合は `renderDay` を使います。`renderDay` は `{ date, weekday, selected, today, disabled, tone }` を受け取ります（タップ・読み上げ・選択不可制御は DS 側が持ったままです）。月移動ボタンは `minDate` / `maxDate` / `disablePast` の範囲外へは自動で disabled になります。
+
+### ブランド色を注入する（ThemeProvider を使わない consumer 向け）
+
+`ThemeProvider` を使わず、アプリごとのブランドトークンを props で流し込む設計（exam-kit 系が app/theme/brand.ts から各コンポーネントへ色を渡している方式）では、`colors` で日セルの色だけを差し替えられます。指定しなかったキーは DS theme の既定色に落ちるので、既存の呼び出しは見た目が変わりません。
+
+```tsx
+<Calendar
+  value={examDate}
+  onChange={setExamDate}
+  weekendTone
+  colors={{
+    selected: brand.primary,        // 選択セルの背景
+    selectedText: brand.onPrimary,  // 選択セルの文字
+    today: brand.accent,            // today リング / ドット
+    sunday: brand.caution,          // weekendTone=true のときだけ効く
+    saturday: brand.primary,
+  }}
+/>
+```
+
+`colors` で足りない見た目（角丸・枠線の太さ・影など）は `dayStyle` で器ごと差し替えます。DS の既定 style の**後ろに**合成されるので確実に勝ちます。
+
+```tsx
+<Calendar
+  dayStyle={(day) => (day.selected ? { borderRadius: 8, borderWidth: 2, borderColor: brand.primary } : null)}
+/>
+```
+
+`renderDay` がセルの「中身」、`dayStyle` がセルの「器」です。色だけなら `colors` で足ります。

@@ -159,6 +159,7 @@ export {
 } from "./Tabs"
 export {
   Calendar,
+  type CalendarDayColors,
   type CalendarDayInfo,
   type CalendarProps,
   type CalendarTodayEmphasis,
