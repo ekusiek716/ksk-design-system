@@ -2,6 +2,13 @@
 
 Native / Expo consumer は、新規 UI を作る前に `ksk-design-system/native/ui` の既存コンポーネントを確認してください。ローカル `ds/` に独自 wrapper を増やす前に、`src/native/COMPONENT_LOOKUP.md` とこのファイルの recipe を使います。
 
+## Tailwind バージョンの前提
+
+`tailwindcss` の peer 範囲は `^3.4.17 || ^4.1.0` です（issue #296）。
+
+- **Web consumer**: `preset.css` が Tailwind v4 構文（`@import "tailwindcss"`）前提のため **v4 系が必須**。3 系はインストールできても preset が機能しません。
+- **Expo / NativeWind consumer**: NativeWind のコンパイラ都合で `^3.4.x` に固定して構いません。`native/ui` entrypoint は Tailwind 4 の機能を要求しないため、この組み合わせが公式サポート範囲です。peer 範囲から 3 系を落とすと consumer の `npm install` が壊れるので、範囲は `__tests__/native-package-contract.test.ts` で契約として固定しています。
+
 ## Component lookup
 
 RN 側の公開 export 一覧は `src/native/COMPONENT_LOOKUP.md` で確認できます。Web 側の `src/components/COMPONENT_LOOKUP.md` と同じく、consumer 実装前の DS-first チェックに使います。

@@ -38,6 +38,13 @@ describe("native package contract", () => {
     }
   })
 
+  it("tailwindcss peer keeps allowing Tailwind 3 for NativeWind consumers (issue #296)", () => {
+    // Expo consumer は NativeWind の都合で Tailwind ^3.4.x に固定している。
+    // native entrypoint のみの利用では Tailwind 4 機能を要求しないため、
+    // peer 範囲から 3 系を落とすと consumer の npm install が壊れる。
+    expect(packageJson.peerDependencies.tailwindcss).toBe("^3.4.17 || ^4.1.0")
+  })
+
   it("web bundle runtime packages are installed or required peers", () => {
     for (const dependency of [
       "@radix-ui/react-slot",
