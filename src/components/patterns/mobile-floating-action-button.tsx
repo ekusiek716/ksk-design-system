@@ -7,6 +7,7 @@ import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboa
 type MobileFloatingActionButtonPlacement = "end" | "start" | "center"
 type MobileFloatingActionButtonKeyboardBehavior = "hide" | "lift" | "stay"
 type MobileFloatingActionButtonBottomOffset = "none" | "bottom-nav" | "bottom-nav-pill" | "bottom-nav-pill-inline"
+type MobileFloatingActionButtonVariant = "default" | "glass"
 
 interface MobileFloatingActionButtonProps extends Omit<React.ComponentProps<typeof Button>, "children" | "size" | "variant"> {
   label: string
@@ -16,6 +17,12 @@ interface MobileFloatingActionButtonProps extends Omit<React.ComponentProps<type
   bottomOffset?: MobileFloatingActionButtonBottomOffset
   keyboardBehavior?: MobileFloatingActionButtonKeyboardBehavior
   mobileOnly?: boolean
+  /**
+   * 見た目。既定は `default`（Brand 塗りのソリッド FAB）。
+   * `glass` は Button の `glass-accent`（Brand ティントの Liquid Glass）を使い、
+   * 写真・地図・リスト等のコンテンツが FAB の背後に透けて見える表現にする。
+   */
+  variant?: MobileFloatingActionButtonVariant
 }
 
 function MobileFloatingActionButton({
@@ -27,6 +34,7 @@ function MobileFloatingActionButton({
   bottomOffset = "bottom-nav",
   keyboardBehavior = "hide",
   mobileOnly = true,
+  variant = "default",
   style,
   ...props
 }: MobileFloatingActionButtonProps) {
@@ -42,10 +50,13 @@ function MobileFloatingActionButton({
       data-placement={placement}
       data-bottom-offset={bottomOffset}
       aria-label={ariaLabel}
-      variant="default"
+      variant={variant === "glass" ? "glass-accent" : "default"}
       size={showLabel ? "lg" : "icon-lg"}
       className={cn(
-        "fixed z-[var(--Z-Floating)] shadow-[var(--shadow-lg)] transition-all duration-[var(--Motion-Duration-Base)]",
+        "fixed z-[var(--Z-Floating)] transition-all duration-[var(--Motion-Duration-Base)]",
+        // glass-accent は inset 3層 + ドロップシャドウを自前で持つため、DS の lg 影を
+        // 重ねると影が二重になって濁る。ソリッド FAB のときだけ影を敷く。
+        variant === "default" && "shadow-[var(--shadow-lg)]",
         "bottom-[calc(env(safe-area-inset-bottom)_+_var(--ksk-fab-bottom-offset)_+_var(--ksk-fab-keyboard-inset))]",
         placement === "end" && "right-4",
         placement === "start" && "left-4",
@@ -77,4 +88,5 @@ export type {
   MobileFloatingActionButtonKeyboardBehavior,
   MobileFloatingActionButtonPlacement,
   MobileFloatingActionButtonProps,
+  MobileFloatingActionButtonVariant,
 }

@@ -1445,8 +1445,9 @@
     {
       "name": "MobileFloatingActionButton",
       "path": "src/components/patterns/mobile-floating-action-button.tsx",
-      "description": "モバイル固定 FAB。BottomTabBar と safe-area を考慮した bottom offset、start/end/center placement、keyboard hide/lift/stay を内包する。",
+      "description": "モバイル固定 FAB。BottomTabBar と safe-area を考慮した bottom offset、start/end/center placement、keyboard hide/lift/stay を内包する。variant=glass で Brand ティントの Liquid Glass 表現になる。",
       "variants": [
+        "variant: default / glass",
         "placement: start / end / center",
         "bottomOffset: none / bottom-nav / bottom-nav-pill / bottom-nav-pill-inline",
         "keyboardBehavior: hide / lift / stay"
@@ -1456,9 +1457,11 @@
       ],
       "rules": [
         "画面側で fixed bottom/right と Button size=icon-lg を手組みしない",
+        "glass-fab 等の独自クラス + 生 button で Liquid Glass FAB を手組みせず variant=glass を使う",
         "BottomTabBar 併用時は bottomOffset=bottom-nav を使う",
         "pill BottomTabBar の上に重ねる場合は bottomOffset=bottom-nav-pill、横並びに置く場合は bottomOffset=bottom-nav-pill-inline を使う",
-        "keyboard 表示中に入力を邪魔する場合は keyboardBehavior=hide を使う"
+        "keyboard 表示中に入力を邪魔する場合は keyboardBehavior=hide を使う",
+        "variant=glass に shadow-* を重ねない（glass-accent が inset 3層 + drop shadow を内包するため二重になる）"
       ]
     },
     {
