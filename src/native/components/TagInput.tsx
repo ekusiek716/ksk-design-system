@@ -1,7 +1,8 @@
-import React, { useState } from "react"
+import React, { useCallback, useRef, useState } from "react"
 import { Pressable, TextInput, View, Text as RNText } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
+import { useWebCompositionGuard } from "../use-web-composition-guard"
 
 export interface TagInputProps {
   value?: string[]
@@ -13,8 +14,24 @@ export interface TagInputProps {
 export function TagInput({ value = [], onChange, placeholder = "タグを入力", maxTags = 10 }: TagInputProps) {
   const { theme, scales } = useTheme()
   const [draft, setDraft] = useState("")
+  const inputRef = useRef<TextInput>(null)
+  // react-native-web 上では TextInput の実体が DOM <input> になり、日本語 IME の
+  // 「変換を確定する Enter」でも onSubmitEditing が発火する。ガードしないと未確定文字が
+  // そのままタグ化される（Web 版 TagInput と同一原因。issue #301）。
+  // ネイティブ実機では compositionstart/end が無く、このフックは no-op。
+  const composingRef = useRef(false)
+  useWebCompositionGuard(
+    inputRef,
+    useCallback(() => {
+      composingRef.current = true
+    }, []),
+    useCallback(() => {
+      composingRef.current = false
+    }, []),
+  )
 
   const add = () => {
+    if (composingRef.current) return
     const t = draft.trim()
     if (!t) return
     if (value.includes(t)) {
@@ -64,6 +81,7 @@ export function TagInput({ value = [], onChange, placeholder = "タグを入力"
         </View>
       ))}
       <TextInput
+        ref={inputRef}
         value={draft}
         onChangeText={setDraft}
         onSubmitEditing={add}

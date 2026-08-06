@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { isImeComposing } from "@/lib/ime"
 
 interface NumberInputProps {
   value?: number
@@ -103,6 +104,9 @@ function NumberInput({
         onFocus={() => { setFocused(true); setRaw(String(value)) }}
         onBlur={(e) => { setFocused(false); commit(e.target.value) }}
         onKeyDown={(e) => {
+          // IME 変換中は Enter が「確定」、ArrowUp/Down が「変換候補の選択」なので、
+          // blur / 増減に横取りさせない（issue #301 と同一原因。全角数字入力時に起きる）。
+          if (isImeComposing(e)) return
           if (e.key === "Enter") (e.target as HTMLInputElement).blur()
           if (e.key === "ArrowUp") { e.preventDefault(); increment() }
           if (e.key === "ArrowDown") { e.preventDefault(); decrement() }
