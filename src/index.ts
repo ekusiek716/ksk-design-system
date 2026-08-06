@@ -398,6 +398,9 @@ export type { ReviewOverlayProps, ReviewPin } from "./components/patterns/review
 
 // ─── Utilities ───
 export { cn } from "./lib/utils"
+// 消費側が独自の入力欄に同じ IME ガードを張れるように公開する（issue #301）
+export { isImeComposing } from "./lib/ime"
+export type { ImeComposableKeyEvent } from "./lib/ime"
 export {
   weddingCategories,
   projectCategories,

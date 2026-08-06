@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { isImeComposing } from "@/lib/ime"
 
 interface SearchBarProps extends Omit<React.ComponentProps<"input">, "type"> {
   onSearch?: (value: string) => void
@@ -11,7 +12,8 @@ function SearchBar({
   ...props
 }: SearchBarProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && onSearch) {
+    // 変換確定の Enter で未確定文字のまま検索が走らないようにする（issue #301 と同一原因）
+    if (e.key === "Enter" && !isImeComposing(e) && onSearch) {
       onSearch(e.currentTarget.value)
     }
   }

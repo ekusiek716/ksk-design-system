@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { isImeComposing } from "@/lib/ime"
 
 interface TagInputProps {
   value?: string[]
@@ -53,6 +54,11 @@ function TagInput({
   )
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // IME 変換中の Enter は「変換の確定」であってタグ追加ではない。
+    // ガードしないと未確定文字がタグ化され、以降の変換操作が失われる（issue #301）。
+    // 読点「、」入力で発火する `,` も同様。Backspace は変換中に押されても
+    // input が空でなければ何もしないため、ガード対象外。
+    if (isImeComposing(e)) return
     if (e.key === "Enter") {
       e.preventDefault()
       skipBlurRef.current = true
