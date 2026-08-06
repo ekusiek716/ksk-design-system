@@ -35,6 +35,7 @@ UI を書く前に必ず確認すること:
 - [ ] アイコンは `iconsax-reactjs` か（`lucide-react` / `heroicons` は使わない）
 - [ ] 生タグ（`<button>` / `<input>` / `<a href>`）でなく DS コンポーネントを使ったか
 - [ ] CSS でベンダープレフィックス併記する場合、**`-webkit-` を先・標準形を後**に書いたか（消費側の minifier が同一プロパティとして dedupe し後勝ちのみ残すため。逆順だと Firefox で静かに無効化。`node scripts/check-prefix-order.mjs` が CI で検出）
+- [ ] flex 行（flex-col でない flex）で shrink-0 の兄弟と可変テキストを並べるとき、テキスト側に `flex-1`（+ 必要なら `min-w-[...]` 下限）を付けたか（`min-w-0` だけだと 1 文字ずつ折り返すまで潰れる。issue #293。`node scripts/check-flex-shrink.mjs` が CI で検出、例外は `ksk-lint-ignore KFX001 -- 理由`）
 - [ ] クラス名は**完全な文字列**で書いたか（`` `bg-${color}` `` のような動的合成は静的抽出できず消費側で CSS が生成されない。分岐は三項演算子か cva variant で。`scripts/generate-source-safelist.mjs` が検出）
 - [ ] `.tsx` 編集後に `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行したか
 - [ ] `FormField` を import する前にどちらか確認したか（react-hook-form の Controller と統合するなら `RhfFormField`＝`ui/form` の `FormField` を index.ts で別名 export したもの。単純な label+error 表示は `patterns/form-field` の `FormField`。迷ったら後者）
