@@ -154,3 +154,82 @@ export function monthLabel(cursor: Date, locale: CalendarLocale = "ja"): string 
     ? `${cursor.getFullYear()}年 ${MONTH_LABELS_JA[cursor.getMonth()]}`
     : `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`
 }
+
+/**
+ * 日セルの色の注入点（issue #304）。
+ *
+ * ThemeProvider を使わず、アプリごとのブランドトークンを props で流し込む consumer
+ * （exam-kit 系の PrimaryButton 方式）向け。未指定のキーは DS theme の既定色に
+ * フォールバックするため、既存の呼び出しは見た目が変わらない。
+ */
+export interface CalendarDayColors {
+  /** 選択セルの背景 */
+  selected?: string
+  /** 選択セルの文字色 */
+  selectedText?: string
+  /** today リングの枠線色 / today ドットの色 */
+  today?: string
+  /** 日曜の文字色（weekendTone=true のときのみ効く） */
+  sunday?: string
+  /** 土曜の文字色（weekendTone=true のときのみ効く） */
+  saturday?: string
+}
+
+/** DS theme から解決した既定色。Calendar が useTheme() の値を詰めて渡す。 */
+export interface CalendarDayColorDefaults {
+  selected: string
+  selectedText: string
+  today: string
+  sunday: string
+  saturday: string
+  weekdayText: string
+}
+
+export interface ResolvedCalendarDayColors {
+  /** セル背景。選択中でなければ transparent */
+  background: string
+  /** 日付テキストの色 */
+  text: string
+  /** today リング / ドットの色 */
+  accent: string
+}
+
+/**
+ * 1 セル分の色を解決する。優先順位は `colors`（consumer 指定）→ DS theme 既定。
+ * `weekendTone=false` のときは曜日色を使わず既定テキスト色に倒す（従来動作）。
+ */
+export function resolveCalendarDayColors(
+  info: Pick<CalendarDayInfo, "selected" | "tone">,
+  defaults: CalendarDayColorDefaults,
+  colors: CalendarDayColors = {},
+  weekendTone = false,
+): ResolvedCalendarDayColors {
+  const accent = colors.today ?? defaults.today
+  if (info.selected) {
+    return {
+      background: colors.selected ?? defaults.selected,
+      text: colors.selectedText ?? defaults.selectedText,
+      accent,
+    }
+  }
+  return {
+    background: "transparent",
+    text: resolveCalendarWeekdayTextColor(info.tone, defaults, colors, weekendTone),
+    accent,
+  }
+}
+
+/** 曜日ヘッダ・未選択セルの文字色。weekendTone=false なら常に fallback。 */
+export function resolveCalendarWeekdayTextColor(
+  tone: CalendarWeekdayTone,
+  defaults: Pick<CalendarDayColorDefaults, "sunday" | "saturday">,
+  colors: Pick<CalendarDayColors, "sunday" | "saturday"> = {},
+  weekendTone = false,
+  fallback?: string,
+): string {
+  const base = fallback ?? ""
+  if (!weekendTone) return base
+  if (tone === "sunday") return colors.sunday ?? defaults.sunday
+  if (tone === "saturday") return colors.saturday ?? defaults.saturday
+  return base
+}

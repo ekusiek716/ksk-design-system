@@ -5,7 +5,10 @@ import {
   defaultDayAccessibilityLabel,
   isDayDisabled,
   monthLabel,
+  resolveCalendarDayColors,
+  resolveCalendarWeekdayTextColor,
   resolveWeekdayTone,
+  type CalendarDayColorDefaults,
   type CalendarDayInfo,
 } from "../src/native/calendar-cells"
 
@@ -109,5 +112,84 @@ describe("native Calendar cell logic (#298④)", () => {
   it("月ラベルは locale で切り替わる", () => {
     expect(monthLabel(new Date(2026, 7, 1), "ja")).toBe("2026年 8月")
     expect(monthLabel(new Date(2026, 7, 1), "en")).toBe("2026-08")
+  })
+})
+
+describe("日セルの色注入（issue #304）", () => {
+  // DS default テーマ相当の既定色
+  const DEFAULTS: CalendarDayColorDefaults = {
+    selected: "#2563EB",
+    selectedText: "#FFFFFF",
+    today: "#2563EB",
+    sunday: "#EC0000",
+    saturday: "#2563EB",
+    weekdayText: "#111827",
+  }
+  // exam-kit の資格別ブランド想定
+  const BRAND = { selected: "#F97316", selectedText: "#1F2937", today: "#EA580C" }
+
+  it("colors 未指定なら DS 既定色に落ちる（既存の見た目を変えない）", () => {
+    const selected = resolveCalendarDayColors({ selected: true, tone: "weekday" }, DEFAULTS)
+
+    expect(selected.background).toBe("#2563EB")
+    expect(selected.text).toBe("#FFFFFF")
+    expect(selected.accent).toBe("#2563EB")
+  })
+
+  it("colors を渡すと選択セルの背景・文字・today 色が consumer 側に切り替わる", () => {
+    const selected = resolveCalendarDayColors({ selected: true, tone: "weekday" }, DEFAULTS, BRAND)
+
+    expect(selected.background).toBe("#F97316")
+    expect(selected.text).toBe("#1F2937")
+    expect(selected.accent).toBe("#EA580C")
+  })
+
+  it("未選択セルの背景は常に transparent で、today 色だけは注入が効く", () => {
+    const plain = resolveCalendarDayColors({ selected: false, tone: "weekday" }, DEFAULTS, BRAND)
+
+    expect(plain.background).toBe("transparent")
+    expect(plain.accent).toBe("#EA580C")
+  })
+
+  it("一部のキーだけ渡した場合、残りは既定色にフォールバックする", () => {
+    const partial = resolveCalendarDayColors(
+      { selected: true, tone: "weekday" },
+      DEFAULTS,
+      { selected: "#F97316" },
+    )
+
+    expect(partial.background).toBe("#F97316")
+    expect(partial.text).toBe("#FFFFFF") // 既定のまま
+  })
+
+  it("weekendTone=false のとき曜日色は効かない（従来動作の維持）", () => {
+    const sunday = resolveCalendarDayColors(
+      { selected: false, tone: "sunday" },
+      DEFAULTS,
+      { sunday: "#00FF00" },
+      false,
+    )
+
+    expect(sunday.text).toBe("")
+  })
+
+  it("weekendTone=true なら日曜・土曜の文字色を注入できる", () => {
+    const colors = { sunday: "#B91C1C", saturday: "#1D4ED8" }
+
+    expect(
+      resolveCalendarWeekdayTextColor("sunday", DEFAULTS, colors, true, "#111827"),
+    ).toBe("#B91C1C")
+    expect(
+      resolveCalendarWeekdayTextColor("saturday", DEFAULTS, colors, true, "#111827"),
+    ).toBe("#1D4ED8")
+    // 平日は fallback のまま
+    expect(
+      resolveCalendarWeekdayTextColor("weekday", DEFAULTS, colors, true, "#111827"),
+    ).toBe("#111827")
+  })
+
+  it("weekendTone=true で colors 未指定なら DS 既定の日=赤 / 土=青になる", () => {
+    expect(resolveCalendarWeekdayTextColor("sunday", DEFAULTS, {}, true, "#111827")).toBe("#EC0000")
+    expect(resolveCalendarWeekdayTextColor("saturday", DEFAULTS, {}, true, "#111827")).toBe("#2563EB")
   })
 })

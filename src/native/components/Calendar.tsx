@@ -10,16 +10,19 @@ import {
   isDayDisabled,
   isSameDay,
   monthLabel as resolveMonthLabel,
+  resolveCalendarDayColors,
+  resolveCalendarWeekdayTextColor,
   resolveWeekdayTone,
   startOfMonth,
   WEEK_LABELS_EN,
   WEEK_LABELS_JA,
+  type CalendarDayColors,
   type CalendarDayInfo,
   type CalendarLocale,
   type CalendarWeekdayTone,
 } from "../calendar-cells"
 
-export type { CalendarDayInfo, CalendarWeekdayTone }
+export type { CalendarDayColors, CalendarDayInfo, CalendarWeekdayTone }
 
 /** 今日セルの強調表現。`ring` は既定（従来動作）。 */
 export type CalendarTodayEmphasis = "ring" | "dot" | "none"
@@ -46,6 +49,18 @@ export interface CalendarProps {
   defaultMonth?: Date
   /** 表示月が変わったときに通知する。 */
   onMonthChange?: (month: Date) => void
+  /**
+   * 日セルの色の注入点（issue #304）。未指定のキーは DS theme の既定色に落ちる。
+   * ThemeProvider を使わず、アプリごとのブランドトークンを props で流し込む
+   * consumer（exam-kit 系）向け。`weekendTone=false` のとき sunday/saturday は効かない。
+   */
+  colors?: CalendarDayColors
+  /**
+   * 日セルのコンテナ style を最後に合成するフック（issue #304）。
+   * `colors` で足りない見た目（角丸・枠線の太さ・影など）の逃げ道。
+   * renderDay がセルの「中身」なのに対し、こちらはセルの「器」を差し替える。
+   */
+  dayStyle?: (info: CalendarDayInfo) => StyleProp<ViewStyle>
   /** 日セルの独自描画。返した要素が Pressable の中身になる。 */
   renderDay?: (info: CalendarDayInfo) => React.ReactNode
   /** 日セルの読み上げラベル生成。既定は「2026年8月6日 木曜日」形式。 */
@@ -69,6 +84,8 @@ export function Calendar({
   today: todayProp,
   defaultMonth,
   onMonthChange,
+  colors,
+  dayStyle,
   renderDay,
   dayAccessibilityLabel,
   previousMonthLabel,
@@ -98,13 +115,20 @@ export function Calendar({
     onMonthChange?.(next)
   }
 
-  /** 曜日トーンに応じた文字色。weekendTone=false なら常に既定色。 */
-  const weekdayColor = (tone: CalendarWeekdayTone, fallback: string) => {
-    if (!weekendTone) return fallback
-    if (tone === "sunday") return theme.text.caution
-    if (tone === "saturday") return theme.text["accent-primary"]
-    return fallback
+  // DS theme 由来の既定色。consumer が colors で上書きしなければこの値が使われる
+  // ＝ 既存の呼び出しは見た目が変わらない（issue #304）。
+  const colorDefaults = {
+    selected: theme.brand.primary,
+    selectedText: theme.text["on-inverse"],
+    today: theme.border["accent-primary"],
+    sunday: theme.text.caution,
+    saturday: theme.text["accent-primary"],
+    weekdayText: theme.text["high-emphasis"],
   }
+
+  /** 曜日トーンに応じた文字色。weekendTone=false なら常に既定色。 */
+  const weekdayColor = (tone: CalendarWeekdayTone, fallback: string) =>
+    resolveCalendarWeekdayTextColor(tone, colorDefaults, colors, weekendTone, fallback)
 
   return (
     <View
@@ -187,6 +211,7 @@ export function Calendar({
           }
           const showRing = info.today && !info.selected && todayEmphasis === "ring"
           const showDot = info.today && !info.selected && todayEmphasis === "dot"
+          const dayColors = resolveCalendarDayColors(info, colorDefaults, colors, weekendTone)
           return (
             <View key={i} style={{ width: `${100 / 7}%`, aspectRatio: 1, padding: 2 }}>
               <Pressable
@@ -197,17 +222,21 @@ export function Calendar({
                   dayAccessibilityLabel?.(info) ?? defaultDayAccessibilityLabel(info, locale)
                 }
                 accessibilityState={{ disabled: info.disabled, selected: info.selected }}
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 2,
-                  borderRadius: scales.borderRadius.full,
-                  backgroundColor: info.selected ? theme.brand.primary : "transparent",
-                  borderWidth: showRing ? 1 : 0,
-                  borderColor: theme.border["accent-primary"],
-                  opacity: info.disabled ? 0.3 : 1,
-                }}
+                style={[
+                  {
+                    flex: 1,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 2,
+                    borderRadius: scales.borderRadius.full,
+                    backgroundColor: dayColors.background,
+                    borderWidth: showRing ? 1 : 0,
+                    borderColor: dayColors.accent,
+                    opacity: info.disabled ? 0.3 : 1,
+                  },
+                  // consumer の逃げ道は最後に合成して確実に勝たせる（issue #304）
+                  dayStyle?.(info),
+                ]}
               >
                 {renderDay ? (
                   renderDay(info)
@@ -218,21 +247,23 @@ export function Calendar({
                         resolveTypo("body.sm"),
                         {
                           color: info.selected
-                            ? theme.text["on-inverse"]
-                            : weekdayColor(info.tone, theme.text["high-emphasis"]),
+                            ? dayColors.text
+                            : weekdayColor(info.tone, colorDefaults.weekdayText),
                           fontWeight: info.selected || info.today ? "700" : "400",
                         },
                       ]}
                     >
                       {c.getDate()}
                     </RNText>
+                    {/* ドットの既定は brand.primary、ring の既定は border.accent-primary と
+                        歴史的に別トークン。colors.today は両方をまとめて上書きする。 */}
                     {showDot && (
                       <View
                         style={{
                           width: 4,
                           height: 4,
                           borderRadius: 2,
-                          backgroundColor: theme.brand.primary,
+                          backgroundColor: colors?.today ?? theme.brand.primary,
                         }}
                       />
                     )}
