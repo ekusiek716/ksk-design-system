@@ -191,6 +191,7 @@ export type {
   MobileFloatingActionButtonKeyboardBehavior,
   MobileFloatingActionButtonPlacement,
   MobileFloatingActionButtonProps,
+  MobileFloatingActionButtonVariant,
 } from "./components/patterns/mobile-floating-action-button"
 export { MobileAppHeader } from "./components/patterns/mobile-app-header"
 export type { MobileAppHeaderProps } from "./components/patterns/mobile-app-header"

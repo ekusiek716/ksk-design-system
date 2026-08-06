@@ -193,6 +193,7 @@ export {
   type MobileFloatingActionButtonKeyboardBehavior,
   type MobileFloatingActionButtonPlacement,
   type MobileFloatingActionButtonProps,
+  type MobileFloatingActionButtonVariant,
 } from "./MobileFloatingActionButton"
 export {
   StatusActionBadge,

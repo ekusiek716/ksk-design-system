@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { Add } from "iconsax-reactjs"
 import { BottomTabBar } from "./commerce/bottom-tab-bar"
@@ -52,6 +53,69 @@ export const WithLabel: Story = {
         bottomOffset="none"
       />
     </div>
+  ),
+}
+
+/**
+ * glass variant は背後のコンテンツが透けるのが要点なので、暗い写真風の背景と
+ * その上を通るテキストに重ねて、ぼかしとブランドティントが効いているか見る。
+ * FAB は position:fixed なので、背景も viewport 全面（layout: fullscreen）にする。
+ *
+ * ksk-ds-allow-custom-ui: 背景は「消費側の写真コンテンツ」の代役。DS の面ではないため
+ * semantic token ではなく写真相当の生グラデーションで置く。
+ */
+const PhotoBackdrop = ({ children }: { children: ReactNode }) => (
+  <div className="relative min-h-screen overflow-hidden bg-[var(--Surface-Inverse)]">
+    <div
+      aria-hidden
+      className="absolute inset-0"
+      style={{
+        backgroundImage:
+          "radial-gradient(120% 90% at 15% 10%, #f59e0b 0%, transparent 55%), radial-gradient(110% 80% at 85% 30%, #0ea5e9 0%, transparent 60%), linear-gradient(160deg, #1f2937 0%, #0f172a 100%)",
+      }}
+    />
+    <div className="relative mx-auto flex min-h-screen max-w-[430px] flex-col justify-end gap-2 px-6 pb-8">
+      {["読みかけの本を追加", "京都旅行のしおり", "来週の買い出しリスト", "写真の上でも FAB の輪郭が読める"].map((line) => (
+        <p key={line} className="typo-body-md text-[var(--Text-on-Inverse)]">
+          {line}
+        </p>
+      ))}
+    </div>
+    {children}
+  </div>
+)
+
+export const Glass: Story = {
+  name: "Glass (Liquid Glass)",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <PhotoBackdrop>
+      <MobileFloatingActionButton
+        label="追加する"
+        icon={<Add size={22} />}
+        variant="glass"
+        mobileOnly={false}
+        bottomOffset="none"
+      />
+    </PhotoBackdrop>
+  ),
+}
+
+export const GlassWithLabel: Story = {
+  name: "Glass (with label)",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <PhotoBackdrop>
+      <MobileFloatingActionButton
+        label="タスクを追加"
+        icon={<Add size={22} />}
+        variant="glass"
+        showLabel
+        mobileOnly={false}
+        placement="center"
+        bottomOffset="none"
+      />
+    </PhotoBackdrop>
   ),
 }
 

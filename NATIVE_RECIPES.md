@@ -117,6 +117,19 @@ import {
 
 Web/PWA consumer は `ksk-design-system` の `MobileAppShell` と `BottomTabBar variant="pill"` / `MobileFloatingActionButton` を組み合わせます。`bottomNavMode="fixed"` では shell が fixed wrapper と safe-area padding を持ちます。既に fixed な nav を渡す場合は `bottomNavMode="external"` を指定します。
 
+### Liquid Glass の FAB
+
+写真・地図・リストの上に FAB を浮かせるときは `variant="glass"` を使います。`GlassView` にブランド色をほぼ不透明（light 95%）で敷いた Liquid Glass で、web の `Button variant="glass-accent"` と同じ質感です。塗り・縁・上辺ハイライトの色は `src/native/glass-accent-fill.ts` の純関数がテーマの `brand.primary` から導出するので、テーマを差し替えれば自動で追従します。
+
+```tsx
+<MobileFloatingActionButton label="追加" variant="glass" onPress={openCreate} />
+```
+
+- 既定は `variant="default"`（ブランド色のソリッド塗り）。既存画面の見た目は変わりません。
+- 塗りを薄くしないでください。低透明度ティントにすると明るい背景で白前景（`text.on-inverse`）が読めなくなります。
+- `glass` に外側の `shadow` を重ねないでください。glass 側が縁・ハイライトを内包しており、影が二重になります。
+- 実際のぼかしは `GlassView` の 4-tier（iOS 26 Liquid Glass → expo-blur → RN Web の backdrop-filter → 半透明 surface）に従います。Android / optional peer 未導入でも塗りは成立します。
+
 ## Fullscreen screen / photo onboarding
 
 `Screen` は header / internal scroll body / footer CTA の骨組みです。写真背景のオンボーディングや入口画面は `PhotoHero` の compound slots を使います。consumer 側で safe-area footer や写真上 typography を再実装しません。

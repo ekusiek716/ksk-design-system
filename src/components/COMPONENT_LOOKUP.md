@@ -137,7 +137,7 @@
 | MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
 | MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount |
 | MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff |
-| MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, With pill BottomTabBar inline |
+| MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
 | PresenceIndicator | `@/components/patterns/presence-indicator` | — | Default, WithBadge, Offline, NameOnly, 狭幅で非表示にする例（className） |
