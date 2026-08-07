@@ -17,7 +17,10 @@ permissions:
 
 jobs:
   receipt:
-    if: github.event.pull_request.draft == false
+    # Codex のレビュー利用枠が枯渇している期間は、リポジトリ変数 CODEX_RECEIPT_DISABLED=true で
+    # スキップできる（10分タイムアウトの恒常赤で信号が死ぬのを防ぐ）。枠回復後は変数を削除して再有効化する:
+    #   gh variable delete CODEX_RECEIPT_DISABLED -R ekusiek716/ksk-design-system
+    if: github.event.pull_request.draft == false && vars.CODEX_RECEIPT_DISABLED != 'true'
     permissions:
       contents: read
       issues: read
