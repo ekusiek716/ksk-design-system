@@ -11,7 +11,7 @@
 # 前提: ksk-design-system@<version> が npm registry に publish 済み
 #
 # 対象リポ（既定）:
-#   引数を省略すると下の DEFAULT_REPOS（フルパス16箇所）が対象。
+#   引数を省略すると下の DEFAULT_REPOS（フルパス20箇所）が対象。
 #   単体リポと monorepo が混在し、~/LocalDev/ 直下と ~/LocalDev/Examination/
 #   配下にまたがる。ディレクトリ名が日本語でも、PR は各リポ内で
 #   `gh pr create` するため GitHub remote から英語リポ名が自動解決される。
@@ -48,7 +48,7 @@ VERSION="${1:?usage: update-consumers.sh <version> [repos...]}"
 shift || true
 ARGS=("$@")
 
-# ── 既定対象リポ（フルパス16箇所）──
+# ── 既定対象リポ（フルパス20箇所）──
 DEFAULT_REPOS=(
   "$HOME/LocalDev/belle-todo"
   "$HOME/LocalDev/trip_todo"
@@ -64,6 +64,13 @@ DEFAULT_REPOS=(
   "$HOME/LocalDev/Examination/基本情報用"
   "$HOME/LocalDev/Examination/情報セキュリティマネジメント用"
   "$HOME/LocalDev/Examination/社労士用"
+  # 2026-08-06 追加。exam-kit から量産された後発4本が既定リストから漏れており、
+  # 1.50.0 / 1.51.0 の一括配布をすり抜けて ^1.50.0 のまま取り残されていた
+  # （consumer 側の tsc が落ちて初めて発覚）。
+  "$HOME/LocalDev/Examination/FP用"
+  "$HOME/LocalDev/Examination/宅建用"
+  "$HOME/LocalDev/Examination/歯科衛生士用"
+  "$HOME/LocalDev/Examination/管理栄養士用"
   "$HOME/LocalDev/aikoibito"
   "$HOME/LocalDev/okuno-todo-suite"
 )
