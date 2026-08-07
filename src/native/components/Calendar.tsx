@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react"
 import { Pressable, View, Text as RNText, type StyleProp, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
+import { IconButton } from "./IconButton"
 import {
   addMonths,
   buildCalendarCells,
@@ -145,43 +146,38 @@ export function Calendar({
       ]}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-        <Pressable
+        {/*
+          月送りは面を持つ IconButton にする（consumer 指摘: 素の Pressable + テキストだと
+          押せる領域が見て分からない）。variant="tertiary" は Surface-Secondary の薄灰背景
+          （CLAUDE.md の semantic token 早見表どおり）、size="sm" は視覚 36pt +
+          IconButton 内部の hitSlop 補正で実効タップ領域 44pt を満たす（icon-button-metrics.ts）。
+          disabled 時は IconButton 既定の opacity 減光（0.56）で区別する。
+          colors/dayStyle は日セル専用の拡張点なので、ここでは既存 IconButton の
+          containerStyle 拡張点をそのまま使い、Calendar 独自の新規 props は増やさない。
+        */}
+        <IconButton
+          accessibilityLabel={previousMonthLabel ?? (locale === "ja" ? "前の月" : "Previous month")}
           onPress={() => goTo(-1)}
           disabled={!canGoPrev}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={previousMonthLabel ?? (locale === "ja" ? "前の月" : "Previous month")}
-          accessibilityState={{ disabled: !canGoPrev }}
-        >
-          <RNText
-            style={[
-              resolveTypo("label.lg"),
-              { color: canGoPrev ? theme.text["medium-emphasis"] : theme.text["low-emphasis"] },
-            ]}
-          >
-            ‹
-          </RNText>
-        </Pressable>
+          variant="tertiary"
+          size="sm"
+          icon={({ color }) => (
+            <RNText style={[resolveTypo("label.lg"), { color }]}>‹</RNText>
+          )}
+        />
         <RNText style={[resolveTypo("label.md"), { color: theme.text["high-emphasis"] }]}>
           {monthLabel}
         </RNText>
-        <Pressable
+        <IconButton
+          accessibilityLabel={nextMonthLabel ?? (locale === "ja" ? "次の月" : "Next month")}
           onPress={() => goTo(1)}
           disabled={!canGoNext}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={nextMonthLabel ?? (locale === "ja" ? "次の月" : "Next month")}
-          accessibilityState={{ disabled: !canGoNext }}
-        >
-          <RNText
-            style={[
-              resolveTypo("label.lg"),
-              { color: canGoNext ? theme.text["medium-emphasis"] : theme.text["low-emphasis"] },
-            ]}
-          >
-            ›
-          </RNText>
-        </Pressable>
+          variant="tertiary"
+          size="sm"
+          icon={({ color }) => (
+            <RNText style={[resolveTypo("label.lg"), { color }]}>›</RNText>
+          )}
+        />
       </View>
       <View style={{ flexDirection: "row" }}>
         {labels.map((l, i) => (

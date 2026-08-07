@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
 import {
   buildCalendarCells,
@@ -191,5 +192,39 @@ describe("日セルの色注入（issue #304）", () => {
   it("weekendTone=true で colors 未指定なら DS 既定の日=赤 / 土=青になる", () => {
     expect(resolveCalendarWeekdayTextColor("sunday", DEFAULTS, {}, true, "#111827")).toBe("#EC0000")
     expect(resolveCalendarWeekdayTextColor("saturday", DEFAULTS, {}, true, "#111827")).toBe("#2563EB")
+  })
+})
+
+describe("Calendar 月送りナビ（native, consumer指摘: タップ領域が見て分からない）", () => {
+  const source = readFileSync("src/native/components/Calendar.tsx", "utf8")
+
+  it("素の Pressable + テキストではなく DS の IconButton で組む", () => {
+    expect(source).toContain('import { IconButton } from "./IconButton"')
+    // 月送り2箇所とも IconButton を使う（day セルは引き続き Pressable のまま）
+    expect(source.match(/<IconButton/g)?.length).toBe(2)
+  })
+
+  it("面のある variant（tertiary = Surface-Secondary の薄灰背景）を使う", () => {
+    expect(source.match(/variant="tertiary"/g)?.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it("色・角丸・タップ領域をハードコードせず IconButton の size prop に委ねる（44pt は icon-button-metrics.ts が保証）", () => {
+    expect(source.match(/size="sm"/g)?.length).toBeGreaterThanOrEqual(2)
+    // 面まわりの色を Calendar 側で直書きしていない（IconButton 内部の theme 解決に委ねる）
+    expect(source).not.toMatch(/backgroundColor:\s*theme\.surface\.secondary/)
+  })
+
+  it("disabled は前月/次月それぞれ canGoPrev / canGoNext をそのまま渡し、IconButton 既定の減光で区別する", () => {
+    expect(source).toContain("disabled={!canGoPrev}")
+    expect(source).toContain("disabled={!canGoNext}")
+  })
+
+  it("previousMonthLabel / nextMonthLabel の読み上げラベル契約を維持する", () => {
+    expect(source).toContain(
+      'accessibilityLabel={previousMonthLabel ?? (locale === "ja" ? "前の月" : "Previous month")}',
+    )
+    expect(source).toContain(
+      'accessibilityLabel={nextMonthLabel ?? (locale === "ja" ? "次の月" : "Next month")}',
+    )
   })
 })
