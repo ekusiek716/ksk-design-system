@@ -32,6 +32,8 @@ export function Chip({
   removable = false,
   onRemove,
   children,
+  accessibilityRole,
+  accessibilityState,
   ...rest
 }: ChipProps) {
   const { theme, scales } = useTheme()
@@ -46,6 +48,12 @@ export function Chip({
     outline: { bg: "transparent", fg: theme.text["high-emphasis"], border: theme.border["medium-emphasis"] },
   }[variant]
 
+  // web 版と同じ既定: ラベルが文字列ならそれを含めて読み上げる（「削除: タグ名」）。
+  const removeLabel =
+    typeof children === "string" || typeof children === "number"
+      ? `削除: ${children}`
+      : "削除"
+
   const bg = selected ? theme.brand.primary : palette.bg
   const fg = selected ? theme.text["on-inverse"] : disabled ? theme.text.disable : palette.fg
   const border = selected ? theme.brand.primary : palette.border
@@ -54,6 +62,11 @@ export function Chip({
     <View style={{ flexDirection: "row", alignSelf: "flex-start" }}>
       <Pressable
         disabled={disabled}
+        // 支援技術への既定値（issue #311）。role が無いとスクリーンリーダーが
+        // ただのテキストとして扱い、selected も読み上げられない。呼び出し側の
+        // 明示値が常に優先される（後方互換）。
+        accessibilityRole={accessibilityRole ?? "button"}
+        accessibilityState={{ selected, disabled, ...accessibilityState }}
         style={({ pressed }) => [
           {
             height: heightMap[size],
@@ -99,6 +112,10 @@ export function Chip({
         <Pressable
           onPress={onRemove}
           disabled={disabled}
+          // ×だけの表示は読み上げで意味が取れないため、role とラベルを既定で持つ。
+          accessibilityRole="button"
+          accessibilityLabel={removeLabel}
+          accessibilityState={{ disabled }}
           style={({ pressed }) => ({
             height: heightMap[size],
             paddingHorizontal: 10,
