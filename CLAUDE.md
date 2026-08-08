@@ -40,6 +40,17 @@ UI を書く前に必ず確認すること:
 - [ ] `.tsx` 編集後に `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行したか
 - [ ] `FormField` を import する前にどちらか確認したか（react-hook-form の Controller と統合するなら `RhfFormField`＝`ui/form` の `FormField` を index.ts で別名 export したもの。単純な label+error 表示は `patterns/form-field` の `FormField`。迷ったら後者）
 
+### 新規・変更するコンポーネントの API チェック（2026-08 の consumer 実機点検で3件連続した型）
+
+「DS 部品の既定値が consumer の想定とズレていた」不具合が同じ週に3件出た（#308 / #311 / exam-kit 側で発覚した ChipSelector の複数選択既定）。部品の props を設計・変更するときは次を確認する:
+
+- [ ] **押せる要素は、押せると見て分かる面を既定で持つか**。素の Pressable + テキストだけの操作子を作らない。面・タップ領域（44pt）は `IconButton` 等の既存部品に委ねる（#308: Calendar の月送り矢印が面を持たず、consumer から差し替え口も無かった）
+- [ ] **インタラクティブな部品は a11y 既定値を自分で持つか**。`accessibilityRole` と、状態（selected / disabled / checked）の `accessibilityState` 反映は**呼び出し側の義務にしない**。呼び出し側の明示値が優先される形で部品が既定を持つ（#311: Chip が role を持たず、スクリーンリーダーにただのテキストとして扱われた）
+- [ ] **モードを持つ部品（単一/複数選択・開閉など）の既定値は、間違えて使うと壊れる側にしていないか**。既定で済ませた呼び出しが静かに誤動作する組み合わせ（例: ChipSelector の既定 `multiple=true` を単一選択のつもりで使うと、押しても values[0] が現在値のまま切り替わらない）は、既定を安全側へ倒すか、必須 prop にして省略をコンパイルエラーにする
+- [ ] **名前付きスロット（meta / description 等）は「何を・どこに置くか」を JSDoc に書いたか**。書いていないスロットは consumer に流用され、想定外の位置崩れになる（#309: ActionTile の meta に選択チェックを入れられ、左下に浮いた）
+
+いずれも lint では拾えない設計判断なので、レビューではこの4点を明示的に見る。
+
 ---
 
 ## 必須: セッション開始時に読み込むファイル
