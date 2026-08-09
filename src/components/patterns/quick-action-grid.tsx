@@ -103,8 +103,10 @@ function ActionTile({
           <span
             className={cn(
               "shrink-0",
-              // 文字列・数値は native 側が resolveTypo("label.md") を当てるので web も揃える
-              (typeof indicator === "string" || typeof indicator === "number") && "typo-label-md"
+              // 文字列・数値は native 側が resolveTypo("label.md") + text.high-emphasis を当てるので web も揃える。
+              // 色は継承に頼らず明示する（消費側の色文脈で崩れるため）
+              (typeof indicator === "string" || typeof indicator === "number") &&
+                "typo-label-md text-[var(--Text-High-Emphasis)]"
             )}
           >
             {indicator}

@@ -67,7 +67,7 @@ export const IndicatorOverride: Story = {
         description="loading は indicator より優先"
         selected
         loading
-        indicator={<span>差し替え表示</span>}
+        indicator={<span className="typo-label-md text-[var(--Text-High-Emphasis)]">差し替え表示</span>}
       />
       {/* 契約: null / false は「指定なし」として既定チェックへフォールバックする（消す口ではない） */}
       <ActionTile label="null は既定へ" description="indicator={null}" selected indicator={null} />
