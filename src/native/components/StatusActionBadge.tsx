@@ -67,10 +67,16 @@ export function StatusActionBadge({
     </>
   )
 
+  // 押せるときだけタップ最小寸法を適用する。asStatus / onPress 無しは非対話（下の分岐で
+  // accessibilityRole="text" の View になる）ので、36 を残すと中身に対して上下が余って
+  // 縦に間延びする（issue #316）。compact は下限を外すと丸がつぶれて楕円になるため
+  // aspectRatio で正円を保つ。
+  const isInteractive = !asStatus && !!onPress
   const baseStyle: StyleProp<ViewStyle> = [
     {
-      minHeight: 36,
-      minWidth: compact ? 36 : undefined,
+      minHeight: isInteractive ? 36 : undefined,
+      minWidth: compact && isInteractive ? 36 : undefined,
+      aspectRatio: compact && !isInteractive ? 1 : undefined,
       paddingHorizontal: scales.spacing.scale[2],
       paddingVertical: scales.spacing.scale[1],
       borderRadius: scales.borderRadius.full,
@@ -86,7 +92,7 @@ export function StatusActionBadge({
     style,
   ]
 
-  if (asStatus || !onPress) {
+  if (!isInteractive) {
     return <View accessibilityRole="text" accessibilityLabel={label} style={baseStyle}>{content}</View>
   }
 
