@@ -100,13 +100,18 @@ function StatusActionBadge({
     </>
   )
   const classes = cn(
-    "inline-flex min-h-9 max-w-full items-center justify-center gap-1.5 rounded-full border border-[var(--Border-Low-Emphasis)] px-2.5 py-1",
+    "inline-flex max-w-full items-center justify-center gap-1.5 rounded-full border border-[var(--Border-Low-Emphasis)] px-2.5 py-1",
     "typo-label-xs select-none",
     stateClasses[state],
+    // タップ最小寸法は押せるときだけ。非対話（asStatus / onClick 無し）で残すと中身に対して
+    // 上下が余り縦に間延びする（issue #316。native 側と同じ構造の不具合）
+    interactive && "min-h-9",
     interactive && "cursor-pointer transition-colors hover:bg-[var(--Surface-Tertiary)]",
     interactive && "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
     disabled && "opacity-50",
-    compact && "min-w-9 px-2",
+    compact && interactive && "min-w-9 px-2",
+    // compact の非対話は左右パディングだけが残ると横長の楕円になるため、上下と同値にして正円を保つ
+    compact && !interactive && "p-1",
     className
   )
 
