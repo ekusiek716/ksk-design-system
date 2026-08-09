@@ -36,7 +36,9 @@ export function CheckboxField({
       style={{
         flexDirection: "row",
         gap: scales.spacing.scale[2],
-        alignItems: "flex-start",
+        // description があるときはチェックを1行目に頭揃えする。無いときは行が minHeight（44）まで
+        // 伸びるので、上寄せだと文字の下に約 19.5pt の空白が残り間延びして見える（issue #315）
+        alignItems: description ? "flex-start" : "center",
         minHeight: scales.touchTargets.buttonCTA.min,
         opacity: disabled ? 0.6 : 1,
       }}
@@ -45,7 +47,7 @@ export function CheckboxField({
         pointerEvents="none"
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
-        style={{ paddingTop: 2 }}
+        style={{ paddingTop: description ? 2 : 0 }}
       >
         <Checkbox checked={checked} disabled={disabled} />
       </View>

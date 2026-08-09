@@ -25,8 +25,10 @@ export function CheckboxGroup({ options, values = [], onChange, disabled = false
       onChange?.([...values, v])
     }
   }
+  // 各行（CheckboxField）が touchTargets.buttonCTA.min（44）の高さを自前で持つため、行間はここで足しすぎない。
+  // scale[3] だと 1 行ラベルで 56pt ピッチになり間延びする（issue #315）
   return (
-    <View style={{ gap: scales.spacing.scale[3] }}>
+    <View style={{ gap: scales.spacing.scale[1] }}>
       {options.map((o) => (
         <CheckboxField
           key={o.value}
