@@ -12,7 +12,14 @@ interface ActionTileProps extends Omit<React.ComponentProps<"button">, "children
   emoji?: React.ReactNode
   label: React.ReactNode
   description?: React.ReactNode
+  /** カード下段の右端に置く補足情報(例:「所要5分」「要解放」)。選択インジケータには使わない — `indicator` を使う。 */
   meta?: React.ReactNode
+  /**
+   * 選択状態などを示す小さな表示。**ラベル行の右端**(loading 時に Spinner が入る位置)に置かれる。
+   * 省略時、選択状態なら DS 標準のチェックを表示する。表示自体を消したい場合の口は用意していない
+   * (選択を色だけで伝えると WCAG 1.4.1 に反するため)。
+   */
+  indicator?: React.ReactNode
   selected?: boolean
   loading?: boolean
   variant?: ActionTileVariant
@@ -45,6 +52,7 @@ function ActionTile({
   label,
   description,
   meta,
+  indicator,
   selected = false,
   loading = false,
   variant = selected ? "selected" : "neutral",
@@ -53,11 +61,13 @@ function ActionTile({
   ...props
 }: ActionTileProps) {
   const isDisabled = disabled || loading
+  const isSelected = selected || variant === "selected"
+  const hasIndicator = indicator !== undefined && indicator !== null && indicator !== false
   return (
     <button
       data-slot="action-tile"
       data-variant={variant}
-      aria-pressed={selected || undefined}
+      aria-pressed={isSelected || undefined}
       type={type ?? "button"}
       disabled={isDisabled}
       className={cn(
@@ -87,7 +97,25 @@ function ActionTile({
           )}
           <span className="typo-label-md min-w-0 truncate">{label}</span>
         </span>
-        {loading && <Spinner size="sm" label="処理中" />}
+        {loading ? (
+          <Spinner size="sm" label="処理中" />
+        ) : hasIndicator ? (
+          <span
+            className={cn(
+              "shrink-0",
+              // 文字列・数値は native 側が resolveTypo("label.md") + text.high-emphasis を当てるので web も揃える。
+              // 色は継承に頼らず明示する（消費側の色文脈で崩れるため）
+              (typeof indicator === "string" || typeof indicator === "number") &&
+                "typo-label-md text-[var(--Text-High-Emphasis)]"
+            )}
+          >
+            {indicator}
+          </span>
+        ) : isSelected ? (
+          <span className="typo-label-md shrink-0 text-[var(--Text-Accent-Primary)]" aria-hidden>
+            ✓
+          </span>
+        ) : null}
       </span>
       {(description || meta) && (
         <span className="flex w-full flex-wrap items-end justify-between gap-x-2 gap-y-1">

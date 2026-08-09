@@ -23,7 +23,14 @@ export interface ActionTileProps extends AccessibilityProps {
   emoji?: React.ReactNode
   label: React.ReactNode
   description?: React.ReactNode
+  /** カード下段の右端に置く補足情報(例:「所要5分」「要解放」)。選択インジケータには使わない — `indicator` を使う。 */
   meta?: React.ReactNode
+  /**
+   * 選択状態などを示す小さな表示。**ラベル行の右端**(loading 時に Spinner が入る位置)に置かれる。
+   * 省略時、選択状態なら DS 標準のチェックを表示する。表示自体を消したい場合の口は用意していない
+   * (選択を色だけで伝えると WCAG 1.4.1 に反するため)。
+   */
+  indicator?: React.ReactNode
   selected?: boolean
   loading?: boolean
   disabled?: boolean
@@ -66,6 +73,7 @@ export function ActionTile({
   label,
   description,
   meta,
+  indicator,
   selected = false,
   loading = false,
   disabled = false,
@@ -78,6 +86,8 @@ export function ActionTile({
 }: ActionTileProps) {
   const { theme, scales } = useTheme()
   const isDisabled = disabled || loading
+  const isSelected = selected || variant === "selected"
+  const hasIndicator = indicator !== undefined && indicator !== null && indicator !== false
   const variantColors = colorsForVariant(variant, theme)
 
   return (
@@ -87,7 +97,7 @@ export function ActionTile({
       accessibilityRole={accessibilityRole ?? "button"}
       accessibilityState={{
         disabled: isDisabled,
-        selected,
+        selected: isSelected,
         busy: loading,
         ...accessibilityState,
       }}
@@ -119,7 +129,26 @@ export function ActionTile({
             label
           )}
         </View>
-        {loading && <Spinner size="sm" />}
+        {loading ? (
+          <Spinner size="sm" />
+        ) : hasIndicator ? (
+          // 文字列だけでなく数値もラップする。View 直下の生テキストは RN 実機で落ちる（Chip.tsx と同じガード）
+          typeof indicator === "string" || typeof indicator === "number" ? (
+            <RNText style={[resolveTypo("label.md"), { color: theme.text["high-emphasis"] }]}>
+              {indicator}
+            </RNText>
+          ) : (
+            indicator
+          )
+        ) : isSelected ? (
+          <View
+            pointerEvents="none"
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          >
+            <RNText style={[resolveTypo("label.md"), { color: theme.text["accent-primary"] }]}>✓</RNText>
+          </View>
+        ) : null}
       </View>
       {(description || meta) && (
         <View style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: scales.spacing.scale[2] }}>
@@ -131,11 +160,11 @@ export function ActionTile({
             description
           )}
           {typeof meta === "string" ? (
-            <RNText style={[resolveTypo("label.sm"), { color: theme.text["low-emphasis"] }]}>
+            <RNText style={[resolveTypo("label.sm"), { color: theme.text["low-emphasis"], marginLeft: "auto" }]}>
               {meta}
             </RNText>
           ) : (
-            meta
+            meta && <View style={{ marginLeft: "auto" }}>{meta}</View>
           )}
         </View>
       )}

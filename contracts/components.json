@@ -2052,7 +2052,7 @@
       "name": "QuickActionGrid / ActionTile",
       "exported": false,
       "path": "src/components/patterns/quick-action-grid.tsx",
-      "description": "ショートカット/絵文字 action の button tile と grid。icon/emoji、label、description、meta、selected/disabled/loading state、2/3/4 column または auto-fit を持つ。",
+      "description": "ショートカット/絵文字 action の button tile と grid。icon/emoji、label、description、meta、indicator、selected/disabled/loading state、2/3/4 column または auto-fit を持つ。",
       "variants": [
         "neutral",
         "selected",
@@ -2064,13 +2064,19 @@
       ],
       "accessibility": [
         "button semantics",
-        "aria-pressed when selected"
+        "aria-pressed when selected (selected prop または variant=\"selected\" のどちらでも true)",
+        "選択状態は色だけでなく既定チェック(indicator省略時)でも伝える(WCAG 1.4.1)",
+        "既定チェックは読み上げ対象外(aria-hidden / accessibilityElementsHidden)。選択状態の正本は aria-pressed(web) / accessibilityState.selected(native)"
       ],
       "rules": [
         "card + button の hybrid を consumer 側で手組みしない",
         "shortcut row/grid の columns/gap を consumer 側で決め打ちしない",
         "children には ActionTile を使う",
-        "選択状態は selected prop を使う"
+        "選択状態は selected prop を使う",
+        "meta はカード下段右端の補足情報専用。選択インジケータには indicator prop を使う(issue #309)",
+        "indicator はラベル行右端(loading 時 Spinner の位置)に表示。省略時は選択状態でDS標準チェックが既定表示される。null/undefined/falseはいずれも「指定なし」として扱われ、選択中なら既定チェックへフォールバックする",
+        "loading は indicator / 既定チェックより優先して表示される",
+        "native では indicator に文字列・数値を渡してもよい(DS 側が Text にラップする)。それ以外の ReactNode はそのまま描画されるため、consumer が Text 相当で包む"
       ],
       "subcomponents": [
         "QuickActionGrid",
