@@ -26,6 +26,12 @@ const config: StorybookConfig = {
   // それらは従来どおり実機で確認する。
   viteFinal: async (config) => {
     config.resolve = config.resolve ?? {}
+    // React 二重ロード防止（issue #334）。node_modules が上位ディレクトリにも
+    // 存在する環境（git worktree 等）で react-native-web が別の react を
+    // 掴むのを防ぐ。理由は vitest.a11y.config.ts のコメント参照。
+    config.resolve.dedupe = [
+      ...new Set([...(config.resolve.dedupe ?? []), "react", "react-dom", "react-native-web"]),
+    ]
     config.resolve.alias = {
       ...(config.resolve.alias as Record<string, string>),
       "react-native": "react-native-web",

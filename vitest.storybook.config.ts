@@ -20,6 +20,8 @@ import { storybookTest } from "@storybook/addon-vitest/vitest-plugin"
  */
 export default defineConfig({
   resolve: {
+    // React 二重ロード防止（issue #334）。理由は vitest.a11y.config.ts のコメント参照。
+    dedupe: ["react", "react-dom", "react-native-web"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
