@@ -111,6 +111,12 @@ rm -f "$NEW_TGZ"
 # 「タグ既存」と判定し GitHub Release 作成をスキップしてしまうため、意図的に
 # `--tags` を付けない。
 echo -e "${CYAN}→ git push origin main${NC}"
+# gh の active account は実行中にも flip するため、開始時に一度揃えるだけでは足りない。
+# 実際に 1.53.0 のリリースで、bump とコミットが済んだ直後の push だけが 403 で落ちた。
+# 不可逆に近い工程の直前で揃え直す。
+if [ -x "$HOME/.claude/scripts/gh-account-guard.sh" ]; then
+  bash "$HOME/.claude/scripts/gh-account-guard.sh" "$(pwd)" || true
+fi
 git push origin main
 PUSHED_SHA="$(git rev-parse HEAD)"
 

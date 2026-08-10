@@ -295,6 +295,13 @@ for repo in "${REPOS[@]}"; do
   # ── push ──
   # 既存 branch から開始しているため、通常 push が fast-forward の場合だけ更新する。
   # 実行中に remote が進んだ場合は失敗させ、force-push で人手の commit を潰さない。
+  #
+  # gh の active account はループの途中でも flip する。リポ単位のガードを通った後に
+  # flip すると push だけが 403 で落ち、"non-fast-forward push" と紛らわしい失敗になる
+  # （1.53.0 の配布で宅建用が実際にこれで落ちた）。push の直前で揃え直す。
+  if [ -x "$HOME/.claude/scripts/gh-account-guard.sh" ]; then
+    bash "$HOME/.claude/scripts/gh-account-guard.sh" "$repo" >/dev/null 2>&1 || true
+  fi
   if ! git -C "$wt" push -u origin "$branch" >/dev/null 2>&1; then
     existing_pr="$(cd "$wt" && gh pr list --state open --head "$branch" --json url -q '.[0].url' 2>/dev/null)"
     echo -e "${RED}FAIL: push（remote が進んだ可能性。再実行で安全に再開）${NC} ${existing_pr:-}"
