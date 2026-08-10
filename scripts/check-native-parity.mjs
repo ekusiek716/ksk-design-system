@@ -237,25 +237,25 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
     { prop: "removable", reason: `Same as \`selected\`: Web's omitted/undefined behaves identically to Native's explicit \`false\` default. ${RD_API_SHAPE}` },
   ]],
   ["Combobox", [
-    { prop: "placeholder", reason: `Web "選択してください" vs Native "選択". ${RD_TEXT_DRIFT}` },
-    { prop: "searchPlaceholder", reason: `Web "検索..." vs Native "検索". ${RD_TEXT_DRIFT}` },
+    { prop: "placeholder", reason: `Web "選択してください" vs Native "選択". ${RD_TEXT_DRIFT}`, followUp: true, note: "placeholder の文言を統一するか判断が必要" },
+    { prop: "searchPlaceholder", reason: `Web "検索..." vs Native "検索". ${RD_TEXT_DRIFT}`, followUp: true, note: "searchPlaceholder の文言を統一するか判断が必要" },
   ]],
   ["MultiSelect", [
-    { prop: "placeholder", reason: `Web "選択してください" vs Native "選択" (same divergence as Combobox, designed independently). ${RD_TEXT_DRIFT}` },
-    { prop: "searchPlaceholder", reason: `Web "検索..." vs Native "検索" (same divergence as Combobox, designed independently). ${RD_TEXT_DRIFT}` },
+    { prop: "placeholder", reason: `Web "選択してください" vs Native "選択" (same divergence as Combobox, designed independently). ${RD_TEXT_DRIFT}`, followUp: true, note: "placeholder の文言を統一するか判断が必要（Combobox と同型）" },
+    { prop: "searchPlaceholder", reason: `Web "検索..." vs Native "検索" (same divergence as Combobox, designed independently). ${RD_TEXT_DRIFT}`, followUp: true, note: "searchPlaceholder の文言を統一するか判断が必要（Combobox と同型）" },
   ]],
   ["ErrorState", [
     { prop: "title", reason: `Web has no destructure default but falls back to the *same* text ("エラーが発生しました") via \`title ?? (notFound ? … : "エラーが発生しました")\` inside the function body. ${RD_BLIND_SPOT} — verified identical effective text, not just a shape artifact.` },
-    { prop: "description", reason: `Web's inline fallback (non-notFound case) is "しばらくしてからもう一度お試しください"; Native's destructure default is "時間をおいて再度お試しください。" — different wording for the same purpose. ${RD_BLIND_SPOT} Additionally a real (non-urgent) copy-harmonization follow-up per RD_TEXT_DRIFT.` },
+    { prop: "description", reason: `Web's inline fallback (non-notFound case) is "しばらくしてからもう一度お試しください"; Native's destructure default is "時間をおいて再度お試しください。" — different wording for the same purpose. ${RD_BLIND_SPOT} Additionally a real (non-urgent) copy-harmonization follow-up per RD_TEXT_DRIFT.`, followUp: true, note: "description の実効フォールバック文言が web/native で異なる（表記ゆれ）" },
   ]],
   ["FilterBar", [
-    { prop: "sortLabel", reason: `Web has no destructure default but falls back to "並べ替え" via \`sortLabel ?? "並べ替え"\` at each render site; Native's destructure default is "並び替え" — near-identical wording, likely independent word-choice drift. ${RD_BLIND_SPOT} Non-urgent copy-harmonization follow-up per RD_TEXT_DRIFT.` },
+    { prop: "sortLabel", reason: `Web has no destructure default but falls back to "並べ替え" via \`sortLabel ?? "並べ替え"\` at each render site; Native's destructure default is "並び替え" — near-identical wording, likely independent word-choice drift. ${RD_BLIND_SPOT} Non-urgent copy-harmonization follow-up per RD_TEXT_DRIFT.`, followUp: true, note: "sortLabel の実効フォールバック文言が web/native で異なる（表記ゆれ）" },
   ]],
   ["NotificationBadge", [
     { prop: "count", reason: `Web declares \`count: number\` as required (no default — callers must always pass a value); Native declares \`count?: number\` optional with a \`0\` fallback for looser call sites. ${RD_API_SHAPE}` },
   ]],
   ["NumberInput", [
-    { prop: "value", reason: `Web declares \`value?: number\` optional with a \`0\` default (usable uncontrolled); Native declares \`value: number\` required (controlled-only, no fallback). ${RD_API_SHAPE} Worth a non-urgent follow-up to decide whether Native should also default to 0 for parity of ergonomics.` },
+    { prop: "value", reason: `Web declares \`value?: number\` optional with a \`0\` default (usable uncontrolled); Native declares \`value: number\` required (controlled-only, no fallback). ${RD_API_SHAPE} Worth a non-urgent follow-up to decide whether Native should also default to 0 for parity of ergonomics.`, followUp: true, note: "Native は value 必須（既定なし）、Web は既定0で uncontrolled 利用可 — 揃えるか要判断" },
   ]],
   ["Progress", [
     { prop: "variant", reason: `Web's destructure default is the literal "default"; Native has no destructure default, but \`resolveProgressVariant\` falls back to \`toneToVariant(tone)\` where \`tone\` defaults to "accent" → also resolves to "default" (see src/native/progress-logic.ts). ${RD_BLIND_SPOT} — verified the two effective defaults are the same value.` },
@@ -267,14 +267,14 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
     { prop: "gap", reason: `Web's token default "md" maps to Tailwind's \`gap-3\` (12px); Native's own default is the literal 12 (px). ${RD_EQUIVALENT_UNIT} — verified same 12px value, not just a same-category guess.` },
   ]],
   ["RatingDisplay", [
-    { prop: "size", reason: `Web's "sm" token resolves to a 12px star icon (see sizeMap in rating-display.tsx); Native's own default is 16 (px) directly on StarRating. These are NOT visually identical (12px vs 16px) — a real, small, non-urgent icon-size drift between platforms' defaults, tracked here pending a decision on which is correct.` },
+    { prop: "size", reason: `Web's "sm" token resolves to a 12px star icon (see sizeMap in rating-display.tsx); Native's own default is 16 (px) directly on StarRating. These are NOT visually identical (12px vs 16px) — a real, small, non-urgent icon-size drift between platforms' defaults, tracked here pending a decision on which is correct.`, followUp: true, note: "web既定12px vs native既定16px — 見た目が実際にズレる、揃えるか要判断" },
   ]],
   ["ReviewCard", [
-    { prop: "helpfulCount", reason: "Web always renders the \"参考になった\" helpful-vote affordance and defaults the count to 0 (shows no count badge when 0); Native treats an omitted helpfulCount as \"hide the whole helpful section\" (`helpfulCount !== undefined` guard). This is a deliberate feature-visibility difference in each platform's own composition, not a simple default-value slip — but worth a non-urgent follow-up to confirm the visibility behavior is intentional on both sides." },
+    { prop: "helpfulCount", reason: "Web always renders the \"参考になった\" helpful-vote affordance and defaults the count to 0 (shows no count badge when 0); Native treats an omitted helpfulCount as \"hide the whole helpful section\" (`helpfulCount !== undefined` guard). This is a deliberate feature-visibility difference in each platform's own composition, not a simple default-value slip — but worth a non-urgent follow-up to confirm the visibility behavior is intentional on both sides.", followUp: true, note: "helpfulCount 省略時の表示可否ロジックが web/native で異なる — 意図か要確認" },
   ]],
   ["Skeleton", [
-    { prop: "width", reason: "Web has no default (omitting width/height relies entirely on the caller's `className`, per the documented legacy `className`-only compat mode); Native defaults to \"100%\" so an unstyled `<Skeleton />` still renders visibly. A real, non-urgent UX difference — worth deciding whether Web should also get a visible fallback size, tracked here rather than fixed (component changes are out of scope for this check)." },
-    { prop: "height", reason: "Same story as `width`: Web has no built-in fallback size (className-only legacy mode), Native defaults to 16 (px) so it's visible unstyled. Non-urgent follow-up, tracked here." },
+    { prop: "width", reason: "Web has no default (omitting width/height relies entirely on the caller's `className`, per the documented legacy `className`-only compat mode); Native defaults to \"100%\" so an unstyled `<Skeleton />` still renders visibly. A real, non-urgent UX difference — worth deciding whether Web should also get a visible fallback size, tracked here rather than fixed (component changes are out of scope for this check).", followUp: true, note: "web は width 未指定だと className 任せで見えない可能性 — native は既定100%で必ず見える" },
+    { prop: "height", reason: "Same story as `width`: Web has no built-in fallback size (className-only legacy mode), Native defaults to 16 (px) so it's visible unstyled. Non-urgent follow-up, tracked here.", followUp: true, note: "web は height 未指定だと className 任せで見えない可能性 — native は既定16pxで必ず見える" },
   ]],
   ["StarRating", [
     { prop: "size", reason: `Web's "md" token is Tailwind's \`size-5\` = 20px (1.25rem); Native's own default is the literal 20 (px). ${RD_EQUIVALENT_UNIT} — verified same 20px value.` },
@@ -283,10 +283,10 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
     { prop: "trend", reason: 'Web `trend?: { value: number; label?: string }` (numeric delta object, no default) vs Native `trend?: "up" | "down" | "neutral"` (enum, defaults to "neutral") are entirely different prop shapes designed independently for this component — not a missed port of the same feature.' },
   ]],
   ["TagInput", [
-    { prop: "placeholder", reason: `Web "タグを入力して Enter" (mentions the Enter-to-add interaction) vs Native "タグを入力" (shorter, no keyboard hint — native doesn't have a physical Enter key affordance in the same sense). ${RD_TEXT_DRIFT}` },
+    { prop: "placeholder", reason: `Web "タグを入力して Enter" (mentions the Enter-to-add interaction) vs Native "タグを入力" (shorter, no keyboard hint — native doesn't have a physical Enter key affordance in the same sense). ${RD_TEXT_DRIFT}`, followUp: true, note: "placeholder の文言を統一するか判断が必要（Enter ヒントの有無）" },
   ]],
   ["TimePicker", [
-    { prop: "minuteStep", reason: 'Web defaults to a 1-minute step (every minute selectable); Native defaults to a 5-minute step. This is a real, user-visible UX difference (very different picker density) — not a cosmetic drift. Tracked here as a genuine open question for follow-up decision (which default is correct, or whether both are intentionally tuned per platform input affordances) rather than silently allowlisted as equivalent.' },
+    { prop: "minuteStep", reason: 'Web defaults to a 1-minute step (every minute selectable); Native defaults to a 5-minute step. This is a real, user-visible UX difference (very different picker density) — not a cosmetic drift. Tracked here as a genuine open question for follow-up decision (which default is correct, or whether both are intentionally tuned per platform input affordances) rather than silently allowlisted as equivalent.', followUp: true, note: "web既定1分刻み vs native既定5分刻み — 操作感が大きく変わる、最優先で要判断" },
   ]],
 ])
 
@@ -530,8 +530,15 @@ function diffDefaults(name, webPath, nativePath) {
   const rawMismatchProps = new Set(rawMismatches.map((r) => r.prop))
   const stale = gapEntries.filter((g) => !rawMismatchProps.has(g.prop)).map((g) => g.prop)
   const mismatches = rawMismatches.filter((r) => !allowedProps.has(r.prop))
+  // Allowlisted entries marked `followUp: true` are exempt from failing the
+  // build, but — unlike a genuinely-equivalent gap (unit conversion, dead-code
+  // artifact) — they represent a real, undecided divergence. Surface them as
+  // advisories every run so "green" doesn't quietly read as "web/native match".
+  const followUps = rawMismatches
+    .filter((r) => allowedProps.get(r.prop)?.followUp)
+    .map((r) => ({ ...r, note: allowedProps.get(r.prop).note }))
 
-  return { mismatches, incomparable, stale }
+  return { mismatches, incomparable, stale, followUps }
 }
 
 function diffProps(name, webPath, nativePath) {
@@ -649,6 +656,7 @@ if (propMismatches.length > 0) {
 const defaultMismatches = []
 const staleDefaultGapEntries = []
 const incomparableDefaults = []
+const followUpDefaults = []
 let defaultsChecked = 0
 
 for (const name of contractNames) {
@@ -663,6 +671,7 @@ for (const name of contractNames) {
   if (diff.stale.length > 0) staleDefaultGapEntries.push({ name, stale: diff.stale })
   if (diff.incomparable.length > 0) incomparableDefaults.push({ name, incomparable: diff.incomparable })
   if (diff.mismatches.length > 0) defaultMismatches.push({ name, mismatches: diff.mismatches })
+  if (diff.followUps.length > 0) followUpDefaults.push({ name, followUps: diff.followUps })
 }
 
 const staleDefaultGaps = [...INTENTIONAL_DEFAULT_GAPS.keys()].filter((name) => !contractNames.includes(name))
@@ -699,6 +708,24 @@ if (defaultMismatches.length > 0) {
   process.exit(1)
 }
 
+// Follow-up defaults: allowlisted (so they don't fail the build — the
+// mismatch itself is genuine and undecided, not a false positive) but a
+// real, still-unresolved Web⇄Native divergence. `followUp: true` entries in
+// INTENTIONAL_DEFAULT_GAPS land here instead of being silently absorbed into
+// the "N intentional default gaps" count, so a green run doesn't read as
+// "web/native defaults match" when they don't. Same ADVISORY convention as
+// scripts/check-flex-shrink.mjs's KFX002 — printed every run, doesn't fail CI.
+const followUpCount = followUpDefaults.reduce((sum, f) => sum + f.followUps.length, 0)
+if (followUpCount > 0) {
+  for (const { name, followUps } of followUpDefaults) {
+    for (const { prop, web, native, note } of followUps) {
+      console.error(
+        `[ADVISORY] ${name}.${prop} DEFAULT-FOLLOWUP web=${JSON.stringify(web)} native=${JSON.stringify(native)} — ${note}`,
+      )
+    }
+  }
+}
+
 console.log(
-  `[native-parity] OK: ${contractNames.length} contract names checked, ${INTENTIONAL_NATIVE_GAPS.size} intentional native gaps, ${propsChecked} components prop-diffed (${INTENTIONAL_PROP_GAPS.size} intentional prop gaps), ${defaultsChecked} components default-diffed (${INTENTIONAL_DEFAULT_GAPS.size} intentional default gaps)`,
+  `[native-parity] OK: ${contractNames.length} contract names checked, ${INTENTIONAL_NATIVE_GAPS.size} intentional native gaps, ${propsChecked} components prop-diffed (${INTENTIONAL_PROP_GAPS.size} intentional prop gaps), ${defaultsChecked} components default-diffed (${INTENTIONAL_DEFAULT_GAPS.size} intentional default gaps / default follow-up ${followUpCount}件 — advisory は助言モード / CI は通過)`,
 )
