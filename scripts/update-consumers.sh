@@ -132,9 +132,17 @@ for repo in "${REPOS[@]}"; do
     continue
   fi
 
+  # ── gh の active account を repo owner に合わせる ──
+  # active account が業務側に flip していると private リポが "Repository not found"
+  # になり、fetch も gh pr create も静かに失敗する（実際に大量 FAIL を起こした）。
+  # リポごとに揃え直してから進める。ガードが無い環境では素通りする。
+  if [ -x "$HOME/.claude/scripts/gh-account-guard.sh" ]; then
+    bash "$HOME/.claude/scripts/gh-account-guard.sh" "$repo" || true
+  fi
+
   # ── origin/main から一時 worktree を切る ──
   if ! git -C "$repo" fetch origin main >/dev/null 2>&1; then
-    echo -e "${RED}FAIL: git fetch origin main${NC}"
+    echo -e "${RED}FAIL: git fetch origin main（gh の active account が想定と違う可能性。gh auth status を確認）${NC}"
     RESULTS+=("$name: FAIL (fetch)")
     continue
   fi
