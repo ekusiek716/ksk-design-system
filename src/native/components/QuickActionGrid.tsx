@@ -88,6 +88,8 @@ export function ActionTile({
   const isDisabled = disabled || loading
   const isSelected = selected || variant === "selected"
   const hasIndicator = indicator !== undefined && indicator !== null && indicator !== false
+  // 下段（description / meta）を描くかどうか。下の JSX の描画条件と必ず一致させる
+  const hasBottomRow = Boolean(description || meta)
   const variantColors = colorsForVariant(variant, theme)
 
   return (
@@ -109,7 +111,10 @@ export function ActionTile({
           borderRadius: scales.borderRadius.xl,
           padding: scales.spacing.scale[3],
           gap: scales.spacing.scale[3],
-          justifyContent: "space-between",
+          // 下段（description / meta）があるときだけ上下に振り分ける。無いときに
+          // space-between にすると、ラベルが上端に貼り付いて下に空白が残り間延びして
+          // 見える（issue #309 の原因2）。1 行タイルは中央に置く
+          justifyContent: hasBottomRow ? "space-between" : "center",
           opacity: isDisabled ? 0.5 : 1,
           ...variantColors,
           backgroundColor: pressed ? theme.surface.secondary : variantColors.backgroundColor,
@@ -150,7 +155,7 @@ export function ActionTile({
           </View>
         ) : null}
       </View>
-      {(description || meta) && (
+      {hasBottomRow && (
         <View style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: scales.spacing.scale[2] }}>
           {typeof description === "string" ? (
             <RNText style={[resolveTypo("body.sm"), { color: theme.text["medium-emphasis"], flex: 1 }]}>

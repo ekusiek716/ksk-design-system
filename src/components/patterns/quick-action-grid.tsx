@@ -63,6 +63,8 @@ function ActionTile({
   const isDisabled = disabled || loading
   const isSelected = selected || variant === "selected"
   const hasIndicator = indicator !== undefined && indicator !== null && indicator !== false
+  // 下段（description / meta）を描くかどうか。下の JSX の描画条件と必ず一致させる
+  const hasBottomRow = Boolean(description || meta)
   return (
     <button
       data-slot="action-tile"
@@ -71,7 +73,10 @@ function ActionTile({
       type={type ?? "button"}
       disabled={isDisabled}
       className={cn(
-        "relative flex min-h-24 flex-col items-start justify-between gap-3 rounded-xl border border-[var(--Border-Low-Emphasis)] p-3 text-left transition-colors",
+        "relative flex min-h-24 flex-col items-start gap-3 rounded-xl border border-[var(--Border-Low-Emphasis)] p-3 text-left transition-colors",
+        // 下段があるときだけ上下に振り分ける。無いときに justify-between にすると
+        // ラベルが上端に貼り付いて下に空白が残り間延びして見える（issue #309 の原因2）
+        hasBottomRow ? "justify-between" : "justify-center",
         "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:outline-none",
         "hover:bg-[var(--Surface-Secondary)]",
         actionTileVariants[variant],
@@ -117,7 +122,7 @@ function ActionTile({
           </span>
         ) : null}
       </span>
-      {(description || meta) && (
+      {hasBottomRow && (
         <span className="flex w-full flex-wrap items-end justify-between gap-x-2 gap-y-1">
           {description && (
             <span className="typo-body-sm min-w-[60%] flex-1 text-[var(--Text-Medium-Emphasis)]">
