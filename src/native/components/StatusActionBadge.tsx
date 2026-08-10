@@ -49,10 +49,26 @@ export function StatusActionBadge({
 
   const content = (
     <>
+      {/* label で全体を1つの意味として読み上げるため、装飾用のインジケータ/ドットは
+          a11y ツリーから外す（react-native-web は accessibilityElementsHidden /
+          importantForAccessibility を尊重しないため aria-hidden を併記。CheckboxField の
+          装飾チェックと同じパターン）。ActivityIndicator は role="progressbar" が固定で
+          出るため、aria-hidden を渡さないと名前なしの progressbar として axe に検出される */}
       {icon ?? (loading || state === "syncing" ? (
-        <ActivityIndicator size="small" color={palette.fg} />
+        <ActivityIndicator
+          size="small"
+          color={palette.fg}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          aria-hidden
+        />
       ) : (
-        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: palette.fg }} />
+        <View
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          aria-hidden
+          style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: palette.fg }}
+        />
       ))}
       {!compact && (
         <RNText numberOfLines={1} style={[resolveTypo("label.xs"), { color: palette.fg }]}>
@@ -95,7 +111,15 @@ export function StatusActionBadge({
   ]
 
   if (!isInteractive) {
-    return <View accessibilityRole="text" accessibilityLabel={label} style={baseStyle}>{content}</View>
+    // accessibilityRole="text" は react-native-web の ARIA role マッピング表で null
+    // （web には role を出さない）ため、aria-label だけが残り axe の aria-prohibited-attr
+    // に引っかかる。role="status" を併記して web でも有効な role を出す（バッジは状態表示
+    // なので意味的にも妥当）
+    return (
+      <View accessibilityRole="text" role="status" accessibilityLabel={label} style={baseStyle}>
+        {content}
+      </View>
+    )
   }
 
   return (

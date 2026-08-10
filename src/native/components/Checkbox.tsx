@@ -7,17 +7,37 @@ export interface CheckboxProps {
   onChange?: (checked: boolean) => void
   disabled?: boolean
   size?: number
+  /**
+   * true のとき、支援技術から読み上げ対象外の純粋な装飾として振る舞う
+   * （accessibilityRole/State を持たず、キーボードフォーカスも受けない）。
+   * CheckboxField 等、親の Pressable が既に role="checkbox" を持ち、
+   * このコンポーネントを見た目のためだけに内側へ入れ子にする場合に使う。
+   * 親側は装飾の subtree を aria-hidden で隠す（react-native-web は
+   * accessibilityElementsHidden / importantForAccessibility を尊重しないため）が、
+   * aria-hidden はフォーカス可能な子孫を許さない（axe: aria-hidden-focus）ので
+   * tabIndex も同時に外す必要がある。
+   * @default false
+   */
+  decorative?: boolean
 }
 
-export function Checkbox({ checked = false, onChange, disabled = false, size = 20 }: CheckboxProps) {
+export function Checkbox({
+  checked = false,
+  onChange,
+  disabled = false,
+  size = 20,
+  decorative = false,
+}: CheckboxProps) {
   const { theme, scales } = useTheme()
   return (
     <Pressable
-      onPress={() => !disabled && onChange?.(!checked)}
+      onPress={() => !decorative && !disabled && onChange?.(!checked)}
       disabled={disabled}
       hitSlop={8}
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked, disabled }}
+      accessibilityRole={decorative ? undefined : "checkbox"}
+      accessibilityState={decorative ? undefined : { checked, disabled }}
+      // decorative 時は web のタブ順から外す（aria-hidden の親と組み合わせて完全に無視させる）
+      tabIndex={decorative ? -1 : undefined}
       style={{
         width: size,
         height: size,
