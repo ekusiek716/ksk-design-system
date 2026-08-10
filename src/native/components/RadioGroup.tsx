@@ -43,9 +43,19 @@ export function RadioGroup({ options, value, onChange, disabled = false }: Radio
               opacity: itemDisabled ? 0.5 : 1,
             }}
             accessibilityRole="radio"
-            accessibilityState={{ selected }}
+            accessibilityState={{ selected, disabled: itemDisabled }}
+            // react-native-web 0.21 は accessibilityState を aria-* に変換しないため、
+            // RN 0.71+ の aria-* props を併記する（peerDependency は react-native >=0.74.0）
+            aria-checked={selected}
+            aria-disabled={itemDisabled || undefined}
           >
             <View
+              pointerEvents="none"
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              // react-native-web は上記2つの native 専用プロパティを尊重しないため、
+              // web でも効く aria-hidden を併記して装飾用の丸印を支援技術から隠す
+              aria-hidden
               style={{
                 width: 20,
                 height: 20,
