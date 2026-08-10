@@ -8,6 +8,11 @@ export interface CardHeaderProps extends ViewProps {
   title: string
   /** 既定 heading.xl */
   titleVariant?: TypoVariant
+  /**
+   * 見出し先頭に添える装飾アイコン等。タップ可能要素は置かない
+   * （押下は Card/親側の責務。ここは視覚的な装飾専用スロット）。
+   */
+  titleLeading?: React.ReactNode
   description?: string
   trailing?: React.ReactNode
   /** 画像/グラデーション等の media 上に載せる場合は "on-primary"。既定 "default" */
@@ -19,6 +24,7 @@ export function CardHeader({
   eyebrow,
   title,
   titleVariant = "heading.xl",
+  titleLeading,
   description,
   trailing,
   tone = "default",
@@ -50,7 +56,15 @@ export function CardHeader({
             {eyebrow}
           </RNText>
         )}
-        <RNText style={[resolveTypo(titleVariant), { color: titleColor }]}>{title}</RNText>
+        {titleLeading ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: scales.spacing.scale[1] }}>
+            {titleLeading}
+            {/* 長文 title がアイコンの分だけ行からはみ出さないよう縮小を許可する */}
+            <RNText style={[resolveTypo(titleVariant), { color: titleColor, flexShrink: 1 }]}>{title}</RNText>
+          </View>
+        ) : (
+          <RNText style={[resolveTypo(titleVariant), { color: titleColor }]}>{title}</RNText>
+        )}
         {description && (
           <RNText
             style={[
