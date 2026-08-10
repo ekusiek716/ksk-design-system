@@ -17,6 +17,14 @@ export interface StatusActionBadgeProps extends Omit<PressableProps, "children" 
   state?: StatusActionBadgeState
   label: string
   count?: number
+  /**
+   * ラベルを視覚的に隠し、アイコン（未指定ならドット）だけの丸いバッジにする。
+   * `label` は読み上げ用として残る。
+   *
+   * **`icon` を渡すこと。** 省略するとドットだけになり、見た目からは何を表しているか
+   * 分からなくなる（特に `asStatus` と併用すると押せもしないただの点になる）。
+   * @default false
+   */
   compact?: boolean
   loading?: boolean
   icon?: React.ReactNode
@@ -37,14 +45,18 @@ export function StatusActionBadge({
   ...rest
 }: StatusActionBadgeProps) {
   const { theme, scales } = useTheme()
+  // 枠線は状態色を持たず常に中立にする。状態はドットの色・文字色・背景ティントで伝わっており、
+  // 枠まで状態色にすると小さなバッジの輪郭だけが強く出て主張が過剰になる。
+  // 枠線自体は残す（背景ティントが淡く、白背景では輪郭が無いとバッジの形が見えないため）。
+  const borderColor = theme.border["low-emphasis"]
   const palette = {
-    idle: { bg: theme.surface.secondary, fg: theme.text["medium-emphasis"], border: theme.border["low-emphasis"] },
-    pending: { bg: theme.surface.warning, fg: theme.text.warning, border: theme.border.warning },
-    syncing: { bg: theme.surface.info, fg: theme.text.info, border: theme.border.info },
-    success: { bg: theme.surface.success, fg: theme.text.success, border: theme.border.success },
-    warning: { bg: theme.surface.warning, fg: theme.text.warning, border: theme.border.warning },
-    error: { bg: theme.surface.caution, fg: theme.text.caution, border: theme.border.caution },
-    offline: { bg: theme.surface.secondary, fg: theme.text["low-emphasis"], border: theme.border["low-emphasis"] },
+    idle: { bg: theme.surface.secondary, fg: theme.text["medium-emphasis"] },
+    pending: { bg: theme.surface.warning, fg: theme.text.warning },
+    syncing: { bg: theme.surface.info, fg: theme.text.info },
+    success: { bg: theme.surface.success, fg: theme.text.success },
+    warning: { bg: theme.surface.warning, fg: theme.text.warning },
+    error: { bg: theme.surface.caution, fg: theme.text.caution },
+    offline: { bg: theme.surface.secondary, fg: theme.text["low-emphasis"] },
   }[state]
 
   const content = (
@@ -99,7 +111,7 @@ export function StatusActionBadge({
       paddingVertical: scales.spacing.scale[1],
       borderRadius: scales.borderRadius.full,
       borderWidth: 1,
-      borderColor: palette.border,
+      borderColor,
       backgroundColor: palette.bg,
       flexDirection: "row",
       alignItems: "center",

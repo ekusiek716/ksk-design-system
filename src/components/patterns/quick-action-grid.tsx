@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Check } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { Spinner } from "@/components/ui/spinner"
@@ -73,10 +74,13 @@ function ActionTile({
       type={type ?? "button"}
       disabled={isDisabled}
       className={cn(
-        "relative flex min-h-24 flex-col items-start gap-3 rounded-xl border border-[var(--Border-Low-Emphasis)] p-3 text-left transition-colors",
-        // 下段があるときだけ上下に振り分ける。無いときに justify-between にすると
-        // ラベルが上端に貼り付いて下に空白が残り間延びして見える（issue #309 の原因2）
-        hasBottomRow ? "justify-between" : "justify-center",
+        // ラベルと説明の間隔は gap トークンだけで決める。justify-between にすると
+        // 高さの下限ぶん両者が最大まで引き離され gap が無視された見た目になる（issue #309 の原因2）
+        "relative flex flex-col items-start justify-center gap-2 rounded-xl border border-[var(--Border-Low-Emphasis)] px-3 text-left transition-colors",
+        // 下段があるタイルだけ 96px の下限を持つ。グリッドで情報量の違うタイルが並ぶときに
+        // 高さを揃えるための下限なので、ラベルだけのタイルには効かせない（中身に対して余る）。
+        // ラベルのみのときは上下 16px のパディングで内容にフィットさせる
+        hasBottomRow ? "min-h-24 py-3" : "py-4",
         "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:outline-none",
         "hover:bg-[var(--Surface-Secondary)]",
         actionTileVariants[variant],
@@ -117,8 +121,10 @@ function ActionTile({
             {indicator}
           </span>
         ) : isSelected ? (
-          <span className="typo-label-md shrink-0 text-[var(--Text-Accent-Primary)]" aria-hidden>
-            ✓
+          // 文字の「✓」グリフはフォント依存で DS のアイコンと太さ・比率が揃わないため
+          // iconsax を使う（native は icon ライブラリを持たないので同形を View で描画）
+          <span className="shrink-0 text-[var(--Text-Accent-Primary)]" aria-hidden>
+            <Check size={16} />
           </span>
         ) : null}
       </span>

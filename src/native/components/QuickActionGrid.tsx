@@ -46,6 +46,39 @@ export interface QuickActionGridProps {
   style?: StyleProp<ViewStyle>
 }
 
+/**
+ * 選択インジケータのチェック。
+ *
+ * 文字の「✓」グリフは端末のフォントに形が依存し、DS のアイコン（web は iconsax）と
+ * 太さ・比率が揃わない。native には icon ライブラリを入れない方針なので、2 辺だけ
+ * 残した View を 45° 回して描く。フォント非依存で線の太さも指定できる。
+ * 装飾なので支援技術からは隠す（選択状態は accessibilityState.selected が伝える）。
+ */
+function CheckMark({ color, size = 16 }: { color: string; size?: number }) {
+  return (
+    <View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      aria-hidden
+      style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}
+    >
+      <View
+        style={{
+          width: size * 0.42,
+          height: size * 0.72,
+          borderRightWidth: 2,
+          borderBottomWidth: 2,
+          borderColor: color,
+          transform: [{ rotate: "45deg" }],
+          // 回転で下がる分を戻して行の中心に合わせる
+          marginTop: -size * 0.1,
+        }}
+      />
+    </View>
+  )
+}
+
 function colorsForVariant(
   variant: ActionTileVariant,
   theme: ReturnType<typeof useTheme>["theme"],
@@ -106,15 +139,20 @@ export function ActionTile({
       {...accessibilityProps}
       style={({ pressed }) => [
         {
-          minHeight: 96,
+          // 下段（description / meta）があるタイルだけ 96pt の下限を持つ。グリッドで
+          // 情報量の違うタイルが並ぶときに高さを揃えるための下限なので、ラベルだけの
+          // タイルには効かせない（効かせると中身に対して高さが余り間延びする）。
+          // ラベルのみのときは上下 16pt のパディングで内容にフィットさせる。
+          minHeight: hasBottomRow ? 96 : undefined,
           borderWidth: 1,
           borderRadius: scales.borderRadius.xl,
-          padding: scales.spacing.scale[3],
-          gap: scales.spacing.scale[3],
-          // 下段（description / meta）があるときだけ上下に振り分ける。無いときに
-          // space-between にすると、ラベルが上端に貼り付いて下に空白が残り間延びして
-          // 見える（issue #309 の原因2）。1 行タイルは中央に置く
-          justifyContent: hasBottomRow ? "space-between" : "center",
+          paddingHorizontal: scales.spacing.scale[3],
+          paddingVertical: hasBottomRow ? scales.spacing.scale[3] : scales.spacing.scale[4],
+          // ラベルと説明の間隔はこの gap トークンだけで決める
+          gap: scales.spacing.scale[2],
+          // space-between にすると下限ぶんラベルと説明が最大まで引き離され、gap が
+          // 無視された見た目になる（issue #309 の原因2）
+          justifyContent: "center",
           opacity: isDisabled ? 0.5 : 1,
           ...variantColors,
           backgroundColor: pressed ? theme.surface.secondary : variantColors.backgroundColor,
@@ -146,13 +184,7 @@ export function ActionTile({
             indicator
           )
         ) : isSelected ? (
-          <View
-            pointerEvents="none"
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-          >
-            <RNText style={[resolveTypo("label.md"), { color: theme.text["accent-primary"] }]}>✓</RNText>
-          </View>
+          <CheckMark color={theme.text["accent-primary"]} />
         ) : null}
       </View>
       {hasBottomRow && (
