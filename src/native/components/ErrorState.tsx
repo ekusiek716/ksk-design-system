@@ -18,7 +18,7 @@ export interface ErrorStateProps extends AccessibilityProps {
 
 export function ErrorState({
   title = "エラーが発生しました",
-  description = "時間をおいて再度お試しください。",
+  description = "しばらくしてからもう一度お試しください",
   icon,
   action,
   accessibilityLabel,

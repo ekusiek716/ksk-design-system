@@ -25,8 +25,8 @@ export function MultiSelect({
   options,
   values = [],
   onChange,
-  placeholder = "選択",
-  searchPlaceholder = "検索",
+  placeholder = "選択してください",
+  searchPlaceholder = "検索...",
   disabled = false,
 }: MultiSelectProps) {
   const { theme, scales } = useTheme()

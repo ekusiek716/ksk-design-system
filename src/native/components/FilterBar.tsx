@@ -17,7 +17,7 @@ export interface FilterBarProps {
   onPressSort?: () => void
 }
 
-export function FilterBar({ filters, sortLabel = "並び替え", onPressSort }: FilterBarProps) {
+export function FilterBar({ filters, sortLabel = "並べ替え", onPressSort }: FilterBarProps) {
   const { theme, scales } = useTheme()
   return (
     <View

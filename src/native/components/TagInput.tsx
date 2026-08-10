@@ -11,7 +11,7 @@ export interface TagInputProps {
   maxTags?: number
 }
 
-export function TagInput({ value = [], onChange, placeholder = "タグを入力", maxTags = 10 }: TagInputProps) {
+export function TagInput({ value = [], onChange, placeholder = "タグを入力して Enter", maxTags = 10 }: TagInputProps) {
   const { theme, scales } = useTheme()
   const [draft, setDraft] = useState("")
   const inputRef = useRef<TextInput>(null)
