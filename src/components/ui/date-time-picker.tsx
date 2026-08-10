@@ -8,7 +8,7 @@ interface DateTimePickerProps
   extends Omit<React.ComponentProps<"div">, "onChange" | "defaultValue"> {
   value?: Date
   onChange?: (value: Date | undefined) => void
-  /** 分の刻み幅。@default 5 */
+  /** 分の刻み幅。省略時は TimePicker の既定（1 分刻み）に従う。 */
   minuteStep?: number
   min?: Date
   max?: Date
@@ -68,7 +68,8 @@ function DateTimePicker({
   id,
   value,
   onChange,
-  minuteStep = 5,
+  // 既定はここで持たず TimePicker に委ねる（両方で持つと既定がズレる）
+  minuteStep,
   min,
   max,
   disabled = false,
