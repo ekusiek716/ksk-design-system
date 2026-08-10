@@ -24,6 +24,14 @@ import { storybookTest } from "@storybook/addon-vitest/vitest-plugin"
  */
 export default defineConfig({
   resolve: {
+    // react / react-dom / react-native-web は必ずこのプロジェクト直下の
+    // node_modules から解決する（issue #334）。git worktree のように
+    // node_modules が上位ディレクトリにも存在しうる環境では、
+    // react-native-web だけが上位の node_modules から解決され、その
+    // react-native-web が上位の react を掴むことで React が二重ロードされ、
+    // `Invalid hook call` / `Cannot read properties of null (reading 'useContext')`
+    // で全ストーリーが落ちる。dedupe で単一インスタンスを保証する。
+    dedupe: ["react", "react-dom", "react-native-web"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
