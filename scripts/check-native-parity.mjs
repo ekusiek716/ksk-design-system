@@ -285,9 +285,6 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
   ["TagInput", [
     { prop: "placeholder", reason: `Web "タグを入力して Enter" (mentions the Enter-to-add interaction) vs Native "タグを入力" (shorter, no keyboard hint — native doesn't have a physical Enter key affordance in the same sense). ${RD_TEXT_DRIFT}`, followUp: true, note: "placeholder の文言を統一するか判断が必要（Enter ヒントの有無）" },
   ]],
-  ["TimePicker", [
-    { prop: "minuteStep", reason: 'Web defaults to a 1-minute step (every minute selectable); Native defaults to a 5-minute step. This is a real, user-visible UX difference (very different picker density) — not a cosmetic drift. Tracked here as a genuine open question for follow-up decision (which default is correct, or whether both are intentionally tuned per platform input affordances) rather than silently allowlisted as equivalent.', followUp: true, note: "web既定1分刻み vs native既定5分刻み — 操作感が大きく変わる、最優先で要判断" },
-  ]],
 ])
 
 function componentEntriesFromContracts() {

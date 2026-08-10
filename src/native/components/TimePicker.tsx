@@ -26,7 +26,8 @@ export function TimePicker({
   value,
   onChange,
   placeholder = "時刻を選択",
-  minuteStep = 5,
+  // web 実装と既定を揃える（1 分刻み）。5 分刻みが要るときは呼び出し側で指定する
+  minuteStep = 1,
   disabled = false,
 }: TimePickerProps) {
   const { theme, scales } = useTheme()

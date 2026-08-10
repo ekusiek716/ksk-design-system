@@ -24,7 +24,8 @@ function clamp(value: Date, minDate?: Date, maxDate?: Date) {
 export function DateTimePicker({
   value,
   onChange,
-  minuteStep = 5,
+  // 既定はここで持たず TimePicker に委ねる（両方で持つと今回のように既定がズレる）
+  minuteStep,
   minDate,
   maxDate,
   disabled = false,
