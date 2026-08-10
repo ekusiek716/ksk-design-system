@@ -1,11 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
 import { Text as RNText, View } from "react-native"
-import { ThemeProvider } from "./theme/ThemeProvider"
+import { ThemeProvider, useTheme } from "./theme/ThemeProvider"
 import { ActionTile, QuickActionGrid } from "./components/QuickActionGrid"
 import { CheckboxGroup } from "./components/CheckboxGroup"
 import { RadioGroup } from "./components/RadioGroup"
 import { StatusActionBadge } from "./components/StatusActionBadge"
+import { CardHeader } from "./components/CardHeader"
+import { GradientSurface } from "./components/GradientSurface"
 
 /**
  * native コンポーネント（`src/native/**`）を react-native-web 経由でブラウザ描画する。
@@ -110,4 +112,47 @@ export const StatusBadgeSizing: Story = {
       </View>
     </View>
   ),
+}
+
+/**
+ * issue #330: tone="on-primary" は画像/グラデーション等の media 上に載せる場合の配色
+ * （eyebrow/title = text.on-media、description = text.on-media-secondary）。
+ * 既定 tone="default" は白背景カード想定の配色のまま。
+ *
+ * on-primary は「AA を満たす濃さの media」の上で使うこと。GradientSurface の
+ * 既定 stops（Brand 400→500→600）では Brand-500 上の白系テキストが 4.5:1 に
+ * 届かないため、ここでは brand.action → active.primary-button（Brand 700→800
+ * 相当）の濃いグラデを明示している（白 6.7:1 / 0.8白 4.9:1 で AA 通過）。
+ */
+function CardHeaderToneDemo() {
+  const { theme } = useTheme()
+  return (
+    <View style={{ gap: 16 }}>
+      <View style={{ padding: 16 }}>
+        <CardHeader
+          eyebrow="今週のおすすめ"
+          title="デフォルトの見出し"
+          description="白背景カード上での配色（既定）"
+        />
+      </View>
+      <GradientSurface
+        stops={[
+          { offset: 0, color: theme.brand.action },
+          { offset: 1, color: theme.active["primary-button"] },
+        ]}
+        style={{ padding: 16, borderRadius: 12, minHeight: 120 }}
+      >
+        <CardHeader
+          tone="on-primary"
+          eyebrow="今週のおすすめ"
+          title="グラデーション上の見出し"
+          description="media 上でも視認できる配色"
+        />
+      </GradientSurface>
+    </View>
+  )
+}
+
+export const CardHeaderTone: Story = {
+  render: () => <CardHeaderToneDemo />,
 }
