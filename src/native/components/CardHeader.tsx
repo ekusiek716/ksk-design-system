@@ -10,6 +10,8 @@ export interface CardHeaderProps extends ViewProps {
   titleVariant?: TypoVariant
   description?: string
   trailing?: React.ReactNode
+  /** 画像/グラデーション等の media 上に載せる場合は "on-primary"。既定 "default" */
+  tone?: "default" | "on-primary"
 }
 
 /** カード冒頭の eyebrow+見出し+説明。余白（4px/4px）を内蔵し利用側の mt-* 手書きを不要にする。 */
@@ -19,10 +21,15 @@ export function CardHeader({
   titleVariant = "heading.xl",
   description,
   trailing,
+  tone = "default",
   style,
   ...rest
 }: CardHeaderProps) {
   const { theme, scales } = useTheme()
+
+  const eyebrowColor = tone === "on-primary" ? theme.text["on-media"] : theme.text["accent-primary"]
+  const titleColor = tone === "on-primary" ? theme.text["on-media"] : theme.text["high-emphasis"]
+  const descriptionColor = tone === "on-primary" ? theme.text["on-media-secondary"] : theme.text["medium-emphasis"]
 
   return (
     <View
@@ -37,18 +44,18 @@ export function CardHeader({
           <RNText
             style={[
               resolveTypo("label.sm"),
-              { color: theme.text["accent-primary"], marginBottom: scales.spacing.scale[1] },
+              { color: eyebrowColor, marginBottom: scales.spacing.scale[1] },
             ]}
           >
             {eyebrow}
           </RNText>
         )}
-        <RNText style={[resolveTypo(titleVariant), { color: theme.text["high-emphasis"] }]}>{title}</RNText>
+        <RNText style={[resolveTypo(titleVariant), { color: titleColor }]}>{title}</RNText>
         {description && (
           <RNText
             style={[
               resolveTypo("body.md"),
-              { color: theme.text["medium-emphasis"], marginTop: scales.spacing.scale[1] },
+              { color: descriptionColor, marginTop: scales.spacing.scale[1] },
             ]}
           >
             {description}

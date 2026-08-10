@@ -6,6 +6,8 @@ import { ActionTile, QuickActionGrid } from "./components/QuickActionGrid"
 import { CheckboxGroup } from "./components/CheckboxGroup"
 import { RadioGroup } from "./components/RadioGroup"
 import { StatusActionBadge } from "./components/StatusActionBadge"
+import { CardHeader } from "./components/CardHeader"
+import { GradientSurface } from "./components/GradientSurface"
 
 /**
  * native コンポーネント（`src/native/**`）を react-native-web 経由でブラウザ描画する。
@@ -108,6 +110,33 @@ export const StatusBadgeSizing: Story = {
         <StatusActionBadge label="押せる（36pt 維持）" state="idle" onPress={() => {}} />
         <StatusActionBadge compact label="押せる compact" state="syncing" onPress={() => {}} />
       </View>
+    </View>
+  ),
+}
+
+/**
+ * issue #330: tone="on-primary" は画像/グラデーション等の media 上に載せる場合の配色
+ * （eyebrow/title = text.on-media、description = text.on-media-secondary）。
+ * 既定 tone="default" は白背景カード想定の配色のまま。
+ */
+export const CardHeaderTone: Story = {
+  render: () => (
+    <View style={{ gap: 16 }}>
+      <View style={{ padding: 16 }}>
+        <CardHeader
+          eyebrow="今週のおすすめ"
+          title="デフォルトの見出し"
+          description="白背景カード上での配色（既定）"
+        />
+      </View>
+      <GradientSurface style={{ padding: 16, borderRadius: 12, minHeight: 120 }}>
+        <CardHeader
+          tone="on-primary"
+          eyebrow="今週のおすすめ"
+          title="グラデーション上の見出し"
+          description="media 上でも視認できる配色"
+        />
+      </GradientSurface>
     </View>
   ),
 }
