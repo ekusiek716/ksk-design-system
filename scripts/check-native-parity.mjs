@@ -236,26 +236,15 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
     { prop: "selected", reason: `Web leaves \`selected\` without a destructure default (omitted ⇒ \`undefined\`, falsy in the \`selected ? … : …\` checks — same runtime behavior as Native's explicit \`false\`). ${RD_API_SHAPE}` },
     { prop: "removable", reason: `Same as \`selected\`: Web's omitted/undefined behaves identically to Native's explicit \`false\` default. ${RD_API_SHAPE}` },
   ]],
-  ["Combobox", [
-    { prop: "placeholder", reason: `Web "選択してください" vs Native "選択". ${RD_TEXT_DRIFT}`, followUp: true, note: "placeholder の文言を統一するか判断が必要" },
-    { prop: "searchPlaceholder", reason: `Web "検索..." vs Native "検索". ${RD_TEXT_DRIFT}`, followUp: true, note: "searchPlaceholder の文言を統一するか判断が必要" },
-  ]],
-  ["MultiSelect", [
-    { prop: "placeholder", reason: `Web "選択してください" vs Native "選択" (same divergence as Combobox, designed independently). ${RD_TEXT_DRIFT}`, followUp: true, note: "placeholder の文言を統一するか判断が必要（Combobox と同型）" },
-    { prop: "searchPlaceholder", reason: `Web "検索..." vs Native "検索" (same divergence as Combobox, designed independently). ${RD_TEXT_DRIFT}`, followUp: true, note: "searchPlaceholder の文言を統一するか判断が必要（Combobox と同型）" },
-  ]],
   ["ErrorState", [
     { prop: "title", reason: `Web has no destructure default but falls back to the *same* text ("エラーが発生しました") via \`title ?? (notFound ? … : "エラーが発生しました")\` inside the function body. ${RD_BLIND_SPOT} — verified identical effective text, not just a shape artifact.` },
-    { prop: "description", reason: `Web's inline fallback (non-notFound case) is "しばらくしてからもう一度お試しください"; Native's destructure default is "時間をおいて再度お試しください。" — different wording for the same purpose. ${RD_BLIND_SPOT} Additionally a real (non-urgent) copy-harmonization follow-up per RD_TEXT_DRIFT.`, followUp: true, note: "description の実効フォールバック文言が web/native で異なる（表記ゆれ）" },
+    { prop: "description", reason: `Web has no destructure default but falls back (non-notFound case) to \`description ?? "しばらくしてからもう一度お試しください"\` inside the function body; Native's destructure default was aligned to the identical text (2026-08-10, previously "時間をおいて再度お試しください。"). ${RD_BLIND_SPOT} — verified identical effective text after alignment.` },
   ]],
   ["FilterBar", [
-    { prop: "sortLabel", reason: `Web has no destructure default but falls back to "並べ替え" via \`sortLabel ?? "並べ替え"\` at each render site; Native's destructure default is "並び替え" — near-identical wording, likely independent word-choice drift. ${RD_BLIND_SPOT} Non-urgent copy-harmonization follow-up per RD_TEXT_DRIFT.`, followUp: true, note: "sortLabel の実効フォールバック文言が web/native で異なる（表記ゆれ）" },
+    { prop: "sortLabel", reason: `Web has no destructure default but falls back to "並べ替え" via \`sortLabel ?? "並べ替え"\` at each render site (it also gates whether the result-count/sort row renders at all, so it deliberately can't become a Web destructure default without changing that visibility check); Native's destructure default was aligned to the identical "並べ替え" text (2026-08-10, previously "並び替え"). ${RD_BLIND_SPOT} — verified identical effective text after alignment.` },
   ]],
   ["NotificationBadge", [
     { prop: "count", reason: `Web declares \`count: number\` as required (no default — callers must always pass a value); Native declares \`count?: number\` optional with a \`0\` fallback for looser call sites. ${RD_API_SHAPE}` },
-  ]],
-  ["NumberInput", [
-    { prop: "value", reason: `Web declares \`value?: number\` optional with a \`0\` default (usable uncontrolled); Native declares \`value: number\` required (controlled-only, no fallback). ${RD_API_SHAPE} Worth a non-urgent follow-up to decide whether Native should also default to 0 for parity of ergonomics.`, followUp: true, note: "Native は value 必須（既定なし）、Web は既定0で uncontrolled 利用可 — 揃えるか要判断" },
   ]],
   ["Progress", [
     { prop: "variant", reason: `Web's destructure default is the literal "default"; Native has no destructure default, but \`resolveProgressVariant\` falls back to \`toneToVariant(tone)\` where \`tone\` defaults to "accent" → also resolves to "default" (see src/native/progress-logic.ts). ${RD_BLIND_SPOT} — verified the two effective defaults are the same value.` },
@@ -267,23 +256,20 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
     { prop: "gap", reason: `Web's token default "md" maps to Tailwind's \`gap-3\` (12px); Native's own default is the literal 12 (px). ${RD_EQUIVALENT_UNIT} — verified same 12px value, not just a same-category guess.` },
   ]],
   ["RatingDisplay", [
-    { prop: "size", reason: `Web's "sm" token resolves to a 12px star icon (see sizeMap in rating-display.tsx); Native's own default is 16 (px) directly on StarRating. These are NOT visually identical (12px vs 16px) — a real, small, non-urgent icon-size drift between platforms' defaults, tracked here pending a decision on which is correct.`, followUp: true, note: "web既定12px vs native既定16px — 見た目が実際にズレる、揃えるか要判断" },
+    { prop: "size", reason: `Web's "sm" token resolves to a 12px star icon (see sizeMap in rating-display.tsx); Native's own default was aligned to the literal 12 (px) (2026-08-10, previously 16 — Web is the reference implementation with more consumers, so Native was changed to match). ${RD_EQUIVALENT_UNIT}` },
   ]],
   ["ReviewCard", [
-    { prop: "helpfulCount", reason: "Web always renders the \"参考になった\" helpful-vote affordance and defaults the count to 0 (shows no count badge when 0); Native treats an omitted helpfulCount as \"hide the whole helpful section\" (`helpfulCount !== undefined` guard). This is a deliberate feature-visibility difference in each platform's own composition, not a simple default-value slip — but worth a non-urgent follow-up to confirm the visibility behavior is intentional on both sides.", followUp: true, note: "helpfulCount 省略時の表示可否ロジックが web/native で異なる — 意図か要確認" },
+    { prop: "helpfulCount", reason: "Not aligned by design: Web always renders the \"参考になった\" helpful-vote *button* (gated by the separate `onHelpful` prop, which Native doesn't have) and only uses `helpfulCount` to decide whether to print the `(N)` suffix inside that button — defaulting it to 0 is safe there because 0 just means \"no suffix\". Native has no press affordance at all; it's a static `参考になった {count}` text line whose *entire visibility* is controlled by `helpfulCount !== undefined`. Giving Native a `0` default would make every ReviewCard permanently show \"参考になった 0\", which is a real behavior regression, not parity. Keeping this optional-with-no-default on Native is the correct API for its no-button design." },
   ]],
   ["Skeleton", [
-    { prop: "width", reason: "Web has no default (omitting width/height relies entirely on the caller's `className`, per the documented legacy `className`-only compat mode); Native defaults to \"100%\" so an unstyled `<Skeleton />` still renders visibly. A real, non-urgent UX difference — worth deciding whether Web should also get a visible fallback size, tracked here rather than fixed (component changes are out of scope for this check).", followUp: true, note: "web は width 未指定だと className 任せで見えない可能性 — native は既定100%で必ず見える" },
-    { prop: "height", reason: "Same story as `width`: Web has no built-in fallback size (className-only legacy mode), Native defaults to 16 (px) so it's visible unstyled. Non-urgent follow-up, tracked here.", followUp: true, note: "web は height 未指定だと className 任せで見えない可能性 — native は既定16pxで必ず見える" },
+    { prop: "width", reason: "Web still has no destructure default for `width` (the legacy `className`-only compat mode described in the JSDoc example must keep working), but as of 2026-08-10 the component's base `className` now always includes `h-4 w-full` ahead of the caller's `className` in `cn()` — so an unstyled `<Skeleton />` renders at the same 16px/100% size as Native's `height=16`/`width=\"100%\"` defaults, and `tailwind-merge` still lets an explicit caller `className` (e.g. `h-4 w-32`) override it exactly as before. Visually resolved; not a real gap, just invisible to this destructure-only extractor because the fix lives in `className`, not a prop default." },
+    { prop: "height", reason: "Same resolution as `width`: the new base `h-4` class (see above) matches Native's `height=16` default. Visually resolved via `className`, invisible to this extractor." },
   ]],
   ["StarRating", [
     { prop: "size", reason: `Web's "md" token is Tailwind's \`size-5\` = 20px (1.25rem); Native's own default is the literal 20 (px). ${RD_EQUIVALENT_UNIT} — verified same 20px value.` },
   ]],
   ["StatCard", [
     { prop: "trend", reason: 'Web `trend?: { value: number; label?: string }` (numeric delta object, no default) vs Native `trend?: "up" | "down" | "neutral"` (enum, defaults to "neutral") are entirely different prop shapes designed independently for this component — not a missed port of the same feature.' },
-  ]],
-  ["TagInput", [
-    { prop: "placeholder", reason: `Web "タグを入力して Enter" (mentions the Enter-to-add interaction) vs Native "タグを入力" (shorter, no keyboard hint — native doesn't have a physical Enter key affordance in the same sense). ${RD_TEXT_DRIFT}`, followUp: true, note: "placeholder の文言を統一するか判断が必要（Enter ヒントの有無）" },
   ]],
 ])
 

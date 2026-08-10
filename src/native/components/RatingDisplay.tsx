@@ -11,7 +11,7 @@ export interface RatingDisplayProps {
   layout?: "row" | "stacked"
 }
 
-export function RatingDisplay({ rating, count, size = 16, layout = "row" }: RatingDisplayProps) {
+export function RatingDisplay({ rating, count, size = 12, layout = "row" }: RatingDisplayProps) {
   const { theme, scales } = useTheme()
   return (
     <View

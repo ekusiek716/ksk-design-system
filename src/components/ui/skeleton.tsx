@@ -26,6 +26,8 @@ export interface SkeletonProps extends Omit<React.ComponentProps<"div">, "width"
  * Skeleton — 読み込み中のプレースホルダ。
  *
  * - `width` / `height` を数値で渡せば px、文字列ならそのまま CSS に渡る
+ * - 何も指定しない場合は `h-4 w-full`（native の 16px / 100% と同等）が既定で
+ *   適用されるため、`<Skeleton />` だけでも必ず見える
  * - `rounded` で角丸プリセットを切り替え（既定 `lg`）
  * - `animate-pulse` がデフォルトで適用
  *
@@ -51,7 +53,7 @@ function Skeleton({ className, width, height, rounded = "lg", style, ...props }:
       data-slot="skeleton"
       aria-hidden="true"
       style={inlineStyle}
-      className={cn("animate-pulse bg-[var(--Surface-Tertiary)]", ROUNDED_MAP[rounded], className)}
+      className={cn("h-4 w-full animate-pulse bg-[var(--Surface-Tertiary)]", ROUNDED_MAP[rounded], className)}
       {...props}
     />
   )

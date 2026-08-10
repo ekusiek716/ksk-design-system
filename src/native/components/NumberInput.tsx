@@ -4,7 +4,7 @@ import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 
 export interface NumberInputProps {
-  value: number
+  value?: number
   onChange?: (value: number) => void
   min?: number
   max?: number
@@ -13,7 +13,7 @@ export interface NumberInputProps {
 }
 
 export function NumberInput({
-  value,
+  value = 0,
   onChange,
   min = 0,
   max = 99,

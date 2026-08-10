@@ -24,8 +24,8 @@ export function Combobox({
   options,
   value,
   onChange,
-  placeholder = "選択",
-  searchPlaceholder = "検索",
+  placeholder = "選択してください",
+  searchPlaceholder = "検索...",
   emptyMessage = "該当なし",
   disabled = false,
 }: ComboboxProps) {
