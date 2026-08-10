@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
-import { View } from "react-native"
+import { Text as RNText, View } from "react-native"
 import { ThemeProvider } from "./theme/ThemeProvider"
 import { ActionTile, QuickActionGrid } from "./components/QuickActionGrid"
 import { CheckboxGroup } from "./components/CheckboxGroup"
@@ -95,7 +95,14 @@ export const StatusBadgeSizing: Story = {
       <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
         <StatusActionBadge asStatus label="Lv.1" state="success" />
         <StatusActionBadge asStatus label="連続0日" state="idle" />
-        <StatusActionBadge asStatus compact label="同期済み" state="success" />
+        {/* compact はラベルを隠すので、icon を渡さないとドットだけになり視覚的な意味が無くなる */}
+        <StatusActionBadge
+          asStatus
+          compact
+          label="同期済み"
+          state="success"
+          icon={<RNText style={{ fontSize: 10 }}>✔︎</RNText>}
+        />
       </View>
       <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
         <StatusActionBadge label="押せる（36pt 維持）" state="idle" onPress={() => {}} />

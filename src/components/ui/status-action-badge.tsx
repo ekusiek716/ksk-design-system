@@ -7,20 +7,31 @@ interface StatusActionBadgeProps extends Omit<React.ComponentProps<"button">, "c
   state?: StatusActionBadgeState
   label: string
   count?: number
+  /**
+   * ラベルを視覚的に隠し、アイコン（未指定ならドット）だけの丸いバッジにする。
+   * `label` は読み上げ用として残る。
+   *
+   * **`icon` を渡すこと。** 省略するとドットだけになり、見た目からは何を表しているか
+   * 分からなくなる（特に `asStatus` と併用すると押せもしないただの点になる）。
+   * @default false
+   */
   compact?: boolean
   loading?: boolean
   icon?: React.ReactNode
   asStatus?: boolean
 }
 
+// 枠線は状態色を持たず常に中立（--Border-Low-Emphasis）にする。状態はドットの色・文字色・
+// 背景ティントで伝わっており、枠まで状態色にすると小さなバッジの輪郭だけが強く出て主張が過剰になる。
+// 枠線自体は残す（背景ティントが淡く、白背景では輪郭が無いとバッジの形が見えないため）。
 const stateClasses: Record<StatusActionBadgeState, string> = {
-  idle: "border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)]",
-  pending: "border-[var(--Border-Warning)] bg-[var(--Surface-Warning)] text-[var(--Text-Warning)]",
-  syncing: "border-[var(--Border-Info)] bg-[var(--Surface-Info)] text-[var(--Text-Info)]",
-  success: "border-[var(--Border-Success)] bg-[var(--Surface-Success)] text-[var(--Text-Success)]",
-  warning: "border-[var(--Border-Warning)] bg-[var(--Surface-Warning)] text-[var(--Text-Warning)]",
-  error: "border-[var(--Border-Caution)] bg-[var(--Surface-Caution)] text-[var(--Text-Caution)]",
-  offline: "border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Secondary)] text-[var(--Text-Low-Emphasis)]",
+  idle: "bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)]",
+  pending: "bg-[var(--Surface-Warning)] text-[var(--Text-Warning)]",
+  syncing: "bg-[var(--Surface-Info)] text-[var(--Text-Info)]",
+  success: "bg-[var(--Surface-Success)] text-[var(--Text-Success)]",
+  warning: "bg-[var(--Surface-Warning)] text-[var(--Text-Warning)]",
+  error: "bg-[var(--Surface-Caution)] text-[var(--Text-Caution)]",
+  offline: "bg-[var(--Surface-Secondary)] text-[var(--Text-Low-Emphasis)]",
 }
 
 const buttonOnlyPropNames = [
