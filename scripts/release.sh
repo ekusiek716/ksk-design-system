@@ -43,6 +43,12 @@ set -euo pipefail
 
 LEVEL_OR_VERSION="${1:?usage: release.sh patch|minor|major|<x.y.z>}"
 
+# gh の active account が業務側に flip していると push が 403 で落ちる。先に揃える。
+# ガードが無い環境では素通りする。
+if [ -x "$HOME/.claude/scripts/gh-account-guard.sh" ]; then
+  bash "$HOME/.claude/scripts/gh-account-guard.sh" "$(git rev-parse --show-toplevel)" || true
+fi
+
 GREEN='\033[0;32m'; RED='\033[0;31m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
 
 # ── 事前チェック ─────────────────────────
