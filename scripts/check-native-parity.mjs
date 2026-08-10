@@ -207,6 +207,89 @@ const INTENTIONAL_PROP_GAPS = new Map([
   ["TimePicker", { webOnly: ["id", "className", "triggerLabel"], nativeOnly: [], reason: R_STYLE }],
 ])
 
+/**
+ * Intentional Web ⇄ Native *default value* gaps (issue #316 follow-up).
+ * Prop-name parity above only catches missing props; it doesn't catch a prop
+ * that exists on both sides but was given a different default (e.g. one
+ * platform fixed a bug by flipping a default and the other wasn't touched).
+ * Same allowlist convention as INTENTIONAL_PROP_GAPS: keyed by component,
+ * each entry documents one prop's platform-diverging default with a reason.
+ * Update this when the extractor below flags a *new* diff that is a
+ * deliberate platform difference — genuine drift should be fixed in code
+ * instead of allowlisted here.
+ */
+// Shared reason strings for recurring categories found on the first run (2026-08-10).
+const RD_EQUIVALENT_UNIT =
+  "the two defaults render the same visual result — Web's string size/spacing token and Native's raw pixel number are just different unit representations of one shared design value, not a functional gap"
+const RD_BLIND_SPOT =
+  "Web computes this default with an inline `??` fallback inside the function body (not in the destructured parameter), which this destructure-only extractor can't see; the *effective* default is documented here for the record, not a real behavioral gap"
+const RD_TEXT_DRIFT =
+  "same-purpose placeholder/label text diverged independently in wording between platforms — cosmetic copy drift, tracked as a real but non-urgent follow-up (harmonize wording), not a functional bug"
+const RD_API_SHAPE =
+  "required-vs-optional (or shape) differs by design between the two platforms' own Props type, so only one side needs a fallback default — a deliberate API surface difference, not a missed port"
+
+const INTENTIONAL_DEFAULT_GAPS = new Map([
+  ["BannerCarousel", [
+    { prop: "itemWidth", reason: "Web defaults to a fixed 200px card width; Native intentionally has no destructure default and instead computes a responsive width (`Dimensions.get(\"window\").width - 32`) inside the function body so cards fit the device screen — a deliberate platform difference, not a missed port" },
+  ]],
+  ["Chip", [
+    { prop: "selected", reason: `Web leaves \`selected\` without a destructure default (omitted ⇒ \`undefined\`, falsy in the \`selected ? … : …\` checks — same runtime behavior as Native's explicit \`false\`). ${RD_API_SHAPE}` },
+    { prop: "removable", reason: `Same as \`selected\`: Web's omitted/undefined behaves identically to Native's explicit \`false\` default. ${RD_API_SHAPE}` },
+  ]],
+  ["Combobox", [
+    { prop: "placeholder", reason: `Web "選択してください" vs Native "選択". ${RD_TEXT_DRIFT}` },
+    { prop: "searchPlaceholder", reason: `Web "検索..." vs Native "検索". ${RD_TEXT_DRIFT}` },
+  ]],
+  ["MultiSelect", [
+    { prop: "placeholder", reason: `Web "選択してください" vs Native "選択" (same divergence as Combobox, designed independently). ${RD_TEXT_DRIFT}` },
+    { prop: "searchPlaceholder", reason: `Web "検索..." vs Native "検索" (same divergence as Combobox, designed independently). ${RD_TEXT_DRIFT}` },
+  ]],
+  ["ErrorState", [
+    { prop: "title", reason: `Web has no destructure default but falls back to the *same* text ("エラーが発生しました") via \`title ?? (notFound ? … : "エラーが発生しました")\` inside the function body. ${RD_BLIND_SPOT} — verified identical effective text, not just a shape artifact.` },
+    { prop: "description", reason: `Web's inline fallback (non-notFound case) is "しばらくしてからもう一度お試しください"; Native's destructure default is "時間をおいて再度お試しください。" — different wording for the same purpose. ${RD_BLIND_SPOT} Additionally a real (non-urgent) copy-harmonization follow-up per RD_TEXT_DRIFT.` },
+  ]],
+  ["FilterBar", [
+    { prop: "sortLabel", reason: `Web has no destructure default but falls back to "並べ替え" via \`sortLabel ?? "並べ替え"\` at each render site; Native's destructure default is "並び替え" — near-identical wording, likely independent word-choice drift. ${RD_BLIND_SPOT} Non-urgent copy-harmonization follow-up per RD_TEXT_DRIFT.` },
+  ]],
+  ["NotificationBadge", [
+    { prop: "count", reason: `Web declares \`count: number\` as required (no default — callers must always pass a value); Native declares \`count?: number\` optional with a \`0\` fallback for looser call sites. ${RD_API_SHAPE}` },
+  ]],
+  ["NumberInput", [
+    { prop: "value", reason: `Web declares \`value?: number\` optional with a \`0\` default (usable uncontrolled); Native declares \`value: number\` required (controlled-only, no fallback). ${RD_API_SHAPE} Worth a non-urgent follow-up to decide whether Native should also default to 0 for parity of ergonomics.` },
+  ]],
+  ["Progress", [
+    { prop: "variant", reason: `Web's destructure default is the literal "default"; Native has no destructure default, but \`resolveProgressVariant\` falls back to \`toneToVariant(tone)\` where \`tone\` defaults to "accent" → also resolves to "default" (see src/native/progress-logic.ts). ${RD_BLIND_SPOT} — verified the two effective defaults are the same value.` },
+  ]],
+  ["ProgressRing", [
+    { prop: "size", reason: `Web's token default "md" and Native's pixel default 64 represent the platforms' own size scales. ${RD_EQUIVALENT_UNIT}` },
+  ]],
+  ["QuickActionGrid", [
+    { prop: "gap", reason: `Web's token default "md" maps to Tailwind's \`gap-3\` (12px); Native's own default is the literal 12 (px). ${RD_EQUIVALENT_UNIT} — verified same 12px value, not just a same-category guess.` },
+  ]],
+  ["RatingDisplay", [
+    { prop: "size", reason: `Web's "sm" token resolves to a 12px star icon (see sizeMap in rating-display.tsx); Native's own default is 16 (px) directly on StarRating. These are NOT visually identical (12px vs 16px) — a real, small, non-urgent icon-size drift between platforms' defaults, tracked here pending a decision on which is correct.` },
+  ]],
+  ["ReviewCard", [
+    { prop: "helpfulCount", reason: "Web always renders the \"参考になった\" helpful-vote affordance and defaults the count to 0 (shows no count badge when 0); Native treats an omitted helpfulCount as \"hide the whole helpful section\" (`helpfulCount !== undefined` guard). This is a deliberate feature-visibility difference in each platform's own composition, not a simple default-value slip — but worth a non-urgent follow-up to confirm the visibility behavior is intentional on both sides." },
+  ]],
+  ["Skeleton", [
+    { prop: "width", reason: "Web has no default (omitting width/height relies entirely on the caller's `className`, per the documented legacy `className`-only compat mode); Native defaults to \"100%\" so an unstyled `<Skeleton />` still renders visibly. A real, non-urgent UX difference — worth deciding whether Web should also get a visible fallback size, tracked here rather than fixed (component changes are out of scope for this check)." },
+    { prop: "height", reason: "Same story as `width`: Web has no built-in fallback size (className-only legacy mode), Native defaults to 16 (px) so it's visible unstyled. Non-urgent follow-up, tracked here." },
+  ]],
+  ["StarRating", [
+    { prop: "size", reason: `Web's "md" token is Tailwind's \`size-5\` = 20px (1.25rem); Native's own default is the literal 20 (px). ${RD_EQUIVALENT_UNIT} — verified same 20px value.` },
+  ]],
+  ["StatCard", [
+    { prop: "trend", reason: 'Web `trend?: { value: number; label?: string }` (numeric delta object, no default) vs Native `trend?: "up" | "down" | "neutral"` (enum, defaults to "neutral") are entirely different prop shapes designed independently for this component — not a missed port of the same feature.' },
+  ]],
+  ["TagInput", [
+    { prop: "placeholder", reason: `Web "タグを入力して Enter" (mentions the Enter-to-add interaction) vs Native "タグを入力" (shorter, no keyboard hint — native doesn't have a physical Enter key affordance in the same sense). ${RD_TEXT_DRIFT}` },
+  ]],
+  ["TimePicker", [
+    { prop: "minuteStep", reason: 'Web defaults to a 1-minute step (every minute selectable); Native defaults to a 5-minute step. This is a real, user-visible UX difference (very different picker density) — not a cosmetic drift. Tracked here as a genuine open question for follow-up decision (which default is correct, or whether both are intentionally tuned per platform input affordances) rather than silently allowlisted as equivalent.' },
+  ]],
+])
+
 function componentEntriesFromContracts() {
   const json = JSON.parse(fs.readFileSync(CONTRACTS, "utf8"))
   const categories = ["ui", "patterns", "commerce", "admin", "shells"]
@@ -295,6 +378,160 @@ function extractOwnProps(filePath, typeName) {
   }
 
   return [...new Set(props)]
+}
+
+/**
+ * Extracts default values assigned via destructuring in `${componentName}`'s
+ * own function signature, e.g. `function X({ compact = false, size = 20 }: XProps)`.
+ * Only the top-level destructured parameter of a `function Name({ ... })`
+ * declaration is read (the codebase's consistent component style — no
+ * `forwardRef`/arrow-function components with defaults were found as of
+ * 2026-08). Returns null if that signature shape isn't found for this
+ * component (e.g. it takes `props` un-destructured), meaning "can't compare"
+ * — same convention as `extractOwnProps` returning null.
+ *
+ * Returns a Map<propName, { kind: "none" | "literal" | "incomparable", value?, raw? }>:
+ *   - "none": no default written (`= undefined` counts as "none" too)
+ *   - "literal": a string/number/boolean/null default we can safely diff
+ *   - "incomparable": a default expression more complex than a literal
+ *     (function call, object/array literal, identifier reference, template
+ *     with interpolation, etc.) — intentionally not compared (see module doc).
+ */
+function extractDefaultsFromDestructure(filePath, componentName) {
+  if (!fs.existsSync(filePath)) return null
+  const source = fs.readFileSync(filePath, "utf8")
+
+  const re = new RegExp(`\\bfunction\\s+${componentName}\\s*\\(\\s*\\{`)
+  const m = re.exec(source)
+  if (!m) return null
+
+  const bodyStart = m.index + m[0].length
+  let depth = 1
+  let i = bodyStart
+  for (; i < source.length && depth > 0; i++) {
+    if (source[i] === "{") depth++
+    else if (source[i] === "}") depth--
+  }
+  const rawBody = source.slice(bodyStart, i - 1)
+  const body = rawBody.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "")
+
+  // Split into top-level destructured entries, respecting nesting so commas
+  // inside default-value expressions (arrays, objects, calls) don't split.
+  const segments = []
+  let nestDepth = 0
+  let current = ""
+  for (const ch of body) {
+    if (ch === "{" || ch === "(" || ch === "[") nestDepth++
+    else if (ch === "}" || ch === ")" || ch === "]") nestDepth--
+    if (ch === "," && nestDepth === 0) {
+      segments.push(current)
+      current = ""
+    } else {
+      current += ch
+    }
+  }
+  if (current.trim()) segments.push(current)
+
+  const defaults = new Map()
+  for (const rawSegment of segments) {
+    const segment = rawSegment.trim()
+    if (!segment || segment.startsWith("...")) continue
+    // Nested destructuring patterns (e.g. `{ a, b } = {}`) don't expose a
+    // single prop name at this level — skip, can't attribute a default.
+    if (segment.startsWith("{") || segment.startsWith("[")) continue
+
+    const pm = /^([A-Za-z_$][\w$]*)\s*(?::\s*[A-Za-z_$][\w$]*)?\s*(?:=\s*([\s\S]+))?$/.exec(segment)
+    if (!pm) continue
+    const propName = pm[1]
+    const rawDefault = pm[2]
+
+    if (rawDefault === undefined) {
+      defaults.set(propName, { kind: "none" })
+      continue
+    }
+    defaults.set(propName, classifyDefaultExpr(rawDefault.trim()))
+  }
+
+  return defaults
+}
+
+function classifyDefaultExpr(expr) {
+  if (expr === "true") return { kind: "literal", value: true }
+  if (expr === "false") return { kind: "literal", value: false }
+  if (expr === "null") return { kind: "literal", value: null }
+  if (expr === "undefined") return { kind: "none" }
+  if (/^-?\d+(\.\d+)?$/.test(expr)) return { kind: "literal", value: Number(expr) }
+
+  const dq = /^"((?:[^"\\]|\\.)*)"$/.exec(expr)
+  if (dq) return { kind: "literal", value: dq[1] }
+  const sq = /^'((?:[^'\\]|\\.)*)'$/.exec(expr)
+  if (sq) return { kind: "literal", value: sq[1] }
+  // Template literal without `${...}` interpolation is effectively a string literal.
+  const bt = /^`((?:[^`\\$]|\\.)*)`$/.exec(expr)
+  if (bt) return { kind: "literal", value: bt[1] }
+
+  return { kind: "incomparable", raw: expr }
+}
+
+const NONE_KEY = " none"
+function defaultKey(entry) {
+  return entry.kind === "none" ? NONE_KEY : JSON.stringify(entry.value)
+}
+
+/**
+ * Diffs default values for props that are declared on *both* platforms'
+ * own `${Name}Props` (uses the same own-prop extraction as diffProps).
+ * Props with no default on either side are not a diff (per spec: two
+ * "undefined-equivalent" props aren't a mismatch). A default on one side
+ * and none on the other IS reported — that's a real behavioral divergence.
+ * Props where either side's default isn't a comparable literal are skipped
+ * and surfaced separately as "incomparable" so the skip is visible, not silent.
+ */
+function diffDefaults(name, webPath, nativePath) {
+  const nativeFile = nativePath.endsWith(".ts") || nativePath.endsWith(".tsx") ? nativePath : `${nativePath}.tsx`
+  const webFile = path.join(ROOT, webPath)
+  const nativeFullPath = path.join(ROOT, "src/native/components", nativeFile)
+
+  const webProps = extractOwnProps(webFile, `${name}Props`)
+  const nativeProps = extractOwnProps(nativeFullPath, `${name}Props`)
+  if (webProps === null || nativeProps === null) return undefined
+
+  const webDefaults = extractDefaultsFromDestructure(webFile, name)
+  const nativeDefaults = extractDefaultsFromDestructure(nativeFullPath, name)
+  if (webDefaults === null || nativeDefaults === null) return undefined // non-destructured signature — can't compare
+
+  const nativePropSet = new Set(nativeProps)
+  const sharedProps = webProps.filter((p) => nativePropSet.has(p))
+
+  const gapEntries = INTENTIONAL_DEFAULT_GAPS.get(name) ?? []
+  const allowedProps = new Map(gapEntries.map((g) => [g.prop, g]))
+
+  const rawMismatches = []
+  const incomparable = []
+
+  for (const prop of sharedProps) {
+    const wd = webDefaults.get(prop) ?? { kind: "none" }
+    const nd = nativeDefaults.get(prop) ?? { kind: "none" }
+
+    if (wd.kind === "none" && nd.kind === "none") continue
+    if (wd.kind === "incomparable" || nd.kind === "incomparable") {
+      incomparable.push({ prop, web: wd.kind === "incomparable" ? wd.raw : undefined, native: nd.kind === "incomparable" ? nd.raw : undefined })
+      continue
+    }
+    if (defaultKey(wd) !== defaultKey(nd)) {
+      rawMismatches.push({
+        prop,
+        web: wd.kind === "none" ? undefined : wd.value,
+        native: nd.kind === "none" ? undefined : nd.value,
+      })
+    }
+  }
+
+  const rawMismatchProps = new Set(rawMismatches.map((r) => r.prop))
+  const stale = gapEntries.filter((g) => !rawMismatchProps.has(g.prop)).map((g) => g.prop)
+  const mismatches = rawMismatches.filter((r) => !allowedProps.has(r.prop))
+
+  return { mismatches, incomparable, stale }
 }
 
 function diffProps(name, webPath, nativePath) {
@@ -407,6 +644,61 @@ if (propMismatches.length > 0) {
   process.exit(1)
 }
 
+// ─── Part 3: default-value parity (issue #316 follow-up) ───
+
+const defaultMismatches = []
+const staleDefaultGapEntries = []
+const incomparableDefaults = []
+let defaultsChecked = 0
+
+for (const name of contractNames) {
+  if (INTENTIONAL_NATIVE_GAPS.has(name)) continue // no native counterpart at all
+  const webPath = webPathByName.get(name)
+  const nativeFile = nativeFileByName.get(name)
+  if (!webPath || !nativeFile) continue
+
+  const diff = diffDefaults(name, webPath, nativeFile)
+  if (diff === undefined) continue
+  defaultsChecked += 1
+  if (diff.stale.length > 0) staleDefaultGapEntries.push({ name, stale: diff.stale })
+  if (diff.incomparable.length > 0) incomparableDefaults.push({ name, incomparable: diff.incomparable })
+  if (diff.mismatches.length > 0) defaultMismatches.push({ name, mismatches: diff.mismatches })
+}
+
+const staleDefaultGaps = [...INTENTIONAL_DEFAULT_GAPS.keys()].filter((name) => !contractNames.includes(name))
+if (staleDefaultGaps.length > 0) {
+  console.warn(`[native-parity] stale default-gap allowlist entries (component no longer in contracts): ${staleDefaultGaps.join(", ")}`)
+}
+
+if (staleDefaultGapEntries.length > 0) {
+  console.warn("[native-parity] stale INTENTIONAL_DEFAULT_GAPS entries (no longer a real diff — safe to remove):")
+  for (const { name, stale } of staleDefaultGapEntries) {
+    console.warn(`  - ${name}: ${stale.join(", ")}`)
+  }
+}
+
+if (incomparableDefaults.length > 0) {
+  console.warn("[native-parity] default values skipped as incomparable (not a literal — function calls, objects, identifiers, etc.):")
+  for (const { name, incomparable } of incomparableDefaults) {
+    for (const { prop, web, native } of incomparable) {
+      console.warn(`  - ${name}.${prop}: web=${web ?? "(none)"} native=${native ?? "(none)"}`)
+    }
+  }
+}
+
+if (defaultMismatches.length > 0) {
+  console.error("[native-parity] Default-value drift between Web and Native (same prop, different default):")
+  for (const { name, mismatches } of defaultMismatches) {
+    for (const { prop, web, native } of mismatches) {
+      console.error(`  - ${name}.${prop}: web default=${JSON.stringify(web)} native default=${JSON.stringify(native)}`)
+    }
+  }
+  console.error(
+    "\nAlign the default on both platforms, or document an intentional gap in INTENTIONAL_DEFAULT_GAPS (scripts/check-native-parity.mjs).",
+  )
+  process.exit(1)
+}
+
 console.log(
-  `[native-parity] OK: ${contractNames.length} contract names checked, ${INTENTIONAL_NATIVE_GAPS.size} intentional native gaps, ${propsChecked} components prop-diffed (${INTENTIONAL_PROP_GAPS.size} intentional prop gaps)`,
+  `[native-parity] OK: ${contractNames.length} contract names checked, ${INTENTIONAL_NATIVE_GAPS.size} intentional native gaps, ${propsChecked} components prop-diffed (${INTENTIONAL_PROP_GAPS.size} intentional prop gaps), ${defaultsChecked} components default-diffed (${INTENTIONAL_DEFAULT_GAPS.size} intentional default gaps)`,
 )
