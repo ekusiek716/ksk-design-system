@@ -156,3 +156,20 @@ function CardHeaderToneDemo() {
 export const CardHeaderTone: Story = {
   render: () => <CardHeaderToneDemo />,
 }
+
+function CardHeaderTitleLeadingDemo() {
+  return (
+    <View style={{ padding: 16 }}>
+      <CardHeader
+        eyebrow="タスク"
+        titleLeading={<RNText>✅</RNText>}
+        title="完了したタスク"
+        description="見出し先頭に装飾アイコンを添える例"
+      />
+    </View>
+  )
+}
+
+export const CardHeaderTitleLeading: Story = {
+  render: () => <CardHeaderTitleLeadingDemo />,
+}
