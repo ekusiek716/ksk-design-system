@@ -50,6 +50,29 @@ html[data-kb-open]
   max-height: calc(100dvh - var(--kb-h, 0px));
 }
 
+/* ── #337: float 系（float / float-glass）の lift + max-height 補正 ──
+   float は画面端に貼り付かず 12px（0.75rem = Tailwind の inset-x-3 / bottom-3）の
+   余白を持つ配置なので、bottom 系と補正量が違う:
+   - lift は「キーボード高さ + 下マージン」
+   - 高さキャップは「可視領域 - 上下マージン - 上部セーフエリア」
+   JS 検知（SheetContent の resolveFloatSheetKeyboardStyle）が動くときは inline で
+   同値を書くため二重適用にならない。 */
+html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-side="float-glass"]) {
+  bottom: calc(var(--kb-h, 0px) + 0.75rem);
+  max-height: max(0px, calc(100dvh - var(--kb-h, 0px) - 1.5rem - env(safe-area-inset-top, 0px)));
+}
+
+/* ── #337: float-glass をスクロール可能にする ──
+   高さキャップは overflow が clip/auto でないと「見えないまま切れる」だけになる。
+   float は Tailwind の overflow-y-auto で足りるが、float-glass は
+   `.glass-specular { overflow: hidden }`（glass.css・非レイヤー CSS）が
+   @layer utilities のユーティリティを常に踏み潰すため効かない。
+   同じ非レイヤーかつ glass.css より後ろに読まれるここで上書きする。
+   auto も clip 系の値なので、角丸での ::before ハイライトのクリップは保たれる。 */
+[data-slot="sheet-content"][data-side="float-glass"] {
+  overflow-y: auto;
+}
+
 /* ── #149: KeyboardAwareSheetFooter behavior="hide" の :has(:focus) フォールバック ── */
 @media (max-width: 767px) {
   :is([data-slot="sheet-content"], [data-slot="bottom-sheet-frame"]):has(
