@@ -143,6 +143,44 @@ function resolveBottomSheetKeyboardStyle(
   return { bottom: keyboardInset, maxHeight: visibleHeight ?? undefined }
 }
 
+/**
+ * float 系シート（`float` / `float-glass`）の外周マージン。
+ * バリアントの `inset-x-3` / `bottom-3`（0.75rem = 12px）と同値。
+ */
+const FLOAT_SHEET_GAP_PX = 12
+
+/**
+ * float 系シートのキーボード追従スタイル（#337）。
+ *
+ * bottom 系と違い float は画面端に貼り付かず 12px の余白を持つため、
+ *   - lift は「キーボード高さ + 下マージン」
+ *   - 高さキャップは「可視領域 − 上下マージン − 上部セーフエリア」
+ * になる。iOS ではキーボード表示時にページ全体が視覚シフトするため、
+ * 背の高い float シートはこの補正が無いと上端が画面外へ抜ける。
+ * belle-todo が globals.css で入れていた回避策と等価。
+ *
+ * キーボード非表示時は undefined を返し、バリアント既定の CSS
+ * （bottom-3 / 高さ無制限）にフォールバックする。
+ *
+ * Exported for unit testing only — not part of the public package API.
+ */
+function resolveFloatSheetKeyboardStyle(
+  keyboardInset: number,
+  visibleHeight: number | null
+): { bottom: number; maxHeight?: string } | undefined {
+  if (keyboardInset <= 0) return undefined
+  const bottom = keyboardInset + FLOAT_SHEET_GAP_PX
+  if (visibleHeight == null) return { bottom }
+  // 極端に背の高いキーボードでキャップが負にならないよう 0 で下限を切る
+  // （負値だと「上端が抜ける」不具合を「中身が高さ 0 で消える」不具合に
+  // すり替えるだけになる）。
+  const cap = Math.max(0, visibleHeight - FLOAT_SHEET_GAP_PX * 2)
+  return {
+    bottom,
+    maxHeight: `max(0px, calc(${cap}px - env(safe-area-inset-top, 0px)))`,
+  }
+}
+
 function useVisualViewportInset(): VisualViewportInset {
   const [inset, setInset] = React.useState<VisualViewportInset>({
     keyboardInset: 0,
@@ -659,6 +697,9 @@ const sheetVariants = cva(
         float: [
           "inset-x-3 bottom-3 rounded-[var(--Radius-Sheet)] max-w-lg mx-auto",
           "bg-[var(--Surface-Primary)]",
+          // #337: キーボード表示時に maxHeight でキャップされるため、
+          // 溢れた分をシート内でスクロールできるようにしておく。
+          "overflow-y-auto",
         ].join(" "),
         /**
          * Liquid Glass フローティングシート
@@ -668,6 +709,11 @@ const sheetVariants = cva(
         "float-glass": [
           "inset-x-3 bottom-3 rounded-[var(--Radius-Sheet)] max-w-lg mx-auto",
           "glass glass-specular",
+          // #337: スクロール可能化は Tailwind の overflow-y-auto では効かない。
+          // glass.css は非レイヤー CSS として読まれ、`.glass-specular` の
+          // `overflow: hidden` が @layer utilities のユーティリティを常に
+          // 踏み潰すため（glass.css のインシデント記録参照）。代わりに
+          // styles/sheet-keyboard.css の非レイヤー規則で上書きしている。
         ].join(" "),
         /**
          * Liquid Glass ボトムシート
@@ -934,10 +980,16 @@ function SheetContent({
   // keyboard-overlap problem as the swipeToClose path: while the keyboard is
   // open, lift the sheet above it and cap its height to the visible region,
   // overriding the variant's `bottom-0` / `max-h-[90dvh]`.
+  //
+  // float 系（`float` / `float-glass`）も同じ問題を持つが、画面端に 12px の
+  // 余白を残す配置なので専用の補正を使う（#337）。
   const isBottomAnchored = side === "bottom" || side === "bottom-glass"
+  const isFloating = side === "float" || side === "float-glass"
   const keyboardStyle = isBottomAnchored
     ? resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false)
-    : undefined
+    : isFloating
+      ? resolveFloatSheetKeyboardStyle(keyboardInset, visibleHeight)
+      : undefined
   const {
     "aria-describedby": ariaDescribedBy,
     ...contentProps
@@ -1979,6 +2031,7 @@ export {
   // (src/index.ts re-exports a curated list only).
   computeVisualViewportInset,
   resolveBottomSheetKeyboardStyle,
+  resolveFloatSheetKeyboardStyle,
   decideSwipeGesture,
   computeFlickVelocity,
   decideSwipeDismiss,

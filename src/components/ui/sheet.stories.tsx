@@ -5,6 +5,8 @@ import {
   Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose,
 } from "./sheet"
 import { Button } from "./button"
+import { Input } from "./input"
+import { FormField } from "../patterns/form-field"
 
 const meta: Meta<typeof Sheet> = {
   title: "Components/Sheet",
@@ -279,6 +281,48 @@ export const BottomSheetSwipeToClose: Story = {
             <SheetFooter>
               <SheetClose asChild>
                 <Button className="w-full" size="lg">確定</Button>
+              </SheetClose>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+      </div>
+    )
+  },
+}
+
+// #337: float シートのキーボード追従。実機（iOS Safari / WKWebView）で入力欄に
+// フォーカスし、シートがキーボードの直上に収まり上端が画面外へ抜けないことを
+// 確認する。背の高いコンテンツを入れてあるのは、補正が無いと上端が抜ける条件を
+// 再現するため。
+export const FloatSheetKeyboard: Story = {
+  name: "Float — 仮想キーボード追従",
+  parameters: { layout: "fullscreen" },
+  render: () => {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <div className="w-full min-h-screen flex flex-col items-center justify-center gap-3 bg-[var(--Surface-Secondary)] p-8">
+        <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)] text-center max-w-xs">
+          実機で入力欄にフォーカスし、シートがキーボードの直上に収まる（上端が画面外へ抜けない）ことを確認します。
+        </p>
+        <Button onClick={() => setOpen(true)}>フローティングシートを開く</Button>
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetContent side="float" className="p-5">
+            <SheetHeader className="mb-4">
+              <SheetTitle>タスクを追加</SheetTitle>
+              <SheetDescription>
+                キーボード表示中もこのタイトルが見えていれば正しい挙動です。
+              </SheetDescription>
+            </SheetHeader>
+            <div className="flex flex-col gap-3 mb-6">
+              {["タイトル", "メモ", "担当", "期日"].map((label, i) => (
+                <FormField key={label} label={label} htmlFor={`float-kb-${i}`}>
+                  <Input id={`float-kb-${i}`} placeholder={`${label}を入力`} />
+                </FormField>
+              ))}
+            </div>
+            <SheetFooter>
+              <SheetClose asChild>
+                <Button className="w-full" size="lg">保存</Button>
               </SheetClose>
             </SheetFooter>
           </SheetContent>
