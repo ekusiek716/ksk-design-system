@@ -25,10 +25,15 @@ export type QuickActionGridSelectionMode = "single" | "multiple"
 /** grid → tile へ選択意味論を渡す。grid 外の ActionTile は null を受ける（＝従来挙動）。 */
 const QuickActionGridSelectionContext = React.createContext<QuickActionGridSelectionMode | null>(null)
 
-/** 開発ビルド判定。DS は node の型を持たないので globalThis 経由で参照する（ErrorBoundary と同じ形）。 */
+/**
+ * 開発ビルド判定。DS は node の型を持たないので globalThis 経由で参照する。
+ * `proc` の存在を先に必須にする（ErrorBoundary と同じ形）。省略すると
+ * process 自体が無い環境で undefined との比較が true になり、本番でも
+ * 警告が出続ける。
+ */
 function isDev() {
   const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
-  return proc?.env?.NODE_ENV !== "production"
+  return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
 }
 
 /**
@@ -284,9 +289,11 @@ export function QuickActionGrid({
     </View>
   )
 
-  if (!selectionMode) return grid
+  // selectionMode 未指定でも必ず Provider を置いて null を流す。置かないと、
+  // selectionMode="single" のグリッドの中に入れ子にした「ただの起動ボタンの
+  // グリッド」が外側の文脈を引き継ぎ、勝手に radio ロールになる。
   return (
-    <QuickActionGridSelectionContext.Provider value={selectionMode}>
+    <QuickActionGridSelectionContext.Provider value={selectionMode ?? null}>
       {grid}
     </QuickActionGridSelectionContext.Provider>
   )

@@ -31,8 +31,12 @@ describe("native QuickActionGrid の selectionMode（#318）", () => {
     expect(source).toContain(
       "const QuickActionGridSelectionContext = React.createContext<QuickActionGridSelectionMode | null>(null)",
     )
-    expect(source).toContain("QuickActionGridSelectionContext.Provider value={selectionMode}")
-    expect(source).toContain("if (!selectionMode) return grid")
+    // 未指定でも必ず Provider を置いて null を流す（置かないと入れ子の内側グリッドが
+    // 外側の single 文脈を引き継いで勝手に radio 化する）
+    expect(source).toContain(
+      "QuickActionGridSelectionContext.Provider value={selectionMode ?? null}",
+    )
+    expect(source).not.toContain("if (!selectionMode) return grid")
   })
 
   it("tile の明示 prop が親 grid より優先される", () => {
@@ -63,7 +67,9 @@ describe("native QuickActionGrid の selectionMode（#318）", () => {
     expect(source).toContain('if (isDev() && selectionMode === "single")')
     expect(source).toContain('child.props.selected === true || child.props.variant === "selected"')
     expect(source).toContain("if (selectedCount > 1)")
-    expect(source).toMatch(/proc\?\.env\?\.NODE_ENV !== "production"/)
+    // proc の存在を先に必須にする。省略すると process 自体が無い環境で
+    // undefined との比較が true になり、本番でも警告が出続ける
+    expect(source).toMatch(/Boolean\(proc\) && proc!\.env\?\.NODE_ENV !== "production"/)
   })
 
   it("呼び出し側の accessibilityRole / accessibilityState は既定より優先される（非破壊）", () => {

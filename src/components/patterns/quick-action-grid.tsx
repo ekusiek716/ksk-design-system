@@ -20,10 +20,16 @@ type QuickActionGridSelectionMode = "single" | "multiple"
 /** grid → tile へ選択意味論を渡す。grid 外で使った ActionTile は null を受ける（＝従来挙動）。 */
 const QuickActionGridSelectionContext = React.createContext<QuickActionGridSelectionMode | null>(null)
 
-/** 開発ビルド判定。DS は node の型を持たないので globalThis 経由で参照する（error-boundary と同じ形）。 */
+/**
+ * 開発ビルド判定。DS は node の型を持たないので globalThis 経由で参照する。
+ * `proc` の存在を先に必須にする（error-boundary と同じ形）。省略して
+ * `proc?.env?.NODE_ENV !== "production"` と書くと、process 自体が無い環境
+ * （バンドラが NODE_ENV を静的置換しない素のブラウザ配布など）で undefined
+ * との比較が true になり、本番でも警告が出続ける。
+ */
 const isDev = () => {
   const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
-  return proc?.env?.NODE_ENV !== "production"
+  return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
 }
 
 interface ActionTileProps extends Omit<React.ComponentProps<"button">, "children"> {
@@ -186,11 +192,16 @@ function ActionTile({
   )
 }
 
-/** grid 直下に限らない（consumer が div でラップしても拾う）タイル収集。disabled は移動対象外。 */
+/**
+ * grid 直下に限らない（consumer が div でラップしても拾う）タイル収集。
+ * ただし**入れ子の QuickActionGrid の中は拾わない** — 内側のタイルは内側の
+ * グリッドが管理するもので、外側の roving tabindex に混ぜると Tab の止まり方が
+ * 壊れる。disabled は移動対象外（呼び出し側でフィルタする）。
+ */
 function collectTiles(container: HTMLElement): HTMLButtonElement[] {
   return Array.from(
     container.querySelectorAll<HTMLButtonElement>('[data-slot="action-tile"]')
-  )
+  ).filter((tile) => tile.closest('[data-slot="quick-action-grid"]') === container)
 }
 
 function QuickActionGrid({
@@ -277,13 +288,14 @@ function QuickActionGrid({
       )}
       {...props}
     >
-      {selectionMode ? (
-        <QuickActionGridSelectionContext.Provider value={selectionMode}>
-          {children}
-        </QuickActionGridSelectionContext.Provider>
-      ) : (
-        children
-      )}
+      {/*
+        selectionMode 未指定でも必ず Provider を置いて null を流す。置かないと、
+        selectionMode="single" のグリッドの中に入れ子にした「ただの起動ボタンの
+        グリッド」が外側の文脈を引き継ぎ、勝手に role="radio" になる。
+      */}
+      <QuickActionGridSelectionContext.Provider value={selectionMode ?? null}>
+        {children}
+      </QuickActionGridSelectionContext.Provider>
     </div>
   )
 }

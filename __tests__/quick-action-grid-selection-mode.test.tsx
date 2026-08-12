@@ -236,4 +236,84 @@ describe("ActionTile 単体・明示 prop", () => {
     expect(tiles()[0].getAttribute("role")).toBe("radio")
     expect(tiles()[0].getAttribute("aria-checked")).toBe("true")
   })
+
+  // レビューで見つかった漏れ: 未指定のグリッドが Provider を置かないと、外側の
+  // single 文脈をそのまま引き継いで「ただの起動ボタン」が radio 化していた。
+  describe("入れ子のグリッド（#318 レビュー指摘）", () => {
+    function Nested() {
+      return (
+        <QuickActionGrid selectionMode="single">
+          <ActionTile label="外1" selected />
+          <ActionTile label="外2" />
+          <QuickActionGrid>
+            <ActionTile label="内1" />
+            <ActionTile label="内2" />
+          </QuickActionGrid>
+        </QuickActionGrid>
+      )
+    }
+
+    it("内側の未指定グリッドのタイルは radio にならない（文脈を引き継がない）", () => {
+      mount(<Nested />)
+      const all = tiles()
+      expect(all.map((t) => t.getAttribute("role"))).toEqual([
+        "radio",
+        "radio",
+        null,
+        null,
+      ])
+    })
+
+    it("外側の roving tabindex に内側のタイルを巻き込まない", () => {
+      mount(<Nested />)
+      const all = tiles()
+      // 外側は選択中の1枚だけ 0 / もう1枚が -1。内側は触られない（tabIndex 既定 0）
+      expect(all[0].tabIndex).toBe(0)
+      expect(all[1].tabIndex).toBe(-1)
+      expect(all[2].getAttribute("tabindex")).toBeNull()
+      expect(all[3].getAttribute("tabindex")).toBeNull()
+    })
+  })
+
+  // レビューで見つかった漏れ: process が無い環境（バンドラが NODE_ENV を
+  // 静的置換しない素のブラウザ配布）で dev 判定がフェイルオープンし、本番でも
+  // 警告が出続けていた。
+  describe("開発時の多重選択 warn（#318 レビュー指摘）", () => {
+    function TwoSelected() {
+      return (
+        <QuickActionGrid selectionMode="single">
+          <ActionTile label="A" selected />
+          <ActionTile label="B" selected />
+        </QuickActionGrid>
+      )
+    }
+
+    it("process が無い環境では warn しない（フェイルクローズ）", () => {
+      const original = Object.getOwnPropertyDescriptor(globalThis, "process")
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+      try {
+        // @ts-expect-error テストのために一時的に process を消す
+        delete globalThis.process
+        mount(<TwoSelected />)
+        expect(warn).not.toHaveBeenCalled()
+      } finally {
+        if (original) Object.defineProperty(globalThis, "process", original)
+        warn.mockRestore()
+      }
+    })
+
+    it("NODE_ENV=production では warn しない", () => {
+      const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+      const prev = proc?.env?.NODE_ENV
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+      try {
+        if (proc?.env) proc.env.NODE_ENV = "production"
+        mount(<TwoSelected />)
+        expect(warn).not.toHaveBeenCalled()
+      } finally {
+        if (proc?.env) proc.env.NODE_ENV = prev
+        warn.mockRestore()
+      }
+    })
+  })
 })
