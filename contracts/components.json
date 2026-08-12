@@ -1521,10 +1521,14 @@
         "multi-select",
         "single-select",
         "max-limit",
-        "removable"
+        "removable",
+        "selection-mode"
       ],
       "rules": [
-        "Use multiple=false for single-select. Use max to limit selection count.",
+        "selectionMode=\"single\" / \"multiple\" で選択意味論を指定する(issue #352。QuickActionGrid / ActionTile と同じ語彙)。multiple は @deprecated だが後方互換のため残っており、selectionMode 未指定時のみ従来どおり multiple(既定 true)から導出する。",
+        "単一選択ではグループが role=\"radiogroup\"、チップが role=\"radio\" + aria-checked になり、矢印キー移動と roving tabindex が有効になる(native は accessibilityRole radiogroup / radio + accessibilityState.checked)。",
+        "単一選択で選択中の値が 2 つ以上あると開発ビルドで console.warn する(issue #39 の footgun 検出)",
+        "Use selectionMode=\"single\" for single-select (multiple=false は非推奨). Use max to limit selection count.",
         "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior."
       ]
     },

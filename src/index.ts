@@ -206,7 +206,7 @@ export type { MobileAppShellBottomNavMode, MobileAppShellBottomPadding, MobileAp
 export { MobileTabBar } from "./components/patterns/commerce/mobile-tab-bar"
 export type { MobileTabBarAddAction, MobileTabBarProps, MobileTabItem } from "./components/patterns/commerce/mobile-tab-bar"
 export { ChipSelector } from "./components/patterns/chip-selector"
-export type { ChipSelectorProps, ChipSelectorOption } from "./components/patterns/chip-selector"
+export type { ChipSelectorProps, ChipSelectorOption, ChipSelectorSelectionMode } from "./components/patterns/chip-selector"
 export { CollapsibleChipField } from "./components/patterns/collapsible-chip-field"
 export type { CollapsibleChipFieldProps } from "./components/patterns/collapsible-chip-field"
 export { ChipFilterBar } from "./components/patterns/chip-filter-bar"
