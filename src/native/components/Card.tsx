@@ -7,6 +7,12 @@ export interface CardProps extends ViewProps {
   padding?: number
   /** shadow トークン名。web は boxShadow、iOS は shadow*、Android は elevation を適用 */
   elevation?: "sm" | "md" | "lg"
+  /**
+   * scales.borderRadius のキー。既定 "lg"（8px、web版 Card の rounded-[var(--Radius-Surface)] と同値）。
+   * 既定を変えると全 consumer のカードの見た目が一斉に変わるため、既定は "lg" のまま据え置き、
+   * 16px 等が欲しい呼び出し側は明示的に指定する（issue #332）。
+   */
+  radius?: "lg" | "xl" | "2xl"
   children: React.ReactNode
 }
 
@@ -36,7 +42,7 @@ function getIosShadow(elevation: NonNullable<CardProps["elevation"]>, shadowColo
 }
 
 /** surface.primary 面 + border.low-emphasis の標準カード。 */
-export function Card({ padding = 4, elevation, style, children, ...rest }: CardProps) {
+export function Card({ padding = 4, elevation, radius = "lg", style, children, ...rest }: CardProps) {
   const { theme, scales } = useTheme()
 
   const shadow: ViewStyle | undefined = elevation
@@ -54,7 +60,7 @@ export function Card({ padding = 4, elevation, style, children, ...rest }: CardP
           backgroundColor: theme.surface.primary,
           borderColor: theme.border["low-emphasis"],
           borderWidth: 1,
-          borderRadius: scales.borderRadius.lg,
+          borderRadius: scales.borderRadius[radius],
           padding: scales.spacing.scale[padding],
           gap: scales.spacing.scale[3],
         },
