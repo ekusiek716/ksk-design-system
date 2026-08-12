@@ -120,8 +120,25 @@ interface DialogContentProps
    * - "top": 上部寄せ (safe-area-inset-top + 2rem 下) — モバイルで縦長
    *   コンテンツ (チェックリスト等) を出すときに、コンテンツが
    *   スクロールしやすく操作しやすい
+   * - "fullscreen": 全画面 (inset-0)。モバイルのウィザード/エディタ等、
+   *   Dialog をページ代わりに使う場面向け。上下とも safe-area を確保する
+   *   （`safeArea` prop で無効化可能）
    */
-  position?: "center" | "top"
+  position?: "center" | "top" | "fullscreen"
+  /**
+   * safe-area（ノッチ・ステータスバー・ホームインジケータ）の回避を
+   * 有効にするか。既定 true。
+   * - "top": 上端に `max(env(safe-area-inset-top), 2rem)` を確保（従来挙動）
+   * - "fullscreen": 四辺すべてに env(safe-area-inset-*) を確保（横向きの
+   *   iPhone ではノッチが左右に来るため上下だけでは足りない）
+   * - "center": 効果なし
+   * false にすると回避を無効化する（consumer が自前で safe-area を管理する
+   * 場合のオプトアウト。安全側の既定を壊さないよう既定は true）。
+   *
+   * なお `data-safe-area` 属性は position に関わらず常に出力される
+   * （値はこの prop そのもの）。効果があるのは "top" / "fullscreen" だけ。
+   */
+  safeArea?: boolean
   /**
    * open 時の初期フォーカス。未指定時は Radix の既定挙動。
    * - "first-input": 最初の入力/操作可能要素
@@ -155,6 +172,7 @@ function DialogContent({
   padding = true,
   description,
   position = "center",
+  safeArea = true,
   autoFocus,
   restoreFocusOnClose = true,
   closeOnEsc = true,
@@ -216,20 +234,54 @@ function DialogContent({
         ref={contentRef}
         data-slot="dialog-content"
         data-position={position}
+        data-safe-area={safeArea}
         className={cn(
-          // 横位置: left-[50%] + translate-x-[-50%] のみ。
-          // inset-x-* と組み合わせると left/right と transform が競合して
-          // SP サイズで左に大きくズレるため使わない。
-          // 幅は w-full + max-w-[calc(100%_-_3rem)] (左右 24px) + 480px キャップ。
-          "fixed left-[50%] z-[var(--Z-Modal)] w-full max-w-[calc(100%_-_3rem)] sm:max-w-[480px] translate-x-[-50%]",
-          // 縦位置
-          position === "top"
-            ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh_-_max(env(safe-area-inset-top),2rem)_-_2rem)] overflow-y-auto"
-            : "top-[50%] translate-y-[-50%]",
-          "rounded-[var(--Radius-Modal)] ksk-squircle bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)]",
-          padding && "flex flex-col gap-4 p-6",
-          "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
-          "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+          "fixed z-[var(--Z-Modal)]",
+          // 横位置・縦位置・サイズ。position ごとに完結した1つの塊として選ぶ
+          // （left-[50%]/inset-0 のような別グループのクラスを同時に混ぜると
+          // twMerge が競合を検出できず、CSS 生成順に結果が左右されるため）。
+          position === "fullscreen"
+            ? // 全画面: inset-0 で画面いっぱいに広げる。角丸・影なし
+              //（全画面では影は不可視で、角丸は端が切れて見えるだけ）。
+              // 内側にヘッダー/フッターを固定するレイアウトが典型なので、
+              // ルートは overflow-hidden にして子側でスクロールさせる
+              // （ルートも auto にするとスクロールコンテナが二重になる）。
+              "inset-0 w-full h-full max-w-none overflow-hidden rounded-none"
+            : [
+                // 横位置: left-[50%] + translate-x-[-50%] のみ。
+                // inset-x-* と組み合わせると left/right と transform が競合して
+                // SP サイズで左に大きくズレるため使わない。
+                // 幅は w-full + max-w-[calc(100%_-_3rem)] (左右 24px) + 480px キャップ。
+                "left-[50%] w-full max-w-[calc(100%_-_3rem)] sm:max-w-[480px] translate-x-[-50%]",
+                // 縦位置
+                position === "top"
+                  ? safeArea
+                    ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh_-_max(env(safe-area-inset-top),2rem)_-_2rem)] overflow-y-auto"
+                    : "top-8 max-h-[calc(100dvh_-_4rem)] overflow-y-auto"
+                  : "top-[50%] translate-y-[-50%]",
+                "rounded-[var(--Radius-Modal)] ksk-squircle",
+              ].join(" "),
+          "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)]",
+          position !== "fullscreen" && "shadow-[var(--shadow-dialog)]",
+          // 内側余白。fullscreen + safeArea では四辺すべてに safe-area 分を
+          // 上乗せする（横向きの iPhone ではノッチが左右に来るため、上下だけ
+          // では足りない）。ショートハンドの padding と方向指定の padding を
+          // 同時に渡すと twMerge が別グループと見なして両方残し、勝敗が CSS
+          // 生成順に左右されるため、必ず1つの完結したクラス集合を選ぶ。
+          padding &&
+            (position === "fullscreen" && safeArea
+              ? "flex flex-col gap-4 pl-[max(1.5rem,env(safe-area-inset-left,0px))] pr-[max(1.5rem,env(safe-area-inset-right,0px))] pt-[calc(1.5rem_+_env(safe-area-inset-top,0px))] pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]"
+              : "flex flex-col gap-4 p-6"),
+          !padding &&
+            position === "fullscreen" &&
+            safeArea &&
+            "pl-[env(safe-area-inset-left,0px)] pr-[env(safe-area-inset-right,0px)] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]",
+          // 入場/退場: 全画面は iOS の全画面モーダル慣習に合わせて下からの
+          // スライド。zoom-95 だと全画面サーフェスが縮んで四辺からオーバーレイが
+          // 覗くため使わない。
+          position === "fullscreen"
+            ? "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom"
+            : "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           className
         )}
         {...props}

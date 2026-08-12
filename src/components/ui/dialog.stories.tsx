@@ -155,6 +155,83 @@ export const TopPositionLongList: Story = {
 }
 
 /**
+ * position="fullscreen"（Issue #339）。inset-0 で画面いっぱいに広がり、
+ * モバイルのウィザード/エディタ等 Dialog をページ代わりに使う場面向け。
+ * 既定 (safeArea=true) で上下に env(safe-area-inset-top/bottom) を確保し、
+ * ノッチ・ステータスバー・ホームインジケータの下にコンテンツが潜らない。
+ */
+export const Fullscreen: Story = {
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>全画面で開く</Button>
+      </DialogTrigger>
+      <DialogContent
+        position="fullscreen"
+        autoFocus="title"
+        description="全画面ダイアログのサンプルです。"
+      >
+        <DialogHeader>
+          <DialogTitle>プロフィールを編集</DialogTitle>
+          <DialogDescription>
+            四辺の余白は safe-area(ノッチ/ステータスバー等)を自動で回避します。
+            ルートはスクロールせず、この本文領域だけがスクロールします。
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="fullscreen-name">名前</Label>
+            <Input id="fullscreen-name" placeholder="山田 太郎" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="fullscreen-bio">自己紹介</Label>
+            <Input id="fullscreen-bio" placeholder="自己紹介を入力" />
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="secondary">キャンセル</Button>
+          </DialogClose>
+          <Button>保存する</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  ),
+}
+
+/**
+ * position="fullscreen" かつ safeArea=false（オプトアウト）。
+ * consumer が自前でヘッダー/フッターの safe-area を管理したい場合に使う。
+ */
+export const FullscreenSafeAreaOptOut: Story = {
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="secondary">全画面で開く（safeArea無効）</Button>
+      </DialogTrigger>
+      <DialogContent
+        position="fullscreen"
+        safeArea={false}
+        autoFocus="title"
+        description="safeArea を無効化した全画面ダイアログのサンプルです。"
+      >
+        <DialogHeader>
+          <DialogTitle>safeArea={"false"}</DialogTitle>
+          <DialogDescription>
+            上下の safe-area 回避を無効化しています。consumer 側で管理する場合に使います。
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="secondary">閉じる</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  ),
+}
+
+/**
  * 既定の `orientation="split"`。2 アクションを均等幅（各 flex-1）で横並びにする。
  * モバイルのボトムシートやアプリ風 UI 向け。左=セカンダリ / 右=プライマリ。
  */
