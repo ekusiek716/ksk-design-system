@@ -44,6 +44,78 @@ export const SingleSelect: Story = {
   },
 }
 
+/**
+ * `selectionMode="single"`（issue #352）。`multiple={false}` と同じ挙動だが、
+ * 語彙が `QuickActionGrid` / `ActionTile`（#318）と揃う。
+ * グループが `role="radiogroup"`、チップが `role="radio"` + `aria-checked` になり、
+ * 矢印キーで移動・選択できる。
+ */
+export const SelectionModeSingle: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [v, setV] = React.useState<string[]>(["work"])
+    return (
+      <div className="p-4 space-y-3">
+        <ChipSelector options={CATEGORIES} value={v} onChange={setV} selectionMode="single" />
+        <p className="typo-label-xs text-[var(--Text-Low-Emphasis)]">選択: {v[0] ?? "なし"}</p>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const group = canvasElement.querySelector('[data-slot="chip-selector"]')!
+    await expect(group.getAttribute("role")).toBe("radiogroup")
+    const chips = [...canvasElement.querySelectorAll<HTMLButtonElement>('button[data-slot="chip"]')]
+    await expect(chips[0].getAttribute("role")).toBe("radio")
+    await expect(chips[0].getAttribute("aria-checked")).toBe("true")
+    await expect(chips[1].getAttribute("aria-checked")).toBe("false")
+    await expect(chips[0].hasAttribute("aria-pressed")).toBe(false)
+    // roving tabindex: 選択中だけ 0
+    await expect(chips.map((c) => c.tabIndex)).toEqual([0, -1, -1, -1, -1, -1])
+  },
+}
+
+/**
+ * `selectionMode="multiple"`（issue #352）。従来の `multiple`（既定）と同じ
+ * トグルボタン意味論で、グループは `role="group"`、チップは `aria-pressed`。
+ */
+export const SelectionModeMultiple: Story = {
+  render: () => {
+    const [v, setV] = React.useState<string[]>(["work", "health"])
+    return (
+      <div className="p-4 space-y-3">
+        <ChipSelector options={CATEGORIES} value={v} onChange={setV} selectionMode="multiple" />
+        <p className="typo-label-xs text-[var(--Text-Low-Emphasis)]">選択: {v.join(", ") || "なし"}</p>
+      </div>
+    )
+  },
+}
+
+/**
+ * `selectionMode` 未指定（既定）。従来どおり `multiple`（既定 `true`）から導出され、
+ * `role="group"` + `aria-pressed` のまま変わらない（非破壊）。
+ */
+export const SelectionModeUnspecified: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [v, setV] = React.useState<string[]>(["work"])
+    return (
+      <div className="p-4">
+        <ChipSelector options={CATEGORIES} value={v} onChange={setV} />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const group = canvasElement.querySelector('[data-slot="chip-selector"]')!
+    await expect(group.getAttribute("role")).toBe("group")
+    const chips = [...canvasElement.querySelectorAll<HTMLButtonElement>('button[data-slot="chip"]')]
+    await expect(chips.some((c) => c.hasAttribute("role"))).toBe(false)
+    await expect(chips.some((c) => c.hasAttribute("aria-checked"))).toBe(false)
+    await expect(chips[chips.length - 1].getAttribute("aria-pressed")).toBe("false")
+    // roving tabindex は single 専用
+    await expect(chips.some((c) => c.hasAttribute("tabindex"))).toBe(false)
+  },
+}
+
 export const WithMax: Story = {
   render: () => {
     const [v, setV] = React.useState<string[]>([])

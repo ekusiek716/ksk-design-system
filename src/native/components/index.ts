@@ -268,7 +268,12 @@ export {
   type QuickActionGridProps,
   type QuickActionGridSelectionMode,
 } from "./QuickActionGrid"
-export { ChipSelector, type ChipSelectorProps, type ChipSelectorOption } from "./ChipSelector"
+export {
+  ChipSelector,
+  type ChipSelectorProps,
+  type ChipSelectorOption,
+  type ChipSelectorSelectionMode,
+} from "./ChipSelector"
 export { CollapsibleChipField, type CollapsibleChipFieldProps } from "./CollapsibleChipField"
 export { ChipFilterBar, type ChipFilterBarProps } from "./ChipFilterBar"
 export { CategoryNav, type CategoryNavProps, type CategoryNavItem } from "./CategoryNav"
