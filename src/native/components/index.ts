@@ -266,6 +266,7 @@ export {
   type ActionTileProps,
   type ActionTileVariant,
   type QuickActionGridProps,
+  type QuickActionGridSelectionMode,
 } from "./QuickActionGrid"
 export { ChipSelector, type ChipSelectorProps, type ChipSelectorOption } from "./ChipSelector"
 export { CollapsibleChipField, type CollapsibleChipFieldProps } from "./CollapsibleChipField"

@@ -2080,11 +2080,14 @@
         "info",
         "caution",
         "columns: 2 / 3 / 4 / auto",
-        "gap: sm / md"
+        "gap: sm / md",
+        "selectionMode: 未指定 / single / multiple"
       ],
       "accessibility": [
         "button semantics",
         "aria-pressed when selected (selected prop または variant=\"selected\" のどちらでも true)",
+        "selectionMode=\"single\" のとき grid が role=\"radiogroup\"、tile が role=\"radio\" + aria-checked(web) / accessibilityRole=\"radiogroup\"|\"radio\" + accessibilityState.checked(native)。この場合 aria-pressed / selected は出さない(意味論の二重化を避ける)",
+        "selectionMode=\"single\" の web は roving tabindex(選択中のタイルのみ tabIndex=0、未選択なら先頭)と上下左右矢印での移動+選択を持つ(WAI-ARIA APG の radio group パターン。端で折り返し、disabled は移動対象外)",
         "選択状態は色だけでなく既定チェック(indicator省略時)でも伝える(WCAG 1.4.1)",
         "既定チェックは読み上げ対象外(aria-hidden / accessibilityElementsHidden)。選択状態の正本は aria-pressed(web) / accessibilityState.selected(native)"
       ],
@@ -2093,6 +2096,9 @@
         "shortcut row/grid の columns/gap を consumer 側で決め打ちしない",
         "children には ActionTile を使う",
         "選択状態は selected prop を使う",
+        "単一選択(アンケートの単一回答など)には selectionMode=\"single\" を指定する。複数選択と明示したい場合は \"multiple\"。未指定は「選択の集合ではない起動ボタン」の意味で、従来どおり grid に role を付けず tile は aria-pressed のみ(issue #318)",
+        "selectionMode=\"single\" で選択中の ActionTile が 2 つ以上あると開発ビルドで console.warn する(ChipSelector の既定モード問題と同じ静かな誤動作の検出)",
+        "ActionTile 側の selectionMode 明示は親 grid より優先される(grid 外の単体使用・混在時の逃げ道)",
         "meta はカード下段右端の補足情報専用。選択インジケータには indicator prop を使う(issue #309)",
         "indicator はラベル行右端(loading 時 Spinner の位置)に表示。省略時は選択状態でDS標準チェックが既定表示される。null/undefined/falseはいずれも「指定なし」として扱われ、選択中なら既定チェックへフォールバックする",
         "loading は indicator / 既定チェックより優先して表示される",

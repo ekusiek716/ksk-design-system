@@ -7,6 +7,24 @@ import { Spinner } from "@/components/ui/spinner"
 type ActionTileVariant = "neutral" | "selected" | "success" | "info" | "caution"
 type QuickActionGridColumns = 2 | 3 | 4 | "auto"
 type QuickActionGridGap = "sm" | "md"
+/**
+ * タイル群の選択意味論（issue #318）。
+ * - `"single"`: 排他選択。grid が `role="radiogroup"`、タイルが `role="radio"` + `aria-checked`
+ * - `"multiple"`: 複数選択。タイルは `aria-pressed`（トグルボタン）
+ *
+ * 未指定は「選択の集合ではない（クイックアクションの起動ボタン）」扱いで、
+ * 従来どおり grid は role を持たず、タイルは `aria-pressed` のみを出す。
+ */
+type QuickActionGridSelectionMode = "single" | "multiple"
+
+/** grid → tile へ選択意味論を渡す。grid 外で使った ActionTile は null を受ける（＝従来挙動）。 */
+const QuickActionGridSelectionContext = React.createContext<QuickActionGridSelectionMode | null>(null)
+
+/** 開発ビルド判定。DS は node の型を持たないので globalThis 経由で参照する（error-boundary と同じ形）。 */
+const isDev = () => {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+  return proc?.env?.NODE_ENV !== "production"
+}
 
 interface ActionTileProps extends Omit<React.ComponentProps<"button">, "children"> {
   icon?: React.ReactNode
@@ -24,11 +42,24 @@ interface ActionTileProps extends Omit<React.ComponentProps<"button">, "children
   selected?: boolean
   loading?: boolean
   variant?: ActionTileVariant
+  /**
+   * 選択意味論を明示する（issue #318）。通常は親 `QuickActionGrid` の `selectionMode` から
+   * 受け取るので指定不要。指定した場合は親より優先される（grid 外の単体使用や、
+   * 1 つの grid に意味の違うタイルが混ざる場合の逃げ道）。
+   */
+  selectionMode?: QuickActionGridSelectionMode
 }
 
 interface QuickActionGridProps extends React.ComponentProps<"div"> {
   columns?: QuickActionGridColumns
   gap?: QuickActionGridGap
+  /**
+   * 配下 `ActionTile` の選択意味論（issue #318）。
+   * - 未指定（既定）: 起動ボタンの集まりとして扱う。grid は role を持たず、タイルは `aria-pressed`
+   * - `"single"`: `role="radiogroup"` + `role="radio"`。矢印キー移動と roving tabindex が有効になる
+   * - `"multiple"`: タイルは `aria-pressed`（トグルボタンであることを明示的に選んだ状態）
+   */
+  selectionMode?: QuickActionGridSelectionMode
 }
 
 const actionTileVariants: Record<ActionTileVariant, string> = {
@@ -59,10 +90,15 @@ function ActionTile({
   variant = selected ? "selected" : "neutral",
   disabled,
   type,
+  selectionMode,
   ...props
 }: ActionTileProps) {
+  const contextSelectionMode = React.useContext(QuickActionGridSelectionContext)
+  // 明示 prop > 親 grid > 未指定（従来挙動）
+  const mode = selectionMode ?? contextSelectionMode
   const isDisabled = disabled || loading
   const isSelected = selected || variant === "selected"
+  const isRadio = mode === "single"
   const hasIndicator = indicator !== undefined && indicator !== null && indicator !== false
   // 下段（description / meta）を描くかどうか。下の JSX の描画条件と必ず一致させる
   const hasBottomRow = Boolean(description || meta)
@@ -70,7 +106,11 @@ function ActionTile({
     <button
       data-slot="action-tile"
       data-variant={variant}
-      aria-pressed={isSelected || undefined}
+      // single では排他選択（radio）、それ以外は従来どおりトグルボタン（aria-pressed）。
+      // radio に aria-pressed を併記すると意味論が二重になるので排他にする。
+      role={isRadio ? "radio" : undefined}
+      aria-checked={isRadio ? isSelected : undefined}
+      aria-pressed={isRadio ? undefined : isSelected || undefined}
       type={type ?? "button"}
       disabled={isDisabled}
       className={cn(
@@ -146,15 +186,89 @@ function ActionTile({
   )
 }
 
+/** grid 直下に限らない（consumer が div でラップしても拾う）タイル収集。disabled は移動対象外。 */
+function collectTiles(container: HTMLElement): HTMLButtonElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLButtonElement>('[data-slot="action-tile"]')
+  )
+}
+
 function QuickActionGrid({
   className,
   columns = 3,
   gap = "md",
+  selectionMode,
+  role,
+  onKeyDown,
+  ref,
+  children,
   ...props
 }: QuickActionGridProps) {
+  const innerRef = React.useRef<HTMLDivElement | null>(null)
+  const isSingle = selectionMode === "single"
+
+  // roving tabindex: 選択中のタイルだけ tabIndex=0（未選択なら先頭）。
+  // 依存配列を持たせず毎レンダー同期する（子の選択状態は grid の props に現れないため）。
+  React.useEffect(() => {
+    const container = innerRef.current
+    if (!isSingle || !container) return
+    const tiles = collectTiles(container)
+    const selectedIndex = tiles.findIndex((t) => t.getAttribute("aria-checked") === "true")
+    const activeIndex = selectedIndex >= 0 ? selectedIndex : tiles.findIndex((t) => !t.disabled)
+    tiles.forEach((tile, index) => {
+      tile.tabIndex = index === activeIndex ? 0 : -1
+    })
+    if (isDev()) {
+      const checkedCount = tiles.filter((t) => t.getAttribute("aria-checked") === "true").length
+      if (checkedCount > 1) {
+        // ChipSelector の既定モード問題と同じ「静かな誤動作」を開発時に見えるようにする（issue #318）
+        console.warn(
+          `[ksk-ds] QuickActionGrid: selectionMode="single" は排他選択ですが、選択中の ActionTile が ${checkedCount} 個あります。selected を 1 つに絞るか selectionMode="multiple" を使ってください。`
+        )
+      }
+    }
+  })
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(event)
+    if (!isSingle || event.defaultPrevented) return
+    const delta =
+      event.key === "ArrowRight" || event.key === "ArrowDown"
+        ? 1
+        : event.key === "ArrowLeft" || event.key === "ArrowUp"
+          ? -1
+          : 0
+    if (delta === 0) return
+    const container = innerRef.current
+    if (!container) return
+    const tiles = collectTiles(container).filter((tile) => !tile.disabled)
+    const current = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>(
+      '[data-slot="action-tile"]'
+    )
+    const currentIndex = current ? tiles.indexOf(current) : -1
+    if (currentIndex < 0 || tiles.length === 0) return
+    event.preventDefault()
+    // radiogroup は端で折り返す（WAI-ARIA APG の radio group パターン）
+    const next = tiles[(currentIndex + delta + tiles.length) % tiles.length]
+    tiles.forEach((tile) => {
+      tile.tabIndex = tile === next ? 0 : -1
+    })
+    next.focus()
+    // 移動先を選択する（radio group では移動と選択が一体）
+    next.click()
+  }
+
   return (
     <div
       data-slot="quick-action-grid"
+      ref={(node: HTMLDivElement | null) => {
+        innerRef.current = node
+        if (typeof ref === "function") ref(node)
+        else if (ref) ref.current = node
+      }}
+      role={role ?? (isSingle ? "radiogroup" : undefined)}
+      data-selection-mode={selectionMode}
+      onKeyDown={handleKeyDown}
       className={cn(
         "grid",
         gridColumns[columns],
@@ -162,9 +276,24 @@ function QuickActionGrid({
         className
       )}
       {...props}
-    />
+    >
+      {selectionMode ? (
+        <QuickActionGridSelectionContext.Provider value={selectionMode}>
+          {children}
+        </QuickActionGridSelectionContext.Provider>
+      ) : (
+        children
+      )}
+    </div>
   )
 }
 
 export { ActionTile, QuickActionGrid }
-export type { ActionTileProps, ActionTileVariant, QuickActionGridColumns, QuickActionGridGap, QuickActionGridProps }
+export type {
+  ActionTileProps,
+  ActionTileVariant,
+  QuickActionGridColumns,
+  QuickActionGridGap,
+  QuickActionGridProps,
+  QuickActionGridSelectionMode,
+}
