@@ -343,7 +343,8 @@
         "safeArea(既定 true) で top/fullscreen の safe-area 回避を制御。false でオプトアウト",
         "autoFocus は first-input / title / ref / false を指定可能",
         "description prop は sr-only description を自動生成する",
-        "DialogTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は position=\"fullscreen\" 配下で page 相当、それ以外は従来の typo-heading-lg"
+        "DialogTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は position=\"fullscreen\" 配下で page 相当、それ以外は従来の typo-heading-lg",
+        "native (src/native/components/Dialog.tsx): position=\"center\"(既定) / \"top\" / \"fullscreen\" を持ち、fullscreen は四辺・top は上端の safe-area を避ける。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）"
       ],
       "variants": {
         "position": [
@@ -381,7 +382,8 @@
         "safeArea(既定 true) は上記2つの回避をまとめてオプトアウトする prop。他の side には効果なし",
         "autoFocus は first-input / title / ref / false を指定可能",
         "description prop はRadix管理IDの sr-only description を自動生成する",
-        "SheetTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は BottomSheetFrame preset=\"mobile-full\"|\"mobile-page\" 配下で page 相当、それ以外は従来の typo-heading-lg"
+        "SheetTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は BottomSheetFrame preset=\"mobile-full\"|\"mobile-page\" 配下で page 相当、それ以外は従来の typo-heading-lg",
+        "native (src/native/components/Sheet.tsx): safeArea(既定 true) で side=\"top\" の上端 inset 退避と、画面いっぱいに近い side=\"bottom\" の食い込み分の退避を行う。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）"
       ],
       "variants": {
         "titleLevel": [
@@ -1328,7 +1330,8 @@
         "trailing"
       ],
       "rules": [
-        "For mobile app page headers. Use sticky prop for fixed-top behavior."
+        "For mobile app page headers. Use sticky prop for fixed-top behavior.",
+        "native (src/native/components/AppHeader.tsx): paddingTop は SafeAreaInsetsProvider から供給された top inset を使う。未供給時のみ従来の決め打ち（iOS 48 / それ以外は通常余白）へフォールバックし、safeArea=false でオプトアウトできる"
       ]
     },
     {

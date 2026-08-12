@@ -1,6 +1,8 @@
 import React from "react"
 import { Pressable, View, Text as RNText, Platform } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { useSafeAreaInsets } from "../theme/SafeAreaInsetsProvider"
+import { resolveAppHeaderPaddingTop } from "../safe-area"
 import { resolveTypo } from "../typography"
 
 export interface AppHeaderProps {
@@ -10,10 +12,27 @@ export interface AppHeaderProps {
   trailing?: React.ReactNode
   onBack?: () => void
   centered?: boolean
+  /**
+   * safe-area（ステータスバー・ノッチ）の回避を有効にするか。既定 true。
+   * `SafeAreaInsetsProvider` で実測 inset が供給されていればその値を、無ければ
+   * 従来の決め打ち（iOS 48 / それ以外は通常余白）を使う。
+   * false にすると回避せず通常余白だけになる（消費側が自前でヘッダー上の
+   * 余白を管理する場合のオプトアウト）。
+   */
+  safeArea?: boolean
 }
 
-export function AppHeader({ title, subtitle, leading, trailing, onBack, centered = true }: AppHeaderProps) {
+export function AppHeader({
+  title,
+  subtitle,
+  leading,
+  trailing,
+  onBack,
+  centered = true,
+  safeArea = true,
+}: AppHeaderProps) {
   const { theme, scales } = useTheme()
+  const insets = useSafeAreaInsets()
   const left =
     leading ??
     (onBack ? (
@@ -37,7 +56,12 @@ export function AppHeader({ title, subtitle, leading, trailing, onBack, centered
         alignItems: "center",
         gap: scales.spacing.scale[2],
         paddingHorizontal: scales.spacing.scale[3],
-        paddingTop: Platform.OS === "ios" ? 48 : scales.spacing.scale[3],
+        paddingTop: resolveAppHeaderPaddingTop({
+          insets,
+          safeArea,
+          isIOS: Platform.OS === "ios",
+          fallbackSpacing: scales.spacing.scale[3],
+        }),
         paddingBottom: scales.spacing.scale[3],
         backgroundColor: theme.surface.primary,
         borderBottomWidth: 1,
