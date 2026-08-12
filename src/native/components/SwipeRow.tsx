@@ -1,5 +1,13 @@
 import React, { useState } from "react"
-import { Animated, PanResponder, Pressable, View, Text as RNText } from "react-native"
+import {
+  Animated,
+  PanResponder,
+  Pressable,
+  View,
+  Text as RNText,
+  type AccessibilityActionEvent,
+  type AccessibilityActionInfo,
+} from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 
@@ -8,16 +16,44 @@ export interface SwipeAction {
   color?: string
   textColor?: string
   onPress: () => void
+  /** VoiceOver/TalkBack 用のアクションラベル・ボタンラベル。既定は label。 */
+  accessibilityLabel?: string
 }
 
 export interface SwipeRowProps {
   rightActions?: SwipeAction[]
   actionWidth?: number
   children: React.ReactNode
+  /**
+   * 行本体の accessibilityActions（VoiceOver のローターから rightActions を
+   * 実行できるようにする、issue #342）。既定は rightActions から自動生成。
+   * 呼び出し側が明示した場合はそちらを優先する。
+   */
+  accessibilityActions?: AccessibilityActionInfo[]
+  /** accessibilityActions のハンドラ。既定は actionName === label で rightActions の onPress を呼ぶ。 */
+  onAccessibilityAction?: (event: AccessibilityActionEvent) => void
+  /**
+   * 行本体を1つの支援技術要素として扱うか（`accessible`）。
+   * rightActions があるとき既定 true。iOS のカスタムアクションは
+   * 「アクセシビリティ要素」に紐づくため、これが false だとローターに
+   * アクションが出ない。
+   *
+   * ただし true にすると行の中の子要素（リンク・チェックボックス等）が
+   * 1つの塊にまとめられ、個別に読み上げ・操作できなくなる。行の中に
+   * 操作可能な子を置く場合は false にし、その子ごとに a11y を設計すること。
+   */
+  accessible?: boolean
 }
 
 /** 右からスワイプして action を出す簡易行。Animated.Value + PanResponder のみで実装。 */
-export function SwipeRow({ rightActions = [], actionWidth = 80, children }: SwipeRowProps) {
+export function SwipeRow({
+  rightActions = [],
+  actionWidth = 80,
+  children,
+  accessibilityActions,
+  onAccessibilityAction,
+  accessible,
+}: SwipeRowProps) {
   const { theme } = useTheme()
   // render 中の ref 読み取りを避けるため useState の lazy initializer で一度だけ生成
   const [translateX] = useState(() => new Animated.Value(0))
@@ -40,6 +76,24 @@ export function SwipeRow({ rightActions = [], actionWidth = 80, children }: Swip
     }),
   )
 
+  const runAction = (a: SwipeAction) => {
+    Animated.spring(translateX, { toValue: 0, useNativeDriver: true }).start()
+    a.onPress()
+  }
+
+  // 支援技術からスワイプ操作を代替する既定値（issue #342）。PanResponder の
+  // ドラッグは VoiceOver/TalkBack から実行できないため、行本体に
+  // accessibilityActions を持たせ rightActions を実行可能にする。
+  // 呼び出し側の明示値が常に優先される。
+  const defaultAccessibilityActions: AccessibilityActionInfo[] = rightActions.map((a) => ({
+    name: a.label,
+    label: a.accessibilityLabel ?? a.label,
+  }))
+  const defaultOnAccessibilityAction = (event: AccessibilityActionEvent) => {
+    const action = rightActions.find((a) => a.label === event.nativeEvent.actionName)
+    if (action) runAction(action)
+  }
+
   return (
     <View style={{ position: "relative", overflow: "hidden" }}>
       <View
@@ -54,10 +108,9 @@ export function SwipeRow({ rightActions = [], actionWidth = 80, children }: Swip
         {rightActions.map((a, i) => (
           <Pressable
             key={i}
-            onPress={() => {
-              Animated.spring(translateX, { toValue: 0, useNativeDriver: true }).start()
-              a.onPress()
-            }}
+            onPress={() => runAction(a)}
+            accessibilityRole="button"
+            accessibilityLabel={a.accessibilityLabel ?? a.label}
             style={{
               width: actionWidth,
               alignItems: "center",
@@ -72,6 +125,13 @@ export function SwipeRow({ rightActions = [], actionWidth = 80, children }: Swip
         ))}
       </View>
       <Animated.View
+        accessible={accessible ?? (rightActions.length > 0 ? true : undefined)}
+        accessibilityActions={
+          rightActions.length > 0 ? accessibilityActions ?? defaultAccessibilityActions : undefined
+        }
+        onAccessibilityAction={
+          rightActions.length > 0 ? onAccessibilityAction ?? defaultOnAccessibilityAction : undefined
+        }
         style={{
           transform: [{ translateX }],
           backgroundColor: theme.surface.primary,

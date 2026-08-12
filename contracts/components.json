@@ -1337,11 +1337,17 @@
     {
       "name": "SwipeRow",
       "path": "src/components/patterns/swipe-row.tsx",
-      "description": "スワイプアクション付きリスト行。左スワイプでアクションボタンを表示。タッチ/マウス両対応。",
+      "description": "スワイプアクション付きリスト行。左スワイプでアクションボタンを表示。タッチ/マウス両対応。actions グループはフォーカスで自動的に開き、Tab / スクリーンリーダーからも到達できる（issue #342）。native 版（src/native/components/SwipeRow.tsx）は rightActions から accessibilityActions を自動生成し VoiceOver/TalkBack からスワイプ操作を代替できる。",
       "features": [
         "swipe-to-reveal",
         "snap-behavior",
-        "multiple-actions"
+        "multiple-actions",
+        "keyboard-focus-reveal",
+        "native-accessibility-actions"
+      ],
+      "accessibility": [
+        "actions グループにフォーカスが入ると開き、外れると閉じる（inert で常時隠さない）",
+        "native: rightActions から accessibilityActions / onAccessibilityAction を既定で自動生成"
       ],
       "rules": [
         "Mobile list items with swipe actions (delete, archive, etc.)"

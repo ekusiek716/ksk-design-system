@@ -14,11 +14,17 @@ interface SwipeRowProps {
   /** スワイプで開く方向 */
   side?: "left" | "right"
   className?: string
+  /**
+   * アクション群をまとめる group のラベル（支援技術向け）。
+   * i18n 対応: 英語では "Row actions" など任意文字列を渡す。
+   * @default "行の操作"
+   */
+  actionsLabel?: string
 }
 
 const ACTION_WIDTH = 72 // px per action
 
-function SwipeRow({ children, actions = [], side = "right", className }: SwipeRowProps) {
+function SwipeRow({ children, actions = [], side = "right", className, actionsLabel = "行の操作" }: SwipeRowProps) {
   const [offset, setOffset] = React.useState(0)
   const [isDragging, setIsDragging] = React.useState(false)
   const startX = React.useRef(0)
@@ -60,6 +66,17 @@ function SwipeRow({ children, actions = [], side = "right", className }: SwipeRo
   }
 
   const close = () => snapTo(0)
+  const open = () => snapTo((side === "right" ? -1 : 1) * maxOffset)
+
+  // キーボード / スクリーンリーダー用の到達経路（issue #342 web 側）。
+  // スワイプはポインタ操作でしか開けないため、actions グループに
+  // フォーカスが入った瞬間に開き、グループの外へ抜けたら閉じる。
+  // inert で常時隠すと Tab / VoiceOver からアクションへ到達できなくなるため、
+  // フォーカス時だけ視覚的にも開いて到達可能にする（レイアウト自体は不変）。
+  const handleActionsFocus = () => open()
+  const handleActionsBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) close()
+  }
 
   if (actions.length === 0) {
     return <div className={className}>{children}</div>
@@ -67,14 +84,18 @@ function SwipeRow({ children, actions = [], side = "right", className }: SwipeRo
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
-      {/* Action buttons — 閉じている間はフォーカス・読み上げ対象から外す */}
+      {/* Action buttons — 常にフォーカス・読み上げ可能。閉じている間は主コンテンツの
+          背後に視覚的に隠れるが、フォーカスが入ると自動で開く（inert は使わない）。 */}
       <div
+        role="group"
+        aria-label={actionsLabel}
         className={cn(
           "absolute inset-y-0 flex",
           side === "right" ? "right-0" : "left-0"
         )}
         style={{ width: maxOffset }}
-        inert={!isOpen ? true : undefined}
+        onFocus={handleActionsFocus}
+        onBlur={handleActionsBlur}
       >
         {actions.map((action, i) => (
           <button
@@ -83,6 +104,7 @@ function SwipeRow({ children, actions = [], side = "right", className }: SwipeRo
             onClick={() => { action.onClick(); close() }}
             className={cn(
               "flex flex-col items-center justify-center gap-1 w-[72px] typo-label-xs font-medium transition-colors",
+              "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
               action.variant === "destructive"
                 ? "bg-[var(--Caution-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Destructive-Button)]"
                 : "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Border-Medium-Emphasis)]"
