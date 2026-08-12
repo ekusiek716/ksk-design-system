@@ -715,7 +715,7 @@ interface SheetContentProps
    *   優先される）
    * false にすると回避を無効化する（consumer が自前で safe-area を管理する
    * 場合のオプトアウト。安全側の既定を壊さないよう既定は true）。他の side
-   * では効果を持たない。
+   * では効果を持たない（`data-safe-area` 属性自体は side に関わらず出る）。
    */
   safeArea?: boolean
 }
@@ -903,9 +903,9 @@ function SheetContent({
   } = props
 
   // side="top" の safe-area 回避。padding true/false それぞれで完結した
-  // クラス集合を選ぶ（p-6 と pt-[...] を同時に混ぜると twMerge がどちらも
-  // 残してしまい CSS 生成順に結果が左右されるため避ける。dialog.tsx の
-  // fullscreen 分岐と同じ理由）。
+  // クラス集合を選ぶ（ショートハンドの padding と方向指定の padding を同時に
+  // 混ぜると twMerge がどちらも残してしまい CSS 生成順に結果が左右されるため
+  // 避ける。dialog.tsx の fullscreen 分岐と同じ理由）。
   const topSafeAreaPaddingClass = isTopSheet
     ? padding
       ? safeArea
@@ -932,7 +932,6 @@ function SheetContent({
       <SheetOverlay glass={useGlassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
         ref={contentRef}
-        data-slot="sheet-content"
         data-side={side}
         data-safe-area={safeArea}
         className={cn(
@@ -942,6 +941,10 @@ function SheetContent({
           className
         )}
         {...contentProps}
+        // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
+        // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
+        // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
+        data-slot="sheet-content"
         style={{
           ...props.style,
           ...keyboardStyle,
@@ -1281,7 +1284,6 @@ function SwipeToCloseBottomSheet({
       <SheetOverlay glass={glassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
         ref={attachTouchListeners}
-        data-slot="sheet-content"
         data-side={side}
         className={cn(
           sheetVariants({ side }),
@@ -1315,6 +1317,10 @@ function SwipeToCloseBottomSheet({
           zIndex: contentZIndex,
         }}
         {...contentProps}
+        // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
+        // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
+        // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
+        data-slot="sheet-content"
         // Full-surface swipe-to-close: handlers live on the content root so a
         // downward swipe anywhere can dismiss. onPointerMove gates on scroll
         // position so it never steals the content's own scroll gesture.
@@ -1592,7 +1598,6 @@ function SwipeToCloseSideDrawer({
       <SheetOverlay glass={glassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
         ref={attachTouchListeners}
-        data-slot="sheet-content"
         data-side={side}
         className={cn(
           sheetVariants({ side }),
@@ -1613,6 +1618,10 @@ function SwipeToCloseSideDrawer({
           zIndex: contentZIndex,
         }}
         {...contentProps}
+        // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
+        // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
+        // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
+        data-slot="sheet-content"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={finishDrag}
@@ -1841,7 +1850,6 @@ function SnapBottomSheetContent({
       )}
       <DialogPrimitive.Content
         ref={sheetRef}
-        data-slot="sheet-content"
         data-side="bottom"
         data-snap-active={activeSnapPoint ?? undefined}
         onKeyDown={onKeyDown}
@@ -1865,6 +1873,10 @@ function SnapBottomSheetContent({
           zIndex: contentZIndex,
         }}
         {...contentProps}
+        // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
+        // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
+        // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
+        data-slot="sheet-content"
         {...(!hasInternalDesc && { "aria-describedby": ariaDescribedBy })}
         onOpenAutoFocus={handleOpenAutoFocus}
         onCloseAutoFocus={handleCloseAutoFocus}

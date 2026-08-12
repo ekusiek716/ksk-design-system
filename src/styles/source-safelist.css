@@ -280,6 +280,7 @@
 @source inline("data-[state=closed]:animate-out");
 @source inline("data-[state=closed]:duration-[var(--Motion-Duration-Fast)]");
 @source inline("data-[state=closed]:fade-out-0");
+@source inline("data-[state=closed]:slide-out-to-bottom");
 @source inline("data-[state=closed]:slide-out-to-left");
 @source inline("data-[state=closed]:slide-out-to-right");
 @source inline("data-[state=closed]:slide-out-to-top");
@@ -298,6 +299,7 @@
 @source inline("data-[state=open]:bg-[var(--Surface-Secondary)]");
 @source inline("data-[state=open]:duration-[var(--Motion-Duration-Base)]");
 @source inline("data-[state=open]:fade-in-0");
+@source inline("data-[state=open]:slide-in-from-bottom");
 @source inline("data-[state=open]:slide-in-from-top");
 @source inline("data-[state=open]:zoom-in-95");
 @source inline("data-[state=unchecked]:bg-[var(--Surface-Quaternary)]");
@@ -709,6 +711,8 @@
 @source inline("pl-4");
 @source inline("pl-8");
 @source inline("pl-9");
+@source inline("pl-[env(safe-area-inset-left,0px)]");
+@source inline("pl-[max(1.5rem,env(safe-area-inset-left,0px))]");
 @source inline("placeholder:text-[var(--Text-Low-Emphasis)]");
 @source inline("pointer-events-auto");
 @source inline("pointer-events-none");
@@ -721,6 +725,8 @@
 @source inline("pr-3");
 @source inline("pr-4");
 @source inline("pr-9");
+@source inline("pr-[env(safe-area-inset-right,0px)]");
+@source inline("pr-[max(1.5rem,env(safe-area-inset-right,0px))]");
 @source inline("pt-0");
 @source inline("pt-1");
 @source inline("pt-1.5");
@@ -730,7 +736,6 @@
 @source inline("pt-4");
 @source inline("pt-5");
 @source inline("pt-6");
-@source inline("pt-[...]");
 @source inline("pt-[calc(1.5rem_+_env(safe-area-inset-top,0px))]");
 @source inline("pt-[env(safe-area-inset-top,0px)]");
 @source inline("px-0");
@@ -865,7 +870,6 @@
 @source inline("sm:max-h-[90dvh]");
 @source inline("sm:max-w-[480px]");
 @source inline("sm:max-w-lg");
-@source inline("sm:max-w-none");
 @source inline("sm:max-w-sm");
 @source inline("sm:max-w-xl");
 @source inline("sm:mx-auto");

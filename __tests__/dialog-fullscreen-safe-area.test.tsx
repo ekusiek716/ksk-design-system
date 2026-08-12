@@ -83,6 +83,48 @@ describe("DialogContent position=\"fullscreen\"（Issue #339）", () => {
     expect(el.getAttribute("data-safe-area")).toBe("true")
     expect(el.className).toContain("env(safe-area-inset-top")
     expect(el.className).toContain("env(safe-area-inset-bottom")
+    // 横向きの iPhone ではノッチが左右に来るので四辺すべてを見る
+    expect(el.className).toContain("env(safe-area-inset-left")
+    expect(el.className).toContain("env(safe-area-inset-right")
+  })
+
+  it("全画面では影を出さず、下からのスライドで入場する（zoom は使わない）", () => {
+    mount(
+      <Dialog open>
+        <DialogContent position="fullscreen" description="desc">
+          content
+        </DialogContent>
+      </Dialog>
+    )
+    const el = getContent()
+    // 全画面サーフェスは影が不可視。zoom-95 だと縮んで四辺から overlay が覗く。
+    expect(el.className).not.toContain("shadow-[var(--shadow-dialog)]")
+    expect(el.className).not.toContain("zoom-in-95")
+    expect(el.className).toContain("slide-in-from-bottom")
+  })
+
+  it("ルートはスクロールさせない（内側にスクロール領域を置く前提・二重スクロール防止）", () => {
+    mount(
+      <Dialog open>
+        <DialogContent position="fullscreen" description="desc">
+          content
+        </DialogContent>
+      </Dialog>
+    )
+    const el = getContent()
+    expect(el.className).toContain("overflow-hidden")
+    expect(el.className).not.toContain("overflow-y-auto")
+  })
+
+  it("center / top は影と zoom を従来どおり保つ（非破壊）", () => {
+    mount(
+      <Dialog open>
+        <DialogContent description="desc">content</DialogContent>
+      </Dialog>
+    )
+    const el = getContent()
+    expect(el.className).toContain("shadow-[var(--shadow-dialog)]")
+    expect(el.className).toContain("zoom-in-95")
   })
 
   it("safeArea=false で safe-area 回避を無効化できる（オプトアウト）", () => {

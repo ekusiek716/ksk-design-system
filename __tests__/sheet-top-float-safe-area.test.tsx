@@ -155,3 +155,37 @@ describe.each(["float", "float-glass"] as const)(
     })
   }
 )
+
+/**
+ * #339 が「data-slot が上書きされてセレクタ追随漏れが起きた」と報告している点。
+ * styles/sheet-keyboard.css のキーボード追従は全て `[data-slot="sheet-content"]`
+ * を起点にしているので、consumer が data-slot を渡して上書きできると補正が
+ * 丸ごと外れる。SheetContent 側で spread より後ろに置いて構造的に防ぐ。
+ */
+describe("data-slot は consumer から上書きできない（#339）", () => {
+  it("data-slot を渡しても sheet-content のまま", () => {
+    mount(
+      <Sheet open>
+        {/* @ts-expect-error 誤用の再現。型では防げても JS からは渡せる */}
+        <SheetContent side="bottom" data-slot="my-sheet" description="desc">
+          content
+        </SheetContent>
+      </Sheet>
+    )
+    expect(document.querySelector('[data-slot="my-sheet"]')).toBeNull()
+    expect(getContent().getAttribute("data-slot")).toBe("sheet-content")
+  })
+
+  it("swipeToClose 経路でも同じ", () => {
+    mount(
+      <Sheet open>
+        {/* @ts-expect-error 誤用の再現 */}
+        <SheetContent side="bottom" swipeToClose data-slot="my-sheet" description="desc">
+          content
+        </SheetContent>
+      </Sheet>
+    )
+    expect(document.querySelector('[data-slot="my-sheet"]')).toBeNull()
+    expect(getContent().getAttribute("data-slot")).toBe("sheet-content")
+  })
+})

@@ -174,7 +174,8 @@ export const Fullscreen: Story = {
         <DialogHeader>
           <DialogTitle>プロフィールを編集</DialogTitle>
           <DialogDescription>
-            上下の余白は safe-area(ノッチ/ステータスバー等)を自動で回避します。
+            四辺の余白は safe-area(ノッチ/ステータスバー等)を自動で回避します。
+            ルートはスクロールせず、この本文領域だけがスクロールします。
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto">

@@ -129,11 +129,14 @@ interface DialogContentProps
    * safe-area（ノッチ・ステータスバー・ホームインジケータ）の回避を
    * 有効にするか。既定 true。
    * - "top": 上端に `max(env(safe-area-inset-top), 2rem)` を確保（従来挙動）
-   * - "fullscreen": 上下に env(safe-area-inset-top) / env(safe-area-inset-bottom)
-   *   を確保
+   * - "fullscreen": 四辺すべてに env(safe-area-inset-*) を確保（横向きの
+   *   iPhone ではノッチが左右に来るため上下だけでは足りない）
    * - "center": 効果なし
    * false にすると回避を無効化する（consumer が自前で safe-area を管理する
    * 場合のオプトアウト。安全側の既定を壊さないよう既定は true）。
+   *
+   * なお `data-safe-area` 属性は position に関わらず常に出力される
+   * （値はこの prop そのもの）。効果があるのは "top" / "fullscreen" だけ。
    */
   safeArea?: boolean
   /**
@@ -238,8 +241,12 @@ function DialogContent({
           // （left-[50%]/inset-0 のような別グループのクラスを同時に混ぜると
           // twMerge が競合を検出できず、CSS 生成順に結果が左右されるため）。
           position === "fullscreen"
-            ? // 全画面: inset-0 で画面いっぱいに広げる。角丸なし。
-              "inset-0 w-full h-full max-w-none sm:max-w-none overflow-y-auto rounded-none"
+            ? // 全画面: inset-0 で画面いっぱいに広げる。角丸・影なし
+              //（全画面では影は不可視で、角丸は端が切れて見えるだけ）。
+              // 内側にヘッダー/フッターを固定するレイアウトが典型なので、
+              // ルートは overflow-hidden にして子側でスクロールさせる
+              // （ルートも auto にするとスクロールコンテナが二重になる）。
+              "inset-0 w-full h-full max-w-none overflow-hidden rounded-none"
             : [
                 // 横位置: left-[50%] + translate-x-[-50%] のみ。
                 // inset-x-* と組み合わせると left/right と transform が競合して
@@ -254,22 +261,27 @@ function DialogContent({
                   : "top-[50%] translate-y-[-50%]",
                 "rounded-[var(--Radius-Modal)] ksk-squircle",
               ].join(" "),
-          "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)]",
-          // 内側余白。fullscreen + safeArea では上下に safe-area 分を追加で
-          // 確保する（左右は通常の 1.5rem のまま）。p-6 と pt-[...] を同時に
-          // 混ぜると twMerge がどちらも conflicting グループと見なさず両方
-          // 残ってしまい CSS 生成順で結果が変わるため、必ず1つの完結した
-          // クラス集合を選ぶ。
+          "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)]",
+          position !== "fullscreen" && "shadow-[var(--shadow-dialog)]",
+          // 内側余白。fullscreen + safeArea では四辺すべてに safe-area 分を
+          // 上乗せする（横向きの iPhone ではノッチが左右に来るため、上下だけ
+          // では足りない）。ショートハンドの padding と方向指定の padding を
+          // 同時に渡すと twMerge が別グループと見なして両方残し、勝敗が CSS
+          // 生成順に左右されるため、必ず1つの完結したクラス集合を選ぶ。
           padding &&
             (position === "fullscreen" && safeArea
-              ? "flex flex-col gap-4 px-6 pt-[calc(1.5rem_+_env(safe-area-inset-top,0px))] pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]"
+              ? "flex flex-col gap-4 pl-[max(1.5rem,env(safe-area-inset-left,0px))] pr-[max(1.5rem,env(safe-area-inset-right,0px))] pt-[calc(1.5rem_+_env(safe-area-inset-top,0px))] pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]"
               : "flex flex-col gap-4 p-6"),
           !padding &&
             position === "fullscreen" &&
             safeArea &&
-            "pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]",
-          "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
-          "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+            "pl-[env(safe-area-inset-left,0px)] pr-[env(safe-area-inset-right,0px)] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]",
+          // 入場/退場: 全画面は iOS の全画面モーダル慣習に合わせて下からの
+          // スライド。zoom-95 だと全画面サーフェスが縮んで四辺からオーバーレイが
+          // 覗くため使わない。
+          position === "fullscreen"
+            ? "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom"
+            : "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           className
         )}
         {...props}
