@@ -1,5 +1,7 @@
 import * as React from "react"
-import { Check } from "iconsax-reactjs"
+// iconsax の `Check` は「小切手（checkbook）」のアイコンで、チェックマークではない。
+// 選択済みの印には TickSquare（チェックボックス）を使う。
+import { TickSquare } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { Spinner } from "@/components/ui/spinner"
@@ -135,7 +137,12 @@ function ActionTile({
       )}
       {...props}
     >
-      <span className="flex w-full items-start justify-between gap-3">
+      {/*
+        items-center: ラベルは常に1行（truncate）なので、インジケータ/Spinner を
+        上端揃えにするとラベルの文字中心より数 px 高い位置に浮いて見える。
+        行の中で縦中央に揃える。
+      */}
+      <span className="flex w-full items-center justify-between gap-3">
         <span className="flex min-w-0 flex-1 items-center gap-2">
           {emoji && (
             <span className="typo-heading-md shrink-0" aria-hidden>
@@ -170,7 +177,7 @@ function ActionTile({
           // 文字の「✓」グリフはフォント依存で DS のアイコンと太さ・比率が揃わないため
           // iconsax を使う（native は icon ライブラリを持たないので同形を View で描画）
           <span className="shrink-0 text-[var(--Text-Accent-Primary)]" aria-hidden>
-            <Check size={16} />
+            <TickSquare size={16} />
           </span>
         ) : null}
       </span>
