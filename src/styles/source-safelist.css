@@ -239,7 +239,6 @@
 @source inline("bottom-[var(--ksk-keyboard-inset)]");
 @source inline("break-words");
 @source inline("container");
-@source inline("contents");
 @source inline("cursor-default");
 @source inline("cursor-grab");
 @source inline("cursor-not-allowed");
@@ -939,6 +938,7 @@
 @source inline("transition-[transform,width,height]");
 @source inline("transition-all");
 @source inline("transition-colors");
+@source inline("transition-none");
 @source inline("transition-opacity");
 @source inline("transition-transform");
 @source inline("translate-x-[-50%]");

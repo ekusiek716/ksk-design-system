@@ -2,6 +2,11 @@ import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import {
+  ModalStackRegistrar,
+  modalContentZ,
+  modalOverlayZ,
+} from "@/lib/modal-stack"
 
 type LayerAutoFocusTarget = "first-input" | "title" | React.RefObject<HTMLElement | null> | false
 
@@ -462,128 +467,15 @@ function SheetPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.P
 }
 
 // ============================================================================
-// Nested-sheet z-index stacking (#158)
+// Nested-modal z-index stacking (#158 / #166 / #340)
 // ----------------------------------------------------------------------------
-// Overlay (--Z-Overlay) / Content (--Z-Modal) were fixed constants shared by every Sheet
-// instance. When a second Sheet opens on top of a first (e.g. a detail sheet
-// triggering a confirm sheet), both overlays render at the same --Z-Overlay and both
-// contents at the same --Z-Modal — DOM order then decides who wins, and a
-// full-screen lower content can end up covering the upper sheet's overlay so
-// it never visually dims.
-//
-// We use a module-level registry (not React Context) because two Sheets are
-// not guaranteed to share a tree: one Sheet's trigger can live *outside* the
-// other's content (e.g. both portaled as siblings under document.body from
-// unrelated trigger call sites), so a parent→child Context would miss that
-// case. A global "who opened, in what order" stack works regardless of where
-// each <Sheet> lives in the React tree.
-//
-// Each open SheetContent instance claims a stack level (0 = first opened) on
-// mount and releases it on unmount; levels are recompacted so they always run
-// 0..n-1 with no gaps, keeping the z-index formula stable even if sheets close
-// out of order. z-index = base + level * STACK_STEP, applied via inline style
-// so it always wins over the Tailwind z-[var(--Z-Overlay)] / z-[var(--Z-Modal)] utility classes (same
-// specificity would otherwise leave DOM order as the tiebreaker again).
+// 実体は `@/lib/modal-stack` に移動した（#340）。Sheet だけがスタックに参加して
+// いると、多段 Sheet（content = 60 + 段数*20）の上に Dialog(60) を開いたときに
+// 後から開いた Dialog が確実に隠れてしまうため、Sheet / Dialog / AlertDialog が
+// 同じ 1 本のスタックを共有する形にした。ここでの Sheet 側の使い方（Registrar を
+// DialogPrimitive.Content の子として置き、z をインライン style で当てる）は
+// 変わっていない。詳しい経緯は modal-stack.ts のコメントを参照。
 // ============================================================================
-
-// preset.css の --Z-Overlay / --Z-Modal と同じ値。インラインの数値 z-index を
-// 算術で積むため CSS 変数のままでは扱えず、ここに数値で持つ。
-// ズレると多段 Sheet の重なりが壊れるので __tests__/z-index-scale-contract.test.ts で
-// preset.css との一致を検査している。
-const SHEET_OVERLAY_BASE_Z = 50
-const SHEET_CONTENT_BASE_Z = 60
-// 1 段あたりの加算。--Z-Modal(60) と --Z-Popover(1000) の間に 40 段ぶんの余白を
-// 確保してあるため、現実的なネスト段数では Popover 以上の層を突き抜けない。
-const SHEET_STACK_STEP = 20
-
-const sheetStackOpenIds: string[] = []
-const sheetStackListeners = new Set<() => void>()
-
-function sheetStackNotify() {
-  sheetStackListeners.forEach((l) => l())
-}
-
-function sheetStackOpen(id: string) {
-  if (!sheetStackOpenIds.includes(id)) sheetStackOpenIds.push(id)
-  sheetStackNotify()
-}
-
-function sheetStackClose(id: string) {
-  const idx = sheetStackOpenIds.indexOf(id)
-  if (idx !== -1) sheetStackOpenIds.splice(idx, 1)
-  sheetStackNotify()
-}
-
-function sheetStackLevelOf(id: string): number {
-  return Math.max(0, sheetStackOpenIds.indexOf(id))
-}
-
-/**
- * Claims a slot in the global open-sheet stack for the lifetime of the
- * mounted component and returns its current depth (0 = first/outermost
- * sheet open). Depth is recomputed whenever any tracked sheet opens/closes,
- * so a sheet's level shifts down automatically if sheets below it close.
- *
- * IMPORTANT: claim/release happen inside a `useEffect`, not during render.
- * `SheetContent` itself is a plain function component rendered unconditionally
- * as a child of `DialogPrimitive.Root` — it runs on every render regardless of
- * whether the sheet is open, so it must NOT call this hook directly (that was
- * the #158→#166 bug: the stack registered "tree order", not "open order", and
- * claiming during render violated render purity, causing StrictMode's
- * simulated remount to drop the claim without a matching re-claim).
- *
- * Instead this hook is used exclusively by {@link SheetStackRegistrar}, a tiny
- * component mounted as a child of `DialogPrimitive.Content` — which Radix
- * mounts/unmounts via `Presence` in sync with the *actual* open state. So the
- * registrar (and thus the claim) only exists while the sheet is really open,
- * and StrictMode's mount→unmount→remount cycle naturally re-claims on remount.
- *
- * Exported for unit testing only — not part of the public package API.
- */
-function useSheetStackLevel(): number {
-  const id = React.useId()
-  React.useEffect(() => {
-    sheetStackOpen(id)
-    return () => {
-      sheetStackClose(id)
-    }
-  }, [id])
-  const subscribe = React.useCallback((onChange: () => void) => {
-    sheetStackListeners.add(onChange)
-    return () => {
-      sheetStackListeners.delete(onChange)
-    }
-  }, [])
-  const getSnapshot = React.useCallback(
-    () => sheetStackLevelOf(id),
-    [id]
-  )
-  const level = React.useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
-  return level
-}
-
-/**
- * Mounts only while the parent `DialogPrimitive.Content` is actually present
- * in the DOM (Radix's `Presence` unmounts Content when the sheet is closed,
- * even though the outer `SheetContent` function component keeps rendering as
- * a normal React child). Claims a stack slot on mount, releases on unmount,
- * and reports the current depth to the parent via `onLevelChange` so the
- * overlay/content z-index can be computed one effect-tick after open — a
- * single-frame lag that resolves before the open animation is visible.
- *
- * Not exported — internal to `SheetContent`'s stacking implementation.
- */
-function SheetStackRegistrar({
-  onLevelChange,
-}: {
-  onLevelChange: (level: number) => void
-}) {
-  const level = useSheetStackLevel()
-  React.useEffect(() => {
-    onLevelChange(level)
-  }, [level, onLevelChange])
-  return null
-}
 
 interface SheetOverlayProps extends React.ComponentProps<typeof DialogPrimitive.Overlay> {
   /**
@@ -617,7 +509,7 @@ function SheetOverlay({
 }: SheetOverlayProps) {
   const controlled = opacity != null
   const resolvedZ =
-    zIndex ?? (stackLevel != null ? SHEET_OVERLAY_BASE_Z + stackLevel * SHEET_STACK_STEP : undefined)
+    zIndex ?? (stackLevel != null ? modalOverlayZ(stackLevel) : undefined)
   return (
     <DialogPrimitive.Overlay
       data-slot="sheet-overlay"
@@ -848,7 +740,7 @@ function SheetContent({
   // nested sheets escalate z-index instead of colliding at the fixed 40/50
   // pair. Unlike the pre-#166 version, `SheetContent` itself does NOT call
   // useSheetStackLevel (it renders unconditionally regardless of open state).
-  // Instead each branch below mounts a <SheetStackRegistrar> *inside* its
+  // Instead each branch below mounts a <ModalStackRegistrar> *inside* its
   // `DialogPrimitive.Content`, which Radix's Presence only mounts while the
   // sheet is actually open — so the stack reflects open order, not tree
   // order, and claim/release live entirely in effects (see useSheetStackLevel
@@ -856,7 +748,7 @@ function SheetContent({
   // tick after mount by the registrar; the resulting z-index lag is a single
   // frame, resolved before the open animation is visible.
   const [stackLevel, setStackLevel] = React.useState(0)
-  const resolvedContentZ = zIndex ?? SHEET_CONTENT_BASE_Z + stackLevel * SHEET_STACK_STEP
+  const resolvedContentZ = zIndex ?? modalContentZ(stackLevel)
   const hasInternalDesc = description != null && description !== false
   const snapCtx = React.useContext(SheetSnapContext)
   // The drag indicator is an iOS HIG "this can be dragged" affordance.
@@ -1014,7 +906,7 @@ function SheetContent({
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
-        <SheetStackRegistrar onLevelChange={setStackLevel} />
+        <ModalStackRegistrar onLevelChange={setStackLevel} />
         {hasInternalDesc && (
           <DialogPrimitive.Description className="sr-only">
             {description}
@@ -1390,7 +1282,7 @@ function SwipeToCloseBottomSheet({
         onEscapeKeyDown={handleEscapeKeyDown}
       >
         {onStackLevelChange && (
-          <SheetStackRegistrar onLevelChange={onStackLevelChange} />
+          <ModalStackRegistrar onLevelChange={onStackLevelChange} />
         )}
         {hasInternalDesc && (
           <DialogPrimitive.Description className="sr-only">
@@ -1685,7 +1577,7 @@ function SwipeToCloseSideDrawer({
         onEscapeKeyDown={handleEscapeKeyDown}
       >
         {onStackLevelChange && (
-          <SheetStackRegistrar onLevelChange={onStackLevelChange} />
+          <ModalStackRegistrar onLevelChange={onStackLevelChange} />
         )}
         {hasInternalDesc && (
           <DialogPrimitive.Description className="sr-only">
@@ -1933,7 +1825,7 @@ function SnapBottomSheetContent({
         onEscapeKeyDown={handleEscapeKeyDown}
       >
         {onStackLevelChange && (
-          <SheetStackRegistrar onLevelChange={onStackLevelChange} />
+          <ModalStackRegistrar onLevelChange={onStackLevelChange} />
         )}
         {hasInternalDesc && (
           <DialogPrimitive.Description className="sr-only">
@@ -2037,6 +1929,5 @@ export {
   decideSwipeDismiss,
   projectCloseAxisDelta,
   closeAxisTranslate,
-  useSheetStackLevel,
 }
 export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset }

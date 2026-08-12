@@ -153,10 +153,11 @@
      SkipLink 1300 … キーボード操作の最初の逃げ道。何にも隠されてはいけない
 
    Modal(60) と Alert-Overlay(900) の間が大きく空いているのは意図的。
-   Sheet はネストすると `Overlay + level*20` / `Modal + level*20` で段を積む
-   （src/components/ui/sheet.tsx の SHEET_*_BASE_Z / SHEET_STACK_STEP、issue #158）。
-   ここを 40 段ぶん空けておくことで、多段 Sheet が Alert 以上の層を
-   突き抜けない。この 3 定数は下の :root と対で維持すること
+   Sheet / Dialog はネストすると `Overlay + level*20` / `Modal + level*20` で
+   段を積む（src/lib/modal-stack.ts の MODAL_*、issue #158 / #340）。
+   ここを空けておくことで、多段モーダルが Alert 以上の層を突き抜けない。
+   AlertDialog も同じスタックに参加するが、基底は Alert-* のまま 12 刻みで積む
+   （ALERT_*）。これらの定数は下の :root と対で維持すること
    （__tests__/z-index-scale-contract.test.ts が一致を検査する）。
 
    CoachMark も同じ理由で専用の 950/960。オンボーディングは Dialog や Sheet を
