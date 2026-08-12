@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
+import { expect, userEvent, within } from "storybook/test"
 import { SwipeRow } from "./swipe-row"
 
 const meta: Meta<typeof SwipeRow> = {
@@ -78,4 +79,32 @@ export const SingleAction: Story = {
       </SwipeRow>
     </div>
   ),
+}
+
+/**
+ * キーボード / スクリーンリーダーからの到達性検証（issue #342）。
+ * スワイプ操作ができない環境でも Tab で actions ボタンへ到達できることを確認する。
+ */
+export const KeyboardAccessible: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div className="w-80 rounded-xl border border-[var(--Border-Low-Emphasis)] overflow-hidden">
+      <button type="button" className="typo-label-sm px-3 py-2 text-[var(--Text-Medium-Emphasis)]">
+        Tab の起点
+      </button>
+      <SwipeRow actions={[{ label: "削除", icon: <TrashIcon />, onClick: () => {}, variant: "destructive" }]}>
+        <TodoItem title="キーボードでも削除できる" desc="Tab で到達しフォーカス表示される" />
+      </SwipeRow>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const origin = canvas.getByText("Tab の起点")
+    origin.focus()
+
+    await userEvent.tab()
+
+    const deleteButton = canvas.getByRole("button", { name: /削除/ })
+    await expect(deleteButton).toHaveFocus()
+  },
 }
