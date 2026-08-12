@@ -32,6 +32,17 @@ export interface SwipeRowProps {
   accessibilityActions?: AccessibilityActionInfo[]
   /** accessibilityActions のハンドラ。既定は actionName === label で rightActions の onPress を呼ぶ。 */
   onAccessibilityAction?: (event: AccessibilityActionEvent) => void
+  /**
+   * 行本体を1つの支援技術要素として扱うか（`accessible`）。
+   * rightActions があるとき既定 true。iOS のカスタムアクションは
+   * 「アクセシビリティ要素」に紐づくため、これが false だとローターに
+   * アクションが出ない。
+   *
+   * ただし true にすると行の中の子要素（リンク・チェックボックス等）が
+   * 1つの塊にまとめられ、個別に読み上げ・操作できなくなる。行の中に
+   * 操作可能な子を置く場合は false にし、その子ごとに a11y を設計すること。
+   */
+  accessible?: boolean
 }
 
 /** 右からスワイプして action を出す簡易行。Animated.Value + PanResponder のみで実装。 */
@@ -41,6 +52,7 @@ export function SwipeRow({
   children,
   accessibilityActions,
   onAccessibilityAction,
+  accessible,
 }: SwipeRowProps) {
   const { theme } = useTheme()
   // render 中の ref 読み取りを避けるため useState の lazy initializer で一度だけ生成
@@ -113,7 +125,7 @@ export function SwipeRow({
         ))}
       </View>
       <Animated.View
-        accessible={rightActions.length > 0 ? true : undefined}
+        accessible={accessible ?? (rightActions.length > 0 ? true : undefined)}
         accessibilityActions={
           rightActions.length > 0 ? accessibilityActions ?? defaultAccessibilityActions : undefined
         }

@@ -14,11 +14,17 @@ interface SwipeRowProps {
   /** スワイプで開く方向 */
   side?: "left" | "right"
   className?: string
+  /**
+   * アクション群をまとめる group のラベル（支援技術向け）。
+   * i18n 対応: 英語では "Row actions" など任意文字列を渡す。
+   * @default "行の操作"
+   */
+  actionsLabel?: string
 }
 
 const ACTION_WIDTH = 72 // px per action
 
-function SwipeRow({ children, actions = [], side = "right", className }: SwipeRowProps) {
+function SwipeRow({ children, actions = [], side = "right", className, actionsLabel = "行の操作" }: SwipeRowProps) {
   const [offset, setOffset] = React.useState(0)
   const [isDragging, setIsDragging] = React.useState(false)
   const startX = React.useRef(0)
@@ -82,7 +88,7 @@ function SwipeRow({ children, actions = [], side = "right", className }: SwipeRo
           背後に視覚的に隠れるが、フォーカスが入ると自動で開く（inert は使わない）。 */}
       <div
         role="group"
-        aria-label="行の操作"
+        aria-label={actionsLabel}
         className={cn(
           "absolute inset-y-0 flex",
           side === "right" ? "right-0" : "left-0"

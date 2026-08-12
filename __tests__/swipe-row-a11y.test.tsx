@@ -80,4 +80,20 @@ describe("SwipeRow の a11y 到達性（#342）", () => {
     })
     expect(content?.style.transform).toBe("translateX(0px)")
   })
+
+  it("group のラベルは actionsLabel で差し替えられる（i18n）", () => {
+    mount(
+      <SwipeRow actions={actions} actionsLabel="Row actions">
+        row
+      </SwipeRow>
+    )
+    const group = container!.querySelector('[role="group"]')
+    expect(group?.getAttribute("aria-label")).toBe("Row actions")
+  })
+
+  it("既定の group ラベルを持つ（ラベル無しの group は読み上げで意味が取れない）", () => {
+    mount(<SwipeRow actions={actions}>row</SwipeRow>)
+    const group = container!.querySelector('[role="group"]')
+    expect(group?.getAttribute("aria-label")).toBe("行の操作")
+  })
 })
