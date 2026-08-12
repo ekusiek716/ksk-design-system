@@ -7,6 +7,7 @@ import { CheckboxGroup } from "./components/CheckboxGroup"
 import { RadioGroup } from "./components/RadioGroup"
 import { StatusActionBadge } from "./components/StatusActionBadge"
 import { CardHeader } from "./components/CardHeader"
+import { Card } from "./components/Card"
 import { GradientSurface } from "./components/GradientSurface"
 
 /**
@@ -172,4 +173,25 @@ function CardHeaderTitleLeadingDemo() {
 
 export const CardHeaderTitleLeading: Story = {
   render: () => <CardHeaderTitleLeadingDemo />,
+}
+
+/**
+ * issue #332: 角丸を "lg"(8px, 既定) / "xl"(12px) / "2xl"(16px) から選べる。
+ * exam-kit は全13箇所で 16px（"2xl"）に上書きしていたため、この prop で置換できる。
+ * 既定は後方互換のため "lg" のまま。
+ */
+export const CardRadius: Story = {
+  render: () => (
+    <View style={{ gap: 16 }}>
+      <Card radius="lg">
+        <RNText>radius="lg"（8px・既定）</RNText>
+      </Card>
+      <Card radius="xl">
+        <RNText>radius="xl"（12px）</RNText>
+      </Card>
+      <Card radius="2xl">
+        <RNText>radius="2xl"（16px）</RNText>
+      </Card>
+    </View>
+  ),
 }
