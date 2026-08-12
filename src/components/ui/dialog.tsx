@@ -6,6 +6,11 @@ import {
   modalContentZ,
   modalOverlayZ,
 } from "@/lib/modal-stack"
+import {
+  TitleSurfaceScaleProvider,
+  useTitleTypoClass,
+  type TitleLevel,
+} from "../../lib/title-level"
 
 type LayerAutoFocusTarget = "first-input" | "title" | React.RefObject<HTMLElement | null> | false
 
@@ -297,7 +302,15 @@ function DialogContent({
             {description}
           </DialogPrimitive.Description>
         )}
-        {children}
+        {/*
+          #341: 全画面 Dialog は「ページ」なので、配下の DialogTitle の既定を
+          画面タイトル（H1）相当へ切り替える。それ以外は "dialog" を明示的に
+          流し、全画面 Dialog の中に開いた中央ダイアログが文脈を引き継いで
+          しまわないようにする。
+        */}
+        <TitleSurfaceScaleProvider scale={position === "fullscreen" ? "page" : "dialog"}>
+          {children}
+        </TitleSurfaceScaleProvider>
       </DialogPrimitive.Content>
     </DialogPortal>
   )
@@ -345,11 +358,30 @@ function DialogFooter({
   )
 }
 
-function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
+interface DialogTitleProps
+  extends React.ComponentProps<typeof DialogPrimitive.Title> {
+  /**
+   * 見出しの役割（#341）。`contracts/composition.json` の `textHierarchy.tree`
+   * と 1 対 1 で対応する:
+   * - "page":    画面タイトル / H1 → `typo-heading-2xl`
+   * - "section": セクション見出し / H2 → `typo-heading-xl`
+   * - "card":    カード見出し / H3 → `typo-heading-md`
+   *
+   * 未指定時はサーフェスの文脈から決まる。`DialogContent position="fullscreen"`
+   * の配下では "page" 相当（`typo-heading-2xl`）、それ以外の中央/上寄せ
+   * ダイアログでは従来どおり `typo-heading-lg`。明示した level は常に文脈より
+   * 優先される。
+   */
+  level?: TitleLevel
+}
+
+function DialogTitle({ className, level, ...props }: DialogTitleProps) {
+  const typoClass = useTitleTypoClass(level)
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("typo-heading-lg text-[var(--Text-High-Emphasis)]", className)}
+      data-level={level}
+      className={cn(typoClass, "text-[var(--Text-High-Emphasis)]", className)}
       {...props}
     />
   )
@@ -377,4 +409,4 @@ export {
   DialogTitle,
   DialogTrigger,
 }
-export type { DialogContentProps, DialogOverlayProps }
+export type { DialogContentProps, DialogOverlayProps, DialogTitleProps }

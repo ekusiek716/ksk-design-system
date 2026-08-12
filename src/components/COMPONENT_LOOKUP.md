@@ -36,7 +36,7 @@
 | DateField | `@/components/ui/date-field` | — | Default, WithInitialValue, CustomPlaceholder, Disabled, CustomFormat |
 | DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, FutureValueOpensSelectedMonth, WithDefaultMonth, Disabled, RangePicker, CalendarOnly, CalendarRange |
 | DateTimePicker | `@/components/ui/date-time-picker` | — | Default, Empty, Bounded |
-| Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, Fullscreen, FullscreenSafeAreaOptOut, ReportShop, StackedFooter, OpensAndIsImmediatelyInteractive, ClosesOnEscape, TrapsFocus, StacksAboveNestedSheets, ConfirmDialogStacksAboveSheet |
+| Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, Fullscreen, FullscreenSafeAreaOptOut, ReportShop, StackedFooter, OpensAndIsImmediatelyInteractive, ClosesOnEscape, TrapsFocus, StacksAboveNestedSheets, ConfirmDialogStacksAboveSheet, TitleLevelFullscreenDefault, TitleLevelExplicit, TitleLevelCenterDefault |
 | DropdownFilter | `@/components/ui/dropdown-filter` | — | Default, ActiveFilter, WithIcons（ビュー切替・アイコン付き）, MultipleFilters |
 | DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent | `@/components/ui/dropdown-menu` | — | Default, WithCheckbox, WithRadio, WithSubmenu, OpensAndSelectsItem, NavigatesWithKeyboard |
 | ErrorBoundary | `@/components/ui/error-boundary` | — | — |
@@ -105,7 +105,7 @@
 | BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
 | Banner | `@/components/patterns/banner` | **variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants |
 | BottomSheetForm | `@/components/patterns/bottom-sheet-form` | — | Default, WithLoading |
-| BottomSheetFrame | `@/components/patterns/bottom-sheet-frame` | — | MobileFull, MobileForm, DesktopFloating, Glass — mobile snap, MobilePage, KeyboardHideFallback, swipeToClose + DetailSheetScaffold (#164) |
+| BottomSheetFrame | `@/components/patterns/bottom-sheet-frame` | — | MobileFull, MobileForm, DesktopFloating, Glass — mobile snap, MobilePage, KeyboardHideFallback, swipeToClose + DetailSheetScaffold (#164), TitleLevelPageDefault, TitleLevelPartialDefault, TitleLevelExplicit |
 | CategoryNav | `@/components/patterns/category-nav` | — | Default, WithSelection |
 | CategoryScroll | `@/components/patterns/category-scroll` | — | Default, CircleShape, GridLayout |
 | CelebrationDialog | `@/components/patterns/celebration-dialog` | — | Basic, Bounce Emoji / Auto Dismiss, Iconsax Badge（emoji の代わり）, Custom Confetti Colors |
