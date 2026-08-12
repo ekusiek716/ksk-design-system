@@ -2,6 +2,10 @@ import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
 import { Text as RNText, View } from "react-native"
 import { ThemeProvider, useTheme } from "./theme/ThemeProvider"
+import { SafeAreaInsetsProvider } from "./theme/SafeAreaInsetsProvider"
+import { AppHeader } from "./components/AppHeader"
+import { Button } from "./components/Button"
+import { Dialog } from "./components/Dialog"
 import { ActionTile, QuickActionGrid } from "./components/QuickActionGrid"
 import { CheckboxGroup } from "./components/CheckboxGroup"
 import { RadioGroup } from "./components/RadioGroup"
@@ -194,4 +198,50 @@ export const CardRadius: Story = {
       </Card>
     </View>
   ),
+}
+
+/**
+ * issue #351: safe-area inset は `SafeAreaInsetsProvider` で消費側が流し込む
+ * （DS は react-native-safe-area-context に依存しない）。供給が無い場合は
+ * 従来の決め打ち（iOS 48 / それ以外は通常余白）へフォールバックする。
+ */
+export const AppHeaderSafeArea: Story = {
+  render: () => (
+    <View style={{ gap: 16 }}>
+      <RNText>inset 未供給（従来どおり）</RNText>
+      <AppHeader title="未供給" subtitle="決め打ちにフォールバック" onBack={() => {}} />
+      <RNText>inset 供給あり（top: 59 の実機想定）</RNText>
+      <SafeAreaInsetsProvider insets={{ top: 59, bottom: 34 }}>
+        <AppHeader title="供給あり" subtitle="実測 inset を使う" onBack={() => {}} />
+      </SafeAreaInsetsProvider>
+      <RNText>safeArea=false（回避しない）</RNText>
+      <SafeAreaInsetsProvider insets={{ top: 59, bottom: 34 }}>
+        <AppHeader title="オプトアウト" onBack={() => {}} safeArea={false} />
+      </SafeAreaInsetsProvider>
+    </View>
+  ),
+}
+
+function DialogFullscreenDemo() {
+  const [open, setOpen] = React.useState(false)
+  return (
+    <SafeAreaInsetsProvider insets={{ top: 59, bottom: 34, left: 0, right: 0 }}>
+      <View style={{ gap: 16 }}>
+        <Button onPress={() => setOpen(true)}>全画面ダイアログを開く</Button>
+        <Dialog
+          open={open}
+          onClose={() => setOpen(false)}
+          position="fullscreen"
+          title="全画面ダイアログ"
+          description="四辺の safe-area を避ける。既定の position は center のままなので既存の呼び出しは無変更。"
+          footer={<Button onPress={() => setOpen(false)}>閉じる</Button>}
+        />
+      </View>
+    </SafeAreaInsetsProvider>
+  )
+}
+
+/** issue #351: web の `DialogContent position="fullscreen"` に対応する native プリセット。 */
+export const DialogFullscreen: Story = {
+  render: () => <DialogFullscreenDemo />,
 }

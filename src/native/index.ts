@@ -8,5 +8,22 @@
 
 export * from "../tokens/native"
 export { ThemeProvider, useTheme, type ThemeContextValue } from "./theme/ThemeProvider"
+export {
+  SafeAreaInsetsProvider,
+  useSafeAreaInsets,
+  type SafeAreaInsetsProviderProps,
+} from "./theme/SafeAreaInsetsProvider"
+export {
+  APP_HEADER_IOS_FALLBACK_PADDING_TOP,
+  hasInsetEdge,
+  resolveAppHeaderPaddingTop,
+  resolveBottomSheetTopInset,
+  resolveFullscreenDialogPadding,
+  resolveInsetEdge,
+  resolveTopSheetPaddingTop,
+  type EdgePadding,
+  type SafeAreaEdge,
+  type SafeAreaInsets,
+} from "./safe-area"
 export { resolveTypo, type TypoVariant, type TypoStyle } from "./typography"
 export * from "./components"

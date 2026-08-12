@@ -13,6 +13,8 @@ import {
   type NativeSyntheticEvent,
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { useSafeAreaInsets } from "../theme/SafeAreaInsetsProvider"
+import { resolveBottomSheetTopInset, resolveTopSheetPaddingTop } from "../safe-area"
 import { resolveTypo } from "../typography"
 import { createRevealLifecycle } from "../modal-reveal-lifecycle"
 import {
@@ -51,6 +53,16 @@ export interface SheetProps {
    * false の場合、スワイプダウンは最小 snap まで戻る（rubber-band）。
    */
   dismissible?: boolean
+  /**
+   * safe-area（ステータスバー・ノッチ・ダイナミックアイランド）の回避を
+   * 有効にするか。既定 true。実測 inset は `SafeAreaInsetsProvider` から供給する
+   * （未供給なら回避量 0＝従来どおりの見た目）。
+   * - `side="top"`: 上端に inset 分の内側余白を確保
+   * - `side="bottom"`: パネル上端が safe-area に食い込む分だけ内容を退避
+   *   （ハーフシート等、上端が届かない場合は何もしない）
+   * - `side="left"` / `"right"`: 効果を持たない
+   */
+  safeArea?: boolean
 }
 
 /**
@@ -73,8 +85,9 @@ export function Sheet(props: SheetProps) {
 const PLAIN_DUR = 220
 const PLAIN_ANIMATION_FALLBACK_DELAY = PLAIN_DUR + 120
 
-function PlainSheet({ open, onClose, side = "bottom", title, children }: SheetProps) {
+function PlainSheet({ open, onClose, side = "bottom", title, children, safeArea = true }: SheetProps) {
   const { theme, scales } = useTheme()
+  const insets = useSafeAreaInsets()
   // useRef(new Animated.Value()).current は render 中の ref 読み取りになるため
   // useState の lazy initializer で一度だけ生成する（react-hooks/refs）
   const [anim] = useState(() => new Animated.Value(0))
@@ -154,6 +167,17 @@ function PlainSheet({ open, onClose, side = "bottom", title, children }: SheetPr
               ? { width: "100%", borderTopLeftRadius: scales.borderRadius["2xl"], borderTopRightRadius: scales.borderRadius["2xl"] }
               : { height: "100%", width: "85%" }),
             padding: scales.spacing.scale[4],
+            // side="top" のパネルは画面上端に貼り付くため、ステータスバー／
+            // ダイナミックアイランド分を上端余白に足す（inset 未供給なら加算 0）。
+            ...(side === "top"
+              ? {
+                  paddingTop: resolveTopSheetPaddingTop(
+                    scales.spacing.scale[4],
+                    insets,
+                    safeArea,
+                  ),
+                }
+              : null),
             gap: scales.spacing.scale[3],
           }}
         >
@@ -200,8 +224,10 @@ function SnapBottomSheet({
   initialSnap,
   footer,
   dismissible = true,
+  safeArea = true,
 }: SheetProps) {
   const { theme, scales } = useTheme()
+  const insets = useSafeAreaInsets()
   const points = useMemo(() => {
     const sorted = [...(snapPoints ?? [0.55, 0.92])]
       .map((p) => clamp(p, 0.1, 0.99))
@@ -220,6 +246,7 @@ function SnapBottomSheet({
       ?.innerHeight
   const H = dimsH > 0 ? dimsH : winH && winH > 0 ? winH : 700
   const panelH = Math.round(H * maxSnap)
+  const safeAreaTopInset = resolveBottomSheetTopInset(insets, safeArea, H, panelH)
 
   // footer の実測高。onLayout で取得し ScrollView の paddingBottom に反映する。
   const [footerH, setFooterH] = useState(0)
@@ -440,7 +467,14 @@ function SnapBottomSheet({
           transform: [{ translateY }],
         }}
       >
-        <View style={{ paddingHorizontal: scales.spacing.scale[4], paddingTop: scales.spacing.scale[3] }}>
+        <View
+          style={{
+            paddingHorizontal: scales.spacing.scale[4],
+            // 最大 snap が画面いっぱいに近いとき、パネル上端が safe-area に
+            // 食い込む分だけハンドル／タイトルを下げる（届かないときは 0）。
+            paddingTop: scales.spacing.scale[3] + safeAreaTopInset,
+          }}
+        >
           <View
             style={{
               width: 40,
