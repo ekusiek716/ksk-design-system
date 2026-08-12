@@ -293,7 +293,7 @@ export type { FileUploadProps, UploadedFile } from "./components/patterns/file-u
 export { CompactFilePicker, ImageAttachmentPicker } from "./components/patterns/compact-file-picker"
 export type { CompactFilePickerProps, ImageAttachment, ImageAttachmentPickerProps } from "./components/patterns/compact-file-picker"
 export { ActionTile, QuickActionGrid } from "./components/patterns/quick-action-grid"
-export type { ActionTileProps, ActionTileVariant, QuickActionGridColumns, QuickActionGridGap, QuickActionGridProps } from "./components/patterns/quick-action-grid"
+export type { ActionTileProps, ActionTileVariant, QuickActionGridColumns, QuickActionGridGap, QuickActionGridProps, QuickActionGridSelectionMode } from "./components/patterns/quick-action-grid"
 export { NotificationList } from "./components/patterns/admin/notification-list"
 export { ChartControls } from "./components/patterns/admin/chart-controls"
 export type { ChartControlsProps, Granularity, Period } from "./components/patterns/admin/chart-controls"

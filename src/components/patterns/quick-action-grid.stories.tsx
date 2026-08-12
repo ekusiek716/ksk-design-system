@@ -1,4 +1,6 @@
+import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, userEvent, within } from "storybook/test"
 import { Add, Heart, NoteText, Star1 } from "iconsax-reactjs"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { ActionTile, QuickActionGrid } from "./quick-action-grid"
@@ -114,6 +116,105 @@ export const NarrowWithLongMeta: Story = {
         description="カジュアルな少人数パーティー向け"
         meta="〜30名"
       />
+    </QuickActionGrid>
+  ),
+}
+
+const PURPOSES = [
+  { value: "career", label: "転職のため" },
+  { value: "skill", label: "スキル証明" },
+  { value: "hobby", label: "趣味・教養" },
+  { value: "school", label: "進学のため" },
+]
+
+function SingleSelectionDemo() {
+  const [value, setValue] = React.useState("skill")
+  return (
+    <QuickActionGrid
+      className="max-w-md"
+      columns={2}
+      selectionMode="single"
+      aria-label="なんのために合格したい？"
+    >
+      {PURPOSES.map((p) => (
+        <ActionTile
+          key={p.value}
+          label={p.label}
+          selected={value === p.value}
+          onClick={() => setValue(p.value)}
+        />
+      ))}
+    </QuickActionGrid>
+  )
+}
+
+/**
+ * issue #318: 単一選択（アンケートの単一回答など）。grid が `role="radiogroup"`、
+ * タイルが `role="radio"` + `aria-checked` になり、roving tabindex と矢印キー移動が有効になる。
+ */
+export const SingleSelection: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => <SingleSelectionDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const group = canvas.getByRole("radiogroup")
+    const radios = canvas.getAllByRole("radio")
+
+    // 初期状態: 選択中のタイルだけが aria-checked=true かつ tabIndex=0（roving tabindex）
+    await expect(group).toBeInTheDocument()
+    await expect(radios[1]).toHaveAttribute("aria-checked", "true")
+    await expect(radios[0]).toHaveAttribute("aria-checked", "false")
+    await expect(radios[1]).toHaveAttribute("tabindex", "0")
+    await expect(radios[0]).toHaveAttribute("tabindex", "-1")
+
+    // 右矢印で次のタイルへ移動し、移動先が選択される
+    radios[1].focus()
+    await userEvent.keyboard("{ArrowRight}")
+    await expect(radios[2]).toHaveFocus()
+    await expect(radios[2]).toHaveAttribute("aria-checked", "true")
+    await expect(radios[1]).toHaveAttribute("aria-checked", "false")
+
+    // 下矢印も「次へ」（2 軸レイアウトのため上下左右すべてを受ける）
+    await userEvent.keyboard("{ArrowDown}")
+    await expect(radios[3]).toHaveAttribute("aria-checked", "true")
+
+    // 端では折り返す（WAI-ARIA APG の radio group パターン）
+    await userEvent.keyboard("{ArrowRight}")
+    await expect(radios[0]).toHaveFocus()
+    await expect(radios[0]).toHaveAttribute("aria-checked", "true")
+
+    // 左矢印で戻る
+    await userEvent.keyboard("{ArrowLeft}")
+    await expect(radios[3]).toHaveAttribute("aria-checked", "true")
+    await expect(radios[3]).toHaveAttribute("tabindex", "0")
+    await expect(radios[0]).toHaveAttribute("tabindex", "-1")
+  },
+}
+
+/**
+ * issue #318: 複数選択。タイルは従来どおり `aria-pressed`（トグルボタン）で、
+ * 「複数選択であること」を API 上で明示した状態。
+ */
+export const MultipleSelection: Story = {
+  render: () => (
+    <QuickActionGrid className="max-w-md" columns={2} selectionMode="multiple">
+      <ActionTile label="通知" description="複数選べる" selected />
+      <ActionTile label="同期" description="複数選べる" selected />
+      <ActionTile label="バックアップ" description="複数選べる" />
+    </QuickActionGrid>
+  ),
+}
+
+/**
+ * issue #318: `selectionMode` 未指定（既定）はクイックアクションの起動ボタン。
+ * grid は role を持たず、タイルは `aria-pressed` のみ（従来と同じ出力）。
+ */
+export const LaunchersWithoutSelectionMode: Story = {
+  render: () => (
+    <QuickActionGrid className="max-w-md" columns={3}>
+      <ActionTile icon={<Add size={20} />} label="記録する" />
+      <ActionTile icon={<Heart size={20} />} label="体調を残す" />
+      <ActionTile icon={<NoteText size={20} />} label="メモを書く" />
     </QuickActionGrid>
   ),
 }

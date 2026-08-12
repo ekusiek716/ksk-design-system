@@ -14,6 +14,29 @@ import { Spinner } from "./Spinner"
 export type ActionTileVariant = "neutral" | "selected" | "success" | "info" | "caution"
 
 /**
+ * タイル群の選択意味論（issue #318）。web と同じ語彙。
+ * - `"single"`: 排他選択。grid が `accessibilityRole="radiogroup"`、タイルが `"radio"` + `accessibilityState.checked`
+ * - `"multiple"`: 複数選択。タイルは `accessibilityRole="button"` + `accessibilityState.selected`
+ *
+ * 未指定は「選択の集合ではない（起動ボタン）」扱いで、従来どおり button + selected を出す。
+ */
+export type QuickActionGridSelectionMode = "single" | "multiple"
+
+/** grid → tile へ選択意味論を渡す。grid 外の ActionTile は null を受ける（＝従来挙動）。 */
+const QuickActionGridSelectionContext = React.createContext<QuickActionGridSelectionMode | null>(null)
+
+/**
+ * 開発ビルド判定。DS は node の型を持たないので globalThis 経由で参照する。
+ * `proc` の存在を先に必須にする（ErrorBoundary と同じ形）。省略すると
+ * process 自体が無い環境で undefined との比較が true になり、本番でも
+ * 警告が出続ける。
+ */
+function isDev() {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+  return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
+}
+
+/**
  * `AccessibilityProps` を継承しているため `accessibilityLabel` /
  * `accessibilityHint` をそのまま渡せる（issue #298①）。label + meta を
  * 合成した読み上げラベル（例: 「模試2（要解放）」）を consumer 側で付けられる。
@@ -35,6 +58,11 @@ export interface ActionTileProps extends AccessibilityProps {
   loading?: boolean
   disabled?: boolean
   variant?: ActionTileVariant
+  /**
+   * 選択意味論を明示する（issue #318）。通常は親 `QuickActionGrid` の `selectionMode` から
+   * 受け取るので指定不要。指定した場合は親より優先される。
+   */
+  selectionMode?: QuickActionGridSelectionMode
   onPress?: () => void
   style?: StyleProp<ViewStyle>
 }
@@ -42,6 +70,13 @@ export interface ActionTileProps extends AccessibilityProps {
 export interface QuickActionGridProps {
   columns?: 2 | 3 | 4
   gap?: number
+  /**
+   * 配下 `ActionTile` の選択意味論（issue #318）。
+   * - 未指定（既定）: 起動ボタンの集まり。従来どおり button + `accessibilityState.selected`
+   * - `"single"`: radiogroup / radio + `accessibilityState.checked`
+   * - `"multiple"`: button + selected（複数選択であることを明示的に選んだ状態）
+   */
+  selectionMode?: QuickActionGridSelectionMode
   children: React.ReactNode
   style?: StyleProp<ViewStyle>
 }
@@ -111,12 +146,16 @@ export function ActionTile({
   loading = false,
   disabled = false,
   variant = selected ? "selected" : "neutral",
+  selectionMode,
   onPress,
   style,
   accessibilityRole,
   accessibilityState,
   ...accessibilityProps
 }: ActionTileProps) {
+  const contextSelectionMode = React.useContext(QuickActionGridSelectionContext)
+  // 明示 prop > 親 grid > 未指定（従来挙動）
+  const isRadio = (selectionMode ?? contextSelectionMode) === "single"
   const { theme, scales } = useTheme()
   const isDisabled = disabled || loading
   const isSelected = selected || variant === "selected"
@@ -129,10 +168,11 @@ export function ActionTile({
     <Pressable
       onPress={onPress}
       disabled={isDisabled}
-      accessibilityRole={accessibilityRole ?? "button"}
+      accessibilityRole={accessibilityRole ?? (isRadio ? "radio" : "button")}
       accessibilityState={{
         disabled: isDisabled,
-        selected: isSelected,
+        // radio は checked が選択状態の正本。selected を併記すると意味論が二重になるので出し分ける
+        ...(isRadio ? { checked: isSelected } : { selected: isSelected }),
         busy: loading,
         ...accessibilityState,
       }}
@@ -212,11 +252,26 @@ export function ActionTile({
 export function QuickActionGrid({
   columns = 3,
   gap = 12,
+  selectionMode,
   children,
   style,
 }: QuickActionGridProps) {
-  return (
+  if (isDev() && selectionMode === "single") {
+    // ChipSelector の既定モード問題と同じ「静かな誤動作」を開発時に見えるようにする（issue #318）
+    const selectedCount = React.Children.toArray(children).filter((child) => {
+      if (!React.isValidElement<ActionTileProps>(child)) return false
+      return child.props.selected === true || child.props.variant === "selected"
+    }).length
+    if (selectedCount > 1) {
+      console.warn(
+        `[ksk-ds] QuickActionGrid: selectionMode="single" は排他選択ですが、選択中の ActionTile が ${selectedCount} 個あります。selected を 1 つに絞るか selectionMode="multiple" を使ってください。`,
+      )
+    }
+  }
+
+  const grid = (
     <View
+      accessibilityRole={selectionMode === "single" ? "radiogroup" : undefined}
       style={[
         {
           flexDirection: "row",
@@ -232,5 +287,14 @@ export function QuickActionGrid({
         </View>
       ))}
     </View>
+  )
+
+  // selectionMode 未指定でも必ず Provider を置いて null を流す。置かないと、
+  // selectionMode="single" のグリッドの中に入れ子にした「ただの起動ボタンの
+  // グリッド」が外側の文脈を引き継ぎ、勝手に radio ロールになる。
+  return (
+    <QuickActionGridSelectionContext.Provider value={selectionMode ?? null}>
+      {grid}
+    </QuickActionGridSelectionContext.Provider>
   )
 }
