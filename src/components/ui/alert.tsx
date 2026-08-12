@@ -1,6 +1,10 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Warning2, InfoCircle, TickCircle, CloseCircle } from "iconsax-reactjs"
+import { Warning2, TickCircle, CloseCircle } from "iconsax-reactjs"
+// iconsax には "i" のグリフが無く、InfoCircle / Information / Danger / Warning2 は
+// すべて感嘆符「!」を器だけ変えて描いたもの。info に InfoCircle を使うと warning と
+// 同じ「!」になり、色と器の形しか差が無くなるので DS 自前の "i" を使う。
+import { InfoCircleIcon } from "@/components/icons/info-circle"
 import { cn } from "@/lib/utils"
 
 /**
@@ -99,7 +103,7 @@ const isBorderedVariant = (
 // (prop-based API で title / description を渡したときに使う)
 const borderedIconMap = {
   success: { Icon: TickCircle, color: "text-[var(--Text-Success)]" },
-  info: { Icon: InfoCircle, color: "text-[var(--Text-Medium-Emphasis)]" },
+  info: { Icon: InfoCircleIcon, color: "text-[var(--Text-Medium-Emphasis)]" },
   error: { Icon: CloseCircle, color: "text-[var(--Text-Caution)]" },
   warning: { Icon: Warning2, color: "text-[var(--Text-Warning)]" },
 } as const

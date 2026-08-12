@@ -33,6 +33,7 @@ UI を書く前に必ず確認すること:
 - [ ] アニメーションは `duration-[var(--Motion-Duration-*)]` / `ease-[var(--Motion-Easing-*)]` か（`duration-200` や生 `cubic-bezier` の直書きは禁止。トークン参照でないと `prefers-reduced-motion` の一括制御から漏れる）
 - [ ] 重なり順は `z-[var(--Z-*)]` か（`z-50` 一律だと Portal のマウント順で勝敗が決まる。`z-10` / `z-20` のコンポーネント内部の重なりは対象外。順序は DESIGN.md の Layering 節）
 - [ ] アイコンは `iconsax-reactjs` か（`lucide-react` / `heroicons` は使わない）
+- [ ] **選んだアイコンの「絵」を実際に見たか**。iconsax は名前と絵が一致しないものがある。`Check` は小切手（checkbook）でチェックマークではない（PR #349 で出荷直前まで残った）。チェックマークは `TickSquare` / `TickCircle`。また **"i" のグリフは iconsax に存在せず**、`InfoCircle` / `Information` / `Danger` / `Warning2` はすべて感嘆符「!」の器違いなので、情報アイコンは DS 自前の `InfoCircleIcon` を使う。名前で選んだら描画結果を目視し、意味が変わると困る箇所は path で固定するテストを書く <!-- docs-drift-ignore: Check TickSquare TickCircle InfoCircle Information Danger Warning2 InfoCircleIcon -->
 - [ ] 生タグ（`<button>` / `<input>` / `<a href>`）でなく DS コンポーネントを使ったか
 - [ ] CSS でベンダープレフィックス併記する場合、**`-webkit-` を先・標準形を後**に書いたか（消費側の minifier が同一プロパティとして dedupe し後勝ちのみ残すため。逆順だと Firefox で静かに無効化。`node scripts/check-prefix-order.mjs` が CI で検出）
 - [ ] flex 行（flex-col でない flex）で shrink-0 の兄弟と可変テキストを並べるとき、テキスト側に `flex-1`（+ 必要なら `min-w-[...]` 下限）を付けたか（`min-w-0` だけだと 1 文字ずつ折り返すまで潰れる。issue #293。`node scripts/check-flex-shrink.mjs` が CI で検出、例外は `ksk-lint-ignore KFX001 -- 理由`）
