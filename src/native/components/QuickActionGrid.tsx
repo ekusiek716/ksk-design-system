@@ -82,32 +82,45 @@ export interface QuickActionGridProps {
 }
 
 /**
- * 選択インジケータのチェック。
+ * 選択インジケータのチェックボックス（web の iconsax `TickSquare` と同形）。
  *
  * 文字の「✓」グリフは端末のフォントに形が依存し、DS のアイコン（web は iconsax）と
- * 太さ・比率が揃わない。native には icon ライブラリを入れない方針なので、2 辺だけ
- * 残した View を 45° 回して描く。フォント非依存で線の太さも指定できる。
- * 装飾なので支援技術からは隠す（選択状態は accessibilityState.selected が伝える）。
+ * 太さ・比率が揃わない。native には icon ライブラリを入れない方針なので、角丸の枠と、
+ * 2 辺だけ残して 45° 回した View の組み合わせで描く。フォント非依存で線の太さも
+ * 指定できる。
+ *
+ * 装飾なので支援技術からは隠す（選択状態は accessibilityState の checked / selected
+ * が伝える）。
  */
 function CheckMark({ color, size = 16 }: { color: string; size?: number }) {
+  const tickSize = size * 0.55
   return (
     <View
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       aria-hidden
-      style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}
+      style={{
+        width: size,
+        height: size,
+        alignItems: "center",
+        justifyContent: "center",
+        // web の TickSquare と同じ「枠 + チェック」。枠が無いと web と形が揃わない
+        borderWidth: 1.5,
+        borderColor: color,
+        borderRadius: size * 0.28,
+      }}
     >
       <View
         style={{
-          width: size * 0.42,
-          height: size * 0.72,
-          borderRightWidth: 2,
-          borderBottomWidth: 2,
+          width: tickSize * 0.42,
+          height: tickSize * 0.72,
+          borderRightWidth: 1.5,
+          borderBottomWidth: 1.5,
           borderColor: color,
           transform: [{ rotate: "45deg" }],
-          // 回転で下がる分を戻して行の中心に合わせる
-          marginTop: -size * 0.1,
+          // 回転で下がる分を戻して枠の中心に合わせる
+          marginTop: -tickSize * 0.1,
         }}
       />
     </View>
@@ -200,7 +213,11 @@ export function ActionTile({
         style,
       ]}
     >
-      <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: scales.spacing.scale[2] }}>
+      {/*
+        alignItems: "center" — ラベルは常に1行なので、インジケータを上端揃えにすると
+        ラベルの文字中心より数 px 高い位置に浮いて見える（web 側と同じ理由で揃える）。
+      */}
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: scales.spacing.scale[2] }}>
         <View style={{ flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: scales.spacing.scale[2] }}>
           {emoji && <RNText style={resolveTypo("heading.md")}>{emoji}</RNText>}
           {icon}
