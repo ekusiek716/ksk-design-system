@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.55.0",
+    "version": "1.56.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 67,
@@ -346,8 +346,16 @@
         "DialogTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は position=\"fullscreen\" 配下で page 相当、それ以外は従来の typo-heading-lg"
       ],
       "variants": {
-        "position": ["center", "top", "fullscreen"],
-        "titleLevel": ["page", "section", "card"]
+        "position": [
+          "center",
+          "top",
+          "fullscreen"
+        ],
+        "titleLevel": [
+          "page",
+          "section",
+          "card"
+        ]
       }
     },
     {
@@ -376,7 +384,11 @@
         "SheetTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は BottomSheetFrame preset=\"mobile-full\"|\"mobile-page\" 配下で page 相当、それ以外は従来の typo-heading-lg"
       ],
       "variants": {
-        "titleLevel": ["page", "section", "card"],
+        "titleLevel": [
+          "page",
+          "section",
+          "card"
+        ],
         "side": [
           "top",
           "bottom",
