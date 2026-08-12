@@ -6,7 +6,7 @@ import * as React from "react"
  * 値は `contracts/composition.json` の `textHierarchy.tree` の role と 1 対 1 で
  * 対応する。typo クラスは {@link TITLE_LEVEL_TYPO} の 1 箇所だけで解決し、
  * 各コンポーネントへハードコードで散らさない。
- * （対応の機械検査: `__tests__/title-level-composition.test.ts`）
+ * （対応の機械検査: `__tests__/title-level-composition.test.tsx`）
  */
 type TitleLevel = "page" | "section" | "card"
 

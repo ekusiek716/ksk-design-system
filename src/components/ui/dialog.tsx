@@ -126,8 +126,9 @@ interface DialogContentProps
    *   コンテンツ (チェックリスト等) を出すときに、コンテンツが
    *   スクロールしやすく操作しやすい
    * - "fullscreen": 全画面 (inset-0)。モバイルのウィザード/エディタ等、
-   *   Dialog をページ代わりに使う場面向け。上下とも safe-area を確保する
-   *   （`safeArea` prop で無効化可能）
+   *   Dialog をページ代わりに使う場面向け。四辺とも safe-area を確保する
+   *   （`safeArea` prop で無効化可能）。配下の DialogTitle は既定で
+   *   画面タイトル相当（typo-heading-2xl）になる（#341）
    */
   position?: "center" | "top" | "fullscreen"
   /**
