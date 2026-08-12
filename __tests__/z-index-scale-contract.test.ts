@@ -10,7 +10,7 @@ import { describe, expect, it } from "vitest"
  */
 
 const preset = readFileSync("src/preset.css", "utf8")
-const sheet = readFileSync("src/components/ui/sheet.tsx", "utf8")
+const modalStack = readFileSync("src/lib/modal-stack.ts", "utf8")
 
 function z(name: string): number {
   const m = preset.match(new RegExp(`--Z-${name}:\\s*(-?\\d+);`))
@@ -18,9 +18,9 @@ function z(name: string): number {
   return Number(m[1])
 }
 
-function sheetConst(name: string): number {
-  const m = sheet.match(new RegExp(`const ${name} = (-?\\d+)`))
-  if (!m) throw new Error(`${name} が sheet.tsx に無い`)
+function stackConst(name: string): number {
+  const m = modalStack.match(new RegExp(`const ${name} = (-?\\d+)`))
+  if (!m) throw new Error(`${name} が src/lib/modal-stack.ts に無い`)
   return Number(m[1])
 }
 
@@ -66,18 +66,28 @@ describe("z-index スケール contract", () => {
     expect(z("SkipLink")).toBeGreaterThan(z("Tooltip"))
   })
 
-  it("sheet.tsx のネスト用 z 定数が preset.css の --Z-Overlay / --Z-Modal と一致する", () => {
-    // インラインの数値 z-index を算術で積むため sheet.tsx は数値で持っている。
-    // 片方だけ動かすと多段 Sheet の暗転が壊れる（issue #158）。
-    expect(sheetConst("SHEET_OVERLAY_BASE_Z")).toBe(z("Overlay"))
-    expect(sheetConst("SHEET_CONTENT_BASE_Z")).toBe(z("Modal"))
+  it("modal-stack.ts のネスト用 z 基底が preset.css の --Z-* と一致する", () => {
+    // インラインの数値 z-index を算術で積むため modal-stack.ts は数値で持っている。
+    // 片方だけ動かすと多段モーダルの暗転・前後関係が壊れる（issue #158 / #340）。
+    expect(stackConst("MODAL_OVERLAY_BASE_Z")).toBe(z("Overlay"))
+    expect(stackConst("MODAL_CONTENT_BASE_Z")).toBe(z("Modal"))
+    expect(stackConst("ALERT_OVERLAY_BASE_Z")).toBe(z("Alert-Overlay"))
+    expect(stackConst("ALERT_CONTENT_BASE_Z")).toBe(z("Alert"))
   })
 
-  it("多段 Sheet を現実的な段数まで積んでも Alert 層を突き抜けない", () => {
-    const step = sheetConst("SHEET_STACK_STEP")
-    const MAX_REALISTIC_NESTING = 8
-    const topmost = z("Modal") + MAX_REALISTIC_NESTING * step
-    expect(topmost).toBeLessThan(z("Alert-Overlay"))
+  it("多段モーダル（Sheet / Dialog）を上限まで積んでも Alert 層を突き抜けない", () => {
+    const step = stackConst("MODAL_STACK_STEP")
+    const max = stackConst("MODAL_STACK_MAX_LEVEL")
+    expect(z("Modal") + max * step).toBeLessThan(z("Alert-Overlay"))
+  })
+
+  it("多段 Alert を上限まで積んでも Coachmark 層を突き抜けず、段どうしが同値にならない", () => {
+    const step = stackConst("ALERT_STACK_STEP")
+    const max = stackConst("ALERT_STACK_MAX_LEVEL")
+    expect(z("Alert") + max * step).toBeLessThan(z("Coachmark-Overlay"))
+    // 刻みが overlay→content の差以下だと、上の段の scrim が下の段の本体と
+    // 同値以上になり「下のアラート本体が上の scrim に沈む」壊れ方をする。
+    expect(step).toBeGreaterThan(z("Alert") - z("Alert-Overlay"))
   })
 
   it("AlertDialog / Dialog / Sheet が正しいトークンを参照している", () => {

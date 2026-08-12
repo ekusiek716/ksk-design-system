@@ -2,6 +2,11 @@ import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { notifyAlertDialogOpening } from "@/lib/layer-coordination"
+import {
+  ModalStackRegistrar,
+  alertContentZ,
+  alertOverlayZ,
+} from "@/lib/modal-stack"
 import { buttonVariants } from "./button"
 import type { ButtonProps } from "./button"
 
@@ -84,17 +89,34 @@ function AlertDialogPortal({
   )
 }
 
+interface AlertDialogOverlayProps
+  extends React.ComponentProps<typeof AlertDialogPrimitive.Overlay> {
+  /**
+   * #340: グローバル open-modal スタックでの深度（0 = 最初に開いたモーダル）。
+   * 指定時は z-index を `--Z-Alert-Overlay + 段数*12` で上書きする。
+   * 未指定時は --Z-Alert-Overlay 固定（従来挙動）。
+   */
+  stackLevel?: number
+}
+
 function AlertDialogOverlay({
   className,
+  style,
+  stackLevel,
   ...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Overlay>) {
+}: AlertDialogOverlayProps) {
   return (
     <AlertDialogPrimitive.Overlay
       data-slot="alert-dialog-overlay"
       className={cn(
+        // stackLevel 指定時は下のインライン style が per-instance で上書きする。
         "fixed inset-0 z-[var(--Z-Alert-Overlay)] bg-[var(--Overlay-Medium)] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
         className
       )}
+      style={{
+        ...style,
+        ...(stackLevel != null ? { zIndex: alertOverlayZ(stackLevel) } : null),
+      }}
       {...props}
     />
   )
@@ -103,23 +125,47 @@ function AlertDialogOverlay({
 function AlertDialogContent({
   className,
   size = "default",
+  style,
+  zIndex,
+  children,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
   size?: "default" | "sm"
+  /**
+   * #340: 多段モーダルの z-index escape hatch。未指定時は開いているモーダルの
+   * 順序（グローバルスタック）から自動算出される。
+   */
+  zIndex?: number
 }) {
+  // #340: Sheet / Dialog と同じグローバル open-modal スタックに参加する。
+  // 基底は --Z-Alert-* のまま＝アラートは常に通常モーダルより上、という現行の
+  // 設計意図を保ったうえで、アラート同士の重なりだけを開いた順に解決する。
+  const [stackLevel, setStackLevel] = React.useState(0)
+  const resolvedContentZ = zIndex ?? alertContentZ(stackLevel)
   return (
     <AlertDialogPortal>
-      <AlertDialogOverlay />
+      <AlertDialogOverlay stackLevel={stackLevel} />
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
         data-size={size}
         onOpenAutoFocus={(e) => e.preventDefault()}
+        style={{ ...style, zIndex: resolvedContentZ }}
         className={cn(
-          "group/alert-dialog-content fixed top-[50%] left-[50%] z-[var(--Z-Alert)] grid w-full max-w-[calc(100%_-_2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[var(--Radius-Modal)] border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-6 shadow-[var(--shadow-dialog)] duration-[var(--Motion-Duration-Base)] data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-lg",
+          // transition-none: `duration-*` は tw-animate 由来で enter/exit の
+          // アニメーション尺のために付いているが、transition-property を明示
+          // しないと既定値 all のまま「全プロパティが 200ms かけて遷移」する。
+          // z-index は離散プロパティなので遷移中の前半は古い値を返し、#340 で
+          // 段数ぶんを加算した z が実際に効くまで約 100ms 遅れる（その間だけ
+          // アラートが下のモーダルに潜る）。enter/exit は keyframes なので
+          // transition を切っても見た目は変わらない。
+          "group/alert-dialog-content transition-none fixed top-[50%] left-[50%] z-[var(--Z-Alert)] grid w-full max-w-[calc(100%_-_2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[var(--Radius-Modal)] border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-6 shadow-[var(--shadow-dialog)] duration-[var(--Motion-Duration-Base)] data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-lg",
           className
         )}
         {...props}
-      />
+      >
+        <ModalStackRegistrar onLevelChange={setStackLevel} />
+        {children}
+      </AlertDialogPrimitive.Content>
     </AlertDialogPortal>
   )
 }

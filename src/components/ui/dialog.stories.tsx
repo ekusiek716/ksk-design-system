@@ -2,6 +2,7 @@
  * @file Dialog のストーリー
  * @description モーダルダイアログコンポーネント。トリガーボタン、ヘッダー、説明、フッターアクション付き
  */
+import { useState } from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "./dialog"
@@ -10,6 +11,8 @@ import { Checkbox } from "./checkbox"
 import { Input } from "./input"
 import { Label } from "./label"
 import { RadioGroup, RadioGroupItem } from "./radio-group"
+import { Sheet, SheetContent, SheetTitle } from "./sheet"
+import { ConfirmDialog } from "../patterns/confirm-dialog"
 
 const meta: Meta<typeof Dialog> = {
   title: "Components/Dialog",
@@ -340,5 +343,107 @@ export const TrapsFocus: Story = {
         `Tab ${i + 1} 回目でフォーカスがダイアログ外（${document.activeElement?.outerHTML?.slice(0, 80)}）に出た`
       ).toBe(true)
     }
+  },
+}
+
+/**
+ * Sheet（多段含む）の上に開いた Dialog が最前面に来る回帰テスト（issue #340）。
+ *
+ * 由来: Dialog が Sheet の「開いた順スタック」に参加しておらず z が --Z-Modal
+ * 固定だったため、多段 Sheet（content = 60 + 段数*20）の上では後から開いた
+ * Dialog が確実に覆われていた。ここでは z 値ではなく「その座標で実際に最前面に
+ * 居るか」（elementFromPoint）を見る。
+ */
+export const StacksAboveNestedSheets: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: function DialogOverNestedSheets() {
+    const [open, setOpen] = useState(false)
+    return (
+      <>
+        <Sheet open>
+          <SheetContent side="bottom">
+            <SheetTitle>1 枚目のシート</SheetTitle>
+          </SheetContent>
+        </Sheet>
+        <Sheet open>
+          <SheetContent side="bottom">
+            <SheetTitle>2 枚目のシート</SheetTitle>
+            <Button data-testid="open" onClick={() => setOpen(true)}>
+              ダイアログを開く
+            </Button>
+          </SheetContent>
+        </Sheet>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent description="多段シートの上から確認します">
+            <DialogHeader>
+              <DialogTitle>シートの上のダイアログ</DialogTitle>
+            </DialogHeader>
+            <DialogFooter>
+              <Button data-testid="confirm">確認する</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
+    )
+  },
+  play: async () => {
+    const body = within(document.body)
+    await userEvent.click(await body.findByTestId("open"))
+
+    const confirm = await body.findByTestId("confirm")
+    // 入場アニメーションが終わり、実際にその座標の最前面が確認ボタンになること。
+    await waitFor(() => {
+      const r = confirm.getBoundingClientRect()
+      const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+      expect(confirm.contains(top)).toBe(true)
+    })
+    await userEvent.click(confirm)
+  },
+}
+
+/**
+ * Sheet の上に開いた ConfirmDialog（AlertDialog 基盤）が最前面に来る回帰テスト
+ * （issue #340 の元症状）。Alert 層は基底が --Z-Alert-* のまま、スタック段数ぶんを
+ * 加算する。
+ */
+export const ConfirmDialogStacksAboveSheet: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: function ConfirmOverSheet() {
+    const [open, setOpen] = useState(false)
+    return (
+      <>
+        <Sheet open>
+          <SheetContent side="bottom">
+            <SheetTitle>下地のシート</SheetTitle>
+            <Button data-testid="open" onClick={() => setOpen(true)}>
+              削除する
+            </Button>
+          </SheetContent>
+        </Sheet>
+        <ConfirmDialog
+          open={open}
+          onOpenChange={setOpen}
+          title="削除しますか"
+          description="この操作は取り消せません。"
+          variant="destructive"
+          confirmLabel="削除する"
+          onConfirm={() => {}}
+        />
+      </>
+    )
+  },
+  play: async () => {
+    const body = within(document.body)
+    await userEvent.click(await body.findByTestId("open"))
+
+    const alert = await body.findByRole("alertdialog")
+    const confirm = within(alert).getByRole("button", { name: "削除する" })
+
+    await waitFor(() => {
+      const r = confirm.getBoundingClientRect()
+      const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+      expect(confirm.contains(top)).toBe(true)
+    })
+    await userEvent.click(confirm)
   },
 }

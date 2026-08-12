@@ -1,6 +1,11 @@
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import {
+  ModalStackRegistrar,
+  modalContentZ,
+  modalOverlayZ,
+} from "@/lib/modal-stack"
 
 type LayerAutoFocusTarget = "first-input" | "title" | React.RefObject<HTMLElement | null> | false
 
@@ -55,16 +60,32 @@ function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.C
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
-function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+interface DialogOverlayProps
+  extends React.ComponentProps<typeof DialogPrimitive.Overlay> {
+  /**
+   * #340: グローバル open-modal スタックでの深度（0 = 最初に開いたモーダル）。
+   * 指定時は z-index を `--Z-Overlay + 段数*20` で上書きする。未指定時は
+   * --Z-Overlay 固定（従来挙動）。
+   */
+  stackLevel?: number
+}
+
+function DialogOverlay({ className, style, stackLevel, ...props }: DialogOverlayProps) {
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
+        // stackLevel 指定時は下のインライン style が per-instance で上書きする
+        // （同一 specificity のユーティリティのままだと DOM 順が勝敗を決める）。
         "fixed inset-0 z-[var(--Z-Overlay)] bg-[var(--Overlay-Dark)]",
         "data-[state=open]:animate-in data-[state=open]:fade-in-0",
         "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
         className
       )}
+      style={{
+        ...style,
+        ...(stackLevel != null ? { zIndex: modalOverlayZ(stackLevel) } : null),
+      }}
       {...props}
     />
   )
@@ -120,6 +141,12 @@ interface DialogContentProps
    * 背景スクロールを許可したい場合は非 modal な Dialog を使う。
    */
   bodyScrollLock?: boolean
+  /**
+   * #340: 多段モーダルの z-index escape hatch。
+   * 未指定時は開いているモーダルの順序（グローバルスタック）から自動算出
+   * （overlay = 50 + 段数*20 / content = 60 + 段数*20）されるため通常は不要。
+   */
+  zIndex?: number
 }
 
 function DialogContent({
@@ -132,9 +159,17 @@ function DialogContent({
   restoreFocusOnClose = true,
   closeOnEsc = true,
   bodyScrollLock: _bodyScrollLock = true,
+  zIndex,
+  style,
   ...props
 }: DialogContentProps) {
   const autoDescId = React.useId()
+  // #340: Sheet(#158) と同じグローバル open-modal スタックに参加する。
+  // DialogContent 自体は開閉に関係なく毎回レンダリングされるので、枠の確保は
+  // Radix の Presence が開いている間だけマウントする <ModalStackRegistrar> に
+  // 任せる（詳細は lib/modal-stack.ts）。
+  const [stackLevel, setStackLevel] = React.useState(0)
+  const resolvedContentZ = zIndex ?? modalContentZ(stackLevel)
   const contentRef = React.useRef<HTMLDivElement>(null)
   const restoreFocusRef = React.useRef<HTMLElement | null>(null)
   // body scroll lock は Radix (modal Dialog) の react-remove-scroll が
@@ -176,7 +211,7 @@ function DialogContent({
   }
   return (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay stackLevel={stackLevel} />
       <DialogPrimitive.Content
         ref={contentRef}
         data-slot="dialog-content"
@@ -198,11 +233,13 @@ function DialogContent({
           className
         )}
         {...props}
+        style={{ ...style, zIndex: resolvedContentZ }}
         aria-describedby={ariaDescribedBy}
         onOpenAutoFocus={handleOpenAutoFocus}
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
+        <ModalStackRegistrar onLevelChange={setStackLevel} />
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">
             {description}
@@ -288,4 +325,4 @@ export {
   DialogTitle,
   DialogTrigger,
 }
-export type { DialogContentProps }
+export type { DialogContentProps, DialogOverlayProps }
