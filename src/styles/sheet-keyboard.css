@@ -5,6 +5,14 @@
    `BottomSheetFrame` も内部で data-slot="sheet-content" + data-side="bottom" に
    なる。#139）向けに、仮想キーボード表示時の 2 つの補正を DS 標準で提供する。
 
+   ⚠️ `[data-slot="bottom-sheet-frame"]` という属性値は存在しない。
+   `BottomSheetFrame` は `SheetContent` を介して常に `data-slot="sheet-content"`
+   を出し、フレーム識別には別属性 `data-frame="bottom-sheet-frame"` を使う
+   （#139 / __tests__/sheet-frame-data-slot.test.tsx）。以前このファイルには
+   `[data-slot="bottom-sheet-frame"]` を対象にした死んだセレクタが残っていた
+   （issue #339）。`[data-slot="sheet-content"]` だけで BottomSheetFrame にも
+   マッチするため、追随漏れを避ける意味でも複合セレクタは使わない。
+
    ─── #150: bottom lift + max-height 補正（consumer 互換） ──────
    SheetContent / SwipeToCloseBottomSheet は JS（visualViewport）でも同じ
    持ち上げ・高さ制限を行うが、visualViewport が inset を出せない環境
@@ -39,14 +47,13 @@
    ============================================================= */
 
 /* ── #150: bottom lift（snap を含む全 bottom シート） ── */
-html[data-kb-open]
-  :is([data-slot="sheet-content"], [data-slot="bottom-sheet-frame"])[data-side="bottom"] {
+html[data-kb-open] [data-slot="sheet-content"][data-side="bottom"] {
   bottom: var(--kb-h, 0px);
 }
 
 /* ── #150: max-height 補正（snap モードは除外） ── */
 html[data-kb-open]
-  :is([data-slot="sheet-content"], [data-slot="bottom-sheet-frame"])[data-side="bottom"]:not([data-snap-active]) {
+  [data-slot="sheet-content"][data-side="bottom"]:not([data-snap-active]) {
   max-height: calc(100dvh - var(--kb-h, 0px));
 }
 
@@ -75,7 +82,7 @@ html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-sid
 
 /* ── #149: KeyboardAwareSheetFooter behavior="hide" の :has(:focus) フォールバック ── */
 @media (max-width: 767px) {
-  :is([data-slot="sheet-content"], [data-slot="bottom-sheet-frame"]):has(
+  [data-slot="sheet-content"]:has(
       :is(
           input:not([type]),
           input[type="text"],

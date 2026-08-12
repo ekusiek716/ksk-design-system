@@ -120,8 +120,22 @@ interface DialogContentProps
    * - "top": 上部寄せ (safe-area-inset-top + 2rem 下) — モバイルで縦長
    *   コンテンツ (チェックリスト等) を出すときに、コンテンツが
    *   スクロールしやすく操作しやすい
+   * - "fullscreen": 全画面 (inset-0)。モバイルのウィザード/エディタ等、
+   *   Dialog をページ代わりに使う場面向け。上下とも safe-area を確保する
+   *   （`safeArea` prop で無効化可能）
    */
-  position?: "center" | "top"
+  position?: "center" | "top" | "fullscreen"
+  /**
+   * safe-area（ノッチ・ステータスバー・ホームインジケータ）の回避を
+   * 有効にするか。既定 true。
+   * - "top": 上端に `max(env(safe-area-inset-top), 2rem)` を確保（従来挙動）
+   * - "fullscreen": 上下に env(safe-area-inset-top) / env(safe-area-inset-bottom)
+   *   を確保
+   * - "center": 効果なし
+   * false にすると回避を無効化する（consumer が自前で safe-area を管理する
+   * 場合のオプトアウト。安全側の既定を壊さないよう既定は true）。
+   */
+  safeArea?: boolean
   /**
    * open 時の初期フォーカス。未指定時は Radix の既定挙動。
    * - "first-input": 最初の入力/操作可能要素
@@ -155,6 +169,7 @@ function DialogContent({
   padding = true,
   description,
   position = "center",
+  safeArea = true,
   autoFocus,
   restoreFocusOnClose = true,
   closeOnEsc = true,
@@ -216,18 +231,43 @@ function DialogContent({
         ref={contentRef}
         data-slot="dialog-content"
         data-position={position}
+        data-safe-area={safeArea}
         className={cn(
-          // 横位置: left-[50%] + translate-x-[-50%] のみ。
-          // inset-x-* と組み合わせると left/right と transform が競合して
-          // SP サイズで左に大きくズレるため使わない。
-          // 幅は w-full + max-w-[calc(100%_-_3rem)] (左右 24px) + 480px キャップ。
-          "fixed left-[50%] z-[var(--Z-Modal)] w-full max-w-[calc(100%_-_3rem)] sm:max-w-[480px] translate-x-[-50%]",
-          // 縦位置
-          position === "top"
-            ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh_-_max(env(safe-area-inset-top),2rem)_-_2rem)] overflow-y-auto"
-            : "top-[50%] translate-y-[-50%]",
-          "rounded-[var(--Radius-Modal)] ksk-squircle bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)]",
-          padding && "flex flex-col gap-4 p-6",
+          "fixed z-[var(--Z-Modal)]",
+          // 横位置・縦位置・サイズ。position ごとに完結した1つの塊として選ぶ
+          // （left-[50%]/inset-0 のような別グループのクラスを同時に混ぜると
+          // twMerge が競合を検出できず、CSS 生成順に結果が左右されるため）。
+          position === "fullscreen"
+            ? // 全画面: inset-0 で画面いっぱいに広げる。角丸なし。
+              "inset-0 w-full h-full max-w-none sm:max-w-none overflow-y-auto rounded-none"
+            : [
+                // 横位置: left-[50%] + translate-x-[-50%] のみ。
+                // inset-x-* と組み合わせると left/right と transform が競合して
+                // SP サイズで左に大きくズレるため使わない。
+                // 幅は w-full + max-w-[calc(100%_-_3rem)] (左右 24px) + 480px キャップ。
+                "left-[50%] w-full max-w-[calc(100%_-_3rem)] sm:max-w-[480px] translate-x-[-50%]",
+                // 縦位置
+                position === "top"
+                  ? safeArea
+                    ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh_-_max(env(safe-area-inset-top),2rem)_-_2rem)] overflow-y-auto"
+                    : "top-8 max-h-[calc(100dvh_-_4rem)] overflow-y-auto"
+                  : "top-[50%] translate-y-[-50%]",
+                "rounded-[var(--Radius-Modal)] ksk-squircle",
+              ].join(" "),
+          "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-dialog)]",
+          // 内側余白。fullscreen + safeArea では上下に safe-area 分を追加で
+          // 確保する（左右は通常の 1.5rem のまま）。p-6 と pt-[...] を同時に
+          // 混ぜると twMerge がどちらも conflicting グループと見なさず両方
+          // 残ってしまい CSS 生成順で結果が変わるため、必ず1つの完結した
+          // クラス集合を選ぶ。
+          padding &&
+            (position === "fullscreen" && safeArea
+              ? "flex flex-col gap-4 px-6 pt-[calc(1.5rem_+_env(safe-area-inset-top,0px))] pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]"
+              : "flex flex-col gap-4 p-6"),
+          !padding &&
+            position === "fullscreen" &&
+            safeArea &&
+            "pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           className

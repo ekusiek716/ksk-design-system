@@ -555,9 +555,11 @@
 @source inline("max-h-[88dvh]");
 @source inline("max-h-[90dvh]");
 @source inline("max-h-[calc(100dvh_-_2rem_-_env(safe-area-inset-top,0px))]");
+@source inline("max-h-[calc(100dvh_-_4rem)]");
 @source inline("max-h-[calc(100dvh_-_env(safe-area-inset-top))]");
 @source inline("max-h-[calc(100dvh_-_max(env(safe-area-inset-top),2rem)_-_2rem)]");
 @source inline("max-h-[inherit]");
+@source inline("max-h-[max(0px,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))]");
 @source inline("max-w-24");
 @source inline("max-w-2xl");
 @source inline("max-w-3xl");
@@ -690,10 +692,13 @@
 @source inline("pb-20");
 @source inline("pb-28");
 @source inline("pb-4");
+@source inline("pb-6");
 @source inline("pb-[calc(1.5rem_+_env(safe-area-inset-bottom))]");
+@source inline("pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]");
 @source inline("pb-[calc(env(safe-area-inset-bottom,0px)_+_1rem)]");
 @source inline("pb-[calc(env(safe-area-inset-bottom,0px)_+_3rem)]");
 @source inline("pb-[env(safe-area-inset-bottom)]");
+@source inline("pb-[env(safe-area-inset-bottom,0px)]");
 @source inline("pb-[max(0.75rem,env(safe-area-inset-bottom))]");
 @source inline("pb-[max(1rem,env(safe-area-inset-bottom))]");
 @source inline("peer-disabled:cursor-not-allowed");
@@ -725,6 +730,9 @@
 @source inline("pt-4");
 @source inline("pt-5");
 @source inline("pt-6");
+@source inline("pt-[...]");
+@source inline("pt-[calc(1.5rem_+_env(safe-area-inset-top,0px))]");
+@source inline("pt-[env(safe-area-inset-top,0px)]");
 @source inline("px-0");
 @source inline("px-0.5");
 @source inline("px-1");
@@ -857,6 +865,7 @@
 @source inline("sm:max-h-[90dvh]");
 @source inline("sm:max-w-[480px]");
 @source inline("sm:max-w-lg");
+@source inline("sm:max-w-none");
 @source inline("sm:max-w-sm");
 @source inline("sm:max-w-xl");
 @source inline("sm:mx-auto");
@@ -924,6 +933,7 @@
 @source inline("top-1.5");
 @source inline("top-1/2");
 @source inline("top-4");
+@source inline("top-8");
 @source inline("top-[50%]");
 @source inline("top-[max(1rem,env(safe-area-inset-top))]");
 @source inline("top-[max(env(safe-area-inset-top),2rem)]");

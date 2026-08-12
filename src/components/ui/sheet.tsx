@@ -705,6 +705,19 @@ interface SheetContentProps
   zIndex?: number
   /** overlay 要素にのみ追加の className を当てたい場合の escape hatch。 */
   overlayClassName?: string
+  /**
+   * safe-area（ノッチ・ステータスバー・ホームインジケータ）の回避を
+   * 有効にするか。既定 true。
+   * - `side="top"`: 上端に `env(safe-area-inset-top)` 分の内側余白を確保
+   * - `side="float"` / `"float-glass"`: キーボード非表示時にも上端が画面外へ
+   *   抜けないよう既定の max-height を確保（可視領域 − 上下マージン1.5rem −
+   *   上部safe-area。キーボード表示時の追従 (#337) とは独立で、そちらが
+   *   優先される）
+   * false にすると回避を無効化する（consumer が自前で safe-area を管理する
+   * 場合のオプトアウト。安全側の既定を壊さないよう既定は true）。他の side
+   * では効果を持たない。
+   */
+  safeArea?: boolean
 }
 
 const swipeSides = new Set(["bottom", "bottom-glass"])
@@ -725,6 +738,7 @@ function SheetContent({
   bodyScrollLock: _bodyScrollLock = true,
   zIndex,
   overlayClassName,
+  safeArea = true,
   ...props
 }: SheetContentProps) {
   const contentRef = React.useRef<HTMLDivElement>(null)
@@ -877,6 +891,7 @@ function SheetContent({
   // 余白を残す配置なので専用の補正を使う（#337）。
   const isBottomAnchored = side === "bottom" || side === "bottom-glass"
   const isFloating = side === "float" || side === "float-glass"
+  const isTopSheet = side === "top"
   const keyboardStyle = isBottomAnchored
     ? resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false)
     : isFloating
@@ -887,6 +902,31 @@ function SheetContent({
     ...contentProps
   } = props
 
+  // side="top" の safe-area 回避。padding true/false それぞれで完結した
+  // クラス集合を選ぶ（p-6 と pt-[...] を同時に混ぜると twMerge がどちらも
+  // 残してしまい CSS 生成順に結果が左右されるため避ける。dialog.tsx の
+  // fullscreen 分岐と同じ理由）。
+  const topSafeAreaPaddingClass = isTopSheet
+    ? padding
+      ? safeArea
+        ? "px-6 pb-6 pt-[calc(1.5rem_+_env(safe-area-inset-top,0px))]"
+        : "p-6"
+      : safeArea
+        ? "pt-[env(safe-area-inset-top,0px)]"
+        : undefined
+    : padding
+      ? "p-6"
+      : undefined
+  // side="float"/"float-glass" のキーボード非表示時デフォルト高さキャップ。
+  // #337 のキーボード追従 (resolveFloatSheetKeyboardStyle) と同じ余白配分
+  // （上下マージン1.5rem・上部safe-area控除）で、キーボード非表示時にも
+  // 背の高いコンテンツの上端が画面外へ抜けるのを防ぐ。JS のキーボード検知が
+  // 発火した場合は inline style（keyboardStyle）が優先して上書きする。
+  const floatSafeAreaMaxHeightClass =
+    isFloating && safeArea
+      ? "max-h-[max(0px,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))]"
+      : undefined
+
   return (
     <SheetPortal container={container}>
       <SheetOverlay glass={useGlassOverlay} className={overlayClassName} stackLevel={stackLevel} />
@@ -894,7 +934,13 @@ function SheetContent({
         ref={contentRef}
         data-slot="sheet-content"
         data-side={side}
-        className={cn(sheetVariants({ side }), padding && "p-6", className)}
+        data-safe-area={safeArea}
+        className={cn(
+          sheetVariants({ side }),
+          topSafeAreaPaddingClass,
+          floatSafeAreaMaxHeightClass,
+          className
+        )}
         {...contentProps}
         style={{
           ...props.style,

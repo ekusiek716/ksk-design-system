@@ -325,7 +325,7 @@
     {
       "name": "Dialog",
       "path": "src/components/ui/dialog.tsx",
-      "description": "タスク面用の中央モーダル(role=dialog)。フォーム入力・絞り込み等の「作業する」面に使う。削除/送信等の割り込み確認は ConfirmDialog / AlertDialog(role=alertdialog) を使い分ける。モバイルは ResponsiveDialog 推奨。position=\"top\" でモバイル向け上部寄せ。autoFocus / restoreFocusOnClose / closeOnEsc / bodyScrollLock でフォーカス・スクロール挙動を制御可能。Sheet と同じ open 順スタックに参加し、多段モーダルでは後から開いた側の overlay/content の z-index が自動繰り上げされる（zIndex prop で上書き可能）。",
+      "description": "タスク面用の中央モーダル(role=dialog)。フォーム入力・絞り込み等の「作業する」面に使う。削除/送信等の割り込み確認は ConfirmDialog / AlertDialog(role=alertdialog) を使い分ける。モバイルは ResponsiveDialog 推奨。position=\"top\" でモバイル向け上部寄せ、position=\"fullscreen\" で全画面(inset-0)。top/fullscreen は既定で safe-area(ノッチ・ステータスバー等)を回避し、safeArea=false でオプトアウト可能。autoFocus / restoreFocusOnClose / closeOnEsc / bodyScrollLock でフォーカス・スクロール挙動を制御可能。Sheet と同じ open 順スタックに参加し、多段モーダルでは後から開いた側の overlay/content の z-index が自動繰り上げされる（zIndex prop で上書き可能）。",
       "subcomponents": [
         "DialogTrigger",
         "DialogContent",
@@ -336,12 +336,17 @@
         "DialogClose"
       ],
       "rules": [
-        "rounded-2xl (16px)",
+        "rounded-2xl (16px)。position=\"fullscreen\" は rounded-none",
         "shadow-[var(--shadow-dialog)]",
         "p-6 padding",
+        "position は center(既定) / top / fullscreen",
+        "safeArea(既定 true) で top/fullscreen の safe-area 回避を制御。false でオプトアウト",
         "autoFocus は first-input / title / ref / false を指定可能",
         "description prop は sr-only description を自動生成する"
-      ]
+      ],
+      "variants": {
+        "position": ["center", "top", "fullscreen"]
+      }
     },
     {
       "name": "Sheet",
@@ -361,6 +366,9 @@
         "Side panel, not modal",
         "swipeToClose は side=bottom / bottom-glass のみ有効",
         "swipeToClose mode は max-h-[90dvh] を自動付与し、viewport 外にはみ出さない",
+        "side=\"top\" は既定(safeArea=true)で env(safe-area-inset-top) を padding-top に確保",
+        "side=\"float\"/\"float-glass\" は既定(safeArea=true)でキーボード非表示時も上端が抜けない max-height を確保",
+        "safeArea(既定 true) は上記2つの回避をまとめてオプトアウトする prop。他の side には効果なし",
         "autoFocus は first-input / title / ref / false を指定可能",
         "description prop はRadix管理IDの sr-only description を自動生成する"
       ],

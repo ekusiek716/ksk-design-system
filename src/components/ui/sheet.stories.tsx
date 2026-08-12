@@ -67,6 +67,68 @@ export const FloatSheet: Story = {
   ),
 }
 
+/**
+ * side="top"（Issue #339）。既定 (safeArea=true) で env(safe-area-inset-top)
+ * 分の padding-top を確保し、ノッチ・ステータスバーの下にコンテンツが潜らない。
+ */
+export const TopSheet: Story = {
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="secondary">上部シートを開く</Button>
+      </SheetTrigger>
+      <SheetContent side="top">
+        <SheetHeader className="mb-4">
+          <SheetTitle>お知らせ</SheetTitle>
+          <SheetDescription>
+            上端は safe-area(ノッチ/ステータスバー等)を自動で回避します。
+          </SheetDescription>
+        </SheetHeader>
+        <SheetFooter className="flex-row gap-2">
+          <SheetClose asChild>
+            <Button className="flex-1" size="lg">閉じる</Button>
+          </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  ),
+}
+
+/**
+ * side="float" + 背の高いコンテンツ（Issue #339）。既定 (safeArea=true) で
+ * キーボード非表示時にも上端が画面外へ抜けない max-height を確保する
+ * （キーボード表示時の追従は #337 / FloatSheetKeyboard を参照）。
+ */
+export const FloatSheetTallContent: Story = {
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="secondary">背の高いフローティングシートを開く</Button>
+      </SheetTrigger>
+      <SheetContent side="float" className="px-5 pt-5 pb-5">
+        <SheetHeader className="mb-4">
+          <SheetTitle>利用規約</SheetTitle>
+          <SheetDescription>
+            上端が画面外へ抜けないよう既定で max-height が確保されます。
+          </SheetDescription>
+        </SheetHeader>
+        <div className="flex flex-col gap-3 overflow-y-auto">
+          {Array.from({ length: 30 }, (_, i) => (
+            <p key={i} className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+              第{i + 1}条 サンプルの規約本文です。背の高いコンテンツでもシートの上端は画面内に収まります。
+            </p>
+          ))}
+        </div>
+        <SheetFooter className="flex-row gap-2">
+          <SheetClose asChild>
+            <Button className="flex-1" size="lg">同意する</Button>
+          </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  ),
+}
+
 export const RightSheet: Story = {
   render: () => (
     <Sheet>
