@@ -118,7 +118,9 @@ function CelebrationDialog({
               </span>
             </span>
           )}
-          <DialogTitle className="typo-heading-xl text-[var(--Text-High-Emphasis)]">
+          {/* #341: typo-heading-xl の手当てを level="section" へ寄せた
+              （値の正本は contracts/composition.json の textHierarchy）。 */}
+          <DialogTitle level="section">
             {title}
           </DialogTitle>
           {description && (

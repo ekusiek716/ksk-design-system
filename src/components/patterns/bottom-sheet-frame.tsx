@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { SheetContent, type SheetContentProps } from "../ui/sheet"
+import { TitleSurfaceScaleProvider } from "../../lib/title-level"
 import { sheetSurfaceClasses, type SheetSurface } from "./sheet-surface"
 
 type BottomSheetFramePreset = "mobile-full" | "mobile-form" | "mobile-page" | "desktop-floating"
@@ -9,6 +10,13 @@ interface BottomSheetFrameProps extends Omit<SheetContentProps, "side" | "paddin
   /** 見た目だけを glass に切り替える。snap mode の side="bottom" は維持する。 */
   surface?: SheetSurface
 }
+
+/**
+ * 全画面級の preset（#341）。この配下では SheetTitle の既定が
+ * 画面タイトル（H1 / `typo-heading-2xl`）相当になる。
+ * `mobile-form` / `desktop-floating` は部分表示なので対象外。
+ */
+const pageScalePresets = new Set<BottomSheetFramePreset>(["mobile-full", "mobile-page"])
 
 const presetClasses: Record<BottomSheetFramePreset, string> = {
   "mobile-full": [
@@ -60,7 +68,13 @@ function BottomSheetFrame({
       className={cn(presetClasses[preset], sheetSurfaceClasses[surface], className)}
       {...props}
     >
-      {children}
+      {/*
+        SheetContent が children を "dialog" 文脈で包むため、全画面級 preset は
+        その内側でさらに "page" 文脈に包み直して既定を上書きする（#341）。
+      */}
+      <TitleSurfaceScaleProvider scale={pageScalePresets.has(preset) ? "page" : "dialog"}>
+        {children}
+      </TitleSurfaceScaleProvider>
     </SheetContent>
   )
 }

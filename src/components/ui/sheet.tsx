@@ -7,6 +7,11 @@ import {
   modalContentZ,
   modalOverlayZ,
 } from "@/lib/modal-stack"
+import {
+  TitleSurfaceScaleProvider,
+  useTitleTypoClass,
+  type TitleLevel,
+} from "../../lib/title-level"
 
 type LayerAutoFocusTarget = "first-input" | "title" | React.RefObject<HTMLElement | null> | false
 
@@ -764,6 +769,14 @@ function SheetContent({
   const [stackLevel, setStackLevel] = React.useState(0)
   const resolvedContentZ = zIndex ?? modalContentZ(stackLevel)
   const hasInternalDesc = description != null && description !== false
+  // #341: 素の Sheet は「全画面のページ」ではないので、配下の SheetTitle の
+  // 既定を従来サイズに保つ文脈を明示的に流す（外側の全画面サーフェスの文脈を
+  // 引き継いでネストしたシートのタイトルが大きくなるのを防ぐ）。全画面級の
+  // preset を持つ BottomSheetFrame は、children をさらに内側で "page" 文脈に
+  // 包み直すことでこれを上書きする。
+  const scopedChildren = (
+    <TitleSurfaceScaleProvider scale="dialog">{children}</TitleSurfaceScaleProvider>
+  )
   const snapCtx = React.useContext(SheetSnapContext)
   // The drag indicator is an iOS HIG "this can be dragged" affordance.
   // Auto-rendered in two cases:
@@ -825,7 +838,7 @@ function SheetContent({
         restoreFocusRef={restoreFocusRef}
         {...props}
       >
-        {children}
+        {scopedChildren}
       </SnapBottomSheetContent>
     )
   }
@@ -849,7 +862,7 @@ function SheetContent({
         restoreFocusRef={restoreFocusRef}
         {...props}
       >
-        {children}
+        {scopedChildren}
       </SwipeToCloseBottomSheet>
     )
   }
@@ -877,7 +890,7 @@ function SheetContent({
         restoreFocusRef={restoreFocusRef}
         {...props}
       >
-        {children}
+        {scopedChildren}
       </SwipeToCloseSideDrawer>
     )
   }
@@ -961,7 +974,7 @@ function SheetContent({
             {description}
           </DialogPrimitive.Description>
         )}
-        {children}
+        {scopedChildren}
       </DialogPrimitive.Content>
     </SheetPortal>
   )
@@ -1955,12 +1968,32 @@ function SheetFooter({
   )
 }
 
-function SheetTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
+interface SheetTitleProps
+  extends React.ComponentProps<typeof DialogPrimitive.Title> {
+  /**
+   * 見出しの役割（#341）。`contracts/composition.json` の `textHierarchy.tree`
+   * と 1 対 1 で対応する:
+   * - "page":    画面タイトル / H1 → `typo-heading-2xl`
+   * - "section": セクション見出し / H2 → `typo-heading-xl`
+   * - "card":    カード見出し / H3 → `typo-heading-md`
+   *
+   * 未指定時はサーフェスの文脈から決まる。全画面級の
+   * `BottomSheetFrame preset="mobile-full" | "mobile-page"` の配下では "page"
+   * 相当（`typo-heading-2xl`）、それ以外の部分表示シートでは従来どおり
+   * `typo-heading-lg`。明示した level は常に文脈より優先される。
+   */
+  level?: TitleLevel
+}
+
+function SheetTitle({ className, level, ...props }: SheetTitleProps) {
+  const typoClass = useTitleTypoClass(level)
   return (
     <DialogPrimitive.Title
       data-slot="sheet-title"
+      data-level={level}
       className={cn(
-        "typo-heading-lg text-[var(--Text-High-Emphasis)]",
+        typoClass,
+        "text-[var(--Text-High-Emphasis)]",
         "focus:outline-none focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         className
       )}
@@ -1988,4 +2021,4 @@ export {
   projectCloseAxisDelta,
   closeAxisTranslate,
 }
-export type { SheetProps, SheetContentProps, SnapPoint, VisualViewportInset }
+export type { SheetProps, SheetContentProps, SheetTitleProps, SnapPoint, VisualViewportInset }

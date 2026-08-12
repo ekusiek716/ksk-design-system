@@ -3,7 +3,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Sheet, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { BottomSheetFrame } from "./bottom-sheet-frame"
 import { DetailSheetHeader, DetailSheetScaffold } from "./detail-sheet-scaffold"
 import { KeyboardAwareSheetFooter } from "./keyboard-aware-sheet-footer"
@@ -194,4 +194,53 @@ export const SwipeToCloseWithScaffold: Story = {
       </Sheet>
     )
   },
+}
+
+/**
+ * #341: SheetTitle の既定サイズは BottomSheetFrame の preset で決まる。
+ * 全画面級（mobile-full / mobile-page）の配下では「画面タイトル / H1」相当
+ * (typo-heading-2xl)、部分表示（mobile-form / desktop-floating）では
+ * 従来どおり typo-heading-lg。明示した level は常に優先される。
+ * 値の正本は contracts/composition.json の textHierarchy。
+ */
+function TitleLevelExample({
+  preset,
+  level,
+}: {
+  preset: "mobile-full" | "mobile-form"
+  level?: "page" | "section" | "card"
+}) {
+  const [open, setOpen] = React.useState(false)
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button>
+          {preset} / level={level ?? "未指定"}
+        </Button>
+      </SheetTrigger>
+      <BottomSheetFrame preset={preset} description="SheetTitle の既定サイズ確認">
+        <div className="flex flex-col gap-2 p-5">
+          <SheetTitle level={level}>配席表</SheetTitle>
+          <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
+            preset とサーフェス文脈から既定サイズが決まります。
+          </p>
+        </div>
+      </BottomSheetFrame>
+    </Sheet>
+  )
+}
+
+/** 全画面級 preset の配下では level 未指定でも画面タイトル相当になる。 */
+export const TitleLevelPageDefault: Story = {
+  render: () => <TitleLevelExample preset="mobile-full" />,
+}
+
+/** 部分表示 preset では従来どおりの既定サイズを保つ（非破壊）。 */
+export const TitleLevelPartialDefault: Story = {
+  render: () => <TitleLevelExample preset="mobile-form" />,
+}
+
+/** 明示した level は文脈より優先される。 */
+export const TitleLevelExplicit: Story = {
+  render: () => <TitleLevelExample preset="mobile-full" level="card" />,
 }

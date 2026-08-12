@@ -524,3 +524,73 @@ export const ConfirmDialogStacksAboveSheet: Story = {
     await userEvent.click(confirm)
   },
 }
+
+/**
+ * #341: DialogTitle の `level`（見出しの役割）。
+ * 全画面サーフェス配下では既定が「画面タイトル / H1」相当
+ * (typo-heading-2xl) に上がる。値の正本は contracts/composition.json の
+ * textHierarchy。
+ */
+export const TitleLevelFullscreenDefault: Story = {
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>全画面（level 未指定 = 画面タイトル）</Button>
+      </DialogTrigger>
+      <DialogContent position="fullscreen" description="全画面配下の既定サイズ。">
+        <DialogHeader>
+          <DialogTitle>配席表</DialogTitle>
+          <DialogDescription>
+            level を渡していませんが、全画面サーフェス配下なので
+            typo-heading-2xl（画面タイトル / H1）で表示されます。
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  ),
+}
+
+/**
+ * #341: 明示した level は文脈より常に優先される。
+ * 全画面配下でも level="card" ならカード見出し (typo-heading-md) になる。
+ */
+export const TitleLevelExplicit: Story = {
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>全画面（level=&quot;card&quot; を明示）</Button>
+      </DialogTrigger>
+      <DialogContent position="fullscreen" description="明示 level の優先。">
+        <DialogHeader>
+          <DialogTitle level="card">配席表</DialogTitle>
+          <DialogDescription>
+            全画面配下でも、明示した level="card"（typo-heading-md）が勝ちます。
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  ),
+}
+
+/**
+ * #341: 非全画面（中央ダイアログ）の既定は従来どおり typo-heading-lg。
+ * 既存 consumer の見た目を一斉に変えないため、既定を引き上げるのは
+ * 全画面級サーフェスの配下だけに限定している。
+ */
+export const TitleLevelCenterDefault: Story = {
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>中央ダイアログ（level 未指定 = 従来サイズ）</Button>
+      </DialogTrigger>
+      <DialogContent description="非全画面の既定サイズ。">
+        <DialogHeader>
+          <DialogTitle>設定を変更</DialogTitle>
+          <DialogDescription>
+            中央ダイアログの既定は従来どおり typo-heading-lg です。
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  ),
+}

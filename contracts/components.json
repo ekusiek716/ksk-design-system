@@ -342,10 +342,12 @@
         "position は center(既定) / top / fullscreen",
         "safeArea(既定 true) で top/fullscreen の safe-area 回避を制御。false でオプトアウト",
         "autoFocus は first-input / title / ref / false を指定可能",
-        "description prop は sr-only description を自動生成する"
+        "description prop は sr-only description を自動生成する",
+        "DialogTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は position=\"fullscreen\" 配下で page 相当、それ以外は従来の typo-heading-lg"
       ],
       "variants": {
-        "position": ["center", "top", "fullscreen"]
+        "position": ["center", "top", "fullscreen"],
+        "titleLevel": ["page", "section", "card"]
       }
     },
     {
@@ -370,9 +372,11 @@
         "side=\"float\"/\"float-glass\" は既定(safeArea=true)でキーボード非表示時も上端が抜けない max-height を確保",
         "safeArea(既定 true) は上記2つの回避をまとめてオプトアウトする prop。他の side には効果なし",
         "autoFocus は first-input / title / ref / false を指定可能",
-        "description prop はRadix管理IDの sr-only description を自動生成する"
+        "description prop はRadix管理IDの sr-only description を自動生成する",
+        "SheetTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は BottomSheetFrame preset=\"mobile-full\"|\"mobile-page\" 配下で page 相当、それ以外は従来の typo-heading-lg"
       ],
       "variants": {
+        "titleLevel": ["page", "section", "card"],
         "side": [
           "top",
           "bottom",

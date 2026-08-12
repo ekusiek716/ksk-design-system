@@ -32,6 +32,9 @@ export { CheckboxField } from "./components/ui/checkbox-field"
 export type { CheckboxFieldProps } from "./components/ui/checkbox-field"
 export { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./components/ui/collapsible"
 export { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger } from "./components/ui/dialog"
+export type { DialogContentProps, DialogOverlayProps, DialogTitleProps } from "./components/ui/dialog"
+// #341: 見出しの役割（level）。値の正本は contracts/composition.json の textHierarchy。
+export type { TitleLevel } from "./lib/title-level"
 export {
   Form,
   FormField as RhfFormField,
@@ -88,7 +91,7 @@ export { ScrollArea, ScrollBar } from "./components/ui/scroll-area"
 export { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "./components/ui/select"
 export { Separator } from "./components/ui/separator"
 export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator } from "./components/ui/sheet"
-export type { SheetProps, SheetContentProps, SnapPoint } from "./components/ui/sheet"
+export type { SheetProps, SheetContentProps, SheetTitleProps, SnapPoint } from "./components/ui/sheet"
 export { Skeleton, SkeletonText } from "./components/ui/skeleton"
 export type { SkeletonProps, SkeletonTextProps } from "./components/ui/skeleton"
 export { ListSkeleton, GridSkeleton } from "./components/patterns/list-skeletons"
