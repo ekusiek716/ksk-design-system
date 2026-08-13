@@ -1203,16 +1203,24 @@
     {
       "name": "ListItem",
       "path": "src/components/patterns/list-item.tsx",
-      "description": "汎用リストアイテム。left/right/bottomスロット付き。href で link、onClick で button、どちらもない場合は静的 div として描画する。",
+      "description": "汎用リストアイテム。left/right/bottom/footer スロット付き。href で link、onClick で button、どちらもない場合は静的 div として描画する。align で中央寄せ、density で行の密度を切り替えられる。",
+      "variants": {
+        "variant": ["default", "destructive"],
+        "align": ["start", "center"],
+        "density": ["comfortable", "compact"]
+      },
       "accessibility": [
         "href renders a real anchor",
         "onClick renders a real button",
-        "44px minimum target and visible focus ring for actionable items"
+        "44px minimum target and visible focus ring for actionable items (density=compact opts out of the 44px floor — use it for static rows or where the tap target is guaranteed elsewhere)"
       ],
       "rules": [
         "遷移は href、同一画面内の操作は onClick を ListItem 自体に渡す",
         "interactive は既存 wrapper の視覚互換用。新規実装では使用しない",
-        "静的項目に role=button や tabIndex を付けない"
+        "静的項目に role=button や tabIndex を付けない",
+        "アイコン+ラベルを中央寄せした full-width CTA 行は align=center を使い、生の button を書かない",
+        "カード内の高密度な行は density=compact を使う。区切り線を消すのは density の責務ではなく className='border-b-0'",
+        "leftSlot 幅にインデントされない全幅の下段要素（進捗バー等）は footerSlot、title 列の内側に置くものは bottomSlot"
       ]
     },
     {
