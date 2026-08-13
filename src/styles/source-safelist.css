@@ -208,6 +208,7 @@
 @source inline("border-[var(--Surface-Primary)]");
 @source inline("border-[var(--Text-Disable)]");
 @source inline("border-b");
+@source inline("border-b-0");
 @source inline("border-b-2");
 @source inline("border-b-[3px]");
 @source inline("border-collapse");

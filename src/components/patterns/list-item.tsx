@@ -12,10 +12,43 @@ import { cn } from "@/lib/utils"
  */
 type ListItemVariant = "default" | "destructive"
 
+/**
+ * 行の中での配置。
+ * - "start"  : 既定。本文列が `flex-1` で伸び、左寄せ・上揃え。
+ * - "center" : 本文列を伸ばさず、leftSlot / 本文 / rightSlot のかたまりを
+ *              行の水平中央に寄せ、垂直方向も中央で揃える。テキストも中央寄せ。
+ *              アイコン + ラベルだけの full-width な CTA 行に使う。
+ */
+type ListItemAlign = "start" | "center"
+
+/**
+ * 行の密度。
+ * - "comfortable" : 既定。`px-4 py-3`、操作可能な行は最低 44px の高さを確保する。
+ * - "compact"     : `px-3 py-1`。カード内に多数行を積む高密度リスト用。
+ *                   **44px のタップ領域保証が外れる**ため、タップ可能な行に
+ *                   使う場合は行そのものが十分なタップ領域を持つか確認すること
+ *                   （静的な情報行での利用を推奨）。
+ *
+ * 区切り線は density の責務に含めない。線を消したい場合は
+ * `className="border-b-0"` を渡す。
+ */
+type ListItemDensity = "comfortable" | "compact"
+
 interface ListItemCommonProps {
   leftSlot?: React.ReactNode
   rightSlot?: React.ReactNode
+  /**
+   * title / description と同じ列（leftSlot の右側）に置く下段スロット。
+   * leftSlot がある場合はその幅ぶんインデントされる。
+   * 行全幅で敷きたいもの（進捗バー等）は `footerSlot` を使う。
+   */
   bottomSlot?: React.ReactNode
+  /**
+   * leftSlot / 本文 / rightSlot の行の**外側**・全幅に置く下段スロット。
+   * leftSlot の幅にインデントされないため、進捗バーやメーターなど
+   * 行いっぱいに敷きたい要素に使う。
+   */
+  footerSlot?: React.ReactNode
   title?: string
   description?: string
   children?: React.ReactNode
@@ -27,6 +60,8 @@ interface ListItemCommonProps {
    */
   interactive?: boolean
   variant?: ListItemVariant
+  align?: ListItemAlign
+  density?: ListItemDensity
 }
 
 type ListItemLinkProps = ListItemCommonProps &
@@ -54,11 +89,14 @@ function ListItem({
   leftSlot,
   rightSlot,
   bottomSlot,
+  footerSlot,
   title,
   description,
   interactive = false,
   disabled = false,
   variant = "default",
+  align = "start",
+  density = "comfortable",
   children,
   href,
   onClick,
@@ -67,22 +105,37 @@ function ListItem({
   const isDestructive = variant === "destructive"
   const actionable = Boolean(href || onClick)
   const visuallyInteractive = actionable || interactive
+  const isCentered = align === "center"
+  const isCompact = density === "compact"
+  const hasFooter = Boolean(footerSlot)
+  // 既定値（align="start" / density="comfortable" / footerSlot なし）のときは
+  // 従来と 1 クラスも変わらない文字列になるよう、断片の順序を保つこと。
+  // 回帰テスト: __tests__/list-item-layout.test.tsx
   const rootClassName = cn(
-    "flex w-full items-start gap-3 border-b border-[var(--Border-Low-Emphasis)] px-4 py-3 text-left",
+    "flex w-full",
+    hasFooter ? "flex-col" : isCentered ? "items-center" : "items-start",
+    !hasFooter && "gap-3",
+    "border-b border-[var(--Border-Low-Emphasis)]",
+    isCompact ? "px-3 py-1" : "px-4 py-3",
+    isCentered ? "justify-center text-center" : "text-left",
     visuallyInteractive && (
       isDestructive
         ? "cursor-pointer transition-colors hover:bg-[var(--Surface-Caution-Subtle)]"
         : "cursor-pointer transition-colors hover:bg-[var(--Surface-Secondary)]"
     ),
-    actionable && "min-h-11 focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+    actionable && (
+      isCompact
+        ? "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+        : "min-h-11 focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+    ),
     disabled && "cursor-not-allowed opacity-50",
     className,
   )
 
-  const content = (
+  const row = (
     <>
       {leftSlot && <div className="shrink-0">{leftSlot}</div>}
-      <div className="flex-1 min-w-0">
+      <div className={isCentered ? "min-w-0" : "flex-1 min-w-0"}>
         {title && (
           <p
             className={cn(
@@ -105,6 +158,24 @@ function ListItem({
       </div>
       {rightSlot && <div className="shrink-0">{rightSlot}</div>}
     </>
+  )
+
+  // footerSlot 未指定のときはラッパ要素を一切増やさない（既存 DOM 構造を維持）。
+  const content = hasFooter ? (
+    <>
+      <div
+        className={cn(
+          "flex w-full",
+          isCentered ? "items-center justify-center" : "items-start",
+          "gap-3",
+        )}
+      >
+        {row}
+      </div>
+      <div className="mt-2 w-full">{footerSlot}</div>
+    </>
+  ) : (
+    row
   )
 
   if (href) {
@@ -160,4 +231,4 @@ function ListItem({
 }
 
 export { ListItem }
-export type { ListItemProps, ListItemVariant }
+export type { ListItemProps, ListItemVariant, ListItemAlign, ListItemDensity }

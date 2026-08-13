@@ -239,6 +239,12 @@ export type {
   FieldSeparatorProps,
 } from "./components/patterns/field"
 export { ListItem } from "./components/patterns/list-item"
+export type {
+  ListItemProps,
+  ListItemVariant,
+  ListItemAlign,
+  ListItemDensity,
+} from "./components/patterns/list-item"
 export { SettingsListRow, SettingsSection } from "./components/patterns/settings-section"
 export type { SettingsListRowProps, SettingsSectionProps, SettingsSectionVariant } from "./components/patterns/settings-section"
 export { NotificationBadge } from "./components/patterns/notification-badge"

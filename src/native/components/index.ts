@@ -205,7 +205,12 @@ export {
 export { Banner, type BannerProps } from "./Banner"
 export { BannerCarousel, type BannerCarouselProps } from "./BannerCarousel"
 export { SearchBar, type SearchBarProps } from "./SearchBar"
-export { ListItem, type ListItemProps } from "./ListItem"
+export {
+  ListItem,
+  type ListItemProps,
+  type ListItemAlign,
+  type ListItemDensity,
+} from "./ListItem"
 export {
   SettingsListRow,
   SettingsSection,
