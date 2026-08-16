@@ -12,6 +12,7 @@ import {
 } from "../../ui/select"
 import { DatePicker } from "../../ui/date-picker"
 import { Chip } from "../chip"
+import { SimplePagination } from "../simple-pagination"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -282,6 +283,12 @@ function getCellEditTriggerProps<TRow, TValue>(
   }
 }
 
+/** 開発ビルド判定（本番バンドルでは警告を出さない）。 */
+const isDev = () => {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+  return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
+}
+
 const DATA_TABLE_INTERACTIVE_SELECTOR = [
   "a[href]",
   "button",
@@ -365,8 +372,8 @@ function getStickyCellProps(
       // 同じ側に複数固定列があっても、外側の列の不透明背景が内側の影を覆うため
       // 実質スクロール領域に面した端の列だけ影が見える。
       side === "left"
-        ? "shadow-[8px_0_12px_-3px_rgba(0,0,0,0.3)]"
-        : "shadow-[-8px_0_12px_-3px_rgba(0,0,0,0.3)]"
+        ? "shadow-[var(--shadow-sticky-inline-start)]"
+        : "shadow-[var(--shadow-sticky-inline-end)]"
     ),
     style: {
       [side]: offset,
@@ -427,6 +434,21 @@ interface DataTableProps<TRow = unknown> extends React.ComponentProps<"div"> {
   rowClickable?: boolean
   tableClassName?: string
   rowClassName?: string | ((row: TRow, index: number) => string | undefined)
+  /**
+   * サーバーページング（ページ切り替えを外部で行う）を有効にする。
+   *
+   * `rows` には「現在ページ分の行だけ」を渡す前提で、`DataTable` は行のスライスをしない。
+   * `pageCount` と併せて指定すると、表の下にページ送り UI（{@link SimplePagination}）を表示する。
+   */
+  manualPagination?: boolean
+  /** 総ページ数。`manualPagination` と併せて指定するとページ送り UI が出る。 */
+  pageCount?: number
+  /** 現在ページ（0-indexed・controlled）。指定すると内部状態は使わない。 */
+  pageIndex?: number
+  /** 現在ページの初期値（0-indexed・uncontrolled） */
+  defaultPageIndex?: number
+  /** ページ変更時のコールバック（0-indexed） */
+  onPaginationChange?: (pageIndex: number) => void
 }
 
 function DataTable<TRow = unknown>({
@@ -448,9 +470,15 @@ function DataTable<TRow = unknown>({
   rowClickable,
   tableClassName,
   rowClassName,
+  manualPagination,
+  pageCount,
+  pageIndex,
+  defaultPageIndex = 0,
+  onPaginationChange,
   ...props
 }: DataTableProps<TRow>) {
   const [internalSort, setInternalSort] = React.useState<DataTableSortState | null>(defaultSort)
+  const [internalPageIndex, setInternalPageIndex] = React.useState(defaultPageIndex)
   const [internalSelectedIds, setInternalSelectedIds] = React.useState<DataTableRowId[]>(
     selection?.defaultSelectedRowIds ?? []
   )
@@ -576,6 +604,34 @@ function DataTable<TRow = unknown>({
   const selectionColSpan = selectionMode === "none" ? 0 : 1
   const colSpan = activeColumns.length + selectionColSpan
 
+  // 固定列の left/right は、表示順の先行固定列の幅から自動で求める（stickyOffset 明示があればそちら優先）。
+  const stickyOffsets = React.useMemo(() => resolveStickyOffsets(activeColumns), [activeColumns])
+  const resolveColumnStickyOffset = (column: DataTableColumn<TRow>) =>
+    stickyOffsets.get(column.key)?.offset ?? column.stickyOffset
+
+  React.useEffect(() => {
+    if (!isDev()) return
+    const unresolved = activeColumns.filter(
+      (column) => column.sticky && stickyOffsets.get(column.key)?.offset === undefined
+    )
+    if (unresolved.length === 0) return
+    console.warn(
+      `[ksk-ds] DataTable: 固定列 ${unresolved
+        .map((column) => `"${column.key}"`)
+        .join(" / ")} のオフセットを自動計算できません。` +
+        `先行する固定列の width が "auto" / "flex" で幅が確定しないためです。` +
+        `該当列に width（"sm" 等）を指定するか、stickyOffset を明示してください。`
+    )
+  }, [activeColumns, stickyOffsets])
+
+  const activePageIndex = pageIndex ?? internalPageIndex
+  const paginationEnabled = Boolean(manualPagination) && typeof pageCount === "number" && pageCount > 0
+  const handlePageChange = (nextPage: number) => {
+    const nextIndex = nextPage - 1
+    if (pageIndex === undefined) setInternalPageIndex(nextIndex)
+    onPaginationChange?.(nextIndex)
+  }
+
   if (!isHighLevel) {
     return (
       <div
@@ -591,7 +647,7 @@ function DataTable<TRow = unknown>({
     )
   }
 
-  return (
+  const table = (
     <div
       data-slot="data-table"
       className={cn(
@@ -628,7 +684,7 @@ function DataTable<TRow = unknown>({
                 onSort={() => handleSort(column)}
                 width={column.width}
                 sticky={column.sticky}
-                stickyOffset={column.stickyOffset}
+                stickyOffset={resolveColumnStickyOffset(column)}
                 className={cn(
                   column.align === "center" && "text-center",
                   column.align === "right" && "text-right",
@@ -715,7 +771,7 @@ function DataTable<TRow = unknown>({
                             align={column.align}
                             width={column.width}
                             sticky={column.sticky}
-                            stickyOffset={column.stickyOffset}
+                            stickyOffset={resolveColumnStickyOffset(column)}
                             className={column.className}
                           >
                             {isEditing && column.editCell
@@ -738,7 +794,7 @@ function DataTable<TRow = unknown>({
                               className={column.className}
                               width={column.width}
                               sticky={column.sticky}
-                              stickyOffset={column.stickyOffset}
+                              stickyOffset={resolveColumnStickyOffset(column)}
                             />
                           )
                         }
@@ -750,7 +806,7 @@ function DataTable<TRow = unknown>({
                             className={column.className}
                             width={column.width}
                             sticky={column.sticky}
-                            stickyOffset={column.stickyOffset}
+                            stickyOffset={resolveColumnStickyOffset(column)}
                           />
                         )
                       }
@@ -760,7 +816,7 @@ function DataTable<TRow = unknown>({
                           align={column.align}
                           width={column.width}
                           sticky={column.sticky}
-                          stickyOffset={column.stickyOffset}
+                          stickyOffset={resolveColumnStickyOffset(column)}
                           className={column.className}
                         >
                           {getColumnValue(row, index, column, context)}
@@ -774,6 +830,21 @@ function DataTable<TRow = unknown>({
           })}
         </DataTableBody>
       </DataTableTable>
+    </div>
+  )
+
+  if (!paginationEnabled) return table
+
+  // ページ送り UI は横スクロールコンテナの外側に置く（表を横に流しても操作系が消えないように）。
+  return (
+    <div data-slot="data-table-paginated" className="flex flex-col gap-3">
+      {table}
+      <SimplePagination
+        className="self-end"
+        page={activePageIndex + 1}
+        totalPages={pageCount ?? 1}
+        onPageChange={handlePageChange}
+      />
     </div>
   )
 }
@@ -954,6 +1025,75 @@ const dataTableWidthVariants = {
   xl: "w-[400px]",
   flex: "w-full min-w-[240px]",
 } as const
+
+/**
+ * `width` enum の実 px 幅。`dataTableWidthVariants` の Tailwind クラスと対になっており、
+ * 固定列オフセットの自動計算（{@link resolveStickyOffsets}）で先行列の幅を積算するために使う。
+ *
+ * `auto` / `flex` は内容やコンテナ幅に依存して確定しないため `null`。
+ * クラス側と食い違うと固定列がズレるため、`__tests__/data-table-sticky-offsets.test.tsx` で
+ * `dataTableWidthVariants` の `w-[Npx]` と一致することを検査している。
+ */
+const DATA_TABLE_WIDTH_PX: Record<DataTableColumnWidth, number | null> = {
+  auto: null,
+  flex: null,
+  narrow: 48,
+  checkbox: 40,
+  action: 48,
+  sm: 120,
+  md: 200,
+  lg: 300,
+  xl: 400,
+}
+
+/** 固定列オフセットの解決結果。`offset` が `undefined` の列は自動計算できなかったもの。 */
+interface DataTableStickyOffset {
+  offset: number | undefined
+  /** `stickyOffset` の明示指定があったか（自動計算より常に優先される） */
+  explicit: boolean
+}
+
+function accumulateStickyOffsets<TRow>(
+  columns: readonly DataTableColumn<TRow>[],
+  side: "left" | "right",
+  result: Map<string, DataTableStickyOffset>
+) {
+  const ordered = side === "left" ? columns : [...columns].reverse()
+  let accumulated = 0
+  // 先行する固定列に幅不定（auto / flex）のものが混ざった時点で、以降の積算は成立しない。
+  let resolvable = true
+  for (const column of ordered) {
+    if (!column.sticky) continue
+    const columnSide: "left" | "right" = column.sticky === "right" ? "right" : "left"
+    if (columnSide !== side) continue
+    const explicit = typeof column.stickyOffset === "number"
+    const offset = explicit ? column.stickyOffset : resolvable ? accumulated : undefined
+    result.set(column.key, { offset, explicit })
+    const width = DATA_TABLE_WIDTH_PX[column.width ?? "auto"]
+    if (width == null) {
+      resolvable = false
+      continue
+    }
+    // 明示指定があればそれを基点に積み直す（手計算と自動計算が混在しても破綻しないように）
+    accumulated = (explicit ? (column.stickyOffset as number) : accumulated) + width
+  }
+}
+
+/**
+ * 表示順の先行固定列の幅を積算して、各固定列の `left` / `right` オフセット(px)を求める。
+ *
+ * - `stickyOffset` の明示指定は常に優先される（後方互換）
+ * - 先行固定列に幅不定（`width` が `auto` / `flex`）の列があると積算できないため `offset` は `undefined` になる
+ * - 固定でない列は積算に含めない（横スクロールで流れるため）
+ */
+function resolveStickyOffsets<TRow>(
+  columns: readonly DataTableColumn<TRow>[]
+): Map<string, DataTableStickyOffset> {
+  const result = new Map<string, DataTableStickyOffset>()
+  accumulateStickyOffsets(columns, "left", result)
+  accumulateStickyOffsets(columns, "right", result)
+  return result
+}
 
 const dataTableHeadVariants = cva(
   "px-3 py-2.5 text-left whitespace-nowrap typo-label-sm text-[var(--Text-Medium-Emphasis)]",
@@ -1934,8 +2074,9 @@ export {
   createDataTableSelectColumn,
 }
 
-export { getStickyCellProps }
+export { getStickyCellProps, resolveStickyOffsets, DATA_TABLE_WIDTH_PX, dataTableWidthVariants }
 export type {
+  DataTableStickyOffset,
   SortDirection,
   DataTableActionMenuItem,
   StickyPosition,

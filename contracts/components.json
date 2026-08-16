@@ -2335,7 +2335,9 @@
         "drag",
         "section-row",
         "section-sticky-left",
-        "section-heading-emphasis"
+        "section-heading-emphasis",
+        "sticky-column-auto-offset",
+        "manual-pagination"
       ],
       "rules": [
         "rows/columns API は最短実装向け",
@@ -2345,6 +2347,8 @@
         "日付編集セルは DataTableDateCell または createDataTableDateColumn を使う",
         "残り幅を受け持つ列は width=\"flex\" を使い、手書き className の w-full/min-w 再実装を避ける",
         "セクション見出しを横スクロール中も左に残す場合は DataTableSectionRow stickyLeft / headingSize を使う",
+        "固定列は column.sticky だけ指定する。left/right は先行固定列の width から自動計算されるため stickyOffset の px 手計算は不要（幅が auto/flex の固定列が先行する場合のみ stickyOffset を明示する）",
+        "サーバー側でページを切り替える表は manualPagination + pageCount + pageIndex + onPaginationChange を使い、rows には現在ページ分だけ渡す（DataTable は行をスライスしない）",
         "複雑なテーブル全体構成は DataTableHead, DataTableRow, DataTableCell などのサブコンポーネントを使う"
       ]
     },

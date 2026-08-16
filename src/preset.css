@@ -208,6 +208,11 @@
   --shadow-lg: 0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12);
   --shadow-dialog: 0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2);
   --shadow-tooltip: 0px 8px 8px -4px rgba(17, 24, 39, 0.08), 0px 4px 6px -4px rgba(17, 24, 39, 0.12);
+  /* 固定列（sticky column）がスクロール領域に落とす方向付きの影。
+     論理方向で命名する（RTL でも「行の先頭側/末尾側」の意味が保たれる）。
+     inline-start = 先頭側に固定された列が、末尾方向へ落とす影。 */
+  --shadow-sticky-inline-start: 8px 0 12px -3px rgba(0, 0, 0, 0.3);
+  --shadow-sticky-inline-end: -8px 0 12px -3px rgba(0, 0, 0, 0.3);
 }
 
 /* ─── Animation ─── */
