@@ -937,3 +937,78 @@ export const DragAndDrop: StoryObj = {
     )
   },
 }
+
+// ─── 固定列のオフセット自動計算（issue #359）───
+
+export const StickyColumnsAuto: StoryObj = {
+  name: "固定列（オフセット自動計算）",
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "左右に複数の固定列を持つ表。`sticky` を付けるだけで、表示順の先行固定列の幅（`width` enum の実 px）から " +
+          "`left` / `right` が自動で決まる。`stickyOffset` の手計算は不要（明示した場合はそちらが優先される）。",
+      },
+    },
+  },
+  render: () => {
+    const columns: DataTableColumn<User>[] = [
+      { key: "id", header: "ID", width: "sm", sticky: "left", render: (row) => row.id },
+      { key: "name", header: "名前", width: "md", sticky: "left", render: (row) => row.name },
+      { key: "email", header: "メール", width: "lg", render: (row) => row.email },
+      { key: "note1", header: "備考1", width: "lg", render: () => "横スクロール確認用の長い列" },
+      { key: "note2", header: "備考2", width: "lg", render: () => "横スクロール確認用の長い列" },
+      {
+        key: "status",
+        header: "ステータス",
+        width: "sm",
+        sticky: "right",
+        render: (row) => (
+          <Badge variant={statusBadgeVariant[row.status]}>{statusLabel[row.status]}</Badge>
+        ),
+      },
+    ]
+    return (
+      <div className="max-w-[720px] p-4">
+        <DataTable rows={sampleUsers} columns={columns} />
+      </div>
+    )
+  },
+}
+
+// ─── サーバーページング（issue #359）───
+
+export const ServerPagination: StoryObj = {
+  name: "サーバーページング",
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`manualPagination` + `pageCount` を渡すと、表の下にページ送り UI が出る。" +
+          "`rows` には現在ページ分の行だけを渡す（DataTable 側では行をスライスしない）。",
+      },
+    },
+  },
+  render: () => {
+    const pageSize = 2
+    const [pageIndex, setPageIndex] = React.useState(0)
+    const columns: DataTableColumn<User>[] = [
+      { key: "name", header: "名前", width: "md", render: (row) => row.name },
+      { key: "email", header: "メール", width: "lg", render: (row) => row.email },
+    ]
+    const pageCount = Math.ceil(sampleUsers.length / pageSize)
+    const rows = sampleUsers.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+    return (
+      <div className="p-4">
+        <DataTable
+          rows={rows}
+          columns={columns}
+          manualPagination
+          pageCount={pageCount}
+          pageIndex={pageIndex}
+          onPaginationChange={setPageIndex}
+        />
+      </div>
+    )
+  },
+}

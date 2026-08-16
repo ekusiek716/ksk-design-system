@@ -171,6 +171,10 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 影は5段（`--shadow-sm/md/lg/dialog/tooltip`）。面は md、浮く要素（dropdown/popover）は lg、
 モーダルは dialog。**境界は影＋1px罫線**で表現し、濃い影の多用は避ける。
 
+横スクロール中の固定列だけは方向付きの影を使う（`--shadow-sticky-inline-start` /
+`--shadow-sticky-inline-end`）。命名は論理方向で、inline-start = 行の先頭側に固定された列が
+末尾方向へ落とす影。生の `rgba()` を直書きせず、必ずこのトークンを参照する。
+
 ## Shapes
 
 角丸はトークン化（ベタ書き禁止）。**面 < モーダル < シート**の順で丸くなる。

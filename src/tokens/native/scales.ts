@@ -244,6 +244,14 @@ export const scales = {
     "tooltip": {
       "boxShadow": "0px 8px 8px -4px rgba(17, 24, 39, 0.08), 0px 4px 6px -4px rgba(17, 24, 39, 0.12)",
       "elevation": 6
+    },
+    "sticky-inline-start": {
+      "boxShadow": "8px 0 12px -3px rgba(0, 0, 0, 0.3)",
+      "elevation": 2
+    },
+    "sticky-inline-end": {
+      "boxShadow": "-8px 0 12px -3px rgba(0, 0, 0, 0.3)",
+      "elevation": 2
     }
   },
   "touchTargets": {
