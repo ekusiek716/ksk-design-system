@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { usePortalContainer } from "./portal-container"
 import {
   ModalStackRegistrar,
   modalContentZ,
@@ -57,8 +58,10 @@ function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
 }
 
-function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+function DialogPortal({ container, ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+  // 明示 container > PortalContainerProvider > document.body（#360）
+  const resolvedContainer = usePortalContainer(container)
+  return <DialogPrimitive.Portal data-slot="dialog-portal" container={resolvedContainer} {...props} />
 }
 
 function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {

@@ -111,6 +111,7 @@
 @source inline("aspect-video");
 @source inline("backdrop-blur");
 @source inline("backdrop-blur-sm");
+@source inline("backdrop-filter");
 @source inline("before:-translate-y-1/2");
 @source inline("before:absolute");
 @source inline("before:content-['']");

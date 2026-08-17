@@ -41,6 +41,7 @@ const INTENTIONAL_NATIVE_GAPS = new Map([
   ["KebabMenu", "admin action menu is Web-only; native uses MenuDrawer/DropdownMenu patterns"],
   ["MobileTabBar", "web-only BottomTabBar wrapper; native uses LiquidBottomTabBar / createExpoRouterTabBar instead"],
   ["NotificationList", "admin notification list is Web-only"],
+  ["PortalContainerProvider", "DOM Portal の描画先を差し替えるための Provider。React Native に DOM Portal は無く、RN の Modal は常にネイティブのルートへ描画されるため Web 専用"],
   ["SearchPanel", "admin search panel is Web-only"],
   ["Section", "full-width CSS background band and responsive vertical rhythm primitive is Web-only; native uses View layout"],
   ["SectionNav", "hash-anchor navigation and aria-current=location are Web-only; native screens use SectionList or explicit scroll handlers"],

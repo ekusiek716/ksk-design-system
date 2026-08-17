@@ -2,6 +2,7 @@ import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { usePortalContainer } from "./portal-container"
 import {
   ModalStackRegistrar,
   modalContentZ,
@@ -467,8 +468,11 @@ function SheetClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Cl
   return <DialogPrimitive.Close data-slot="sheet-close" {...props} />
 }
 
-function SheetPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="sheet-portal" {...props} />
+function SheetPortal({ container, ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+  // 明示 container（SheetContent.container）> PortalContainerProvider >
+  // document.body（#360）。既存の container prop の挙動は不変。
+  const resolvedContainer = usePortalContainer(container)
+  return <DialogPrimitive.Portal data-slot="sheet-portal" container={resolvedContainer} {...props} />
 }
 
 // ============================================================================
