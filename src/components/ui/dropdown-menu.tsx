@@ -1,6 +1,7 @@
 import * as React from "react"
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { usePortalContainer } from "./portal-container"
 
 // ─── Inline icons (no lucide-react dep) ──────────────────────────────────────
 
@@ -81,10 +82,17 @@ function DropdownMenu({
 }
 
 function DropdownMenuPortal({
+  container,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Portal>) {
+  // 明示 container > PortalContainerProvider > document.body（#360）
+  const resolvedContainer = usePortalContainer(container)
   return (
-    <DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />
+    <DropdownMenuPrimitive.Portal
+      data-slot="dropdown-menu-portal"
+      container={resolvedContainer}
+      {...props}
+    />
   )
 }
 
@@ -104,8 +112,10 @@ function DropdownMenuContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+  // PortalContainerProvider があればそのスコープ内へ、無ければ document.body（#360）
+  const container = usePortalContainer()
   return (
-    <DropdownMenuPrimitive.Portal>
+    <DropdownMenuPrimitive.Portal container={container}>
       <DropdownMenuPrimitive.Content
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}

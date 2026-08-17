@@ -1,6 +1,7 @@
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { usePortalContainer } from "./portal-container"
 import { notifyAlertDialogOpening } from "@/lib/layer-coordination"
 import {
   ModalStackRegistrar,
@@ -82,10 +83,17 @@ function AlertDialogTrigger({
 }
 
 function AlertDialogPortal({
+  container,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
+  // 明示 container > PortalContainerProvider > document.body（#360）
+  const resolvedContainer = usePortalContainer(container)
   return (
-    <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
+    <AlertDialogPrimitive.Portal
+      data-slot="alert-dialog-portal"
+      container={resolvedContainer}
+      {...props}
+    />
   )
 }
 

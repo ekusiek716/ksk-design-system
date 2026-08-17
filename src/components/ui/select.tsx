@@ -2,6 +2,7 @@ import * as React from "react"
 import { Select as SelectPrimitive } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { usePortalContainer } from "./portal-container"
 
 /**
  * SelectTrigger のサイズ規格。Button/Input と揃えて 3 段階を用意。
@@ -59,8 +60,10 @@ function SelectTrigger({ className, children, size, ...props }: SelectTriggerPro
 }
 
 function SelectContent({ className, children, position = "popper", ...props }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  // PortalContainerProvider があればそのスコープ内へ、無ければ document.body（#360）
+  const container = usePortalContainer()
   return (
-    <SelectPrimitive.Portal>
+    <SelectPrimitive.Portal container={container}>
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(

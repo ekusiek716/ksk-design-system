@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Tooltip as TooltipPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { usePortalContainer } from "./portal-container"
 
 type CoachMarkPlacement = "top" | "bottom" | "left" | "right"
 type CoachMarkVariant = "default" | "brand"
@@ -60,13 +61,16 @@ function CoachMark({
   // screen readers still get an accessible description via the role="tooltip" node.
   const ariaLabel = typeof content === "string" ? content : "コーチマーク"
 
+  // PortalContainerProvider があればそのスコープ内へ、無ければ document.body（#360）
+  const portalContainer = usePortalContainer()
+
   return (
     <TooltipPrimitive.Provider delayDuration={delayDuration}>
       <TooltipPrimitive.Root open={open} onOpenChange={onOpenChange}>
         <TooltipPrimitive.Trigger asChild>
           {children}
         </TooltipPrimitive.Trigger>
-        <TooltipPrimitive.Portal>
+        <TooltipPrimitive.Portal container={portalContainer}>
           <TooltipPrimitive.Content
             data-slot="coach-mark"
             data-variant={variant}
