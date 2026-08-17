@@ -3,6 +3,25 @@ import { cn } from "@/lib/utils"
 import { buttonVariants } from "./button"
 import type { VariantProps } from "class-variance-authority"
 
+type PaginationLinkOwnProps = {
+  isActive?: boolean
+  /**
+   * 押せない状態（先頭ページで「前へ」等）。button 描画では素の disabled、
+   * a 描画では href を外した上で tabIndex=-1 + pointer-events-none にする
+   * （aria-disabled だけでは実際には押せてしまうため）。
+   */
+  disabled?: boolean
+} & Pick<VariantProps<typeof buttonVariants>, "size">
+
+/**
+ * 描画する要素。既定は `a`（ページ遷移リンク）。
+ * SPA でページ状態だけを切り替える用途（`href="#"` + preventDefault のごまかしが
+ * 要らない）では `as="button"` を渡す（issue #357）。
+ */
+type PaginationLinkProps =
+  | (PaginationLinkOwnProps & { as?: "a" } & React.ComponentProps<"a">)
+  | (PaginationLinkOwnProps & { as: "button" } & React.ComponentProps<"button">)
+
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return <nav role="navigation" aria-label="ページネーション" data-slot="pagination" className={cn("mx-auto flex w-full justify-center", className)} {...props} />
 }
@@ -15,24 +34,46 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
   return <li data-slot="pagination-item" {...props} />
 }
 
-type PaginationLinkProps = {
-  isActive?: boolean
-} & Pick<VariantProps<typeof buttonVariants>, "size"> &
-  React.ComponentProps<"a">
+function PaginationLink({
+  className,
+  isActive,
+  disabled,
+  size = "icon",
+  as = "a",
+  ...props
+}: PaginationLinkProps) {
+  const linkClassName = cn(
+    buttonVariants({
+      variant: isActive ? "default" : "ghost",
+      size,
+    }),
+    className
+  )
 
-function PaginationLink({ className, isActive, size = "icon", ...props }: PaginationLinkProps) {
+  if (as === "button") {
+    const { type = "button", ...rest } = props as React.ComponentProps<"button">
+    return (
+      <button
+        type={type}
+        disabled={disabled}
+        aria-current={isActive ? "page" : undefined}
+        data-slot="pagination-link"
+        className={linkClassName}
+        {...rest}
+      />
+    )
+  }
+
+  const { href, tabIndex, ...rest } = props as React.ComponentProps<"a">
   return (
     <a
+      href={disabled ? undefined : href}
+      tabIndex={disabled ? -1 : tabIndex}
       aria-current={isActive ? "page" : undefined}
+      aria-disabled={disabled || undefined}
       data-slot="pagination-link"
-      className={cn(
-        buttonVariants({
-          variant: isActive ? "default" : "ghost",
-          size,
-        }),
-        className
-      )}
-      {...props}
+      className={cn(linkClassName, disabled && "pointer-events-none opacity-50")}
+      {...rest}
     />
   )
 }
@@ -90,3 +131,4 @@ function PaginationEllipsis({ className, label = "その他のページ", ...pro
 }
 
 export { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis }
+export type { PaginationLinkProps }
