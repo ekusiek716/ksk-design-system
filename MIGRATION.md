@@ -3,6 +3,40 @@
 メジャーバージョン間の移行ガイド。
 patch / minor は原則破壊変更なし、自動アップグレード可（例外: **v1.34.0 で npm パッケージ名を変更**。import の置換が必要。下記参照）。
 
+<!-- deprecations:start（自動生成・手で編集しない） -->
+
+## 非推奨 API 一覧
+
+正本は [`contracts/deprecations.json`](./contracts/deprecations.json)。この節はそこから生成しています。
+
+消費側での残存件数は次のコマンドで数えられます（read-only・残件があれば exit 1）:
+
+```bash
+npx ksk-ds check-migration ./src
+```
+
+| API | 使われ方 | 移行先 | 非推奨にした版 | 削除予定 |
+| --- | --- | --- | --- | --- |
+| `ListItem.interactive` | `<ListItem interactive>` | href または onClick を ListItem 自体へ渡す | 1.46.0 | v2.0.0 |
+| `ChipSelector.multiple` | `<ChipSelector multiple>` | selectionMode（multiple={false} は selectionMode="single"、multiple は selectionMode="multiple"） | unreleased | v2.0.0 |
+| `PillToggle.onValueChange` | `<PillToggle onValueChange>` | onChange | 1.49.0 | v2.0.0 |
+| `ProductCard.deliveryLabel` | `<ProductCard deliveryLabel>` | なし（v1.30.0 以降は描画されないため、渡している箇所は削除する） | 1.30.1 | v2.0.0 |
+| `Progress.tone` | `<Progress tone>` | variant | 1.40.1 | v2.0.0 |
+
+各エントリの補足:
+
+- **ListItem.interactive**（issue #207） — 外側の Link / button でラップする既存コードの視覚互換用に残している。 実装: src/components/patterns/list-item.tsx
+- **ChipSelector.multiple**（issue #352） — 既定が true（複数選択）で「渡し忘れると静かに壊れる側」に倒れているため新規実装では使わない。 実装: src/components/patterns/chip-selector.tsx / src/native/components/ChipSelector.tsx
+- **PillToggle.onValueChange**（issue #264） — 後方互換エイリアス。onChange を併せて渡した場合は onChange が優先される。 実装: src/components/ui/pill-toggle.tsx
+- **ProductCard.deliveryLabel** — 既存 consumer の型互換のためだけに残している no-op prop。 実装: src/components/patterns/commerce/product-card.tsx
+- **Progress.tone** — React Native 版のみ。既存 RN consumer 向けの互換。 実装: src/native/components/Progress.tsx
+
+削除は「全消費リポで `check-migration` の残件が 0」を条件に、`削除予定` のメジャーリリースで行います。
+
+<!-- deprecations:end -->
+
+---
+
 ## v2.0 (未リリース)
 
 まだメジャー破壊変更の予定はなし。
@@ -132,6 +166,15 @@ export default [
 ```
 
 これで codemod が拾えなかった旧 API の使用を検出できる。
+
+### Step 3.5. 非推奨 API の残存を数える
+
+```bash
+npx ksk-ds check-migration ./src
+```
+
+`contracts/deprecations.json` の非推奨 API が何件残っているかを、識別子別・ファイル別に出す
+（read-only・残件があれば exit 1 なので CI にも置ける）。
 
 ### Step 4. 動作確認
 

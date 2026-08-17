@@ -42,6 +42,7 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   npx ksk-ds lint src --format json   CI 向け JSON 出力
   npx ksk-ds lint --changed           Git 差分のみ検査
   npx ksk-ds check-migration ./src    非推奨 API の残存を検査（read-only）
+  npx ksk-ds check-migration ./src --format=json  CI 向け JSON 出力
   npx ksk-ds check-duplicates [DIR]    DS と同名のローカル実装を検査
   npx ksk-ds check-duplicates --strict 検出時に exit 1（CI 向け）
   npx ksk-ds codemod                   利用できる codemod を一覧
@@ -58,8 +59,8 @@ if (cmd === "lint") {
 }
 
 if (cmd === "check-migration") {
-  const { runCheckMigrationCli } = await import("../scripts/codemod/check-migration.mjs")
-  const status = runCheckMigrationCli(args.slice(1))
+  const { runCheckMigrationCli } = await import("./check-migration.js")
+  const status = runCheckMigrationCli(args.slice(1), { cwd: process.cwd(), pkgRoot })
   process.exit(status)
 }
 
