@@ -220,6 +220,7 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **src/components/COMPONENT_LOOKUP.md** | 全コンポーネントのバリアント・インポートパス一覧（自動生成） |
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
 | **contracts/screen-patterns.json** | 画面実装前にどのシェル/パターンを使うかを決める decisionTree・crudMatrix |
+| **contracts/deprecations.json** | 非推奨 API の正本台帳（移行先・削除予定。MIGRATION.md の一覧節と check-migration CLI の入力） |
 | **contracts/composition.json** | 選んだパターン内部の並べ方（骨格構造・余白リズム・カード階層・テキスト階層・CTA優先度） |
 
 ---
@@ -269,6 +270,12 @@ npm run generate:lookup
 
 # DESIGN.md contract 検査
 npm run lint:design
+
+# 非推奨 API 台帳の整合検査（台帳 ⇔ 実ソースの @deprecated JSDoc）
+npm run lint:deprecations
+
+# MIGRATION.md の「非推奨 API 一覧」節を台帳から再生成
+npm run generate:migration-doc
 
 # @source safelist 再生成（新しい Tailwind クラスを使ったら実行）
 npm run generate:safelist

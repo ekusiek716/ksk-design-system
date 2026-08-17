@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "purpose": "非推奨 API の正本台帳。消費側の残存を数える check-migration CLI と MIGRATION.md 生成の入力になる。",
+    "sourceOfTruth": "contracts/deprecations.json",
+    "consumers": [
+      "bin/check-migration.js（npx ksk-ds check-migration ./src）",
+      "scripts/generate-migration-doc.mjs（MIGRATION.md の自動生成節）",
+      "scripts/check-deprecations.mjs（台帳と @deprecated JSDoc の整合検査）"
+    ],
+    "fields": {
+      "id": "台帳内で一意。prop なら `Component.prop`、export なら export 名",
+      "kind": "prop | export。prop は JSX 属性として、export は import / re-export として検出する",
+      "component": "kind=prop のときの JSX タグ名（DS の export 名）",
+      "prop": "kind=prop のときの属性名",
+      "identifier": "kind=export のときの export 名",
+      "since": "非推奨にしたバージョン。未リリースなら unreleased",
+      "replacement": "移行先（消費側がそのまま読める日本語）",
+      "removeIn": "削除予定バージョン",
+      "sources": "@deprecated JSDoc を持つ実装ファイル（check-deprecations.mjs が実在を照合する）",
+      "issue": "経緯の参照先（任意）"
+    },
+    "policy": "エントリの削除条件は「全消費リポで check-migration の残件が 0」。削除は removeIn のメジャーリリースで行う。",
+    "counts": {
+      "total": 5,
+      "prop": 5,
+      "export": 0
+    }
+  },
+  "deprecations": [
+    {
+      "id": "ListItem.interactive",
+      "kind": "prop",
+      "component": "ListItem",
+      "prop": "interactive",
+      "since": "1.46.0",
+      "replacement": "href または onClick を ListItem 自体へ渡す",
+      "removeIn": "2.0.0",
+      "sources": ["src/components/patterns/list-item.tsx"],
+      "issue": "#207",
+      "note": "外側の Link / button でラップする既存コードの視覚互換用に残している。"
+    },
+    {
+      "id": "ChipSelector.multiple",
+      "kind": "prop",
+      "component": "ChipSelector",
+      "prop": "multiple",
+      "since": "unreleased",
+      "replacement": "selectionMode（multiple={false} は selectionMode=\"single\"、multiple は selectionMode=\"multiple\"）",
+      "removeIn": "2.0.0",
+      "sources": [
+        "src/components/patterns/chip-selector.tsx",
+        "src/native/components/ChipSelector.tsx"
+      ],
+      "issue": "#352",
+      "note": "既定が true（複数選択）で「渡し忘れると静かに壊れる側」に倒れているため新規実装では使わない。"
+    },
+    {
+      "id": "PillToggle.onValueChange",
+      "kind": "prop",
+      "component": "PillToggle",
+      "prop": "onValueChange",
+      "since": "1.49.0",
+      "replacement": "onChange",
+      "removeIn": "2.0.0",
+      "sources": ["src/components/ui/pill-toggle.tsx"],
+      "issue": "#264",
+      "note": "後方互換エイリアス。onChange を併せて渡した場合は onChange が優先される。"
+    },
+    {
+      "id": "ProductCard.deliveryLabel",
+      "kind": "prop",
+      "component": "ProductCard",
+      "prop": "deliveryLabel",
+      "since": "1.30.1",
+      "replacement": "なし（v1.30.0 以降は描画されないため、渡している箇所は削除する）",
+      "removeIn": "2.0.0",
+      "sources": ["src/components/patterns/commerce/product-card.tsx"],
+      "note": "既存 consumer の型互換のためだけに残している no-op prop。"
+    },
+    {
+      "id": "Progress.tone",
+      "kind": "prop",
+      "component": "Progress",
+      "prop": "tone",
+      "since": "1.40.1",
+      "replacement": "variant",
+      "removeIn": "2.0.0",
+      "sources": ["src/native/components/Progress.tsx"],
+      "note": "React Native 版のみ。既存 RN consumer 向けの互換。"
+    }
+  ]
+}

@@ -4,17 +4,18 @@
 
 ## 移行状況の確認（check-migration）
 
-非推奨 API（`eslint/deprecated.js` の `DEPRECATED` が正本）が利用側プロジェクトに
+非推奨 API（`contracts/deprecations.json` が正本）が利用側プロジェクトに
 まだ残っているかを read-only で検査する。書き換えは一切行わない。
+実体は `bin/check-migration.js`。
 
 ```bash
 npx ksk-design-system check-migration ./src
-# または
-node node_modules/ksk-design-system/scripts/codemod/check-migration.mjs ./src
+npx ksk-design-system check-migration ./src --format=json
 ```
 
-- `ksk-design-system` を参照していないファイルはスキップする（誤検知防止）
-- 0 件なら「移行完了」で exit 0、1 件以上見つかれば識別子別の内訳を出力して exit 1
+- TypeScript の AST で識別子ベースに検出する（コメント・文字列は誤検出しない）
+- `ksk-design-system` からの import に加え、相対 import 経由の re-export も追う
+- 0 件なら exit 0、1 件以上なら識別子別・ファイル別の内訳を出力して exit 1
 - 検出されたら該当する codemod（下記）を使って移行する
 
 ## 使い方（利用側プロジェクトで）
@@ -32,8 +33,8 @@ npx ksk-design-system codemod <name> ./src
 
 `<name>` は `scripts/codemod/<name>.mjs` のファイル名部分。**破壊変更に対応する
 codemod はそのリリース時に追加され、実行コマンドは MIGRATION.md に記載される。**
-`template.mjs`（雛形）と `check-migration.mjs`（読み取り専用スキャナ）は
-codemod としては呼べない。
+`template.mjs`（雛形）と `check-migration`（読み取り専用スキャナ。実体は
+`bin/check-migration.js`）は codemod としては呼べない。
 
 ## 新しい codemod の作り方（メンテナ向け）
 
@@ -71,4 +72,5 @@ codemod としては呼べない。
 
 - `MIGRATION.md` — メジャーバージョン毎の移行ガイド
 - `RELEASE.md` — リリースサイクル
-- `eslint/deprecated.js` — 旧 API 検出用 ESLint ルール
+- `contracts/deprecations.json` — 非推奨 API の正本台帳
+- `eslint/deprecated.js` — 旧 API（export 名）検出用 ESLint ルール
