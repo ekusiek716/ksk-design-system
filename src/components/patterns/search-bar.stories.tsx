@@ -39,3 +39,11 @@ export const WithOnSearch: Story = {
     onSearch: (value: string) => alert(`検索: ${value}`),
   },
 }
+
+export const AsForm: Story = {
+  args: {
+    placeholder: "Enter/送信ボタンで検索",
+    asForm: true,
+    onSearch: (value: string) => alert(`検索: ${value}`),
+  },
+}
