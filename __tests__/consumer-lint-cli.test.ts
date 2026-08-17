@@ -61,4 +61,24 @@ describe("consumer lint CLI", () => {
     `)
     expect(result.status).toBe(0)
   })
+
+  it("does not flag P047 for a motion-related time mention inside a comment", () => {
+    const result = runKskLint(`
+      // Recomputing per request is ~300-500ms on the current working set,
+      // so we memoize it instead.
+      export function Example() {
+        return <div>キャッシュ</div>
+      }
+    `)
+    expect(result.stdout).not.toContain("P047")
+  })
+
+  it("flags P047 for a raw motion value in real code", () => {
+    const result = runKskLint(`
+      export function Example() {
+        return <div style={{ transition: "all 300ms" }}>アニメーション</div>
+      }
+    `)
+    expect(result.stdout).toContain("P047")
+  })
 })

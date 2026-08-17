@@ -194,8 +194,12 @@ function lintFile(file, cwd, rules) {
       continue
     }
     for (let index = 0; index < lines.length; index++) {
-      const line = lines[index]
+      let line = lines[index]
       if (matchesRuleExclude(rule, rel, line)) continue
+      if (rule.id === "P047") {
+        if (isCommentOnlyLine(line)) continue
+        line = stripLineComment(line)
+      }
       if (!regex.test(line)) continue
       findings.push(toFinding(rule, rel, index + 1))
     }
@@ -237,6 +241,22 @@ function findEscape(source, file) {
 
 function lineForIndex(source, index) {
   return source.slice(0, index).split(/\r?\n/).length
+}
+
+// P047（モーション値直書き禁止）専用: コメント行 / JSDoc 継続行を判定対象から除外する。
+// 例: 「// Recomputing per request is ~300-500ms on the current working set,」の
+// ようなコメント中の時間表記が誤検知されるのを防ぐ（行頭 // ・行頭 * ・行頭 /* を持つ行）。
+// 他ルールには適用しない（コメント由来の誤検知はほぼゼロで、広げるメリットが無い）。
+function isCommentOnlyLine(line) {
+  return /^\s*(\/\/|\/\*|\*)/.test(line)
+}
+
+// 行内コメント（`code() // 300ms のようなコメント`）は // 以降を判定対象から除外する。
+// 素朴な実装のため文字列リテラル内の `//`（URL 等）も削る可能性はあるが、P047 の
+// 対象（motion 値）がその形で書かれることは実質無いためスコープを絞って許容する。
+function stripLineComment(line) {
+  const index = line.indexOf("//")
+  return index === -1 ? line : line.slice(0, index)
 }
 
 function matchesRuleExclude(rule, file, line) {
