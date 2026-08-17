@@ -1226,7 +1226,11 @@
     {
       "name": "SearchBar",
       "path": "src/components/patterns/search-bar.tsx",
-      "description": "検索バー。アイコン+テキスト入力の組み合わせ。ページ内検索・フィルタリングに使用。"
+      "description": "検索バー。アイコン+テキスト入力の組み合わせ。ページ内検索・フィルタリングに使用。asForm=true でルートが form[role=search] になり、Enter/送信ボタンの submit で onSearch を呼ぶ（既定 false はルート div のまま、Enter は keydown で処理）。input には enterKeyHint=search を常時付与。",
+      "rules": [
+        "asForm=false（既定）ではルート div に role=search を付けない。消費側が外側で role=search を既に持つ場合に二重ランドマークになるのを避けるため",
+        "asForm=true と keydown 側の Enter 処理は二重発火防止のため排他"
+      ]
     },
     {
       "name": "Chip",
