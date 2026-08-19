@@ -22,8 +22,10 @@ interface InputProps extends Omit<React.ComponentProps<"input">, "prefix"> {
   showCount?: boolean
 }
 
+// 高さ・横 padding・角丸は product theme の公開変数（`--Field-*`）を参照する。
+// 既定値は従来の h-12 / px-3 / rounded-lg と同値（issue #364）。
 const inputBaseClass = [
-  "flex h-12 w-full rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-3 typo-body-md text-[var(--Text-High-Emphasis)] transition-colors",
+  "flex h-[var(--Field-Height-Md)] w-full rounded-[var(--Field-Radius)] border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-[var(--Field-Padding-X-Md)] typo-body-md text-[var(--Text-High-Emphasis)] transition-colors",
   "file:border-0 file:bg-transparent file:typo-body-md",
   "placeholder:text-[var(--Text-Low-Emphasis)]",
   "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:border-[var(--Border-Accent-Primary)]",

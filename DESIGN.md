@@ -269,6 +269,38 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
 `z-10` / `z-20` のような小さい素の値は「コンポーネント内部の重なり」用途で、
 このグローバルスケールの対象外。
 
+## Product Theme Override（プロダクト単位の寸法調整）
+
+マルチテーマ（Brand 10行差し替え）が切り替えるのは**色だけ**。コントロールの高さ・横 padding・
+角丸・カードの余白は、消費プロダクトが CSS 変数を上書きして調整する。className を何十箇所も
+書き換える運用（exam-kit の Card 角丸13箇所 = issue #332）を、変数1行に畳むための層。
+
+既定値は `src/styles/product-theme.css`、**上書きしてよい変数の許可リストは
+`contracts/product-theme-overrides.json` が正本**。ここに無い変数（`--Hover-*` / `--Z-*` /
+`--glass-*` など）は内部実装で、上書きすると DS を上げた瞬間に静かに壊れる。
+`npx ksk-ds lint <consumer>/src` の **P049** が消費側 CSS を検査する。
+
+| family | 変数 | 既定値 | 使う部品 |
+|---|---|---|---|
+| Control | `--Control-Height-{Xs,Sm,Md,Lg,Xl}` | 24 / 32 / 40 / 48 / 56px | Button の size |
+| Control | `--Control-Padding-X-{Xs,Sm,Md,Lg,Xl}` | 8 / 12 / 16 / 24 / 32px | Button の size |
+| Control | `--Control-Gap` / `--Control-Radius` | 8px / ピル | Button のアイコン間隔・角丸 |
+| Field | `--Field-Height-{Sm,Md,Lg}` | 36 / 48 / 56px | Input / SelectTrigger |
+| Field | `--Field-Padding-X-{Sm,Md,Lg}` / `--Field-Padding-Y` | 10 / 12 / 16px / 8px | Input / Textarea / SelectTrigger |
+| Field | `--Field-Min-Height` / `--Field-Radius` | 80px / 8px | Textarea / フィールド共通の角丸 |
+| Product | `--Product-Card-Padding` / `--Product-Card-Gap` | 24px / 24px | Card（default バリアント） |
+
+- **Control と Field はスケールが別**。ksk のフィールドは元々ボタンより背が高く（Input は 48px、
+  Button の既定は 40px）、横 padding も狭い。片方に畳むとどちらかの実寸が変わるので分けている。
+- 参照は arbitrary value（`h-[var(--Control-Height-Md)]`）。Motion / Layering / Radius と同じ
+  「semantic 変数を Tailwind の任意値で読む」流儀に揃えてある。`@theme` のユーティリティ化はしない
+  （`:root` 以外のスコープに当てた上書きが効かなくなるため）。
+- 上書きは `:root` でも任意の要素でもよい。カスケードだけで解決するので Server Component のまま使える。
+- タップ領域（`Button size="icon-xl"` = 44px）と FAB（58px）は意図的にこのスケールの外に置いている。
+  product theme で縮められると HIG の最小タップ領域を割るため。
+- 色は従来どおり semantic トークン（`--Surface-*` / `--Text-*` / `--Brand-*`）と Brand ランプの
+  上書きで調整する。カードの面は `--card-surface`、角丸は `--Radius-Surface` が既存の公開シーム。
+
 ## Components
 
 代表例（トークン参照で構成）。

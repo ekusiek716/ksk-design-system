@@ -387,6 +387,8 @@
 @source inline("gap-4");
 @source inline("gap-6");
 @source inline("gap-8");
+@source inline("gap-[var(--Control-Gap)]");
+@source inline("gap-[var(--Product-Card-Gap)]");
 @source inline("gap-x-2");
 @source inline("gap-x-4");
 @source inline("gap-y-1");
@@ -440,6 +442,14 @@
 @source inline("h-[58px]");
 @source inline("h-[5px]");
 @source inline("h-[60px]");
+@source inline("h-[var(--Control-Height-Lg)]");
+@source inline("h-[var(--Control-Height-Md)]");
+@source inline("h-[var(--Control-Height-Sm)]");
+@source inline("h-[var(--Control-Height-Xl)]");
+@source inline("h-[var(--Control-Height-Xs)]");
+@source inline("h-[var(--Field-Height-Lg)]");
+@source inline("h-[var(--Field-Height-Md)]");
+@source inline("h-[var(--Field-Height-Sm)]");
 @source inline("h-[var(--radix-select-trigger-height)]");
 @source inline("h-auto");
 @source inline("h-full");
@@ -609,6 +619,8 @@
 @source inline("min-h-[66px]");
 @source inline("min-h-[80px]");
 @source inline("min-h-[inherit]");
+@source inline("min-h-[var(--Control-Height-Xl)]");
+@source inline("min-h-[var(--Field-Min-Height)]");
 @source inline("min-h-dvh");
 @source inline("min-h-full");
 @source inline("min-h-screen");
@@ -687,6 +699,7 @@
 @source inline("p-4");
 @source inline("p-6");
 @source inline("p-8");
+@source inline("p-[var(--Product-Card-Padding)]");
 @source inline("p-px");
 @source inline("paused");
 @source inline("pb-0.5");
@@ -753,7 +766,14 @@
 @source inline("px-4!");
 @source inline("px-5");
 @source inline("px-6");
-@source inline("px-8");
+@source inline("px-[var(--Control-Padding-X-Lg)]");
+@source inline("px-[var(--Control-Padding-X-Md)]");
+@source inline("px-[var(--Control-Padding-X-Sm)]");
+@source inline("px-[var(--Control-Padding-X-Xl)]");
+@source inline("px-[var(--Control-Padding-X-Xs)]");
+@source inline("px-[var(--Field-Padding-X-Lg)]");
+@source inline("px-[var(--Field-Padding-X-Md)]");
+@source inline("px-[var(--Field-Padding-X-Sm)]");
 @source inline("py-0.5");
 @source inline("py-1");
 @source inline("py-1.5");
@@ -769,6 +789,7 @@
 @source inline("py-5");
 @source inline("py-6");
 @source inline("py-8");
+@source inline("py-[var(--Field-Padding-Y)]");
 @source inline("py-[var(--Space-Section-2xl)]");
 @source inline("py-[var(--Space-Section-md)]");
 @source inline("py-[var(--Space-Section-xl)]");
@@ -801,6 +822,8 @@
 @source inline("rounded-2xl");
 @source inline("rounded-[5px]");
 @source inline("rounded-[inherit]");
+@source inline("rounded-[var(--Control-Radius)]");
+@source inline("rounded-[var(--Field-Radius)]");
 @source inline("rounded-[var(--Radius-Modal)]");
 @source inline("rounded-[var(--Radius-Sheet)]");
 @source inline("rounded-[var(--Radius-Surface)]");
@@ -855,6 +878,9 @@
 @source inline("size-[120px]");
 @source inline("size-[58px]");
 @source inline("size-[60px]");
+@source inline("size-[var(--Control-Height-Lg)]");
+@source inline("size-[var(--Control-Height-Md)]");
+@source inline("size-[var(--Control-Height-Sm)]");
 @source inline("size-auto");
 @source inline("size-full");
 @source inline("sm:bottom-4");

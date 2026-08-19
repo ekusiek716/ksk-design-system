@@ -1,0 +1,154 @@
+{
+  "meta": {
+    "name": "KSK Design System — Product Theme Override API",
+    "version": "1.0.0",
+    "issue": 364,
+    "description": "消費プロダクトが DS の正本を複製せず、自分のリポジトリの CSS だけで上書きしてよい公開 CSS 変数の契約。既定値の定義は src/styles/product-theme.css、色トークンの定義は src/styles/semantic.css / src/themes/*.css。",
+    "sourceOfTruth": [
+      "src/styles/product-theme.css",
+      "src/styles/semantic.css",
+      "src/preset.css"
+    ]
+  },
+  "consumerContract": {
+    "importOrder": [
+      "@import \"ksk-design-system/preset\";",
+      "@import \"./themes/my-client.css\";",
+      "@import \"./product-theme.css\";"
+    ],
+    "scope": ":root（アプリ全体）または任意の要素（その配下だけ）",
+    "allowedPattern": "preset の後に、ここで許可された CSS 変数だけを上書きする",
+    "forbiddenPattern": "消費プロダクト側に tokens.json / semantic.css / preset.css のコピーや独自 Tailwind preset を作らない。許可リストに無い内部変数を上書きしない",
+    "lintRule": "P049（npx ksk-ds lint が消費側 CSS を検査する）"
+  },
+  "allowedVariables": {
+    "brandColor": [
+      "--Primitive-Brand-50",
+      "--Primitive-Brand-100",
+      "--Primitive-Brand-200",
+      "--Primitive-Brand-300",
+      "--Primitive-Brand-400",
+      "--Primitive-Brand-500",
+      "--Primitive-Brand-600",
+      "--Primitive-Brand-700",
+      "--Primitive-Brand-800",
+      "--Primitive-Brand-900"
+    ],
+    "semanticColor": [
+      "--Surface-Primary",
+      "--Surface-Secondary",
+      "--Surface-Tertiary",
+      "--Surface-Accent-Primary-Light",
+      "--Text-High-Emphasis",
+      "--Text-Medium-Emphasis",
+      "--Text-Low-Emphasis",
+      "--Text-Accent-Primary",
+      "--Text-on-Inverse",
+      "--Border-Low-Emphasis",
+      "--Border-Medium-Emphasis",
+      "--Border-Accent-Primary",
+      "--Brand-Primary",
+      "--Brand-Action",
+      "--Focus-High-Emphasis",
+      "--card-surface"
+    ],
+    "controlSize": [
+      "--Control-Height-Xs",
+      "--Control-Height-Sm",
+      "--Control-Height-Md",
+      "--Control-Height-Lg",
+      "--Control-Height-Xl",
+      "--Control-Padding-X-Xs",
+      "--Control-Padding-X-Sm",
+      "--Control-Padding-X-Md",
+      "--Control-Padding-X-Lg",
+      "--Control-Padding-X-Xl",
+      "--Control-Gap"
+    ],
+    "fieldSize": [
+      "--Field-Height-Sm",
+      "--Field-Height-Md",
+      "--Field-Height-Lg",
+      "--Field-Padding-X-Sm",
+      "--Field-Padding-X-Md",
+      "--Field-Padding-X-Lg",
+      "--Field-Padding-Y",
+      "--Field-Min-Height"
+    ],
+    "shape": [
+      "--Control-Radius",
+      "--Field-Radius",
+      "--Radius-Surface",
+      "--Radius-Modal",
+      "--Radius-Sheet"
+    ],
+    "productSpacing": [
+      "--Product-Card-Padding",
+      "--Product-Card-Gap",
+      "--Space-Section-xs",
+      "--Space-Section-sm",
+      "--Space-Section-md",
+      "--Space-Section-lg",
+      "--Space-Section-xl",
+      "--Space-Section-2xl"
+    ],
+    "motion": [
+      "--Motion-Duration-Fast",
+      "--Motion-Duration-Base",
+      "--Motion-Duration-Slow",
+      "--Motion-Duration-Slower"
+    ]
+  },
+  "dsVariableNamespaces": [
+    "--Primitive-",
+    "--Categorical-",
+    "--Surface-",
+    "--Text-",
+    "--Border-",
+    "--Brand-",
+    "--Object-",
+    "--Overlay-",
+    "--Focus-",
+    "--Caution-",
+    "--Success-",
+    "--Warning-",
+    "--Info-",
+    "--Hover-",
+    "--Active-",
+    "--Disable",
+    "--Motion-",
+    "--Z-",
+    "--Radius-",
+    "--Space-Section-",
+    "--Control-",
+    "--Field-",
+    "--Product-",
+    "--glass-",
+    "--card-surface"
+  ],
+  "namespaceNote": "P049 が「DS の変数を上書きしている」と判定する接頭辞。ここに該当し allowedVariables に無い変数を消費側 CSS が宣言していたら契約違反。shadcn 互換の小文字ブリッジ（--primary / --border 等）は消費側アプリが同名変数を持つことがあるため対象外。",
+  "wiredComponents": {
+    "Button": [
+      "--Control-Height-*",
+      "--Control-Padding-X-*",
+      "--Control-Gap",
+      "--Control-Radius"
+    ],
+    "Input": ["--Field-Height-Md", "--Field-Padding-X-Md", "--Field-Radius"],
+    "Textarea": [
+      "--Field-Min-Height",
+      "--Field-Padding-X-Md",
+      "--Field-Padding-Y",
+      "--Field-Radius"
+    ],
+    "SelectTrigger": ["--Field-Height-*", "--Field-Padding-X-*", "--Field-Radius"],
+    "Card": ["--Product-Card-Padding", "--Product-Card-Gap", "--Radius-Surface", "--card-surface"]
+  },
+  "aiGuidance": [
+    "プロダクト差分は、まずこの契約の CSS 変数上書きで表現する。className での個別上書きを何十箇所にも散らさない。",
+    "許可リストに無い変数（--Hover-* / --glass-* / --Z-* などの内部変数）は消費側から上書きしない。必要なら DS 側に issue を立てて公開変数を増やす。",
+    "DS 側で新しくサイズ・角丸を持つコンポーネントを作るときは、固定の h-* / px-* / rounded-* ではなく Control / Field 変数を arbitrary value（h-[var(--Control-Height-Md)]）で参照する。",
+    "Control（Button 系）と Field（Input / Textarea / SelectTrigger）はスケールが別。ksk のフィールドは元々ボタンより背が高いため、片方に畳むと実寸が変わる。",
+    "色は semantic トークン経由でのみ上書きする。Primitive を直接参照するのは Brand ランプ（--Primitive-Brand-*）だけが例外。"
+  ]
+}

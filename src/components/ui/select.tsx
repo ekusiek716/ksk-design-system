@@ -7,15 +7,18 @@ import { usePortalContainer } from "./portal-container"
 /**
  * SelectTrigger のサイズ規格。Button/Input と揃えて 3 段階を用意。
  * 既定は default (h-12) — 既存挙動と完全互換。
+ *
+ * 高さ・横 padding・角丸は product theme の公開変数（`--Field-*`）を参照する。
+ * 既定値は従来の固定クラスと同値（issue #364）。
  */
 const selectTriggerVariants = cva(
-  "flex w-full items-center justify-between rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+  "flex w-full items-center justify-between rounded-[var(--Field-Radius)] border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
   {
     variants: {
       size: {
-        sm:      "h-9 px-2.5 typo-body-sm",
-        default: "h-12 px-3 typo-body-md",
-        lg:      "h-14 px-4 typo-body-md",
+        sm:      "h-[var(--Field-Height-Sm)] px-[var(--Field-Padding-X-Sm)] typo-body-sm",
+        default: "h-[var(--Field-Height-Md)] px-[var(--Field-Padding-X-Md)] typo-body-md",
+        lg:      "h-[var(--Field-Height-Lg)] px-[var(--Field-Padding-X-Lg)] typo-body-md",
       },
     },
     defaultVariants: { size: "default" },

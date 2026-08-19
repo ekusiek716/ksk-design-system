@@ -21,8 +21,10 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        /** 既定: 内側に p-6 と gap-6（情報を持つカード向け）。 */
-        default: "gap-6 p-6",
+        /** 既定: 内側に p-6 と gap-6 相当（情報を持つカード向け）。
+         *  実値は product theme の公開変数 `--Product-Card-Padding` / `--Product-Card-Gap`
+         *  で、既定値は従来の p-6 / gap-6 と同値（issue #364）。 */
+        default: "gap-[var(--Product-Card-Gap)] p-[var(--Product-Card-Padding)]",
         /** メディアカード: padding/gap なし。サムネ等を端まで広げる用途。
          *  オーバーレイで title/badge を絶対配置するときに p-6 が邪魔だったケースに。 */
         media: "gap-0 p-0 overflow-hidden",

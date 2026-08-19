@@ -2,8 +2,14 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { extname, join, relative, resolve } from "node:path"
 import { spawnSync } from "node:child_process"
 import { inspectCardChildSpacing } from "./card-child-spacing.js"
+import { inspectProductThemeOverrides, loadProductThemeContract } from "./product-theme-override.js"
 
 const DEFAULT_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx"])
+/**
+ * CSS 専用ルール（P049）の走査対象。TSX 向けの正規表現ルールは CSS には当てず、
+ * engine: "product-theme-override" を持つルールだけをここに流す（issue #364）。
+ */
+const CSS_EXTENSIONS = new Set([".css"])
 const DEFAULT_IGNORES = [
   ".git",
   ".next",
@@ -23,13 +29,23 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
   }
 
   const rules = loadRules(rulesPath)
+  const cssRules = rules.filter((rule) => rule.engine === "product-theme-override")
+  const sourceRules = rules.filter((rule) => rule.engine !== "product-theme-override")
+  const productThemeContract = cssRules.length > 0 ? readProductThemeContract(pkgRoot) : null
+
   const files = options.changed
     ? getChangedFiles(cwd, options)
     : collectTargetFiles(cwd, options.targets, options)
   const findings = []
 
   for (const file of files) {
-    findings.push(...lintFile(file, cwd, rules, options))
+    if (CSS_EXTENSIONS.has(extname(file))) {
+      if (productThemeContract) {
+        findings.push(...lintCssFile(file, cwd, cssRules, productThemeContract))
+      }
+      continue
+    }
+    findings.push(...lintFile(file, cwd, sourceRules, options))
   }
 
   const summary = summarize(findings)
@@ -133,7 +149,7 @@ function collect(abs, cwd, options, out) {
     }
     return
   }
-  if (stat.isFile() && DEFAULT_EXTENSIONS.has(extname(abs))) out.push(abs)
+  if (stat.isFile() && isLintableFile(abs)) out.push(abs)
 }
 
 function getChangedFiles(cwd, options) {
@@ -153,7 +169,46 @@ function getChangedFiles(cwd, options) {
     .map((name) => resolve(cwd, name))
     .filter((abs) => existsSync(abs))
     .filter((abs) => !shouldIgnorePath(normalize(relative(cwd, abs)), options))
-    .filter((abs) => DEFAULT_EXTENSIONS.has(extname(abs)))
+    .filter((abs) => isLintableFile(abs))
+}
+
+function isLintableFile(abs) {
+  const ext = extname(abs)
+  return DEFAULT_EXTENSIONS.has(ext) || CSS_EXTENSIONS.has(ext)
+}
+
+/** contracts/product-theme-overrides.json（P049 の許可リスト）を読む */
+function readProductThemeContract(pkgRoot) {
+  const path = resolve(pkgRoot, "contracts/product-theme-overrides.json")
+  if (!existsSync(path)) return null
+  try {
+    return loadProductThemeContract(JSON.parse(readFileSync(path, "utf8")))
+  } catch {
+    return null
+  }
+}
+
+/**
+ * CSS ファイルには product theme の許可リスト検査（P049）だけを当てる。
+ * TSX 向けの正規表現ルールを CSS に流すと誤検知しかしない。
+ */
+function lintCssFile(file, cwd, cssRules, contract) {
+  const rel = normalize(relative(cwd, file))
+  const source = readFileSync(file, "utf8")
+  const escape = findEscape(source, rel)
+  if (escape.valid) return []
+
+  const findings = escape.invalid ? [escape.invalid] : []
+  for (const rule of cssRules) {
+    for (const violation of inspectProductThemeOverrides(source, contract)) {
+      if (matchesRuleExclude(rule, rel, violation.name)) continue
+      findings.push({
+        ...toFinding(rule, rel, violation.line),
+        message: `${rule.message ?? "product theme の許可リスト外の変数を上書きしています"}: ${violation.name}`,
+      })
+    }
+  }
+  return findings
 }
 
 function lintFile(file, cwd, rules) {
