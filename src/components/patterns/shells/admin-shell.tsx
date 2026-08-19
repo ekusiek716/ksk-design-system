@@ -100,7 +100,11 @@ function AdminShell({
           </header>
         )}
         <main id={mainId} tabIndex={-1} data-slot="admin-main" className="flex-1 overflow-auto">
-          <Container size="fluid" className="py-6">
+          {/* 縦 padding は product theme の --Product-Page-Padding-Y を参照する
+              （issue #364 追補）。AppShell / MarketingShell / MobileAppShell は
+              本文の padding をシェル自身が持たない（Container の gutter か
+              呼び出し側の contentClassName に委ねている）ため対象外。 */}
+          <Container size="fluid" className="py-[var(--Product-Page-Padding-Y)]">
             {children}
           </Container>
         </main>

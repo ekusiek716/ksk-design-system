@@ -31,7 +31,13 @@ function TabsList({
         data-variant={variant}
         className={cn(
           "inline-flex w-fit max-w-full overflow-x-auto items-center gap-1 bg-[var(--Surface-Tertiary)] p-1 text-[var(--Text-Medium-Emphasis)]",
-          variant === "pill" ? "h-11 rounded-full" : "h-10 rounded-lg",
+          // 高さ・角丸は product theme の公開変数を参照する（issue #364 追補）。
+          // pill(44px)は Control スケール（40/48px）のどちらとも一致しないため
+          // Chip の縦タッチターゲットと同じ理由（WCAG 2.5.5 相当の当たり判定）で
+          // 固定値のまま据え置き、角丸だけ Button と同じ --Control-Radius を共有する。
+          variant === "pill"
+            ? "h-11 rounded-[var(--Control-Radius)]"
+            : "h-[var(--Control-Height-Md)] rounded-[var(--Field-Radius)]",
           className
         )}
         {...props}
@@ -48,7 +54,10 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
       data-variant={variant}
       className={cn(
         "inline-flex items-center justify-center whitespace-nowrap typo-label-sm transition-all",
-        variant === "pill" ? "relative rounded-full px-4 py-1.5 gap-1.5" : "rounded-lg px-3 py-1.5",
+        // 横 padding・角丸も product theme の公開変数を参照する（issue #364 追補）。
+        variant === "pill"
+          ? "relative rounded-[var(--Control-Radius)] px-[var(--Control-Padding-X-Md)] py-1.5 gap-1.5"
+          : "rounded-[var(--Field-Radius)] px-[var(--Control-Padding-X-Sm)] py-1.5",
         // pill は見た目の高さ(h-9/h-8)を維持したまま、当たり判定だけをトラック全高(44px)まで
         // 透明な before 擬似要素で拡張する。本体の height は変更しない（belle-todo 事例の再発防止）。
         variant === "pill" &&

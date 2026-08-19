@@ -63,7 +63,7 @@ describe("shell layout ownership", () => {
     expect(markup).toContain('data-slot="admin-header"')
     expect(markup.match(/data-slot="container"/g)).toHaveLength(2)
     expect(markup).toContain("px-6")
-    expect(markup).toContain("py-6")
+    expect(markup).toContain("py-[var(--Product-Page-Padding-Y)]")
   })
 
   it("MarketingShell の全幅 footer を Section + spacious Container で維持する", () => {

@@ -151,6 +151,13 @@ const EQUIVALENTS: Array<[baseline: string, tokenized: string, property: string]
   // ─── Card ───
   ["p-6", "p-[var(--Product-Card-Padding)]", "padding"],
   ["gap-6", "gap-[var(--Product-Card-Gap)]", "gap"],
+  // ─── Tabs（issue #364 追補）───
+  ["h-10", "h-[var(--Control-Height-Md)]", "height"],
+  ["px-3", "px-[var(--Control-Padding-X-Sm)]", "padding-inline"],
+  ["px-4", "px-[var(--Control-Padding-X-Md)]", "padding-inline"],
+  ["rounded-lg", "rounded-[var(--Field-Radius)]", "border-radius"],
+  // ─── AdminShell（issue #364 追補）───
+  ["py-6", "py-[var(--Product-Page-Padding-Y)]", "padding-block"],
 ]
 
 describe("product theme の既定値は origin/main の固定クラスと同一実寸 (issue #364)", () => {
@@ -166,6 +173,17 @@ describe("product theme の既定値は origin/main の固定クラスと同一�
       9999,
     )
   })
+
+  it("Chip のピル角丸も rounded-full 相当（rounded-full と --Chip-Radius はどちらも実質無限大）", () => {
+    expect(toPx(declaration("rounded-full", "border-radius"))).toBeGreaterThanOrEqual(9999)
+    expect(toPx(declaration("rounded-[var(--Chip-Radius)]", "border-radius"))).toBeGreaterThanOrEqual(9999)
+  })
+
+  it("Tabs の pill 高さ（44px）は Control スケールの外に固定してある", () => {
+    // 40px(Md) / 48px(Lg) のどちらとも一致しないため、Chip の縦タッチターゲットと
+    // 同じ理由で固定値のまま据え置いている（issue #364 追補）。
+    expect(toPx(declaration("h-11", "height"))).toBe(44)
+  })
 })
 
 describe("公開変数の配線", () => {
@@ -176,6 +194,26 @@ describe("公開変数の配線", () => {
     expect(buttonVariants({ size: "icon" })).toContain("size-[var(--Control-Height-Md)]")
     expect(buttonVariants({})).toContain("gap-[var(--Control-Gap)]")
     expect(buttonVariants({ variant: "default" })).toContain("rounded-[var(--Control-Radius)]")
+  })
+
+  it("Tabs の default variant が Control / Field 変数を参照する", async () => {
+    const source = readFileSync(join(ROOT, "src/components/ui/tabs.tsx"), "utf8")
+    expect(source).toContain("h-[var(--Control-Height-Md)]")
+    expect(source).toContain("rounded-[var(--Field-Radius)]")
+    expect(source).toContain("px-[var(--Control-Padding-X-Sm)]")
+    expect(source).toContain("px-[var(--Control-Padding-X-Md)]")
+    expect(source).toContain("rounded-[var(--Control-Radius)]")
+  })
+
+  it("Chip のピル角丸が --Chip-Radius を参照する", async () => {
+    const { chipVariants } = await import("../src/components/patterns/chip")
+    expect(chipVariants({ shape: "pill" })).toContain("rounded-[var(--Chip-Radius)]")
+    expect(chipVariants({ shape: "square" })).toContain("rounded-sm")
+  })
+
+  it("AdminShell の本文 padding が --Product-Page-Padding-Y を参照する", async () => {
+    const source = readFileSync(join(ROOT, "src/components/patterns/shells/admin-shell.tsx"), "utf8")
+    expect(source).toContain("py-[var(--Product-Page-Padding-Y)]")
   })
 
   it("固定タップ領域（icon-xl = 44px）は product theme から外してある", async () => {
