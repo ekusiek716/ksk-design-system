@@ -126,9 +126,18 @@ for repo in "${REPOS[@]}"; do
   echo "   $repo"
 
   # monorepo worktree 対策で -d でなく -e（.git はファイルの場合もある）
+  # ディレクトリ自体が無い＝DEFAULT_REPOS と実態がズレている。黄色の SKIP だと
+  # 19 個の緑 OK に埋もれて見落とすので FAIL 扱いにする（v1.58.0 配布で
+  # 情報セキュリティマネジメント用 が消えていたのを SKIP のまま流し、v1.57.0 も
+  # 未適用だったと後から気づいた）。
   if [ ! -e "$repo/.git" ]; then
-    echo -e "${YELLOW}→ SKIP (no git)${NC}"
-    RESULTS+=("$name: SKIP (no git)")
+    if [ ! -d "$repo" ]; then
+      echo -e "${RED}FAIL: ディレクトリが存在しない（DEFAULT_REPOS の掃除か clone し直しが必要）${NC}"
+      RESULTS+=("$name: FAIL (missing dir: $repo)")
+    else
+      echo -e "${RED}FAIL: git リポジトリではない${NC}"
+      RESULTS+=("$name: FAIL (no git)")
+    fi
     continue
   fi
 
