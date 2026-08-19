@@ -251,3 +251,65 @@ describe("公開変数の配線", () => {
     expect(preset).toContain(`@import "./styles/product-theme.css";`)
   })
 })
+
+/**
+ * --Product-Type-Scale（issue #371/#372 の逆輸入）の非破壊性を固定する。
+ *
+ * jsdom は calc() を評価しないため、Tailwind ビルドで実 px を突き合わせる
+ * 他のテストとは違い、ここは **typography.css の CSS 文字列の契約**で固定する:
+ *
+ *   1. 全 @utility の font-size が calc(<px>px * var(--Product-Type-Scale, 1))
+ *      形式であること（他形式に書き換えられていないか）
+ *   2. @utility の個数が 17 のまま変わっていないこと
+ *   3. calc() を手で評価する resolver で、スケール未指定(既定 1)なら現行と
+ *      同一 px、1.25 を当てれば 1.25 倍になること
+ */
+describe("--Product-Type-Scale（issue #371/#372）", () => {
+  const typographyCss = readFileSync(join(ROOT, "src/styles/typography.css"), "utf8")
+  const utilityBlocks = [...typographyCss.matchAll(/@utility\s+(typo-[a-z0-9-]+)\s*\{([^}]*)\}/g)]
+
+  // typo-on-image だけは text-shadow 専用で font-size を持たない。
+  const blocksWithFontSize = utilityBlocks.filter(([, , body]) => /font-size:/.test(body))
+
+  it("@utility の個数が 18（うち font-size を持つのは 17）のまま変わっていない", () => {
+    expect(utilityBlocks.length).toBe(18)
+    expect(blocksWithFontSize.length).toBe(17)
+  })
+
+  it("全 typo-* の font-size が calc(<px>px * var(--Product-Type-Scale, 1)) 形式", () => {
+    const CALC_RE = /^calc\((\d+)px \* var\(--Product-Type-Scale, 1\)\)$/
+    for (const [, name, body] of blocksWithFontSize) {
+      const decl = body.match(/font-size:\s*([^;]+);/)
+      expect(decl, `${name} に font-size 宣言がありません`).not.toBeNull()
+      expect(decl![1].trim(), `${name} の font-size が calc() 形式ではありません`).toMatch(CALC_RE)
+    }
+  })
+
+  it("--Product-Type-Scale の既定値が product-theme.css で 1 に宣言されている", () => {
+    expect(defaults.get("--Product-Type-Scale")).toBe("1")
+  })
+
+  /** calc(<px>px * var(--Product-Type-Scale, 1)) を手で評価する（jsdom 代替） */
+  function resolveFontSizePx(utilityName: string, scale: number): number {
+    const block = utilityBlocks.find(([, name]) => name === utilityName)
+    if (!block) throw new Error(`${utilityName} が見つかりません`)
+    const decl = block[2].match(/font-size:\s*calc\((\d+)px \* var\(--Product-Type-Scale, 1\)\);/)
+    if (!decl) throw new Error(`${utilityName} の font-size を解決できません`)
+    return Number(decl[1]) * scale
+  }
+
+  it("--Product-Type-Scale 未指定（既定 1）なら typo-heading-3xl は 28px のまま", () => {
+    expect(resolveFontSizePx("typo-heading-3xl", 1)).toBe(28)
+  })
+
+  it("--Product-Type-Scale: 1.25 を当てると typo-heading-3xl は 35px になる", () => {
+    expect(resolveFontSizePx("typo-heading-3xl", 1.25)).toBe(35)
+  })
+
+  it("--Product-Type-Scale が contracts の許可リストに載っている", () => {
+    const contract = JSON.parse(
+      readFileSync(join(ROOT, "contracts/product-theme-overrides.json"), "utf8"),
+    ) as { allowedVariables: Record<string, string[]> }
+    expect(contract.allowedVariables.productTypography).toEqual(["--Product-Type-Scale"])
+  })
+})

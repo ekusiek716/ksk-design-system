@@ -292,6 +292,7 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
 | Product | `--Product-Page-Padding-Y` | 24px | AdminShell の `<main>` 縦 padding |
 | Chip | `--Chip-Radius` | ピル | Chip の pill 角丸 |
 | Tabs | `--Control-Height-Md` / `--Control-Padding-X-{Sm,Md}` / `--Control-Radius` / `--Field-Radius` | 40px / 12・16px / ピル / 8px | TabsList / TabsTrigger（Control・Field を再利用） |
+| Typography | `--Product-Type-Scale` | 1 | `typo-*`（`src/styles/typography.css`）の font-size 全体 |
 
 - **Control と Field はスケールが別**。ksk のフィールドは元々ボタンより背が高く（Input は 48px、
   Button の既定は 40px）、横 padding も狭い。片方に畳むとどちらかの実寸が変わるので分けている。
@@ -310,6 +311,12 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
   `AdminShell` の `<main>` だけが `--Product-Page-Padding-Y` を持つ。
 - 色は従来どおり semantic トークン（`--Surface-*` / `--Text-*` / `--Brand-*`）と Brand ランプの
   上書きで調整する。カードの面は `--card-surface`、角丸は `--Radius-Surface` が既存の公開シーム。
+- **`--Product-Type-Scale`**（issue #371/#372 の stract-ui からの逆輸入）は `typo-*` の font-size に
+  `calc(<px> * var(--Product-Type-Scale, 1))` として一律で掛かる乗数。line-height は unitless、
+  letter-spacing は em のため font-size の変化に自動で連動し、別途スケールしない。
+  **Control / Field の高さ・padding には掛からない**（意図的な分離。文字だけ拡大して枠が追従しないと
+  窮屈になるため、拡大するプロダクトは `--Control-Height-*` / `--Field-Height-*` も別途上げる契約）。
+  Web のみが対象で、React Native（`src/tokens/native/scales.ts`）には効かない。
 
 ## Components
 
