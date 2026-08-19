@@ -289,6 +289,9 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
 | Field | `--Field-Padding-X-{Sm,Md,Lg}` / `--Field-Padding-Y` | 10 / 12 / 16px / 8px | Input / Textarea / SelectTrigger |
 | Field | `--Field-Min-Height` / `--Field-Radius` | 80px / 8px | Textarea / フィールド共通の角丸 |
 | Product | `--Product-Card-Padding` / `--Product-Card-Gap` | 24px / 24px | Card（default バリアント） |
+| Product | `--Product-Page-Padding-Y` | 24px | AdminShell の `<main>` 縦 padding |
+| Chip | `--Chip-Radius` | ピル | Chip の pill 角丸 |
+| Tabs | `--Control-Height-Md` / `--Control-Padding-X-{Sm,Md}` / `--Control-Radius` / `--Field-Radius` | 40px / 12・16px / ピル / 8px | TabsList / TabsTrigger（Control・Field を再利用） |
 
 - **Control と Field はスケールが別**。ksk のフィールドは元々ボタンより背が高く（Input は 48px、
   Button の既定は 40px）、横 padding も狭い。片方に畳むとどちらかの実寸が変わるので分けている。
@@ -297,7 +300,14 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
   （`:root` 以外のスコープに当てた上書きが効かなくなるため）。
 - 上書きは `:root` でも任意の要素でもよい。カスケードだけで解決するので Server Component のまま使える。
 - タップ領域（`Button size="icon-xl"` = 44px）と FAB（58px）は意図的にこのスケールの外に置いている。
-  product theme で縮められると HIG の最小タップ領域を割るため。
+  product theme で縮められると HIG の最小タップ領域を割るため。同じ理由で **Chip の高さ・横 padding**
+  （sm/md/lg の縦 margin が「44px タッチターゲット - 本体高さ」の手計算値）と **Tabs の pill 高さ
+  （44px、Control スケールの 40/48px のどちらとも不一致）** も配線していない。
+- **Checkbox / RadioGroup / Switch**（20px の `size-5` トグル）は「コントロールの高さ」という概念が
+  当てはまらないため、この契約の対象外。
+- **AppShell / MarketingShell / MobileAppShell** はページ本文の padding をシェル自身が持たず
+  （`Container` の gutter か呼び出し側の `contentClassName` に委ねている）、対象外。
+  `AdminShell` の `<main>` だけが `--Product-Page-Padding-Y` を持つ。
 - 色は従来どおり semantic トークン（`--Surface-*` / `--Text-*` / `--Brand-*`）と Brand ランプの
   上書きで調整する。カードの面は `--card-surface`、角丸は `--Radius-Surface` が既存の公開シーム。
 

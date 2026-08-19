@@ -790,6 +790,7 @@
 @source inline("py-6");
 @source inline("py-8");
 @source inline("py-[var(--Field-Padding-Y)]");
+@source inline("py-[var(--Product-Page-Padding-Y)]");
 @source inline("py-[var(--Space-Section-2xl)]");
 @source inline("py-[var(--Space-Section-md)]");
 @source inline("py-[var(--Space-Section-xl)]");
@@ -822,6 +823,7 @@
 @source inline("rounded-2xl");
 @source inline("rounded-[5px]");
 @source inline("rounded-[inherit]");
+@source inline("rounded-[var(--Chip-Radius)]");
 @source inline("rounded-[var(--Control-Radius)]");
 @source inline("rounded-[var(--Field-Radius)]");
 @source inline("rounded-[var(--Radius-Modal)]");
@@ -831,7 +833,7 @@
 @source inline("rounded-lg");
 @source inline("rounded-md");
 @source inline("rounded-none");
-@source inline("rounded-r-full");
+@source inline("rounded-r-[var(--Chip-Radius)]");
 @source inline("rounded-r-none");
 @source inline("rounded-r-sm");
 @source inline("rounded-sm");

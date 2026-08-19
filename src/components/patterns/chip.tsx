@@ -50,7 +50,13 @@ const chipVariants = cva(
         tile: "size-12 shrink-0 typo-body-md",
       },
       shape: {
-        pill: "rounded-full",
+        // ピル角丸は product theme の --Chip-Radius を参照する（issue #364 追補）。
+        // Button の --Control-Radius とは独立させてある: プロダクトによっては
+        // ボタンを角ばらせつつチップだけピルのまま、という組み合わせがあり得るため。
+        // 高さ・横 padding は Control 変数へ配線しない — sm/md/lg の各 my-*（縦の
+        // margin）は「44px - 本体高さ」ちょうどで手計算されており、height を
+        // 変数化すると当たり判定が再計算されず、タッチターゲットの math が壊れる。
+        pill: "rounded-[var(--Chip-Radius)]",
         square: "rounded-sm",
       },
     },
@@ -185,7 +191,7 @@ function Chip({
   }[actualSize]
 
   const removeButtonShape =
-    actualShape === "square" || actualSize === "tile" ? "rounded-r-sm" : "rounded-r-full"
+    actualShape === "square" || actualSize === "tile" ? "rounded-r-sm" : "rounded-r-[var(--Chip-Radius)]"
 
   if (removable) {
     const actionClassName = cn(

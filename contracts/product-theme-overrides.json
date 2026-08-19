@@ -85,12 +85,16 @@
     "productSpacing": [
       "--Product-Card-Padding",
       "--Product-Card-Gap",
+      "--Product-Page-Padding-Y",
       "--Space-Section-xs",
       "--Space-Section-sm",
       "--Space-Section-md",
       "--Space-Section-lg",
       "--Space-Section-xl",
       "--Space-Section-2xl"
+    ],
+    "chip": [
+      "--Chip-Radius"
     ],
     "motion": [
       "--Motion-Duration-Fast",
@@ -123,6 +127,7 @@
     "--Control-",
     "--Field-",
     "--Product-",
+    "--Chip-",
     "--glass-",
     "--card-surface"
   ],
@@ -142,13 +147,25 @@
       "--Field-Radius"
     ],
     "SelectTrigger": ["--Field-Height-*", "--Field-Padding-X-*", "--Field-Radius"],
-    "Card": ["--Product-Card-Padding", "--Product-Card-Gap", "--Radius-Surface", "--card-surface"]
+    "Card": ["--Product-Card-Padding", "--Product-Card-Gap", "--Radius-Surface", "--card-surface"],
+    "Tabs": [
+      "--Control-Height-Md",
+      "--Control-Padding-X-Sm",
+      "--Control-Padding-X-Md",
+      "--Control-Radius",
+      "--Field-Radius"
+    ],
+    "Chip": ["--Chip-Radius"],
+    "AdminShell": ["--Product-Page-Padding-Y"]
   },
   "aiGuidance": [
     "プロダクト差分は、まずこの契約の CSS 変数上書きで表現する。className での個別上書きを何十箇所にも散らさない。",
     "許可リストに無い変数（--Hover-* / --glass-* / --Z-* などの内部変数）は消費側から上書きしない。必要なら DS 側に issue を立てて公開変数を増やす。",
     "DS 側で新しくサイズ・角丸を持つコンポーネントを作るときは、固定の h-* / px-* / rounded-* ではなく Control / Field 変数を arbitrary value（h-[var(--Control-Height-Md)]）で参照する。",
     "Control（Button 系）と Field（Input / Textarea / SelectTrigger）はスケールが別。ksk のフィールドは元々ボタンより背が高いため、片方に畳むと実寸が変わる。",
-    "色は semantic トークン経由でのみ上書きする。Primitive を直接参照するのは Brand ランプ（--Primitive-Brand-*）だけが例外。"
+    "色は semantic トークン経由でのみ上書きする。Primitive を直接参照するのは Brand ランプ（--Primitive-Brand-*）だけが例外。",
+    "Checkbox / RadioGroup / Switch（20px の size-5 トグル）は意図的にこの契約の対象外。「コントロールの高さ」という概念が当てはまらない固定サイズのため、Control 変数を当てると意味が壊れる。",
+    "Chip は角丸（--Chip-Radius）だけを配線し、高さ・横 padding は配線しない。sm/md/lg の縦 margin（my-*）は「44px タッチターゲット - 本体高さ」ちょうどの手計算値で、height を変数化すると当たり判定の math が壊れる。",
+    "AppShell / MarketingShell / MobileAppShell はページ本文の padding をシェル自身が持たない（Container の gutter か呼び出し側の contentClassName に委ねている）ため product theme の対象外。AdminShell の <main> だけが --Product-Page-Padding-Y を持つ。"
   ]
 }

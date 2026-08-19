@@ -76,4 +76,15 @@
      ここでは重複させない（許可リストには両方載せている）。 */
   --Product-Card-Padding: 1.5rem; /* 24px — p-6 */
   --Product-Card-Gap: 1.5rem;     /* 24px — gap-6 */
+
+  /* AdminShell の本文（<main>）縦 padding。既定は py-6 と同値。
+     AppShell / MarketingShell / MobileAppShell はページ本文の padding を
+     シェル自身が持たず（Container の gutter か呼び出し側の contentClassName に
+     委ねている）ため、対象外（issue #364 追補）。 */
+  --Product-Page-Padding-Y: 1.5rem; /* 24px — py-6 */
+
+  /* Chip のピル角丸。Button の --Control-Radius とは独立させてある。
+     プロダクトによってはボタンを角ばらせつつチップだけピルのまま、といった
+     組み合わせがあり得るため（issue #364 追補）。 */
+  --Chip-Radius: 9999px; /* rounded-full 相当 */
 }
