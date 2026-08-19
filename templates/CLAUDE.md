@@ -1,5 +1,5 @@
 <!--
-  このファイルは ksk-design-system の postinstall で自動設置されました。
+  このファイルは `npx ksk-ds init` で設置されました。
   最新ルールを取り込むには: npx ksk-ds init --force
 -->
 
