@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs"
+import { dirname } from "node:path"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { spawnSync } from "node:child_process"
@@ -17,6 +18,44 @@ function runKskLint(source: string, extraArgs: string[] = []) {
 }
 
 describe("consumer lint CLI", () => {
+  // issue #378: ビルド生成物を走査すると、バンドルされた DS 自身の CSS を
+  // 「consumer が DS 変数を上書きしている」と誤認して P049 が大量に出る。
+  // belle-todo の実測でリポジトリ全体 1,955 件 → 33 件（src 限定と同数）。
+  it("ビルド生成物（out / Capacitor の public コピー）を走査しない", () => {
+    const dir = mkdtempSync(join(tmpdir(), "ksk-ds-lint-ignore-"))
+    // DS 自身の内部変数を含む「バンドル済み CSS」を各生成物ディレクトリに置く
+    const bundled = ":root{--Hover-Primary-Button:#123456;--Brand-Light:#654321}"
+    for (const rel of [
+      "out/_next/static/chunks/app.css",
+      "ios/App/App/public/assets/index.css",
+      "android/app/src/main/assets/public/assets/index.css",
+      ".claude/worktrees/wt/src/styles/theme.css",
+    ]) {
+      const file = join(dir, rel)
+      mkdirSync(dirname(file), { recursive: true })
+      writeFileSync(file, bundled)
+    }
+    // 本物の src だけは検出されること（対照）
+    const srcFile = join(dir, "src/styles/theme.css")
+    mkdirSync(dirname(srcFile), { recursive: true })
+    writeFileSync(srcFile, bundled)
+
+    const result = spawnSync(process.execPath, ["bin/init.js", "lint", dir, "--format", "json"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    })
+    const payload = JSON.parse(result.stdout)
+    const p049 = payload.results.filter((f: { ruleId: string }) => f.ruleId === "P049")
+    expect(p049.length).toBeGreaterThan(0)
+    for (const f of p049 as { file: string }[]) {
+      expect(f.file).toContain("src/styles/theme.css")
+      expect(f.file).not.toMatch(/(^|\/)(out|\.claude)\//)
+      expect(f.file).not.toContain("App/public")
+      expect(f.file).not.toContain("assets/public")
+    }
+  })
+
+
   // issue #374: P032 の否定先読みは「マッチ位置より後ろ」しか見ないため、
   // `border-[var(...)]` の `border` 部分自身にマッチして色指定そのものを違反に
   // 数えていた。ルールの fix が案内する形（色併記 / transparent + 状態クラス）が
