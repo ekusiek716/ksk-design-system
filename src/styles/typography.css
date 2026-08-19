@@ -11,47 +11,53 @@
    3. カラーは別途指定: className="typo-body-sm text-[var(--Text-Low-Emphasis)]"
    4. レスポンシブ対応可: md:typo-heading-xl
    5. CVA 内でも typo-* を使用する
+
+   font-size は calc(<px> * var(--Product-Type-Scale, 1)) 形式で書く
+   （既定 1 = 現行と同一px。src/styles/product-theme.css の
+   --Product-Type-Scale を参照。プロダクト単位の文字サイズ倍率、issue #371/#372）。
+   line-height は unitless（比率）、letter-spacing は em のためどちらも
+   font-size の変化に自動連動する。別途スケールしない。
    ============================================================= */
 
 /* ─── Heading（見出し） ─── */
 
 @utility typo-heading-3xl {
-  font-size: 28px;
+  font-size: calc(28px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 @utility typo-heading-2xl {
-  font-size: 24px;
+  font-size: calc(24px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 @utility typo-heading-xl {
-  font-size: 21px;
+  font-size: calc(21px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 @utility typo-heading-lg {
-  font-size: 18px;
+  font-size: calc(18px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 @utility typo-heading-md {
-  font-size: 16px;
+  font-size: calc(16px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 @utility typo-heading-sm {
-  font-size: 14px;
+  font-size: calc(14px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -60,19 +66,19 @@
 /* ─── Body（本文） ─── */
 
 @utility typo-body-lg {
-  font-size: 16px;
+  font-size: calc(16px * var(--Product-Type-Scale, 1));
   line-height: 1.75;
   font-weight: 400;
 }
 
 @utility typo-body-md {
-  font-size: 14px;
+  font-size: calc(14px * var(--Product-Type-Scale, 1));
   line-height: 1.75;
   font-weight: 400;
 }
 
 @utility typo-body-sm {
-  font-size: 12px;
+  font-size: calc(12px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 400;
 }
@@ -81,7 +87,7 @@
    本文の最小は typo-body-sm(12px)。10px を本文に使うとモバイル可読性の
    下限（iOS HIG ~11pt / WCAG 観点）を割る。 */
 @utility typo-body-xs {
-  font-size: 10px;
+  font-size: calc(10px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 400;
 }
@@ -89,27 +95,27 @@
 /* ─── Label（ボタン・ナビ・タグ） ─── */
 
 @utility typo-label-lg {
-  font-size: 16px;
+  font-size: calc(16px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 @utility typo-label-md {
-  font-size: 14px;
+  font-size: calc(14px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 @utility typo-label-sm {
-  font-size: 12px;
+  font-size: calc(12px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 500;
 }
 
 @utility typo-label-xs {
-  font-size: 10px;
+  font-size: calc(10px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 500;
 }
@@ -117,14 +123,14 @@
 /* ─── Display（ヒーロー・ランディング用） ─── */
 
 @utility typo-display-xl {
-  font-size: 48px;
+  font-size: calc(48px * var(--Product-Type-Scale, 1));
   line-height: 1.25;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 @utility typo-display-lg {
-  font-size: 36px;
+  font-size: calc(36px * var(--Product-Type-Scale, 1));
   line-height: 1.3;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -134,7 +140,7 @@
    caption(11px) は非必須の注釈・法的表記のみ。本文には使わない（本文下限は body-sm=12px）。 */
 
 @utility typo-caption {
-  font-size: 11px;
+  font-size: calc(11px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 400;
 }

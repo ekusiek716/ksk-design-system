@@ -263,6 +263,39 @@ export const AdminShellPagePadding: Story = {
   ),
 }
 
+export const TypeScale: Story = {
+  name: "Type-Scale（--Product-Type-Scale）",
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+        <code>typo-*</code> の font-size に一律で掛かる乗数（既定 1）。line-height は unitless、
+        letter-spacing は em のため font-size の変化に自動で連動する。Control（Button）/
+        Field（Input 等）の高さ・padding には掛からない — 文字を拡大するときは
+        <code>--Control-Height-*</code> / <code>--Field-Height-*</code> を別途上げる契約。
+      </p>
+      {[
+        { label: "0.875（コンパクト）", scale: 0.875 },
+        { label: "1（既定）", scale: 1 },
+        { label: "1.125（拡大）", scale: 1.125 },
+      ].map((row) => (
+        <div key={row.label} className="flex flex-col gap-2">
+          <p className="typo-label-sm text-[var(--Text-Medium-Emphasis)]">{row.label}</p>
+          <div
+            style={{ "--Product-Type-Scale": row.scale } as React.CSSProperties}
+            className="flex flex-col gap-2 border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4"
+          >
+            <p className="typo-heading-2xl text-[var(--Text-High-Emphasis)]">見出し typo-heading-2xl</p>
+            <p className="typo-body-md text-[var(--Text-High-Emphasis)]">
+              本文 typo-body-md。フィールドの高さはこの倍率に連動しない。
+            </p>
+            <Input placeholder="typo-* の文字サイズだけが変わる" />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+}
+
 export const FieldScale: Story = {
   name: "Field スケール（Input / Select / Textarea）",
   render: () => (

@@ -87,4 +87,19 @@
      プロダクトによってはボタンを角ばらせつつチップだけピルのまま、といった
      組み合わせがあり得るため（issue #364 追補）。 */
   --Chip-Radius: 9999px; /* rounded-full 相当 */
+
+  /* ─── Product: 画面全体の文字サイズ倍率（issue #371/#372 の逆輸入） ───
+     `typo-*` の font-size に一律で掛かる乗数。line-height は unitless
+     （行間比率）なので font-size の変化に自動で追従し、letter-spacing は
+     em 指定なので同様に font-size に連動する。どちらも別途変数化しない。
+
+     Web 専用。React Native は CSS カスタムプロパティを解決できないため、
+     native 側のトークン（src/tokens/native/scales.ts の typography）は
+     この変数と独立に管理する。
+
+     Control（Button）/ Field（Input 等）の高さ・padding には**意図的に
+     掛けない**。文字だけ拡大して枠が追従しないと窮屈になるため、消費側は
+     文字を拡大するときは --Control-Height-* / --Field-Height-* も
+     別途上げる契約にしてある（stract-ui と同じ判断）。 */
+  --Product-Type-Scale: 1;
 }

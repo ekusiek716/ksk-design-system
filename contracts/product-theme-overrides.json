@@ -96,6 +96,9 @@
     "chip": [
       "--Chip-Radius"
     ],
+    "productTypography": [
+      "--Product-Type-Scale"
+    ],
     "motion": [
       "--Motion-Duration-Fast",
       "--Motion-Duration-Base",
@@ -166,6 +169,7 @@
     "色は semantic トークン経由でのみ上書きする。Primitive を直接参照するのは Brand ランプ（--Primitive-Brand-*）だけが例外。",
     "Checkbox / RadioGroup / Switch（20px の size-5 トグル）は意図的にこの契約の対象外。「コントロールの高さ」という概念が当てはまらない固定サイズのため、Control 変数を当てると意味が壊れる。",
     "Chip は角丸（--Chip-Radius）だけを配線し、高さ・横 padding は配線しない。sm/md/lg の縦 margin（my-*）は「44px タッチターゲット - 本体高さ」ちょうどの手計算値で、height を変数化すると当たり判定の math が壊れる。",
-    "AppShell / MarketingShell / MobileAppShell はページ本文の padding をシェル自身が持たない（Container の gutter か呼び出し側の contentClassName に委ねている）ため product theme の対象外。AdminShell の <main> だけが --Product-Page-Padding-Y を持つ。"
+    "AppShell / MarketingShell / MobileAppShell はページ本文の padding をシェル自身が持たない（Container の gutter か呼び出し側の contentClassName に委ねている）ため product theme の対象外。AdminShell の <main> だけが --Product-Page-Padding-Y を持つ。",
+    "--Product-Type-Scale は typo-* の font-size に一律で掛かる乗数（既定 1）。文字倍率を上げたら Control（Button）/ Field（Input 等）の高さ・padding も --Control-Height-* / --Field-Height-* 等で別途上げること。この変数はコントロールの寸法には自動連動しない（文字だけ大きくして枠が追従しないと窮屈になるため、意図的に分離してある）。Web のみが対象で React Native（native/scales.ts）には効かない。"
   ]
 }
