@@ -1,0 +1,79 @@
+/* =============================================================
+   KSK Design System — Product Theme Override API（issue #364）
+
+   マルチテーマ（Brand 10行差し替え）が扱うのは「色」だけで、コントロールの
+   高さ・横 padding・角丸・カードの余白といった**寸法**をプロダクト単位で
+   変える口が無かった。消費側は className で個別に上書きするしかなく、
+   同じ上書きが何十箇所にも散る（exam-kit の Card 角丸13箇所 = issue #332）。
+
+   ここはその「公開して良い CSS 変数」の既定値。消費プロダクトは preset の
+   後ろに自分の CSS を1枚置き、この変数だけを上書きする。
+
+     @import "ksk-design-system/preset";
+     @import "./themes/my-client.css";   … Brand 10行（色）
+     @import "./product-theme.css";      … ここの変数（寸法・面）
+
+   機械可読な許可リストは contracts/product-theme-overrides.json が正本。
+   **ここに無い変数は公開契約ではない**（内部実装なので予告なく変わる）。
+   許可リスト外の上書きは `npx ksk-ds lint` の P049 が検出する。
+
+   既定値は現行実装の固定 Tailwind クラス（h-10 / px-4 …）と 1px も違わない。
+   上書きしない限り見た目は変わらない（__tests__/product-theme-defaults.test.tsx
+   が origin/main 相当の実寸で固定している）。
+
+   スコープ:
+   - `:root` に置けばアプリ全体に効く。
+   - 任意の要素（`<div style="--Control-Height-Md: 3rem">` や
+     `className="[--Control-Height-Md:3rem]"`）に置けばその配下だけに効く。
+     コンポーネント側は `h-[var(--Control-Height-Md)]` の形で参照しており、
+     CSS カスタムプロパティのカスケードで解決するため、React context も
+     prop 追加も要らない（Server Component のまま使える）。
+   ============================================================= */
+
+:root {
+  /* ─── Control: Button 系の内寸 ───
+     5段スケール。Button の size バリアント xs / sm / default(=Md) / lg / xl と
+     1対1で対応する。既定値は h-6/h-8/h-10/h-12/h-14・px-2/px-3/px-4/px-6/px-8。 */
+  --Control-Height-Xs: 1.5rem;   /* 24px — h-6 */
+  --Control-Height-Sm: 2rem;     /* 32px — h-8 */
+  --Control-Height-Md: 2.5rem;   /* 40px — h-10（Button の既定） */
+  --Control-Height-Lg: 3rem;     /* 48px — h-12 */
+  --Control-Height-Xl: 3.5rem;   /* 56px — h-14 */
+
+  --Control-Padding-X-Xs: 0.5rem;   /* 8px  — px-2 */
+  --Control-Padding-X-Sm: 0.75rem;  /* 12px — px-3 */
+  --Control-Padding-X-Md: 1rem;     /* 16px — px-4 */
+  --Control-Padding-X-Lg: 1.5rem;   /* 24px — px-6 */
+  --Control-Padding-X-Xl: 2rem;     /* 32px — px-8 */
+
+  /* アイコンとラベルの間隔（Button のベース gap-2） */
+  --Control-Gap: 0.5rem;         /* 8px */
+
+  /* Button の角丸。既定はピル（rounded-full 相当）。
+     角ばったボタンにしたいプロダクトはここを 0.5rem 等に落とす。 */
+  --Control-Radius: 9999px;
+
+  /* ─── Field: Input / Textarea / SelectTrigger の内寸 ───
+     Control とは別スケール。ksk のフィールドは元々ボタンより背が高く
+     （Input は h-12）、横 padding も狭い（px-3）。同じ変数に畳むと
+     どちらかの実寸が変わってしまうため、独立した family として持つ。 */
+  --Field-Height-Sm: 2.25rem;   /* 36px — h-9（SelectTrigger sm） */
+  --Field-Height-Md: 3rem;      /* 48px — h-12（Input / SelectTrigger の既定） */
+  --Field-Height-Lg: 3.5rem;    /* 56px — h-14（SelectTrigger lg） */
+
+  --Field-Padding-X-Sm: 0.625rem; /* 10px — px-2.5 */
+  --Field-Padding-X-Md: 0.75rem;  /* 12px — px-3（Input / Textarea の既定） */
+  --Field-Padding-X-Lg: 1rem;     /* 16px — px-4 */
+
+  --Field-Padding-Y: 0.5rem;      /* 8px  — Textarea の py-2 */
+  --Field-Min-Height: 5rem;       /* 80px — Textarea の min-h */
+
+  /* Input / Textarea / SelectTrigger の角丸（rounded-lg = 8px） */
+  --Field-Radius: 0.5rem;
+
+  /* ─── Product: カードの余白リズム ───
+     面の色は `--card-surface`、角丸は `--Radius-Surface` が既に公開契約なので
+     ここでは重複させない（許可リストには両方載せている）。 */
+  --Product-Card-Padding: 1.5rem; /* 24px — p-6 */
+  --Product-Card-Gap: 1.5rem;     /* 24px — gap-6 */
+}

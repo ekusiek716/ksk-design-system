@@ -91,8 +91,10 @@ describe("Button — backwards-compat", () => {
   it("新規 size: hero がレンダリング可能", () => {
     const out = html(<Button size="hero">CTA</Button>)
     expect(out).toContain('data-size="hero"')
-    expect(out).toContain("rounded-full")
-    expect(out).toContain("min-h-14")
+    // 実値は従来と同じピル・56px。参照経路だけが product theme の公開変数に変わった
+    // （issue #364。既定値の同値性は product-theme-defaults.test.tsx が固定する）。
+    expect(out).toContain("rounded-[var(--Control-Radius)]")
+    expect(out).toContain("min-h-[var(--Control-Height-Xl)]")
   })
 
   it("asChild は子の anchor に Button の属性を委譲し、button を入れ子にしない", () => {

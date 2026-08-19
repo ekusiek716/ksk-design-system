@@ -21,6 +21,9 @@
 @import "./styles/glass.css";
 @import "./styles/motion.css";
 @import "./styles/sheet-keyboard.css";
+/* プロダクト単位で上書きしてよい寸法・面の公開変数（issue #364）。
+   許可リストの正本は contracts/product-theme-overrides.json。 */
+@import "./styles/product-theme.css";
 /* DS 内部ユーティリティの safelist（自動生成 / issue #258）。
    消費側の @source が無い・パスがずれていても DS のクラス CSS が生成される保険。 */
 @import "./styles/source-safelist.css";

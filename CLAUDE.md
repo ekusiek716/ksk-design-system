@@ -38,6 +38,7 @@ UI を書く前に必ず確認すること:
 - [ ] CSS でベンダープレフィックス併記する場合、**`-webkit-` を先・標準形を後**に書いたか（消費側の minifier が同一プロパティとして dedupe し後勝ちのみ残すため。逆順だと Firefox で静かに無効化。`node scripts/check-prefix-order.mjs` が CI で検出）
 - [ ] flex 行（flex-col でない flex）で shrink-0 の兄弟と可変テキストを並べるとき、テキスト側に `flex-1`（+ 必要なら `min-w-[...]` 下限）を付けたか（`min-w-0` だけだと 1 文字ずつ折り返すまで潰れる。issue #293。`node scripts/check-flex-shrink.mjs` が CI で検出、例外は `ksk-lint-ignore KFX001 -- 理由`）
 - [ ] クラス名は**完全な文字列**で書いたか（`` `bg-${color}` `` のような動的合成は静的抽出できず消費側で CSS が生成されない。分岐は三項演算子か cva variant で。`scripts/generate-source-safelist.mjs` が検出）
+- [ ] コントロールの寸法（高さ・横 padding・角丸・カード余白）を書くとき、固定の `h-10` / `px-4` / `p-6` ではなく product theme の公開変数（`h-[var(--Control-Height-Md)]` / `p-[var(--Product-Card-Padding)]`）を参照したか（issue #364。許可リストは `contracts/product-theme-overrides.json`。Button 系は `--Control-*`、Input/Textarea/SelectTrigger は `--Field-*` とスケールが別）
 - [ ] `.tsx` 編集後に `bash scripts/lint-scratch.sh`、コンポーネント増減時は `npm run check` を実行したか
 - [ ] `FormField` を import する前にどちらか確認したか（react-hook-form の Controller と統合するなら `RhfFormField`＝`ui/form` の `FormField` を index.ts で別名 export したもの。単純な label+error 表示は `patterns/form-field` の `FormField`。迷ったら後者）
 
@@ -67,6 +68,7 @@ tokens.json                             # カラー・スペーシング・シ�
 contracts/token-hex-cache.json          # semantic トークンのデフォルトテーマ解決済み hex（テーマ依存キーは meta.themeDependentKeys 参照・自動生成）
 src/components/COMPONENT_LOOKUP.md      # バリアント・インポートパス一覧（自動生成）
 contracts/screen-patterns.json          # 画面実装前にどのシェル/パターンを使うかの decisionTree・crudMatrix
+contracts/product-theme-overrides.json   # プロダクト単位で上書きしてよい CSS 変数の許可リスト（寸法・面）
 contracts/composition.json              # 選んだパターン内部の並べ方（骨格構造・余白リズム・カード階層・テキスト階層・CTA優先度）
 ```
 
@@ -221,6 +223,7 @@ Brand色を差し替え（10行）→ Primitive Layer → Semantic Layer → Bri
 | **DESIGN.md** | AI エージェント向け視覚言語サマリ（トークン＋意図・voice・motion） |
 | **contracts/screen-patterns.json** | 画面実装前にどのシェル/パターンを使うかを決める decisionTree・crudMatrix |
 | **contracts/deprecations.json** | 非推奨 API の正本台帳（移行先・削除予定。MIGRATION.md の一覧節と check-migration CLI の入力） |
+| **contracts/product-theme-overrides.json** | プロダクト単位で上書きしてよい CSS 変数の許可リスト（寸法・面。既定値は src/styles/product-theme.css・lint は P049） |
 | **contracts/composition.json** | 選んだパターン内部の並べ方（骨格構造・余白リズム・カード階層・テキスト階層・CTA優先度） |
 
 ---
@@ -242,6 +245,7 @@ src/
 │   ├── semantic.css   # Layer 2: 用途別トークン
 │   ├── typography.css # typo-* ユーティリティ
 │   ├── motion.css     # duration / easing トークン（--Motion-*）
+│   ├── product-theme.css    # プロダクト単位で上書きしてよい寸法・面の公開変数（issue #364）
 │   └── source-safelist.css  # @source safelist（自動生成・手で編集しない / issue #258）
 ├── themes/            # default / orange / green / violet / blue
 ├── preset.css         # 外部プロジェクト向けプリセット

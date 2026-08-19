@@ -1,8 +1,8 @@
 {
   "meta": {
     "name": "KSK Design System — Rules Contracts",
-    "version": "1.1.0",
-    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン48件・AIアンチパターン10件。"
+    "version": "1.2.0",
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン49件・AIアンチパターン10件。"
   },
   "prohibited": [
     {
@@ -441,6 +441,18 @@
       "message": "グローバルな重なり層に素の z-index を使わない",
       "fix": "z-[var(--Z-{Sticky,Nav,Overlay,Modal,Popover,Toast,Tooltip,SkipLink})] を使用",
       "note": "z-50 一律だと Portal のマウント順（＝開いた順）で勝敗が決まる。z-10 / z-20 のコンポーネント内部の重なりは対象外"
+    },
+    {
+      "id": "P049",
+      "severity": "error",
+      "category": "token",
+      "pattern": "product-theme-override",
+      "engine": "product-theme-override",
+      "appliesTo": ["*.css"],
+      "excludes": [],
+      "message": "product theme の許可リストに無い DS の CSS 変数を消費側で上書きしている",
+      "fix": "contracts/product-theme-overrides.json の allowedVariables にある変数だけを上書きする。足りない場合は DS 側に公開変数の追加を依頼する",
+      "note": "対象は .css の宣言のみ（var() での参照は自由）。--Hover-* / --Z-* / --glass-* のような内部変数を上書きすると DS を上げた瞬間に静かに壊れる。shadcn 互換の小文字ブリッジ（--primary 等）は消費側アプリと名前が衝突しうるため対象外（issue #364）"
     }
   ],
   "aiPatterns": {
