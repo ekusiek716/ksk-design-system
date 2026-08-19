@@ -202,7 +202,9 @@ function readProductThemeContract(pkgRoot) {
   const path = resolve(pkgRoot, "contracts/product-theme-overrides.json")
   if (!existsSync(path)) return null
   try {
-    return loadProductThemeContract(JSON.parse(readFileSync(path, "utf8")))
+    // pkgRoot を渡すと「DS に実在する変数」だけを違反にする（issue #377）。
+    // DS の CSS が読めない環境では接頭辞一致だけの従来判定へフォールバックする。
+    return loadProductThemeContract(JSON.parse(readFileSync(path, "utf8")), { pkgRoot })
   } catch {
     return null
   }

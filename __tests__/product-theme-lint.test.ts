@@ -5,12 +5,16 @@
  * 許可リスト・namespace 定義が DS の実 CSS からドリフトしていないことを固定する。
  */
 import { describe, expect, it } from "vitest"
-import { mkdtempSync, writeFileSync, readFileSync, readdirSync } from "node:fs"
+import { mkdtempSync, writeFileSync, readFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { spawnSync } from "node:child_process"
 
-import { inspectProductThemeOverrides, loadProductThemeContract } from "../bin/product-theme-override.js"
+import {
+  collectDsDeclaredVariables,
+  inspectProductThemeOverrides,
+  loadProductThemeContract,
+} from "../bin/product-theme-override.js"
 
 const ROOT = process.cwd()
 const contractJson = JSON.parse(
@@ -19,7 +23,10 @@ const contractJson = JSON.parse(
   allowedVariables: Record<string, string[]>
   dsVariableNamespaces: string[]
 }
-const contract = loadProductThemeContract(contractJson)
+/** CLI と同じ条件（DS の CSS を読み、実在する変数だけを違反にする / issue #377） */
+const contract = loadProductThemeContract(contractJson, { pkgRoot: ROOT })
+/** DS の CSS が読めない環境のフォールバック（接頭辞一致だけで判定する） */
+const prefixOnlyContract = loadProductThemeContract(contractJson)
 
 function runLint(css: string) {
   const dir = mkdtempSync(join(tmpdir(), "ksk-ds-p049-"))
@@ -76,6 +83,79 @@ describe("P049 の判定ロジック", () => {
     expect(findings).toEqual([])
   })
 
+  it("Neutral パレット（Gray 10段 + White / Black）の差し替えは違反にしない", () => {
+    // Brand 10 行と並ぶ「アイデンティティのパレット層」（issue #377）。
+    const css = [
+      "--Primitive-Gray-50",
+      "--Primitive-Gray-100",
+      "--Primitive-Gray-200",
+      "--Primitive-Gray-300",
+      "--Primitive-Gray-400",
+      "--Primitive-Gray-500",
+      "--Primitive-Gray-600",
+      "--Primitive-Gray-700",
+      "--Primitive-Gray-800",
+      "--Primitive-Gray-900",
+      "--Primitive-White",
+      "--Primitive-Black",
+    ]
+      .map((name) => `  ${name}: #FBF9F8;`)
+      .join("\n")
+    expect(inspectProductThemeOverrides(`:root {\n${css}\n}`, contract)).toEqual([])
+  })
+
+  it("Status の semantic トークンの上書きは違反にしない", () => {
+    const css = [
+      "--Surface-Caution",
+      "--Surface-Caution-Subtle",
+      "--Surface-Caution-Strong",
+      "--Surface-Success",
+      "--Surface-Success-Subtle",
+      "--Surface-Warning",
+      "--Surface-Info",
+      "--Surface-Info-Subtle",
+      "--Text-Caution",
+      "--Text-Success",
+      "--Text-Warning",
+      "--Text-Info",
+      "--Border-Caution",
+      "--Border-Success",
+      "--Border-Warning",
+      "--Border-Info",
+      "--Caution-Base",
+      "--Success-Base",
+      "--Warning-Base",
+      "--Info-Base",
+      "--Surface-Inverse",
+      "--Text-on-Inverse-Secondary",
+      "--Object-on-Inverse",
+    ]
+      .map((name) => `  ${name}: #3A2F2C;`)
+      .join("\n")
+    expect(inspectProductThemeOverrides(`:root {\n${css}\n}`, contract)).toEqual([])
+  })
+
+  it("Status の primitive は依然として違反（色調整は semantic 層で行う契約）", () => {
+    // 方針: primitive を直接上書きしてよいのは Brand と Neutral の2パレットだけ。
+    const findings = inspectProductThemeOverrides(
+      `:root {\n  --Primitive-Red-50: #3A2020;\n  --Primitive-Green-700: #2F6B4A;\n}`,
+      contract,
+    )
+    expect(findings.map((f) => f.name)).toEqual(["--Primitive-Red-50", "--Primitive-Green-700"])
+  })
+
+  it("DS に存在しない変数は namespace が一致しても違反にしない", () => {
+    // --Surface-Inverse-Hover は消費側（belle）が DS の命名に寄せて作った独自変数で、
+    // DS には存在しない。上書きではないので P049 の対象外（issue #377）。
+    const css = `:root { --Surface-Inverse-Hover: #333; --Text-Brandish-Foo: #444; }`
+    expect(inspectProductThemeOverrides(css, contract)).toEqual([])
+    // DS の CSS を読めない環境では従来どおり接頭辞一致だけで判定する（フォールバック）
+    expect(inspectProductThemeOverrides(css, prefixOnlyContract).map((f) => f.name)).toEqual([
+      "--Surface-Inverse-Hover",
+      "--Text-Brandish-Foo",
+    ])
+  })
+
   it("行番号を正しく返す（コメントで行がずれない）", () => {
     const findings = inspectProductThemeOverrides(
       `/* 1行目\n2行目 */\n:root {\n  --Z-Toast: 5;\n}`,
@@ -101,6 +181,21 @@ describe("公開 CLI（ksk-ds lint）", () => {
     expect(result.status).toBe(0)
   })
 
+  it("Neutral パレットと Status semantic の上書きを通す", () => {
+    const result = runLint(
+      `:root {\n  --Primitive-Gray-50: #FBF9F8;\n  --Primitive-Gray-900: #1C1A1A;\n  --Primitive-White: #FFFDFC;\n  --Surface-Caution: #3A2020;\n  --Surface-Inverse-Hover: #333;\n}`,
+    )
+    expect(result.stdout).not.toContain("P049")
+    expect(result.status).toBe(0)
+  })
+
+  it("Status の primitive 上書きは P049 のエラーとして報告する", () => {
+    const result = runLint(`:root {\n  --Primitive-Red-50: #3A2020;\n}`)
+    expect(result.stdout).toContain("error P049")
+    expect(result.stdout).toContain("--Primitive-Red-50")
+    expect(result.status).toBe(1)
+  })
+
   it("CSS には TSX 向けの正規表現ルールを当てない（誤検知しない）", () => {
     // P008（HEX 直書き）は .tsx 向け。CSS に色を書くのは当然なので流してはいけない。
     const result = runLint(`:root {\n  --my-app-accent: #3B82F6;\n}`)
@@ -110,23 +205,23 @@ describe("公開 CLI（ksk-ds lint）", () => {
 })
 
 describe("契約のドリフト検査", () => {
-  /** DS が実際に宣言している CSS 変数名 */
+  /** DS が実際に宣言している CSS 変数名（lint 本体と同じ収集器を使う） */
   function declaredVariables(): string[] {
-    const dirs = ["src/styles", "src/themes"]
-    const files = dirs.flatMap((dir) =>
-      readdirSync(join(ROOT, dir))
-        .filter((name) => name.endsWith(".css"))
-        .map((name) => join(ROOT, dir, name)),
-    )
-    files.push(join(ROOT, "src/preset.css"))
-
-    const names = new Set<string>()
-    for (const file of files) {
-      const css = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "")
-      for (const match of css.matchAll(/^\s*(--[A-Za-z0-9_-]+)\s*:/gm)) names.add(match[1])
-    }
-    return [...names]
+    const names = collectDsDeclaredVariables(ROOT)
+    expect(names, "DS の CSS 変数を収集できませんでした").not.toBeNull()
+    return [...names!]
   }
+
+  it("primitive の公開は Brand と Neutral の2パレットだけ（status の primitive は非公開）", () => {
+    // 方針（issue #377）: status 系の色調整は semantic 層で行う。primitive を開けると
+    // 上書き箇所が増え、DS 側が primitive の割り当てを変えたときに壊れる。
+    const primitives = [...contract.allowed].filter((name) => name.startsWith("--Primitive-"))
+    const unexpected = primitives.filter(
+      (name) => !/^--Primitive-(Brand-\d+|Gray-\d+|White|Black)$/.test(name),
+    )
+    expect(unexpected).toEqual([])
+    expect(contractJson.allowedVariables.neutralPalette).toHaveLength(12)
+  })
 
   it("PascalCase の DS 変数はすべて dsVariableNamespaces のどれかに属する", () => {
     // ここが漏れると、その namespace の変数は消費側が自由に上書きしても P049 が黙る。
