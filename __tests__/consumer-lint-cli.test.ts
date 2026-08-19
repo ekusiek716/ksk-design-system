@@ -17,6 +17,31 @@ function runKskLint(source: string, extraArgs: string[] = []) {
 }
 
 describe("consumer lint CLI", () => {
+  // issue #374: P032 の否定先読みは「マッチ位置より後ろ」しか見ないため、
+  // `border-[var(...)]` の `border` 部分自身にマッチして色指定そのものを違反に
+  // 数えていた。ルールの fix が案内する形（色併記 / transparent + 状態クラス）が
+  // どちらも消えず、ninshin-todo で 161 件中 148 件が誤検知だった。
+  it("P032: 色をトークンで併記した border は違反にしない（自己マッチの回帰）", () => {
+    const result = runKskLint(`
+      export function Probe() {
+        return (
+          <>
+            <div className="border rounded-lg p-3">A</div>
+            <div className="border border-[var(--Border-Low-Emphasis)] rounded-lg p-3">B</div>
+            <div className="border border-transparent data-[state=active]:border-[var(--Brand-Primary)]">C</div>
+            <div className="border-b border-[var(--Border-Low-Emphasis)]">D</div>
+            <div className="border-[var(--Border-Low-Emphasis)] p-2">E</div>
+          </>
+        )
+      }
+    `, ["--format", "json"])
+    const payload = JSON.parse(result.stdout)
+    const p032 = payload.results.filter((f: { ruleId: string; line: number }) => f.ruleId === "P032")
+    // 本物の違反は A（5行目）だけ。B〜E は fix が案内する形なので検出しない
+    expect(p032.map((f: { line: number }) => f.line)).toEqual([5])
+  })
+
+
   it("reports contract-backed DS violations with file and fix", () => {
     const result = runKskLint(`
       export function Example() {
