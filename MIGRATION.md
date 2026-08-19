@@ -53,6 +53,27 @@ npx ksk-ds check-migration ./src
 
 ## v1 系内の minor 変更（参考）
 
+### 次のリリース — `postinstall` による AI ルールファイル自動設置を廃止（要確認）
+
+これまで `npm install ksk-design-system` の `postinstall` フックが、消費側の
+プロジェクトルートに `CLAUDE.md` / `AGENTS.md`（`node_modules` 内の DS ルールを指す
+薄いポインタ）を自動設置していた。**この自動設置を廃止し、明示コマンドに一本化した。**
+
+```bash
+npx ksk-ds init          # 設置（既存ファイルはスキップ）
+npx ksk-ds init --force  # 既存ファイルを最新テンプレートで上書き
+```
+
+**既に設置済みの消費リポは対応不要。** 元々 `postinstall` は既存ファイルを上書きしない
+仕様だったため、設置済みのプロジェクトでは実質 no-op だった。影響を受けるのは
+**新規に DS を導入するプロジェクトの初回だけ**で、`npm install` の後に上記を 1 回実行する。
+
+廃止の理由は、install 時にプロジェクトルートへ AI エージェント向け指示ファイルを書き込む
+挙動が、サプライチェーン検査で「同意なき AI エージェント制御面の設置」として Critical 判定
+されるため。LPM Firewall が 1.49.2 / 1.51.1 をこの理由でブロック判定しており、
+`postinstall` を持つ限りバージョンを上げても判定が引き継がれる。あわせて
+`INIT_CWD` 参照も削除し、書き込み先はコマンドを実行したディレクトリに固定した。
+
 ### 次のリリース — PillToggle の onChange/onValueChange 統一（破壊変更なし）
 
 `PillToggle` のみ他コンポーネント（Switch 等の native 系を除く）と異なり `onValueChange`

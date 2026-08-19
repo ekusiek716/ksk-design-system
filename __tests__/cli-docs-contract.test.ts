@@ -44,7 +44,7 @@ function docInvocations() {
 function implementedSubcommands() {
   const source = readFileSync(join(ROOT, "bin/init.js"), "utf8")
   const subs = new Set<string>()
-  // `cmd === "x"` の分岐に加え、既定コマンドの許可リスト `cmd !== "init" && cmd !== "postinstall"` も拾う
+  // `cmd === "x"` の分岐に加え、既定コマンドの許可リスト `cmd !== "init"` も拾う
   for (const m of source.matchAll(/cmd\s*[!=]==\s*"([^"]+)"/g)) subs.add(m[1])
   return subs
 }

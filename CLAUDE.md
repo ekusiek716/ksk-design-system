@@ -17,7 +17,7 @@
   末尾が `codex-pr-review-guidelines` のマーカー）で囲み同期対象から除外する
 - 片方だけ編集したら **`node scripts/check-agents-docs-sync.mjs`**（`npm run check` に
   組み込み済み）を実行し、乖離が無いことを確認する
-- `templates/CLAUDE.md` / `templates/AGENTS.md`（postinstall で配布するテンプレート）も
+- `templates/CLAUDE.md` / `templates/AGENTS.md`（`npx ksk-ds init` で配布するテンプレート）も
   同じ仕組みで同期検査の対象
 
 ## 実装前セルフチェック（AI必読・最優先）

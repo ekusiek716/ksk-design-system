@@ -48,6 +48,21 @@ Tailwind 4.1 で導入された `@source inline()` を使うため）
 npm install ksk-design-system
 ```
 
+AI コーディング（Claude Code / Codex）を使うプロジェクトでは、続けて 1 回だけ実行します。
+
+```bash
+npx ksk-ds init
+```
+
+プロジェクトルートに `CLAUDE.md` / `AGENTS.md`（`node_modules` 内の DS ルールを指す薄いポインタ）を
+設置します。AI エージェントは `node_modules` 配下を自動では読まないため、このファイルが無いと
+DS のルールが適用されません。既存ファイルはスキップされ、更新は `--force` で上書きします。
+
+> **v1.60.0 で `postinstall` による自動設置を廃止しました。** install 時にプロジェクトルートへ
+> AI 指示ファイルを書き込む挙動は、サプライチェーン検査で「同意なき AI エージェント制御面の設置」
+> として Critical 判定されるためです（LPM Firewall が 1.49.2 / 1.51.1 をこの理由でブロック判定）。
+> v1.59.0 以前から更新する場合、既に設置済みのファイルはそのまま使えます。
+
 ```css
 /* globals.css / app.css（CSS の場所に応じて ../../ の数を調整） */
 @import "tailwindcss";

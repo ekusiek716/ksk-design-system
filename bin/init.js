@@ -6,6 +6,12 @@
 // プロジェクトルートに AGENTS.md / CLAUDE.md（node_modules 内の DS ルールを
 // 参照する薄いポインタ）を置く必要がある。
 //
+// 設置は **明示実行のみ**（`npx ksk-ds init`）。install 時に自動で置く
+// postinstall フックは v1.60.0 で廃止した。install-time にプロジェクトルートへ
+// AI 指示ファイルを書き込む挙動は、サプライチェーン検査で
+// 「同意なき AI エージェント制御面の設置」として Critical 判定されるため
+// （LPM Firewall が 1.49.2 / 1.51.1 をこの理由でブロック判定）。
+//
 // Usage:
 //   npx ksk-design-system init          # AGENTS.md + CLAUDE.md を設置
 //   npx ksk-design-system init --force  # 既存ファイルを上書き
@@ -13,7 +19,6 @@
 //   npx ksk-ds lint src                 # contracts/rules.json に基づき consumer UI を検査
 //   npx ksk-ds check-duplicates src     # DS と同名のローカル実装を検査
 //   npx ksk-ds codemod <name> ./src     # scripts/codemod/<name>.mjs を実行
-//   npx ksk-design-system postinstall   # npm postinstall から呼ばれる silent モード
 
 import { copyFileSync, existsSync, readdirSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
@@ -82,7 +87,7 @@ if (cmd === "demo") {
   process.exit(0)
 }
 
-if (cmd !== "init" && cmd !== "postinstall") {
+if (cmd !== "init") {
   console.error(`未知のコマンド: ${cmd}`)
   console.error(`npx ksk-design-system help を参照してください`)
   process.exit(1)
@@ -209,32 +214,18 @@ function runDemo(rest) {
   console.log(``)
 }
 
-// ─── postinstall モードのガード ─────────────────────────────
-// INIT_CWD は npm install が実行されたディレクトリ（consumer のルート）。
-// 未設定、または pkgRoot と同じ場合は DS 自身のインストールコンテキストなのでスキップ。
-const isPostinstall = cmd === "postinstall"
-const consumerRoot = process.env.INIT_CWD || process.cwd()
-
-if (isPostinstall) {
-  // DS 自身を開発している場合（INIT_CWD が pkgRoot）はスキップ
-  if (!process.env.INIT_CWD || resolve(consumerRoot) === pkgRoot) {
-    process.exit(0)
-  }
-  // consumer のルートに package.json が無ければスキップ（安全のため）
-  if (!existsSync(join(consumerRoot, "package.json"))) {
-    process.exit(0)
-  }
-}
+// ─── init（明示実行のみ）─────────────────────────────────────
+// 書き込み先はコマンドを叩いたディレクトリ。install 時の暗黙実行が無くなったので
+// INIT_CWD 等の環境変数は参照しない。
+const consumerRoot = process.cwd()
 
 const files = [
   { src: "templates/AGENTS.md", dest: "AGENTS.md", label: "Codex 用" },
   { src: "templates/CLAUDE.md", dest: "CLAUDE.md", label: "Claude Code 用" },
 ]
 
-if (!isPostinstall) {
-  console.log("ksk-design-system init")
-  console.log("AI (Claude / Codex) 向けルールファイルを設置します。\n")
-}
+console.log("ksk-design-system init")
+console.log("AI (Claude / Codex) 向けルールファイルを設置します。\n")
 
 let created = 0
 let skipped = 0
@@ -244,31 +235,19 @@ for (const { src, dest, label } of files) {
   const destPath = join(consumerRoot, dest)
 
   if (!existsSync(srcPath)) {
-    if (!isPostinstall) {
-      console.error(`  ✗ テンプレートが見つかりません: ${srcPath}`)
-    }
-    process.exit(isPostinstall ? 0 : 1)
+    console.error(`  ✗ テンプレートが見つかりません: ${srcPath}`)
+    process.exit(1)
   }
 
   if (existsSync(destPath) && !force) {
-    if (!isPostinstall) {
-      console.log(`  ⏭  ${dest} は既に存在するためスキップ（--force で上書き）`)
-    }
+    console.log(`  ⏭  ${dest} は既に存在するためスキップ（--force で上書き）`)
     skipped++
     continue
   }
 
   copyFileSync(srcPath, destPath)
-  if (isPostinstall) {
-    console.log(`[ksk-design-system] ${dest} をプロジェクトルートに設置しました`)
-  } else {
-    console.log(`  ✓ ${dest} を設置しました（${label}）`)
-  }
+  console.log(`  ✓ ${dest} を設置しました（${label}）`)
   created++
-}
-
-if (isPostinstall) {
-  process.exit(0)
 }
 
 console.log(`\n完了: ${created} 作成 / ${skipped} スキップ`)
