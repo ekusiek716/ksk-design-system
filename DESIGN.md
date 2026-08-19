@@ -311,6 +311,15 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
   `AdminShell` の `<main>` だけが `--Product-Page-Padding-Y` を持つ。
 - 色は従来どおり semantic トークン（`--Surface-*` / `--Text-*` / `--Brand-*`）と Brand ランプの
   上書きで調整する。カードの面は `--card-surface`、角丸は `--Radius-Surface` が既存の公開シーム。
+- **primitive を直接上書きしてよいのは Brand（`--Primitive-Brand-*`）と Neutral
+  （`--Primitive-Gray-50〜900` / `--Primitive-White` / `--Primitive-Black`）の2つのアイデンティティ
+  パレットだけ**（issue #377）。warm gray のように DS 既定の cool gray と世界観が違うプロダクトは
+  Neutral ランプごと差し替える。status 系（Red / Green / Blue / Yellow / Orange）の色調整は
+  semantic 層（`--Surface-Caution` / `--Text-Success` / `--Caution-Base` 等）で行う — 上書き1箇所で
+  済み、DS が primitive の割り当てを変えても壊れない。
+  **Neutral を差し替えたらコントラストは消費側の責任**。Gray は `--Text-High-Emphasis`（本文色）や
+  `--Surface-Secondary` を駆動するので、本文×背景が WCAG AA（4.5:1）を満たすか light / dark 両方で
+  実測すること。DS の `scripts/check-contrast.mjs` は DS 既定パレットしか見ていない。
 - **`--Product-Type-Scale`**（issue #371/#372 の stract-ui からの逆輸入）は `typo-*` の font-size に
   `calc(<px> * var(--Product-Type-Scale, 1))` として一律で掛かる乗数。line-height は unitless、
   letter-spacing は em のため font-size の変化に自動で連動し、別途スケールしない。
