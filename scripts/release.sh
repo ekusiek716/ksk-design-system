@@ -24,7 +24,7 @@
 #      → publish.yml が version 変更を検知して npm publish
 #      （Trusted Publishing）・タグ作成・GitHub Release を自動実行
 #   5. npm view でレジストリ反映をポーリング確認
-#   6. bash scripts/update-consumers.sh <version>（5 リポ自動 PR）
+#   6. bash scripts/update-consumers.sh <version>（DEFAULT_REPOS 全件へ自動 PR）
 #
 # タグ・GitHub Release の作成は publish.yml に完全委任する。ローカルで
 # `npm version` の既定動作（ローカルタグ作成 + commit）を使うと、
