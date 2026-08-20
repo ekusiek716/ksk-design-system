@@ -275,6 +275,11 @@ npx ksk-ds check-duplicates ./src --strict
 
 既定は助言モードで終了コード 0、`--strict` は重複候補があると終了コード 1 です。正本は同梱の `contracts/components.json` であり、consumer 側に別の「昇格候補台帳」を作らないでください。
 
+DS を import して委譲するだけの薄いラッパー（段階移行の型）は、DS と同名でも重複報告から除外され、`ℹ ラッパー（DS 委譲済み）として除外` として件数のみ表示されます。
+
+<!-- docs-drift-ignore: PrimaryButton AppTextInput BottomSheet CandidateOverflowMenu CrisisBanner AvatarView -->
+さらに、`contracts/components.json` と完全一致しない名前でも、DS 部品を連想させる命名パターン（`PrimaryButton` → `Button` / `AppTextInput` → `Input` / `BottomSheet` → `Sheet` / `CandidateOverflowMenu` → `DropdownMenu` / `CrisisBanner` → `Banner` / `AvatarView` → `Avatar` 等）は「重複の疑い」として `⚠` 付きで warn 表示されます。これは名前一致のみによる推測（AST は使いません）のため確度は下がり、`--strict` でも exit code には影響しません。誤検知の場合は無視して構いませんが、恒常的に抑制したい場合はそのファイル内のコメントに `ksk-ds-local-fallback` を含めてください。
+
 ### Media overlay utilities
 
 動画・写真の上に文字や操作を置く場合は、`--Text-on-Media` と `.text-on-media` / `.text-on-media-secondary`、上下の `.media-scrim-top` / `.media-scrim-bottom` を使います。TikTok / Reels 型の操作群は `MediaActionCluster` が glass ボタン、ラベル、safe-area anchor、idle auto-hide をまとめて扱います。
