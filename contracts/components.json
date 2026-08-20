@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 68,
-      "patterns": 57,
+      "patterns": 60,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 148
+      "total": 151
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -2083,6 +2083,80 @@
       "accessibility": [],
       "rules": [
         "isActive 切替時に key を変えて Chip を強制再マウント (selected キャッシュ残り防止)"
+      ]
+    },
+    {
+      "name": "FilterPill",
+      "path": "src/components/patterns/filter-pill.tsx",
+      "description": "任意コンテンツの Popover を開くフィルタピル。value 指定で適用中（Brand 配色・\"ラベル: 値\" 表記）になり、onClear を渡すとピル内にクリアボタンが出る。パネルの中身は自由スロット。",
+      "variants": [
+        "active (value 指定)",
+        "inactive"
+      ],
+      "sizes": [
+        "sm",
+        "md"
+      ],
+      "accessibility": [
+        "トリガーは aria-expanded / aria-haspopup=\"dialog\" を部品側で持つ",
+        "クリアボタンには既定 aria-label（`{label}をクリア`）が付く",
+        "クリアは Popover トリガーの兄弟に配置し button の入れ子を作らない",
+        "Popover パネル（role=\"dialog\"）に既定の aria-label（`{label}のフィルタ` / panelLabel で上書き）が付く"
+      ],
+      "rules": [
+        "単純な on/off トグルは FilterChip、単一選択リストは DropdownFilter、任意パネル + 明示クリアは FilterPill",
+        "適用中かどうかの正本は value（active フラグを別に持たない）",
+        "value の整形（複数選択の \"渋谷 他2件\" 等）は呼び出し側の責務"
+      ]
+    },
+    {
+      "name": "ImageOverlayAction",
+      "path": "src/components/patterns/image-overlay-action.tsx",
+      "description": "画像の上に重ねる単一のアクションボタン（お気に入りトグル・カルーセル矢印・削除など）。見た目の円は sm/md で変わるが、タップ領域は常に 44px 以上。placement で四隅・左右中央に絶対配置する。",
+      "variants": [
+        "tone: surface / scrim"
+      ],
+      "sizes": [
+        "sm",
+        "md"
+      ],
+      "accessibility": [
+        "aria-label が必須（型で強制。アイコンのみの操作子のため）",
+        "pressed を渡すと aria-pressed が出る（トグル用途）",
+        "タップ領域 44px 以上を size によらず確保する"
+      ],
+      "rules": [
+        "写真の上に素のアイコンだけを置かない。半透明の面（surface）か暗いスクリム（scrim）を必ず持たせる",
+        "scrim はテーマ非依存の --Surface-VideoOverlay-* / --Text-on-Media を使う（ライト/ダークで反転させない）",
+        "親要素に relative が必要（placement=\"none\" 以外）",
+        "stretched-link のカード内では既定の stopPropagation により親の遷移を起こさない",
+        "複数操作をラベル付きでまとめる動画プレイヤー用途は MediaActionCluster を使う（本部品は静止画上の単発操作専用）"
+      ]
+    },
+    {
+      "name": "ThumbnailCard",
+      "path": "src/components/patterns/thumbnail-card.tsx",
+      "description": "サムネイル + 見出し + 補足 + meta で、カード全体が 1 つのリンク / ボタンになる汎用カード（stretched link）。secondaryAction をサムネ上に重ねられる。価格・レーティングを持たないコンテンツ（レコメンド・記事・検索結果）向け。",
+      "variants": {
+        "orientation": [
+          "vertical",
+          "horizontal"
+        ],
+        "aspect": [
+          "square",
+          "video",
+          "portrait"
+        ]
+      },
+      "accessibility": [
+        "全面リンク / ボタンの accessible name は title",
+        "サムネの alt は既定で空（リンク名の二重読み上げ回避）",
+        "secondaryAction はリンク面の前面に置かれ、押してもカードの遷移は起きない"
+      ],
+      "rules": [
+        "価格・レーティング・カート追加を持つ EC 商品は ProductCard を使う。meta に価格文字列を手組みしない",
+        "テキスト側に別リンクを置かない（リンクの入れ子になる）。別操作は secondaryAction へ",
+        "meta には押せない表示のみ置く"
       ]
     },
     {

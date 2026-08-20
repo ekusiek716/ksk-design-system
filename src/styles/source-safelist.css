@@ -35,6 +35,7 @@
 @source inline("[&>*]:flex-1");
 @source inline("[&>*]:flex-col");
 @source inline("[&>*]:min-w-[140px]");
+@source inline("[&>*]:pointer-events-auto");
 @source inline("[&>*]:shrink-0");
 @source inline("[&>button]:bg-[var(--Brand-Primary)]");
 @source inline("[&>button]:bg-transparent!");
@@ -517,6 +518,7 @@
 @source inline("hover:bg-[var(--Surface-Tertiary)]");
 @source inline("hover:bg-[var(--Text-Low-Emphasis)]");
 @source inline("hover:bg-[var(--Text-on-Inverse)]/10");
+@source inline("hover:bg-[var(--Text-on-Inverse)]/20");
 @source inline("hover:bg-transparent");
 @source inline("hover:border-[var(--Border-Accent-Primary)]");
 @source inline("hover:border-[var(--Border-High-Emphasis)]");
@@ -904,6 +906,7 @@
 @source inline("size-14");
 @source inline("size-18");
 @source inline("size-2");
+@source inline("size-20");
 @source inline("size-3");
 @source inline("size-3.5");
 @source inline("size-4");
@@ -929,6 +932,7 @@
 @source inline("sm:grid-cols-2");
 @source inline("sm:grid-cols-3");
 @source inline("sm:grid-cols-4");
+@source inline("sm:h-[var(--Control-Height-Md)]");
 @source inline("sm:hidden");
 @source inline("sm:inset-x-4");
 @source inline("sm:justify-center");
@@ -1110,6 +1114,7 @@
 @source inline("z-1");
 @source inline("z-10");
 @source inline("z-[1]");
+@source inline("z-[2]");
 @source inline("z-[3]");
 @source inline("z-[4]");
 @source inline("z-[5]");
