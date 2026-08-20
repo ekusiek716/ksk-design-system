@@ -129,6 +129,54 @@ describe("issue #388: P026 の同一行 aria-label / aria-labelledby / id 判定
   })
 })
 
+describe("issue #396: P026 のタグ語彙拡張（DatePicker / Combobox 等）", () => {
+  it("aria-label の無い DatePicker の placeholder は検出する", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return <DatePicker placeholder="日付を選択" />
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P026")).toHaveLength(1)
+  })
+
+  it("aria-label を持つ DatePicker は違反にしない", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return <DatePicker aria-label="日付を選択" placeholder="日付を選択" />
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P026")).toHaveLength(0)
+  })
+
+  it("大文字 A の TextArea（AutoGrowTextarea 等ではない素の TextArea）も検出する", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return <TextArea placeholder="ご意見をお聞かせください" />
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P026")).toHaveLength(1)
+  })
+
+  it("SelectValue の placeholder は意図的に対象外のまま（親 Select/FormField 側がラベルを担う合成コンポーネント）", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return (
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="取引先を選択" />
+            </SelectTrigger>
+          </Select>
+        )
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P026")).toHaveLength(0)
+  })
+})
+
 describe("issue #389: P037 / P040 の上限付与と matchAll 化", () => {
   it("P040: ファイル先頭のデータ配列の emoji と数百行離れた aria-pressed は無関係なので誤検知しない", () => {
     const filler = Array.from({ length: 40 }, (_, i) => `  // padding comment number ${i} adds unrelated distance in this source file`).join("\n")
