@@ -44,3 +44,8 @@ export const Disabled: Story = {
 export const CustomFormat: Story = {
   render: () => <DateFieldDemo value="2026-07-02" dateFormat="yyyy年MM月dd日" />,
 }
+
+/** issue #426: 可視ラベルを置けない文脈（テーブルセル等）向けに triggerLabel で SR 向けラベルを渡す */
+export const WithTriggerLabel: Story = {
+  render: () => <DateFieldDemo placeholder="挙式日を選択" triggerLabel="挙式日" />,
+}

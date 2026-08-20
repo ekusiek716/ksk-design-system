@@ -33,13 +33,18 @@ export interface DateFieldProps {
   disabled?: boolean
   /** DatePicker に渡す表示フォーマッタ（trigger の表示のみ。value/onChange は常に ISO 文字列） */
   formatter?: (d: Date) => string
+  /**
+   * trigger の accessibilityLabel（issue #426）。
+   * 未指定時は選択済みの日付、未選択なら placeholder が読み上げられる（内部 DatePicker のフォールバック）。
+   */
+  accessibilityLabel?: string
 }
 
 /**
  * DateField — native DatePicker（Date オブジェクト API）を
  * "YYYY-MM-DD" ISO 文字列 API でラップする adapter。web 版と同じ変換ロジック。
  */
-export function DateField({ value, onChange, placeholder, disabled, formatter }: DateFieldProps) {
+export function DateField({ value, onChange, placeholder, disabled, formatter, accessibilityLabel }: DateFieldProps) {
   return (
     <DatePicker
       value={strToDate(value)}
@@ -47,6 +52,7 @@ export function DateField({ value, onChange, placeholder, disabled, formatter }:
       placeholder={placeholder}
       disabled={disabled}
       formatter={formatter}
+      accessibilityLabel={accessibilityLabel}
     />
   )
 }

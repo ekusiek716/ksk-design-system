@@ -291,12 +291,12 @@
       "id": "P026",
       "severity": "warning",
       "category": "form",
-      "pattern": "<\\w*(?:[Ii]nput|[Tt]ext[Aa]rea|DatePicker|DateField|TimePicker|Combobox|MultiSelect|SearchBar)\\b(?!(?:(?!<)[\\s\\S]){0,400}?\\b(?:aria-labelledby|aria-label|accessibilityLabelledBy|accessibilityLabel|id)=)(?:(?!<)[\\s\\S]){0,400}?placeholder=",
+      "pattern": "<\\w*(?:[Ii]nput|[Tt]ext[Aa]rea|DatePicker|DateField|TimePicker|Combobox|MultiSelect|SearchBar)\\b(?!(?:(?!<)[\\s\\S]){0,400}?\\b(?:aria-labelledby|aria-label|accessibilityLabelledBy|accessibilityLabel|triggerLabel|id)=)(?:(?!<)[\\s\\S]){0,400}?placeholder=",
       "excludePaths": [".stories."],
       "excludeDsPaths": ["components/ui/", "components/patterns/"],
       "excludeLines": [],
-      "message": "placeholder のみでラベルを省略しない（タグ内に aria-label / aria-labelledby / id のいずれも無い）",
-      "fix": "aria-label か aria-labelledby を付けるか、id と <Label htmlFor> を対応させる（React Native は accessibilityLabel / accessibilityLabelledBy）（入力タグ単位の判定。タグ外の <Label> との対応は id の有無で近似している）"
+      "message": "placeholder のみでラベルを省略しない（タグ内に aria-label / aria-labelledby / triggerLabel / id のいずれも無い）",
+      "fix": "aria-label か aria-labelledby を付けるか、id と <Label htmlFor> を対応させる（React Native は accessibilityLabel / accessibilityLabelledBy）。DatePicker / TimePicker / Combobox / DateField / MultiSelect は triggerLabel も可（入力タグ単位の判定。タグ外の <Label> との対応は id の有無で近似している）"
     },
     {
       "id": "P027",

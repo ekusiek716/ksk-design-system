@@ -24,6 +24,11 @@ export interface MultiSelectProps {
   clearable?: boolean
   /** クリアボタンの aria-label。@default "選択をクリア" */
   clearLabel?: string
+  /**
+   * trigger のスクリーンリーダー向けラベル（issue #426）。
+   * 未指定時は未選択なら placeholder、選択済みならチップの表示テキストがそのまま読み上げられる。
+   */
+  triggerLabel?: string
 }
 
 function MultiSelect({
@@ -38,6 +43,7 @@ function MultiSelect({
   maxDisplay = 3,
   clearable = true,
   clearLabel = "選択をクリア",
+  triggerLabel,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
@@ -73,6 +79,7 @@ function MultiSelect({
             disabled={disabled}
             aria-expanded={open}
             aria-haspopup="listbox"
+            aria-label={triggerLabel ?? (value.length === 0 ? placeholder : undefined)}
             className={cn(
               "relative flex min-h-12 w-full flex-wrap items-center gap-1.5 rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-3 py-2 pr-10 typo-body-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 text-left",
               showClearButton && "pr-16",
