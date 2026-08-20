@@ -40,30 +40,64 @@ const DEFAULT_IGNORE_PATHS = [
   "android/app/src/main/assets/public",
 ]
 
-/** appliesTo に書けるプラットフォーム識別子（これ以外はグロブとして解釈する） */
+/** appliesTo に書けるプラットフォーム識別子（後方互換のため引き続き解釈する） */
 export const PLATFORMS = ["web", "native"]
 
 /**
- * React Native のファイルであることを示す import / API シグナル（issue #391）。
- * - `from "react-native"`（サブパス・`require()` も含む）
- * - `from "ksk-design-system/native"`（DS の native エントリ）
- * - `StyleSheet.create(`（RN のスタイル定義。import 経由でなくても RN 判定に足る）
+ * appliesTo に書ける capability（能力）タグ。プラットフォーム二値ではなく
+ * 「そのファイルがどの記法を持ちうるか」で表す（issue #391 のレビュー指摘）。
+ *
+ * - `dom`      … 小文字の HTML 生タグ・href/type 等の DOM 属性が書ける
+ * - `tailwind` … className に Tailwind クラスを書く（web / NativeWind の RN）
+ * - `web`      … CSS 変数・CSS 単位が効く純 web
+ * - `native`   … React Native のファイル
+ *
+ * これ以外の文字列はファイル名グロブとして解釈する（既存の `["*.css"]`）。
+ */
+export const CAPABILITIES = ["dom", "tailwind", "web", "native"]
+
+/**
+ * React Native のファイルであることを示すシグナル（issue #391）。
+ *
+ * import / require の**構文形**に絞っている。以前は `\bfrom\s*["']react-native["']`
+ * だけで見ていたため、文字列リテラルの中に import 文の見本を持つファイル
+ * （ドキュメント生成・コードテンプレート）が native 判定になっていた。
+ *
+ * 既知の限界: 複数行テンプレートリテラルの中に「行頭から始まる import 文」が
+ * ある場合は依然 native と誤判定する。lint は構文解析をせず行単位で見るため、
+ * ここは許容している（該当ファイルは `--platform` で上書きできる）。
  */
 const NATIVE_SOURCE_SIGNALS = [
-  /\bfrom\s*["']react-native(?:\/[^"']*)?["']/,
+  // import / export ... from "react-native"（複数行 import も [^;] が改行を跨ぐ）
+  /^\s*(?:import|export)\b[^;]*\bfrom\s*["']react-native(?:\/[^"']*)?["']/m,
+  // 副作用 import: import "react-native"
+  /^\s*import\s*["']react-native(?:\/[^"']*)?["']/m,
   /\brequire\(\s*["']react-native(?:\/[^"']*)?["']\s*\)/,
-  /["']ksk-design-system\/native(?:\/[^"']*)?["']/,
+  // DS の native エントリ
+  /^\s*(?:import|export)\b[^;]*\bfrom\s*["']ksk-design-system\/native(?:\/[^"']*)?["']/m,
+  /\brequire\(\s*["']ksk-design-system\/native(?:\/[^"']*)?["']\s*\)/,
+  // RN のスタイル定義。import 経由でなくても RN 判定に足る
   /\bStyleSheet\s*\.\s*create\s*\(/,
 ]
 
 /** `Foo.native.tsx` のようなプラットフォーム別サフィックス */
 const NATIVE_FILENAME_RE = /\.native\.[cm]?[jt]sx?$/
 
+/** .css ファイルの capability。CSS は純 web にしか存在しない */
+const CSS_CAPABILITIES = new Set(["dom", "tailwind", "web"])
+
+/**
+ * NativeWind（RN で className に Tailwind クラスを書く）の使用シグナル。
+ * exam-kit 系 11 アプリはこれを使っており、RN だからと Tailwind 系ルールを
+ * 一律に外すと lint がほぼ無効化される（ap-app で 858 件 → 66 件）。
+ */
+const CLASSNAME_RE = /\bclassName\s*=/
+
 /**
  * ファイル 1 つのプラットフォームを判定する（issue #391）。
  *
  * 優先順位は CLI の `--platform` > ファイル名サフィックス > ソース内シグナル。
- * どのシグナルも無ければ従来どおり web 扱い（＝全ルール適用）にフォールバックする。
+ * どのシグナルも無ければ従来どおり web 扱いにフォールバックする。
  *
  * @param {string} filePath 判定対象のパス（相対・絶対どちらでもよい）
  * @param {string} source   ソース本文。コメントをマスクしたものを渡すと、
@@ -76,6 +110,27 @@ export function detectPlatform(filePath, source = "", override = null) {
   if (NATIVE_FILENAME_RE.test(normalize(filePath))) return "native"
   if (NATIVE_SOURCE_SIGNALS.some((signal) => signal.test(source))) return "native"
   return "web"
+}
+
+/**
+ * ファイル 1 つが持つ capability の集合を返す（issue #391 のレビュー指摘）。
+ *
+ * - web ファイル              → { dom, tailwind, web }
+ * - native ＋ className あり  → { native, tailwind }（NativeWind）
+ * - native ＋ className なし  → { native }（StyleSheet）
+ *
+ * `--platform native` を明示しても、Tailwind を持つかどうかはソース側の
+ * className 有無で決める。NativeWind の consumer が `--platform native` を
+ * 付けた瞬間に Tailwind 系ルールを失う、という事故を避けるため。
+ *
+ * @returns {Set<string>}
+ */
+export function detectCapabilities(filePath, source = "", override = null) {
+  const platform = detectPlatform(filePath, source, override)
+  if (platform === "web") return new Set(["dom", "tailwind", "web"])
+  const capabilities = new Set(["native"])
+  if (CLASSNAME_RE.test(source)) capabilities.add("tailwind")
+  return capabilities
 }
 
 /**
@@ -105,15 +160,17 @@ function matchesGlob(glob, filePath) {
 /**
  * ルールを当該ファイルに適用してよいかを `appliesTo` で判定する（issue #391）。
  *
- * `appliesTo` 未指定は「全プラットフォーム対象」（後方互換）。指定がある場合は
- * プラットフォーム識別子とグロブの OR で、どれか 1 つでも一致すれば適用する。
+ * `appliesTo` 未指定は全ファイル対象（後方互換）。指定がある場合は
+ * capability タグとグロブの OR で、どれか 1 つでも一致すれば適用する。
+ * 旧語彙の `"web"` / `"native"` も capability 集合に含まれるのでそのまま動く。
  */
-export function ruleAppliesTo(rule, { platform, filePath }) {
+export function ruleAppliesTo(rule, { capabilities, filePath }) {
   const appliesTo = rule?.appliesTo
   if (!Array.isArray(appliesTo) || appliesTo.length === 0) return true
+  const caps = capabilities instanceof Set ? capabilities : new Set(capabilities ?? [])
   return appliesTo.some((entry) => {
     if (typeof entry !== "string" || entry.length === 0) return false
-    if (PLATFORMS.includes(entry)) return entry === platform
+    if (CAPABILITIES.includes(entry)) return caps.has(entry)
     return matchesGlob(entry, filePath)
   })
 }
@@ -319,8 +376,8 @@ function lintCssFile(file, cwd, cssRules, contract) {
   const findings = escape.invalid ? [escape.invalid] : []
   for (const rule of cssRules) {
     // CSS は web のみに存在する（RN に .css は無い）。glob 指定の appliesTo は
-    // platform 識別子を含まないので、この判定でも従来どおり P049 が当たる。
-    if (!ruleAppliesTo(rule, { platform: "web", filePath: rel })) continue
+    // capability タグを含まないので、この判定でも従来どおり P049 が当たる。
+    if (!ruleAppliesTo(rule, { capabilities: CSS_CAPABILITIES, filePath: rel })) continue
     for (const violation of inspectProductThemeOverrides(source, contract)) {
       if (matchesRuleExclude(rule, rel, violation.name)) continue
       findings.push({
@@ -347,12 +404,13 @@ function lintFile(file, cwd, rules, options = {}) {
   // （改行はそのまま残し、コメント本文だけを同じ文字数の空白に置換するため）。
   const maskedSource = maskComments(source)
   const maskedLines = maskedSource.split(/\r?\n/)
-  // プラットフォーム判定はコメントをマスクしたソースに対して行う
+  // プラットフォーム / capability 判定はコメントをマスクしたソースに対して行う
   // （コメント中の「react-native」で native 判定にならないように / issue #391）。
   const platform = detectPlatform(rel, maskedSource, options.platform)
+  const capabilities = detectCapabilities(rel, maskedSource, options.platform)
 
   for (const rule of rules) {
-    if (!ruleAppliesTo(rule, { platform, filePath: rel })) continue
+    if (!ruleAppliesTo(rule, { capabilities, filePath: rel })) continue
     if (rule.engine === "card-direct-child-spacing") {
       for (const finding of inspectCardChildSpacing(source, file)) {
         const line = lines[finding.line - 1] ?? ""
