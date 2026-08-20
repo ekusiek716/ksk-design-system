@@ -58,31 +58,34 @@ VERSION="${1:?usage: update-consumers.sh <version> [repos...]}"
 shift || true
 ARGS=("$@")
 
-# ── 既定対象リポ（フルパス20箇所）──
+# ── 既定対象リポ（フルパス21箇所）──
+# 2026-08-20 全面更新（issue #403）: ローカル再編（~/localdev/exam-kit-apps/ 等への集約）に追従。
+# 正本の考え方: 「package.json に ksk-design-system 依存を持つ全リポ」。一覧の検算は
+#   grep -l '"ksk-design-system"' ~/localdev/*/package.json ~/localdev/*/*/package.json ~/localdev/*/*/*/package.json
+# で行う（node_modules と ksk-design-system 自身を除く）。
 DEFAULT_REPOS=(
-  "$HOME/LocalDev/belle-todo"
-  "$HOME/LocalDev/trip_todo"
-  "$HOME/LocalDev/ninshin-todo"
-  "$HOME/LocalDev/yokoku-app"
-  "$HOME/LocalDev/pawly"
-  "$HOME/LocalDev/Examination/exam-kit"
-  "$HOME/LocalDev/Examination/ITパスポート用"
-  "$HOME/LocalDev/Examination/HCD基礎検定用"
-  "$HOME/LocalDev/Examination/denki1-app"
-  "$HOME/LocalDev/Examination/電気工事士用"
-  "$HOME/LocalDev/Examination/応用情報用"
-  "$HOME/LocalDev/Examination/基本情報用"
-  "$HOME/LocalDev/Examination/情報セキュリティマネジメント用"
-  "$HOME/LocalDev/Examination/社労士用"
-  # 2026-08-06 追加。exam-kit から量産された後発4本が既定リストから漏れており、
-  # 1.50.0 / 1.51.0 の一括配布をすり抜けて ^1.50.0 のまま取り残されていた
-  # （consumer 側の tsc が落ちて初めて発覚）。
-  "$HOME/LocalDev/Examination/FP用"
-  "$HOME/LocalDev/Examination/宅建用"
-  "$HOME/LocalDev/Examination/歯科衛生士用"
-  "$HOME/LocalDev/Examination/管理栄養士用"
-  "$HOME/LocalDev/aikoibito"
-  "$HOME/LocalDev/okuno-todo-suite"
+  "$HOME/localdev/todo-apps/belle-todo"
+  "$HOME/localdev/todo-apps/trip-todo"
+  "$HOME/localdev/todo-apps/ninshin-todo"
+  "$HOME/localdev/todo-apps/okuno-todo-suite"
+  "$HOME/localdev/yokoku-app"
+  "$HOME/localdev/pawly"
+  # 2026-08-20 追加（issue #403）: 一覧から漏れて 1.53.0 のまま8バージョン取り残されていた
+  "$HOME/localdev/camera-app"
+  "$HOME/localdev/exam-kit-apps/exam-kit"
+  "$HOME/localdev/exam-kit-apps/itpassport-app"
+  "$HOME/localdev/exam-kit-apps/hcd-basic-app"
+  "$HOME/localdev/exam-kit-apps/denki1-app"
+  "$HOME/localdev/exam-kit-apps/denki2-app"
+  "$HOME/localdev/exam-kit-apps/ap-app"
+  "$HOME/localdev/exam-kit-apps/fe-app"
+  "$HOME/localdev/exam-kit-apps/sg-app"
+  "$HOME/localdev/exam-kit-apps/sharoshi-app"
+  "$HOME/localdev/exam-kit-apps/fp-app"
+  "$HOME/localdev/exam-kit-apps/takken-app"
+  "$HOME/localdev/exam-kit-apps/dental-hygienist-exam-app"
+  "$HOME/localdev/exam-kit-apps/registered-dietitian-exam-app"
+  "$HOME/localdev/ai-partner/aikoibito"
 )
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
@@ -124,14 +127,14 @@ resolve_repo() {
     printf '%s' "$arg"
     return 0
   fi
-  if [ -d "$HOME/LocalDev/$arg" ]; then
-    printf '%s' "$HOME/LocalDev/$arg"
-    return 0
-  fi
-  if [ -d "$HOME/LocalDev/Examination/$arg" ]; then
-    printf '%s' "$HOME/LocalDev/Examination/$arg"
-    return 0
-  fi
+  # 再編後のカテゴリフォルダを順に探す（issue #403）
+  local base
+  for base in "$HOME/localdev" "$HOME/localdev/exam-kit-apps" "$HOME/localdev/todo-apps" "$HOME/localdev/trading-bots" "$HOME/localdev/ai-partner" "$HOME/localdev/devtools"; do
+    if [ -d "$base/$arg" ]; then
+      printf '%s' "$base/$arg"
+      return 0
+    fi
+  done
   return 1
 }
 
