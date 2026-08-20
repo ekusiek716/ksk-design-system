@@ -123,11 +123,48 @@ if (aiPatternMatch && Number(aiPatternMatch[1]) !== aiPatterns.length) {
   )
 }
 
-// ─── excludes のスキーマ準拠（配列 or 未指定） ──────────────────
+// ─── excludes 系のスキーマ準拠（issue #404） ────────────────────
+//
+// 除外語彙は用途ごとに分かれている:
+//   excludePaths   … パスに当てる（全リポジトリで有効。".stories." 等）
+//   excludeDsPaths … パスに当てるが DS パッケージ配下のファイルにだけ効く
+//                    （"components/ui/" 等。consumer の同名ディレクトリでは効かない）
+//   excludeLines   … 行の内容に当てる（"data-slot" / "asChild" 等）
+// 旧スキーマの単一 excludes は bin/lint.js が後方互換で読むが、
+// パスと内容を区別できないため rules.json 本体では使わせない。
 
-for (const rule of prohibited) {
-  if (rule.excludes !== undefined && !Array.isArray(rule.excludes)) {
-    errors.push(`${rule.id}: excludes は配列でなければならない`)
+const EXCLUDE_FIELDS = ["excludePaths", "excludeDsPaths", "excludeLines"]
+/** パスらしい語（"/" を含むか、拡張子・ファイル名断片） */
+const PATH_LIKE = /[/]|^\.[A-Za-z]/
+
+for (const rule of [...prohibited, ...aiPatterns]) {
+  for (const field of EXCLUDE_FIELDS) {
+    if (rule[field] !== undefined && !Array.isArray(rule[field])) {
+      errors.push(`${rule.id}: ${field} は配列でなければならない`)
+    }
+  }
+  if (rule.excludes !== undefined) {
+    errors.push(
+      `${rule.id}: 旧スキーマの excludes は使わない。` +
+        `パス除外は excludePaths / excludeDsPaths、行内容の除外は excludeLines に分ける（issue #404）`,
+    )
+  }
+  for (const entry of Array.isArray(rule.excludeLines) ? rule.excludeLines : []) {
+    if (typeof entry === "string" && entry.includes("/") && !entry.includes("(")) {
+      errors.push(
+        `${rule.id}: excludeLines にパスらしい値がある（"${entry}"）。` +
+          `パスは excludePaths / excludeDsPaths へ移す`,
+      )
+    }
+  }
+  for (const field of ["excludePaths", "excludeDsPaths"]) {
+    for (const entry of Array.isArray(rule[field]) ? rule[field] : []) {
+      if (typeof entry === "string" && !PATH_LIKE.test(entry)) {
+        errors.push(
+          `${rule.id}: ${field} にパスでない値がある（"${entry}"）。行内容の除外は excludeLines へ移す`,
+        )
+      }
+    }
   }
 }
 
