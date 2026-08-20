@@ -69,6 +69,10 @@ interface CarouselControlsProps {
   onPrevious: () => void
   onNext: () => void
   onGoTo: (index: number) => void
+  /** 「前へ」ボタンの aria-label。@default "前へ" */
+  previousLabel?: string
+  /** 「次へ」ボタンの aria-label。@default "次へ" */
+  nextLabel?: string
 }
 
 function carouselControls({
@@ -79,6 +83,8 @@ function carouselControls({
   onPrevious,
   onNext,
   onGoTo,
+  previousLabel = "前へ",
+  nextLabel = "次へ",
 }: CarouselControlsProps) {
   return (
     <>
@@ -87,7 +93,7 @@ function carouselControls({
           <button
             type="button"
             onClick={onPrevious}
-            aria-label="前へ"
+            aria-label={previousLabel}
             className="absolute left-2 top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-md)] transition-opacity lg:flex lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:focus-visible:opacity-100"
           >
             <ArrowLeft2 size={20} aria-hidden="true" />
@@ -95,7 +101,7 @@ function carouselControls({
           <button
             type="button"
             onClick={onNext}
-            aria-label="次へ"
+            aria-label={nextLabel}
             className="absolute right-2 top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-md)] transition-opacity lg:flex lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:focus-visible:opacity-100"
           >
             <ArrowRight2 size={20} aria-hidden="true" />

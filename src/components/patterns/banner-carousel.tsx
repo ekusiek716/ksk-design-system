@@ -22,6 +22,8 @@ interface BannerCarouselProps {
   /** バナー幅（px） */
   itemWidth?: number
   className?: string
+  /** スクロール領域 (role="region") の aria-label。@default "バナー一覧" */
+  regionLabel?: string
 }
 
 // キャプション（Text-on-Inverse）を載せるため -Bold を使う。
@@ -50,6 +52,7 @@ function BannerCarousel({
   itemAspectRatio = "2/1",
   itemWidth = 200,
   className,
+  regionLabel = "バナー一覧",
 }: BannerCarouselProps) {
   return (
     <div data-slot="banner-carousel" className={cn("w-full", className)}>
@@ -77,7 +80,7 @@ function BannerCarousel({
         className="flex gap-2.5 overflow-x-auto scrollbar-none pb-1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
         tabIndex={0}
         role="region"
-        aria-label="バナー一覧"
+        aria-label={regionLabel}
       >
         {items.map((item, i) => {
           const background = item.gradient ?? DEFAULT_BACKGROUNDS[i % DEFAULT_BACKGROUNDS.length]

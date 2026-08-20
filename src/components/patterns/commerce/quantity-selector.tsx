@@ -18,6 +18,14 @@ interface QuantitySelectorProps extends Omit<React.ComponentProps<"div">, "onCha
   showTrash?: boolean
   /** 削除時のコールバック */
   onDelete?: () => void
+  /** 全体を囲む role="group" の aria-label。@default "数量選択" */
+  groupLabel?: string
+  /** 減少ボタンの aria-label（trash 状態でない場合）。@default "数量を減らす" */
+  decreaseLabel?: string
+  /** 増加ボタンの aria-label。@default "数量を増やす" */
+  increaseLabel?: string
+  /** 減少ボタンが削除操作を兼ねる（trash 状態）ときの aria-label。@default "削除" */
+  deleteLabel?: string
 }
 
 /** マイナスアイコン */
@@ -35,7 +43,7 @@ function TrashIcon({ size = 14 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
 }
 
-function QuantitySelector({ className, value, min = 1, max = 99, onChange, disabled = false, size = "md", showTrash = false, onDelete, ...props }: QuantitySelectorProps) {
+function QuantitySelector({ className, value, min = 1, max = 99, onChange, disabled = false, size = "md", showTrash = false, onDelete, groupLabel = "数量選択", decreaseLabel = "数量を減らす", increaseLabel = "数量を増やす", deleteLabel = "削除", ...props }: QuantitySelectorProps) {
   /** ゴミ箱表示条件：showTrashが有効かつ最小値以下 */
   const isTrash = showTrash && value <= min
   /** 減少可能かどうか */
@@ -51,12 +59,12 @@ function QuantitySelector({ className, value, min = 1, max = 99, onChange, disab
   /* smサイズ: カート内で使用するコンパクトなピル型 */
   if (size === "sm") {
     return (
-      <div data-slot="quantity-selector" className={cn("inline-flex h-9 w-[108px] items-center justify-between rounded-full bg-[var(--Surface-Tertiary)] px-2.5", disabled && "opacity-50", className)} role="group" aria-label="数量選択" {...props}>
-        <button type="button" className={cn("flex size-7 shrink-0 items-center justify-center rounded-full", (canDec || isTrash) ? "text-[var(--Object-High-Emphasis)]" : "text-[var(--Object-Disable)]")} onClick={handleDec} disabled={!(canDec || (isTrash && !disabled))} aria-label={isTrash ? "削除" : "数量を減らす"}>
+      <div data-slot="quantity-selector" className={cn("inline-flex h-9 w-[108px] items-center justify-between rounded-full bg-[var(--Surface-Tertiary)] px-2.5", disabled && "opacity-50", className)} role="group" aria-label={groupLabel} {...props}>
+        <button type="button" className={cn("flex size-7 shrink-0 items-center justify-center rounded-full", (canDec || isTrash) ? "text-[var(--Object-High-Emphasis)]" : "text-[var(--Object-Disable)]")} onClick={handleDec} disabled={!(canDec || (isTrash && !disabled))} aria-label={isTrash ? deleteLabel : decreaseLabel}>
           {isTrash ? <TrashIcon size={14} /> : <MinusIcon size={14} />}
         </button>
         <span className={cn("w-7 shrink-0 text-center tabular-nums typo-label-md select-none", disabled ? "text-[var(--Text-Disable)]" : "text-[var(--Text-High-Emphasis)]")} aria-live="polite">{value}</span>
-        <button type="button" className={cn("flex size-7 shrink-0 items-center justify-center rounded-full", canInc ? "text-[var(--Object-High-Emphasis)]" : "text-[var(--Object-Disable)]")} onClick={handleInc} disabled={!canInc} aria-label="数量を増やす">
+        <button type="button" className={cn("flex size-7 shrink-0 items-center justify-center rounded-full", canInc ? "text-[var(--Object-High-Emphasis)]" : "text-[var(--Object-Disable)]")} onClick={handleInc} disabled={!canInc} aria-label={increaseLabel}>
           <PlusIcon size={14} />
         </button>
       </div>
@@ -65,12 +73,12 @@ function QuantitySelector({ className, value, min = 1, max = 99, onChange, disab
 
   /* mdサイズ: 商品詳細ページで使用する丸ボタン型 */
   return (
-    <div data-slot="quantity-selector" className={cn("inline-flex items-center gap-3", className)} role="group" aria-label="数量選択" {...props}>
-      <button type="button" className={cn("flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] transition-colors", (canDec || isTrash) ? "text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)]" : "text-[var(--Object-Disable)]")} onClick={handleDec} disabled={!(canDec || (isTrash && !disabled))} aria-label={isTrash ? "削除" : "数量を減らす"}>
+    <div data-slot="quantity-selector" className={cn("inline-flex items-center gap-3", className)} role="group" aria-label={groupLabel} {...props}>
+      <button type="button" className={cn("flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] transition-colors", (canDec || isTrash) ? "text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)]" : "text-[var(--Object-Disable)]")} onClick={handleDec} disabled={!(canDec || (isTrash && !disabled))} aria-label={isTrash ? deleteLabel : decreaseLabel}>
         {isTrash ? <TrashIcon size={18} /> : <MinusIcon size={18} />}
       </button>
       <span className={cn("flex h-10 w-12 shrink-0 items-center justify-center rounded-lg border border-[var(--Border-Medium-Emphasis)] typo-label-lg select-none", disabled ? "bg-[var(--Surface-Tertiary)] text-[var(--Text-Disable)]" : "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)]")} aria-live="polite">{value}</span>
-      <button type="button" className={cn("flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] transition-colors", canInc ? "text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)]" : "text-[var(--Object-Disable)]")} onClick={handleInc} disabled={!canInc} aria-label="数量を増やす">
+      <button type="button" className={cn("flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] transition-colors", canInc ? "text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)]" : "text-[var(--Object-Disable)]")} onClick={handleInc} disabled={!canInc} aria-label={increaseLabel}>
         <PlusIcon size={18} />
       </button>
     </div>

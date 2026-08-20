@@ -22,6 +22,8 @@ export interface MultiSelectProps {
   maxDisplay?: number
   /** 選択済みをクリアするボタンを表示 @default true */
   clearable?: boolean
+  /** クリアボタンの aria-label。@default "選択をクリア" */
+  clearLabel?: string
 }
 
 function MultiSelect({
@@ -35,6 +37,7 @@ function MultiSelect({
   className,
   maxDisplay = 3,
   clearable = true,
+  clearLabel = "選択をクリア",
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
@@ -115,7 +118,7 @@ function MultiSelect({
           <button
             type="button"
             data-slot="multi-select-clear"
-            aria-label="選択をクリア"
+            aria-label={clearLabel}
             onClick={() => onChange?.([])}
             className="absolute right-9 top-1/2 z-[1] flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] transition-colors hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Object-High-Emphasis)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
           >

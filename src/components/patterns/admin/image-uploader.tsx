@@ -12,9 +12,11 @@ interface ImageUploaderProps extends React.ComponentProps<"div"> {
   onRemove?: (index: number) => void
   maxImages?: number
   columns?: number
+  /** 追加ボタンの aria-label。@default "画像を追加" */
+  addLabel?: string
 }
 
-function ImageUploader({ images = [], onAdd, onRemove, maxImages = 10, columns = 4, className, ...props }: ImageUploaderProps) {
+function ImageUploader({ images = [], onAdd, onRemove, maxImages = 10, columns = 4, className, addLabel = "画像を追加", ...props }: ImageUploaderProps) {
   return (
     <div data-slot="image-uploader" className={cn("grid gap-3", className)} style={{ gridTemplateColumns: `repeat(${Math.min(columns, 6)}, minmax(0, 1fr))` }} {...props}>
       {/* アップロード済み画像一覧 */}
@@ -34,7 +36,7 @@ function ImageUploader({ images = [], onAdd, onRemove, maxImages = 10, columns =
       ))}
       {/* 追加ボタン */}
       {images.length < maxImages && (
-        <button type="button" className="aspect-square rounded-lg border-2 border-dashed border-[var(--Border-Medium-Emphasis)] flex flex-col items-center justify-center gap-1 hover:border-[var(--Border-Accent-Primary)] hover:bg-[var(--Surface-Accent-Primary-Light)] transition-colors cursor-pointer" onClick={onAdd} aria-label="画像を追加">
+        <button type="button" className="aspect-square rounded-lg border-2 border-dashed border-[var(--Border-Medium-Emphasis)] flex flex-col items-center justify-center gap-1 hover:border-[var(--Border-Accent-Primary)] hover:bg-[var(--Surface-Accent-Primary-Light)] transition-colors cursor-pointer" onClick={onAdd} aria-label={addLabel}>
           {/* プラスアイコン */}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">追加</span>

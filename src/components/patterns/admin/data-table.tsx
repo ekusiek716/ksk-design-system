@@ -449,6 +449,10 @@ interface DataTableProps<TRow = unknown> extends React.ComponentProps<"div"> {
   defaultPageIndex?: number
   /** ページ変更時のコールバック（0-indexed） */
   onPaginationChange?: (pageIndex: number) => void
+  /** 選択列ヘッダー（th）の aria-label。@default "行選択" */
+  selectionColumnLabel?: string
+  /** 「すべて選択」チェックボックスの aria-label。@default "すべて選択" */
+  selectAllLabel?: string
 }
 
 function DataTable<TRow = unknown>({
@@ -475,6 +479,8 @@ function DataTable<TRow = unknown>({
   pageIndex,
   defaultPageIndex = 0,
   onPaginationChange,
+  selectionColumnLabel = "行選択",
+  selectAllLabel = "すべて選択",
   ...props
 }: DataTableProps<TRow>) {
   const [internalSort, setInternalSort] = React.useState<DataTableSortState | null>(defaultSort)
@@ -660,7 +666,7 @@ function DataTable<TRow = unknown>({
         <DataTableHeader>
           <tr>
             {selectionMode !== "none" && (
-              <DataTableHead className="w-[40px]" aria-label="行選択">
+              <DataTableHead className="w-[40px]" aria-label={selectionColumnLabel}>
                 {selectionMode === "multi" && (
                   <Checkbox
                     checked={
@@ -671,7 +677,7 @@ function DataTable<TRow = unknown>({
                           : false
                     }
                     onCheckedChange={toggleAllRows}
-                    aria-label="すべて選択"
+                    aria-label={selectAllLabel}
                   />
                 )}
               </DataTableHead>
@@ -1349,9 +1355,11 @@ interface DataTableActionMenuItem {
 
 interface DataTableActionCellProps extends React.ComponentProps<"td"> {
   items: DataTableActionMenuItem[]
+  /** 行メニュー起動ボタンの aria-label。@default "行メニュー" */
+  menuLabel?: string
 }
 
-function DataTableActionCell({ className, items, ...props }: DataTableActionCellProps) {
+function DataTableActionCell({ className, items, menuLabel = "行メニュー", ...props }: DataTableActionCellProps) {
   return (
     <td
       data-slot="data-table-action-cell"
@@ -1363,7 +1371,7 @@ function DataTableActionCell({ className, items, ...props }: DataTableActionCell
           <button
             type="button"
             className="flex size-8 items-center justify-center rounded-full text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] transition-colors"
-            aria-label="行メニュー"
+            aria-label={menuLabel}
           >
             <MoreDotsIcon />
           </button>

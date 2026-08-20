@@ -82,6 +82,8 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
    * コンテンツがバーの下を通過するレイアウト（全画面リスト等）で指定する。
    */
   scrollEdge?: boolean
+  /** nav 要素の aria-label。@default "メインナビゲーション" */
+  navLabel?: string
 }
 
 // 選択プラッター（水滴カプセル）の面。色は「背後のメディア」に相対する
@@ -134,6 +136,7 @@ function BottomTabBar({
   floatingPosition = "center",
   keyboardBehavior = "stay",
   scrollEdge = false,
+  navLabel = "メインナビゲーション",
   ...props
 }: BottomTabBarProps) {
   const keyboardState = useBottomTabBarKeyboardState(keyboardBehavior)
@@ -151,11 +154,12 @@ function BottomTabBar({
         floatingPosition={floatingPosition}
         scrollEdge={scrollEdge}
         keyboardState={keyboardState}
+        navLabel={navLabel}
         {...props}
       />
     )
   }
-  return <BottomTabBarDefault className={className} items={items} keyboardState={keyboardState} {...props} />
+  return <BottomTabBarDefault className={className} items={items} keyboardState={keyboardState} navLabel={navLabel} {...props} />
 }
 
 // ─── Default variant (従来型) ─────────────────────────────────────────────────
@@ -165,6 +169,7 @@ function BottomTabBarDefault({
   items,
   keyboardState,
   style,
+  navLabel = "メインナビゲーション",
   ...props
 }: Omit<BottomTabBarProps, "variant" | "keyboardBehavior"> & { keyboardState: BottomTabBarKeyboardState }) {
   return (
@@ -172,7 +177,7 @@ function BottomTabBarDefault({
       data-slot="bottom-tab-bar"
       data-keyboard-behavior={keyboardState.keyboardBehavior}
       data-keyboard-open={keyboardState.isKeyboardOpen || undefined}
-      aria-label="メインナビゲーション"
+      aria-label={navLabel}
       className={cn(
         "fixed inset-x-0 z-[var(--Z-Nav)] transition-all duration-[var(--Motion-Duration-Base)]",
         keyboardState.keyboardBehavior === "lift"
@@ -217,6 +222,7 @@ function BottomTabBarPill({
   scrollEdge = false,
   keyboardState,
   style,
+  navLabel = "メインナビゲーション",
   ...props
 }: Omit<BottomTabBarProps, "variant" | "keyboardBehavior"> & { keyboardState: BottomTabBarKeyboardState }) {
   const hasProminentLayout = Boolean(centerAction) || showLabels === true
@@ -313,7 +319,7 @@ function BottomTabBarPill({
       data-slot="bottom-nav-pill"
       data-keyboard-behavior={keyboardState.keyboardBehavior}
       data-keyboard-open={keyboardState.isKeyboardOpen || undefined}
-      aria-label="メインナビゲーション"
+      aria-label={navLabel}
       className={cn(
         "z-[var(--Z-Nav)] lg:hidden transition-all duration-[var(--Motion-Duration-Base)]",
         pillPosition === "fixed" ? "fixed" : "absolute",
