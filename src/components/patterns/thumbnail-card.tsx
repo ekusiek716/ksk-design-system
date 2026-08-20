@@ -130,8 +130,13 @@ function ThumbnailCard({
       {overlay && <div className="absolute inset-x-1 bottom-1 flex flex-wrap gap-1">{overlay}</div>}
       {secondaryAction && (
         // stretched link より前面に置き、押しても遷移が起きないようにする。
-        <div className="absolute inset-0 z-[2] pointer-events-none [&>*]:pointer-events-auto">
-          {secondaryAction}
+        // pointer-events は Tailwind クラスでなく inline style で書く:
+        // 消費側の @source スキャンが minified dist から pointer-events-auto を
+        // 拾えないと穴あけが壊れ、クリックが背後へ貫通する（__tests__/pointer-events-mine.test.ts）。
+        <div className="absolute inset-0 z-[2]" style={{ pointerEvents: "none" }}>
+          <div className="contents" style={{ pointerEvents: "auto" }}>
+            {secondaryAction}
+          </div>
         </div>
       )}
     </div>
