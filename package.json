@@ -123,6 +123,14 @@
     "./eslint/deprecated": {
       "import": "./eslint/deprecated.js",
       "default": "./eslint/deprecated.js"
+    },
+    "./eslint/icon-button-aria-label": {
+      "import": "./eslint/icon-button-aria-label.js",
+      "default": "./eslint/icon-button-aria-label.js"
+    },
+    "./eslint/no-colorless-border": {
+      "import": "./eslint/no-colorless-border.js",
+      "default": "./eslint/no-colorless-border.js"
     }
   },
   "sideEffects": [
