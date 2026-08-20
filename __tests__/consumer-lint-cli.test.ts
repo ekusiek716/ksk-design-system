@@ -18,6 +18,36 @@ function runKskLint(source: string, extraArgs: string[] = []) {
 }
 
 describe("consumer lint CLI", () => {
+  // issue #394: process.exit() は stdout がパイプのとき未フラッシュ分を捨てる。
+  // 出力がパイプバッファ（64KB）を超えると途中で切られ、壊れた JSON が相手に渡っていた
+  // （belle-todo で `--format json | jq` がパースエラー。ファイルへのリダイレクトでは
+  // 書き込みが同期なので再現せず、パイプのときだけ壊れる）。
+  it("--format json の出力がパイプバッファ(64KB)を超えても壊れない", () => {
+    const dir = mkdtempSync(join(tmpdir(), "ksk-ds-lint-bigout-"))
+    const srcDir = join(dir, "src")
+    mkdirSync(srcDir)
+    // 1ファイルあたり複数違反 × 40ファイルで、JSON が 64KB を確実に超えるようにする
+    const body = Array.from(
+      { length: 5 },
+      () => `  <div className="text-blue-500 bg-red-500" />`,
+    ).join("\n")
+    for (let i = 0; i < 40; i++) {
+      writeFileSync(join(srcDir, `F${i}.tsx`), `export const F${i} = () => (\n<>\n${body}\n</>\n)\n`)
+    }
+
+    const result = spawnSync(process.execPath, ["bin/init.js", "lint", srcDir, "--format", "json"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      maxBuffer: 64 * 1024 * 1024,
+    })
+
+    // 前提（これを下回ると truncation を検出できないテストになる）
+    expect(result.stdout.length).toBeGreaterThan(65536)
+    const payload = JSON.parse(result.stdout)
+    expect(payload.results.length).toBeGreaterThan(0)
+  })
+
+
   // issue #378: ビルド生成物を走査すると、バンドルされた DS 自身の CSS を
   // 「consumer が DS 変数を上書きしている」と誤認して P049 が大量に出る。
   // belle-todo の実測でリポジトリ全体 1,955 件 → 33 件（src 限定と同数）。

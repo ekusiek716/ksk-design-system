@@ -35,6 +35,24 @@ const force = args.includes("--force")
 /** scripts/codemod/ 配下にあるが codemod として呼べないもの（雛形・読み取り専用スキャナ） */
 const NON_CODEMOD = new Set(["template", "check-migration"])
 
+/**
+ * 出力を掃いてから終了する（issue #394）。
+ *
+ * stdout がパイプのとき Node の書き込みは非同期で、process.exit() は未フラッシュ分を
+ * 捨てる。`ksk-ds lint --format json | jq` のように出力が 64KB（パイプバッファ1個分）を
+ * 超えると、そこで切られた壊れた JSON が相手に渡っていた。ファイルへのリダイレクトでは
+ * 書き込みが同期なので再現せず、パイプのときだけ壊れる。
+ *
+ * stream の書き込みは順序が保証されるので、最後に積んだ空 write のコールバックは
+ * 先行する出力が全部掃けた後に呼ばれる。それを待ってから exit する。
+ */
+async function exitWith(code) {
+  if (process.stdout.writable) {
+    await new Promise((resolve) => process.stdout.write("", () => resolve()))
+  }
+  process.exit(code)
+}
+
 if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   console.log(`ksk-design-system CLI
 
@@ -54,19 +72,19 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   npx ksk-ds codemod <name> [DIR] --dry 破壊変更の自動移行（事前確認）
   npx ksk-ds codemod <name> [DIR]      破壊変更の自動移行（書き込み）
 `)
-  process.exit(0)
+  await exitWith(0)
 }
 
 if (cmd === "lint") {
   const { runLintCli } = await import("./lint.js")
   const status = await runLintCli(args.slice(1), { cwd: process.cwd(), pkgRoot })
-  process.exit(status)
+  await exitWith(status)
 }
 
 if (cmd === "check-migration") {
   const { runCheckMigrationCli } = await import("./check-migration.js")
   const status = runCheckMigrationCli(args.slice(1), { cwd: process.cwd(), pkgRoot })
-  process.exit(status)
+  await exitWith(status)
 }
 
 if (cmd === "check-duplicates") {
@@ -75,22 +93,22 @@ if (cmd === "check-duplicates") {
     cwd: process.cwd(),
     pkgRoot,
   })
-  process.exit(status)
+  await exitWith(status)
 }
 
 if (cmd === "codemod") {
-  process.exit(runCodemod(args.slice(1)))
+  await exitWith(runCodemod(args.slice(1)))
 }
 
 if (cmd === "demo") {
   runDemo(args.slice(1))
-  process.exit(0)
+  await exitWith(0)
 }
 
 if (cmd !== "init") {
   console.error(`未知のコマンド: ${cmd}`)
   console.error(`npx ksk-design-system help を参照してください`)
-  process.exit(1)
+  await exitWith(1)
 }
 
 // ─── codemod ────────────────────────────────────────────────
