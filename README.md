@@ -201,6 +201,21 @@ const BRAND = "#06C755"
   それを再梱包したベンダリングコピー）は P049 の対象外です。トークンを**定義**している側で
   あって、consumer による上書きではないためです。
 
+#### ルールごとの除外（rules.json の excludes 系）
+
+`contracts/rules.json` の除外指定は、当てる対象ごとに 3 つに分かれています。
+
+| フィールド | 当てる対象 | 効く範囲 |
+|---|---|---|
+| `excludePaths` | ファイルパス | 全リポジトリ（`.stories.` 等） |
+| `excludeDsPaths` | ファイルパス | **DS パッケージ配下のファイルだけ**（`components/ui/` 等） |
+| `excludeLines` | 行の内容 | 全リポジトリ（`data-slot` / `asChild` 等） |
+
+`excludeDsPaths` は「DS 自身の実装だから生タグを書いてよい」という意味の除外なので、
+consumer が shadcn 既定の `src/components/ui/` に部品を置いても中核ルールは無効化されません
+（v1.63.x までは単一の `excludes` をパスと行内容の両方に OR で当てていたため、
+このディレクトリ名だけで 13 ルールが同時に黙っていました）。
+
 ### Jest（CommonJS）でコンポーネントをテストする
 
 このパッケージは **ESM-only** です。CJS との dual build は配布せず、Jest
