@@ -7,6 +7,7 @@
 #         bash scripts/update-consumers.sh 1.46.0 belle-todo
 #         bash scripts/update-consumers.sh 1.46.0 "$HOME/LocalDev/pawly"
 #         DRY_RUN=1 bash scripts/update-consumers.sh 1.46.0 belle-todo
+#         KSK_GH_ACCOUNT=other-account bash scripts/update-consumers.sh 1.46.0
 #
 # 前提: ksk-design-system@<version> が npm registry に publish 済み
 #
@@ -44,6 +45,11 @@
 # 終了コード:
 #   FAIL が1件でもあれば 1、それ以外は 0。PR URL を取れなかったリポは OK ではなく
 #   FAIL (pr create) として数える（branch は push 済みなので手動 PR で復旧できる）。
+#
+# gh アカウント:
+#   実行中に gh の active account が振れると private リポが見えず失敗するため、
+#   冒頭で GH_TOKEN を固定する（既定 ekusiek716 / KSK_GH_ACCOUNT で変更可）。
+#   git の credential helper も gh 経由なので fetch / push にも効く。
 # =============================================================
 
 set -uo pipefail
@@ -81,6 +87,28 @@ DEFAULT_REPOS=(
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
 RESULTS=()
+
+# ── gh のアカウント固定 ──
+# gh の active account が実行中に別アカウント（keisukeokuno-cpu 等）へ振れると、
+# private リポが見えず gh pr create が
+# "Could not resolve to a Repository with the name ..." で失敗する。
+# 1.60.0 配布で歯科衛生士用、1.61.0 配布で ninshin-todo が実際にこれで落ちた
+# （毎回別のリポに当たるレースなので、リポ側の問題と見分けがつきにくい）。
+# GH_TOKEN を固定すると gh だけでなく git も従う
+# （credential.https://github.com.helper が `gh auth git-credential` のため、
+#   fetch / push の 403 も一緒に防げる）。
+GH_ACCOUNT="${KSK_GH_ACCOUNT:-ekusiek716}"
+if [ -z "${GH_TOKEN:-}" ]; then
+  GH_TOKEN="$(gh auth token -u "$GH_ACCOUNT" 2>/dev/null)" || true
+  if [ -z "$GH_TOKEN" ]; then
+    echo -e "${RED}✗ gh のトークンを取得できません（アカウント: $GH_ACCOUNT）${NC}" >&2
+    echo "  gh auth login で $GH_ACCOUNT にログインするか、別アカウントなら" >&2
+    echo "  KSK_GH_ACCOUNT=<account> か GH_TOKEN=<token> を指定してください" >&2
+    exit 1
+  fi
+  export GH_TOKEN
+  echo -e "${CYAN}gh アカウントを $GH_ACCOUNT に固定しました${NC}"
+fi
 
 # 中断（Ctrl-C 等）時も処理中リポの一時 worktree を残さない。
 # cleanup はループ内で毎回 $repo / $wt を掴んで再定義される。
