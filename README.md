@@ -140,7 +140,14 @@ npx ksk-ds lint src
 npx ksk-ds lint src --format json
 npx ksk-ds lint --changed
 npx ksk-ds lint src --platform native
+npx ksk-ds lint src --strict            # warning も exit 1
+npx ksk-ds lint src --max-warnings=0    # warning が N 件を超えたら exit 1
 ```
+
+既定では `severity: "error"` のルールだけが exit code に影響します。a11y 系を含む
+`warning` ルールも CI で締めたい場合は `--strict` か `--max-warnings N` を使ってください。
+**未知のオプションはエラー終了**します（黙って捨てないので、CI に書いたフラグが
+無言で効かないことはありません）。
 
 ルールはファイルごとに **capability（そのファイルがどの記法を持ちうるか）** を判定して
 出し分けます（`contracts/rules.json` の `appliesTo`）。
@@ -161,11 +168,38 @@ native の判定シグナルは `*.native.tsx` というファイル名、`react
 `appliesTo` を持たないルール（`#hex` 直書きの P008 等）は従来どおり全ファイルに適用され、
 native では RN 向けの fix 文言を表示します。
 
-出力は `file:line rule severity fix` を含みます。どうしても DS で表現できない domain-specific UI は、理由付きの escape コメントを置きます。
+出力は `file:line rule severity fix` を含みます。severity の語彙は `error` / `warning` で、
+`contracts/rules.json` と JSON 出力・text 出力すべてで一致しています。
+
+#### 例外（escape）
+
+どうしても DS で表現できない箇所は、**ルール単位・理由付き**の escape コメントを置きます
+（理由は 5 文字以上が必須。空虚な理由は `ESCAPE002` として報告され、ignore は効きません）。
 
 ```tsx
-// ksk-ds-allow-custom-ui: medical chart requires bespoke interaction
+// ksk-ds-lint-ignore P008 -- ブランドロゴの規定色のため
+const BRAND = "#06C755"
 ```
+
+| 書き方 | スコープ |
+|---|---|
+| `// ksk-ds-lint-ignore P008 -- 理由` | そのコメント行から**下 2 行以内**・指定ルールのみ |
+| `// ksk-ds-lint-ignore-file P008 -- 理由` | **そのファイル全体**・指定ルールのみ |
+| `// ksk-ds-allow-custom-ui: 理由` | そのファイル全体・**全ルール**（非推奨・後方互換） |
+
+`ksk-ds-allow-custom-ui` はスコープが広すぎて将来の違反まで隠すため、新規では使わず
+ルール単位の `ksk-ds-lint-ignore` を使ってください。escape マーカーは**コメントの中でのみ**
+有効で、文字列リテラル（ドキュメント URL 等）の中では発火しません。
+理由は 5 文字以上が必須です。また理由文字列に `*` は使えません
+（`*/` を誤って飲み込まないための制約で、`*` 以降は理由として認識されません）。
+
+#### lint されないファイル
+
+- 先頭 12 行に自動生成マーカー（`AUTO-GENERATED` / `DO NOT EDIT` / `自動生成` 等）を持つ
+  ファイルは全ルールを skip します。直す先は生成物ではなく生成元です。
+- DS 自身のトークン定義 CSS（`src/styles/*.css` / `src/themes/*.css` / `src/preset.css` と、
+  それを再梱包したベンダリングコピー）は P049 の対象外です。トークンを**定義**している側で
+  あって、consumer による上書きではないためです。
 
 ### Jest（CommonJS）でコンポーネントをテストする
 

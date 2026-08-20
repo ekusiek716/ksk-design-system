@@ -83,7 +83,8 @@
       "excludes": [".stories.", ".css", "shadow", "fill=", "stroke="],
       "message": "HEX ハードコード禁止",
       "fix": "セマンティックトークン var(--...) を使用",
-      "fixNative": "ksk-design-system/native の primitives / getTheme() のトークンを使用"
+      "fixNative": "ksk-design-system/native の primitives / getTheme() のトークンを使用",
+      "note": "自動生成物（先頭ヘッダに AUTO-GENERATED / 自動生成 マーカーを持つファイル）は lint 側で全ルール skip される。ブランドロゴ規定色のように hex がそこにしか書けない手書きファイルは // ksk-ds-lint-ignore-file P008 -- 理由 で外す（issue #408）"
     },
     {
       "id": "P009",
@@ -489,7 +490,7 @@
       "excludes": [],
       "message": "product theme の許可リストに無い DS の CSS 変数を消費側で上書きしている",
       "fix": "contracts/product-theme-overrides.json の allowedVariables にある変数だけを上書きする。足りない場合は DS 側に公開変数の追加を依頼する",
-      "note": "対象は .css の宣言のみ（var() での参照は自由）。--Hover-* / --Z-* / --glass-* のような内部変数を上書きすると DS を上げた瞬間に静かに壊れる。shadcn 互換の小文字ブリッジ（--primary 等）は消費側アプリと名前が衝突しうるため対象外（issue #364）"
+      "note": "対象は .css の宣言のみ（var() での参照は自由）。--Hover-* / --Z-* / --glass-* のような内部変数を上書きすると DS を上げた瞬間に静かに壊れる。shadcn 互換の小文字ブリッジ（--primary 等）は消費側アプリと名前が衝突しうるため対象外（issue #364）。DS 自身 / ベンダリングされた DS のトークン定義 CSS（src/styles/*.css・src/themes/*.css・src/preset.css とその再梱包コピー）は「定義」であって上書きではないため lint 側で対象外にしている（issue #407）"
     }
   ],
   "aiPatterns": {
