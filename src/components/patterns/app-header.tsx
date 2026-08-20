@@ -1,11 +1,30 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
+/**
+ * nav 項目を消費側のルーターコンポーネントで描画するためのレンダースロット。
+ *
+ * 渡された props（`href` / `className` / `children` / `onClick`）を
+ * **そのまま**転送すること。className を落とすとアクティブ色・hover が失われる。
+ * Button の `asChild` と同じ思想で、DS 側は見た目、消費側は遷移方法を担う。
+ *
+ * @example
+ * render: (p) => <Link href={p.href!} className={p.className}>{p.children}</Link>
+ */
+type AppHeaderNavRender = (props: {
+  href?: string
+  className?: string
+  children: React.ReactNode
+  onClick?: () => void
+}) => React.ReactElement
+
 interface AppHeaderNavItem {
   label: string
   href?: string
   onClick?: () => void
   isActive?: boolean
+  /** next/link 等で描画したいときのレンダースロット。@see AppHeaderNavRender */
+  render?: AppHeaderNavRender
 }
 
 interface AppHeaderProps {
@@ -113,20 +132,35 @@ function AppHeader({
           {/* PC: inline ナビを並べる */}
           {nav && nav.length > 0 && (
             <nav className="hidden @[768px]:flex items-center gap-4 ml-6">
-              {nav.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  onClick={item.onClick}
-                  data-active={item.isActive || undefined}
-                  className={cn(
-                    "typo-label-md text-[var(--Text-Medium-Emphasis)] hover:text-[var(--Text-High-Emphasis)] transition-colors",
-                    item.isActive && "text-[var(--Brand-Primary)]"
-                  )}
-                >
-                  {item.label}
-                </a>
-              ))}
+              {nav.map((item) => {
+                const navClassName = cn(
+                  "typo-label-md text-[var(--Text-Medium-Emphasis)] hover:text-[var(--Text-High-Emphasis)] transition-colors",
+                  item.isActive && "text-[var(--Brand-Primary)]"
+                )
+                if (item.render) {
+                  return (
+                    <React.Fragment key={item.label}>
+                      {item.render({
+                        href: item.href,
+                        className: navClassName,
+                        children: item.label,
+                        onClick: item.onClick,
+                      })}
+                    </React.Fragment>
+                  )
+                }
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={item.onClick}
+                    data-active={item.isActive || undefined}
+                    className={navClassName}
+                  >
+                    {item.label}
+                  </a>
+                )
+              })}
             </nav>
           )}
           <div className="flex-1" />
@@ -194,4 +228,4 @@ function AppHeader({
 }
 
 export { AppHeader }
-export type { AppHeaderProps, AppHeaderNavItem }
+export type { AppHeaderProps, AppHeaderNavItem, AppHeaderNavRender }

@@ -39,7 +39,10 @@ const chipVariants = cva(
       // 横スクロール行に置くときは行側に `min-h-11 items-center` を付けること
       // （ChipFilterBar / TabsList はそうしている）。
       size: {
-        // my-* は「44px - 本体の高さ」の半分。28+8*2 / 32+6*2 / 36+4*2 = いずれも 44px。
+        // my-* は「44px - 本体の高さ」の半分。20+12*2 / 28+8*2 / 32+6*2 / 36+4*2 = いずれも 44px。
+        // xs は本文行の中に混ぜる極小ピル（h-5 = 20px）。見た目は小さいが、
+        // 当たり判定は sm/md/lg と同じく縦 44px（before 擬似要素 + my-3）・横 44px（min-w-11）を維持する。
+        xs: "h-5 my-3 min-w-11 px-2 typo-label-xs before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
         // sm/md/lg に tile のような shrink-0 は不要。min-width は flex-shrink の
         // 下限として効くので、min-w-11 だけで 44px は割られない。tile が #280 で
         // shrink-0 を必要としたのは size-12 が width であって min-width ではないため。
@@ -57,6 +60,9 @@ const chipVariants = cva(
         // margin）は「44px - 本体高さ」ちょうどで手計算されており、height を
         // 変数化すると当たり判定が再計算されず、タッチターゲットの math が壊れる。
         pill: "rounded-[var(--Chip-Radius)]",
+        // pill と square の中間。カード内のタイル型チップなど、
+        // 完全な角丸ピルでは幼く、rounded-sm(4px) では硬すぎる場面向け。
+        rounded: "rounded-lg",
         square: "rounded-sm",
       },
     },
@@ -91,7 +97,7 @@ interface ChipProps
  *
  * Tag（表示専用ラベル）との違い：
  * - Chip はインタラクティブ（クリック・選択・削除可）
- * - Chip は pill（rounded-full）/ square / tile を持つ
+ * - Chip は shape: pill / rounded / square と size: xs / sm / md / lg / tile を持つ
  * - Chip は count バッジ・売り切れ状態・removable を持てる
  *
  * ### AI 向け使用ルール
@@ -184,6 +190,7 @@ function Chip({
   const removeTouchTarget =
     "before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']"
   const removeButtonSize = {
+    xs: `h-5 w-11 ${removeTouchTarget}`,
     sm: `h-7 w-11 ${removeTouchTarget}`,
     md: `h-8 w-11 ${removeTouchTarget}`,
     lg: `h-9 w-11 ${removeTouchTarget}`,
@@ -191,7 +198,11 @@ function Chip({
   }[actualSize]
 
   const removeButtonShape =
-    actualShape === "square" || actualSize === "tile" ? "rounded-r-sm" : "rounded-r-[var(--Chip-Radius)]"
+    actualShape === "square" || actualSize === "tile"
+      ? "rounded-r-sm"
+      : actualShape === "rounded"
+        ? "rounded-r-lg"
+        : "rounded-r-[var(--Chip-Radius)]"
 
   if (removable) {
     const actionClassName = cn(

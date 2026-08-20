@@ -152,3 +152,32 @@ export const Transparent: Story = {
     </div>
   ),
 }
+
+/**
+ * nav 項目の `render` スロットで next/link 等のルーターコンポーネントを差し込む例。
+ * 渡された `className` をそのまま転送すること（落とすとアクティブ色が失われる）。
+ */
+export const NavWithRenderSlot: Story = {
+  render: () => (
+    <div className="@container">
+      <AppHeader
+        layout="logo"
+        logo={<span className="typo-heading-sm text-[var(--Text-High-Emphasis)]">ksk</span>}
+        nav={[
+          {
+            label: "求人",
+            href: "/jobs",
+            isActive: true,
+            // 実プロジェクトでは next/link の <Link> を返す
+            render: (p) => (
+              <a href={p.href} className={p.className} data-router-link="true">
+                {p.children}
+              </a>
+            ),
+          },
+          { label: "企業", href: "/companies" },
+        ]}
+      />
+    </div>
+  ),
+}

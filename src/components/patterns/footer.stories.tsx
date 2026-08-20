@@ -78,3 +78,64 @@ export const Minimal: Story = {
     paymentIcons: ["VISA", "Master", "PayPay"],
   },
 }
+
+/**
+ * `render` スロットで next/link 等のルーターコンポーネントを差し込む例。
+ * 渡された `className` をそのまま転送すること（落とすと配色・hover が失われる）。
+ */
+export const WithRenderSlot: Story = {
+  args: {
+    linkGroups: [
+      {
+        title: "プロダクト",
+        links: [
+          {
+            label: "機能一覧",
+            href: "/features",
+            // 実プロジェクトでは next/link の <Link> を返す
+            render: (p) => (
+              <a href={p.href} className={p.className} data-router-link="true">
+                {p.children}
+              </a>
+            ),
+          },
+          { label: "料金プラン", href: "/pricing" },
+        ],
+      },
+    ],
+    socialLinks: [
+      {
+        label: "X (Twitter)",
+        href: "#",
+        icon: <XIcon />,
+        render: (p) => (
+          <a href={p.href} className={p.className} aria-label={p["aria-label"]} data-router-link="true">
+            {p.children}
+          </a>
+        ),
+      },
+    ],
+    copyright: "© 2026 KSK Inc.",
+  },
+}
+
+/**
+ * `extra` はリンク以外の短い案内文・補足を置く枠。
+ * linkGroups の下・socialLinks の上に描画される。
+ */
+export const WithExtra: Story = {
+  args: {
+    linkGroups: LINK_GROUPS.slice(0, 2),
+    extra: <p>本サービスは景品表示法および特定商取引法に基づく表記に従って運営しています。</p>,
+    socialLinks: [{ label: "Instagram", href: "#", icon: <IGIcon /> }],
+    copyright: "© 2026 KSK Inc.",
+  },
+}
+
+/** `paymentIcons` は既定で非表示。出したい場合のみ明示的に渡す。 */
+export const WithPaymentIcons: Story = {
+  args: {
+    paymentIcons: ["VISA", "Master", "JCB", "AmEx", "PayPay", "LINE Pay"],
+    copyright: "© 2026 KSK Inc.",
+  },
+}

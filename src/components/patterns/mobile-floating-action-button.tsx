@@ -23,6 +23,14 @@ interface MobileFloatingActionButtonProps extends Omit<React.ComponentProps<type
    * 写真・地図・リスト等のコンテンツが FAB の背後に透けて見える表現にする。
    */
   variant?: MobileFloatingActionButtonVariant
+  /**
+   * 下部固定の全幅 CTA にする。既定 `false`（従来どおり右下の円形 FAB）。
+   *
+   * true のとき `placement` は無視され、左右に safe-area + 16px の inset を取った
+   * 全幅ボタンになる。ラベルは常に表示される（`showLabel` の指定は不要）。
+   * 「この画面で next action が 1 つだけ」の予約・購入・送信フローに使う。
+   */
+  fullWidth?: boolean
 }
 
 function MobileFloatingActionButton({
@@ -35,9 +43,12 @@ function MobileFloatingActionButton({
   keyboardBehavior = "hide",
   mobileOnly = true,
   variant = "default",
+  fullWidth = false,
   style,
   ...props
 }: MobileFloatingActionButtonProps) {
+  // 全幅 CTA はラベルが無いと何の操作か分からないため、常にラベルを出す。
+  const showsLabel = showLabel || fullWidth
   const ariaLabel = props["aria-label"] ?? label
   const { keyboardInset, isKeyboardOpen } = useVisualViewportKeyboardInset()
   const shouldHide = keyboardBehavior === "hide" && isKeyboardOpen
@@ -51,16 +62,19 @@ function MobileFloatingActionButton({
       data-bottom-offset={bottomOffset}
       aria-label={ariaLabel}
       variant={variant === "glass" ? "glass-accent" : "default"}
-      size={showLabel ? "lg" : "icon-lg"}
+      data-full-width={fullWidth || undefined}
+      size={showsLabel ? "lg" : "icon-lg"}
       className={cn(
         "fixed z-[var(--Z-Floating)] transition-all duration-[var(--Motion-Duration-Base)]",
         // glass-accent は inset 3層 + ドロップシャドウを自前で持つため、DS の lg 影を
         // 重ねると影が二重になって濁る。ソリッド FAB のときだけ影を敷く。
         variant === "default" && "shadow-[var(--shadow-lg)]",
         "bottom-[calc(env(safe-area-inset-bottom)_+_var(--ksk-fab-bottom-offset)_+_var(--ksk-fab-keyboard-inset))]",
-        placement === "end" && "right-4",
-        placement === "start" && "left-4",
-        placement === "center" && "left-1/2 -translate-x-1/2",
+        // 全幅 CTA: 左右に safe-area（横向き時のノッチ）+ 16px の inset を取る。
+        fullWidth && "left-[calc(env(safe-area-inset-left)_+_1rem)] right-[calc(env(safe-area-inset-right)_+_1rem)] w-auto justify-center",
+        !fullWidth && placement === "end" && "right-4",
+        !fullWidth && placement === "start" && "left-4",
+        !fullWidth && placement === "center" && "left-1/2 -translate-x-1/2",
         bottomOffset === "none" && "[--ksk-fab-bottom-offset:1rem]",
         bottomOffset === "bottom-nav-pill-inline" && "[--ksk-fab-bottom-offset:1rem]",
         bottomOffset === "bottom-nav" && "[--ksk-fab-bottom-offset:5rem]",
@@ -77,7 +91,7 @@ function MobileFloatingActionButton({
       <span aria-hidden className="flex size-5 items-center justify-center">
         {icon ?? <Add size={22} />}
       </span>
-      {showLabel && <span>{label}</span>}
+      {showsLabel && <span>{label}</span>}
     </Button>
   )
 }

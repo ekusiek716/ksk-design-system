@@ -141,3 +141,28 @@ export const WithPillBottomNavInline: Story = {
     </div>
   ),
 }
+
+/**
+ * `fullWidth` — 下部固定の全幅 CTA。左右に safe-area + 16px の inset を取る。
+ * ラベルは常に表示され、`placement` は無視される。
+ */
+export const FullWidth: Story = {
+  name: "Full width CTA",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div className="relative min-h-screen bg-[var(--Surface-Secondary)]">
+      <div className="mx-auto flex min-h-screen max-w-[430px] flex-col gap-3 px-6 py-10">
+        <div className="h-3 w-28 rounded-full bg-[var(--Surface-Tertiary)]" />
+        <div className="h-3 w-full rounded-full bg-[var(--Surface-Tertiary)]" />
+        <div className="h-3 w-2/3 rounded-full bg-[var(--Surface-Tertiary)]" />
+      </div>
+      <MobileFloatingActionButton
+        fullWidth
+        label="この内容で予約する"
+        icon={<Add size={22} />}
+        mobileOnly={false}
+        bottomOffset="none"
+      />
+    </div>
+  ),
+}

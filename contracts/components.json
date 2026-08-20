@@ -1245,7 +1245,10 @@
         "静的項目に role=button や tabIndex を付けない",
         "アイコン+ラベルを中央寄せした full-width CTA 行は align=center を使い、生の button を書かない",
         "カード内の高密度な行は density=compact を使う。区切り線を消すのは density の責務ではなく className='border-b-0'",
-        "leftSlot 幅にインデントされない全幅の下段要素（進捗バー等）は footerSlot、title 列の内側に置くものは bottomSlot"
+        "leftSlot 幅にインデントされない全幅の下段要素（進捗バー等）は footerSlot、title 列の内側に置くものは bottomSlot",
+        "押せる行（href / onClick）の中に削除ボタン等の別操作を置く場合は secondaryAction を使う。rightSlot に button を入れると button の入れ子で不正な HTML になる",
+        "secondaryAction 指定時はルートが div になり、行全体を覆う不可視の a/button（stretched link）+ 副アクションの兄弟配置に切り替わる",
+        "バッジ・日時・シェブロンなど押せない表示は secondaryAction ではなく rightSlot"
       ]
     },
     {
@@ -1267,16 +1270,24 @@
         "outline"
       ],
       "sizes": [
+        "xs",
         "sm",
         "md",
         "lg",
         "tile"
       ],
+      "shapes": [
+        "pill",
+        "rounded",
+        "square"
+      ],
       "rules": [
         "Tag (表示専用) との違いは interactive 性",
         "soldOut は斜線オーバーレイ + disabled",
         "href を渡すと <a> でレンダリング",
-        "shape=pill (既定) / square、size=tile は正方形タイル",
+        "shape=pill (既定) / rounded (rounded-lg) / square (rounded-sm)、size=tile は正方形タイル",
+        "size=xs は本文行に混ぜる極小ピル (h-5)。当たり判定は縦横とも 44px を維持する",
+        "size=xs / sm/md/lg は before 擬似要素で縦 44px を確保するため、置き場所の親に min-h-11 が必要",
         "touch device では selected 切替時の color transition を走らせない",
         "Android tap highlight は DS 側で抑制するため consumer CSS で上書きしない",
         "removable の削除ボタンは横44px + 縦44px hit areaを確保する"
@@ -1285,10 +1296,23 @@
     {
       "name": "Tag",
       "path": "src/components/patterns/tag.tsx",
-      "description": "表示のみラベル。カテゴリ・ステータスの視覚的表示に使用。Chipと違いクリック不可。",
+      "description": "表示のみラベル。カテゴリ・ステータスの視覚的表示に使用。Chipと違いクリック不可。categorical で --Categorical-1..16 のカテゴリ識別色を適用できる。",
+      "variants": {
+        "variant": [
+          "default",
+          "brand",
+          "caution",
+          "success",
+          "warning",
+          "info"
+        ]
+      },
       "rules": [
         "rounded-sm (4px)",
-        "Display-only, not interactive"
+        "Display-only, not interactive",
+        "categorical={1..16} で --Categorical-{n}-Subtle 背景 + --Categorical-{n}-Bold 文字。文字に base 色は使わない（コントラスト不足）",
+        "categorical は Brand 非連動のテーマ非依存パレット。ステータス表現には variant を使う",
+        "dot は categorical 指定時のみ有効で、--Categorical-{n}（base）のドットを添える"
       ]
     },
     {
@@ -1368,6 +1392,7 @@
       ],
       "rules": [
         "For mobile app page headers. Use sticky prop for fixed-top behavior.",
+        "nav 項目の render スロットで next/link 等を差し込める。渡された className をそのまま転送すること",
         "native (src/native/components/AppHeader.tsx): paddingTop は SafeAreaInsetsProvider から供給された top inset を使う。未供給時のみ従来の決め打ち（iOS 48 / それ以外は通常余白）へフォールバックし、safeArea=false でオプトアウトできる"
       ]
     },
@@ -1522,7 +1547,8 @@
         "variant: default / glass",
         "placement: start / end / center",
         "bottomOffset: none / bottom-nav / bottom-nav-pill / bottom-nav-pill-inline",
-        "keyboardBehavior: hide / lift / stay"
+        "keyboardBehavior: hide / lift / stay",
+        "fullWidth: true / false"
       ],
       "accessibility": [
         "label prop is required and used as aria-label"
@@ -1533,7 +1559,8 @@
         "BottomTabBar 併用時は bottomOffset=bottom-nav を使う",
         "pill BottomTabBar の上に重ねる場合は bottomOffset=bottom-nav-pill、横並びに置く場合は bottomOffset=bottom-nav-pill-inline を使う",
         "keyboard 表示中に入力を邪魔する場合は keyboardBehavior=hide を使う",
-        "variant=glass に shadow-* を重ねない（glass-accent が inset 3層 + drop shadow を内包するため二重になる）"
+        "variant=glass に shadow-* を重ねない（glass-accent が inset 3層 + drop shadow を内包するため二重になる）",
+        "下部固定の全幅 CTA は fullWidth を使い、fixed inset-x + Button を手組みしない。fullWidth 時は placement が無視されラベルが常に表示される"
       ]
     },
     {
@@ -1718,7 +1745,20 @@
     {
       "name": "Footer",
       "path": "src/components/patterns/footer.tsx",
-      "description": "フッター。リンクグループ・コピーライト・SNSリンクを含むページ下部コンポーネント。"
+      "description": "フッター。リンクグループ・コピーライト・SNSリンク・extra スロットを含むページ下部コンポーネント。",
+      "slots": [
+        "logo",
+        "linkGroups",
+        "extra",
+        "socialLinks",
+        "paymentIcons",
+        "copyright"
+      ],
+      "rules": [
+        "リンク項目・SNS リンクの render スロットで next/link 等を差し込める。渡された className をそのまま転送すること",
+        "paymentIcons の既定は空。決済バッジを出す場合のみ明示的に配列を渡す",
+        "extra は linkGroups の下・socialLinks の上に描画する短い案内文・補足の枠。ナビゲーションリンク・SNS・著作権表記は専用 prop を使う"
+      ]
     },
     {
       "name": "MenuDrawer",
