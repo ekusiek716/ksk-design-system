@@ -242,6 +242,12 @@ function lintFile(file, cwd, rules) {
   const findings = []
   if (escape.invalid) findings.push(escape.invalid)
   const lines = source.split(/\r?\n/)
+  // コメント除去はファイル単位で1回だけ計算し、全ルールで使い回す
+  // （ルール数 × 行数で毎回スキャンし直すコストを避ける）。
+  // マスク後も文字インデックス・行番号は元の source と完全に一致する
+  // （改行はそのまま残し、コメント本文だけを同じ文字数の空白に置換するため）。
+  const maskedSource = maskComments(source)
+  const maskedLines = maskedSource.split(/\r?\n/)
 
   for (const rule of rules) {
     if (rule.engine === "card-direct-child-spacing") {
@@ -253,31 +259,35 @@ function lintFile(file, cwd, rules) {
       }
       continue
     }
+    const isFullFileRule = rule.pattern.includes("[\\s\\S]")
     let regex
     try {
-      regex = new RegExp(rule.pattern)
+      // 全ファイル横断ルールは matchAll で複数件拾うため g フラグを必須にする
+      // （issue #389: source.match() は最初の1件しか返さず取りこぼしていた）。
+      regex = new RegExp(rule.pattern, isFullFileRule ? "g" : undefined)
     } catch {
       continue
     }
-    if (rule.pattern.includes("[\\s\\S]")) {
-      const match = source.match(regex)
-      if (match && match.index != null) {
-        const lineNumber = lineForIndex(source, match.index)
-        const line = lines[lineNumber - 1] ?? ""
-        if (!matchesRuleExclude(rule, rel, line)) {
-          findings.push(toFinding(rule, rel, lineNumber))
-        }
+    if (isFullFileRule) {
+      // コメントでマスク済みの source に対して照合する（issue #390 のレビュー指摘:
+      // マスクが行単位の分岐にしか無いと、コメント中の <input placeholder> が
+      // P026 に、SheetHeader/KebabMenu を説明する一文が P037 に誤検知していた）。
+      for (const match of maskedSource.matchAll(regex)) {
+        if (match.index == null) continue
+        const lineNumber = lineForIndex(maskedSource, match.index)
+        // excludes（ksk-ds-allow-* 等）はコメントに書かれることが多いため、
+        // 判定は常にマスク前の生の行に対して行う。
+        const rawLine = lines[lineNumber - 1] ?? ""
+        if (matchesRuleExclude(rule, rel, rawLine)) continue
+        findings.push(toFinding(rule, rel, lineNumber))
       }
       continue
     }
     for (let index = 0; index < lines.length; index++) {
-      let line = lines[index]
-      if (matchesRuleExclude(rule, rel, line)) continue
-      if (rule.id === "P047") {
-        if (isCommentOnlyLine(line)) continue
-        line = stripLineComment(line)
-      }
-      if (!regex.test(line)) continue
+      const rawLine = lines[index]
+      if (matchesRuleExclude(rule, rel, rawLine)) continue
+      const maskedLine = maskedLines[index] ?? ""
+      if (!regex.test(maskedLine)) continue
       findings.push(toFinding(rule, rel, index + 1))
     }
   }
@@ -320,20 +330,80 @@ function lineForIndex(source, index) {
   return source.slice(0, index).split(/\r?\n/).length
 }
 
-// P047（モーション値直書き禁止）専用: コメント行 / JSDoc 継続行を判定対象から除外する。
-// 例: 「// Recomputing per request is ~300-500ms on the current working set,」の
-// ようなコメント中の時間表記が誤検知されるのを防ぐ（行頭 // ・行頭 * ・行頭 /* を持つ行）。
-// 他ルールには適用しない（コメント由来の誤検知はほぼゼロで、広げるメリットが無い）。
-function isCommentOnlyLine(line) {
-  return /^\s*(\/\/|\/\*|\*)/.test(line)
-}
+// ソース全体を1文字ずつ走査し、コメント本文だけを同じ文字数の空白に
+// 置換したソースを返す（改行はそのまま残すので行番号・文字インデックスは
+// 元の source と完全に一致する）。対象は // 行コメント、複数行にまたがる
+// /* ... */ ブロックコメント、および JSX の単一行コメント {/* ... */}
+// （中身が /* ... */ そのものなので同じ分岐で処理される）。
+//
+// 文字列リテラル（' " `）の内側は絶対にマスクしない。これが issue #390 の
+// レビューで実証された根本原因の修正: 従来の stripLineComment は
+// `indexOf("//")` で単純に切り落としていたため、
+// `<img src="https://cdn.x/a.png" alt="…" />` のような URL を含む行で
+// alt 以降ごと消え、alt があるのに P025 が誤検知していた。
+//
+// 簡易スキャナのため、テンプレートリテラル内の `${ ... }` 式に現れる
+// // や /* までは追跡しない（バッククォート文字列の一部として丸ごと
+// 文字列扱いにする）。同様に、JS の正規表現リテラル（/foo\/bar/）も
+// 専用には解釈しない。DS の対象ファイル（JSX/TSX コンポーネント）では
+// どちらも実質的に稀なため、誤検知を減らすという目的に対しては許容する。
+function maskComments(source) {
+  let result = ""
+  let stringChar = null // 現在文字列リテラルの内側なら区切り文字（' " `）、外側なら null
+  const n = source.length
+  let i = 0
 
-// 行内コメント（`code() // 300ms のようなコメント`）は // 以降を判定対象から除外する。
-// 素朴な実装のため文字列リテラル内の `//`（URL 等）も削る可能性はあるが、P047 の
-// 対象（motion 値）がその形で書かれることは実質無いためスコープを絞って許容する。
-function stripLineComment(line) {
-  const index = line.indexOf("//")
-  return index === -1 ? line : line.slice(0, index)
+  while (i < n) {
+    const ch = source[i]
+
+    if (stringChar) {
+      // 文字列の内側: エスケープはペアで読み飛ばし、区切り文字が来たら閉じる
+      if (ch === "\\" && i + 1 < n) {
+        result += ch + source[i + 1]
+        i += 2
+        continue
+      }
+      if (ch === stringChar) stringChar = null
+      result += ch
+      i += 1
+      continue
+    }
+
+    if (ch === "'" || ch === '"' || ch === "`") {
+      stringChar = ch
+      result += ch
+      i += 1
+      continue
+    }
+
+    if (ch === "/" && source[i + 1] === "/") {
+      // 行コメント: 改行の直前まで空白に置換する
+      while (i < n && source[i] !== "\n" && source[i] !== "\r") {
+        result += " "
+        i += 1
+      }
+      continue
+    }
+
+    if (ch === "/" && source[i + 1] === "*") {
+      // ブロックコメント（複数行対応）。JSX の {/* ... */} も外側の { } は
+      // 通常のコードとして残り、中身の /* ... */ だけがここで処理される。
+      while (i < n && !(source[i] === "*" && source[i + 1] === "/")) {
+        result += source[i] === "\n" || source[i] === "\r" ? source[i] : " "
+        i += 1
+      }
+      if (i < n) {
+        result += "  " // 終端の */ も空白化する
+        i += 2
+      }
+      continue
+    }
+
+    result += ch
+    i += 1
+  }
+
+  return result
 }
 
 function matchesRuleExclude(rule, file, line) {

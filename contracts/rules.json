@@ -232,10 +232,10 @@
       "id": "P026",
       "severity": "warning",
       "category": "form",
-      "pattern": "placeholder=.*(?!.*<Label|.*<label)",
+      "pattern": "<\\w*(?:[Ii]nput|[Tt]extarea)\\b(?!(?:(?!<)[\\s\\S]){0,400}?\\b(?:aria-labelledby|aria-label|id)=)(?:(?!<)[\\s\\S]){0,400}?placeholder=",
       "excludes": [".stories.", "components/ui/", "components/patterns/"],
-      "message": "placeholder のみでラベルを省略しない",
-      "fix": "<Label> を必ず付ける（スクリーンリーダーはplaceholderを読まない）"
+      "message": "placeholder のみでラベルを省略しない（タグ内に aria-label / aria-labelledby / id のいずれも無い）",
+      "fix": "aria-label か aria-labelledby を付けるか、id と <Label htmlFor> を対応させる（入力タグ単位の判定。タグ外の <Label> との対応は id の有無で近似している）"
     },
     {
       "id": "P027",
@@ -331,7 +331,7 @@
       "id": "P037",
       "severity": "error",
       "category": "component-adoption",
-      "pattern": "SheetHeader[\\s\\S]*KebabMenu|KebabMenu[\\s\\S]*SheetHeader",
+      "pattern": "SheetHeader[\\s\\S]{0,500}KebabMenu|KebabMenu[\\s\\S]{0,500}SheetHeader",
       "excludes": [".stories.", "DetailSheetHeader", "ksk-ds-allow-custom-ui"],
       "message": "SheetHeader + KebabMenu の手配置禁止",
       "fix": "<DetailSheetHeader trailing={<KebabMenu ... />} /> を使用"
@@ -358,7 +358,7 @@
       "id": "P040",
       "severity": "error",
       "category": "component-adoption",
-      "pattern": "(function|const)\\s+(ActionTile|QuickActionGrid)\\b|aria-pressed[\\s\\S]*(emoji|絵文字|mood|shortcut)",
+      "pattern": "(function|const)\\s+(ActionTile|QuickActionGrid)\\b|aria-pressed[\\s\\S]{0,500}(emoji|絵文字|mood|shortcut)",
       "excludes": [".stories.", "components/patterns/", "src/native/components/", "ksk-ds-allow-custom-ui"],
       "message": "shortcut / emoji action tile のローカル再実装禁止",
       "fix": "<QuickActionGrid><ActionTile ... /></QuickActionGrid> を使用"
