@@ -224,3 +224,101 @@ ${filler}
     expect(p037[0].line).not.toBe(p037[1].line)
   })
 })
+
+// issue #390 フォローアップ: 独立レビューで確定した🔴3件（stripLineComment が
+// indexOf("//") で文字列リテラルの中身ごと切り落としていたため、URL を含む行で
+// alt 以降が消え P025 が誤検知したり、HEX 色や pravatar.cc の禁止ドメインが
+// 逆に検出できなくなっていた）の回帰テスト。文字列を絶対にマスクしない
+// maskComments への置き換えで解消したことを確認する。
+describe("issue #390 フォローアップ: 文字列リテラルを壊さないコメントマスキング", () => {
+  it("URL を含む属性値があっても alt 付き <img> は P025 を誤検知しない", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return <img src="https://cdn.example.com/a.png" alt="ユーザーのアバター" className="rounded-full" />
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P025")).toHaveLength(0)
+  })
+
+  it("URL を含む文字列内の HEX カラーは引き続き P008 で検出する", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return <div style={{backgroundImage:'url("https://x/a.png")', color:'#ff0000'}} />
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P008")).toHaveLength(1)
+  })
+
+  it("pravatar.cc の禁止ドメインは引き続き P014 で検出する", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return <img alt="a" src="https://i.pravatar.cc/150" />
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P014")).toHaveLength(1)
+  })
+
+  it("生の <a href> とフォントサイズ直書きは同一行でも両方検出する", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return <a href="https://x.com" className="text-[14px]">link</a>
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.some((f) => f.ruleId === "P006")).toBe(true)
+    expect(findings.some((f) => f.ruleId === "P011")).toBe(true)
+  })
+
+  it("複数行ブロックコメント内の HEX 色と <img> は検出しない", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        /*
+         * 説明用のサンプル: color: #ff0000 の <img src="x" /> をここに置く想定
+         */
+        return null
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P008")).toHaveLength(0)
+    expect(findings.filter((f) => f.ruleId === "P025")).toHaveLength(0)
+  })
+
+  it("全ファイル走査ルールも JSX 単一行コメント内の placeholder は検出しない", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return (
+          <div>
+            {/* <input placeholder="例" /> をここに置く */}
+          </div>
+        )
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P026")).toHaveLength(0)
+  })
+
+  it("全ファイル走査ルールも行コメント内の SheetHeader/KebabMenu 言及は検出しない", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        // SheetHeader と KebabMenu を手で並べるのは禁止
+        return null
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P037")).toHaveLength(0)
+  })
+
+  it("テンプレートリテラル内の HEX 色は文字列なのでマスクせず検出する", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        const css = \`* { color: #ff0000 }\`
+        return css
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P008")).toHaveLength(1)
+  })
+})
