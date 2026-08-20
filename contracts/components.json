@@ -2107,7 +2107,10 @@
         "単純な on/off トグルは FilterChip、単一選択リストは DropdownFilter、任意パネル + 明示クリアは FilterPill",
         "適用中かどうかの正本は value（active フラグを別に持たない）",
         "value の整形（複数選択の \"渋谷 他2件\" 等）は呼び出し側の責務"
-      ]
+      ],
+      "props": {
+        "icon": "ReactNode — ラベル左のアイコン（装飾・aria-hidden。iconsax size=16 相当）"
+      }
     },
     {
       "name": "ImageOverlayAction",

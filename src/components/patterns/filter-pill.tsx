@@ -49,6 +49,11 @@ interface FilterPillProps {
   align?: "start" | "center" | "end"
   /** Popover パネルに渡す className（幅の上書き等）。 */
   contentClassName?: string
+  /**
+   * ラベルの左に出すアイコン（iconsax の size=16 相当を想定）。
+   * 装飾なので aria-hidden で描画される。
+   */
+  icon?: React.ReactNode
   size?: FilterPillSize
   disabled?: boolean
   className?: string
@@ -96,6 +101,7 @@ function FilterPill({
   panelLabel,
   align = "start",
   contentClassName,
+  icon,
   size = "md",
   disabled = false,
   className,
@@ -134,6 +140,11 @@ function FilterPill({
               "disabled:cursor-not-allowed disabled:pointer-events-none",
             )}
           >
+            {icon && (
+              <span aria-hidden="true" className="shrink-0 inline-flex">
+                {icon}
+              </span>
+            )}
             <span className="truncate">{isActive ? `${label}: ${value}` : label}</span>
             <ChevronDownIcon />
           </button>
