@@ -626,6 +626,12 @@
         "md",
         "lg"
       ],
+      "props": {
+        "allowClear": "boolean (既定 false) — 有効時、現在値と同じ星の再クリックで onChange(0)",
+        "label": "string (既定 \"評価\") — interactive 時の radiogroup aria-label",
+        "valueLabel": "(value: number, max: number) => string (既定 `${value}/${max}点`) — read-only 時の aria-label",
+        "starLabel": "(value: number) => string (既定 `${value}点`) — interactive 時の各星（radio）の aria-label"
+      },
       "rules": [
         "Omit onChange for read-only display. Pass onChange for interactive input."
       ]
@@ -978,6 +984,9 @@
         "aria-haspopup=listbox",
         "aria-expanded"
       ],
+      "props": {
+        "closeLabel": "string (既定 \"閉じる\") — 内部の閉じるオーバーレイの aria-label"
+      },
       "rules": [
         "DataTable のフィルタ列で使う",
         "getDisplayLabel で表示変換",

@@ -70,7 +70,7 @@
 | SocialIcon, SOCIAL_ICON_PLATFORMS, SOCIAL_ICON_LABELS | `@/components/ui/social-icon` | — | Default, AllPlatforms, AllMono, Tones |
 | SocialLoginButton | `@/components/ui/social-login-button` | — | Line, Google, Apple, Amazon, AllProviders, Loading |
 | Spinner | `@/components/ui/spinner` | — | Default, AllSizes |
-| StarRating | `@/components/ui/star-rating` | — | Interactive, ReadOnly, Sizes |
+| StarRating | `@/components/ui/star-rating` | — | Interactive, AllowClear, ReadOnly, Sizes |
 | StatusActionBadge, SyncStatusButton | `@/components/ui/status-action-badge` | — | AllStates, Actionable, Compact |
 | SubNav | `@/components/ui/sub-nav` | — | Underline, Chip, WithBadge, WithDescriptions |
 | Switch | `@/components/ui/switch` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, SettingsList |
