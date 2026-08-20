@@ -275,10 +275,11 @@ function lintFile(file, cwd, rules) {
     for (let index = 0; index < lines.length; index++) {
       let line = lines[index]
       if (matchesRuleExclude(rule, rel, line)) continue
-      if (rule.id === "P047") {
-        if (isCommentOnlyLine(line)) continue
-        line = stripLineComment(line)
-      }
+      // コメント行はスキップ、行末コメント / JSX の {/* ... */} 単一行コメントは
+      // 除去してから照合する（issue #390: 従来 P047 限定だった除去処理を全ルールへ
+      // 引き上げ。コメントで要素名を説明しただけの行が誤検知されるのを防ぐ）。
+      if (isCommentOnlyLine(line)) continue
+      line = stripLineComment(line)
       if (!regex.test(line)) continue
       findings.push(toFinding(rule, rel, index + 1))
     }
@@ -322,20 +323,27 @@ function lineForIndex(source, index) {
   return source.slice(0, index).split(/\r?\n/).length
 }
 
-// P047（モーション値直書き禁止）専用: コメント行 / JSDoc 継続行を判定対象から除外する。
+// 行単位ルール共通: コメント行 / JSDoc 継続行を判定対象から除外する。
 // 例: 「// Recomputing per request is ~300-500ms on the current working set,」の
-// ようなコメント中の時間表記が誤検知されるのを防ぐ（行頭 // ・行頭 * ・行頭 /* を持つ行）。
-// 他ルールには適用しない（コメント由来の誤検知はほぼゼロで、広げるメリットが無い）。
+// ようなコメント中の記述が誤検知されるのを防ぐ（行頭 // ・行頭 * ・行頭 /* を持つ行、
+// および行全体が JSX の {/* ... */} 単一行コメントである行）。
+// 全ルール共通で適用する（issue #390: 従来は P047 限定だった）。
 function isCommentOnlyLine(line) {
-  return /^\s*(\/\/|\/\*|\*)/.test(line)
+  if (/^\s*(\/\/|\/\*|\*)/.test(line)) return true
+  return /^\s*\{\s*\/\*[\s\S]*\*\/\s*\}\s*$/.test(line)
 }
 
-// 行内コメント（`code() // 300ms のようなコメント`）は // 以降を判定対象から除外する。
-// 素朴な実装のため文字列リテラル内の `//`（URL 等）も削る可能性はあるが、P047 の
-// 対象（motion 値）がその形で書かれることは実質無いためスコープを絞って許容する。
+// 行内コメントを判定対象から除外する。
+// - JSX の単一行コメント {/* ... */}（`<div>{/* TODO */}</div>` のような行中の断片）
+// - 通常の /* ... */ ブロックコメント（同一行で閉じているもの）
+// - // 以降の行コメント
+// を順に取り除く。素朴な実装のため文字列リテラル内の `//` や `/*`（URL 等）も
+// 削る可能性はあるが、対象ルールの誤検知回避が優先のため許容する。
 function stripLineComment(line) {
-  const index = line.indexOf("//")
-  return index === -1 ? line : line.slice(0, index)
+  let result = line.replace(/\{\s*\/\*[\s\S]*?\*\/\s*\}/g, "")
+  result = result.replace(/\/\*[\s\S]*?\*\//g, "")
+  const index = result.indexOf("//")
+  return index === -1 ? result : result.slice(0, index)
 }
 
 function matchesRuleExclude(rule, file, line) {
