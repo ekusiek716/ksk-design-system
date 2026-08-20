@@ -633,7 +633,8 @@
         "md"
       ],
       "rules": [
-        "Use for 2-4 options only. For 5+ options use Tabs."
+        "Use for 2-4 options only. 1行固定の segmented control で折り返せない。",
+        "5択以上・折り返しが要る単一選択は ChipSelector の selectionMode=\"single\" を使う(issue #418)。選択中の1つだけ見せて畳む場合は CollapsibleChipField(issue #419)。パネル連動が要るなら Tabs。"
       ]
     },
     {
@@ -1611,36 +1612,46 @@
     {
       "name": "ChipSelector",
       "path": "src/components/patterns/chip-selector.tsx",
-      "description": "チップ複数選択コンポーネント。カテゴリ・タグ等の複数/単一選択に使用。max上限・removableバッジ対応。",
+      "description": "チップ選択コンポーネント。flex-wrap で折り返すので選択肢数の上限が無く、カテゴリ・タグ等の複数/単一選択に使う。max上限・removableバッジ対応。5択以上の単一選択は PillToggle でなくこれを使う(issue #418)。",
       "features": [
         "multi-select",
         "single-select",
         "max-limit",
         "removable",
-        "selection-mode"
+        "selection-mode",
+        "wrap",
+        "scalar-single-value"
       ],
       "rules": [
         "selectionMode=\"single\" / \"multiple\" で選択意味論を指定する(issue #352。QuickActionGrid / ActionTile と同じ語彙)。multiple は @deprecated だが後方互換のため残っており、selectionMode 未指定時のみ従来どおり multiple(既定 true)から導出する。",
+        "単一選択(selectionMode=\"single\")の value/onChange はスカラー(T | null)。配列形は v1.61 以前との後方互換でのみ受け付け、開発ビルドで console.warn する(issue #418)。",
         "単一選択ではグループが role=\"radiogroup\"、チップが role=\"radio\" + aria-checked になり、矢印キー移動と roving tabindex が有効になる(native は accessibilityRole radiogroup / radio + accessibilityState.checked)。",
         "単一選択で選択中の値が 2 つ以上あると開発ビルドで console.warn する(issue #39 の footgun 検出)",
         "Use selectionMode=\"single\" for single-select (multiple=false は非推奨). Use max to limit selection count.",
-        "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior."
+        "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior.",
+        "PillToggle は 2〜4 択の segmented control 専用。5択以上・折り返しが要る単一選択はこの selectionMode=\"single\" を使う(issue #418)。"
       ]
     },
     {
       "name": "CollapsibleChipField",
       "path": "src/components/patterns/collapsible-chip-field.tsx",
-      "description": "折りたたみ式の単一選択チップフィールド。未選択時は全選択肢を展開表示し、選択後は選択中の1チップのみに折りたたむ。再タップで解除（onClear）または再選択用に再展開する。belle-todo 移植（Issue #106）。ChipSelector（複数選択）とは別 API・別用途。",
+      "description": "折りたたみ式の単一選択チップフィールド（アイコン/ラベル先頭行）。未選択時は全選択肢を展開表示し、選択後は選択中の1チップのみに折りたたむ。タップで再展開して選び直す。trip-todo InlineChipPicker 相当(issue #419)。ChipSelector（折りたたまない）とは別 API・別用途。",
       "features": [
         "single-select",
         "collapse-on-select",
         "always-expanded-mode",
-        "leading-icon-or-label"
+        "leading-icon-or-label",
+        "disclosure-a11y",
+        "escape-to-collapse",
+        "focus-restore"
       ],
       "rules": [
         "ChipSelector（chip-selector.tsx）とは別コンポーネント。混同して置き換えない。",
         "onClear 未指定時、選択済み chip の再タップは解除でなく再選択用の再展開のみ（required field 対応）。",
-        "label 指定時は幅 w-20 固定でフィールドリストの他行とラベル幅を揃える。"
+        "label 指定時は幅 w-20 固定でフィールドリストの他行とラベル幅を揃える。",
+        "折りたたみ中の1チップは開閉トリガで aria-expanded を持ち、展開中は行が role=\"radiogroup\"・各チップが role=\"radio\" + aria-checked になる。矢印キー移動と roving tabindex 付き(issue #419)。",
+        "展開で選択中チップへフォーカスが移り、Escape で畳んで元のチップへ戻る(issue #419)。",
+        "label を持たない icon 先頭の行では radiogroup に名前が付かないので ariaLabel を必ず渡す(issue #419)。"
       ]
     },
     {

@@ -270,6 +270,7 @@
 @source inline("bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]");
 @source inline("bottom-[var(--ksk-keyboard-inset)]");
 @source inline("break-words");
+@source inline("collapse");
 @source inline("container");
 @source inline("cursor-default");
 @source inline("cursor-grab");
