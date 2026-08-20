@@ -40,6 +40,10 @@
 # DRY_RUN=1:
 #   push / gh pr create をスキップ。package.json 書換・npm install・commit
 #   までは実行し、`git show --stat HEAD` 相当を表示して worktree を掃除。
+#
+# 終了コード:
+#   FAIL が1件でもあれば 1、それ以外は 0。PR URL を取れなかったリポは OK ではなく
+#   FAIL (pr create) として数える（branch は push 済みなので手動 PR で復旧できる）。
 # =============================================================
 
 set -uo pipefail
@@ -115,6 +119,14 @@ else
       RESULTS+=("$arg: FAIL (not found)")
     fi
   done
+fi
+
+# 引数が全部解決できないと REPOS が空のまま。set -u 配下で "${REPOS[@]}" を展開すると
+# unbound variable で落ち、下の要約も終了コードも出ないまま終わる（FAIL が握り潰される）。
+if [ ${#REPOS[@]} -eq 0 ]; then
+  echo ""
+  echo -e "${RED}対象リポが1つも解決できませんでした${NC}"
+  exit 1
 fi
 
 for repo in "${REPOS[@]}"; do
@@ -341,25 +353,60 @@ EOF
     fs.writeFileSync(file, fs.readFileSync(file, "utf8").replaceAll("__VERSION__", version));
   ' "$pr_body_file" "$VERSION"
 
+  # gh pr create が失敗しても branch は push 済みなので、ここを成功扱いにすると
+  # 配布漏れがログを目視するまで気づけない（2026-08-20 の 1.60.0 配布で
+  # 歯科衛生士用が「OK（PR URL 未取得）」のまま PR 不在になった）。
+  # PR URL を取れなかったら FAIL として集計する。
+  pr_err="$(mktemp)"
+  pr_note="既存"
   pr_url="$(cd "$wt" && gh pr list --state open --head "$branch" --json url -q '.[0].url' 2>/dev/null)"
   if [ -z "$pr_url" ]; then
+    pr_note="新規"
     pr_url="$(cd "$wt" && gh pr create \
       --title "chore: ksk-design-system v${VERSION} に bump" \
       --body-file "$pr_body_file" \
-      2>/dev/null | tail -1)"
+      2>"$pr_err" | tail -1)"
+    # closed / merged 済みの同名ブランチ PR がある場合 gh pr create は失敗するので拾い直す
+    if [ -z "$pr_url" ]; then
+      pr_url="$(cd "$wt" && gh pr list --head "$branch" --json url -q '.[0].url' 2>/dev/null)"
+      pr_note="既存"
+    fi
   fi
   rm -f "$pr_body_file"
 
-  # 既に同ブランチの PR がある場合 gh は失敗するので既存 PR URL を拾う
-  if [ -z "$pr_url" ]; then
-    pr_url="$(cd "$wt" && gh pr list --head "$branch" --json url -q '.[0].url' 2>/dev/null)"
-  fi
+  # gh pr create は成功時に PR URL を最終行へ出す。URL の形をしていなければ失敗扱い
+  # （空文字だけでなく、警告行などを掴んだケースもここで弾く）。
+  case "$pr_url" in
+    https://github.com/*) ;;
+    *)
+      echo -e "${RED}FAIL: PR を作成できませんでした${NC}"
+      echo "   branch $branch は push 済みなので、手動で PR を作れば復旧できる"
+      [ -s "$pr_err" ] && sed 's/^/   /' "$pr_err"
+      rm -f "$pr_err"
+      cleanup
+      RESULTS+=("$name: FAIL (pr create; branch $branch は push 済)")
+      continue
+      ;;
+  esac
+  rm -f "$pr_err"
 
   cleanup
-  RESULTS+=("$name: OK ${pr_url:-（PR URL 未取得・branch は push 済）}")
-  echo -e "${GREEN}OK${NC} ${pr_url:-}"
+  RESULTS+=("$name: OK ($pr_note) $pr_url")
+  echo -e "${GREEN}OK${NC} $pr_url"
 done
 
 echo ""
 echo "======================================="
 for r in "${RESULTS[@]}"; do echo "$r"; done
+
+# FAIL が1件でもあれば非ゼロで終わる。全件 OK の体裁で exit 0 を返すと、
+# 呼び出し側（人・CI）が要約を目視しない限り配布漏れに気づけない。
+failed=0
+for r in "${RESULTS[@]}"; do
+  case "$r" in *": FAIL"*) failed=$((failed + 1)) ;; esac
+done
+if [ "$failed" -gt 0 ]; then
+  echo ""
+  echo -e "${RED}FAIL: $failed 件${NC}（上の一覧を確認してリトライすること）"
+  exit 1
+fi
