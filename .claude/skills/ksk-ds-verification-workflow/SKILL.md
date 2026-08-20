@@ -66,7 +66,7 @@ git diff --name-only main -- '*.tsx' | xargs grep -nE '<検証したい pattern>
 | UI コンポーネント（`src/components/**`）を追加・修正した | `npm run test:a11y`（axe-core、全ストーリー対象。issue #261。color-contrast も有効 — 無効状態デモ等 WCAG 1.4.3 の inactive 例外のみストーリー側で理由コメント付き除外可。rules.json の `accessibility.requirements[].machineVerified` に axe でカバーできる項目/できない項目の対応表あり） |
 | DESIGN.md 変更 | `npm run lint:design` |
 | `.tsx` で新しい Tailwind クラスを使った | `npm run generate:safelist`（`@source` safelist 再生成。`npm run check` の `lint:safelist` が未再生成を検出） |
-| リリース | `bash scripts/release.sh` → 消費側一括は `scripts/bump-consumers.sh`（対象はメモリ ds-consumers.md 参照） |
+| リリース | `bash scripts/release.sh` → 消費側一括は `scripts/update-consumers.sh`（対象は release.sh の DEFAULT_REPOS 参照） |
 
 ## 3. モデル分担（検証ループの運用）
 

@@ -24,6 +24,13 @@
  * COMPONENT_LOOKUP.md 系（generate-component-lookup.mjs /
  * generate-native-component-lookup.mjs）は version 文字列を出力に含まないため
  * ここでは対象外（`npm run check` の generate:lookup --check が別途乖離を検出する）。
+ *
+ * --check モード（issue #414）:
+ *   package.json の version と、contracts/components.json meta.version /
+ *   contracts/token-hex-cache.json meta.version が一致しているかだけを検証する
+ *   （ファイルは書き換えない）。npm run check に組み込み、手動 bump 漏れで
+ *   components.json が黙ってズレる事故を防ぐ。
+ *   実行: node scripts/sync-version.mjs --check
  */
 import { readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
@@ -38,6 +45,44 @@ const TOKEN_HEX_SCRIPT_PATH = join(ROOT, "scripts", "generate-token-hex-cache.mj
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"))
+}
+
+function checkOnly() {
+  const pkg = readJson(PACKAGE_JSON_PATH)
+  const version = pkg.version
+  if (!version) {
+    console.error("✗ package.json に version がありません")
+    process.exit(1)
+  }
+
+  const mismatches = []
+  const components = readJson(COMPONENTS_JSON_PATH)
+  if (components.meta?.version !== version) {
+    mismatches.push(
+      `contracts/components.json meta.version（${components.meta?.version}）が package.json version（${version}）と不一致`,
+    )
+  }
+
+  let tokenHexCache
+  try {
+    tokenHexCache = readJson(TOKEN_HEX_CACHE_PATH)
+  } catch {
+    tokenHexCache = null
+  }
+  if (tokenHexCache && tokenHexCache.meta?.version !== version) {
+    mismatches.push(
+      `contracts/token-hex-cache.json meta.version（${tokenHexCache.meta?.version}）が package.json version（${version}）と不一致`,
+    )
+  }
+
+  if (mismatches.length > 0) {
+    console.error(`✗ バージョン provenance がズレています（${mismatches.length} 件）\n`)
+    for (const m of mismatches) console.error(`  - ${m}`)
+    console.error(`\n\`node scripts/sync-version.mjs\` を実行して同期してください。`)
+    process.exit(1)
+  }
+
+  console.log(`✓ package.json / components.json / token-hex-cache.json は version ${version} で同期済み`)
 }
 
 function main() {
@@ -89,4 +134,8 @@ function main() {
   }
 }
 
-main()
+if (process.argv.includes("--check")) {
+  checkOnly()
+} else {
+  main()
+}

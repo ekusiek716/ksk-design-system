@@ -32,17 +32,25 @@ export function search(query: string): SearchResult[] {
 
   for (const { key, items } of groups) {
     for (const comp of items) {
+      // variants は配列のほか {open: [...], close: [...]} 形式の dict も許容される
+      // （Dialog / Sheet / ListItem / Tag が該当。issue #413 のテストで発覚）。
+      const asList = (v: unknown): string[] =>
+        Array.isArray(v)
+          ? v.map(String)
+          : v && typeof v === "object"
+            ? Object.entries(v).flatMap(([k, vs]) => [k, ...asList(vs)])
+            : []
       const searchable = [
         comp.name,
         comp.path,
         comp.description ?? "",
-        ...(comp.variants ?? []),
-        ...(comp.sizes ?? []),
-        ...(comp.subcomponents ?? []),
+        ...asList(comp.variants),
+        ...asList(comp.sizes),
+        ...asList(comp.subcomponents),
         ...(comp.exportedAs ? [comp.exportedAs] : []),
-        ...(comp.aliases ?? []),
-        ...(comp.deprecatedAliases ?? []),
-        ...(comp.rules ?? []),
+        ...asList(comp.aliases),
+        ...asList(comp.deprecatedAliases),
+        ...asList(comp.rules),
       ]
         .join(" ")
         .toLowerCase();

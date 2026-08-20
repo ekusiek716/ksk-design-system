@@ -77,11 +77,23 @@ function flattenSemanticColors(semantic: Record<string, Record<string, string>>)
     border: "Border",
     status: "Status",
   };
+  const pascal = (role: string) =>
+    role.split("-").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join("-");
   for (const [group, values] of Object.entries(semantic)) {
     const prefix = categoryMap[group] ?? group;
     for (const [role, value] of Object.entries(values)) {
-      const rolePascal = role.split("-").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join("-");
-      result.push({ name: `var(--${prefix}-${rolePascal})`, value });
+      if (typeof value === "string") {
+        result.push({ name: `var(--${prefix}-${pascal(role)})`, value });
+        continue;
+      }
+      // categorical のような1段深い入れ子（{hue, base, subtle, bold}）を
+      // 個別トークンに展開する。object のまま返すとキーワード検索
+      // （value.toLowerCase）が落ちる（issue #413 のテストで発覚）。
+      for (const [sub, subValue] of Object.entries(value as Record<string, string>)) {
+        if (typeof subValue !== "string") continue;
+        const subName = sub === "base" ? "" : `-${pascal(sub)}`;
+        result.push({ name: `var(--${pascal(prefix)}-${pascal(role)}${subName})`, value: subValue });
+      }
     }
   }
   return result;

@@ -26,6 +26,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -34,6 +35,29 @@ const CHECK = process.argv.includes('--check');
 
 const tokens = JSON.parse(readFileSync(join(ROOT, 'tokens.json'), 'utf8'));
 const THEMES = Object.keys(tokens.themes); // default, blue, orange, green, violet
+
+/**
+ * tokens.json の実更新日を git log から取得する（issue #414）。
+ * tokens.json の meta.lastUpdated は手書きで更新漏れが起きるため、生成物の
+ * provenance ヘッダには手書き値を信用せず、git 上の実コミット日を焼き込む。
+ * git が使えない・履歴がない（shallow clone 等）場合のみ meta.lastUpdated に
+ * フォールバックする。
+ */
+function resolveTokensLastUpdated() {
+  try {
+    const date = execFileSync(
+      'git',
+      ['log', '-1', '--format=%cs', '--', 'tokens.json'],
+      { cwd: ROOT, encoding: 'utf8' },
+    ).trim();
+    if (date) return date;
+  } catch {
+    // git 不可・履歴なし等は手書き値にフォールバック
+  }
+  return tokens.meta?.lastUpdated ?? 'unknown';
+}
+
+const TOKENS_LAST_UPDATED = resolveTokensLastUpdated();
 
 /* ---------- color utils ---------- */
 
@@ -292,7 +316,7 @@ const BANNER = `// =============================================================
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // \`npm run generate:tokens\` を実行してください。
-// source: tokens.json v${tokens.meta.version} (${tokens.meta.lastUpdated})
+// source: tokens.json v${tokens.meta.version} (${TOKENS_LAST_UPDATED})
 // =============================================================
 `;
 
