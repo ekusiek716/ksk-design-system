@@ -513,5 +513,7 @@ const invokedDirectly =
 
 if (invokedDirectly) {
   const pkgRoot = resolve(dirname(new URL(import.meta.url).pathname), "..")
-  process.exit(runCheckMigrationCli(process.argv.slice(2), { cwd: process.cwd(), pkgRoot }))
+  // process.exit() は stdout がパイプのとき未フラッシュ分を捨てる（issue #394）。
+  // ここはモジュール末尾なので exitCode を立てれば、自然終了時に出力が掃かれる。
+  process.exitCode = runCheckMigrationCli(process.argv.slice(2), { cwd: process.cwd(), pkgRoot })
 }
