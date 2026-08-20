@@ -17,11 +17,11 @@ const meta: Meta<typeof Chip> = {
     },
     size: {
       control: "select",
-      options: ["sm", "md", "lg"],
+      options: ["xs", "sm", "md", "lg", "tile"],
     },
     shape: {
       control: "select",
-      options: ["pill", "square", "tile"],
+      options: ["pill", "rounded", "square"],
     },
     selected: { control: "boolean" },
     removable: { control: "boolean" },
@@ -245,4 +245,38 @@ export const TileTouchTargetNotShrunk: Story = {
       ).toBeGreaterThanOrEqual(44)
     }
   },
+}
+
+/**
+ * `size="xs"` は本文行に混ぜる極小ピル（h-5 = 20px）。
+ * 見た目は小さいが、当たり判定は縦横とも 44px を維持する。
+ * 親が 44px 未満だと before 擬似要素がクリップされるため、
+ * 行側に `min-h-11 items-center` を付けること。
+ */
+export const ExtraSmall: Story = {
+  render: () => (
+    <div className="flex min-h-11 items-center gap-2">
+      <Chip size="xs">新着</Chip>
+      <Chip size="xs" variant="accent">残りわずか</Chip>
+      <Chip size="xs" variant="outline">送料無料</Chip>
+      <Chip size="xs" selected>選択中</Chip>
+      <Chip size="xs" removable onRemove={() => {}}>削除可</Chip>
+    </div>
+  ),
+}
+
+/**
+ * `shape="rounded"` は pill と square の中間（rounded-lg / 8px）。
+ * ピルでは幼く、rounded-sm では硬すぎるカード内タイル向け。
+ */
+export const RoundedShape: Story = {
+  render: () => (
+    <div className="flex min-h-11 flex-wrap items-center gap-2">
+      <Chip shape="pill">pill</Chip>
+      <Chip shape="rounded">rounded</Chip>
+      <Chip shape="square">square</Chip>
+      <Chip shape="rounded" selected>rounded / selected</Chip>
+      <Chip shape="rounded" removable onRemove={() => {}}>rounded / removable</Chip>
+    </div>
+  ),
 }

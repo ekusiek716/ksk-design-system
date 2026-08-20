@@ -55,3 +55,31 @@ export const AllVariants: Story = {
     </div>
   ),
 }
+
+/**
+ * カテゴリ識別色（`--Categorical-1..16`）。Brand に連動しないテーマ非依存の
+ * 質的パレットで、「N 番目のカテゴリ」を色で区別する用途にだけ使う。
+ * 文字は必ず `-Bold`（base は明色相だと白背景でコントラスト不足）。
+ */
+export const Categorical: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-2">
+      {([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] as const).map((n) => (
+        <Tag key={n} categorical={n}>
+          カテゴリ {n}
+        </Tag>
+      ))}
+    </div>
+  ),
+}
+
+/** `dot` で base 色のドットを添える（色だけに頼らない補助）。 */
+export const CategoricalWithDot: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-2">
+      <Tag categorical={1} dot>打ち合わせ</Tag>
+      <Tag categorical={6} dot>締め切り</Tag>
+      <Tag categorical={12} dot>プライベート</Tag>
+    </div>
+  ),
+}

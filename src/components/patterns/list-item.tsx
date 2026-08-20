@@ -49,6 +49,22 @@ interface ListItemCommonProps {
    * 行いっぱいに敷きたい要素に使う。
    */
   footerSlot?: React.ReactNode
+  /**
+   * 行の右端に置く「行そのものとは別の操作」（削除ボタン・トグル・メニュー等）。
+   *
+   * 行を押せる状態（`href` / `onClick`）で行内にボタンを置くと button の入れ子で
+   * 不正な HTML になるため、このスロットを使うと行の実装が
+   * `<div>` + 行全体を覆う不可視の a/button（stretched link）+ 副アクションの
+   * 兄弟配置に切り替わる。副アクションは行のクリック領域の**上**に載るので、
+   * 押しても行の onClick は発火しない。
+   *
+   * ここに置くもの: それ自体が独立した操作である要素（IconButton / Switch / メニュー）。
+   * 置かないもの: 単なる表示（バッジ・日時・シェブロン）は `rightSlot` を使う。
+   *
+   * a11y: overlay の accessible name は `aria-label` → `title` → `description`（文字列時）
+   * の順で決まる。いずれも無い（children だけの）行では `aria-label` を必ず渡すこと。
+   */
+  secondaryAction?: React.ReactNode
   title?: string
   description?: string
   children?: React.ReactNode
@@ -90,6 +106,7 @@ function ListItem({
   rightSlot,
   bottomSlot,
   footerSlot,
+  secondaryAction,
   title,
   description,
   interactive = false,
@@ -157,6 +174,11 @@ function ListItem({
         {bottomSlot && <div className="mt-2">{bottomSlot}</div>}
       </div>
       {rightSlot && <div className="shrink-0">{rightSlot}</div>}
+      {secondaryAction && (
+        // stretched link（行全体を覆う a/button）より前面に置き、
+        // 副アクションのクリックが行の遷移・onClick に吸われないようにする。
+        <div className="relative z-10 shrink-0">{secondaryAction}</div>
+      )}
     </>
   )
 
@@ -177,6 +199,58 @@ function ListItem({
   ) : (
     row
   )
+
+  // secondaryAction がある行を押せるようにすると、a/button の中に別の button を
+  // 入れることになり不正な HTML になる。行を <div> にして、行全体を覆う不可視の
+  // a/button（stretched link）を兄弟として置く構造に切り替える。
+  if (secondaryAction && actionable) {
+    // restProps（target / rel / onKeyDown / data-* 等）は外側の div ではなく、
+    // 実際に操作可能な overlay の a/button に乗せる（secondaryAction 無しの分岐と同じ挙動）。
+    const restProps = props as Record<string, unknown>
+    const overlayLabel =
+      (restProps["aria-label"] as string | undefined) ??
+      title ??
+      (typeof description === "string" ? description : undefined)
+    const overlayClassName = cn(
+      "absolute inset-0",
+      "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+      disabled && "cursor-not-allowed",
+    )
+    return (
+      <div
+        data-slot="list-item"
+        data-variant={variant}
+        className={cn(rootClassName, "relative")}
+      >
+        {content}
+        {href ? (
+          <a
+            {...(restProps as Omit<React.ComponentPropsWithoutRef<"a">, "href" | "onClick">)}
+            href={href}
+            aria-label={overlayLabel}
+            aria-disabled={disabled || undefined}
+            className={overlayClassName}
+            onClick={(event) => {
+              if (disabled) {
+                event.preventDefault()
+                return
+              }
+              ;(onClick as React.MouseEventHandler<HTMLAnchorElement> | undefined)?.(event)
+            }}
+          />
+        ) : (
+          <button
+            {...(restProps as Omit<React.ComponentPropsWithoutRef<"button">, "onClick">)}
+            type="button"
+            aria-label={overlayLabel}
+            disabled={disabled}
+            className={overlayClassName}
+            onClick={onClick as React.MouseEventHandler<HTMLButtonElement>}
+          />
+        )}
+      </div>
+    )
+  }
 
   if (href) {
     const anchorProps = props as Omit<React.ComponentPropsWithoutRef<"a">, "href" | "onClick">

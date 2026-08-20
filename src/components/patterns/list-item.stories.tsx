@@ -7,7 +7,8 @@ import { ListItem } from "./list-item"
 import { Avatar, AvatarFallback } from "../ui/avatar"
 import { Badge } from "../ui/badge"
 import { Progress } from "../ui/progress"
-import { Setting2, Profile2User, LogoutCurve } from "iconsax-reactjs"
+import { Setting2, Profile2User, LogoutCurve, Trash } from "iconsax-reactjs"
+import { Button } from "../ui/button"
 
 const meta: Meta<typeof ListItem> = {
   title: "Components/ListItem",
@@ -192,6 +193,43 @@ export const WithFooterSlot: Story = {
           </Avatar>
         }
         bottomSlot={<Progress value={62} />}
+      />
+    </div>
+  ),
+}
+
+/**
+ * `secondaryAction` — 押せる行の中に「行とは別の操作」を置く。
+ * 行は div + 行全体を覆う不可視 button（stretched link）になるため、
+ * button の入れ子（不正な HTML）にならない。
+ */
+export const WithSecondaryAction: Story = {
+  render: () => (
+    <div className="flex flex-col rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] overflow-hidden">
+      <ListItem
+        title="佐藤花子"
+        description="タップで詳細、右のボタンで削除"
+        onClick={() => {}}
+        leftSlot={
+          <Avatar className="size-9">
+            <AvatarFallback>佐</AvatarFallback>
+          </Avatar>
+        }
+        secondaryAction={
+          <Button variant="ghost" size="icon-sm" aria-label="佐藤花子 を削除">
+            <Trash size={18} />
+          </Button>
+        }
+      />
+      <ListItem
+        title="リンク行 + 副アクション"
+        description="href の行でも入れ子にならない"
+        href="#"
+        secondaryAction={
+          <Button variant="ghost" size="icon-sm" aria-label="リンク行 を削除">
+            <Trash size={18} />
+          </Button>
+        }
       />
     </div>
   ),

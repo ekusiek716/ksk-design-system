@@ -53,6 +53,23 @@ npx ksk-ds check-migration ./src
 
 ## v1 系内の minor 変更（参考）
 
+### 次のリリース — `Footer` の `paymentIcons` 既定値が空になった（挙動変更）
+
+`Footer` は `paymentIcons` を省略すると `["VISA", "Master", "JCB", "AmEx", "PayPay", "LINE Pay"]`
+の決済バッジを既定で描画していた。EC 以外のプロダクトでも「取り扱っていない決済手段」が
+出てしまうため、**既定値を `[]`（非表示）に変更**した。
+
+従来の表示を維持したい場合は明示的に渡す:
+
+```tsx
+<Footer
+  paymentIcons={["VISA", "Master", "JCB", "AmEx", "PayPay", "LINE Pay"]}
+  copyright="© 2026 KSK Inc."
+/>
+```
+
+`paymentIcons` を明示的に渡していた箇所は影響なし。
+
 ### 次のリリース — `postinstall` による AI ルールファイル自動設置を廃止（要確認）
 
 これまで `npm install ksk-design-system` の `postinstall` フックが、消費側の
