@@ -23,7 +23,7 @@ describe("ksk-ds lint", () => {
       }
     `)
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain("warn P046")
+    expect(result.stdout).toContain("warning P046")
   })
 
   it("CardContent 内部の spacing を direct child として誤検知しない", () => {
@@ -50,7 +50,7 @@ describe("ksk-ds lint", () => {
       }
     `)
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain("warn P046")
+    expect(result.stdout).toContain("warning P046")
   })
 
   it("media Card の spacing は警告しない", () => {

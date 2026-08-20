@@ -1,5 +1,6 @@
 // brand カラーは tokens に含まれないため、データ定義を .ts に分離して
 // lint-scratch (HEX ハードコード検出) の対象外にする。
+// ksk-ds-lint-ignore-file P008 -- 各社のブランドロゴ規定色。DS トークンに置き換えるとロゴの規定違反になる（issue #408）
 
 export type SocialIconBrand = "x" | "instagram" | "youtube" | "tiktok" | "facebook" | "line"
 

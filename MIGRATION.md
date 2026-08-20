@@ -53,6 +53,54 @@ npx ksk-ds check-migration ./src
 
 ## v1 系内の minor 変更（参考）
 
+### 次のリリース — `ksk-ds lint` の severity 語彙が `warn` → `warning` に統一（要確認）
+
+`--format json` の `results[].severity` と text 出力の severity 表記が、これまで
+`"warn"` と `"warning"` で不統一だった（contract の `contracts/rules.json` は
+`"warning"`、CLI 出力は `"warn"`）。**CLI 出力側を `"warning"` に揃えた**（issue #406）。
+
+CI で JSON をフィルタしている場合は置き換えが必要:
+
+```bash
+# before
+jq '[.results[] | select(.severity == "warn")] | length'
+# after
+jq '[.results[] | select(.severity == "warning")] | length'
+```
+
+text 出力の要約行も `0 error / 3 warn` → `0 error / 3 warning` に変わる。
+
+あわせて `ksk-ds lint` に次を追加した:
+
+- `--strict` … warning があれば exit 1
+- `--max-warnings N` … warning が N 件を超えたら exit 1
+- **未知のオプションはエラー終了**（従来は黙って捨てられ、CI に書いた
+  `--strict` が無言で効かないまま緑になっていた）
+
+### 次のリリース — `ksk-ds lint` の escape がルール単位・行単位で書けるようになった
+
+ファイル全体・全ルールを無期限に外す `// ksk-ds-allow-custom-ui: 理由` は
+後方互換で残るが**非推奨**。新規はルール単位を使う（issue #405）:
+
+```tsx
+// ksk-ds-lint-ignore P008 -- ブランドロゴの規定色のため     ← 直下 2 行以内に効く
+// ksk-ds-lint-ignore-file P008 -- ブランド定数ファイル      ← そのファイル全体・P008 のみ
+```
+
+理由は **5 文字以上が必須**。空虚な理由は `ESCAPE001` / `ESCAPE002` として報告され、
+ignore は効かない。あわせて escape マーカーは**文字列リテラルの中では発火しなくなった**
+（ドキュメント URL に `ksk-ds-allow-custom-ui` が含まれるだけで lint 全体が黙って
+無効化されていた）。既に short な理由を書いていたファイルは lint が復活するので、
+理由を書き足すか違反を直すこと。
+
+### 次のリリース — 自動生成物と DS 自身のトークン CSS を lint 対象外にした
+
+- 先頭 12 行に自動生成マーカー（`AUTO-GENERATED` / `DO NOT EDIT` / `自動生成` 等）を
+  持つファイルは全ルールを skip する（issue #408）。直す先は生成物ではなく生成元。
+- P049（product theme の無許可上書き）は、DS 自身 / ベンダリングされた DS の
+  トークン定義 CSS を対象外にする（issue #407）。`vendor/ksk-design-system/**` のように
+  DS を再梱包しているリポで P049 が大量に出ていたのが解消する。
+
 ### 次のリリース — `Footer` の `paymentIcons` 既定値が空になった（挙動変更）
 
 `Footer` は `paymentIcons` を省略すると `["VISA", "Master", "JCB", "AmEx", "PayPay", "LINE Pay"]`
