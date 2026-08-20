@@ -96,9 +96,9 @@ const R_INDEPENDENT =
 
 const INTENTIONAL_PROP_GAPS = new Map([
   ["Button", {
-    webOnly: ["asChild", "haptic"],
+    webOnly: ["asChild", "haptic", "unstyled"],
     nativeOnly: ["variant", "elevation", "containerStyle", "pressedContainerStyle", "textStyle", "leadingIcon", "trailingIcon", "loading", "loadingLabel", "children"],
-    reason: `asChild (Radix Slot) has no RN equivalent, native composition wraps components directly; haptic (navigator.vibrate) is Web-only mobile-browser API. ${R_VARIANT_ARTIFACT}. Native additionally exposes RN-only styling (containerStyle/pressedContainerStyle/textStyle), icon slots, and an async loading state not yet ported to Web.`,
+    reason: `asChild (Radix Slot) has no RN equivalent, native composition wraps components directly; haptic (navigator.vibrate) is Web-only mobile-browser API; unstyled (issue #420) strips the Web Tailwind layer for gradual migration — Native has no CSS layer to strip (styles are StyleSheet/inline). ${R_VARIANT_ARTIFACT}. Native additionally exposes RN-only styling (containerStyle/pressedContainerStyle/textStyle), icon slots, and an async loading state not yet ported to Web.`,
   }],
   ["PillToggle", {
     webOnly: ["onValueChange", "size", "className"],
@@ -153,7 +153,7 @@ const INTENTIONAL_PROP_GAPS = new Map([
   ["ImageAttachmentPicker", { webOnly: ["accept"], nativeOnly: [], reason: "accept (MIME filter) is a DOM <input> attribute with no RN equivalent; Native relies on the OS picker's own image-only mode" }],
   ["ImageCarousel", { webOnly: ["aspectRatio", "showArrows", "autoPlay"], nativeOnly: ["height", "showCounter"], reason: R_INDEPENDENT + " (Web: arrow/autoplay controls; Native: fixed-height with a counter overlay)" }],
   ["ImageGallery", { webOnly: ["indicatorType", "aspectRatio", "onImageClick", "className", "prevLabel", "nextLabel", "imageLabel"], nativeOnly: ["initialIndex", "thumbnailSize"], reason: R_INDEPENDENT + " (Web: richer indicator/label i18n API; Native: initialIndex + thumbnail sizing)" }],
-  ["Input", { webOnly: ["startAdornment", "endAdornment", "showCount"], nativeOnly: ["invalid", "disabled", "leading", "trailing"], reason: "startAdornment/endAdornment (Web) vs leading/trailing (Native) naming diverged independently for the same adornment-slot feature; invalid/disabled are inherited via extends on Web (invisible to this extractor)" }],
+  ["Input", { webOnly: ["startAdornment", "endAdornment", "showCount", "unstyled"], nativeOnly: ["invalid", "disabled", "leading", "trailing"], reason: "startAdornment/endAdornment (Web) vs leading/trailing (Native) naming diverged independently for the same adornment-slot feature; invalid/disabled are inherited via extends on Web (invisible to this extractor); unstyled (issue #420) strips the Web Tailwind layer for gradual migration — Native has no CSS layer to strip (styles are StyleSheet/inline)" }],
   ["KeyboardAwareSheetFooter", { webOnly: [], nativeOnly: ["children", "style"], reason: R_STYLE }],
   ["ListItem", { webOnly: [], nativeOnly: ["leading", "title", "description", "trailing", "footerSlot", "showChevron", "onPress", "disabled", "align", "density"], reason: "Web ListItem's props live in a discriminated union (ListItemLinkProps | ListItemButtonProps | ListItemStaticProps) built from a separate ListItemCommonProps interface, so this `${Name}Props`-interface-body extractor sees no own props on the Web side and reports every Native prop as Native-only. footerSlot/align/density (issue #355) exist on BOTH platforms with the same vocabulary and semantics — an extraction artifact, not a real gap. leading/trailing are Native's naming for Web's leftSlot/rightSlot (independent naming drift predating this check); showChevron/onPress/disabled are likewise declared directly on Native and inside the union on Web" }],
   ["ListSkeleton", { webOnly: ["loadingLabel", "className"], nativeOnly: [], reason: R_STYLE }],
@@ -205,7 +205,7 @@ const INTENTIONAL_PROP_GAPS = new Map([
   ["SyncStatusBadge", { webOnly: ["state", "errorCount", "onRetry", "syncingLabel", "successLabel", "errorLabel", "offlineLabel", "retryLabel", "className"], nativeOnly: ["status", "label"], reason: "state vs status naming diverged independently; Web has a richer per-state i18n label API not yet ported to Native" }],
   ["Tag", { webOnly: ["categorical", "dot"], nativeOnly: ["tone", "variant", "children"], reason: R_INDEPENDENT + " (Web: variant + categorical palette props; Native: tone + children). categorical/dot map to --Categorical-* CSS variables and are not ported to Native yet" }],
   ["TagInput", { webOnly: ["disabled", "max", "allowDuplicates", "className", "inputLabel"], nativeOnly: ["maxTags"], reason: "max vs maxTags naming diverged independently for the same limit" }],
-  ["Textarea", { webOnly: ["autoGrow", "showCount"], nativeOnly: ["invalid", "disabled", "minHeight"], reason: "invalid/disabled are inherited via extends on Web (invisible to this extractor); autoGrow/showCount are Web-only features not yet ported to Native's separate AutoGrowTextarea component" }],
+  ["Textarea", { webOnly: ["autoGrow", "showCount", "unstyled"], nativeOnly: ["invalid", "disabled", "minHeight"], reason: "invalid/disabled are inherited via extends on Web (invisible to this extractor); autoGrow/showCount are Web-only features not yet ported to Native's separate AutoGrowTextarea component; unstyled (issue #420) strips the Web Tailwind layer for gradual migration — Native has no CSS layer to strip (styles are StyleSheet/inline)" }],
   ["TimePicker", { webOnly: ["id", "className", "triggerLabel"], nativeOnly: [], reason: R_STYLE }],
 ])
 

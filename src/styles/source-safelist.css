@@ -382,6 +382,7 @@
 @source inline("focus-visible:border-[var(--Object-Accent-Primary)]");
 @source inline("focus-visible:outline-hidden");
 @source inline("focus-visible:outline-none");
+@source inline("focus-visible:ring-0");
 @source inline("focus-visible:ring-2");
 @source inline("focus-visible:ring-4");
 @source inline("focus-visible:ring-[3px]");
