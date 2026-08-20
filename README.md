@@ -95,7 +95,16 @@ consumer 側のローカル grep script が古くならないよう、DS 本体�
 npx ksk-ds lint src
 npx ksk-ds lint src --format json
 npx ksk-ds lint --changed
+npx ksk-ds lint src --platform native
 ```
+
+ルールはファイルごとに **web / native** を判定して出し分けます（`contracts/rules.json` の
+`appliesTo`）。Tailwind クラス・DOM 生タグ・CSS 変数を前提にしたルールは web 専用で、
+React Native のファイルには当たりません。判定シグナルは `*.native.tsx` というファイル名、
+`react-native` / `ksk-design-system/native` の import、`StyleSheet.create` の使用です。
+自動判定が合わない場合は `--platform web` / `--platform native` で上書きできます
+（ファイル判定より優先）。`appliesTo` を持たないルール（`#hex` 直書きの P008 等）は
+従来どおり両方に適用され、native では RN 向けの fix 文言を表示します。
 
 出力は `file:line rule severity fix` を含みます。どうしても DS で表現できない domain-specific UI は、理由付きの escape コメントを置きます。
 

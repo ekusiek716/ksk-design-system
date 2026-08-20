@@ -3,6 +3,25 @@
 > 正規表現・excludes の正本は `contracts/rules.json`。本ファイルは各ルールの
 > **rationale（防ぐ失敗）** を言語化した参照資料。ID は rules.json と対応。
 
+## appliesTo — ルールの適用範囲（web / native / グロブ）
+
+各ルールは `appliesTo` で適用範囲を絞れる（issue #391）。**未指定は全プラットフォーム対象**
+（後方互換）で、指定した場合は列挙のうち 1 つでも一致すれば適用する。
+
+- `"web"` / `"native"` — プラットフォーム識別子
+- `"*.css"` 等 — ファイル名グロブ（P049 が使用）
+
+`["web"]` を付けるのは **Tailwind クラス・DOM 生タグ・CSS 変数/単位を前提にしたルール**。
+React Native に Tailwind クラスは存在せず、そのまま当てると誤検知しかしない
+（P032 は aikoibito mobile で 76 件全部が `borderColor: colors.border` の `.border` への誤爆だった）。
+逆に `#hex` 直書き（P008）や DS コンポーネントの再実装禁止（P033–P040 等）は
+プラットフォーム非依存なので `appliesTo` を付けず全対象のままにする。**迷ったら付けない。**
+
+ファイルの判定シグナルは `*.native.tsx` / `react-native` import /
+`ksk-design-system/native` import / `StyleSheet.create`。CLI の `--platform web|native` が
+ファイル判定より優先される。web 前提の fix 文言が native で実行不能なルールは
+`fixNative` を持たせる（P008: `var(--...)` → native のトークン）。
+
 ## component — 生タグ・自作の禁止（P001–P007）
 
 すべて同じ失敗を防ぐ: **生タグは DS のトークン・状態・a11y 実装を全部持っていない**。
