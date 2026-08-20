@@ -26,7 +26,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -37,27 +37,18 @@ const tokens = JSON.parse(readFileSync(join(ROOT, 'tokens.json'), 'utf8'));
 const THEMES = Object.keys(tokens.themes); // default, blue, orange, green, violet
 
 /**
- * tokens.json の実更新日を git log から取得する（issue #414）。
- * tokens.json の meta.lastUpdated は手書きで更新漏れが起きるため、生成物の
- * provenance ヘッダには手書き値を信用せず、git 上の実コミット日を焼き込む。
- * git が使えない・履歴がない（shallow clone 等）場合のみ meta.lastUpdated に
- * フォールバックする。
+ * 生成物の provenance（issue #414）。
+ * tokens.json の meta.lastUpdated は手書きで更新漏れが起きるため信用しない。
+ * 当初は git log の日付を使ったが、CI の shallow clone やブランチ状態で
+ * 日付がぶれて --check が環境依存で落ちた（PR #435 で発覚）。
+ * 内容ハッシュなら「tokens.json のどの内容から生成されたか」を
+ * どの環境でも決定的に示せる。
  */
-function resolveTokensLastUpdated() {
-  try {
-    const date = execFileSync(
-      'git',
-      ['log', '-1', '--format=%cs', '--', 'tokens.json'],
-      { cwd: ROOT, encoding: 'utf8' },
-    ).trim();
-    if (date) return date;
-  } catch {
-    // git 不可・履歴なし等は手書き値にフォールバック
-  }
-  return tokens.meta?.lastUpdated ?? 'unknown';
-}
-
-const TOKENS_LAST_UPDATED = resolveTokensLastUpdated();
+const TOKENS_CONTENT_HASH = createHash('sha256')
+  .update(readFileSync(join(ROOT, 'tokens.json')))
+  .digest('hex')
+  .slice(0, 12);
+const TOKENS_LAST_UPDATED = `sha256:${TOKENS_CONTENT_HASH}`;
 
 /* ---------- color utils ---------- */
 
