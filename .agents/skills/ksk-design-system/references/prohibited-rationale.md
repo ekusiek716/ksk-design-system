@@ -54,7 +54,7 @@
 - **P023 `outline-none`** → フォーカスリング削除はキーボード利用者に「今どこにいるか」を消す WCAG 違反。`focus-visible:ring-[3px] ring-[var(--Focus-High-Emphasis)]/50` に置換
 - **P024 `<div onClick>`** → キーボード・スクリーンリーダーから操作不能。`<Button>`
 - **P025 `<img>` alt なし** → SR が読めない。装飾は `alt=""` を明示
-- **P026 placeholder のみでラベル省略** → SR は placeholder を読まない。入力中に説明が消える。`<Label>` 必須
+- **P026 placeholder のみでラベル省略** → SR は placeholder を読まない。入力中に説明が消える。`<Label htmlFor>` + `id`、または `aria-label` / `aria-labelledby` を必須（lint は入力タグ内の id / aria-* の有無で判定）
 - **P027 メール欄に `type="text"`** → モバイルのメール用キーボードが出ない・ブラウザ検証が効かない
 
 ## ai-pattern / animation（P013, P014, P030）
