@@ -43,8 +43,13 @@ export function runCheckDuplicatesCli(
   const wrapperExclusions = results
     .flatMap((result) => result.wrapperExclusions)
     .sort((a, b) => a.file.localeCompare(b.file) || a.name.localeCompare(b.name))
+  const suspicions = results
+    .flatMap((result) => result.suspicions)
+    .sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line || a.name.localeCompare(b.name))
 
-  printFindings(findings, wrapperExclusions, files.length, options.strict)
+  printFindings(findings, wrapperExclusions, suspicions, files.length, options.strict)
+  // suspicions は名前ヒューリスティックによる warn 止まりの「疑い」であり、
+  // --strict でも exit code には影響させない（issue #392 取りこぼし側）。
   return options.strict && findings.length > 0 ? 1 : 0
 }
 
@@ -187,12 +192,60 @@ function collectDsReExports(source) {
   return reExports
 }
 
+// issue #392 取りこぼし側: 名前が違う真の重複（改名された DS 相当の自前実装）を
+// AST を使わず名前ヒューリスティックで拾う。確度が下がるため error にはせず warn
+// （「疑い」）止まりとし、--strict でも exit code は変えない。
+//
+// キーワードは接尾辞（PrimaryButton・AppTextInput 等の前置修飾パターン）と
+// 接頭辞（AvatarView 等、DS 部品名 + 汎用語のパターン）の両方で判定する。
+const NAME_HEURISTIC_MAP = {
+  Button: "Button",
+  TextInput: "Input",
+  Input: "Input",
+  Sheet: "Sheet",
+  Modal: "Dialog",
+  Menu: "DropdownMenu",
+  Banner: "Banner",
+  Alert: "Alert",
+  Avatar: "Avatar",
+  // Card は除外: ドメインカード（PropertyCard 等）が正当に多く、ノイズ源になる
+  Chip: "Chip",
+  Badge: "Badge",
+  Toast: "Toast",
+  Tooltip: "Tooltip",
+  Dialog: "Dialog",
+}
+const NAME_HEURISTIC_KEYWORDS = Object.keys(NAME_HEURISTIC_MAP).sort((a, b) => b.length - a.length)
+// 接頭辞パターンで許容する汎用語（残り部分がこれらに完全一致する場合のみ疑いとする）。
+// 無制限に許可すると「AvatarUploadFlow」のような無関係な名前まで拾ってしまうため絞る。
+const GENERIC_NAME_SUFFIXES = new Set(["View", "Component", "Element", "Widget", "Item", "Base", "Wrapper"])
+// 抑制マーカー: このコメントを含むファイルは「疑い」報告の対象から除外する
+// （contracts/rules.json 等の既存の一時実装ルールに合わせた運用）。
+const SUPPRESSION_MARKER = "ksk-ds-local-fallback"
+
+function suggestDsNameForLocalName(name) {
+  for (const keyword of NAME_HEURISTIC_KEYWORDS) {
+    if (name.length > keyword.length && name.endsWith(keyword)) {
+      return NAME_HEURISTIC_MAP[keyword]
+    }
+  }
+  for (const keyword of NAME_HEURISTIC_KEYWORDS) {
+    if (name.length > keyword.length && name.startsWith(keyword)) {
+      const remainder = name.slice(keyword.length)
+      if (GENERIC_NAME_SUFFIXES.has(remainder)) return NAME_HEURISTIC_MAP[keyword]
+    }
+  }
+  return null
+}
+
 function findDuplicateExports(file, cwd, registry) {
   const source = readFileSync(file, "utf8")
   const lines = source.split(/\r?\n/)
   const findings = []
   const wrapperExclusions = []
+  const suspicions = []
   const relFile = normalize(relative(cwd, file))
+  const suppressSuspicions = source.includes(SUPPRESSION_MARKER)
 
   const codeForImportScan = stripComments(source)
   const dsImportSourceNames = collectDsImportSourceNames(codeForImportScan)
@@ -206,7 +259,23 @@ function findDuplicateExports(file, cwd, registry) {
     if (!match) continue
     const name = match[1]
     const components = registry.get(name)
-    if (!components) continue
+
+    if (!components) {
+      // 完全一致は無いが、名前が DS 部品を連想させるパターン（issue #392 取りこぼし側）。
+      // DS を import しているファイル（何らかの形で DS を使っている＝別部品のラッパー等）
+      // でも疑いは出す。抑制は SUPPRESSION_MARKER コメントのみ。
+      if (suppressSuspicions) continue
+      const suggested = suggestDsNameForLocalName(name)
+      if (!suggested) continue
+      suspicions.push({
+        file: relFile,
+        line: index + 1,
+        name,
+        suggested,
+        suggestedComponents: registry.get(suggested) ?? null,
+      })
+      continue
+    }
 
     // 同名のローカル宣言があっても、同ファイルが ksk-design-system から同名（元の
     // export 名基準。ローカル alias は問わない）を import して使っているなら、
@@ -231,10 +300,10 @@ function findDuplicateExports(file, cwd, registry) {
     wrapperExclusions.push({ file: relFile, name: localName })
   }
 
-  return { findings, wrapperExclusions }
+  return { findings, wrapperExclusions, suspicions }
 }
 
-function printFindings(findings, wrapperExclusions, scannedFiles, strict) {
+function printFindings(findings, wrapperExclusions, suspicions, scannedFiles, strict) {
   if (findings.length === 0) {
     console.log(`ksk-ds check-duplicates: 重複候補はありません（${scannedFiles} files）`)
   } else {
@@ -260,6 +329,21 @@ function printFindings(findings, wrapperExclusions, scannedFiles, strict) {
       console.log(`  ℹ ラッパー（DS 委譲済み）として除外: ${wrapper.name} (${wrapper.file})`)
     }
   }
+
+  if (suspicions.length > 0) {
+    console.log(`\n⚠ 重複の疑い（名前ヒューリスティック・要確認）: ${suspicions.length} 件`)
+    for (const suspicion of suspicions) {
+      const dsPathHint = suspicion.suggestedComponents
+        ? ` (DS: ${suspicion.suggestedComponents.map((component) => component.path).join(", ")})`
+        : ""
+      console.log(
+        `  ⚠ ${suspicion.file}:${suspicion.line} ${suspicion.name} は DS の ${suspicion.suggested} で置換できる可能性があります${dsPathHint}`,
+      )
+    }
+    console.log(
+      "  ※ 名前一致のみによる推測（warn）です。誤検知の場合は無視して問題ありません。抑制するには実装コメントに `ksk-ds-local-fallback` を含めてください。",
+    )
+  }
 }
 
 function printHelp() {
@@ -278,6 +362,12 @@ DIR の既定値:
   ただし、同ファイルが ksk-design-system から同名（alias 可）を import/re-export して
   使っているものは DS 委譲ラッパーとみなし、重複報告から除外します（info 行で件数報告）。
   既定は助言モード（常に exit 0）、--strict は検出時 exit 1 です。
+
+  完全一致しない名前でも、DS 部品を連想させる命名パターン
+  （PrimaryButton → Button・AppTextInput → Input・BottomSheet → Sheet・
+  CandidateOverflowMenu → DropdownMenu・CrisisBanner → Banner・AvatarView → Avatar 等）は
+  「重複の疑い」として warn 表示します（--strict でも exit code には影響しません）。
+  抑制するにはファイル内のコメントに \`ksk-ds-local-fallback\` を含めてください。
 `)
 }
 

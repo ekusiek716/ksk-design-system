@@ -218,3 +218,70 @@ describe("DS ラッパー除外", () => {
     expect(result.stdout).not.toContain("ラッパー")
   })
 })
+
+// issue #392 第2弾（取りこぼし側）: 名前が違う真の重複を、AST を使わない
+// 名前ヒューリスティックで「重複の疑い」として warn 検出する。
+// issue に記載の実例6件を fixture として固定する。
+describe("重複の疑い（名前ヒューリスティック）", () => {
+  it.each([
+    ["PrimaryButton", "src/PrimaryButton.tsx", "Button"],
+    ["GhostButton", "src/GhostButton.tsx", "Button"],
+    ["AppTextInput", "src/AppTextInput.tsx", "Input"],
+    ["BottomSheet", "src/BottomSheet.tsx", "Sheet"],
+    ["CandidateOverflowMenu", "src/CandidateOverflowMenu.tsx", "DropdownMenu"],
+    ["CrisisBanner", "src/CrisisBanner.tsx", "Banner"],
+    ["AvatarView", "src/AvatarView.tsx", "Avatar"],
+  ])("%s は DS の %s の疑いとして warn 検出し、strict でも exit 0 のまま", (name, path, suggested) => {
+    const consumer = createConsumer({
+      [path]: `export function ${name}() { return null }\n`,
+    })
+    const result = run(consumer, "./src", "--strict")
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain("重複の疑い")
+    expect(result.stdout).toContain(`${path}:1 ${name}`)
+    expect(result.stdout).toContain(`DS の ${suggested} で置換できる可能性があります`)
+    // 疑いは error ではないので、通常の findings 検出フォーマットには出ない
+    expect(result.stdout).not.toContain(`${path}:1 ${name}\n  DS:`)
+  })
+
+  it("DS ラッパー（同名 import 済み）は疑い検出の対象にならない", () => {
+    const consumer = createConsumer({
+      "src/Card.tsx": [
+        "import { Card as KskCard } from 'ksk-design-system/native/ui'",
+        "",
+        "export function Card({ children }: { children: unknown }) {",
+        "  return KskCard",
+        "}",
+        "",
+      ].join("\n"),
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).not.toContain("重複の疑い")
+  })
+
+  it("DS 部品と無関係な名前は疑い検出の対象にならない", () => {
+    const consumer = createConsumer({
+      "src/DomainWidget.tsx": "export function DomainWidget() { return null }\n",
+      "src/AvatarUploadFlow.tsx": "export function AvatarUploadFlow() { return null }\n",
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).not.toContain("重複の疑い")
+  })
+
+  it("`ksk-ds-local-fallback` コメントがあるファイルは疑い検出を抑制する", () => {
+    const consumer = createConsumer({
+      "src/PrimaryButton.tsx": [
+        "// ksk-ds-local-fallback: DS に X が追加されたら削除 (issue #999)",
+        "export function PrimaryButton() { return null }",
+        "",
+      ].join("\n"),
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).not.toContain("重複の疑い")
+    expect(result.stdout).not.toContain("PrimaryButton")
+  })
+})
