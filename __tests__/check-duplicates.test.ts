@@ -120,3 +120,101 @@ describe("contracts の exported:false を尊重する", () => {
     expect(result.stdout).toContain("DS: ui / src/components/ui/form.tsx")
   })
 })
+
+// issue #392 第1弾: DS を委譲するだけの薄いラッパー（段階移行の型）まで
+// 「DS と同名」というだけで重複として誤検知していた問題の回帰テスト。
+// 実測（aikoibito/apps/mobile）: EmptyState / Card はこのパターンで誤検知されていた。
+describe("DS ラッパー除外", () => {
+  it("DS を import しないローカル同名宣言は引き続き検出する", () => {
+    const consumer = createConsumer({
+      "src/Card.tsx": "export function Card() { return null }\n",
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain("src/Card.tsx:1 Card")
+    expect(result.stdout).not.toContain("ラッパー")
+  })
+
+  it("`as DS〜` エイリアス import + ローカル同名 export はラッパーとして除外し info 行で報告する（strict でも exit 0）", () => {
+    const consumer = createConsumer({
+      "src/EmptyState.tsx": [
+        "import { EmptyState as DSEmptyState } from 'ksk-design-system/native/ui'",
+        "",
+        "export function EmptyState() {",
+        "  return DSEmptyState",
+        "}",
+        "",
+      ].join("\n"),
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).not.toContain("src/EmptyState.tsx:")
+    expect(result.stdout).toContain("重複候補はありません")
+    expect(result.stdout).toContain("ℹ ラッパー（DS 委譲済み）として除外: 1 件")
+    expect(result.stdout).toContain("ℹ ラッパー（DS 委譲済み）として除外: EmptyState (src/EmptyState.tsx)")
+  })
+
+  it("`as Ksk〜` エイリアス import も同様にラッパーとして除外する", () => {
+    const consumer = createConsumer({
+      "src/Card.tsx": [
+        "import { Card as KskCard } from 'ksk-design-system/native/ui'",
+        "",
+        "export function Card({ children }: { children: unknown }) {",
+        "  return KskCard",
+        "}",
+        "",
+      ].join("\n"),
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain("ℹ ラッパー（DS 委譲済み）として除外: Card (src/Card.tsx)")
+  })
+
+  it("re-export 形式（export { X as Y } from ksk-design-system）もラッパーとして除外する", () => {
+    // FormField は ui/form モジュールの export 名。RhfFormField は contracts 上の
+    // 登録済み alias（#260/#266）。DS 自身の実装を right-through で再輸出しているだけなので
+    // ラッパー扱いにする。
+    const consumer = createConsumer({
+      "src/rhf-form-field.ts": "export { FormField as RhfFormField } from 'ksk-design-system/ui/form'\n",
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain("重複候補はありません")
+    expect(result.stdout).toContain("ℹ ラッパー（DS 委譲済み）として除外: 1 件")
+    expect(result.stdout).toContain("RhfFormField (src/rhf-form-field.ts)")
+  })
+
+  it("DS を import していても別名のローカル宣言はこの機能の影響を受けない", () => {
+    const consumer = createConsumer({
+      "src/my-widget.tsx": [
+        "import { EmptyState as DSEmptyState } from 'ksk-design-system/native/ui'",
+        "",
+        "export function MyCustomWidget() {",
+        "  return DSEmptyState",
+        "}",
+        "",
+      ].join("\n"),
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain("重複候補はありません")
+    expect(result.stdout).not.toContain("ラッパー")
+  })
+
+  it("JSDoc コメント内の使用例 import はラッパー判定に使わない（コメントは除外して走査する）", () => {
+    const consumer = createConsumer({
+      "src/EmptyState.tsx": [
+        "/**",
+        " * 使用例:",
+        " * import { EmptyState } from \"ksk-design-system\"",
+        " */",
+        "export function EmptyState() { return null }",
+        "",
+      ].join("\n"),
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(1)
+    expect(result.stdout).toContain("src/EmptyState.tsx:5 EmptyState")
+    expect(result.stdout).not.toContain("ラッパー")
+  })
+})
