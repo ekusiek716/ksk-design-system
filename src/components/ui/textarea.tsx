@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useValueLength } from "@/lib/use-value-length"
+import { UNSTYLED_FOCUS_RING } from "@/lib/server-variants/unstyled"
 
 interface TextareaProps extends React.ComponentProps<"textarea"> {
   /** 入力内容に合わせて高さを自動伸縮する */
@@ -10,12 +11,25 @@ interface TextareaProps extends React.ComponentProps<"textarea"> {
    * 右下に「現在/max」を表示し、上限到達時は caution 色になる。
    */
   showCount?: boolean
+  /**
+   * 視覚クラスを一切出さず、挙動と a11y だけを提供する（issue #420）。
+   *
+   * `min-h-* / w-full / border-* / bg-* / px-* / py-* / typo-* / placeholder:*` などの
+   * 寸法・枠・背景・タイポ系クラスを出力しない。維持されるのは autoGrow の
+   * 高さ自動伸縮（`resize-none overflow-hidden` は autoGrow の機能そのもの）、
+   * showCount の文字数カウント、そして a11y のための focus-visible ring。
+   *
+   * aikoibito のチャット入力欄が `--Field-Min-Height: 5rem` の流入で
+   * 43px → 80px になった事例（issue #420）が想定ユースケース。
+   */
+  unstyled?: boolean
 }
 
 function Textarea({
   className,
   autoGrow,
   showCount,
+  unstyled = false,
   maxLength,
   value,
   defaultValue,
@@ -67,13 +81,17 @@ function Textarea({
       defaultValue={defaultValue}
       maxLength={maxLength}
       className={cn(
-        // 最小高さ・padding・角丸は product theme の公開変数（`--Field-*`）を参照する。
-        // 既定値は従来の min-h-[80px] / px-3 / py-2 / rounded-lg と同値（issue #364）。
-        "flex min-h-[var(--Field-Min-Height)] w-full rounded-[var(--Field-Radius)] border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-[var(--Field-Padding-X-Md)] py-[var(--Field-Padding-Y)] typo-body-md text-[var(--Text-High-Emphasis)] transition-colors",
-        "placeholder:text-[var(--Text-Low-Emphasis)]",
-        "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:border-[var(--Border-Accent-Primary)]",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        "aria-invalid:border-[var(--Border-Caution)]",
+        unstyled
+          ? UNSTYLED_FOCUS_RING
+          : [
+              // 最小高さ・padding・角丸は product theme の公開変数（`--Field-*`）を参照する。
+              // 既定値は従来の min-h-[80px] / px-3 / py-2 / rounded-lg と同値（issue #364）。
+              "flex min-h-[var(--Field-Min-Height)] w-full rounded-[var(--Field-Radius)] border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-[var(--Field-Padding-X-Md)] py-[var(--Field-Padding-Y)] typo-body-md text-[var(--Text-High-Emphasis)] transition-colors",
+              "placeholder:text-[var(--Text-Low-Emphasis)]",
+              "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:border-[var(--Border-Accent-Primary)]",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              "aria-invalid:border-[var(--Border-Caution)]",
+            ],
         autoGrow && "resize-none overflow-hidden",
         className
       )}
@@ -95,7 +113,7 @@ function Textarea({
   const atLimit = maxLength != null && length >= maxLength
 
   return (
-    <div data-slot="textarea-with-count" className="w-full">
+    <div data-slot="textarea-with-count" className={unstyled ? undefined : "w-full"}>
       {textarea}
       <div className="mt-1 flex justify-end">
         <span

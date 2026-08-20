@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useValueLength } from "@/lib/use-value-length"
+import { UNSTYLED_FOCUS_RING } from "@/lib/server-variants/unstyled"
 
 interface InputProps extends Omit<React.ComponentProps<"input">, "prefix"> {
   /**
@@ -20,6 +21,25 @@ interface InputProps extends Omit<React.ComponentProps<"input">, "prefix"> {
    * controlled / uncontrolled と IME 入力の両方に追従する。
    */
   showCount?: boolean
+  /**
+   * 視覚クラスを一切出さず、挙動と a11y だけを提供する（issue #420）。
+   *
+   * `h-* / w-full / border-* / bg-* / px-* / typo-* / placeholder:*` などの
+   * 寸法・枠・背景・タイポ系クラスを出力しない。維持されるのは
+   * showCount の文字数カウント（controlled / uncontrolled / IME 追従）、
+   * adornment のレイアウト土台、そして a11y のための focus-visible ring。
+   *
+   * adornment を併用した場合、ラッパー div の `relative flex items-center` と
+   * 装飾側の `absolute / inset-y-0 / left-3 / right-3` は **機能の土台**なので
+   * 残す（外すと装飾の絶対配置が別の祖先を基準にして壊れる）。ただし
+   * ラッパーの `w-full` と装飾側の `typo-body-md` / 文字色は出さない。
+   * input 側の `pl-9` / `pr-9` は装飾と重ならないための同じ機能の一部なので残す
+   * （手書き CSS が padding を宣言していれば非レイヤー側が勝つ）。
+   *
+   * showCount のカウンタ自体は手書き CSS が知らない DS 固有の追加 DOM なので、
+   * `w-full` を除き DS の見た目のままにする。
+   */
+  unstyled?: boolean
 }
 
 // 高さ・横 padding・角丸は product theme の公開変数（`--Field-*`）を参照する。
@@ -39,6 +59,7 @@ function Input({
   startAdornment,
   endAdornment,
   showCount,
+  unstyled = false,
   maxLength,
   value,
   defaultValue,
@@ -84,7 +105,7 @@ function Input({
         onCompositionEnd?.(event)
       }}
       className={cn(
-        inputBaseClass,
+        unstyled ? UNSTYLED_FOCUS_RING : inputBaseClass,
         startAdornment && "pl-9",
         endAdornment && "pr-9",
         className,
@@ -95,15 +116,34 @@ function Input({
 
   const control =
     startAdornment || endAdornment ? (
-      <div data-slot="input-group" className="relative flex w-full items-center">
+      <div
+        data-slot="input-group"
+        className={
+          unstyled
+            ? "relative flex items-center"
+            : "relative flex w-full items-center"
+        }
+      >
         {startAdornment && (
-          <div className="pointer-events-none absolute left-3 inset-y-0 flex items-center text-[var(--Text-Low-Emphasis)] typo-body-md select-none">
+          <div
+            className={
+              unstyled
+                ? "pointer-events-none absolute left-3 inset-y-0 flex items-center select-none"
+                : "pointer-events-none absolute left-3 inset-y-0 flex items-center text-[var(--Text-Low-Emphasis)] typo-body-md select-none"
+            }
+          >
             {startAdornment}
           </div>
         )}
         {input}
         {endAdornment && (
-          <div className="absolute right-3 inset-y-0 flex items-center text-[var(--Text-Low-Emphasis)] typo-body-md">
+          <div
+            className={
+              unstyled
+                ? "absolute right-3 inset-y-0 flex items-center"
+                : "absolute right-3 inset-y-0 flex items-center text-[var(--Text-Low-Emphasis)] typo-body-md"
+            }
+          >
             {endAdornment}
           </div>
         )}
@@ -117,7 +157,7 @@ function Input({
   const atLimit = maxLength != null && length >= maxLength
 
   return (
-    <div data-slot="input-with-count" className="w-full">
+    <div data-slot="input-with-count" className={unstyled ? undefined : "w-full"}>
       {control}
       <div className="mt-1 flex justify-end">
         <span
