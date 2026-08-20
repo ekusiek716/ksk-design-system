@@ -1,8 +1,22 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { basename, extname, join, relative, resolve } from "node:path"
 import { spawnSync } from "node:child_process"
-import { inspectCardChildSpacing } from "./card-child-spacing.js"
 import { inspectProductThemeOverrides, loadProductThemeContract } from "./product-theme-override.js"
+
+// card-child-spacing.js は `import ts from "typescript"` している（P046 専用エンジン）。
+// typescript は 24MB 前後あり、59ルール中 P046 の1つにしか使わないため、
+// P046 が実際に有効なとき（rules.json に該当ルールがあり、対象ファイルも存在するとき）
+// だけ動的 import する（issue #409）。typescript が未インストールの consumer では
+// ERR_MODULE_NOT_FOUND で落とさず、P046 だけを skip して案内を1行出す。
+let cardChildSpacingModulePromise = null
+async function loadCardChildSpacing() {
+  if (!cardChildSpacingModulePromise) {
+    cardChildSpacingModulePromise = import("./card-child-spacing.js").catch((error) => {
+      return { __unavailable: true, error }
+    })
+  }
+  return cardChildSpacingModulePromise
+}
 
 const DEFAULT_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx"])
 /**
@@ -342,10 +356,27 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
 
   const rules = loadRules(rulesPath)
   const cssRules = rules.filter((rule) => rule.engine === "product-theme-override")
-  const sourceRules = rules.filter((rule) => rule.engine !== "product-theme-override")
+  let sourceRules = rules.filter((rule) => rule.engine !== "product-theme-override")
   const productThemeContract = cssRules.length > 0 ? readProductThemeContract(pkgRoot) : null
   // DS 自身 / ベンダリングされた DS の CSS を P049 の対象から外すための材料（issue #407）
   const dsCssIdentity = cssRules.length > 0 ? collectDsCssIdentity(pkgRoot) : null
+
+  // P046（card-direct-child-spacing）が有効なときだけ typescript を動的 import する。
+  // 未インストール環境では ERR_MODULE_NOT_FOUND で落とさず、P046 だけ skip して1行案内する（issue #409）。
+  let inspectCardChildSpacing = null
+  const hasCardSpacingRule = sourceRules.some((rule) => rule.engine === "card-direct-child-spacing")
+  if (hasCardSpacingRule) {
+    const mod = await loadCardChildSpacing()
+    if (mod.__unavailable) {
+      console.log(
+        `[ksk-ds lint] typescript が見つからないため P046（Card 直下の子要素スペーシング）を skip します。` +
+          `devDependencies に typescript を追加すると検査対象になります。`,
+      )
+      sourceRules = sourceRules.filter((rule) => rule.engine !== "card-direct-child-spacing")
+    } else {
+      inspectCardChildSpacing = mod.inspectCardChildSpacing
+    }
+  }
 
   const files = options.changed
     ? getChangedFiles(cwd, options)
@@ -367,7 +398,7 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
       }
       continue
     }
-    findings.push(...lintFile(file, cwd, sourceRules, options))
+    findings.push(...lintFile(file, cwd, sourceRules, { ...options, inspectCardChildSpacing }))
   }
 
   const summary = summarize(findings)
@@ -675,7 +706,8 @@ function lintFile(file, cwd, rules, options = {}) {
   for (const rule of rules) {
     if (!ruleAppliesTo(rule, { capabilities, filePath: rel })) continue
     if (rule.engine === "card-direct-child-spacing") {
-      for (const finding of inspectCardChildSpacing(source, file)) {
+      if (!options.inspectCardChildSpacing) continue
+      for (const finding of options.inspectCardChildSpacing(source, file)) {
         const line = lines[finding.line - 1] ?? ""
         if (ignores.suppresses(rule.id ?? "UNKNOWN", finding.line)) continue
         if (!matchesRuleExclude(rule, rel, line)) {

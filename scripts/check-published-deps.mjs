@@ -80,6 +80,50 @@ for (const dependency of [...staticImports].sort()) {
   errors.push(`${dependency}: Web bundle が静的 import していますが dependencies / peerDependencies にありません`)
 }
 
+// ─── bin/ の CLI スクリプト（issue #409） ──────────────────────
+// dist/index.js とは別系統のエントリポイント。bin/ の import はここまで対象外だった
+// （bin/lint.js・bin/check-migration.js が typescript を無条件 import していても
+// 検出できていなかった）。static import は dist と同じ契約（dependencies /
+// peerDependencies いずれかに存在必須）で検査する。dynamic import（`await import(...)`）は
+// 「実行時に無くても起動は落とさない optional 扱い」として区別し、dependencies /
+// peerDependencies のどちらにも無ければ別カテゴリで報告する（エラーにはしない — 完全に
+// 未インストールな optional 依存はあり得る設計のため）。
+const binDir = new URL("../bin/", import.meta.url)
+const binFiles = existsSync(binDir)
+  ? readdirSync(binDir).filter((name) => name.endsWith(".js")).sort()
+  : []
+
+const binStaticImports = new Set()
+const binDynamicImports = new Set()
+for (const name of binFiles) {
+  const source = readFileSync(new URL(name, binDir), "utf8")
+  const [binImports] = parse(source)
+  for (const importSpecifier of binImports) {
+    const specifier = importSpecifier.n
+    if (!specifier) continue
+    if (specifier.startsWith(".") || specifier.startsWith("node:")) continue
+    const dependency = packageName(specifier)
+    if (importSpecifier.d >= 0) {
+      // `d` は dynamic import の開始位置（>= 0 なら `import()` 呼び出し）。
+      binDynamicImports.add(dependency)
+    } else {
+      binStaticImports.add(dependency)
+    }
+  }
+}
+
+const binOptionalOnly = []
+for (const dependency of [...binStaticImports].sort()) {
+  if (packageJson.dependencies?.[dependency]) continue
+  if (packageJson.peerDependencies?.[dependency]) continue
+  errors.push(`${dependency}: bin/ が静的 import していますが dependencies / peerDependencies にありません`)
+}
+for (const dependency of [...binDynamicImports].sort()) {
+  if (binStaticImports.has(dependency)) continue // 静的 import 側で既に検査済み
+  if (packageJson.dependencies?.[dependency] || packageJson.peerDependencies?.[dependency]) continue
+  binOptionalOnly.push(dependency)
+}
+
 if (errors.length > 0) {
   console.error("✗ 公開 Web bundle の依存契約に違反があります")
   for (const error of errors) console.error(`  - ${error}`)
@@ -87,3 +131,12 @@ if (errors.length > 0) {
 }
 
 console.log(`✓ 公開 Web bundle の静的依存 ${staticImports.size} 件は install 契約と一致しています`)
+console.log(
+  `✓ bin/ の静的依存 ${binStaticImports.size} 件は install 契約と一致しています` +
+    (binDynamicImports.size > 0 ? `（dynamic import ${binDynamicImports.size} 件は optional 扱い）` : ""),
+)
+if (binOptionalOnly.length > 0) {
+  console.log(
+    `  optional（dependencies / peerDependencies 未記載の dynamic import）: ${binOptionalOnly.join(", ")}`,
+  )
+}

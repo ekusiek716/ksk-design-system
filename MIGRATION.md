@@ -53,6 +53,19 @@ npx ksk-ds check-migration ./src
 
 ## v1 系内の minor 変更（参考）
 
+### 次のリリース — `typescript` が必須依存から optional peer dependency になった（issue #409）
+
+CLI の1ルール（P046）のためだけに typescript（24MB）が全 consumer の
+node_modules に入っていたのを解消した。install サイズが減り、`ksk-ds lint` の
+起動も速くなる（実測 655ms → 407ms）。
+
+- **通常の TypeScript プロジェクト**: 自前で typescript を持っているので影響なし
+- **typescript を持たないプロジェクト**: P046（card-child-spacing）だけが
+  「typescript が無いため skip」の1行案内つきでスキップされる。他の全ルールは動く
+- DS の typescript に transitive 依存していた場合のみ、自分の devDependencies に
+  typescript を追加すること
+
+
 ### 次のリリース — `ksk-ds lint` の severity 語彙が `warn` → `warning` に統一（要確認）
 
 `--format json` の `results[].severity` と text 出力の severity 表記が、これまで

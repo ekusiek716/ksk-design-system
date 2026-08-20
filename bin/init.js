@@ -82,8 +82,23 @@ if (cmd === "lint") {
 }
 
 if (cmd === "check-migration") {
-  const { runCheckMigrationCli } = await import("./check-migration.js")
-  const status = runCheckMigrationCli(args.slice(1), { cwd: process.cwd(), pkgRoot })
+  // check-migration.js は TypeScript の AST 解析そのものが本体なので、
+  // typescript 不在なら raw な ERR_MODULE_NOT_FOUND ではなく案内を出して
+  // skip する（exit 0。lint 同様に「無言で落ちる」を避ける／issue #409）。
+  let mod
+  try {
+    mod = await import("./check-migration.js")
+  } catch (error) {
+    if (error?.code === "ERR_MODULE_NOT_FOUND" && String(error.message ?? "").includes("typescript")) {
+      console.log(
+        `[ksk-ds check-migration] typescript が見つからないため skip します。` +
+          `devDependencies に typescript を追加すると検査できます。`,
+      )
+      await exitWith(0)
+    }
+    throw error
+  }
+  const status = mod.runCheckMigrationCli(args.slice(1), { cwd: process.cwd(), pkgRoot })
   await exitWith(status)
 }
 
