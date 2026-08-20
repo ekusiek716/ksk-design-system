@@ -19,6 +19,11 @@ export interface CollapsibleChipFieldProps<K extends string> {
   getIcon?: (key: K) => string
   /** 候補数が少なく、選択後も比較対象を見せたいフィールド用。常に全展開。 */
   alwaysExpanded?: boolean
+  /**
+   * 展開時の選択グループ（accessibilityRole="radiogroup"）のアクセシブル名（issue #419）。
+   * 未指定なら `label` を使う。アイコンだけで `label` を持たない行では必ず指定すること。
+   */
+  ariaLabel?: string
 }
 
 const LEADING_WIDTH = 80 // w-20 相当
@@ -39,6 +44,7 @@ export function CollapsibleChipField<K extends string>({
   getLabel,
   getIcon,
   alwaysExpanded = false,
+  ariaLabel,
 }: CollapsibleChipFieldProps<K>) {
   const { theme, scales } = useTheme()
   const hasSelection = selected !== undefined && selected !== null && selected !== ""
@@ -53,6 +59,9 @@ export function CollapsibleChipField<K extends string>({
   const selectionInOptions = hasSelection && options.includes(selected as K)
   const expanded = alwaysExpanded || !selectionInOptions || forcedExpand
   const visible = expanded ? options : options.filter((k) => k === selected)
+  // 開閉トリガが存在する（＝畳める）状態か。常時展開・未選択のときは畳む先が無い（issue #419）
+  const collapsible = !alwaysExpanded && selectionInOptions
+  const groupLabel = ariaLabel ?? label
 
   const leading = label ? (
     <RNText
@@ -77,12 +86,31 @@ export function CollapsibleChipField<K extends string>({
   return (
     <View style={{ flexDirection: "row", alignItems: "flex-start", gap: scales.spacing.scale[4], paddingVertical: scales.spacing.scale[3] }}>
       {leading}
-      <View style={{ flex: 1, flexDirection: "row", flexWrap: "wrap", gap: scales.spacing.scale[2], minHeight: ROW_MIN_HEIGHT, alignItems: "center" }}>
+      <View style={{ flex: 1, flexDirection: "row", flexWrap: "wrap", gap: scales.spacing.scale[2], minHeight: ROW_MIN_HEIGHT, alignItems: "center" }}
+        accessibilityRole={expanded ? "radiogroup" : undefined}
+        accessibilityLabel={expanded ? groupLabel : undefined}
+      >
         {visible.map((key) => (
           <Chip
             key={key}
             size="md"
             selected={!forcedExpand && selected === key}
+            // 展開中は radio、折りたたみ中は開閉トリガ（issue #419）。web の
+            // role="radio" / aria-checked / aria-expanded と同じ意味論。
+            accessibilityRole={expanded ? "radio" : undefined}
+            accessibilityState={
+              expanded
+                ? {
+                    checked: selected === key,
+                    // web は forcedExpand（再選択モード）中、選択中チップに
+                    // aria-expanded=true を付ける。native も同じ情報を伝える。
+                    expanded: collapsible && selected === key ? forcedExpand : undefined,
+                    selected: undefined,
+                  }
+                : collapsible && selected === key
+                  ? { expanded: false, selected: undefined }
+                  : undefined
+            }
             onPress={() => {
               if (forcedExpand) {
                 onSelect(key)

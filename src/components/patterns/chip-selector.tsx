@@ -39,37 +39,108 @@ function collectChips(container: HTMLElement): HTMLButtonElement[] {
   ).filter((chip) => chip.closest('[data-slot="chip-selector"]') === container)
 }
 
-interface ChipSelectorProps<T extends string = string> {
-  options: ChipSelectorOption<T>[]
-  value: T[]
-  onChange: (value: T[]) => void
-  /**
-   * 複数選択を許可するか。
-   *
-   * @deprecated issue #352。`selectionMode` を使うこと
-   * （`multiple={false}` は `selectionMode="single"`、`multiple` は `selectionMode="multiple"`）。
-   * 後方互換のため型からは消していないが、既定が `true`（複数選択）で
-   * 「渡し忘れると静かに壊れる側」に倒れているため、新規実装では使わない。
-   *
-   * @default true
-   */
-  multiple?: boolean
-  /**
-   * 選択の意味論（issue #352）。`QuickActionGrid` / `ActionTile` と同じ語彙。
-   * - `"single"`: 排他選択。グループが `role="radiogroup"`、チップが `role="radio"` + `aria-checked`。
-   *   roving tabindex と矢印キー移動が有効になる
-   * - `"multiple"`: 複数選択。チップは `aria-pressed`（トグルボタン）
-   *
-   * 未指定のときは後方互換のため従来どおり `multiple`（既定 `true`）から導出する。
-   * 指定した場合は `multiple` より優先される。
-   */
-  selectionMode?: ChipSelectorSelectionMode
-  /** 最大選択数（複数選択時のみ有効） */
-  max?: number
-  size?: "sm" | "md" | "lg"
-  className?: string
-}
+/**
+ * props はユニオンで宣言する（`Base & (A | B)` の交差型にしない）。
+ * `PillToggle` と同じ理由で、`scripts/check-native-parity.mjs` の正規表現ベースの
+ * props 抽出が交差型だと最初の `{` しか own-props body として読まないため。
+ *
+ * `selectionMode="single"` はメンバーが 2 つある（issue #418）:
+ * - **スカラー版（推奨）**: `value: T | null`・`onChange: (v: T | null) => void`
+ * - **配列版（非推奨・後方互換）**: `value: T[]`・`onChange: (v: T[]) => void`。
+ *   #352 で `selectionMode="single"` を導入したとき value は `T[]` 固定だったので、
+ *   既にそれを使っている呼び出しをコンパイルエラーにしないために残してある。
+ *   スカラー版に一本化すると型エラーになるだけでなく、`useState<T[]>` の setter に
+ *   スカラーが流れて実行時にも静かに壊れるため、value の形を見て onChange の形を合わせる。
+ */
+type ChipSelectorProps<T extends string = string> =
+  | {
+      options: ChipSelectorOption<T>[]
+      /**
+       * 選択の意味論（issue #352）。`QuickActionGrid` / `ActionTile` と同じ語彙。
+       * `"single"` は排他選択で、グループが `role="radiogroup"`、チップが
+       * `role="radio"` + `aria-checked` になり、roving tabindex と矢印キー移動が有効。
+       */
+      selectionMode: "single"
+      /** 選択中の値。単一選択なので**スカラー**（未選択は `null` / `undefined`） */
+      value: T | null | undefined
+      /**
+       * 選択が変わったときに呼ばれる。選択中のチップを再タップして解除したときは `null`。
+       */
+      onChange: (value: T | null) => void
+      size?: "sm" | "md" | "lg"
+      className?: string
+      /** 単一選択では無効（複数選択時のみ有効） */
+      max?: never
+      /** @deprecated `selectionMode` を使うこと。単一選択では指定できない */
+      multiple?: never
+    }
+  | {
+      options: ChipSelectorOption<T>[]
+      selectionMode: "single"
+      /**
+       * 非推奨（issue #418）。単一選択ではスカラー（`T | null`）を渡すこと。
+       * 配列は v1.61 以前との後方互換で受け付けているだけで、開発ビルドで警告が出る。
+       *
+       * `@deprecated` タグを付けていないのは意図的で、`value` / `onChange` という
+       * 名前そのものは現役の API だから。台帳（contracts/deprecations.json）へ
+       * 載せると check-migration が消費側の全 `value` 属性を残件として数えてしまう。
+       */
+      value: T[]
+      /** 非推奨（issue #418）。スカラー版の `value` / `onChange` を使うこと */
+      onChange: (value: T[]) => void
+      size?: "sm" | "md" | "lg"
+      className?: string
+      max?: never
+      multiple?: never
+    }
+  | {
+      options: ChipSelectorOption<T>[]
+      /**
+       * 選択の意味論（issue #352）。`"multiple"` は複数選択で、チップは
+       * `aria-pressed`（トグルボタン）になる。
+       *
+       * 未指定のときは後方互換のため従来どおり `multiple`（既定 `true`）から導出する。
+       * 指定した場合は `multiple` より優先される。
+       */
+      selectionMode?: "multiple"
+      value: T[]
+      onChange: (value: T[]) => void
+      /**
+       * 複数選択を許可するか。
+       *
+       * @deprecated issue #352。`selectionMode` を使うこと
+       * （`multiple={false}` は `selectionMode="single"`、`multiple` は `selectionMode="multiple"`）。
+       * 後方互換のため型からは消していないが、既定が `true`（複数選択）で
+       * 「渡し忘れると静かに壊れる側」に倒れているため、新規実装では使わない。
+       *
+       * @default true
+       */
+      multiple?: boolean
+      /** 最大選択数（複数選択時のみ有効） */
+      max?: number
+      size?: "sm" | "md" | "lg"
+      className?: string
+    }
 
+/**
+ * ChipSelector — チップ列の選択部品。`flex-wrap` で**折り返す**ので選択肢数の上限が無い。
+ *
+ * ### 単一選択（issue #418）
+ * ```tsx
+ * const [category, setCategory] = React.useState<Category | null>(null)
+ * <ChipSelector selectionMode="single" options={CATEGORIES} value={category} onChange={setCategory} />
+ * ```
+ * `PillToggle` は 1 行固定の segmented control で 2〜4 択専用。**5 択以上・折り返しが
+ * 要る単一選択はこの `selectionMode="single"` を使う**（支出カテゴリのような 9 択など）。
+ *
+ * ### 複数選択（既定）
+ * ```tsx
+ * <ChipSelector selectionMode="multiple" options={TAGS} value={tags} onChange={setTags} max={3} />
+ * ```
+ *
+ * 「選択中の 1 つだけ表示して、タップで候補を開く」折りたたみ型が要る場合は
+ * `CollapsibleChipField` を使う（issue #419）。
+ */
 function ChipSelector<T extends string = string>({
   options,
   value,
@@ -86,18 +157,41 @@ function ChipSelector<T extends string = string>({
   const isSingle = !isMultiple
   const containerRef = React.useRef<HTMLDivElement | null>(null)
 
+  // 単一選択は value がスカラーでも配列でも受ける（issue #418）。
+  // 内部は常に配列で扱い、onChange だけ「受け取った形」に合わせて返す。
+  // こうしないと v1.61 で `selectionMode="single"` + `T[]` を採用済みの
+  // 呼び出しが、スカラーを渡されて静かに壊れる（setState<T[]> に string が入る）。
+  const isLegacyArrayValue = Array.isArray(value)
+  const selectedValues: T[] = isLegacyArrayValue
+    ? (value as T[])
+    : value == null
+      ? []
+      : [value as T]
+
+  const emit = React.useCallback(
+    (next: T[]) => {
+      if (isSingle && !isLegacyArrayValue) {
+        // スカラー API: 選択なしは null
+        ;(onChange as (v: T | null) => void)(next[0] ?? null)
+        return
+      }
+      ;(onChange as (v: T[]) => void)(next)
+    },
+    [onChange, isSingle, isLegacyArrayValue]
+  )
+
   const toggle = React.useCallback((v: T) => {
     if (isMultiple) {
-      if (value.includes(v)) {
-        onChange(value.filter((x) => x !== v))
+      if (selectedValues.includes(v)) {
+        emit(selectedValues.filter((x) => x !== v))
       } else {
-        if (max && value.length >= max) return
-        onChange([...value, v])
+        if (max && selectedValues.length >= max) return
+        emit([...selectedValues, v])
       }
     } else {
-      onChange(value.includes(v) ? [] : [v])
+      emit(selectedValues.includes(v) ? [] : [v])
     }
-  }, [value, onChange, isMultiple, max])
+  }, [selectedValues, emit, isMultiple, max])
 
   // roving tabindex: 選択中のチップだけ tabIndex=0（未選択なら先頭の有効チップ）。
   // 依存配列を持たせず毎レンダー同期する（#318 と同じ）。
@@ -110,11 +204,18 @@ function ChipSelector<T extends string = string>({
     chips.forEach((chip, index) => {
       chip.tabIndex = index === activeIndex ? 0 : -1
     })
-    if (isDev() && value.length > 1) {
+    if (isDev() && selectedValues.length > 1) {
       // #39 の footgun（単一選択のつもりで既定の複数選択を使い、value[0] を読む実装が
       // 静かに壊れる）を開発時に見えるようにする（issue #352）
       console.warn(
-        `[ksk-ds] ChipSelector: selectionMode="single" は排他選択ですが、選択中の値が ${value.length} 個あります。value を 1 つに絞るか selectionMode="multiple" を使ってください。`
+        `[ksk-ds] ChipSelector: selectionMode="single" は排他選択ですが、選択中の値が ${selectedValues.length} 個あります。value を 1 つに絞るか selectionMode="multiple" を使ってください。`
+      )
+    }
+    if (isDev() && isLegacyArrayValue) {
+      // issue #418: 単一選択の value は配列でなくスカラー（`T | null`）が正。
+      // 配列も後方互換で動くが、新規実装で使われ続けないよう開発ビルドで知らせる。
+      console.warn(
+        '[ksk-ds] ChipSelector: selectionMode="single" に配列の value を渡しています。スカラー（value={v} / onChange={(v) => ...}、未選択は null）へ移行してください（issue #418。配列は後方互換で動作します）。'
       )
     }
   })
@@ -159,8 +260,8 @@ function ChipSelector<T extends string = string>({
       className={cn("flex flex-wrap gap-2", className)}
     >
       {options.map((opt) => {
-        const selected = value.includes(opt.value)
-        const disabled = !selected && !!max && value.length >= max
+        const selected = selectedValues.includes(opt.value)
+        const disabled = !selected && !!max && selectedValues.length >= max
         return (
           <Chip
             key={opt.value}
@@ -169,7 +270,7 @@ function ChipSelector<T extends string = string>({
             selected={selected}
             disabled={disabled}
             removable={selected && isMultiple}
-            onRemove={() => onChange(value.filter((x) => x !== opt.value))}
+            onRemove={() => emit(selectedValues.filter((x) => x !== opt.value))}
             onClick={() => toggle(opt.value)}
             role={isSingle ? "radio" : undefined}
             aria-checked={isSingle ? selected : undefined}

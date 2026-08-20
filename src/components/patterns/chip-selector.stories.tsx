@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { expect } from "storybook/test"
+import { expect, userEvent, waitFor } from "storybook/test"
 import * as React from "react"
 import { ChipSelector } from "./chip-selector"
 
@@ -17,6 +17,19 @@ const CATEGORIES = [
   { label: "健康", value: "health" },
   { label: "趣味", value: "hobby" },
   { label: "買い物", value: "shopping" },
+  { label: "その他", value: "other" },
+]
+
+/** 支出カテゴリ相当の 9 択（issue #418）。1 行に収まらず折り返す前提の選択肢数。 */
+const EXPENSE_CATEGORIES = [
+  { label: "食費", value: "food" },
+  { label: "交通費", value: "transport" },
+  { label: "宿泊", value: "lodging" },
+  { label: "観光", value: "sightseeing" },
+  { label: "買い物", value: "shopping" },
+  { label: "通信", value: "telecom" },
+  { label: "医療", value: "medical" },
+  { label: "交際費", value: "social" },
   { label: "その他", value: "other" },
 ]
 
@@ -113,6 +126,58 @@ export const SelectionModeUnspecified: Story = {
     await expect(chips[chips.length - 1].getAttribute("aria-pressed")).toBe("false")
     // roving tabindex は single 専用
     await expect(chips.some((c) => c.hasAttribute("tabindex"))).toBe(false)
+  },
+}
+
+/**
+ * **単一選択のスカラー API**（issue #418）。`value` は `T | null`、`onChange` も
+ * スカラーを受け取る。`useState<T[]>` を挟まずそのまま state に繋げられる。
+ *
+ * `PillToggle` は 1 行固定の segmented control で 2〜4 択専用。支出カテゴリのような
+ * **9 択の単一選択は折り返せるこちらを使う**（`flex-wrap` で自動的に複数行になる）。
+ */
+export const SingleSelectScalar: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [v, setV] = React.useState<string | null>("food")
+    return (
+      <div className="p-4 space-y-3" style={{ maxWidth: 360 }}>
+        <ChipSelector
+          selectionMode="single"
+          options={EXPENSE_CATEGORIES}
+          value={v}
+          onChange={setV}
+        />
+        <p className="typo-label-xs text-[var(--Text-Low-Emphasis)]">選択: {v ?? "なし"}</p>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const group = canvasElement.querySelector('[data-slot="chip-selector"]')!
+    await expect(group.getAttribute("role")).toBe("radiogroup")
+    const chips = () => [
+      ...canvasElement.querySelectorAll<HTMLButtonElement>('button[data-slot="chip"]'),
+    ]
+    await expect(chips().length).toBe(9)
+
+    // 9 択が 1 行に収まらず折り返していること（PillToggle で表現できない理由）
+    const rows = new Set(chips().map((c) => Math.round(c.getBoundingClientRect().top)))
+    await expect(rows.size).toBeGreaterThan(1)
+
+    // 排他選択: 別のチップを押すと前の選択が外れる
+    await expect(chips()[0].getAttribute("aria-checked")).toBe("true")
+    await userEvent.click(chips()[3])
+    await waitFor(async () => {
+      await expect(chips()[3].getAttribute("aria-checked")).toBe("true")
+    })
+    await expect(chips()[0].getAttribute("aria-checked")).toBe("false")
+
+    // 選択中を再タップすると解除（スカラー API では null が流れる）
+    await userEvent.click(chips()[3])
+    await waitFor(async () => {
+      await expect(canvasElement.textContent).toContain("選択: なし")
+    })
+    await expect(chips().every((c) => c.getAttribute("aria-checked") === "false")).toBe(true)
   },
 }
 

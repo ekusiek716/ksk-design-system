@@ -52,6 +52,16 @@ type PillToggleProps<T extends string = string> =
  * Tabs とトークン（角丸・余白・アクティブ表現）を共有する。
  *
  * パネルを切り替えたい（コンテンツ連動）場合は `Tabs` を直接使う。
+ *
+ * ### 選択肢数の上限（issue #418）
+ * **2〜4 択の segmented control 専用**。1 行固定で折り返せない（`TabsList` は
+ * 横並びの segmented control で、選択肢が増えると各ピルが潰れるか横に溢れる）。
+ *
+ * **5 択以上・折り返しが要る単一選択は
+ * `ChipSelector` の単一選択モード（`selectionMode="single"`）を使う**
+ * （`flex-wrap` で自動的に複数行になる。支出カテゴリ 9 択など）。
+ * 選択中の 1 つだけ見せて畳みたい場合は `CollapsibleChipField`（issue #419）。
+ * パネル連動が要るなら `Tabs`。
  */
 const TRIGGER_SIZE = {
   sm: "h-8 px-3 typo-label-xs",
