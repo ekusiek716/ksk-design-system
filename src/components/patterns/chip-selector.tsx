@@ -210,13 +210,10 @@ function ChipSelector<T extends string = string>({
         `[ksk-ds] ChipSelector: selectionMode="single" は排他選択ですが、選択中の値が ${selectedValues.length} 個あります。value を 1 つに絞るか selectionMode="multiple" を使ってください。`
       )
     }
-    if (isDev() && isLegacyArrayValue) {
-      // issue #418: 単一選択の value は配列でなくスカラー（`T | null`）が正。
-      // 配列も後方互換で動くが、新規実装で使われ続けないよう開発ビルドで知らせる。
-      console.warn(
-        '[ksk-ds] ChipSelector: selectionMode="single" に配列の value を渡しています。スカラー（value={v} / onChange={(v) => ...}、未選択は null）へ移行してください（issue #418。配列は後方互換で動作します）。'
-      )
-    }
+    // issue #418: 単一選択の value は配列でなくスカラー（T | null）が正だが、
+    // 配列版は正当な後方互換 API なので runtime warn は出さない（毎レンダー
+    // 発火して騒がしく、既存テストの「正しい利用は無警告」契約にも反する）。
+    // 移行案内は JSDoc と型定義（スカラーを先頭メンバーに）で行う。
   })
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
