@@ -43,6 +43,12 @@ native の判定シグナルは `*.native.tsx` / `react-native` の **import 文
 CLI の `--platform web|native` がファイル判定より優先されるが、
 `--platform native` でも tailwind を持つかどうかはソースの `className` 有無で決める。
 
+### typo は fail-open
+
+`appliesTo` に capability でもグロブでもない値（typo）が 1 つでもあると、そのルールは
+**全ファイル対象へ倒れ**、実行ごとに 1 回 stderr へ警告が出る。閉じる側に倒すと
+typo したルールがどのファイルにも当たらないまま静かに無効化されるため。
+
 ### 付け方の原則
 
 `#hex` 直書き（P008）や DS コンポーネントの再実装禁止（P033–P040 等）は記法非依存なので

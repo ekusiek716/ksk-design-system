@@ -21,7 +21,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { spawnSync } from "node:child_process"
 
-import { detectCapabilities, detectPlatform, ruleAppliesTo } from "../bin/lint.js"
+import { detectCapabilities, detectPlatform, ruleAppliesTo, runLintCli } from "../bin/lint.js"
 
 // CLI を子プロセスで起動するテストが多く、1 件あたり数秒かかる（P049 の契約読み込みで
 // DS の CSS を全部読むため）。既定の 5s では 2 回起動するケースが落ちる。
@@ -324,5 +324,133 @@ export const Form = () => <TextInput placeholder="メールアドレス" />
     const bare = runLint("Form.tsx", `export const F = () => <input placeholder="p" />\n`)
     expect(ruleIds(labelled).has("P026")).toBe(false)
     expect(ruleIds(bare).has("P026")).toBe(true)
+  })
+})
+
+// 追レビューの再現ケース: capability 判定が「コメントはマスクするが文字列は
+// マスクしていない」生ソースに対して走っていたため、文字列の中身で判定が壊れていた。
+describe("capability 判定が文字列リテラルに騙されない", () => {
+  // 🔴 再現1: StyleSheet 系 native に WebView の HTML 文字列を足すだけで
+  // tailwind capability が付き、P032 の 76 件誤検知が復活していた
+  const WEBVIEW_SOURCE = `
+import { StyleSheet, View } from "react-native"
+import { WebView } from "react-native-webview"
+
+const colors = { border: "#E5E7EB" }
+
+const styles = StyleSheet.create({
+  card: { borderWidth: 1, borderColor: colors.border },
+})
+
+export function Chart() {
+  return (
+    <View style={styles.card}>
+      <WebView source={{ html: '<div className="legend-item">chart</div>' }} />
+    </View>
+  )
+}
+`
+
+  it("文字列の中の className= では tailwind capability が付かない", () => {
+    expect([...detectCapabilities("src/Chart.tsx", WEBVIEW_SOURCE)].sort()).toEqual(["native"])
+  })
+
+  it("WebView の HTML 文字列を持つ StyleSheet ファイルで P032 = 0", () => {
+    const findings = runLint("Chart.tsx", WEBVIEW_SOURCE)
+    expect(findings.filter((f) => f.ruleId === "P032")).toHaveLength(0)
+  })
+
+  // 🟡 再現2: 実コード行の行頭が export なので行頭アンカーを素通りし、
+  // テンプレートリテラルの中身で純 web ファイルが native 判定になっていた
+  const SNIPPET_SOURCE = `
+export const snippet = \`import { View } from "react-native"\`;
+
+export function Page() {
+  return <button className="border">保存</button>
+}
+`
+
+  it("テンプレートリテラル内の import 文で web ファイルが native 化しない", () => {
+    expect(detectPlatform("src/Docs.tsx", SNIPPET_SOURCE)).toBe("web")
+  })
+
+  it("同ファイルで dom 系ルール（P001）が従来どおり 1 件出る", () => {
+    const findings = runLint("Docs.tsx", SNIPPET_SOURCE)
+    expect(findings.filter((f) => f.ruleId === "P001")).toHaveLength(1)
+  })
+
+  // 実 NativeWind（JSX 属性の className=）は文字列の外側なので検出が続くこと
+  it("実 NativeWind ファイルでは tailwind 系の発火が維持される（回帰確認）", () => {
+    expect([...detectCapabilities("src/Card.tsx", NATIVEWIND_SOURCE)].sort()).toEqual([
+      "native", "tailwind",
+    ])
+    const ids = ruleIds(runLint("Card.tsx", NATIVEWIND_SOURCE))
+    expect(ids.has("P032")).toBe(true)
+    expect(ids.has("P011")).toBe(true)
+    expect(ids.has("P016")).toBe(true)
+  })
+})
+
+// 🟢 appliesTo の typo が「黙って誰にも当たらない」状態にならないこと
+describe("appliesTo の未知の値は fail-open（全ファイル対象）", () => {
+  function runWithRules(rule: Record<string, unknown>, fileName: string, source: string) {
+    const pkgRoot = mkdtempSync(join(tmpdir(), "ksk-ds-pkgroot-"))
+    mkdirSync(join(pkgRoot, "contracts"))
+    writeFileSync(
+      join(pkgRoot, "contracts/rules.json"),
+      JSON.stringify({ prohibited: [rule] }),
+    )
+    const cwd = mkdtempSync(join(tmpdir(), "ksk-ds-cwd-"))
+    writeFileSync(join(cwd, fileName), source)
+
+    const stdout: string[] = []
+    const stderr: string[] = []
+    const logSpy = vi.spyOn(console, "log").mockImplementation((...a) => void stdout.push(a.join(" ")))
+    const errSpy = vi.spyOn(console, "error").mockImplementation((...a) => void stderr.push(a.join(" ")))
+    try {
+      return runLintCli([cwd, "--format", "json"], { cwd, pkgRoot }).then((status) => ({
+        status,
+        stderr: stderr.join("\n"),
+        results: JSON.parse(stdout.join("\n")).results as Finding[],
+      }))
+    } finally {
+      logSpy.mockRestore()
+      errSpy.mockRestore()
+    }
+  }
+
+  const TYPO_RULE = {
+    id: "PTEST",
+    severity: "warn",
+    category: "test",
+    appliesTo: ["tailwnd"],
+    pattern: "NEEDLE",
+    message: "typo テスト",
+    fix: "",
+  }
+
+  it("typo したルールは全ファイルに適用される（StyleSheet native でも当たる）", async () => {
+    const { results } = await runWithRules(
+      TYPO_RULE,
+      "Card.tsx",
+      `import { StyleSheet } from "react-native"\nconst s = StyleSheet.create({})\nconst x = "NEEDLE"\n`,
+    )
+    expect(results.filter((f) => f.ruleId === "PTEST")).toHaveLength(1)
+  })
+
+  it("typo は stderr に警告として出る", async () => {
+    const { stderr } = await runWithRules(TYPO_RULE, "Card.tsx", `const x = "NEEDLE"\n`)
+    expect(stderr).toContain("PTEST")
+    expect(stderr).toContain("appliesTo")
+    expect(stderr).toContain("tailwnd")
+  })
+
+  it("正しい capability 値なら従来どおり絞り込む（対照）", async () => {
+    const { results } = await runWithRules(
+      { ...TYPO_RULE, appliesTo: ["tailwind"] },
+      "Card.tsx",
+      `import { StyleSheet } from "react-native"\nconst s = StyleSheet.create({})\nconst x = "NEEDLE"\n`,
+    )
+    expect(results.filter((f) => f.ruleId === "PTEST")).toHaveLength(0)
   })
 })
