@@ -135,13 +135,22 @@ describe("P049 の判定ロジック", () => {
     expect(inspectProductThemeOverrides(`:root {\n${css}\n}`, contract)).toEqual([])
   })
 
-  it("Status の primitive は依然として違反（色調整は semantic 層で行う契約）", () => {
-    // 方針: primitive を直接上書きしてよいのは Brand と Neutral の2パレットだけ。
+  it("statusPalette に載っていない status の primitive は違反（色調整は semantic 層で行う契約）", () => {
+    // 方針: primitive を無条件に上書きしてよいのは Brand と Neutral の2パレットだけ。
+    // Red-400 は dark の --Text-Caution / --Object-Caution / --Border-Caution を、
+    // Orange-700 は light の --Text-Warning / --Warning-Base を駆動するため開けていない。
     const findings = inspectProductThemeOverrides(
-      `:root {\n  --Primitive-Red-50: #3A2020;\n  --Primitive-Green-700: #2F6B4A;\n}`,
+      `:root {\n  --Primitive-Red-400: #3A2020;\n  --Primitive-Orange-700: #2F6B4A;\n}`,
       contract,
     )
-    expect(findings.map((f) => f.name)).toEqual(["--Primitive-Red-50", "--Primitive-Green-700"])
+    expect(findings.map((f) => f.name)).toEqual(["--Primitive-Red-400", "--Primitive-Orange-700"])
+  })
+
+  it("statusPalette に載っている段は許可（issue #384）", () => {
+    const css = contractJson.allowedVariables.statusPalette
+      .map((name: string) => `  ${name}: #123456;`)
+      .join("\n")
+    expect(inspectProductThemeOverrides(`.dark {\n${css}\n}`, contract)).toEqual([])
   })
 
   it("DS に存在しない変数は namespace が一致しても違反にしない", () => {
@@ -189,10 +198,10 @@ describe("公開 CLI（ksk-ds lint）", () => {
     expect(result.status).toBe(0)
   })
 
-  it("Status の primitive 上書きは P049 のエラーとして報告する", () => {
-    const result = runLint(`:root {\n  --Primitive-Red-50: #3A2020;\n}`)
+  it("statusPalette 外の status primitive 上書きは P049 のエラーとして報告する", () => {
+    const result = runLint(`:root {\n  --Primitive-Red-400: #3A2020;\n}`)
     expect(result.stdout).toContain("error P049")
-    expect(result.stdout).toContain("--Primitive-Red-50")
+    expect(result.stdout).toContain("--Primitive-Red-400")
     expect(result.status).toBe(1)
   })
 
@@ -212,15 +221,33 @@ describe("契約のドリフト検査", () => {
     return [...names!]
   }
 
-  it("primitive の公開は Brand と Neutral の2パレットだけ（status の primitive は非公開）", () => {
-    // 方針（issue #377）: status 系の色調整は semantic 層で行う。primitive を開けると
+  it("primitive の公開は Brand / Neutral の2パレットと statusPalette の個別段だけ", () => {
+    // 方針（issue #377）: status 系の色調整は原則 semantic 層で行う。primitive を開けると
     // 上書き箇所が増え、DS 側が primitive の割り当てを変えたときに壊れる。
+    // 例外（issue #384）: 消費側が DS の primitive を自分の Tailwind alias（@theme inline）の
+    // 実体として使っている場合、生成ユーティリティに var(--Primitive-*) が直接展開されるため
+    // semantic 経由の経路が無い。その用途に限り statusPalette として1段ずつ開ける。
+    // パレット全段は開けない（accent 段は dark の DS semantic も駆動するため）。
     const primitives = [...contract.allowed].filter((name) => name.startsWith("--Primitive-"))
     const unexpected = primitives.filter(
       (name) => !/^--Primitive-(Brand-\d+|Gray-\d+|White|Black)$/.test(name),
     )
-    expect(unexpected).toEqual([])
+    expect([...unexpected].sort()).toEqual([...contractJson.allowedVariables.statusPalette].sort())
     expect(contractJson.allowedVariables.neutralPalette).toHaveLength(12)
+  })
+
+  it("statusPalette の tint 段（-50）は DS の .dark ブロックが参照していない", () => {
+    // -50 を dark で上書きしても DS コンポーネントに影響しない、という公開の前提条件。
+    // dark の Surface-Caution/Success/Warning/Info は -900 と実値で組んであるので、
+    // ここが崩れたら（dark が -50 を参照し始めたら）公開の根拠が消える。
+    const css = readFileSync(join(ROOT, "src/styles/semantic.css"), "utf8")
+    const darkAt = css.indexOf(".dark {")
+    expect(darkAt, ".dark ブロックが見つかりません").toBeGreaterThan(-1)
+    const darkBlock = css.slice(darkAt)
+    const tintSteps = contractJson.allowedVariables.statusPalette.filter((n) => n.endsWith("-50"))
+    expect(tintSteps.length).toBeGreaterThan(0)
+    const referenced = tintSteps.filter((name) => darkBlock.includes(`var(${name})`))
+    expect(referenced).toEqual([])
   })
 
   it("PascalCase の DS 変数はすべて dsVariableNamespaces のどれかに属する", () => {
