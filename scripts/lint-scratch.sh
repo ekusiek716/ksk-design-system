@@ -353,49 +353,37 @@ for FILE in $FILES; do
   # ──────────────────────────────────────────
   # DS-first recipe guardrails（consumer 側のみ）
   # ──────────────────────────────────────────
+  # G1〜G4 は撤去済み（issue #389 対応）。contracts/rules.json を読まない
+  # grep 独自判定が bin/lint.js + contracts/rules.json の P033〜P036 と
+  # パターン・excludes とも完全に重複していたため削除した。
+  #   G1 (Button aria-pressed toggle 手組み)      → P033
+  #   G2 (一時的成功/同期通知の Banner 化禁止)      → P034
+  #   G3 (icon button の独自 utility class 禁止)   → P035
+  #   G4 (EmptyState CTA の className 手組み禁止)  → P036
+  # これらの検査は `node bin/init.js lint <path>` / `node bin/lint.js <path>`
+  # （contracts/rules.json が正本）が consumer 向け lint として担う。
+  # DS 自身の src への適用は、同じ lint 経路で P008/P049 が大量誤検知する
+  # 既知issue（#407 / #408）が解決してから検討する。
   if [ "$IS_DS" = false ] && [ "$HAS_DS_ESCAPE" = false ]; then
-    # G1. Button を aria-pressed toggle として手組みしない
-    MATCHES=$(grep -nE '<Button[^>]*aria-pressed|aria-pressed[^>]*<Button' "$FILE" 2>/dev/null \
-      | grep -Ev "$COMMENT_LINE" || true)
-    if [ -n "$MATCHES" ]; then
-      echo -e "${RED}❌ $FILE: Button toggle の手組み → PillToggle / RadioGroup / Tabs を使う（例外は ksk-ds-allow-custom-ui コメント）${NC}"
-      echo "$MATCHES" | head -3
-      ERRORS=$((ERRORS + 1))
-    fi
-
-    # G2. 一時的な成功/同期通知を page Banner にしない
-    MATCHES=$(grep -nE '<Banner[^>]*variant=["'\'']success["'\''][^>]*(保存|復旧|接続|同期|削除|完了)' "$FILE" 2>/dev/null \
-      | grep -Ev "$COMMENT_LINE" || true)
-    if [ -n "$MATCHES" ]; then
-      echo -e "${RED}❌ $FILE: transient notice を Banner 化しない → toast.success / toast.connectionRestored を使う${NC}"
-      echo "$MATCHES" | head -3
-      ERRORS=$((ERRORS + 1))
-    fi
-
-    # G3. raw icon utility class を作らない
-    MATCHES=$(grep -nE 'btn-icon|icon-only-button|className=.*icon-button' "$FILE" 2>/dev/null \
-      | grep -Ev "$COMMENT_LINE" || true)
-    if [ -n "$MATCHES" ]; then
-      echo -e "${RED}❌ $FILE: icon button の独自 class → Button size=\"icon\" / \"icon-sm\" / \"icon-lg\" を使う${NC}"
-      echo "$MATCHES" | head -3
-      ERRORS=$((ERRORS + 1))
-    fi
-
-    # G4. EmptyState CTA サイズを画面ごとに className で組まない
-    MATCHES=$(grep -n '<EmptyState[^>]*action={[[:space:]]*<Button[^}]*className=' "$FILE" 2>/dev/null \
-      | grep -Ev "$COMMENT_LINE" || true)
-    if [ -n "$MATCHES" ]; then
-      echo -e "${RED}❌ $FILE: EmptyState CTA の手組み → actionLabel + actionLayout=\"content|full|compact\" を使う${NC}"
-      echo "$MATCHES" | head -3
-      ERRORS=$((ERRORS + 1))
-    fi
-
-    # G5. SheetHeader + KebabMenu は DetailSheetHeader recipe を使う
+    # G5. SheetHeader + KebabMenu は DetailSheetHeader recipe を使う。
+    # bin/lint.js の P037（contracts/rules.json）と同じ 500 文字近接窓で判定する。
+    # 旧実装はファイル全体に SheetHeader / KebabMenu が1つずつ存在するかだけを見る
+    # 距離上限の無い判定で、issue #389 が bin/lint.js 側で直したのと同型の誤検知
+    # （ファイルのどこにあっても無関係に発火する）を持っていた。
     if grep -q 'SheetHeader' "$FILE" 2>/dev/null && grep -q 'KebabMenu' "$FILE" 2>/dev/null && ! grep -q 'DetailSheetHeader' "$FILE" 2>/dev/null; then
-      MATCHES=$(grep -n 'SheetHeader\|KebabMenu' "$FILE" 2>/dev/null | head -3 || true)
-      echo -e "${RED}❌ $FILE: SheetHeader + KebabMenu の手配置 → DetailSheetHeader trailing={<KebabMenu ... />} を使う${NC}"
-      echo "$MATCHES"
-      ERRORS=$((ERRORS + 1))
+      G5_LINE=$(node -e '
+        const fs = require("fs")
+        const src = fs.readFileSync(process.argv[1], "utf8")
+        const re = /SheetHeader[\s\S]{0,500}KebabMenu|KebabMenu[\s\S]{0,500}SheetHeader/
+        const m = re.exec(src)
+        if (m) console.log(src.slice(0, m.index).split(/\r?\n/).length)
+      ' "$FILE" 2>/dev/null || true)
+      if [ -n "$G5_LINE" ]; then
+        MATCHES=$(grep -n 'SheetHeader\|KebabMenu' "$FILE" 2>/dev/null | head -3 || true)
+        echo -e "${RED}❌ $FILE: SheetHeader + KebabMenu の手配置（${G5_LINE}行目付近、近接500文字以内）→ DetailSheetHeader trailing={<KebabMenu ... />} を使う${NC}"
+        echo "$MATCHES"
+        ERRORS=$((ERRORS + 1))
+      fi
     fi
   fi
 
