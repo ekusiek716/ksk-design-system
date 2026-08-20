@@ -20,6 +20,8 @@
     "allowedPattern": "preset の後に、ここで許可された CSS 変数だけを上書きする",
     "forbiddenPattern": "消費プロダクト側に tokens.json / semantic.css / preset.css のコピーや独自 Tailwind preset を作らない。許可リストに無い内部変数を上書きしない",
     "lintRule": "P049（npx ksk-ds lint が消費側 CSS を検査する）",
+    "statusPaletteNote": "statusPalette は「消費側が DS の primitive を自分の Tailwind alias（--color-sun-800 等）の実体として使っている」ケース向けの公開段（issue #384）。@theme inline の alias は生成ユーティリティに var(--Primitive-*) が直接展開されるため、alias 側を dark で差し替えても効かず、primitive を上書きする以外の経路が無い。公開しているのは status の tint 段（-50 × 4色）と、依頼のあったアクセント段（Red-600 / Green-700）だけ。-50 は DS の .dark ブロックが一切参照していない（dark の Surface-Caution/Success/Warning/Info は -900 と実値）ので、dark 内での上書きは DS コンポーネントに対して無害。light では --Surface-Caution / --Surface-Success / --Surface-Warning / --Surface-Info を駆動するので上書きは効く。アクセント段は light / dark の両方で DS semantic を駆動するため、パレット全段ではなく依頼ベースで1段ずつ開ける。",
+    "statusPaletteSideEffects": "--Primitive-Red-600 は --Caution-Base（light / dark 共通）と、dark の --Active-Destructive-Button を駆動する。dark で Red-600 を Red-500(#EF4444) より明るい値に差し替えると、destructive ボタンの active が hover より明るくなり押下の階調が反転する。差し替えるなら --Hover-Destructive-Button との明度関係を実測すること。--Primitive-Green-700 は light の --Text-Success / --Success-Base のみを駆動する（dark は Green-400 なので影響なし）。",
     "contrastResponsibility": "neutralPalette（--Primitive-Gray-* / White / Black）を差し替えたら、本文×背景のコントラストは消費プロダクト側の責任になる。Gray は --Text-High-Emphasis（本文色）・--Text-Medium-Emphasis・--Surface-Secondary・--Border-Low-Emphasis など semantic.css の 33 箇所を駆動しているため、差し替え後に本文テキスト×各 Surface が WCAG AA（4.5:1、大きい文字は 3:1）を満たすか必ず実測すること。DS 側の scripts/check-contrast.mjs は DS 既定パレット向けの検査で、消費側の差し替えは見ていない。light / dark の両方を確認する。"
   },
   "allowedVariables": {
@@ -48,6 +50,14 @@
       "--Primitive-Gray-900",
       "--Primitive-White",
       "--Primitive-Black"
+    ],
+    "statusPalette": [
+      "--Primitive-Red-50",
+      "--Primitive-Green-50",
+      "--Primitive-Blue-50",
+      "--Primitive-Amber-50",
+      "--Primitive-Red-600",
+      "--Primitive-Green-700"
     ],
     "semanticColor": [
       "--Surface-Primary",
@@ -210,9 +220,10 @@
     "許可リストに無い変数（--Hover-* / --glass-* / --Z-* などの内部変数）は消費側から上書きしない。必要なら DS 側に issue を立てて公開変数を増やす。",
     "DS 側で新しくサイズ・角丸を持つコンポーネントを作るときは、固定の h-* / px-* / rounded-* ではなく Control / Field 変数を arbitrary value（h-[var(--Control-Height-Md)]）で参照する。",
     "Control（Button 系）と Field（Input / Textarea / SelectTrigger）はスケールが別。ksk のフィールドは元々ボタンより背が高いため、片方に畳むと実寸が変わる。",
-    "primitive を直接上書きしてよいのは Brand（--Primitive-Brand-*）と Neutral（--Primitive-Gray-* / --Primitive-White / --Primitive-Black）の2つのアイデンティティパレットだけ。status 系（Red / Green / Blue / Yellow / Orange）の色調整は semantic 層（--Surface-Caution / --Text-Success / --Caution-Base 等）で行う。semantic を直接上書きするほうが、上書き1箇所で済み、DS 側が primitive の割り当てを変えても壊れない。",
+    "status 系（Red / Green / Blue / Amber / Orange）の色調整は、原則 semantic 層（--Surface-Caution / --Text-Success / --Caution-Base 等）で行う。semantic を直接上書きするほうが上書き1箇所で済み、DS 側が primitive の割り当てを変えても壊れない。status の primitive（statusPalette）を上書きしてよいのは、消費側が DS の primitive を自分の Tailwind alias の実体として使っていて semantic 経由の経路が無い場合だけ（issue #384）。まず semantic で表現できないか確認し、できるならそちらを使う。",
+    "primitive を無条件に上書きしてよいのは Brand（--Primitive-Brand-*）と Neutral（--Primitive-Gray-* / --Primitive-White / --Primitive-Black）の2つのアイデンティティパレット。status の primitive は statusPalette に載っている段だけが例外で、必要な段が足りなければ DS 側に issue を立てて1段ずつ開ける（パレット全段を勝手に上書きしない）。",
     "neutralPalette（Gray 10段 + White / Black）は Brand と並ぶアイデンティティのパレット層。warm gray など DS 既定の cool gray と違う世界観を持つプロダクトはここを差し替える。ただし Gray は --Text-High-Emphasis（本文色）や --Surface-Secondary を駆動するため、差し替えたら本文×背景のコントラストが WCAG AA（4.5:1）を満たすか消費側で必ず確認すること（light / dark 両方）。DS 側のコントラスト検査は DS 既定パレットしか見ていない。",
-    "色は semantic トークン経由でのみ上書きする。Primitive を直接参照するのは Brand ランプ（--Primitive-Brand-*）と Neutral ランプ（--Primitive-Gray-* / White / Black）だけが例外。",
+    "色は semantic トークン経由でのみ上書きする。Primitive を直接参照するのは Brand ランプ（--Primitive-Brand-*）・Neutral ランプ（--Primitive-Gray-* / White / Black）・statusPalette に載っている段だけが例外。",
     "Checkbox / RadioGroup / Switch（20px の size-5 トグル）は意図的にこの契約の対象外。「コントロールの高さ」という概念が当てはまらない固定サイズのため、Control 変数を当てると意味が壊れる。",
     "Chip は角丸（--Chip-Radius）だけを配線し、高さ・横 padding は配線しない。sm/md/lg の縦 margin（my-*）は「44px タッチターゲット - 本体高さ」ちょうどの手計算値で、height を変数化すると当たり判定の math が壊れる。",
     "AppShell / MarketingShell / MobileAppShell はページ本文の padding をシェル自身が持たない（Container の gutter か呼び出し側の contentClassName に委ねている）ため product theme の対象外。AdminShell の <main> だけが --Product-Page-Padding-Y を持つ。",
