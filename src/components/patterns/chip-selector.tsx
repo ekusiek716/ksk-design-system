@@ -162,11 +162,10 @@ function ChipSelector<T extends string = string>({
   // こうしないと v1.61 で `selectionMode="single"` + `T[]` を採用済みの
   // 呼び出しが、スカラーを渡されて静かに壊れる（setState<T[]> に string が入る）。
   const isLegacyArrayValue = Array.isArray(value)
-  const selectedValues: T[] = isLegacyArrayValue
-    ? (value as T[])
-    : value == null
-      ? []
-      : [value as T]
+  const selectedValues: T[] = React.useMemo(
+    () => (isLegacyArrayValue ? (value as T[]) : value == null ? [] : [value as T]),
+    [isLegacyArrayValue, value]
+  )
 
   const emit = React.useCallback(
     (next: T[]) => {
