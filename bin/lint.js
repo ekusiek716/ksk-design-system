@@ -253,20 +253,22 @@ function lintFile(file, cwd, rules) {
       }
       continue
     }
+    const isFullFileRule = rule.pattern.includes("[\\s\\S]")
     let regex
     try {
-      regex = new RegExp(rule.pattern)
+      // 全ファイル横断ルールは matchAll で複数件拾うため g フラグを必須にする
+      // （issue #389: source.match() は最初の1件しか返さず取りこぼしていた）。
+      regex = new RegExp(rule.pattern, isFullFileRule ? "g" : undefined)
     } catch {
       continue
     }
-    if (rule.pattern.includes("[\\s\\S]")) {
-      const match = source.match(regex)
-      if (match && match.index != null) {
+    if (isFullFileRule) {
+      for (const match of source.matchAll(regex)) {
+        if (match.index == null) continue
         const lineNumber = lineForIndex(source, match.index)
         const line = lines[lineNumber - 1] ?? ""
-        if (!matchesRuleExclude(rule, rel, line)) {
-          findings.push(toFinding(rule, rel, lineNumber))
-        }
+        if (matchesRuleExclude(rule, rel, line)) continue
+        findings.push(toFinding(rule, rel, lineNumber))
       }
       continue
     }
