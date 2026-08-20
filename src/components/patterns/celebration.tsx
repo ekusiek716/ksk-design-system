@@ -54,6 +54,8 @@ interface CelebrationProps extends React.ComponentProps<"div"> {
   autoDismissMs?: number
   onTapDismiss?: () => void
   onDone?: () => void
+  /** タップで閉じる不可視ボタンの aria-label。@default "閉じる" */
+  dismissLabel?: string
 }
 
 const CONFETTI_COLORS = [
@@ -117,6 +119,7 @@ function Celebration({
   autoDismissMs,
   onTapDismiss,
   onDone,
+  dismissLabel = "閉じる",
   className,
   style,
   ...props
@@ -224,7 +227,7 @@ function Celebration({
       {canTapDismiss && (
         <button
           type="button"
-          aria-label="閉じる"
+          aria-label={dismissLabel}
           className="absolute inset-0 cursor-pointer"
           style={{ pointerEvents: "auto" }}
           onClick={handleTapDismiss}

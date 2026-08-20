@@ -28,6 +28,8 @@ type KebabMenuItem = KebabMenuActionItem | KebabMenuSeparatorItem
 
 interface KebabMenuProps extends React.ComponentProps<"button"> {
   items: KebabMenuItem[]
+  /** トリガーボタンの aria-label。@default "メニュー"（DataTableActionCell.menuLabel と同名） */
+  menuLabel?: string
 }
 
 function isSeparator(item: KebabMenuItem): item is KebabMenuSeparatorItem {
@@ -38,7 +40,7 @@ function isSeparator(item: KebabMenuItem): item is KebabMenuSeparatorItem {
  * 縦三点メニュー。DropdownMenu（Radix）を内部利用しており、
  * キーボード操作・Esc クローズ・フォーカス管理・role="menu" を備える。
  */
-function KebabMenu({ items, className, ...props }: KebabMenuProps) {
+function KebabMenu({ items, className, menuLabel = "メニュー", ...props }: KebabMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -49,7 +51,7 @@ function KebabMenu({ items, className, ...props }: KebabMenuProps) {
             "flex size-8 shrink-0 items-center justify-center rounded-lg hover:bg-[var(--Surface-Secondary)] transition-colors",
             className
           )}
-          aria-label="メニュー"
+          aria-label={menuLabel}
           {...props}
         >
           <svg

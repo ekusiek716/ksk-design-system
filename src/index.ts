@@ -262,7 +262,7 @@ export type { StatCardProps, StatCardVariant } from "./components/patterns/stat-
 export { Tag, tagVariants } from "./components/patterns/tag"
 export type { TagProps, TagCategorical } from "./components/patterns/tag"
 export { ResponsiveDialog, ResponsiveDialogTrigger, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter, ResponsiveDialogClose, useMediaQuery } from "./components/ui/responsive-dialog"
-export { Toaster, useToast, toast } from "./components/ui/toast"
+export { Toaster, useToast, toast, configureToast } from "./components/ui/toast"
 export type { Toast, ToastVariant, ToastOptions, ToastFn } from "./components/ui/toast"
 export { SkipLink } from "./components/ui/skip-link"
 export type { SkipLinkProps } from "./components/ui/skip-link"

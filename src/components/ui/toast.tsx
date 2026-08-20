@@ -105,6 +105,27 @@ const toastStore: ToastStore = {
 }
 
 /**
+ * fire-and-forget（auto-mount）経路の viewport 読み上げラベル。
+ * `configureToast()` で上書きできるモジュールスコープの既定値（後勝ち・
+ * リクエスト間で共有されるため SSR では呼ばないこと）。
+ * `<Toaster>` 経由の描画は props（regionLabel / closeLabel）が直接
+ * viewport に渡るため、この値には依存しない。既定は現行の日本語（後方互換）。
+ */
+const toastLabels = {
+  region: "通知",
+  close: "閉じる",
+}
+
+/**
+ * fire-and-forget API（auto-mount viewport）用のラベル設定。
+ * `<Toaster>` を使う場合は props で渡せばよく、これを呼ぶ必要はない。
+ */
+function configureToast(options: { regionLabel?: string; closeLabel?: string }): void {
+  if (options.regionLabel !== undefined) toastLabels.region = options.regionLabel
+  if (options.closeLabel !== undefined) toastLabels.close = options.closeLabel
+}
+
+/**
  * `<Toaster />` がマウントされているかどうかを追跡するフラグ。
  * fire-and-forget な `toast()` が自動マウントする viewport は、
  * このフラグが立っている時は描画をスキップする
@@ -159,14 +180,14 @@ function useToast(): ToastContextValue {
 // Viewport (shared between Toaster と auto-mounted root)
 // =============================================================
 
-function ToastViewport() {
+function ToastViewport({ regionLabel, closeLabel }: { regionLabel?: string; closeLabel?: string } = {}) {
   const toasts = useToastStoreSnapshot()
   if (typeof document === "undefined") return null
   return createPortal(
     <div
       data-slot="toast-viewport"
       role="region"
-      aria-label="通知"
+      aria-label={regionLabel ?? toastLabels.region}
       // 常設コンテナを live region にする（トースト要素自身への role="status" 付与は
       // 挿入時に読み上げられない SR があるため、追加を polite で通知する構成）
       aria-live="polite"
@@ -200,7 +221,7 @@ function ToastViewport() {
             data-slot="button"
             onClick={() => toastStore.dismiss(t.id)}
             className="shrink-0 text-[var(--Object-Medium-Emphasis)] hover:text-[var(--Object-High-Emphasis)] cursor-pointer"
-            aria-label="閉じる"
+            aria-label={closeLabel ?? toastLabels.close}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -217,7 +238,15 @@ function ToastViewport() {
 // <Toaster /> — Provider モード（既存 API、後方互換）
 // =============================================================
 
-function Toaster({ children }: { children?: React.ReactNode }) {
+interface ToasterProps {
+  children?: React.ReactNode
+  /** viewport (role="region") の aria-label。@default "通知" */
+  regionLabel?: string
+  /** 各トーストの閉じるボタンの aria-label。@default "閉じる" */
+  closeLabel?: string
+}
+
+function Toaster({ children, regionLabel, closeLabel }: ToasterProps) {
   // 自動マウントされた viewport との二重描画を避けるため、
   // マウント中フラグを立てる。
   React.useEffect(() => {
@@ -232,7 +261,7 @@ function Toaster({ children }: { children?: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <ToastViewport />
+      <ToastViewport regionLabel={regionLabel} closeLabel={closeLabel} />
     </ToastContext.Provider>
   )
 }
@@ -339,5 +368,5 @@ toast.retryFailed = (options) =>
   showToast("再試行できませんでした", options, "caution")
 toast.dismiss = (id: string) => toastStore.dismiss(id)
 
-export { Toaster, useToast, toast, toastVariants }
+export { Toaster, useToast, toast, toastVariants, configureToast }
 export type { Toast, ToastVariant, ToastOptions, ToastFn, ToastAction }

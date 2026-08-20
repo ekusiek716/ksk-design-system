@@ -10,6 +10,10 @@ interface ContentCarouselProps extends React.ComponentProps<"div"> {
   slides: React.ReactNode[]
   showDots?: boolean
   showArrows?: boolean
+  /** 前へ矢印の aria-label。@default "前へ"（issue #428） */
+  previousLabel?: string
+  /** 次へ矢印の aria-label。@default "次へ"（issue #428） */
+  nextLabel?: string
   /** 自動送りの間隔（ms）。0 で無効。 */
   autoPlay?: number
 }
@@ -38,6 +42,8 @@ function usePrefersReducedMotion() {
 function ContentCarousel({
   slides,
   showDots = true,
+  previousLabel,
+  nextLabel,
   showArrows = true,
   autoPlay = 0,
   className,
@@ -142,6 +148,8 @@ function ContentCarousel({
         onPrevious={previous}
         onNext={next}
         onGoTo={goTo}
+        previousLabel={previousLabel}
+        nextLabel={nextLabel}
       />
     </div>
   )

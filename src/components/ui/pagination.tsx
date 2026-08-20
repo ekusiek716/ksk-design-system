@@ -22,8 +22,13 @@ type PaginationLinkProps =
   | (PaginationLinkOwnProps & { as?: "a" } & React.ComponentProps<"a">)
   | (PaginationLinkOwnProps & { as: "button" } & React.ComponentProps<"button">)
 
-function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
-  return <nav role="navigation" aria-label="ページネーション" data-slot="pagination" className={cn("mx-auto flex w-full justify-center", className)} {...props} />
+type PaginationProps = React.ComponentProps<"nav"> & {
+  /** nav 要素の aria-label。@default "ページネーション"（SimplePagination.navLabel と同名） */
+  navLabel?: string
+}
+
+function Pagination({ className, navLabel = "ページネーション", ...props }: PaginationProps) {
+  return <nav role="navigation" aria-label={navLabel} data-slot="pagination" className={cn("mx-auto flex w-full justify-center", className)} {...props} />
 }
 
 function PaginationContent({ className, ...props }: React.ComponentProps<"ul">) {

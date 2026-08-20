@@ -12,6 +12,12 @@ interface ImageCarouselProps extends React.ComponentProps<"div"> {
   showDots?: boolean
   showArrows?: boolean
   autoPlay?: number
+  /** スクロール領域 (role="region") の aria-label。@default "画像カルーセル" */
+  regionLabel?: string
+  /** 「前へ」ボタンの aria-label。@default "前へ" */
+  previousLabel?: string
+  /** 「次へ」ボタンの aria-label。@default "次へ" */
+  nextLabel?: string
 }
 
 // 汎用画像カルーセルコンポーネント（CSS scroll-snap使用）
@@ -21,6 +27,9 @@ function ImageCarousel({
   showDots = true,
   showArrows = true,
   autoPlay = 0,
+  regionLabel = "画像カルーセル",
+  previousLabel = "前へ",
+  nextLabel = "次へ",
   className,
   ...props
 }: ImageCarouselProps) {
@@ -54,7 +63,7 @@ function ImageCarousel({
         style={{ scrollbarWidth: "none" }}
         tabIndex={0}
         role="region"
-        aria-label="画像カルーセル"
+        aria-label={regionLabel}
       >
         {images.map((img, i) => (
           <div
@@ -97,6 +106,8 @@ function ImageCarousel({
         onPrevious={previous}
         onNext={next}
         onGoTo={goTo}
+        previousLabel={previousLabel}
+        nextLabel={nextLabel}
       />
     </div>
   )

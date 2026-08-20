@@ -27,6 +27,8 @@ interface SimplePaginationBaseProps
   previousLabel?: string
   /** 「次へ」ボタンのラベル / aria-label */
   nextLabel?: string
+  /** nav 要素の aria-label。@default "ページネーション" */
+  navLabel?: string
   /**
    * 中央ラベルのカスタムレンダラ。
    * 指定された場合、format によらず常にこの関数の結果が表示される。
@@ -122,6 +124,7 @@ function SimplePagination({
   compact = false,
   previousLabel = "前へ",
   nextLabel = "次へ",
+  navLabel = "ページネーション",
   renderLabel,
   className,
   total,
@@ -222,7 +225,7 @@ function SimplePagination({
   return (
     <nav
       role="navigation"
-      aria-label="ページネーション"
+      aria-label={navLabel}
       data-slot="simple-pagination"
       className={cn(
         "flex items-center justify-between gap-2 sm:justify-center sm:gap-4",

@@ -45,6 +45,10 @@ interface FilterBarProps extends React.ComponentProps<"nav"> {
   onSortClick?: () => void
   onMoreFilters?: () => void
   activeFilterCount?: number
+  /** nav 要素の aria-label。@default "フィルター" */
+  navLabel?: string
+  /** 絞り込みボタンの aria-label。@default "絞り込み" */
+  moreFiltersLabel?: string
 }
 
 /** フィルターチップ + ドロップダウン */
@@ -131,12 +135,14 @@ function FilterBar({
   onMoreFilters,
   activeFilterCount,
   className,
+  navLabel = "フィルター",
+  moreFiltersLabel = "絞り込み",
   ...props
 }: FilterBarProps) {
 
   return (
     <nav
-      aria-label="フィルター"
+      aria-label={navLabel}
       data-slot="filter-bar"
       className={cn("space-y-2", className)}
       {...props}
@@ -148,7 +154,7 @@ function FilterBar({
           type="button"
           className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--Surface-Tertiary)] text-[var(--Text-High-Emphasis)] transition-colors hover:opacity-80"
           onClick={onMoreFilters}
-          aria-label="絞り込み"
+          aria-label={moreFiltersLabel}
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path d="M3 5h14M5 10h10M7 15h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />

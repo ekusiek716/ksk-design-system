@@ -19,6 +19,8 @@ interface ShareButtonsProps {
   copiedLabel?: string
   copyErrorLabel?: string
   feedbackDuration?: number
+  /** 全体を囲む role="group" の aria-label。@default "シェア" */
+  groupLabel?: string
 }
 
 const REGION_PROVIDERS: Record<ShareRegion, ShareProvider[]> = {
@@ -156,6 +158,7 @@ function ShareButtons({
   copiedLabel = "コピーしました",
   copyErrorLabel = "コピーできませんでした",
   feedbackDuration = 2000,
+  groupLabel = "シェア",
 }: ShareButtonsProps) {
   const [copyFeedback, setCopyFeedback] = React.useState<{
     provider: ShareProvider
@@ -224,7 +227,7 @@ function ShareButtons({
         data-layout="circle"
         className={cn("flex items-center gap-4", className)}
         role="group"
-        aria-label="シェア"
+        aria-label={groupLabel}
         data-region={region}
       >
         {activeProviders.map((p) => {
@@ -269,7 +272,7 @@ function ShareButtons({
       data-layout="inline"
       className={cn("flex items-center gap-2 flex-wrap", className)}
       role="group"
-      aria-label="シェア"
+      aria-label={groupLabel}
       data-region={region}
     >
       {activeProviders.map((p) => {

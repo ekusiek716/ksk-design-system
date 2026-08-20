@@ -6,6 +6,8 @@ interface BulkActionsProps extends React.ComponentProps<"div"> {
   selectedCount: number
   /** 選択解除ボタンクリック時 */
   onClear?: () => void
+  /** 選択解除ボタンの aria-label。@default "選択を解除" */
+  clearLabel?: string
 }
 
 /**
@@ -15,7 +17,7 @@ interface BulkActionsProps extends React.ComponentProps<"div"> {
  * 選択件数 + アクションボタン群を横並びで表示。
  * selectedCount が 0 のとき自動で非表示になる。
  */
-function BulkActions({ selectedCount, onClear, children, className, ...props }: BulkActionsProps) {
+function BulkActions({ selectedCount, onClear, children, className, clearLabel = "選択を解除", ...props }: BulkActionsProps) {
   if (selectedCount === 0) return null
 
   return (
@@ -52,7 +54,7 @@ function BulkActions({ selectedCount, onClear, children, className, ...props }: 
             type="button"
             className="flex size-7 items-center justify-center rounded-full text-[var(--Text-on-Inverse)]/60 hover:text-[var(--Text-on-Inverse)] hover:bg-[var(--Text-on-Inverse)]/10 transition-colors cursor-pointer"
             onClick={onClear}
-            aria-label="選択を解除"
+            aria-label={clearLabel}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
