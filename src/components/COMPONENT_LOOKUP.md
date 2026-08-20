@@ -128,9 +128,11 @@
 | FieldSet, FieldLegend, FieldGroup, FieldDescription, FieldError, FieldSeparator | `@/components/patterns/field` | — | 3セクションの長いフォーム, SeparatorWithLabel |
 | FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
 | FilterChip | `@/components/patterns/filter-chip` | — | Inactive, ActiveWithValue, Toggle, Group |
+| FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears |
 | Footer | `@/components/patterns/footer` | — | Default, Minimal, WithRenderSlot, WithExtra, WithPaymentIcons |
 | FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
+| ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
 | KeyboardAwareSheetFooter | `@/components/patterns/keyboard-aware-sheet-footer` | — | Fixed, HideWhenKeyboardOpen, Glass |
 | ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot, AlignCenter, DensityCompact, WithFooterSlot, WithSecondaryAction |
 | ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | Default, WithoutFilter, FewRows |
@@ -159,6 +161,7 @@
 | SwipeRow | `@/components/patterns/swipe-row` | — | Default, SingleAction, KeyboardAccessible |
 | TagInput | `@/components/patterns/tag-input` | — | Default, WithInitialTags, WithMax, Disabled |
 | Tag | `@/components/patterns/tag` | **variant**: `default`, `brand`, `caution`, `success`, `warning`, `info` | Default, Brand, Caution, Success, Warning, Info, AllVariants, Categorical, CategoricalWithDot |
+| ThumbnailCard | `@/components/patterns/thumbnail-card` | — | Vertical, Horizontal, WithSecondaryAction, Strip, WholeCardClickableWithSecondaryAction |
 
 ### patterns/commerce/
 
