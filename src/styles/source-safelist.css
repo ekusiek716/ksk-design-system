@@ -35,7 +35,6 @@
 @source inline("[&>*]:flex-1");
 @source inline("[&>*]:flex-col");
 @source inline("[&>*]:min-w-[140px]");
-@source inline("[&>*]:pointer-events-auto");
 @source inline("[&>*]:shrink-0");
 @source inline("[&>button]:bg-[var(--Brand-Primary)]");
 @source inline("[&>button]:bg-transparent!");
@@ -273,6 +272,7 @@
 @source inline("break-words");
 @source inline("collapse");
 @source inline("container");
+@source inline("contents");
 @source inline("cursor-default");
 @source inline("cursor-grab");
 @source inline("cursor-not-allowed");
