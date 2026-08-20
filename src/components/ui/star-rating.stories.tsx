@@ -59,6 +59,41 @@ export const Interactive: Story = {
   },
 }
 
+export const AllowClear: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [v, setV] = React.useState(3)
+    const [v2, setV2] = React.useState(3)
+    return (
+      <div className="flex flex-col gap-4 p-4">
+        <StarRating value={v} onChange={setV} allowClear />
+        <p className="typo-label-sm text-[var(--Text-Medium-Emphasis)]">{v} / 5</p>
+        {/* 既定（allowClear なし）: 再クリックで値が変わらないことの回帰確認用 */}
+        <StarRating value={v2} onChange={setV2} label="評価（既定）" />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const clearable = within(canvas.getByRole("radiogroup", { name: "評価" }))
+    const radios = clearable.getAllByRole("radio")
+
+    await expect(radios[2]).toHaveAttribute("aria-checked", "true")
+    await userEvent.click(radios[2])
+    await expect(radios[2]).toHaveAttribute("aria-checked", "false")
+    for (const radio of radios) {
+      await expect(radio).toHaveAttribute("aria-checked", "false")
+    }
+
+    // 既定は同じ星の再クリックでもクリアされない（後方互換）
+    const plain = within(canvas.getByRole("radiogroup", { name: "評価（既定）" }))
+    const plainRadios = plain.getAllByRole("radio")
+    await expect(plainRadios[2]).toHaveAttribute("aria-checked", "true")
+    await userEvent.click(plainRadios[2])
+    await expect(plainRadios[2]).toHaveAttribute("aria-checked", "true")
+  },
+}
+
 export const ReadOnly: Story = {
   render: () => (
     <div className="flex flex-col gap-3 p-4">

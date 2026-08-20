@@ -9,6 +9,20 @@ interface StarRatingProps {
   size?: "sm" | "md" | "lg" | "xl"
   /** 右端に "2/5" 形式のテキストを表示 */
   showLabel?: boolean
+  /**
+   * 有効時、現在値と同じ星を再度クリック/タップすると onChange(0) を渡し
+   * 未評価状態に戻せるようにする（既定 false = 従来どおり再クリックでも値は変わらない）。
+   *
+   * 注: WAI-ARIA の radiogroup 慣習（radio はユーザー操作で未選択に戻せない）からの
+   * 意図的な逸脱。クリア後は aria-checked がすべて false になる。
+   */
+  allowClear?: boolean
+  /** interactive 時（onChange 指定時）の radiogroup 全体の aria-label。既定は "評価"。 */
+  label?: string
+  /** read-only 時の aria-label を組み立てる関数。既定は `${value}/${max}点`。 */
+  valueLabel?: (value: number, max: number) => string
+  /** interactive 時の各星（radio）の aria-label を組み立てる関数。既定は `${value}点`。 */
+  starLabel?: (value: number) => string
   className?: string
 }
 
@@ -67,6 +81,10 @@ function StarRating({
   max = 5,
   size = "md",
   showLabel = false,
+  allowClear = false,
+  label = "評価",
+  valueLabel = (v, m) => `${v}/${m}点`,
+  starLabel = (v) => `${v}点`,
   className,
 }: StarRatingProps) {
   const [hovered, setHovered] = React.useState<number | null>(null)
@@ -112,7 +130,7 @@ function StarRating({
       // 単一のまとまりとして読み上げさせる（axe: aria-prohibited-attr 対策。
       // role なし div への aria-label は無効）。
       role={interactive ? "radiogroup" : "img"}
-      aria-label={interactive ? "評価" : `${value}/${max}点`}
+      aria-label={interactive ? label : valueLabel(value, max)}
       className={cn("inline-flex items-center gap-1", className)}
     >
       {Array.from({ length: max }, (_, i) => {
@@ -148,9 +166,16 @@ function StarRating({
             size="icon-xl"
             role="radio"
             aria-checked={value === starValue}
-            aria-label={`${starValue}点`}
+            aria-label={starLabel(starValue)}
             tabIndex={starValue === selectedValue ? 0 : -1}
-            onClick={() => onChange?.(starValue)}
+            onClick={() => {
+              const clearing = allowClear && value === starValue
+              // クリア時は hover プレビューも消す。残すとポインタ/タッチ端末で
+              // display = hovered ?? value のまま星が塗られて見え、クリアの
+              // 視覚フィードバックが出ない。
+              if (clearing) setHovered(null)
+              onChange?.(clearing ? 0 : starValue)
+            }}
             onKeyDown={(event) => selectByKeyboard(event, starValue)}
             onMouseEnter={() => setHovered(starValue)}
             onMouseLeave={() => setHovered(null)}

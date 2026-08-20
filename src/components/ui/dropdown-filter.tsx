@@ -32,6 +32,8 @@ export interface DropdownFilterProps<K extends string = string> {
    * 例: "追加順" を pristine とすれば、追加順のときは「並び替え」と表示し pristine 配色に。
    */
   pristineValue?: K
+  /** オーバーレイを閉じる不可視ボタンの aria-label。既定は "閉じる"。 */
+  closeLabel?: string
   className?: string
 }
 
@@ -45,6 +47,7 @@ function DropdownFilter<K extends string = string>({
   getDisplayLabel,
   valueOnly = false,
   pristineValue,
+  closeLabel = "閉じる",
   className,
 }: DropdownFilterProps<K>) {
   const [open, setOpen] = React.useState(false)
@@ -105,7 +108,7 @@ function DropdownFilter<K extends string = string>({
         <>
           <button
             type="button"
-            aria-label="閉じる"
+            aria-label={closeLabel}
             className="fixed inset-0 z-[var(--Z-Overlay)]"
             onClick={() => setOpen(false)}
           />
