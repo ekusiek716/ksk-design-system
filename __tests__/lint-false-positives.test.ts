@@ -87,6 +87,46 @@ describe("issue #388: P026 の同一行 aria-label / aria-labelledby / id 判定
     const findings = findingsOf(result.stdout)
     expect(findings.filter((f) => f.ruleId === "P026")).toHaveLength(1)
   })
+
+  it("props が複数行に割れていても、タグ内の id を認識して違反にしない", () => {
+    const { result } = runKskLint(`
+      export function Example({ name, onName }) {
+        return (
+          <>
+            <Label htmlFor="create-name">名前</Label>
+            <input
+              id="create-name"
+              className="text-input"
+              value={name}
+              onChange={(e) => onName(e.target.value)}
+              maxLength={24}
+              placeholder="例：ゆい"
+            />
+          </>
+        )
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P026")).toHaveLength(0)
+  })
+
+  it("props が複数行に割れた id 無しの textarea は違反にする", () => {
+    const { result } = runKskLint(`
+      export function Example({ text, onText }) {
+        return (
+          <textarea
+            className="text-input area"
+            value={text}
+            onChange={(e) => onText(e.target.value)}
+            rows={3}
+            placeholder="例"
+          />
+        )
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P026")).toHaveLength(1)
+  })
 })
 
 describe("issue #389: P037 / P040 の上限付与と matchAll 化", () => {
