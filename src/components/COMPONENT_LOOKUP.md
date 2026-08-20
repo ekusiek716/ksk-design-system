@@ -128,7 +128,7 @@
 | FieldSet, FieldLegend, FieldGroup, FieldDescription, FieldError, FieldSeparator | `@/components/patterns/field` | — | 3セクションの長いフォーム, SeparatorWithLabel |
 | FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
 | FilterChip | `@/components/patterns/filter-chip` | — | Inactive, ActiveWithValue, Toggle, Group |
-| FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears |
+| FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears, WithIcon |
 | Footer | `@/components/patterns/footer` | — | Default, Minimal, WithRenderSlot, WithExtra, WithPaymentIcons |
 | FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |

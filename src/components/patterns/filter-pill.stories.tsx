@@ -6,6 +6,7 @@ import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { expect, userEvent, within, screen } from "storybook/test"
 import { FilterPill } from "./filter-pill"
+import { Location } from "iconsax-reactjs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 
@@ -123,5 +124,24 @@ export const OpensPanelAndClears: Story = {
       "false",
     )
     await expect(canvas.queryByRole("button", { name: "エリアをクリア" })).toBeNull()
+  },
+}
+
+/** ラベル左にアイコンを出す。アイコンは装飾（aria-hidden）でラベル読み上げは不変。 */
+export const WithIcon: Story = {
+  render: () => {
+    const [value, setValue] = React.useState<string | undefined>("渋谷区")
+    return (
+      <div className="p-4">
+        <FilterPill
+          label="エリア"
+          value={value}
+          onClear={() => setValue(undefined)}
+          icon={<Location size={16} aria-hidden />}
+        >
+          <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">エリア選択 UI</p>
+        </FilterPill>
+      </div>
+    )
   },
 }
