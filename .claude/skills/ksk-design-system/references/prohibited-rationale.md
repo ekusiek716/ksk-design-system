@@ -3,24 +3,52 @@
 > 正規表現・excludes の正本は `contracts/rules.json`。本ファイルは各ルールの
 > **rationale（防ぐ失敗）** を言語化した参照資料。ID は rules.json と対応。
 
-## appliesTo — ルールの適用範囲（web / native / グロブ）
+## appliesTo — ルールの適用範囲（capability タグ）
 
-各ルールは `appliesTo` で適用範囲を絞れる（issue #391）。**未指定は全プラットフォーム対象**
+各ルールは `appliesTo` で適用範囲を絞れる（issue #391）。**未指定は全ファイル対象**
 （後方互換）で、指定した場合は列挙のうち 1 つでも一致すれば適用する。
 
-- `"web"` / `"native"` — プラットフォーム識別子
-- `"*.css"` 等 — ファイル名グロブ（P049 が使用）
+値は「プラットフォーム」ではなく **capability（そのファイルがどの記法を持ちうるか）**:
 
-`["web"]` を付けるのは **Tailwind クラス・DOM 生タグ・CSS 変数/単位を前提にしたルール**。
-React Native に Tailwind クラスは存在せず、そのまま当てると誤検知しかしない
-（P032 は aikoibito mobile で 76 件全部が `borderColor: colors.border` の `.border` への誤爆だった）。
-逆に `#hex` 直書き（P008）や DS コンポーネントの再実装禁止（P033–P040 等）は
-プラットフォーム非依存なので `appliesTo` を付けず全対象のままにする。**迷ったら付けない。**
+| タグ | 意味 | 付けるルール |
+|---|---|---|
+| `dom` | 小文字の HTML 生タグ・`href` / `type` 等の DOM 属性が書ける | P001–P007, P024, P025, P027, P039, P045, AI8 |
+| `tailwind` | `className` に Tailwind クラスを書く（web ＋ **NativeWind** の RN） | P009–P013, P016–P023, P028–P032, P041, P042, P044, P046, P048, AI1–AI6, AI9 |
+| `web` | CSS 変数・CSS 単位が効く純 web | P015, AI7 |
+| `native` | React Native のファイル | （現時点で専用ルールなし） |
 
-ファイルの判定シグナルは `*.native.tsx` / `react-native` import /
-`ksk-design-system/native` import / `StyleSheet.create`。CLI の `--platform web|native` が
-ファイル判定より優先される。web 前提の fix 文言が native で実行不能なルールは
-`fixNative` を持たせる（P008: `var(--...)` → native のトークン）。
+`"*.css"` のようなグロブも書ける（P049 が使用）。旧語彙の `"web"` / `"native"` も
+capability として引き続き解釈される。
+
+### なぜ platform 二値ではないのか
+
+最初は `["web"]` / `["native"]` の二値で棚卸ししたが、**consumer の多く（exam-kit 系 11 アプリ）は
+NativeWind を使っており、RN でも `className` に Tailwind クラスを書く**。
+「RN だから Tailwind 系は全部外す」と倒すと、そちらの lint がほぼ無効化される
+（ap-app の実測で 858 件 → 66 件、92% 減）。
+一方 StyleSheet 系の RN（aikoibito mobile）では Tailwind 系は誤検知しかしない
+（P032 は 76 件全部が `borderColor: colors.border` の `.border` への誤爆だった）。
+この 2 つを両立させるには、ファイル側を `className` の有無で見分ける必要がある。
+
+ファイルの capability:
+
+- web（native シグナルなし）→ `{dom, tailwind, web}`
+- native ＋ `className` あり → `{native, tailwind}`
+- native ＋ `className` なし → `{native}`
+
+native の判定シグナルは `*.native.tsx` / `react-native` の **import 文** /
+`ksk-design-system/native` の import 文 / `StyleSheet.create`。
+文字列の中に import 文の見本があるだけのファイルを native 扱いしないよう、
+シグナルは行頭アンカー付きの構文形に限定している。
+CLI の `--platform web|native` がファイル判定より優先されるが、
+`--platform native` でも tailwind を持つかどうかはソースの `className` 有無で決める。
+
+### 付け方の原則
+
+`#hex` 直書き（P008）や DS コンポーネントの再実装禁止（P033–P040 等）は記法非依存なので
+`appliesTo` を付けず全対象のままにする。**迷ったら付けない。**
+web 前提の fix 文言が native で実行不能なルールは `fixNative` を持たせる
+（P008: `var(--...)` → native のトークン）。
 
 ## component — 生タグ・自作の禁止（P001–P007）
 
@@ -73,7 +101,7 @@ React Native に Tailwind クラスは存在せず、そのまま当てると誤
 - **P023 `outline-none`** → フォーカスリング削除はキーボード利用者に「今どこにいるか」を消す WCAG 違反。`focus-visible:ring-[3px] ring-[var(--Focus-High-Emphasis)]/50` に置換
 - **P024 `<div onClick>`** → キーボード・スクリーンリーダーから操作不能。`<Button>`
 - **P025 `<img>` alt なし** → SR が読めない。装飾は `alt=""` を明示
-- **P026 placeholder のみでラベル省略** → SR は placeholder を読まない。入力中に説明が消える。`<Label htmlFor>` + `id`、または `aria-label` / `aria-labelledby` を必須（lint は入力タグ内の id / aria-* の有無で判定）
+- **P026 placeholder のみでラベル省略** → SR は placeholder を読まない。入力中に説明が消える。`<Label htmlFor>` + `id`、または `aria-label` / `aria-labelledby` を必須。React Native は `accessibilityLabel` / `accessibilityLabelledBy`（lint は入力タグ内の id / aria-* / accessibility* の有無で判定）
 - **P027 メール欄に `type="text"`** → モバイルのメール用キーボードが出ない・ブラウザ検証が効かない
 
 ## ai-pattern / animation（P013, P014, P030）
