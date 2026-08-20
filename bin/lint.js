@@ -40,11 +40,182 @@ const DEFAULT_IGNORE_PATHS = [
   "android/app/src/main/assets/public",
 ]
 
+/** appliesTo に書けるプラットフォーム識別子（後方互換のため引き続き解釈する） */
+export const PLATFORMS = ["web", "native"]
+
+/**
+ * appliesTo に書ける capability（能力）タグ。プラットフォーム二値ではなく
+ * 「そのファイルがどの記法を持ちうるか」で表す（issue #391 のレビュー指摘）。
+ *
+ * - `dom`      … 小文字の HTML 生タグ・href/type 等の DOM 属性が書ける
+ * - `tailwind` … className に Tailwind クラスを書く（web / NativeWind の RN）
+ * - `web`      … CSS 変数・CSS 単位が効く純 web
+ * - `native`   … React Native のファイル
+ *
+ * これ以外の文字列はファイル名グロブとして解釈する（既存の `["*.css"]`）。
+ */
+export const CAPABILITIES = ["dom", "tailwind", "web", "native"]
+
+/**
+ * React Native のファイルであることを示すシグナル（issue #391）。
+ *
+ * import / require の**構文形**に絞っている。以前は `\bfrom\s*["']react-native["']`
+ * だけで見ていたため、文字列リテラルの中に import 文の見本を持つファイル
+ * （ドキュメント生成・コードテンプレート）が native 判定になっていた。
+ *
+ * 防御の役割分担（レビュー再現ケース）:
+ * - 通常クォート（' "）の文字列は**単一行**なので、行頭アンカー `^\s*(?:import|export)`
+ *   が防ぐ。`const s = "import { View } from 'react-native'"` は行頭が const なので
+ *   マッチしない。ここは温存する必要がある — import 指定子そのものが
+ *   `from "react-native"` という通常クォートだから。
+ * - 唯一の穴は**複数行を跨げるテンプレートリテラル**で、
+ *   `export const snippet = \`\nimport { View } from "react-native"\n\`` のように
+ *   行頭から始まる行を内側に持てる。これは maskTemplateLiterals() で潰す。
+ */
+const NATIVE_SOURCE_SIGNALS = [
+  // import / export ... from "react-native"（複数行 import も [^;] が改行を跨ぐ）
+  /^\s*(?:import|export)\b[^;]*\bfrom\s*["']react-native(?:\/[^"']*)?["']/m,
+  // 副作用 import: import "react-native"
+  /^\s*import\s*["']react-native(?:\/[^"']*)?["']/m,
+  /\brequire\(\s*["']react-native(?:\/[^"']*)?["']\s*\)/,
+  // DS の native エントリ
+  /^\s*(?:import|export)\b[^;]*\bfrom\s*["']ksk-design-system\/native(?:\/[^"']*)?["']/m,
+  /\brequire\(\s*["']ksk-design-system\/native(?:\/[^"']*)?["']\s*\)/,
+  // RN のスタイル定義。import 経由でなくても RN 判定に足る
+  /\bStyleSheet\s*\.\s*create\s*\(/,
+]
+
+/** `Foo.native.tsx` のようなプラットフォーム別サフィックス */
+const NATIVE_FILENAME_RE = /\.native\.[cm]?[jt]sx?$/
+
+/** .css ファイルの capability。CSS は純 web にしか存在しない */
+const CSS_CAPABILITIES = new Set(["dom", "tailwind", "web"])
+
+/**
+ * NativeWind（RN で className に Tailwind クラスを書く）の使用シグナル。
+ * exam-kit 系 11 アプリはこれを使っており、RN だからと Tailwind 系ルールを
+ * 一律に外すと lint がほぼ無効化される（ap-app で 858 件 → 66 件）。
+ *
+ * 判定は**文字列を全部マスクしたソース**に対して行う。JSX 属性の className= は
+ * 文字列の外側にあるので実 NativeWind は検出でき、
+ * `<WebView source={{ html: '<div className="legend-item">' }} />` のように
+ * 文字列の中に HTML を持つ StyleSheet ファイルは tailwind 扱いにならない
+ * （これを取りこぼすと P032 の 76 件誤検知が復活する）。
+ */
+const CLASSNAME_RE = /\bclassName\s*=/
+
+/**
+ * ファイル 1 つのプラットフォームを判定する（issue #391）。
+ *
+ * 優先順位は CLI の `--platform` > ファイル名サフィックス > ソース内シグナル。
+ * どのシグナルも無ければ従来どおり web 扱いにフォールバックする。
+ * コメント・テンプレートリテラルのマスクは内部で行うので、生ソースを渡してよい。
+ *
+ * @param {string} filePath 判定対象のパス（相対・絶対どちらでもよい）
+ * @param {string} source   ソース本文（生でよい）
+ * @param {"web"|"native"|null|undefined} override CLI の --platform
+ * @returns {"web"|"native"}
+ */
+export function detectPlatform(filePath, source = "", override = null) {
+  if (override === "native" || override === "web") return override
+  if (NATIVE_FILENAME_RE.test(normalize(filePath))) return "native"
+  // 通常クォートは残す（import 指定子の "react-native" を読む必要があるため）。
+  // 詳細は NATIVE_SOURCE_SIGNALS のコメントを参照。
+  const scanned = maskTemplateLiterals(maskComments(source))
+  if (NATIVE_SOURCE_SIGNALS.some((signal) => signal.test(scanned))) return "native"
+  return "web"
+}
+
+/**
+ * ファイル 1 つが持つ capability の集合を返す（issue #391 のレビュー指摘）。
+ *
+ * - web ファイル              → { dom, tailwind, web }
+ * - native ＋ className あり  → { native, tailwind }（NativeWind）
+ * - native ＋ className なし  → { native }（StyleSheet）
+ *
+ * `--platform native` を明示しても、Tailwind を持つかどうかはソース側の
+ * className 有無で決める。NativeWind の consumer が `--platform native` を
+ * 付けた瞬間に Tailwind 系ルールを失う、という事故を避けるため。
+ *
+ * @returns {Set<string>}
+ */
+export function detectCapabilities(filePath, source = "", override = null) {
+  const platform = detectPlatform(filePath, source, override)
+  if (platform === "web") return new Set(["dom", "tailwind", "web"])
+  const capabilities = new Set(["native"])
+  // className= は文字列の外側（JSX 属性）にあるものだけを数える
+  if (CLASSNAME_RE.test(maskStrings(maskComments(source)))) capabilities.add("tailwind")
+  return capabilities
+}
+
+/**
+ * `appliesTo` のエントリ 1 件をファイル名グロブとして照合する。
+ * 相対パス全体と basename の両方に当てる（`*.css` が `src/a.css` にも当たるように）。
+ */
+function matchesGlob(glob, filePath) {
+  const pattern = glob
+    .split(/(\*\*|\*|\?)/)
+    .map((part) => {
+      if (part === "**") return ".*"
+      if (part === "*") return "[^/]*"
+      if (part === "?") return "[^/]"
+      return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    })
+    .join("")
+  let regex
+  try {
+    regex = new RegExp(`^${pattern}$`)
+  } catch {
+    return false
+  }
+  const rel = normalize(filePath)
+  return regex.test(rel) || regex.test(rel.split("/").pop() ?? "")
+}
+
+/**
+ * `appliesTo` のエントリ 1 件を分類する。
+ * グロブ形の判定は「`*` を含む」または「`.` を含む」（`*.css` / `theme.css`）。
+ */
+function classifyAppliesToEntry(entry) {
+  if (typeof entry !== "string" || entry.length === 0) return "invalid"
+  if (CAPABILITIES.includes(entry)) return "capability"
+  if (entry.includes("*") || entry.includes(".")) return "glob"
+  return "invalid"
+}
+
+/**
+ * ルールを当該ファイルに適用してよいかを `appliesTo` で判定する（issue #391）。
+ *
+ * `appliesTo` 未指定は全ファイル対象（後方互換）。指定がある場合は
+ * capability タグとグロブの OR で、どれか 1 つでも一致すれば適用する。
+ * 旧語彙の `"web"` / `"native"` も capability 集合に含まれるのでそのまま動く。
+ *
+ * 未知の値（capability でもグロブでもない = typo）が 1 つでもあれば
+ * **全ファイル対象へ倒す（fail-open）**。閉じる側に倒すと、typo したルールが
+ * どのファイルにも当たらないまま静かに無効化される（fail-silent-closed）。
+ * 警告は loadRules() が実行ごとに 1 回 stderr へ出す。
+ */
+export function ruleAppliesTo(rule, { capabilities, filePath }) {
+  const appliesTo = rule?.appliesTo
+  if (!Array.isArray(appliesTo) || appliesTo.length === 0) return true
+  if (appliesTo.some((entry) => classifyAppliesToEntry(entry) === "invalid")) return true
+  const caps = capabilities instanceof Set ? capabilities : new Set(capabilities ?? [])
+  return appliesTo.some((entry) => {
+    if (classifyAppliesToEntry(entry) === "capability") return caps.has(entry)
+    return matchesGlob(entry, filePath)
+  })
+}
+
 export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(".") } = {}) {
   const options = parseArgs(argv)
   const rulesPath = resolve(pkgRoot, "contracts/rules.json")
   if (!existsSync(rulesPath)) {
     console.error(`contracts/rules.json が見つかりません: ${rulesPath}`)
+    return 1
+  }
+
+  if (options.platform && !PLATFORMS.includes(options.platform)) {
+    console.error(`--platform には ${PLATFORMS.join(" / ")} のいずれかを指定してください: ${options.platform}`)
     return 1
   }
 
@@ -83,9 +254,18 @@ function parseArgs(argv) {
   const excludes = []
   let format = "text"
   let changed = false
+  let platform = null
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
+    if (arg === "--platform") {
+      platform = argv[++i] ?? ""
+      continue
+    }
+    if (arg.startsWith("--platform=")) {
+      platform = arg.slice("--platform=".length)
+      continue
+    }
     if (arg === "--format") {
       format = argv[++i] ?? "text"
       continue
@@ -118,6 +298,9 @@ function parseArgs(argv) {
   --changed       Git の変更ファイルのみ検査
   --format json   JSON 出力
   --exclude TEXT  パスに TEXT を含むファイルを除外
+  --platform P    web / native を強制（既定はファイルごとに自動判定）
+                  自動判定のシグナル: *.native.tsx / react-native import /
+                  ksk-design-system/native import / StyleSheet.create
 
 例外:
   // ksk-ds-allow-custom-ui: domain-specific reason
@@ -131,6 +314,7 @@ function parseArgs(argv) {
     changed,
     excludes: excludes.filter(Boolean),
     format: format === "json" ? "json" : "text",
+    platform,
     targets: targets.length > 0 ? targets : ["."],
   }
 }
@@ -146,7 +330,30 @@ function loadRules(rulesPath) {
     ? contract.aiPatterns.patterns.map((rule) => ({ ...rule, category: "ai-pattern", severity: "warn" }))
     : []
 
-  return [...prohibited, ...aiPatterns].filter((rule) => typeof rule.pattern === "string" && rule.pattern.length > 0)
+  const rules = [...prohibited, ...aiPatterns].filter(
+    (rule) => typeof rule.pattern === "string" && rule.pattern.length > 0,
+  )
+  warnUnknownAppliesTo(rules)
+  return rules
+}
+
+/**
+ * appliesTo の typo を実行ごとに 1 回 stderr へ報告する（issue #391）。
+ * 適用そのものは ruleAppliesTo が fail-open（全ファイル対象）で扱うので、
+ * ここは気づかせるためだけの警告。stdout は --format json が使うので汚さない。
+ */
+function warnUnknownAppliesTo(rules) {
+  for (const rule of rules) {
+    if (!Array.isArray(rule.appliesTo)) continue
+    const unknown = rule.appliesTo.filter((entry) => classifyAppliesToEntry(entry) === "invalid")
+    if (unknown.length === 0) continue
+    console.error(
+      `[ksk-ds lint] ${rule.id ?? "UNKNOWN"}: appliesTo に未知の値があります: ` +
+        `${unknown.map((entry) => JSON.stringify(entry)).join(", ")}。` +
+        `指定できるのは capability（${CAPABILITIES.join(" / ")}）かグロブ（*.css 等）です。` +
+        `このルールは全ファイル対象として扱います`,
+    )
+  }
 }
 
 function collectTargetFiles(cwd, targets, options) {
@@ -222,10 +429,13 @@ function lintCssFile(file, cwd, cssRules, contract) {
 
   const findings = escape.invalid ? [escape.invalid] : []
   for (const rule of cssRules) {
+    // CSS は web のみに存在する（RN に .css は無い）。glob 指定の appliesTo は
+    // capability タグを含まないので、この判定でも従来どおり P049 が当たる。
+    if (!ruleAppliesTo(rule, { capabilities: CSS_CAPABILITIES, filePath: rel })) continue
     for (const violation of inspectProductThemeOverrides(source, contract)) {
       if (matchesRuleExclude(rule, rel, violation.name)) continue
       findings.push({
-        ...toFinding(rule, rel, violation.line),
+        ...toFinding(rule, rel, violation.line, "web"),
         message: `${rule.message ?? "product theme の許可リスト外の変数を上書きしています"}: ${violation.name}`,
       })
     }
@@ -233,7 +443,7 @@ function lintCssFile(file, cwd, cssRules, contract) {
   return findings
 }
 
-function lintFile(file, cwd, rules) {
+function lintFile(file, cwd, rules, options = {}) {
   const rel = normalize(relative(cwd, file))
   const source = readFileSync(file, "utf8")
   const escape = findEscape(source, rel)
@@ -248,13 +458,19 @@ function lintFile(file, cwd, rules) {
   // （改行はそのまま残し、コメント本文だけを同じ文字数の空白に置換するため）。
   const maskedSource = maskComments(source)
   const maskedLines = maskedSource.split(/\r?\n/)
+  // capability 判定に必要なマスク（コメント / 文字列 / テンプレート）は
+  // detectPlatform・detectCapabilities の内側で行うので、生の source を渡す。
+  // 種類ごとにマスク範囲が違うため、ここで作った maskedSource は流用できない。
+  const platform = detectPlatform(rel, source, options.platform)
+  const capabilities = detectCapabilities(rel, source, options.platform)
 
   for (const rule of rules) {
+    if (!ruleAppliesTo(rule, { capabilities, filePath: rel })) continue
     if (rule.engine === "card-direct-child-spacing") {
       for (const finding of inspectCardChildSpacing(source, file)) {
         const line = lines[finding.line - 1] ?? ""
         if (!matchesRuleExclude(rule, rel, line)) {
-          findings.push(toFinding(rule, rel, finding.line))
+          findings.push(toFinding(rule, rel, finding.line, platform))
         }
       }
       continue
@@ -279,7 +495,7 @@ function lintFile(file, cwd, rules) {
         // 判定は常にマスク前の生の行に対して行う。
         const rawLine = lines[lineNumber - 1] ?? ""
         if (matchesRuleExclude(rule, rel, rawLine)) continue
-        findings.push(toFinding(rule, rel, lineNumber))
+        findings.push(toFinding(rule, rel, lineNumber, platform))
       }
       continue
     }
@@ -288,14 +504,14 @@ function lintFile(file, cwd, rules) {
       if (matchesRuleExclude(rule, rel, rawLine)) continue
       const maskedLine = maskedLines[index] ?? ""
       if (!regex.test(maskedLine)) continue
-      findings.push(toFinding(rule, rel, index + 1))
+      findings.push(toFinding(rule, rel, index + 1, platform))
     }
   }
 
   return findings
 }
 
-function toFinding(rule, file, line) {
+function toFinding(rule, file, line, platform = "web") {
   return {
     file,
     line,
@@ -303,7 +519,9 @@ function toFinding(rule, file, line) {
     severity: rule.severity === "error" ? "error" : "warn",
     category: rule.category ?? "pattern",
     message: rule.message ?? rule.name ?? "DS rule violation",
-    fix: rule.fix ?? "",
+    // native ファイルには Web 前提の修正提案（var(--...) 等）が実行不能なので、
+    // ルールが fixNative を持つならそちらを出す（issue #391）。
+    fix: (platform === "native" ? rule.fixNative : null) ?? rule.fix ?? "",
   }
 }
 
@@ -404,6 +622,75 @@ function maskComments(source) {
   }
 
   return result
+}
+
+/** 文字数と行番号を保ったまま 1 文字を潰す（改行だけは残す） */
+function blankChar(ch) {
+  return ch === "\n" || ch === "\r" ? ch : " "
+}
+
+const ALL_STRING_DELIMITERS = new Set(["'", '"', "`"])
+const TEMPLATE_DELIMITER_ONLY = new Set(["`"])
+
+/**
+ * 文字列リテラルの**中身**を同じ文字数の空白へ置換したソースを返す（issue #391）。
+ * クォート記号そのものは残し、改行もそのまま残すので、文字インデックス・行番号は
+ * 元の source と完全に一致する。
+ *
+ * `delimiters` でどの種類の文字列を潰すかを選べる。どの場合も ' " ` の 3 種すべてを
+ * **追跡**する（通常文字列の中のバッククォートをテンプレート開始と誤認しないため）が、
+ * 中身を潰すのは `delimiters` に含まれる区切り文字の文字列だけ。
+ *
+ * 既知の限界（maskComments と同じ簡易スキャナのため）:
+ * - テンプレートリテラルの `${ ... }` 式の内側は追跡せず、テンプレートの一部として
+ *   丸ごと文字列扱いにする
+ * - JS の正規表現リテラル（/foo\/bar/）は専用に解釈しない
+ * - JSX テキスト中のアポストロフィ（`<Text>don't</Text>`）は文字列開始として
+ *   扱われる。この場合 className= を見落として tailwind capability が付かない側に
+ *   倒れる（＝ルールを外す方向で、誤検知を増やす方向ではない）
+ */
+function maskStrings(source, delimiters = ALL_STRING_DELIMITERS) {
+  let result = ""
+  let stringChar = null
+  const n = source.length
+  let i = 0
+
+  while (i < n) {
+    const ch = source[i]
+
+    if (stringChar) {
+      const shouldBlank = delimiters.has(stringChar)
+      // エスケープはペアで読み飛ばす（\" が文字列を閉じないように）
+      if (ch === "\\" && i + 1 < n) {
+        result += shouldBlank ? blankChar(ch) + blankChar(source[i + 1]) : ch + source[i + 1]
+        i += 2
+        continue
+      }
+      if (ch === stringChar) {
+        stringChar = null
+        result += ch
+        i += 1
+        continue
+      }
+      result += shouldBlank ? blankChar(ch) : ch
+      i += 1
+      continue
+    }
+
+    if (ALL_STRING_DELIMITERS.has(ch)) stringChar = ch
+    result += ch
+    i += 1
+  }
+
+  return result
+}
+
+/**
+ * テンプレートリテラル（バッククォート）の中身だけを潰す。
+ * 通常クォートは温存するので `import { View } from "react-native"` は読めるままになる。
+ */
+function maskTemplateLiterals(source) {
+  return maskStrings(source, TEMPLATE_DELIMITER_ONLY)
 }
 
 function matchesRuleExclude(rule, file, line) {

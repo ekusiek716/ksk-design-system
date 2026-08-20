@@ -95,7 +95,27 @@ consumer 側のローカル grep script が古くならないよう、DS 本体�
 npx ksk-ds lint src
 npx ksk-ds lint src --format json
 npx ksk-ds lint --changed
+npx ksk-ds lint src --platform native
 ```
+
+ルールはファイルごとに **capability（そのファイルがどの記法を持ちうるか）** を判定して
+出し分けます（`contracts/rules.json` の `appliesTo`）。
+
+| ファイル | capability | 当たるルール |
+|---|---|---|
+| web（native シグナルなし） | `dom` `tailwind` `web` | 全部 |
+| React Native ＋ `className` あり（**NativeWind**） | `native` `tailwind` | Tailwind 系は当たる／DOM 生タグ系と CSS 変数系は外れる |
+| React Native ＋ `className` なし（**StyleSheet**） | `native` | Tailwind 系も外れる |
+
+native の判定シグナルは `*.native.tsx` というファイル名、`react-native` /
+`ksk-design-system/native` の **import 文**、`StyleSheet.create` の使用です。
+自動判定が合わない場合は `--platform web` / `--platform native` で上書きできます
+（ファイル判定より優先）。ただし `--platform native` を付けても Tailwind を持つかどうかは
+ソースの `className` の有無で決まるので、NativeWind の consumer が Tailwind 系ルールを
+失うことはありません。
+
+`appliesTo` を持たないルール（`#hex` 直書きの P008 等）は従来どおり全ファイルに適用され、
+native では RN 向けの fix 文言を表示します。
 
 出力は `file:line rule severity fix` を含みます。どうしても DS で表現できない domain-specific UI は、理由付きの escape コメントを置きます。
 
