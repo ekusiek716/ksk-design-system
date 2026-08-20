@@ -77,7 +77,6 @@ for (const rule of prohibited) {
     continue
   }
   try {
-    // eslint-disable-next-line no-new
     new RegExp(rule.pattern)
   } catch (error) {
     errors.push(`${rule.id}: pattern が正規表現としてコンパイル不能（${error.message}）`)
@@ -98,7 +97,6 @@ for (const rule of aiPatterns) {
     continue
   }
   try {
-    // eslint-disable-next-line no-new
     new RegExp(rule.pattern)
   } catch (error) {
     errors.push(`${rule.id}: pattern が正規表現としてコンパイル不能（${error.message}）`)
