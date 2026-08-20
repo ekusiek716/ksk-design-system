@@ -87,6 +87,50 @@ import { Button, Card, Input, FormField } from "ksk-design-system"
 
 新規クライアント案件では、テーマファイルで `--Primitive-Brand-500` などブランドカラーの 10 行を定義するだけで、全コンポーネントがそのブランドカラーで動作します。
 
+### 段階移行レシピ（既存 CSS を保ったまま DS 化する）
+
+既存の手書き CSS で作られた画面を DS へ移すときは、**見た目を後回しにして挙動と
+アクセシビリティだけ先に統一する**のが最も安全です。生タグ（`<button>` / `<input>` /
+`<textarea>`）を DS コンポーネントへ置き換え、既存クラスを `className` へ渡し、
+`unstyled` を付けます。
+
+```tsx
+// before — 生タグ + 手書き CSS
+<button className="btn btn-primary" onClick={submit}>ログイン</button>
+<textarea className="composer-input" value={text} onChange={onChange} />
+
+// after — 挙動と a11y は DS、見た目は既存 CSS のまま
+<Button unstyled className="btn btn-primary" onClick={submit}>ログイン</Button>
+<Textarea unstyled className="composer-input" value={text} onChange={onChange} />
+```
+
+**なぜ `unstyled` が要るのか。** 手書き CSS は非レイヤー、DS のユーティリティは
+`@layer utilities` なので、宣言が衝突すれば手書き側が勝ちます。しかし手書きクラスの
+大半は height / white-space / font-weight / border-radius / background を宣言して
+おらず、**衝突しないプロパティは DS の base + variant がそのまま効きます**。
+`className` を渡すだけでは見た目は保てません。aikoibito web の実測では、
+チャット入力欄が `--Field-Min-Height: 5rem` の流入で **43px → 80px** に、
+ログイン CTA が **52px → 40px** に変わりました（issue #420）。
+
+`unstyled` を付けたときに DS が出すのは次だけです。
+
+| コンポーネント | 維持されるもの | 出さないもの |
+|---|---|---|
+| `Button` | `type` 既定 `"button"` / disabled・aria-disabled クリックの抑止 / `haptic` / `asChild` | `inline-flex` `items-center` `justify-center` `gap-*` `whitespace-nowrap` `typo-*` `cursor-pointer` と variant・size・layout の全クラス |
+| `Input` | `showCount`（IME 追従）/ adornment の配置土台 | `h-*` `w-full` `border-*` `bg-*` `px-*` `typo-*` `placeholder:*` |
+| `Textarea` | `autoGrow` / `showCount` | `min-h-*` `w-full` `border-*` `bg-*` `px-*` `py-*` `typo-*` `placeholder:*` |
+
+キーボード操作時の `focus-visible` リングだけは a11y のため既定で残ります。手書き CSS が
+自前のフォーカス表現を持つ場合は `className="focus-visible:ring-0"` で消せます。
+
+移行の順番は次のとおりです。
+
+1. 生タグを DS コンポーネント + `unstyled` + 既存クラスへ置き換える（見た目は 1px も変わらない）
+2. この状態で `npx ksk-ds lint src` の P001〜P006 を通す
+3. 画面ごとに、既存クラスを DS のトークン・variant へ置き換えて `unstyled` を外す
+
+`unstyled` は移行の足場であって最終形ではありません。3 が済んだ画面から順に外してください。
+
 ### Consumer lint
 
 consumer 側のローカル grep script が古くならないよう、DS 本体から `contracts/rules.json` を読む lint CLI を同梱しています。

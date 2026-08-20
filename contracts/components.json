@@ -63,6 +63,11 @@
         "icon-fab",
         "match"
       ],
+      "props": {
+        "asChild": "boolean — 子要素へ見た目と操作属性を委譲（リンクを Button として見せる）",
+        "haptic": "\"light\" | \"medium\" | \"heavy\" | \"warning\" — navigator.vibrate()",
+        "unstyled": "boolean — 視覚クラスを出さず挙動と a11y だけ提供（段階移行用 / issue #420）"
+      },
       "accessibility": [
         "aria-label required for icon-only buttons",
         "Native loading state sets accessibility busy"
@@ -75,7 +80,8 @@
         "variant=glass は背景がグラデーション/写真の場合のみ使用",
         "variant=glass-inverse は暗い写真・動画・濃色面上の Liquid Glass CTA 専用",
         "variant=inverse / ghost-inverse は暗背景・ヒーローセクション専用",
-        "size=hero は hero / final-CTA 専用（ピル型 56px）"
+        "size=hero は hero / final-CTA 専用（ピル型 56px）",
+        "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（variant / size は無視され、focus ring 以外の視覚クラスを出さない）"
       ]
     },
     {
@@ -84,13 +90,20 @@
       "path": "src/components/ui/input.tsx",
       "description": "テキスト入力フィールド。h-12, rounded-sm, セマンティックトークン使用。必ずLabelとセットで使う。",
       "variants": [],
+      "props": {
+        "startAdornment": "ReactNode — 左側の装飾（単位記号・アイコン等）",
+        "endAdornment": "ReactNode — 右側の装飾（クリアボタン等・pointer-events 有効）",
+        "showCount": "boolean — maxLength とセットで文字数カウンタ（IME 追従）",
+        "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）"
+      },
       "accessibility": [
         "Must pair with <Label>"
       ],
       "rules": [
         "Must use <Input> not <input>",
         "showCount + maxLength で controlled / uncontrolled / IME 対応の文字数カウンタを表示",
-        "showCount 未指定時は wrapper / counter DOM を追加しない"
+        "showCount 未指定時は wrapper / counter DOM を追加しない",
+        "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（showCount / adornment / IME 追従は維持される）"
       ]
     },
     {
@@ -206,13 +219,19 @@
       "path": "src/components/ui/textarea.tsx",
       "description": "複数行テキスト入力。コメント・説明文など長文入力に使用。必ずLabelとセットで使う。",
       "variants": [],
+      "props": {
+        "autoGrow": "boolean — 入力内容に合わせて高さを自動伸縮",
+        "showCount": "boolean — maxLength とセットで文字数カウンタ（IME 追従）",
+        "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）"
+      },
       "accessibility": [
         "Must pair with <Label>"
       ],
       "rules": [
         "Must use <Textarea> not <textarea>",
         "showCount + maxLength で controlled / uncontrolled / IME 対応の文字数カウンタを表示",
-        "showCount 未指定時は wrapper / counter DOM を追加しない"
+        "showCount 未指定時は wrapper / counter DOM を追加しない",
+        "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（autoGrow / showCount は維持される）"
       ]
     },
     {
