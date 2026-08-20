@@ -232,10 +232,10 @@
       "id": "P026",
       "severity": "warning",
       "category": "form",
-      "pattern": "placeholder=.*(?!.*<Label|.*<label)",
+      "pattern": "^(?!.*\\b(?:aria-labelledby|aria-label|id)=).*placeholder=",
       "excludes": [".stories.", "components/ui/", "components/patterns/"],
-      "message": "placeholder のみでラベルを省略しない",
-      "fix": "<Label> を必ず付ける（スクリーンリーダーはplaceholderを読まない）"
+      "message": "placeholder のみでラベルを省略しない（同一行に aria-label / aria-labelledby / id のいずれも無い）",
+      "fix": "aria-label か aria-labelledby を付けるか、id と <Label htmlFor> を対応させる（別行の <Label> は行単位の lint では検出できないため、id の有無で判定している）"
     },
     {
       "id": "P027",
