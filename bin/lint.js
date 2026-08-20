@@ -40,11 +40,94 @@ const DEFAULT_IGNORE_PATHS = [
   "android/app/src/main/assets/public",
 ]
 
+/** appliesTo に書けるプラットフォーム識別子（これ以外はグロブとして解釈する） */
+export const PLATFORMS = ["web", "native"]
+
+/**
+ * React Native のファイルであることを示す import / API シグナル（issue #391）。
+ * - `from "react-native"`（サブパス・`require()` も含む）
+ * - `from "ksk-design-system/native"`（DS の native エントリ）
+ * - `StyleSheet.create(`（RN のスタイル定義。import 経由でなくても RN 判定に足る）
+ */
+const NATIVE_SOURCE_SIGNALS = [
+  /\bfrom\s*["']react-native(?:\/[^"']*)?["']/,
+  /\brequire\(\s*["']react-native(?:\/[^"']*)?["']\s*\)/,
+  /["']ksk-design-system\/native(?:\/[^"']*)?["']/,
+  /\bStyleSheet\s*\.\s*create\s*\(/,
+]
+
+/** `Foo.native.tsx` のようなプラットフォーム別サフィックス */
+const NATIVE_FILENAME_RE = /\.native\.[cm]?[jt]sx?$/
+
+/**
+ * ファイル 1 つのプラットフォームを判定する（issue #391）。
+ *
+ * 優先順位は CLI の `--platform` > ファイル名サフィックス > ソース内シグナル。
+ * どのシグナルも無ければ従来どおり web 扱い（＝全ルール適用）にフォールバックする。
+ *
+ * @param {string} filePath 判定対象のパス（相対・絶対どちらでもよい）
+ * @param {string} source   ソース本文。コメントをマスクしたものを渡すと、
+ *                          コメント中の "react-native" で誤判定しない
+ * @param {"web"|"native"|null|undefined} override CLI の --platform
+ * @returns {"web"|"native"}
+ */
+export function detectPlatform(filePath, source = "", override = null) {
+  if (override === "native" || override === "web") return override
+  if (NATIVE_FILENAME_RE.test(normalize(filePath))) return "native"
+  if (NATIVE_SOURCE_SIGNALS.some((signal) => signal.test(source))) return "native"
+  return "web"
+}
+
+/**
+ * `appliesTo` のエントリ 1 件をファイル名グロブとして照合する。
+ * 相対パス全体と basename の両方に当てる（`*.css` が `src/a.css` にも当たるように）。
+ */
+function matchesGlob(glob, filePath) {
+  const pattern = glob
+    .split(/(\*\*|\*|\?)/)
+    .map((part) => {
+      if (part === "**") return ".*"
+      if (part === "*") return "[^/]*"
+      if (part === "?") return "[^/]"
+      return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    })
+    .join("")
+  let regex
+  try {
+    regex = new RegExp(`^${pattern}$`)
+  } catch {
+    return false
+  }
+  const rel = normalize(filePath)
+  return regex.test(rel) || regex.test(rel.split("/").pop() ?? "")
+}
+
+/**
+ * ルールを当該ファイルに適用してよいかを `appliesTo` で判定する（issue #391）。
+ *
+ * `appliesTo` 未指定は「全プラットフォーム対象」（後方互換）。指定がある場合は
+ * プラットフォーム識別子とグロブの OR で、どれか 1 つでも一致すれば適用する。
+ */
+export function ruleAppliesTo(rule, { platform, filePath }) {
+  const appliesTo = rule?.appliesTo
+  if (!Array.isArray(appliesTo) || appliesTo.length === 0) return true
+  return appliesTo.some((entry) => {
+    if (typeof entry !== "string" || entry.length === 0) return false
+    if (PLATFORMS.includes(entry)) return entry === platform
+    return matchesGlob(entry, filePath)
+  })
+}
+
 export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(".") } = {}) {
   const options = parseArgs(argv)
   const rulesPath = resolve(pkgRoot, "contracts/rules.json")
   if (!existsSync(rulesPath)) {
     console.error(`contracts/rules.json が見つかりません: ${rulesPath}`)
+    return 1
+  }
+
+  if (options.platform && !PLATFORMS.includes(options.platform)) {
+    console.error(`--platform には ${PLATFORMS.join(" / ")} のいずれかを指定してください: ${options.platform}`)
     return 1
   }
 
@@ -83,9 +166,18 @@ function parseArgs(argv) {
   const excludes = []
   let format = "text"
   let changed = false
+  let platform = null
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
+    if (arg === "--platform") {
+      platform = argv[++i] ?? ""
+      continue
+    }
+    if (arg.startsWith("--platform=")) {
+      platform = arg.slice("--platform=".length)
+      continue
+    }
     if (arg === "--format") {
       format = argv[++i] ?? "text"
       continue
@@ -118,6 +210,9 @@ function parseArgs(argv) {
   --changed       Git の変更ファイルのみ検査
   --format json   JSON 出力
   --exclude TEXT  パスに TEXT を含むファイルを除外
+  --platform P    web / native を強制（既定はファイルごとに自動判定）
+                  自動判定のシグナル: *.native.tsx / react-native import /
+                  ksk-design-system/native import / StyleSheet.create
 
 例外:
   // ksk-ds-allow-custom-ui: domain-specific reason
@@ -131,6 +226,7 @@ function parseArgs(argv) {
     changed,
     excludes: excludes.filter(Boolean),
     format: format === "json" ? "json" : "text",
+    platform,
     targets: targets.length > 0 ? targets : ["."],
   }
 }
@@ -222,10 +318,13 @@ function lintCssFile(file, cwd, cssRules, contract) {
 
   const findings = escape.invalid ? [escape.invalid] : []
   for (const rule of cssRules) {
+    // CSS は web のみに存在する（RN に .css は無い）。glob 指定の appliesTo は
+    // platform 識別子を含まないので、この判定でも従来どおり P049 が当たる。
+    if (!ruleAppliesTo(rule, { platform: "web", filePath: rel })) continue
     for (const violation of inspectProductThemeOverrides(source, contract)) {
       if (matchesRuleExclude(rule, rel, violation.name)) continue
       findings.push({
-        ...toFinding(rule, rel, violation.line),
+        ...toFinding(rule, rel, violation.line, "web"),
         message: `${rule.message ?? "product theme の許可リスト外の変数を上書きしています"}: ${violation.name}`,
       })
     }
@@ -233,7 +332,7 @@ function lintCssFile(file, cwd, cssRules, contract) {
   return findings
 }
 
-function lintFile(file, cwd, rules) {
+function lintFile(file, cwd, rules, options = {}) {
   const rel = normalize(relative(cwd, file))
   const source = readFileSync(file, "utf8")
   const escape = findEscape(source, rel)
@@ -248,13 +347,17 @@ function lintFile(file, cwd, rules) {
   // （改行はそのまま残し、コメント本文だけを同じ文字数の空白に置換するため）。
   const maskedSource = maskComments(source)
   const maskedLines = maskedSource.split(/\r?\n/)
+  // プラットフォーム判定はコメントをマスクしたソースに対して行う
+  // （コメント中の「react-native」で native 判定にならないように / issue #391）。
+  const platform = detectPlatform(rel, maskedSource, options.platform)
 
   for (const rule of rules) {
+    if (!ruleAppliesTo(rule, { platform, filePath: rel })) continue
     if (rule.engine === "card-direct-child-spacing") {
       for (const finding of inspectCardChildSpacing(source, file)) {
         const line = lines[finding.line - 1] ?? ""
         if (!matchesRuleExclude(rule, rel, line)) {
-          findings.push(toFinding(rule, rel, finding.line))
+          findings.push(toFinding(rule, rel, finding.line, platform))
         }
       }
       continue
@@ -279,7 +382,7 @@ function lintFile(file, cwd, rules) {
         // 判定は常にマスク前の生の行に対して行う。
         const rawLine = lines[lineNumber - 1] ?? ""
         if (matchesRuleExclude(rule, rel, rawLine)) continue
-        findings.push(toFinding(rule, rel, lineNumber))
+        findings.push(toFinding(rule, rel, lineNumber, platform))
       }
       continue
     }
@@ -288,14 +391,14 @@ function lintFile(file, cwd, rules) {
       if (matchesRuleExclude(rule, rel, rawLine)) continue
       const maskedLine = maskedLines[index] ?? ""
       if (!regex.test(maskedLine)) continue
-      findings.push(toFinding(rule, rel, index + 1))
+      findings.push(toFinding(rule, rel, index + 1, platform))
     }
   }
 
   return findings
 }
 
-function toFinding(rule, file, line) {
+function toFinding(rule, file, line, platform = "web") {
   return {
     file,
     line,
@@ -303,7 +406,9 @@ function toFinding(rule, file, line) {
     severity: rule.severity === "error" ? "error" : "warn",
     category: rule.category ?? "pattern",
     message: rule.message ?? rule.name ?? "DS rule violation",
-    fix: rule.fix ?? "",
+    // native ファイルには Web 前提の修正提案（var(--...) 等）が実行不能なので、
+    // ルールが fixNative を持つならそちらを出す（issue #391）。
+    fix: (platform === "native" ? rule.fixNative : null) ?? rule.fix ?? "",
   }
 }
 
