@@ -36,6 +36,19 @@ export interface MobileFloatingActionButtonProps extends Omit<PressableProps, "c
    */
   variant?: MobileFloatingActionButtonVariant
   style?: StyleProp<ViewStyle>
+  /**
+   * `bottomOffset` プリセット値へ加算する追加オフセット（pt）。
+   *
+   * 画面下に広告バナー（AdMob 等）を出すアプリで、バナーの高さぶん FAB を
+   * 持ち上げる用途を想定。既定は未指定（＝加算なし・既存の挙動を変えない）。
+   * web 版（`bottomOffsetExtra?: string`＝CSS length）と異なり、native は
+   * 数値の pt で受け取る。
+   *
+   * @example
+   * // AdMob バナー（高さは SDK から取得した値）の分だけ FAB を持ち上げる
+   * <MobileFloatingActionButton label="追加する" bottomOffsetExtra={admobBannerHeight} />
+   */
+  bottomOffsetExtra?: number
 }
 
 export function MobileFloatingActionButton({
@@ -47,6 +60,7 @@ export function MobileFloatingActionButton({
   keyboardBehavior = "hide",
   variant = "default",
   style,
+  bottomOffsetExtra,
   ...rest
 }: MobileFloatingActionButtonProps) {
   const { theme, scales, mode } = useTheme()
@@ -76,7 +90,10 @@ export function MobileFloatingActionButton({
         ? { left: scales.spacing.scale[4] }
         : { right: scales.spacing.scale[4] }
 
-  const bottom = bottomMap[bottomOffset] + (keyboardBehavior === "lift" && keyboardOpen ? 160 : 0)
+  const bottom =
+    bottomMap[bottomOffset] +
+    (bottomOffsetExtra ?? 0) +
+    (keyboardBehavior === "lift" && keyboardOpen ? 160 : 0)
   const radius = scales.borderRadius.full
   const box = {
     minHeight: 48,

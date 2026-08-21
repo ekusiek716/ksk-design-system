@@ -1603,7 +1603,8 @@
         "placement: start / end / center",
         "bottomOffset: none / bottom-nav / bottom-nav-pill / bottom-nav-pill-inline",
         "keyboardBehavior: hide / lift / stay",
-        "fullWidth: true / false"
+        "fullWidth: true / false",
+        "bottomOffsetExtra: CSS length（web）/ number pt（native）。bottomOffset プリセット値へ加算する任意の追加オフセット"
       ],
       "accessibility": [
         "label prop is required and used as aria-label"
@@ -1615,7 +1616,8 @@
         "pill BottomTabBar の上に重ねる場合は bottomOffset=bottom-nav-pill、横並びに置く場合は bottomOffset=bottom-nav-pill-inline を使う",
         "keyboard 表示中に入力を邪魔する場合は keyboardBehavior=hide を使う",
         "variant=glass に shadow-* を重ねない（glass-accent が inset 3層 + drop shadow を内包するため二重になる）",
-        "下部固定の全幅 CTA は fullWidth を使い、fixed inset-x + Button を手組みしない。fullWidth 時は placement が無視されラベルが常に表示される"
+        "下部固定の全幅 CTA は fullWidth を使い、fixed inset-x + Button を手組みしない。fullWidth 時は placement が無視されラベルが常に表示される",
+        "広告バナー等で動的に持ち上げる必要があるときは、内部変数 --ksk-fab-bottom-offset を直接上書きせず bottomOffsetExtra を使う（issue #453）"
       ]
     },
     {

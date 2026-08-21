@@ -444,3 +444,11 @@ export {
   getCategoricalBold,
 } from "./lib/category-presets"
 export type { CategoryPresetItem } from "./lib/category-presets"
+// カテゴリ識別色（--Categorical-1..16）の consumer 向け公開ヘルパー（issue #452）
+export {
+  CATEGORICAL_SURFACE_CLASS,
+  CATEGORICAL_DOT_CLASS,
+  categoricalSurfaceClass,
+  categoricalVar,
+} from "./lib/categorical"
+export type { CategoricalIndex } from "./lib/categorical"
