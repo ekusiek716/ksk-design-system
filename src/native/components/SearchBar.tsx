@@ -1,9 +1,14 @@
 import React from "react"
-import { Pressable, TextInput, View, Text as RNText } from "react-native"
+import { Pressable, TextInput, View, Text as RNText, type AccessibilityProps } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 
-export interface SearchBarProps {
+/**
+ * `AccessibilityProps` を継承しているため、`accessibilityLabel` /
+ * `accessibilityHint` / `accessibilityState` / `accessibilityRole` を
+ * そのまま渡せる（issue #465）。内部の `TextInput` へそのまま転送する。
+ */
+export interface SearchBarProps extends AccessibilityProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
@@ -19,6 +24,11 @@ export function SearchBar({
   onSubmit,
   onClear,
   autoFocus,
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityRole,
+  accessibilityState,
+  ...accessibilityProps
 }: SearchBarProps) {
   const { theme, scales } = useTheme()
   return (
@@ -42,6 +52,11 @@ export function SearchBar({
         placeholderTextColor={theme.text["low-emphasis"]}
         returnKeyType="search"
         autoFocus={autoFocus}
+        accessibilityLabel={accessibilityLabel ?? placeholder}
+        accessibilityHint={accessibilityHint}
+        accessibilityRole={accessibilityRole}
+        accessibilityState={accessibilityState}
+        {...accessibilityProps}
         style={[
           resolveTypo("body.md"),
           { flex: 1, color: theme.text["high-emphasis"], paddingVertical: 0 },
