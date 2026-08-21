@@ -243,6 +243,9 @@
       "path": "src/components/ui/label.tsx",
       "description": "フォームラベル。すべての入力コントロールに対して必須。htmlForで入力と紐付ける。",
       "variants": [],
+      "props": {
+        "unstyled": "boolean — typo-label-md・文字色・peer-disabled 系クラスを出さず Radix Label の挙動だけ提供（段階移行用 / issue #443, #420の続き）"
+      },
       "rules": [
         "Always pair with form control via htmlFor"
       ]
