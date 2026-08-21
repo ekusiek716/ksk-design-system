@@ -19,6 +19,11 @@ export interface MultiSelectProps {
   placeholder?: string
   searchPlaceholder?: string
   disabled?: boolean
+  /**
+   * trigger の accessibilityLabel（issue #426）。
+   * 未指定時は未選択なら placeholder、選択済みなら表示中のサマリーテキストが読み上げられる。
+   */
+  accessibilityLabel?: string
 }
 
 export function MultiSelect({
@@ -28,6 +33,7 @@ export function MultiSelect({
   placeholder = "選択してください",
   searchPlaceholder = "検索...",
   disabled = false,
+  accessibilityLabel,
 }: MultiSelectProps) {
   const { theme, scales } = useTheme()
   const [open, setOpen] = useState(false)
@@ -56,6 +62,8 @@ export function MultiSelect({
           setOpen(true)
         }}
         disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel ?? summary}
         style={{
           flexDirection: "row",
           alignItems: "center",

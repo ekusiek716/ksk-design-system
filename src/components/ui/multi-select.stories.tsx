@@ -32,3 +32,22 @@ export const Default: Story = {
     )
   },
 }
+
+/** issue #426: 可視ラベルを置けない文脈（テーブルセル等）向けに triggerLabel で SR 向けラベルを渡す */
+export const WithTriggerLabel: Story = {
+  render: () => {
+    const [value, setValue] = React.useState<string[]>([])
+    return (
+      <div className="w-80">
+        <MultiSelect
+          options={skills}
+          value={value}
+          onChange={setValue}
+          placeholder="スキルを選択"
+          triggerLabel="得意なスキル"
+        />
+        <p className="mt-2 typo-body-sm text-[var(--Text-Medium-Emphasis)]">選択: {value.join(", ") || "なし"}</p>
+      </div>
+    )
+  },
+}

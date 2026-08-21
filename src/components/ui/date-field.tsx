@@ -36,6 +36,12 @@ interface DateFieldProps {
   className?: string
   /** DatePicker に渡す表示フォーマット（trigger の表示のみ。value/onChange は常に ISO 文字列） */
   dateFormat?: string
+  /**
+   * trigger のスクリーンリーダー向けラベル（issue #426）。
+   * 未指定時は選択済みの日付、未選択なら placeholder が読み上げられる（内部 DatePicker のフォールバック）。
+   * `<Label htmlFor>` と対応させる場合は id 連携でも可（P026 は id / aria-label のいずれでも解消）。
+   */
+  triggerLabel?: string
 }
 
 /**
@@ -46,7 +52,7 @@ interface DateFieldProps {
  * strToDate/dateToStr は `new Date(y, m-1, d)` のローカルタイム方式で
  * UTC 変換を経由しないため、日付が前後にずれない。
  */
-function DateField({ value, onChange, placeholder, disabled, className, dateFormat }: DateFieldProps) {
+function DateField({ value, onChange, placeholder, disabled, className, dateFormat, triggerLabel }: DateFieldProps) {
   // 毎レンダーで新しい Date インスタンスを作ると、選択直後の閉じアニメーション中に
   // Calendar が identity 変化で再レンダーされ、ちらつきの一因になる。value 基準で固定する。
   const date = React.useMemo(() => strToDate(value), [value])
@@ -66,6 +72,7 @@ function DateField({ value, onChange, placeholder, disabled, className, dateForm
         placeholder={placeholder}
         disabled={disabled}
         dateFormat={dateFormat}
+        triggerLabel={triggerLabel}
       />
     </div>
   )

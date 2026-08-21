@@ -211,7 +211,10 @@
       "rules": [
         "value/onChange は常に \"YYYY-MM-DD\" 文字列。Date オブジェクトを直接渡さない",
         "strToDate/dateToStr は new Date(y, m-1, d) のローカルタイム方式（TZ ずれ回避）"
-      ]
+      ],
+      "props": {
+        "triggerLabel": "string — trigger のスクリーンリーダー向けラベル。未指定時は選択済みの日付/placeholder が読み上げられる（issue #426。React Native 版は accessibilityLabel）"
+      }
     },
     {
       "name": "Textarea",
@@ -1037,7 +1040,8 @@
         "3 件以上選択する用途に。少数なら CheckboxGroup を優先"
       ],
       "props": {
-        "clearLabel": "string (既定 \"選択をクリア\") — クリアボタンの aria-label（issue #428）"
+        "clearLabel": "string (既定 \"選択をクリア\") — クリアボタンの aria-label（issue #428）",
+        "triggerLabel": "string — trigger のスクリーンリーダー向けラベル。未指定時は未選択なら placeholder、選択済みならチップの表示テキストが読み上げられる（issue #426。React Native 版は accessibilityLabel）"
       }
     },
     {

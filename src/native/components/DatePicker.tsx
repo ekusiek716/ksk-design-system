@@ -14,6 +14,11 @@ export interface DatePickerProps {
   maxDate?: Date
   disabled?: boolean
   formatter?: (d: Date) => string
+  /**
+   * trigger の accessibilityLabel（issue #426）。
+   * 未指定時は選択済みの日付、未選択なら placeholder が読み上げられる。
+   */
+  accessibilityLabel?: string
 }
 
 function defaultFormat(d: Date) {
@@ -28,6 +33,7 @@ export function DatePicker({
   maxDate,
   disabled = false,
   formatter = defaultFormat,
+  accessibilityLabel,
 }: DatePickerProps) {
   const { theme, scales } = useTheme()
   const [open, setOpen] = useState(false)
@@ -42,6 +48,8 @@ export function DatePicker({
           setOpen(true)
         }}
         disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel ?? (value ? formatter(value) : placeholder)}
         style={{
           flexDirection: "row",
           alignItems: "center",
