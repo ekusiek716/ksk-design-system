@@ -370,3 +370,63 @@ describe("issue #390 フォローアップ: 文字列リテラルを壊さない
     expect(findings.filter((f) => f.ruleId === "P008")).toHaveLength(1)
   })
 })
+
+describe("issue #455: P006 は Button asChild / Slot 経由の <a href> を誤検出しない", () => {
+  it("<Button asChild><a href> 構成は検出しない", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return (
+          <Button asChild variant="link">
+            <a href="https://example.com" target="_blank">
+              サービスへ
+            </a>
+          </Button>
+        )
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P006")).toHaveLength(0)
+  })
+
+  it("<Slot> 経由の <a href> も検出しない", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return (
+          <Slot>
+            <a href="https://example.com">リンク</a>
+          </Slot>
+        )
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P006")).toHaveLength(0)
+  })
+
+  it("asChild の無い生の <a href> は引き続き検出する", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return <a href="https://example.com">リンク</a>
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P006")).toHaveLength(1)
+  })
+
+  it("遠く離れた（300 文字より前の）asChild は近傍とみなさず検出する", () => {
+    const padding = "x".repeat(400)
+    const { result } = runKskLint(`
+      export function Example() {
+        return (
+          <Button asChild variant="link">
+            <span>{"${padding}"}</span>
+          </Button>
+        )
+      }
+      export function Unrelated() {
+        return <a href="https://example.com">リンク</a>
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P006")).toHaveLength(1)
+  })
+})

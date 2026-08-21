@@ -29,19 +29,23 @@ export interface CategoryPresetItem {
   categoricalIndex: number
 }
 
+// var(--Categorical-N...) の組み立ては @/lib/categorical（issue #452）を正本とする。
+// ここでは薄いラッパーとして再公開するだけで、実装を二重管理しない。
+import { categoricalVar, type CategoricalIndex } from "./categorical"
+
 /** `--Categorical-{index}` を返す（ドット・アイコン・小さな塗り用）。 */
 export function getCategoricalColor(index: number): string {
-  return `var(--Categorical-${index})`
+  return categoricalVar(index as CategoricalIndex, "base")
 }
 
 /** `--Categorical-{index}-Subtle` を返す（背景ティント用）。 */
 export function getCategoricalSubtle(index: number): string {
-  return `var(--Categorical-${index}-Subtle)`
+  return categoricalVar(index as CategoricalIndex, "subtle")
 }
 
 /** `--Categorical-{index}-Bold` を返す（文字・ラベル用。必ず -Bold を使うこと）。 */
 export function getCategoricalBold(index: number): string {
-  return `var(--Categorical-${index}-Bold)`
+  return categoricalVar(index as CategoricalIndex, "bold")
 }
 
 /**

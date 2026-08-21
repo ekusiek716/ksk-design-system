@@ -140,7 +140,7 @@
 | MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
 | MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount |
 | MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff |
-| MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline, Full width CTA |
+| MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline, Full width CTA, With ad banner offset (bottomOffsetExtra) |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
 | PresenceIndicator | `@/components/patterns/presence-indicator` | — | Default, WithBadge, Offline, NameOnly, 狭幅で非表示にする例（className） |
@@ -160,7 +160,7 @@
 | StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |
 | SwipeRow | `@/components/patterns/swipe-row` | — | Default, SingleAction, KeyboardAccessible |
 | TagInput | `@/components/patterns/tag-input` | — | Default, WithInitialTags, WithMax, Disabled |
-| Tag | `@/components/patterns/tag` | **variant**: `default`, `brand`, `caution`, `success`, `warning`, `info` | Default, Brand, Caution, Success, Warning, Info, AllVariants, Categorical, CategoricalWithDot |
+| Tag | `@/components/patterns/tag` | **variant**: `default`, `brand`, `caution`, `success`, `warning`, `info` | Default, Brand, Caution, Success, Warning, Info, AllVariants, Categorical, CategoricalWithDot, CategoricalHelpers |
 | ThumbnailCard | `@/components/patterns/thumbnail-card` | — | Vertical, Horizontal, WithSecondaryAction, Strip, WholeCardClickableWithSecondaryAction |
 
 ### patterns/commerce/

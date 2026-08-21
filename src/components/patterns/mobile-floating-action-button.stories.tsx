@@ -166,3 +166,33 @@ export const FullWidth: Story = {
     </div>
   ),
 }
+
+/**
+ * `bottomOffsetExtra` — 画面下の広告バナー（AdMob 等）の高さぶん FAB を持ち上げる
+ * 用途を想定した動的加算オフセット（issue #453）。プリセットの `bottomOffset` 値へ
+ * CSS length を加算する。ここでは AdMob バナー高さの代役として 64px の帯を敷く。
+ */
+export const WithBottomOffsetExtra: Story = {
+  name: "With ad banner offset (bottomOffsetExtra)",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div className="relative min-h-screen bg-[var(--Surface-Secondary)]">
+      <div className="mx-auto flex min-h-screen max-w-[430px] flex-col gap-3 px-6 py-10 pb-24">
+        <div className="h-3 w-28 rounded-full bg-[var(--Surface-Tertiary)]" />
+        <div className="h-3 w-full rounded-full bg-[var(--Surface-Tertiary)]" />
+        <div className="h-3 w-2/3 rounded-full bg-[var(--Surface-Tertiary)]" />
+      </div>
+      {/* ksk-ds-allow-custom-ui: AdMob バナー枠の代役。実運用では SDK が挿入する */}
+      <div className="fixed inset-x-0 bottom-0 flex h-16 items-center justify-center bg-[var(--Surface-Tertiary)] typo-label-sm text-[var(--Text-Low-Emphasis)]">
+        広告バナー（高さ 64px の代役）
+      </div>
+      <MobileFloatingActionButton
+        label="追加する"
+        icon={<Add size={22} />}
+        mobileOnly={false}
+        bottomOffset="bottom-nav"
+        bottomOffsetExtra="64px"
+      />
+    </div>
+  ),
+}

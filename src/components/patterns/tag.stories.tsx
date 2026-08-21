@@ -4,6 +4,7 @@
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import { Tag } from "./tag"
+import { categoricalSurfaceClass, categoricalVar } from "@/lib/categorical"
 
 const meta: Meta<typeof Tag> = {
   title: "Components/Tag",
@@ -80,6 +81,41 @@ export const CategoricalWithDot: Story = {
       <Tag categorical={1} dot>打ち合わせ</Tag>
       <Tag categorical={6} dot>締め切り</Tag>
       <Tag categorical={12} dot>プライベート</Tag>
+    </div>
+  ),
+}
+
+/**
+ * `Tag` 以外でカテゴリ識別色を使う場合の公開ヘルパー（issue #452）。
+ * `categoricalSurfaceClass` / `categoricalVar` は `@/lib/categorical` から export される。
+ *
+ * 例: belle-todo のカンバンボード列見出しやカレンダーの予定ドット。
+ */
+export const CategoricalHelpers: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap gap-2">
+        {([1, 6, 12] as const).map((n) => (
+          <div key={n} className={`rounded-md px-3 py-2 typo-label-sm ${categoricalSurfaceClass(n)}`}>
+            ボード列 {n}
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-2">
+        {([1, 6, 12] as const).map((n) => (
+          <span
+            key={n}
+            aria-hidden="true"
+            className={`size-2 rounded-full ${categoricalSurfaceClass(n, "dot")}`}
+          />
+        ))}
+        <span
+          className="typo-label-sm"
+          style={{ color: categoricalVar(6, "bold") }}
+        >
+          カレンダーの予定ドット相当（インライン style での参照例）
+        </span>
+      </div>
     </div>
   ),
 }

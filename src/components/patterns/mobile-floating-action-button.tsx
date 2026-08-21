@@ -31,6 +31,20 @@ interface MobileFloatingActionButtonProps extends Omit<React.ComponentProps<type
    * 「この画面で next action が 1 つだけ」の予約・購入・送信フローに使う。
    */
   fullWidth?: boolean
+  /**
+   * `bottomOffset` プリセット値へ加算する追加オフセット（CSS length。例: `"64px"`）。
+   *
+   * 画面下に広告バナー（AdMob 等）を出すアプリで、バナーの高さぶん FAB を
+   * 持ち上げる用途を想定。既定は未指定（＝加算なし・既存の挙動を変えない）。
+   *
+   * @example
+   * // AdMob バナー（高さは実測 or SDK から取得した値）の分だけ FAB を持ち上げる
+   * <MobileFloatingActionButton
+   *   label="追加する"
+   *   bottomOffsetExtra={`${admobBannerHeight}px`}
+   * />
+   */
+  bottomOffsetExtra?: string
 }
 
 function MobileFloatingActionButton({
@@ -44,6 +58,7 @@ function MobileFloatingActionButton({
   mobileOnly = true,
   variant = "default",
   fullWidth = false,
+  bottomOffsetExtra,
   style,
   ...props
 }: MobileFloatingActionButtonProps) {
@@ -69,7 +84,7 @@ function MobileFloatingActionButton({
         // glass-accent は inset 3層 + ドロップシャドウを自前で持つため、DS の lg 影を
         // 重ねると影が二重になって濁る。ソリッド FAB のときだけ影を敷く。
         variant === "default" && "shadow-[var(--shadow-lg)]",
-        "bottom-[calc(env(safe-area-inset-bottom)_+_var(--ksk-fab-bottom-offset)_+_var(--ksk-fab-keyboard-inset))]",
+        "bottom-[calc(env(safe-area-inset-bottom)_+_var(--ksk-fab-bottom-offset)_+_var(--ksk-fab-bottom-offset-extra,_0px)_+_var(--ksk-fab-keyboard-inset))]",
         // 全幅 CTA: 左右に safe-area（横向き時のノッチ）+ 16px の inset を取る。
         fullWidth && "left-[calc(env(safe-area-inset-left)_+_1rem)] right-[calc(env(safe-area-inset-right)_+_1rem)] w-auto justify-center",
         !fullWidth && placement === "end" && "right-4",
@@ -85,6 +100,9 @@ function MobileFloatingActionButton({
       )}
       style={{
         "--ksk-fab-keyboard-inset": `${liftInset}px`,
+        ...(bottomOffsetExtra !== undefined && {
+          "--ksk-fab-bottom-offset-extra": bottomOffsetExtra,
+        }),
         ...style,
       } as React.CSSProperties}
     >

@@ -70,7 +70,7 @@
       "severity": "error",
       "category": "component",
       "appliesTo": ["dom"],
-      "pattern": "<a href",
+      "pattern": "(?<!(?:asChild|<Slot)[\\s\\S]{0,300})<a href",
       "excludePaths": [".stories."],
       "excludeDsPaths": ["components/ui/", "components/patterns/"],
       "excludeLines": ["data-slot", "asChild"],
