@@ -63,6 +63,13 @@ export interface SheetProps {
    * - `side="left"` / `"right"`: 効果を持たない
    */
   safeArea?: boolean
+  /**
+   * パネル（および snap モードの footer）の面色。既定は `theme.surface.primary`
+   * （従来どおり）。テーマ tint を持つプロダクトが、シートだけ自前の面色に
+   * 寄せられるようにするための口（issue #448）。
+   * scrim の色は変えない。
+   */
+  surfaceColor?: string
 }
 
 /**
@@ -85,7 +92,15 @@ export function Sheet(props: SheetProps) {
 const PLAIN_DUR = 220
 const PLAIN_ANIMATION_FALLBACK_DELAY = PLAIN_DUR + 120
 
-function PlainSheet({ open, onClose, side = "bottom", title, children, safeArea = true }: SheetProps) {
+function PlainSheet({
+  open,
+  onClose,
+  side = "bottom",
+  title,
+  children,
+  safeArea = true,
+  surfaceColor,
+}: SheetProps) {
   const { theme, scales } = useTheme()
   const insets = useSafeAreaInsets()
   // useRef(new Animated.Value()).current は render 中の ref 読み取りになるため
@@ -162,7 +177,7 @@ function PlainSheet({ open, onClose, side = "bottom", title, children, safeArea 
               offset[side].translateX ? { translateX: offset[side].translateX } : { translateX: 0 },
               offset[side].translateY ? { translateY: offset[side].translateY } : { translateY: 0 },
             ],
-            backgroundColor: theme.surface.primary,
+            backgroundColor: surfaceColor ?? theme.surface.primary,
             ...(side === "bottom" || side === "top"
               ? { width: "100%", borderTopLeftRadius: scales.borderRadius["2xl"], borderTopRightRadius: scales.borderRadius["2xl"] }
               : { height: "100%", width: "85%" }),
@@ -225,6 +240,7 @@ function SnapBottomSheet({
   footer,
   dismissible = true,
   safeArea = true,
+  surfaceColor,
 }: SheetProps) {
   const { theme, scales } = useTheme()
   const insets = useSafeAreaInsets()
@@ -461,7 +477,7 @@ function SnapBottomSheet({
           right: 0,
           bottom: 0,
           height: panelH,
-          backgroundColor: theme.surface.primary,
+          backgroundColor: surfaceColor ?? theme.surface.primary,
           borderTopLeftRadius: scales.borderRadius["2xl"],
           borderTopRightRadius: scales.borderRadius["2xl"],
           transform: [{ translateY }],
@@ -530,7 +546,7 @@ function SnapBottomSheet({
             paddingBottom: scales.spacing.scale[4],
             borderTopWidth: 1,
             borderTopColor: theme.border["low-emphasis"],
-            backgroundColor: theme.surface.primary,
+            backgroundColor: surfaceColor ?? theme.surface.primary,
           }}
         >
           {footer}
