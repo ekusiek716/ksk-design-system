@@ -346,7 +346,8 @@
       ],
       "rules": [
         "rounded-full only",
-        "Use DiceBear shapes for placeholder, not pravatar.cc"
+        "Use DiceBear shapes for placeholder, not pravatar.cc",
+        "native (src/native/components/Avatar.tsx): size はプリセット(sm/md/lg/xl)に加えて pt の数値も可。shape=\"circle\"(既定)|\"rounded\"、rounded の角丸は radius(lg/xl/2xl・既定 xl)。fallback は文字列に加えて ReactNode を受け、独自のフォールバック表示（決定論グラデ+絵文字等）を差し込める。source はリモート URL 文字列も受け取り {uri} に正規化する（issue #449）"
       ]
     },
     {
@@ -410,7 +411,8 @@
         "autoFocus は first-input / title / ref / false を指定可能",
         "description prop はRadix管理IDの sr-only description を自動生成する",
         "SheetTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は BottomSheetFrame preset=\"mobile-full\"|\"mobile-page\" 配下で page 相当、それ以外は従来の typo-heading-lg",
-        "native (src/native/components/Sheet.tsx): safeArea(既定 true) で side=\"top\" の上端 inset 退避と、画面いっぱいに近い side=\"bottom\" の食い込み分の退避を行う。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）"
+        "native (src/native/components/Sheet.tsx): safeArea(既定 true) で side=\"top\" の上端 inset 退避と、画面いっぱいに近い side=\"bottom\" の食い込み分の退避を行う。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
+        "native (src/native/components/Sheet.tsx): surfaceColor でパネル（および snap モードの footer）の面色を上書きできる。未指定なら theme.surface.primary（従来どおり）。scrim の色は変えない（issue #448）"
       ],
       "variants": {
         "titleLevel": [
@@ -2205,7 +2207,8 @@
       ],
       "rules": [
         "長い SheetContent className recipe を consumer 側に重複させず BottomSheetFrame preset を使う",
-        "フォーム/詳細の中身は DetailSheetScaffold と KeyboardAwareSheetFooter を使う"
+        "フォーム/詳細の中身は DetailSheetScaffold と KeyboardAwareSheetFooter を使う",
+        "native (src/native/components/BottomSheetFrame.tsx): height=\"preset\"(既定・従来の固定高)|\"fitContent\"(min/max を外して内容量に追従)。maxHeight で上限だけ明示できる。safeArea(既定 false) で bottom inset 分の内側余白、handle(既定 false) で上端のつまみを表示（issue #448）"
       ]
     },
     {
