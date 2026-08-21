@@ -198,8 +198,19 @@ const BRAND = "#06C755"
 - 先頭 12 行に自動生成マーカー（`AUTO-GENERATED` / `DO NOT EDIT` / `自動生成` 等）を持つ
   ファイルは全ルールを skip します。直す先は生成物ではなく生成元です。
 - DS 自身のトークン定義 CSS（`src/styles/*.css` / `src/themes/*.css` / `src/preset.css` と、
-  それを再梱包したベンダリングコピー）は P049 の対象外です。トークンを**定義**している側で
-  あって、consumer による上書きではないためです。
+  それを再梱包したベンダリングコピー）は P049 / P050 の対象外です。トークンを**定義**している側で
+  あって、consumer による上書き・並行実装ではないためです。
+
+#### P050: DS を参照しない並行パレットの検出（issue #393）
+
+P049 は「DS の名前空間の変数（`--Primitive-Brand-500` 等）に触れている CSS」しか見ないため、DS を
+一切使わない独自パレット（`--bg` / `--accent` / `--surface` 等）を持つ consumer には
+無言でした。P050 は `:root` / `.dark` / `[data-theme=...]` のようなルート的セレクタの中で、
+DS 名前空間に属さないカスタムプロパティへ色値（`#hex` / `rgb()` / `hsl()` / `oklch()`）を
+<!-- docs-drift-ignore: --Primitive- -->
+5 個以上定義していたら「並行パレットの疑い」を warn します。値が `var(--Primitive-...)` の
+ように DS トークンを参照しているだけのものはカウントしません。意図的な独立パレット
+（LINE 風チャット画面のライトなど）は `// ksk-ds-lint-ignore P050 -- 理由` で抑制できます。
 
 #### ルールごとの除外（rules.json の excludes 系）
 

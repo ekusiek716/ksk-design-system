@@ -2,7 +2,7 @@
   "meta": {
     "name": "KSK Design System — Rules Contracts",
     "version": "1.2.0",
-    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン49件・AIアンチパターン10件。"
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン50件・AIアンチパターン10件。"
   },
   "prohibited": [
     {
@@ -555,6 +555,19 @@
       "message": "product theme の許可リストに無い DS の CSS 変数を消費側で上書きしている",
       "fix": "contracts/product-theme-overrides.json の allowedVariables にある変数だけを上書きする。足りない場合は DS 側に公開変数の追加を依頼する",
       "note": "対象は .css の宣言のみ（var() での参照は自由）。--Hover-* / --Z-* / --glass-* のような内部変数を上書きすると DS を上げた瞬間に静かに壊れる。shadcn 互換の小文字ブリッジ（--primary 等）は消費側アプリと名前が衝突しうるため対象外（issue #364）。DS 自身 / ベンダリングされた DS のトークン定義 CSS（src/styles/*.css・src/themes/*.css・src/preset.css とその再梱包コピー）は「定義」であって上書きではないため lint 側で対象外にしている（issue #407）"
+    },
+    {
+      "id": "P050",
+      "severity": "warning",
+      "category": "token",
+      "pattern": "parallel-palette-detection",
+      "engine": "parallel-palette",
+      "minColorVars": 5,
+      "appliesTo": ["*.css"],
+      "excludeLines": [],
+      "message": "DS を参照しない並行パレットの疑い（DS 名前空間に属さないカスタムプロパティに色値を5個以上定義）",
+      "fix": "ksk-design-system/preset + テーマの導入、または既存変数の値を DS トークン参照へ置換",
+      "note": "P049 は DS 名前空間（--Primitive- 等）に触れる CSS だけを違反にするため、DS を一切使わない独自パレット（--bg / --accent / --surface 等）を敷いた CSS には無言だった（issue #393）。:root / .dark / [data-theme=...] のようなルート的セレクタの中で、DS 名前空間（contracts/product-theme-overrides.json の dsVariableNamespaces）に属さないカスタムプロパティへ色値（hex / rgb() / hsl() / oklch()）を minColorVars 個以上定義していたら warn する。値が var(--Primitive-...) のように DS トークンを参照しているだけのものはカウントしない。意図的な独立パレット（チャット画面の LINE 風ライト等）は // ksk-ds-lint-ignore P050 -- 理由 で抑制できる。DS 自身 / ベンダリングされた DS の CSS は P049 と同じ判定（issue #407）で対象外"
     }
   ],
   "aiPatterns": {
