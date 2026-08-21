@@ -269,7 +269,7 @@
       "severity": "warning",
       "category": "accessibility",
       "appliesTo": ["dom"],
-      "pattern": "<div.*onClick|<span.*onClick",
+      "pattern": "<div\\b(?:(?!<|>)[\\s\\S])*?\\sonClick\\b|<span\\b(?:(?!<|>)[\\s\\S])*?\\sonClick\\b",
       "excludePaths": [".stories."],
       "excludeLines": [],
       "message": "<div onClick> 禁止（キーボード操作・スクリーンリーダー不可）",
