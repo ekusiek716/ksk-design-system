@@ -285,3 +285,66 @@ describe("重複の疑い（名前ヒューリスティック）", () => {
     expect(result.stdout).not.toContain("PrimaryButton")
   })
 })
+
+// issue #451: 「疑い」判定が、改名された DS 委譲ラッパー（DS を import して実際に
+// JSX/関数呼び出しで使っている）を誤検知していた問題の回帰テスト。
+describe("重複の疑い: DS 委譲ラッパー（改名済み）の除外", () => {
+  it("DropdownMenu へ委譲する CandidateOverflowMenu は疑い対象から除外する", () => {
+    const consumer = createConsumer({
+      "src/CandidateOverflowMenu.tsx": [
+        "import { DropdownMenu } from 'ksk-design-system'",
+        "",
+        "export function CandidateOverflowMenu() {",
+        "  return <DropdownMenu>menu</DropdownMenu>",
+        "}",
+        "",
+      ].join("\n"),
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).not.toContain("重複の疑い")
+  })
+
+  it("Alert へ委譲する CrisisBanner は疑い対象から除外する", () => {
+    const consumer = createConsumer({
+      "src/CrisisBanner.tsx": [
+        "import { Alert } from 'ksk-design-system'",
+        "",
+        "export function CrisisBanner() {",
+        "  return Alert({ children: 'danger' })",
+        "}",
+        "",
+      ].join("\n"),
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).not.toContain("重複の疑い")
+  })
+
+  it("DS を import していない同名パターン（PrimaryButton）は引き続き疑いに出る", () => {
+    const consumer = createConsumer({
+      "src/PrimaryButton.tsx": "export function PrimaryButton() { return null }\n",
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain("重複の疑い")
+    expect(result.stdout).toContain("src/PrimaryButton.tsx:1 PrimaryButton")
+  })
+
+  it("DS を import しているだけで実際には使っていない場合は疑い検出を維持する", () => {
+    const consumer = createConsumer({
+      "src/CandidateOverflowMenu.tsx": [
+        "import { DropdownMenu } from 'ksk-design-system'",
+        "",
+        "export function CandidateOverflowMenu() {",
+        "  return null",
+        "}",
+        "",
+      ].join("\n"),
+    })
+    const result = run(consumer, "./src", "--strict")
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain("重複の疑い")
+    expect(result.stdout).toContain("src/CandidateOverflowMenu.tsx:3 CandidateOverflowMenu")
+  })
+})
