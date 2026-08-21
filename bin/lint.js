@@ -1,7 +1,11 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { basename, extname, isAbsolute, join, relative, resolve } from "node:path"
 import { spawnSync } from "node:child_process"
-import { inspectProductThemeOverrides, loadProductThemeContract } from "./product-theme-override.js"
+import {
+  inspectParallelPaletteCandidates,
+  inspectProductThemeOverrides,
+  loadProductThemeContract,
+} from "./product-theme-override.js"
 
 // card-child-spacing.js は `import ts from "typescript"` している（P046 専用エンジン）。
 // typescript は 24MB 前後あり、59ルール中 P046 の1つにしか使わないため、
@@ -354,9 +358,13 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
     return 1
   }
 
+  // CSS 専用エンジン一覧。P049（product-theme-override）と P050（parallel-palette、
+  // issue #393）はどちらも .css だけを対象にした独自エンジンで、TSX 向けの
+  // 正規表現エンジンとは別の走査経路（lintCssFile）を通す。
+  const CSS_ENGINES = new Set(["product-theme-override", "parallel-palette"])
   const rules = loadRules(rulesPath)
-  const cssRules = rules.filter((rule) => rule.engine === "product-theme-override")
-  let sourceRules = rules.filter((rule) => rule.engine !== "product-theme-override")
+  const cssRules = rules.filter((rule) => CSS_ENGINES.has(rule.engine))
+  let sourceRules = rules.filter((rule) => !CSS_ENGINES.has(rule.engine))
   const productThemeContract = cssRules.length > 0 ? readProductThemeContract(pkgRoot) : null
   // DS 自身 / ベンダリングされた DS の CSS を P049 の対象から外すための材料（issue #407）
   const dsCssIdentity = cssRules.length > 0 ? collectDsCssIdentity(pkgRoot) : null
@@ -393,7 +401,10 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
       continue
     }
     if (CSS_EXTENSIONS.has(extname(file))) {
-      if (productThemeContract) {
+      // productThemeContract が読めない環境（contracts/product-theme-overrides.json
+      // が無い）でも P050 は動かせるので、CSS ルールが 1 件でもあれば走査する
+      // （P049 側は contract が null なら lintCssFile 内で個別に skip する）。
+      if (cssRules.length > 0) {
         findings.push(
           ...lintCssFile(file, cwd, cssRules, productThemeContract, dsCssIdentity, pkgRoot),
         )
@@ -649,8 +660,8 @@ function readProductThemeContract(pkgRoot) {
 }
 
 /**
- * CSS ファイルには product theme の許可リスト検査（P049）だけを当てる。
- * TSX 向けの正規表現ルールを CSS に流すと誤検知しかしない。
+ * CSS ファイルには P049（product theme の許可リスト検査）と P050（並行パレット検出、
+ * issue #393）だけを当てる。TSX 向けの正規表現ルールを CSS に流すと誤検知しかしない。
  */
 function lintCssFile(file, cwd, cssRules, contract, dsCssIdentity = null, pkgRoot = null) {
   const rel = normalize(relative(cwd, file))
@@ -668,8 +679,32 @@ function lintCssFile(file, cwd, cssRules, contract, dsCssIdentity = null, pkgRoo
   findings.push(...ignores.problems)
   for (const rule of cssRules) {
     // CSS は web のみに存在する（RN に .css は無い）。glob 指定の appliesTo は
-    // capability タグを含まないので、この判定でも従来どおり P049 が当たる。
+    // capability タグを含まないので、この判定でも従来どおり P049/P050 が当たる。
     if (!ruleAppliesTo(rule, { capabilities: CSS_CAPABILITIES, filePath: rel })) continue
+
+    if (rule.engine === "parallel-palette") {
+      // contract が読めない（DS の名前空間一覧が無い）と何が DS 名前空間かを
+      // 判定できず false positive しか出せないので、その場合は skip する。
+      if (!contract) continue
+      const threshold = typeof rule.minColorVars === "number" ? rule.minColorVars : 5
+      const candidates = inspectParallelPaletteCandidates(source, { namespaces: contract.namespaces })
+      if (candidates.length < threshold) continue
+      const first = candidates[0]
+      if (matchesRuleExclude(rule, { file: rel, line: first.name, isDsFile })) continue
+      if (ignores.suppresses(rule.id ?? "UNKNOWN", first.line)) continue
+      const names = candidates.slice(0, 5).map((c) => c.name).join(", ")
+      const suffix = candidates.length > 5 ? ` ほか計${candidates.length}個` : `（計${candidates.length}個）`
+      findings.push({
+        ...toFinding(rule, rel, first.line, "web"),
+        message: `${rule.message ?? "DS を参照しない並行パレットの疑い"}: ${names}${suffix}`,
+      })
+      continue
+    }
+
+    // contract が読めない環境（contracts/product-theme-overrides.json が無い）では
+    // P049 の許可リスト判定ができないので skip する（従来は呼び出し元で丸ごと
+    // skip していたのと同じ挙動を、CSS ルール単位に落とし込んだだけ）。
+    if (!contract) continue
     for (const violation of inspectProductThemeOverrides(source, contract)) {
       // violation.name は CSS 変数名（＝内容）なので line 側に渡す。
       // パス除外を変数名に当ててはいけない（issue #404 の提案 c）。

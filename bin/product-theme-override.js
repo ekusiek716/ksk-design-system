@@ -103,6 +103,61 @@ export function inspectProductThemeOverrides(source, contract) {
 }
 
 /**
+ * P050 — DS を参照しない並行パレットの検出（issue #393）
+ *
+ * P049 は「DS の名前空間に触れている CSS」しか見ないため、DS 名前空間を
+ * 一切使わない独自パレット（`--bg` / `--accent` / `--surface` 等）を持つ
+ * consumer には無言だった。`:root` / `.dark` / `[data-theme=...]` のような
+ * ルート的セレクタの中で、DS 名前空間に属さないカスタムプロパティへ
+ * 色値（hex / rgb / hsl / oklch）を敷いている数を数え、閾値以上なら
+ * 「並行パレットの疑い」として warn する。
+ *
+ * 値が `var(--Primitive-...)` のように DS トークンを参照しているだけの
+ * ものはカウントしない（それは並行パレットではなく DS への委譲）。
+ */
+
+/** ルート的セレクタ（ここで宣言された変数だけがテーマの「パレット」候補） */
+const ROOT_LIKE_BLOCK =
+  /(?:^|[};])\s*(:root|\.dark|\[data-theme(?:=[^\]]*)?\])\s*\{([^{}]*)\}/g
+
+/** ブロック内のカスタムプロパティ宣言（値も一緒に取る） */
+const DECLARATION_WITH_VALUE = /(^|[;{}\s])(--[A-Za-z0-9_-]+)\s*:\s*([^;]+);/g
+
+/** 色値を含む値（hex / rgb() / rgba() / hsl() / hsla() / oklch()） */
+const COLOR_VALUE_RE = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(|\boklch\(/i
+
+/** 値が `var(...)` の参照だけで完結しているか（DS トークンへの委譲はカウントしない） */
+const VAR_ONLY_RE = /^var\(/i
+
+/**
+ * @param {string} source CSS ソース
+ * @param {{ namespaces?: string[] }} options DS 名前空間の一覧
+ * @returns {Array<{ line: number, name: string }>} DS 名前空間に属さず色値を持つ宣言
+ */
+export function inspectParallelPaletteCandidates(source, { namespaces = [] } = {}) {
+  const stripped = stripCssComments(source)
+  const candidates = []
+
+  for (const block of stripped.matchAll(ROOT_LIKE_BLOCK)) {
+    const body = block[2]
+    const bodyStart = block.index + block[0].indexOf(body)
+    for (const decl of body.matchAll(DECLARATION_WITH_VALUE)) {
+      const name = decl[2]
+      const value = decl[3].trim()
+      if (namespaces.some((prefix) => name.startsWith(prefix))) continue
+      if (VAR_ONLY_RE.test(value)) continue
+      if (!COLOR_VALUE_RE.test(value)) continue
+      const nameIndex = bodyStart + decl.index + decl[0].indexOf(name)
+      candidates.push({
+        line: stripped.slice(0, nameIndex).split(/\r?\n/).length,
+        name,
+      })
+    }
+  }
+  return candidates
+}
+
+/**
  * 契約 JSON から判定に使う形へ畳む。
  *
  * @param {object} contract contracts/product-theme-overrides.json の中身
