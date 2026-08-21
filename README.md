@@ -308,6 +308,8 @@ DS を import して委譲するだけの薄いラッパー（段階移行の型
 <!-- docs-drift-ignore: PrimaryButton AppTextInput BottomSheet CandidateOverflowMenu CrisisBanner AvatarView -->
 さらに、`contracts/components.json` と完全一致しない名前でも、DS 部品を連想させる命名パターン（`PrimaryButton` → `Button` / `AppTextInput` → `Input` / `BottomSheet` → `Sheet` / `CandidateOverflowMenu` → `DropdownMenu` / `CrisisBanner` → `Banner` / `AvatarView` → `Avatar` 等）は「重複の疑い」として `⚠` 付きで warn 表示されます。これは名前一致のみによる推測（AST は使いません）のため確度は下がり、`--strict` でも exit code には影響しません。誤検知の場合は無視して構いませんが、恒常的に抑制したい場合はそのファイル内のコメントに `ksk-ds-local-fallback` を含めてください。
 
+ただし、ファイルが `ksk-design-system`（`/native` 等のサブパス含む）から named import し、その import した識別子を JSX またはコールとして実際に使っている場合は、名前が DS と異なっていても「DS 委譲ラッパー」とみなし疑い検出の対象から除外します（例: `CandidateOverflowMenu` が `DropdownMenu` を import して `<DropdownMenu>` として使うケース）。DS を import しているだけで実際には使っていない場合はこの除外の対象外です。
+
 ### Media overlay utilities
 
 動画・写真の上に文字や操作を置く場合は、`--Text-on-Media` と `.text-on-media` / `.text-on-media-secondary`、上下の `.media-scrim-top` / `.media-scrim-bottom` を使います。TikTok / Reels 型の操作群は `MediaActionCluster` が glass ボタン、ラベル、safe-area anchor、idle auto-hide をまとめて扱います。

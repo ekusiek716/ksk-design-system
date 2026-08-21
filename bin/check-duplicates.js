@@ -174,6 +174,34 @@ function collectDsImportSourceNames(source) {
   return names
 }
 
+// このファイルが ksk-design-system から named import している要素の
+// ローカル名（alias 込み）の集合。DS 委譲ラッパー判定（実使用チェック）に使う。
+function collectDsImportLocalNames(source) {
+  const names = new Set()
+  const importPattern = /import\s*\{([^}]*)\}\s*from\s*["']([^"']+)["']/g
+
+  for (const match of source.matchAll(importPattern)) {
+    const [, specifierList, moduleSpecifier] = match
+    if (!isDsModuleSpecifier(moduleSpecifier)) continue
+    for (const { localName } of parseSpecifierList(specifierList)) {
+      names.add(localName)
+    }
+  }
+
+  return names
+}
+
+// import した DS のローカル名が、JSX（`<Name`）または関数呼び出し（`Name(`）として
+// 実際に使われているか。import しているだけで使っていないケース（不要 import 等）は
+// 「実際に委譲している」とは言えないため対象外にする。
+function usesAnyIdentifierAsJsxOrCall(source, localNames) {
+  for (const localName of localNames) {
+    const usagePattern = new RegExp(`<${localName}[\\s/>]|\\b${localName}\\s*\\(`)
+    if (usagePattern.test(source)) return true
+  }
+  return false
+}
+
 // `export { X as Y } from 'ksk-design-system/...'` のような re-export 形式。
 // これは常に DS の実装をそのまま右から左へ渡すだけなので、localName が
 // registry と一致する場合は無条件でラッパー（除外対象）として扱う。
@@ -249,7 +277,11 @@ function findDuplicateExports(file, cwd, registry) {
 
   const codeForImportScan = stripComments(source)
   const dsImportSourceNames = collectDsImportSourceNames(codeForImportScan)
+  const dsImportLocalNames = collectDsImportLocalNames(codeForImportScan)
   const dsReExportLocalNames = collectDsReExports(codeForImportScan)
+  // issue #451: 名前が DS と違っても、DS を import してそれを JSX/関数呼び出しで
+  // 実際に使っていれば「DS 委譲ラッパー」とみなし、名前ヒューリスティックの疑い対象から除外する。
+  const isDsDelegatingWrapper = usesAnyIdentifierAsJsxOrCall(codeForImportScan, dsImportLocalNames)
 
   const declarationPattern =
     /^\s*export\s+(?:default\s+)?(?:(?:async|declare)\s+)?(?:function|const)\s+([A-Z][A-Za-z0-9]*)\b/
@@ -265,6 +297,7 @@ function findDuplicateExports(file, cwd, registry) {
       // DS を import しているファイル（何らかの形で DS を使っている＝別部品のラッパー等）
       // でも疑いは出す。抑制は SUPPRESSION_MARKER コメントのみ。
       if (suppressSuspicions) continue
+      if (isDsDelegatingWrapper) continue
       const suggested = suggestDsNameForLocalName(name)
       if (!suggested) continue
       suspicions.push({
