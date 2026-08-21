@@ -100,6 +100,7 @@
 @source inline("animate-in");
 @source inline("animate-pulse");
 @source inline("animate-spin");
+@source inline("appearance-none");
 @source inline("aria-disabled:opacity-50");
 @source inline("aria-invalid:border-[var(--Border-Caution)]");
 @source inline("aria-invalid:ring-[var(--Caution-Base)]/20");

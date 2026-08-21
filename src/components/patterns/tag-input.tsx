@@ -73,7 +73,11 @@ function TagInput({
     }
   }
 
+  // 枠内クリックで実 <input>（下記）へフォーカスを移すだけの補助操作。
+  // 主操作は input 自体が担い、キーボードユーザーは Tab で input へ
+  // 直接到達できるため代替経路が別にある。
   return (
+    // ksk-ds-lint-ignore P024 -- 上記の通り input への focus 移譲のみの補助操作
     <div
       data-slot="tag-input"
       className={cn(
