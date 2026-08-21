@@ -27,6 +27,16 @@ export const WithRequiredMarker: Story = {
   ),
 }
 
+export const Unstyled: Story = {
+  // 段階移行用（issue #420 の続き・#443）。typo-label-md / 文字色 /
+  // peer-disabled 系のクラスを一切出さず、既存の手書きクラスだけを反映する。
+  render: () => (
+    <Label unstyled className="gate-label">
+      メールアドレス（手書き CSS 相当）
+    </Label>
+  ),
+}
+
 export const DisabledState: Story = {
   // 無効状態の見た目デモ。disabled な Input と htmlFor で関連付けており、
   // ラベルは inactive UI component の一部＝WCAG 1.4.3 のコントラスト要件対象外。

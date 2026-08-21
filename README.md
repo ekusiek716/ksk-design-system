@@ -119,9 +119,11 @@ import { Button, Card, Input, FormField } from "ksk-design-system"
 | `Button` | `type` 既定 `"button"` / disabled・aria-disabled クリックの抑止 / `haptic` / `asChild` | `inline-flex` `items-center` `justify-center` `gap-*` `whitespace-nowrap` `typo-*` `cursor-pointer` と variant・size・layout の全クラス |
 | `Input` | `showCount`（IME 追従）/ adornment の配置土台 | `h-*` `w-full` `border-*` `bg-*` `px-*` `typo-*` `placeholder:*` |
 | `Textarea` | `autoGrow` / `showCount` | `min-h-*` `w-full` `border-*` `bg-*` `px-*` `py-*` `typo-*` `placeholder:*` |
+| `Label` | Radix Label の挙動（クリックで対象コントロールへフォーカス移動） | `typo-label-md` `text-[var(--Text-High-Emphasis)]` `peer-disabled:cursor-not-allowed` `peer-disabled:opacity-50` |
 
-キーボード操作時の `focus-visible` リングだけは a11y のため既定で残ります。手書き CSS が
-自前のフォーカス表現を持つ場合は `className="focus-visible:ring-0"` で消せます。
+キーボード操作時の `focus-visible` リングだけは a11y のため既定で残ります（`Label` は
+フォーカス可能要素ではないため対象外）。手書き CSS が自前のフォーカス表現を持つ場合は
+`className="focus-visible:ring-0"` で消せます。
 
 移行の順番は次のとおりです。
 

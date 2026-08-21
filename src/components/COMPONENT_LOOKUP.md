@@ -45,7 +45,7 @@
 | IconBadge | `@/components/ui/icon-badge` | **size**: `md`, `ml`, `lg`<br>**appearance**: `accent`, `plain` | Medium, MediumLarge, Large, InCardFlow |
 | ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |
 | Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput |
-| Label | `@/components/ui/label` | — | Default, WithRequiredMarker, DisabledState |
+| Label | `@/components/ui/label` | — | Default, WithRequiredMarker, Unstyled, DisabledState |
 | MultiSelect | `@/components/ui/multi-select` | — | Default, WithTriggerLabel |
 | NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
