@@ -43,6 +43,12 @@ export interface ButtonProps extends Omit<PressableProps, "children" | "style"> 
   loading?: boolean
   /** loading 中も読み上げ/表示したい label。未指定なら spinner のみ */
   loadingLabel?: string
+  /**
+   * loading 中の ActivityIndicator の色。未指定時は既定どおり variant の
+   * 文字色（palette[variant].fg / glass の fg）を使う（挙動不変・issue #450）。
+   * variant 背景色そのものでスピナーを塗りたい等、稀なケース向けの明示上書き口。
+   */
+  spinnerColor?: string
   children?: React.ReactNode
 }
 
@@ -57,6 +63,7 @@ export function Button({
   trailingIcon,
   loading = false,
   loadingLabel,
+  spinnerColor,
   children,
   disabled,
   accessibilityState,
@@ -134,6 +141,7 @@ export function Button({
               textStyle={textStyle}
               loading={loading}
               loadingLabel={loadingLabel}
+              spinnerColor={spinnerColor}
               leadingIcon={leadingIcon}
               trailingIcon={trailingIcon}
               gap={scales.spacing.scale[2]}
@@ -185,6 +193,7 @@ export function Button({
         textStyle={textStyle}
         loading={loading}
         loadingLabel={loadingLabel}
+        spinnerColor={spinnerColor}
         leadingIcon={leadingIcon}
         trailingIcon={trailingIcon}
         gap={scales.spacing.scale[2]}
@@ -200,6 +209,7 @@ function ButtonContent({
   textStyle,
   loading,
   loadingLabel,
+  spinnerColor,
   leadingIcon,
   trailingIcon,
   gap,
@@ -209,6 +219,7 @@ function ButtonContent({
   textStyle?: StyleProp<TextStyle>
   loading: boolean
   loadingLabel?: string
+  spinnerColor?: string
   leadingIcon?: React.ReactNode
   trailingIcon?: React.ReactNode
   gap: number
@@ -219,7 +230,7 @@ function ButtonContent({
   if (loading) {
     return (
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap }}>
-        <ActivityIndicator size="small" color={color} />
+        <ActivityIndicator size="small" color={spinnerColor ?? color} />
         {loadingLabel ? <RNText style={labelStyle}>{loadingLabel}</RNText> : null}
       </View>
     )
