@@ -72,12 +72,12 @@ function ImageGallery({
       {/* Main */}
       <div
         className={cn(
-          "relative w-full overflow-hidden rounded-xl bg-[var(--Surface-Tertiary)] cursor-pointer",
+          "relative w-full overflow-hidden rounded-xl bg-[var(--Surface-Tertiary)]",
+          onImageClick && "cursor-pointer",
           ASPECT[aspectRatio] ?? "aspect-[4/3]"
         )}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
-        onClick={() => onImageClick?.(active)}
       >
         {current && (
           <img
@@ -85,6 +85,19 @@ function ImageGallery({
             src={current.src}
             alt={current.alt ?? imageLabel(active)}
             className="w-full h-full object-cover transition-opacity duration-[var(--Motion-Duration-Base)]"
+          />
+        )}
+
+        {/* 画像クリックの主操作。矢印ボタン・カウントバッジより DOM 順で先に置き、
+            それらの後方に来る要素が重なり上で優先してクリックを受けるようにする
+            （矢印側の stopPropagation は本 button が親でなくなったため不要だが、
+            他要素への影響を避けるため既存のまま残す）。issue #461 */}
+        {onImageClick && (
+          <button
+            type="button"
+            className="absolute inset-0 z-0 h-full w-full cursor-pointer appearance-none"
+            aria-label={imageLabel(active)}
+            onClick={() => onImageClick(active)}
           />
         )}
 

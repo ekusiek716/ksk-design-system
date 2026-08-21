@@ -20,10 +20,9 @@ interface StatCardProps extends Omit<React.ComponentProps<"div">, "onClick"> {
    */
   variant?: StatCardVariant
   /**
-   * Interactive モード: true にすると card が button のように振る舞う。
-   * - `role=button` / `tabIndex=0` / focus-visible ring / active:scale を自動付与
-   * - onClick / onKeyDown (Enter/Space) を有効化
-   * - hover で軽い陰り、cursor-pointer
+   * Interactive モード: true にすると card が実 `<button>` として描画される。
+   * - ネイティブ button のフォーカスリング・キーボード操作（Enter/Space）を自動付与
+   * - hover で軽い陰り、cursor-pointer、active:scale
    *
    * onClick だけ渡しても interactive=true 扱いする。
    */
@@ -81,29 +80,24 @@ function StatCard({
 }: StatCardProps) {
   const styles = variantStyles[variant]
   const isInteractive = interactive ?? !!onClick
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!isInteractive || !onClick) return
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault()
-      onClick(e as unknown as React.MouseEvent<HTMLDivElement>)
-    }
-  }
+  // interactive 時は実 <button> を描画する（role=button の div + 手動
+  // keydown による Enter/Space 再実装は、フォーカスリング・タップ領域・
+  // Space のページスクロール抑止をすべて自前で正しく持つ必要があり漏れやすい。
+  // 非 interactive 時は従来どおり素の div。issue #461。
+  const Comp = (isInteractive ? "button" : "div") as React.ElementType
 
   return (
-    <div
+    <Comp
+      type={isInteractive ? "button" : undefined}
       data-slot="stat-card"
       data-variant={variant}
       data-interactive={isInteractive || undefined}
-      role={isInteractive ? "button" : undefined}
-      tabIndex={isInteractive ? 0 : undefined}
       onClick={isInteractive ? onClick : undefined}
-      onKeyDown={isInteractive ? handleKeyDown : undefined}
       className={cn(
-        "flex flex-col gap-2 rounded-lg border border-[var(--Border-Low-Emphasis)] p-4 shadow-[var(--shadow-md)]",
+        "flex flex-col gap-2 rounded-lg border border-[var(--Border-Low-Emphasis)] p-4 text-left shadow-[var(--shadow-md)]",
         styles.card,
         isInteractive && [
-          "cursor-pointer transition-all",
+          "w-full appearance-none cursor-pointer transition-all",
           styles.hoverBg,
           "active:scale-[0.98]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2",
@@ -150,7 +144,7 @@ function StatCard({
           )}
         </div>
       )}
-    </div>
+    </Comp>
   )
 }
 

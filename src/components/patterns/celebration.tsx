@@ -281,7 +281,11 @@ function Celebration({
         </div>
       )}
 
+      {/* カード本体タップでの dismiss は、直上の全面 <button aria-label="閉じる">
+          （canTapDismiss 時のみ描画）と同じ操作の click-through 用ショートカット。
+          キーボード・SR ユーザーはその button で同等の操作ができるため主操作の欠落はない。 */}
       {showMessage && (
+        // ksk-ds-lint-ignore P024 -- 上記 button と同等の click-through 補助操作
         <div
           onClick={canTapDismiss ? handleTapDismiss : undefined}
           style={{ pointerEvents: "auto" }}
@@ -316,7 +320,11 @@ function Celebration({
               {description}
             </p>
           )}
+          {/* 操作自体は行わず、内側の actions（実ボタン群）へのクリックが
+              カードの dismiss ハンドラへバブリングするのを止めるためだけの
+              stopPropagation。 */}
           {actions && (
+            // ksk-ds-lint-ignore P024 -- 上記の通り stopPropagation のみで操作は持たない
             <div
               className="mt-4 flex flex-wrap justify-center gap-2"
               onClick={(event) => event.stopPropagation()}
