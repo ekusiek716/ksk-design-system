@@ -430,3 +430,39 @@ describe("issue #455: P006 は Button asChild / Slot 経由の <a href> を誤�
     expect(findings.filter((f) => f.ruleId === "P006")).toHaveLength(1)
   })
 })
+
+describe("issue #459: P024 は同一行の子要素 onClick を div/span 自身の onClick と誤検出しない", () => {
+  it("同一行の <div><Button onClick /></div> は検出しない", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return <div className="flex"><Button onClick={() => {}}>送信</Button></div>
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P024")).toHaveLength(0)
+  })
+
+  it("<div onClick> は引き続き検出する", () => {
+    const { result } = runKskLint(`
+      export function Example() {
+        return <div onClick={() => {}}>クリック</div>
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P024")).toHaveLength(1)
+  })
+
+  it("TodoRow 相当の <span onClick> は引き続き検出する", () => {
+    const { result } = runKskLint(`
+      export function TodoRow() {
+        return (
+          <div className="flex items-center">
+            <span onClick={(e) => e.stopPropagation()}>担当者</span>
+          </div>
+        )
+      }
+    `)
+    const findings = findingsOf(result.stdout)
+    expect(findings.filter((f) => f.ruleId === "P024")).toHaveLength(1)
+  })
+})
