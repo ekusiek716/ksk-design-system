@@ -77,6 +77,7 @@
         "リンクを Button として表示する場合は <Button asChild><a href=... /></Button> を使う",
         "Icon-only buttons require aria-label",
         "Native Button supports loading/loadingLabel and leadingIcon/trailingIcon; do not wrap ActivityIndicator in Text",
+        "Native Button supports spinnerColor to override the loading ActivityIndicator color; default unchanged (falls back to variant fg color, issue #450)",
         "variant=glass は背景がグラデーション/写真の場合のみ使用",
         "variant=glass-inverse は暗い写真・動画・濃色面上の Liquid Glass CTA 専用",
         "variant=inverse / ghost-inverse は暗背景・ヒーローセクション専用",
@@ -103,7 +104,8 @@
         "Must use <Input> not <input>",
         "showCount + maxLength で controlled / uncontrolled / IME 対応の文字数カウンタを表示",
         "showCount 未指定時は wrapper / counter DOM を追加しない",
-        "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（showCount / adornment / IME 追従は維持される）"
+        "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（showCount / adornment / IME 追従は維持される）",
+        "Native Input supports style (outer container View) and inputStyle (inner TextInput) as RN-idiomatic style overrides, merged after DS defaults (issue #447)"
       ]
     },
     {
