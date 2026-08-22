@@ -142,6 +142,15 @@ for (const rule of [...prohibited, ...aiPatterns]) {
     if (rule[field] !== undefined && !Array.isArray(rule[field])) {
       errors.push(`${rule.id}: ${field} は配列でなければならない`)
     }
+    for (const entry of Array.isArray(rule[field]) ? rule[field] : []) {
+      if (typeof entry === "string" && entry.includes("\\")) {
+        errors.push(
+          `${rule.id}: ${field} に正規表現エスケープ痕がある（"${entry}"）。` +
+            `${field} は bin/lint.js で literal 文字列として includes() 比較されるため、` +
+            `エスケープ無しの literal 値に統一する（issue #463）`,
+        )
+      }
+    }
   }
   if (rule.excludes !== undefined) {
     errors.push(

@@ -228,7 +228,7 @@
       "pattern": "shadow-md\\b|shadow-lg\\b|shadow-xl\\b|shadow-2xl\\b",
       "excludePaths": [".stories."],
       "excludeDsPaths": ["components/ui/", "components/patterns/"],
-      "excludeLines": ["shadow-\\["],
+      "excludeLines": ["shadow-["],
       "message": "DS 定義外のシャドウ禁止",
       "fix": "shadow-[var(--shadow-sm/md/lg/dialog/tooltip)]"
     },
