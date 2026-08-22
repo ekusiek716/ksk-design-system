@@ -229,6 +229,22 @@ consumer が shadcn 既定の `src/components/ui/` に部品を置いても中�
 （v1.63.x までは単一の `excludes` をパスと行内容の両方に OR で当てていたため、
 このディレクトリ名だけで 13 ルールが同時に黙っていました）。
 
+`excludeLines` の各値は **literal 文字列**として `line.includes(value)` で判定されます
+（正規表現ではありません）。`shadow-\[` のように正規表現エスケープした値を書くと、実ソースの
+`shadow-[var(--shadow-md)]` と一致せず除外が一度も効きません（issue #463）。
+`scripts/check-rules-contract.mjs`（`npm run check` に組み込み済み）が `excludeLines` /
+`excludePaths` / `excludeDsPaths` 内のバックスラッシュ混入を検出します。
+
+#### P029: テンプレートリテラル className の許容範囲（issue #464）
+
+`className={\`...\${...}...\`}` の補間部（`${...}`）が**文字列リテラルのみで構成される式**
+（単純三項 `cond ? "a" : "b"` / `&&` / ネスト三項）なら、Tailwind の静的クラス抽出を壊さないため
+P029 の対象外です。CLAUDE.md の実装前セルフチェックにある「クラス名は完全な文字列で書く。分岐は
+三項演算子か cva variant で」という方針と一致させています。
+
+識別子・関数呼び出し・メンバーアクセスの補間（`` `bg-${color}` `` 等）や、テンプレートリテラルの
+入れ子は静的抽出できないため引き続き検出します。`cn()` / `clsx()` / CVA を使ってください。
+
 ### Jest（CommonJS）でコンポーネントをテストする
 
 このパッケージは **ESM-only** です。CJS との dual build は配布せず、Jest

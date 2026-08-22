@@ -789,6 +789,7 @@ function lintFile(file, cwd, rules, options = {}) {
       if (matchesRuleExclude(rule, { file: rel, line: rawLine, isDsFile })) continue
       const maskedLine = maskedLines[index] ?? ""
       if (!regex.test(maskedLine)) continue
+      if (rule.id === "P029" && isP029TemplateLiteralExempt(rawLine)) continue
       if (ignores.suppresses(rule.id ?? "UNKNOWN", index + 1)) continue
       findings.push(toFinding(rule, rel, index + 1, platform))
     }
@@ -1117,6 +1118,188 @@ function maskStrings(source, delimiters = ALL_STRING_DELIMITERS) {
  */
 function maskTemplateLiterals(source) {
   return maskStrings(source, TEMPLATE_DELIMITER_ONLY)
+}
+
+/**
+ * P029（テンプレートリテラル className 禁止）の例外判定（issue #464）。
+ *
+ * `className={\`base ${cond ? "a" : "b"}\`}` のように、補間部（`${...}`）が
+ * 「文字列リテラルのみで構成される式」（三項・&&・ネスト三項を含む）なら
+ * Tailwind の静的クラス抽出を壊さないため対象外にする。`${color}` のような
+ * 識別子・関数呼び出し・メンバーアクセスの補間は従来どおり検出する。
+ *
+ * 文字列一致ベースの簡易パーサーであり、TypeScript の完全な式パーサーではない。
+ * 判定に迷うケース（バッククォートのネスト等）は安全側＝「例外にしない」を返す。
+ */
+
+/** 文字列/括弧の深さを見ながら、depth 0 の `?` `:` `&&` `||` の位置を集める */
+function scanTopLevelOperatorTokens(expr) {
+  const tokens = []
+  let depth = 0
+  let quote = null
+  for (let i = 0; i < expr.length; i++) {
+    const ch = expr[i]
+    if (quote) {
+      if (ch === "\\") {
+        i += 1
+        continue
+      }
+      if (ch === quote) quote = null
+      continue
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch
+      continue
+    }
+    if (ch === "(" || ch === "[" || ch === "{") {
+      depth += 1
+      continue
+    }
+    if (ch === ")" || ch === "]" || ch === "}") {
+      depth -= 1
+      continue
+    }
+    if (depth !== 0) continue
+    if (ch === "?") tokens.push({ index: i, type: "?" })
+    else if (ch === ":") tokens.push({ index: i, type: ":" })
+    else if (ch === "&" && expr[i + 1] === "&") {
+      tokens.push({ index: i, type: "&&" })
+      i += 1
+    } else if (ch === "|" && expr[i + 1] === "|") {
+      tokens.push({ index: i, type: "||" })
+      i += 1
+    }
+  }
+  return tokens
+}
+
+/** `cond ? a : b` を depth 0 の `?`/`:` のバランスで分割する（ネスト三項対応） */
+function splitTopLevelTernary(expr) {
+  const tokens = scanTopLevelOperatorTokens(expr)
+  const questionIndex = tokens.findIndex((token) => token.type === "?")
+  if (questionIndex === -1) return null
+  let balance = 1
+  for (let i = questionIndex + 1; i < tokens.length; i++) {
+    if (tokens[i].type === "?") balance += 1
+    else if (tokens[i].type === ":") {
+      balance -= 1
+      if (balance === 0) {
+        const questionPos = tokens[questionIndex].index
+        const colonPos = tokens[i].index
+        return {
+          whenTrue: expr.slice(questionPos + 1, colonPos),
+          whenFalse: expr.slice(colonPos + 1),
+        }
+      }
+    }
+  }
+  return null
+}
+
+/** `lhs && rhs` / `lhs || rhs` を最初の depth 0 演算子で分割する */
+function splitTopLevelLogical(expr) {
+  const token = scanTopLevelOperatorTokens(expr).find(
+    (candidate) => candidate.type === "&&" || candidate.type === "||",
+  )
+  if (!token) return null
+  return { rhs: expr.slice(token.index + token.type.length) }
+}
+
+function isStringLiteralExpr(expr) {
+  const trimmed = expr.trim()
+  return /^"(?:[^"\\]|\\.)*"$/.test(trimmed) || /^'(?:[^'\\]|\\.)*'$/.test(trimmed)
+}
+
+/** `(expr)` のように括弧が式全体をちょうど一度だけ包んでいるか */
+function isFullyParenWrapped(expr) {
+  if (expr[0] !== "(" || expr[expr.length - 1] !== ")") return false
+  let depth = 0
+  for (let i = 0; i < expr.length; i++) {
+    if (expr[i] === "(") depth += 1
+    else if (expr[i] === ")") {
+      depth -= 1
+      if (depth === 0) return i === expr.length - 1
+    }
+  }
+  return false
+}
+
+/** 補間式が「文字列リテラルのみで構成される式」か（issue #464） */
+export function isLiteralOnlyInterpolation(expr) {
+  const trimmed = (expr ?? "").trim()
+  if (trimmed === "") return false
+  // ネストしたテンプレートリテラルは判定を諦めて安全側（=対象外にしない）に倒す
+  if (trimmed.includes("`")) return false
+  if (isStringLiteralExpr(trimmed)) return true
+  if (isFullyParenWrapped(trimmed)) return isLiteralOnlyInterpolation(trimmed.slice(1, -1))
+  const ternary = splitTopLevelTernary(trimmed)
+  if (ternary) {
+    return isLiteralOnlyInterpolation(ternary.whenTrue) && isLiteralOnlyInterpolation(ternary.whenFalse)
+  }
+  const logical = splitTopLevelLogical(trimmed)
+  if (logical) return isLiteralOnlyInterpolation(logical.rhs)
+  return false
+}
+
+/** テンプレートリテラル（バッククォート開始位置つき）の中身を取り出す。同一行内で閉じない場合は null */
+function extractTemplateLiteralBody(line, backtickIndex) {
+  let i = backtickIndex + 1
+  let braceDepth = 0
+  let content = ""
+  while (i < line.length) {
+    const ch = line[i]
+    if (ch === "\\") {
+      content += ch + (line[i + 1] ?? "")
+      i += 2
+      continue
+    }
+    if (braceDepth === 0 && ch === "`") return content
+    if (ch === "{") braceDepth += 1
+    else if (ch === "}" && braceDepth > 0) braceDepth -= 1
+    content += ch
+    i += 1
+  }
+  return null
+}
+
+/** テンプレートリテラルの中身から `${...}` の中身だけを depth バランスで取り出す */
+function extractInterpolationExprs(content) {
+  const exprs = []
+  let i = content.indexOf("${")
+  while (i !== -1) {
+    const start = i + 2
+    let depth = 1
+    let j = start
+    while (j < content.length && depth > 0) {
+      if (content[j] === "{") depth += 1
+      else if (content[j] === "}") depth -= 1
+      j += 1
+    }
+    if (depth === 0) {
+      exprs.push(content.slice(start, j - 1))
+      i = content.indexOf("${", j)
+    } else {
+      exprs.push(content.slice(start))
+      break
+    }
+  }
+  return exprs
+}
+
+/**
+ * P029 が fire した行が「className の template literal で、補間部が全て
+ * 文字列リテラルのみで構成される式」なら true（＝対象外にしてよい）を返す。
+ */
+export function isP029TemplateLiteralExempt(line) {
+  const classNameIndex = line.indexOf("className=")
+  if (classNameIndex === -1) return false
+  const backtickIndex = line.indexOf("`", classNameIndex)
+  if (backtickIndex === -1) return false
+  const content = extractTemplateLiteralBody(line, backtickIndex)
+  if (content === null) return false
+  const interpolations = extractInterpolationExprs(content)
+  if (interpolations.length === 0) return false
+  return interpolations.every((expr) => isLiteralOnlyInterpolation(expr))
 }
 
 function excludeList(value) {
