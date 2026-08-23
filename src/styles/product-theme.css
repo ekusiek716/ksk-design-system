@@ -13,6 +13,11 @@
      @import "./themes/my-client.css";   … Brand 10行（色）
      @import "./product-theme.css";      … ここの変数（寸法・面）
 
+   preset を使わずトークン CSS を個別 import する消費側は、このファイルを
+   subpath export で直接読める（コピー同期は不要）:
+
+     @import "ksk-design-system/tokens/product-theme";
+
    機械可読な許可リストは contracts/product-theme-overrides.json が正本。
    **ここに無い変数は公開契約ではない**（内部実装なので予告なく変わる）。
    許可リスト外の上書きは `npx ksk-ds lint` の P049 が検出する。
