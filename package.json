@@ -92,6 +92,10 @@
       "import": "./src/styles/categorical.css",
       "default": "./src/styles/categorical.css"
     },
+    "./tokens/product-theme": {
+      "import": "./src/styles/product-theme.css",
+      "default": "./src/styles/product-theme.css"
+    },
     "./glass": {
       "import": "./src/styles/glass.css",
       "default": "./src/styles/glass.css"
