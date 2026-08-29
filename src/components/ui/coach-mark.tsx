@@ -24,6 +24,18 @@ interface CoachMarkProps {
   /** 閉じるボタン表示 */
   showClose?: boolean
   onClose?: () => void
+  /**
+   * 次へボタンの文言（既定 "次へ →"）。i18n はアプリ側で解決して渡す。
+   * 矢印は文言に含まれるため、渡すと矢印も置き換わる（例: "Next →"）。
+   */
+  nextLabel?: string
+  /** スキップボタンの文言（既定 "スキップ"） */
+  skipLabel?: string
+  /**
+   * バルーンの aria-label。content が string ならその文字列、
+   * それ以外は既定 "コーチマーク"（issue #477）。
+   */
+  ariaLabel?: string
   delayDuration?: number
   className?: string
 }
@@ -47,6 +59,9 @@ function CoachMark({
   onNext,
   showClose,
   onClose,
+  nextLabel = "次へ →",
+  skipLabel = "スキップ",
+  ariaLabel: ariaLabelProp,
   delayDuration = 0,
   className,
 }: CoachMarkProps) {
@@ -59,7 +74,8 @@ function CoachMark({
   // Passing `aria-label` makes Radix render the label *string* instead of the
   // children in that copy, so no button (and no Arrow) is ever duplicated while
   // screen readers still get an accessible description via the role="tooltip" node.
-  const ariaLabel = typeof content === "string" ? content : "コーチマーク"
+  const ariaLabel =
+    ariaLabelProp ?? (typeof content === "string" ? content : "コーチマーク")
 
   // PortalContainerProvider があればそのスコープ内へ、無ければ document.body（#360）
   const portalContainer = usePortalContainer()
@@ -106,7 +122,7 @@ function CoachMark({
                         onClick={onClose}
                         className="typo-label-xs text-[var(--Text-on-Inverse)] underline underline-offset-2 hover:no-underline"
                       >
-                        スキップ
+                        {skipLabel}
                       </button>
                     )}
                     {onNext && (
@@ -115,7 +131,7 @@ function CoachMark({
                         onClick={onNext}
                         className="typo-label-xs text-[var(--Text-on-Inverse)] bg-[var(--Overlay-Light)] hover:underline px-2.5 py-0.5 rounded-md ml-auto"
                       >
-                        次へ →
+                        {nextLabel}
                       </button>
                     )}
                   </div>

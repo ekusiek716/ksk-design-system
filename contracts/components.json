@@ -707,7 +707,12 @@
       "description": "オンボーディング吹き出し（ガイド/ツールチップ）。ステップ番号・次へボタン・閉じるボタン対応。",
       "variants": [],
       "accessibility": [],
-      "rules": []
+      "rules": [],
+      "props": {
+        "nextLabel": "string (既定 \"次へ →\") — 次へボタンの文言。矢印は文言に含まれる（issue #477）",
+        "skipLabel": "string (既定 \"スキップ\") — スキップボタンの文言（issue #477）",
+        "ariaLabel": "string — バルーンの aria-label。未指定時は content が string ならその文字列、それ以外は \"コーチマーク\"（issue #477）"
+      }
     },
     {
       "name": "CountdownTimer",
@@ -2017,8 +2022,12 @@
       ],
       "rules": [
         "isCoachCompleted/markCoachCompleted で完了状態を永続化",
-        "対象要素が見つからない step は画面中央フォールバック"
-      ]
+        "対象要素が見つからない step は画面中央フォールバック",
+        "ボタン文言・aria-label の i18n は labels prop で渡す（未指定は既定文言のまま・後方互換）"
+      ],
+      "props": {
+        "labels": "{ next?, done?, skip?, ariaLabel? } — ボタン文言と overlay の aria-label。i18n はアプリ側で解決して渡す。done 未指定なら next にフォールバック（issue #477）"
+      }
     },
     {
       "name": "PromptCoordinatorProvider/AutoPrompt",
