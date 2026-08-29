@@ -113,11 +113,14 @@
 @source inline("backdrop-blur");
 @source inline("backdrop-blur-sm");
 @source inline("backdrop-filter");
+@source inline("before:-translate-x-1/2");
 @source inline("before:-translate-y-1/2");
 @source inline("before:absolute");
 @source inline("before:content-['']");
 @source inline("before:inset-x-0");
+@source inline("before:left-1/2");
 @source inline("before:min-h-11");
+@source inline("before:size-11");
 @source inline("before:top-1/2");
 @source inline("bg-[color-mix(in_srgb,var(--Text-on-Inverse)_30%,transparent)]");
 @source inline("bg-[rgba(255,255,255,0.20)]");

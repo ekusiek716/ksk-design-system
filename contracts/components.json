@@ -286,7 +286,8 @@
       "description": "ラジオボタングループ。単一選択に使用。各RadioGroupItemにLabelが必要。",
       "variants": [],
       "accessibility": [
-        "Must pair with <Label> for each item"
+        "Must pair with <Label> for each item",
+        "RadioGroupItem は見た目 20px の円のまま ::before で 44x44px の当たり判定を内蔵する。消費側で [role=\"radio\"] のグローバル寸法上書きを追加しない（issue #470）"
       ]
     },
     {

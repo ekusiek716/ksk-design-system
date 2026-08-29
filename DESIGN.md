@@ -165,6 +165,10 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 - **タッチターゲット**（モバイル）: WCAG 2.5.5 / Apple HIG に従い主要操作（ボタン/アイコンボタン/入力/ナビ）の
   **min は 44px** 以上、推奨 48px。44 未満が避けられない **チップ（min 32px）は hitSlop**（不可視の拡張タップ領域）で
   実効 44px を確保する。値の正本は `tokens.json` の `touchTargets`。
+- **タップ領域はコンポーネント所有**。見た目の寸法が 44px 未満のコントロール（Chip / pill TabsTrigger /
+  RadioGroupItem の 20px 円など）は、透明な `::before` 擬似要素で当たり判定だけを 44px に広げる。
+  消費側で `[role="radio"] { min-height: 44px }` のようなロール単位のグローバル上書きを足してはいけない
+  （円が縦長に潰れ、ChipSelector など同じロールを使う他コントロールも巻き添えで壊れる。issue #470）。
 
 ## Elevation & Depth
 
