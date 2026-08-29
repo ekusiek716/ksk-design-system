@@ -311,7 +311,11 @@
    適用する。BottomTabBar の中央アクションが「消費側が --Nav-Center-Action-*
    を宣言していなければ .glass-accent の既定値そのまま」という契約を
    var() のフォールバックで表現するため（issue #471 / src/styles/bottom-nav.css）。
-   --ksk-glass-accent-* は内部実装であって公開契約ではない。 */
+   --ksk-glass-accent-* は内部実装であって公開契約ではない。BottomTabBar の
+   中央アクション（src/styles/bottom-nav.css）だけが参照する前提で置いており、
+   .glass-accent を使う他のコンポーネントからは参照しないこと。面の
+   カスタマイズ口が別のコンポーネントにも要るなら、そのコンポーネント用の
+   公開変数（--Nav-* に相当するもの）を改めて設計する。 */
 .glass-accent {
   --ksk-glass-accent-bg: color-mix(in srgb, var(--Brand-Primary) 95%, transparent);
   --ksk-glass-accent-border: 0.5px solid rgba(255, 255, 255, 0.40);

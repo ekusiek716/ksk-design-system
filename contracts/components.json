@@ -2534,7 +2534,8 @@
         "tabs は BottomTabBarItem を手組みせず MobileTabItem<T>[]（key/label/Icon）で渡す",
         "addAction 指定時はブランド色丸背景 + Add アイコンが自動で centerAction になる",
         "floatingPosition='left'|'right' を使う場合は FAB を反対側に併置する",
-        "寸法・面の上書きは BottomTabBar と同じ --Nav-* を使う（MobileTabBar は薄いラッパーなので変数はそのまま効く。issue #471）"
+        "寸法・面の上書きは BottomTabBar と同じ --Nav-* を使う（MobileTabBar は薄いラッパーなので変数はそのまま効く。issue #471）",
+        "[data-global-nav-add-icon] は belle-todo 互換の後方互換フックで公開契約ではない。中央アクションのアイコンは data-slot=\"bottom-nav-center-action-icon\" で狙う（issue #471）"
       ],
       "productTheme": [
         "--Nav-Pill-*",
