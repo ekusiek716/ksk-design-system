@@ -22,7 +22,8 @@
     "lintRule": "P049（npx ksk-ds lint が消費側 CSS を検査する）",
     "statusPaletteNote": "statusPalette は「消費側が DS の primitive を自分の Tailwind alias（--color-sun-800 等）の実体として使っている」ケース向けの公開段（issue #384）。@theme inline の alias は生成ユーティリティに var(--Primitive-*) が直接展開されるため、alias 側を dark で差し替えても効かず、primitive を上書きする以外の経路が無い。公開しているのは status の tint 段（-50 × 4色）と、依頼のあったアクセント段（Red-600 / Green-700）だけ。-50 は DS の .dark ブロックが一切参照していない（dark の Surface-Caution/Success/Warning/Info は -900 と実値）ので、dark 内での上書きは DS コンポーネントに対して無害。light では --Surface-Caution / --Surface-Success / --Surface-Warning / --Surface-Info を駆動するので上書きは効く。アクセント段は light / dark の両方で DS semantic を駆動するため、パレット全段ではなく依頼ベースで1段ずつ開ける。",
     "statusPaletteSideEffects": "--Primitive-Red-600 は --Caution-Base（light / dark 共通）と、dark の --Active-Destructive-Button を駆動する。dark で Red-600 を Red-500(#EF4444) より明るい値に差し替えると、destructive ボタンの active が hover より明るくなり押下の階調が反転する。差し替えるなら --Hover-Destructive-Button との明度関係を実測すること。--Primitive-Green-700 は light の --Text-Success / --Success-Base のみを駆動する（dark は Green-400 なので影響なし）。",
-    "contrastResponsibility": "neutralPalette（--Primitive-Gray-* / White / Black）を差し替えたら、本文×背景のコントラストは消費プロダクト側の責任になる。Gray は --Text-High-Emphasis（本文色）・--Text-Medium-Emphasis・--Surface-Secondary・--Border-Low-Emphasis など semantic.css の 33 箇所を駆動しているため、差し替え後に本文テキスト×各 Surface が WCAG AA（4.5:1、大きい文字は 3:1）を満たすか必ず実測すること。DS 側の scripts/check-contrast.mjs は DS 既定パレット向けの検査で、消費側の差し替えは見ていない。light / dark の両方を確認する。"
+    "contrastResponsibility": "neutralPalette（--Primitive-Gray-* / White / Black）を差し替えたら、本文×背景のコントラストは消費プロダクト側の責任になる。Gray は --Text-High-Emphasis（本文色）・--Text-Medium-Emphasis・--Surface-Secondary・--Border-Low-Emphasis など semantic.css の 33 箇所を駆動しているため、差し替え後に本文テキスト×各 Surface が WCAG AA（4.5:1、大きい文字は 3:1）を満たすか必ず実測すること。DS 側の scripts/check-contrast.mjs は DS 既定パレット向けの検査で、消費側の差し替えは見ていない。light / dark の両方を確認する。",
+    "navSurfaceNote": "--Nav-Center-Action-Surface / -Border / -Shadow と --Nav-Selected-Surface / -Shadow は例外的に :root へ既定値を置いていない（issue #471）。DS 既定は tone=\"inverse\" / dark で出し分ける素材（.glass-accent・ガラスの選択プラッター）で、単一の :root 値に畳めないため。src/styles/bottom-nav.css が var(--Nav-*, <DS 既定>) の形で持ち、消費側が宣言したときだけ上書きされる。宣言しなければレンダリングは 1px も変わらない。"
   },
   "allowedVariables": {
     "brandColor": [
@@ -158,6 +159,21 @@
       "--Motion-Duration-Base",
       "--Motion-Duration-Slow",
       "--Motion-Duration-Slower"
+    ],
+    "nav": [
+      "--Nav-Pill-Min-Height",
+      "--Nav-Pill-Padding-X",
+      "--Nav-Pill-Padding-Y",
+      "--Nav-Pill-Gap",
+      "--Nav-Item-Min-Height",
+      "--Nav-Item-Gap",
+      "--Nav-Center-Action-Size",
+      "--Nav-Center-Action-Radius",
+      "--Nav-Center-Action-Surface",
+      "--Nav-Center-Action-Border",
+      "--Nav-Center-Action-Shadow",
+      "--Nav-Selected-Surface",
+      "--Nav-Selected-Shadow"
     ]
   },
   "dsVariableNamespaces": [
@@ -186,7 +202,8 @@
     "--Product-",
     "--Chip-",
     "--glass-",
-    "--card-surface"
+    "--card-surface",
+    "--Nav-"
   ],
   "namespaceNote": "P049 が「DS の変数を上書きしている」と判定する接頭辞。ここに該当し、かつ DS 自身の CSS（src/preset.css / src/styles/*.css / src/themes/*.css）に実在し、allowedVariables に無い変数を消費側 CSS が宣言していたら契約違反。接頭辞は一致するが DS に実在しない名前（消費側が DS の命名に寄せて作った独自変数。例: --Surface-Inverse-Hover）は上書きではないので対象外（issue #377）。DS の CSS が読めない環境では接頭辞一致だけで判定する。shadcn 互換の小文字ブリッジ（--primary / --border 等）は消費側アプリが同名変数を持つことがあるため対象外。",
   "wiredComponents": {
@@ -196,15 +213,28 @@
       "--Control-Gap",
       "--Control-Radius"
     ],
-    "Input": ["--Field-Height-Md", "--Field-Padding-X-Md", "--Field-Radius"],
+    "Input": [
+      "--Field-Height-Md",
+      "--Field-Padding-X-Md",
+      "--Field-Radius"
+    ],
     "Textarea": [
       "--Field-Min-Height",
       "--Field-Padding-X-Md",
       "--Field-Padding-Y",
       "--Field-Radius"
     ],
-    "SelectTrigger": ["--Field-Height-*", "--Field-Padding-X-*", "--Field-Radius"],
-    "Card": ["--Product-Card-Padding", "--Product-Card-Gap", "--Radius-Surface", "--card-surface"],
+    "SelectTrigger": [
+      "--Field-Height-*",
+      "--Field-Padding-X-*",
+      "--Field-Radius"
+    ],
+    "Card": [
+      "--Product-Card-Padding",
+      "--Product-Card-Gap",
+      "--Radius-Surface",
+      "--card-surface"
+    ],
     "Tabs": [
       "--Control-Height-Md",
       "--Control-Padding-X-Sm",
@@ -212,8 +242,24 @@
       "--Control-Radius",
       "--Field-Radius"
     ],
-    "Chip": ["--Chip-Radius"],
-    "AdminShell": ["--Product-Page-Padding-Y"]
+    "Chip": [
+      "--Chip-Radius"
+    ],
+    "AdminShell": [
+      "--Product-Page-Padding-Y"
+    ],
+    "BottomTabBar": [
+      "--Nav-Pill-*",
+      "--Nav-Item-*",
+      "--Nav-Center-Action-*",
+      "--Nav-Selected-*"
+    ],
+    "MobileTabBar": [
+      "--Nav-Pill-*",
+      "--Nav-Item-*",
+      "--Nav-Center-Action-*",
+      "--Nav-Selected-*"
+    ]
   },
   "aiGuidance": [
     "プロダクト差分は、まずこの契約の CSS 変数上書きで表現する。className での個別上書きを何十箇所にも散らさない。",
@@ -227,6 +273,8 @@
     "Checkbox / RadioGroup / Switch（20px の size-5 トグル）は意図的にこの契約の対象外。「コントロールの高さ」という概念が当てはまらない固定サイズのため、Control 変数を当てると意味が壊れる。",
     "Chip は角丸（--Chip-Radius）だけを配線し、高さ・横 padding は配線しない。sm/md/lg の縦 margin（my-*）は「44px タッチターゲット - 本体高さ」ちょうどの手計算値で、height を変数化すると当たり判定の math が壊れる。",
     "AppShell / MarketingShell / MobileAppShell はページ本文の padding をシェル自身が持たない（Container の gutter か呼び出し側の contentClassName に委ねている）ため product theme の対象外。AdminShell の <main> だけが --Product-Page-Padding-Y を持つ。",
-    "--Product-Type-Scale は typo-* の font-size に一律で掛かる乗数（既定 1）。文字倍率を上げたら Control（Button）/ Field（Input 等）の高さ・padding も --Control-Height-* / --Field-Height-* 等で別途上げること。この変数はコントロールの寸法には自動連動しない（文字だけ大きくして枠が追従しないと窮屈になるため、意図的に分離してある）。Web のみが対象で React Native（native/scales.ts）には効かない。"
+    "--Product-Type-Scale は typo-* の font-size に一律で掛かる乗数（既定 1）。文字倍率を上げたら Control（Button）/ Field（Input 等）の高さ・padding も --Control-Height-* / --Field-Height-* 等で別途上げること。この変数はコントロールの寸法には自動連動しない（文字だけ大きくして枠が追従しないと窮屈になるため、意図的に分離してある）。Web のみが対象で React Native（native/scales.ts）には効かない。",
+    "BottomTabBar / MobileTabBar の寸法・面は --Nav-* で変える。DS の内部マークアップ（[data-slot=\"bottom-nav-pill\"] > :is(a, button) や span:first-child / span:last-child のような子孫順、[data-global-nav-add-icon]）を !important で叩かない。DOM を狙う必要が残る場合も、公開している data-slot（bottom-nav-item / -item-icon / -item-label / bottom-nav-center-action / -icon / -label / bottom-nav-selected-surface）だけを使う（issue #471）。",
+    "--Nav-Item-Min-Height / --Nav-Center-Action-Size は max(44px, var(...)) で参照しているため、44px（HIG のタップ領域下限）より小さくはならない。ナビを詰めたい場合も当たり判定は 44px を保つ。"
   ]
 }

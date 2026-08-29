@@ -92,12 +92,13 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
 //   Brand テーマ切替の対象外）。
 // ライトはガラス面自体が白いためプラッターが沈みやすい。白 70% + ごく浅い
 // 外影 1 枚で「持ち上がった水滴」の輪郭を出す（強い外影はピル本体の影と
-// 二重になるため 3px/8% に留める）
-function platterSurfaceClass(tone: BottomTabBarTone) {
-  return tone === "inverse"
-    ? "bg-[rgba(255,255,255,0.20)] shadow-[inset_0_1px_0_rgba(255,255,255,0.30)]"
-    : "[background:color-mix(in_srgb,var(--Surface-Primary)_70%,transparent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.60),0_1px_3px_rgba(0,0,0,0.08)]"
-}
+// 二重になるため 3px/8% に留める）。
+//
+// 実際の宣言は src/styles/bottom-nav.css の
+// `[data-slot="bottom-nav-selected-surface"]`（tone は祖先の data-tone で分岐）。
+// 消費側が --Nav-Selected-Surface / --Nav-Selected-Shadow を宣言したときだけ
+// 上書きされる公開契約なので、className の白リテラルには戻さないこと（issue #471）。
+const PLATTER_SURFACE_SLOT = "bottom-nav-selected-surface"
 
 // SSR（react-dom/server）では useLayoutEffect が警告を出すため、
 // サーバでは useEffect に落とす定番パターン（どちらもサーバでは走らない）
@@ -124,6 +125,71 @@ function useBottomTabBarKeyboardState(keyboardBehavior: BottomTabBarKeyboardBeha
 
 // ─── BottomNav ────────────────────────────────────────────────────────────────
 
+/**
+ * BottomTabBar — モバイルのグローバルナビゲーション。
+ *
+ * ## プロダクト側のカスタマイズ契約（issue #471）
+ *
+ * 寸法・面は className の `!important` や子孫セレクタ（`span:first-child` 等）
+ * ではなく、**公開 CSS 変数**で変える。許可リストは
+ * `contracts/product-theme-overrides.json` の `nav` グループが正本。
+ *
+ * ```css
+ * :root {
+ *   --Nav-Pill-Min-Height: 4.5rem;
+ *   --Nav-Pill-Padding-X: 0.75rem;
+ *   --Nav-Pill-Padding-Y: 0.625rem;
+ *   --Nav-Pill-Gap: 0.25rem;
+ *   --Nav-Item-Min-Height: 3rem;
+ *   --Nav-Item-Gap: 0.125rem;
+ *   --Nav-Center-Action-Size: 3rem;
+ *   --Nav-Center-Action-Radius: 1rem;
+ *   --Nav-Center-Action-Surface: var(--Brand-Primary);
+ *   --Nav-Center-Action-Border: 1px solid var(--Border-Accent-Primary);
+ *   --Nav-Center-Action-Shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+ *   --Nav-Selected-Surface: var(--Surface-Accent-Primary-Light);
+ *   --Nav-Selected-Shadow: none;
+ * }
+ * ```
+ *
+ * - `--Nav-Pill-*` … pill の最小高さ・内側 padding・アイテム間の gap
+ * - `--Nav-Item-*` … タブの最小高さ（44px 未満にしても 44px より縮まない）と
+ *   アイコン↔ラベルの gap
+ * - `--Nav-Center-Action-Size` / `-Radius` … 中央アクションの寸法・角丸
+ * - `--Nav-Center-Action-Surface` / `-Border` / `-Shadow` と
+ *   `--Nav-Selected-Surface` / `-Shadow` は**宣言したときだけ** DS 既定
+ *   （`.glass-accent` / ガラスの選択プラッター）を置き換える。未宣言なら
+ *   tone / dark の出し分けは従来どおり DS 側が持つ。
+ * - 寸法系が効くのは prominent レイアウト（`showLabels` か `centerAction` が
+ *   ある pill）。アイコンのみの compact pill は契約外で固定。
+ *
+ * ## 安定 data-slot（DOM で狙ってよいアンカー）
+ *
+ * | slot | 対象 |
+ * | --- | --- |
+ * | `bottom-tab-bar` | default variant の nav |
+ * | `bottom-nav-pill` | pill variant の nav（tone は `data-tone`） |
+ * | `bottom-nav-item` | 各タブ（`a` / `button`）。`data-tab-key` でタブ識別 |
+ * | `bottom-nav-item-icon` | タブのアイコン領域 |
+ * | `bottom-nav-item-label` | タブのラベル |
+ * | `bottom-nav-center-action` | 中央アクション（`a` / `button`） |
+ * | `bottom-nav-center-action-icon` | 中央アクションのアイコン領域 |
+ * | `bottom-nav-center-action-label` | 中央アクションのラベル（label 指定時のみ） |
+ * | `bottom-nav-selected-surface` | 選択プラッターのスライド overlay |
+ *
+ * 上記以外の入れ子・タグ・子要素の順序は内部実装で、予告なく変わる
+ * （v1.43.0 で中央アクションのラッパー構造が変わり消費側が壊れた事故が由来）。
+ *
+ * ## a11y の既定
+ *
+ * - `nav` に `aria-label`（`navLabel`。既定「メインナビゲーション」）
+ * - アクティブなタブに `aria-current="page"`
+ * - ラベル非表示時はタブに `aria-label`（`ariaLabel ?? label`）
+ * - 中央アクションに `aria-label`（`ariaLabel ?? label`）
+ * - タップ領域は 44px（HIG 下限）を下回らない
+ *
+ * いずれも呼び出し側の義務にしていない（明示値があればそちらが優先）。
+ */
 function BottomTabBar({
   className,
   items,
@@ -317,6 +383,7 @@ function BottomTabBarPill({
       )}
       <nav
       data-slot="bottom-nav-pill"
+      data-tone={tone}
       data-keyboard-behavior={keyboardState.keyboardBehavior}
       data-keyboard-open={keyboardState.isKeyboardOpen || undefined}
       aria-label={navLabel}
@@ -338,7 +405,11 @@ function BottomTabBarPill({
         // 素材頼みになる）。
         "flex items-center rounded-full glass-specular",
         tone === "inverse" ? "glass-dark" : "glass",
-        hasProminentLayout ? "min-h-[66px] gap-1 px-2 py-2" : "h-[58px] gap-0 px-3",
+        // prominent（ラベル表示 / 中央アクションあり）の寸法は公開契約
+        // （--Nav-Pill-*）。アイコンのみの compact は契約外で固定のまま。
+        hasProminentLayout
+          ? "min-h-[var(--Nav-Pill-Min-Height)] gap-[var(--Nav-Pill-Gap)] px-[var(--Nav-Pill-Padding-X)] py-[var(--Nav-Pill-Padding-Y)]"
+          : "h-[58px] gap-0 px-3",
         keyboardState.shouldHide && "translate-y-2 opacity-0 pointer-events-none invisible",
         className
       )}
@@ -356,11 +427,12 @@ function BottomTabBarPill({
       {platterRect && (
         <span
           aria-hidden="true"
+          data-slot={PLATTER_SURFACE_SLOT}
+          data-nav-platter
           className={cn(
             "absolute left-0 top-0 rounded-full pointer-events-none",
             platterAnimated &&
-              "transition-[transform,width,height] duration-[var(--Motion-Duration-Base)] ease-[var(--Motion-Easing-Standard)] motion-reduce:transition-none",
-            platterSurfaceClass(tone)
+              "transition-[transform,width,height] duration-[var(--Motion-Duration-Base)] ease-[var(--Motion-Easing-Standard)] motion-reduce:transition-none"
           )}
           style={{
             width: platterRect.w,
@@ -430,21 +502,24 @@ function NavItem({
   // スライド overlay の計測アンカー（プラッターが包むべき矩形）
   const isPlatterAnchorTag = compact && isLabelVisible && item.isActive
   const isPlatterAnchorIcon = compact && !isLabelVisible && item.isActive
-  const platterSurface = platterSurfaceClass(tone)
 
   return (
     <Tag
+      data-slot="bottom-nav-item"
       data-tab-key={item.tabKey}
       data-platter-anchor={isPlatterAnchorTag || undefined}
+      data-nav-platter={platterOnTag || undefined}
       className={cn(
-        "relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-full",
+        // タップ領域は HIG 下限 44px を DS 側で守る（--Nav-Item-Min-Height を
+        // 44px 未満にしても縮まない）。gap はアイコン↔ラベル間。
+        "relative flex min-h-[max(2.75rem,var(--Nav-Item-Min-Height))] flex-col items-center justify-center gap-[var(--Nav-Item-Gap)] rounded-full",
         // iOS 26 のガラスは押下で沈む（ゲル感）。opacity だけでなく scale も入れる
         "transition-[transform,opacity] duration-[var(--Motion-Duration-Fast)] active:scale-95 active:opacity-80",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
         compact ? (isLabelVisible ? "h-full min-w-0 flex-1 px-2 py-1" : "h-full w-14") : "min-w-0 flex-1 pb-1 pt-1",
         // 影は上端のインセットハイライト 1 枚のみ。外側ドロップシャドウを足すと
         // ピル本体（.glass）の影と二重になり煩く見える
-        platterOnTag && platterSurface,
+        // 面の宣言は bottom-nav.css（data-slot 経由の公開契約）が持つ
         item.isActive
           ? tone === "inverse"
             ? "text-[var(--Text-on-Inverse)]"
@@ -459,15 +534,15 @@ function NavItem({
     >
       {/* アイコン領域（アイコンのみ表示時・default variant ではプラッターを兼ねる） */}
       <span
+        data-slot="bottom-nav-item-icon"
         data-platter-anchor={isPlatterAnchorIcon || undefined}
+        data-nav-platter={(platterOnIcon && compact) || undefined}
         className={cn(
           "relative flex items-center justify-center rounded-full transition-colors",
           compact ? (isLabelVisible ? "h-7 min-w-7" : "h-8 w-12") : "h-7 w-14",
-          platterOnIcon && (
-            compact
-              ? platterSurface
-              : "bg-[var(--Surface-Accent-Primary-Light)]"
-          )
+          // compact のプラッターは bottom-nav.css（data-slot）が面を持つ。
+          // default variant（M3 スタイル）は従来どおりの semantic 塗り。
+          platterOnIcon && !compact && "bg-[var(--Surface-Accent-Primary-Light)]"
         )}
       >
         {item.isActive && item.activeIcon ? item.activeIcon : item.icon}
@@ -481,7 +556,10 @@ function NavItem({
       {isLabelVisible && (
         // typo クラスはアクティブ状態で変えない（weight ジャンプでラベルが揺れる）。
         // 状態差は色・opacity のみで表現する（iOS 26 と同じ）
-        <span className="max-w-full truncate px-0.5 text-center typo-label-xs">
+        <span
+          data-slot="bottom-nav-item-label"
+          className="max-w-full truncate px-0.5 text-center typo-label-xs"
+        >
           {item.label}
         </span>
       )}
@@ -500,13 +578,21 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
 
   return (
     <Tag
+      data-slot="bottom-nav-center-action"
       className={cn(
-        "relative flex shrink-0 items-center justify-center rounded-full",
-        hasLabel ? "h-12 min-w-[78px] gap-1 px-3" : "size-12",
+        // 寸法・角丸は公開契約（--Nav-Center-Action-Size / -Radius）。
+        // タップ領域の HIG 下限 44px は max() で DS 側が守る。
+        "relative flex shrink-0 items-center justify-center rounded-[var(--Nav-Center-Action-Radius)]",
+        hasLabel
+          ? "h-[max(2.75rem,var(--Nav-Center-Action-Size))] min-w-[78px] gap-1 px-3"
+          : "size-[max(2.75rem,var(--Nav-Center-Action-Size))]",
         // iOS 26 の主要アクションはフラット塗りではなく brand ティントの
         // Liquid Glass（.glass-accent = lensing + 3層 inset の質感、
         // .glass-specular = エッジの屈折リム）。テーマ・reduced-transparency
         // フォールバックは glass.css 側で面倒を見る
+        // 面（背景・境界・影）は .glass-accent が既定を持ち、消費側が
+        // --Nav-Center-Action-Surface / -Border / -Shadow を宣言したときだけ
+        // src/styles/bottom-nav.css 側で上書きされる（issue #471）。
         "glass-accent glass-specular text-[var(--Text-on-Inverse)]",
         "typo-label-sm transition-transform duration-[var(--Motion-Duration-Fast)] active:scale-[0.96]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
@@ -515,12 +601,17 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
       {...tagProps}
     >
       <span
+        data-slot="bottom-nav-center-action-icon"
         className={cn("flex items-center justify-center", hasLabel && "size-5")}
         aria-hidden="true"
       >
         {item.icon}
       </span>
-      {hasLabel && <span className="max-w-[5rem] truncate">{item.label}</span>}
+      {hasLabel && (
+        <span data-slot="bottom-nav-center-action-label" className="max-w-[5rem] truncate">
+          {item.label}
+        </span>
+      )}
     </Tag>
   )
 }

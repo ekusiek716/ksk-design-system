@@ -19,6 +19,7 @@
 @import "./styles/categorical.css";
 @import "./styles/typography.css";
 @import "./styles/glass.css";
+@import "./styles/bottom-nav.css";
 @import "./styles/motion.css";
 @import "./styles/sheet-keyboard.css";
 /* プロダクト単位で上書きしてよい寸法・面の公開変数（issue #364）。

@@ -74,7 +74,6 @@
 @source inline("[--ksk-fab-bottom-offset:6rem]");
 @source inline("[-webkit-tap-highlight-color:transparent]");
 @source inline("[@media(hover:hover)]:transition-colors");
-@source inline("[background:color-mix(in_srgb,var(--Surface-Primary)_70%,transparent)]");
 @source inline("[scrollbar-width:none]");
 @source inline("absolute");
 @source inline("active:bg-[var(--Active-Destructive-Button)]");
@@ -123,7 +122,6 @@
 @source inline("before:size-11");
 @source inline("before:top-1/2");
 @source inline("bg-[color-mix(in_srgb,var(--Text-on-Inverse)_30%,transparent)]");
-@source inline("bg-[rgba(255,255,255,0.20)]");
 @source inline("bg-[var(--Border-Low-Emphasis)]");
 @source inline("bg-[var(--Border-Medium-Emphasis)]");
 @source inline("bg-[var(--Brand-Apple)]");
@@ -427,6 +425,8 @@
 @source inline("gap-6");
 @source inline("gap-8");
 @source inline("gap-[var(--Control-Gap)]");
+@source inline("gap-[var(--Nav-Item-Gap)]");
+@source inline("gap-[var(--Nav-Pill-Gap)]");
 @source inline("gap-[var(--Product-Card-Gap)]");
 @source inline("gap-x-2");
 @source inline("gap-x-4");
@@ -481,6 +481,7 @@
 @source inline("h-[58px]");
 @source inline("h-[5px]");
 @source inline("h-[60px]");
+@source inline("h-[max(2.75rem,var(--Nav-Center-Action-Size))]");
 @source inline("h-[var(--Control-Height-Lg)]");
 @source inline("h-[var(--Control-Height-Md)]");
 @source inline("h-[var(--Control-Height-Sm)]");
@@ -657,11 +658,12 @@
 @source inline("min-h-9");
 @source inline("min-h-[100dvh]");
 @source inline("min-h-[36px]");
-@source inline("min-h-[66px]");
 @source inline("min-h-[80px]");
 @source inline("min-h-[inherit]");
+@source inline("min-h-[max(2.75rem,var(--Nav-Item-Min-Height))]");
 @source inline("min-h-[var(--Control-Height-Xl)]");
 @source inline("min-h-[var(--Field-Min-Height)]");
+@source inline("min-h-[var(--Nav-Pill-Min-Height)]");
 @source inline("min-h-dvh");
 @source inline("min-h-full");
 @source inline("min-h-screen");
@@ -816,6 +818,7 @@
 @source inline("px-[var(--Field-Padding-X-Lg)]");
 @source inline("px-[var(--Field-Padding-X-Md)]");
 @source inline("px-[var(--Field-Padding-X-Sm)]");
+@source inline("px-[var(--Nav-Pill-Padding-X)]");
 @source inline("py-0.5");
 @source inline("py-1");
 @source inline("py-1.5");
@@ -832,6 +835,7 @@
 @source inline("py-6");
 @source inline("py-8");
 @source inline("py-[var(--Field-Padding-Y)]");
+@source inline("py-[var(--Nav-Pill-Padding-Y)]");
 @source inline("py-[var(--Product-Page-Padding-Y)]");
 @source inline("py-[var(--Space-Section-2xl)]");
 @source inline("py-[var(--Space-Section-md)]");
@@ -869,6 +873,7 @@
 @source inline("rounded-[var(--Chip-Radius)]");
 @source inline("rounded-[var(--Control-Radius)]");
 @source inline("rounded-[var(--Field-Radius)]");
+@source inline("rounded-[var(--Nav-Center-Action-Radius)]");
 @source inline("rounded-[var(--Radius-Modal)]");
 @source inline("rounded-[var(--Radius-Sheet)]");
 @source inline("rounded-[var(--Radius-Surface)]");
@@ -893,8 +898,6 @@
 @source inline("shadow-[0_0_0_5px_rgba(216,216,219,0.3)]");
 @source inline("shadow-[0_0_0_5px_rgba(236,0,0,0.15)]");
 @source inline("shadow-[0_0_0_5px_rgba(31,204,132,0.2)]");
-@source inline("shadow-[inset_0_1px_0_rgba(255,255,255,0.30)]");
-@source inline("shadow-[inset_0_1px_0_rgba(255,255,255,0.60),0_1px_3px_rgba(0,0,0,0.08)]");
 @source inline("shadow-[var(--shadow-dialog)]");
 @source inline("shadow-[var(--shadow-lg)]");
 @source inline("shadow-[var(--shadow-md)]");
@@ -925,6 +928,7 @@
 @source inline("size-[120px]");
 @source inline("size-[58px]");
 @source inline("size-[60px]");
+@source inline("size-[max(2.75rem,var(--Nav-Center-Action-Size))]");
 @source inline("size-[var(--Control-Height-Lg)]");
 @source inline("size-[var(--Control-Height-Md)]");
 @source inline("size-[var(--Control-Height-Sm)]");

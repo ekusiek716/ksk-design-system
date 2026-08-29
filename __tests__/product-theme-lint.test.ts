@@ -260,8 +260,18 @@ describe("契約のドリフト検査", () => {
 
   it("許可リストの変数はすべて DS が実際に宣言している（存在しない変数を公開しない）", () => {
     const declared = new Set(declaredVariables())
-    // --card-surface は「宣言されていたら効く」シームなので既定宣言を持たない（card.tsx 側で参照）
-    const seams = new Set(["--card-surface"])
+    // 「宣言されていたら効く」シームは既定宣言を持たない。
+    // --card-surface は card.tsx 側で参照。--Nav-*-Surface / -Border / -Shadow は
+    // DS 既定が tone / dark で出し分ける素材のため単一の :root 値に畳めず、
+    // src/styles/bottom-nav.css が var(--Nav-*, <DS 既定>) の形で受ける（issue #471）。
+    const seams = new Set([
+      "--card-surface",
+      "--Nav-Center-Action-Surface",
+      "--Nav-Center-Action-Border",
+      "--Nav-Center-Action-Shadow",
+      "--Nav-Selected-Surface",
+      "--Nav-Selected-Shadow",
+    ])
     const missing = [...contract.allowed].filter((name) => !declared.has(name) && !seams.has(name))
     expect(missing).toEqual([])
   })

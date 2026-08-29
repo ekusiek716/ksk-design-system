@@ -107,4 +107,39 @@
      文字を拡大するときは --Control-Height-* / --Field-Height-* も
      別途上げる契約にしてある（stract-ui と同じ判断）。 */
   --Product-Type-Scale: 1;
+
+  /* ─── Nav: BottomTabBar / MobileTabBar の pill・中央アクション（issue #471） ───
+     5 アイテム + 大きめ中央アクションのグロナビを組むプロダクトが、DS の内部
+     マークアップ（`[data-slot="bottom-nav-pill"] > :is(a,button)` や
+     `span:first-child`）を `!important` で叩かずに寸法を変えられるようにする口。
+     v1.43.0 で中央アクションのラッパー構造を変えたとき消費側が壊れた事故が由来。
+
+     既定値は現行実装の固定 Tailwind クラス（min-h-[66px] / px-2 / py-2 / gap-1 /
+     min-h-11 / gap-0.5 / size-12）と 1px も違わない。
+
+     対象は **prominent レイアウト**（showLabels か centerAction がある pill）。
+     アイコンのみの compact pill（h-[58px] / px-3）は契約外で固定のまま。
+
+     タップ領域の下限 44px（HIG）は DS 側が `max(44px, var(...))` で守るため、
+     これらを 44px 未満にしても実寸は 44px より縮まない。 */
+  --Nav-Pill-Min-Height: 4.125rem; /* 66px — min-h-[66px] */
+  --Nav-Pill-Padding-X: 0.5rem;    /* 8px  — px-2 */
+  --Nav-Pill-Padding-Y: 0.5rem;    /* 8px  — py-2 */
+  --Nav-Pill-Gap: 0.25rem;         /* 4px  — gap-1（アイテム間） */
+
+  --Nav-Item-Min-Height: 2.75rem;  /* 44px — min-h-11 */
+  --Nav-Item-Gap: 0.125rem;        /* 2px  — gap-0.5（アイコン↔ラベル） */
+
+  --Nav-Center-Action-Size: 3rem;  /* 48px — size-12 */
+  --Nav-Center-Action-Radius: 9999px; /* rounded-full 相当 */
+
+  /* 面（背景・境界・影）系は「未指定なら DS の素材（.glass-accent /
+     選択プラッター）そのまま」という契約なので、:root に既定値を**置かない**。
+     src/styles/bottom-nav.css が var() のフォールバックとして DS 既定を持つ:
+
+       --Nav-Center-Action-Surface / -Border / -Shadow
+       --Nav-Selected-Surface / --Nav-Selected-Shadow
+
+     宣言した時だけ上書きされる（宣言しなければ tone="inverse" / dark の
+     出し分けを DS 側が従来どおり面倒を見る）。 */
 }

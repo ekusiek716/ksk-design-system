@@ -1,0 +1,62 @@
+/* =============================================================
+   KSK Design System — BottomTabBar 公開カスタマイズ契約（issue #471）
+
+   5 アイテム + 大きめ中央アクションのグロナビを組む消費プロダクトが、DS の
+   内部マークアップ（`[data-slot="bottom-nav-pill"] > :is(a, button)`・
+   `span:first-child` / `span:last-child` 等の子孫順）に依存せず面を変えられる
+   ようにする。v1.43.0 で中央アクションのラッパー構造を変えたときに消費側
+   （belle-todo）が壊れ、`!important` の山が残った事故が由来。
+
+   ── 寸法は product-theme.css の --Nav-* が担当（:root に既定値あり）。
+   ── 面（背景・境界・影）はここが担当し、**既定値を :root に置かない**。
+      var(--Nav-*, <DS 既定>) の形で書き、消費側が宣言したときだけ上書きされる。
+      宣言しなければ tone="inverse" / dark の出し分けは従来どおり DS が持つ。
+
+   公開しているのは data-slot と CSS 変数だけ。要素の入れ子・タグ・順序は
+   内部実装なので、ここに書かれていないセレクタに依存しないこと。
+
+   安定 data-slot:
+     bottom-nav-pill                 … pill 本体（nav）。tone は data-tone
+     bottom-nav-item                 … 各タブ（a / button）
+     bottom-nav-item-icon            … タブのアイコン領域
+     bottom-nav-item-label           … タブのラベル
+     bottom-nav-center-action        … 中央アクション（a / button）
+     bottom-nav-center-action-icon   … 中央アクションのアイコン領域
+     bottom-nav-center-action-label  … 中央アクションのラベル
+     bottom-nav-selected-surface     … 選択プラッターのスライド overlay
+   選択プラッターの面は [data-nav-platter] が付いた要素（上記 overlay と、
+   SSR / 計測前に面を兼ねるタブ本体・アイコン領域）に当たる。
+   ============================================================= */
+
+/* ─── 中央アクションの面 ───
+   .glass-accent と同じ詳細度（0,1,0）なので、glass.css より後に読み込まれる
+   このファイルが勝つ。フォールバックは .glass-accent 自身が同じ要素に載せる
+   内部変数なので、未宣言時のレンダリングは 1px も変わらない。 */
+[data-slot="bottom-nav-center-action"] {
+  background: var(--Nav-Center-Action-Surface, var(--ksk-glass-accent-bg));
+  border: var(--Nav-Center-Action-Border, var(--ksk-glass-accent-border));
+  box-shadow: var(--Nav-Center-Action-Shadow, var(--ksk-glass-accent-shadow));
+}
+
+/* ─── 選択プラッター（水滴カプセル）の面 ───
+   既定はテーマ非依存のガラス素材（背後のメディアに相対する白リテラル）。
+   tone="inverse" は暗いメディア上用に別の既定を持つ。 */
+/* スライド overlay（data-slot 付き）と、SSR / 計測前の静的プラッター
+   （タブ本体やアイコン領域が兼ねるので data-slot は別の値を持つ）の両方に
+   同じ面を当てるため、共通マーカー [data-nav-platter] で受ける。 */
+[data-nav-platter] {
+  background: var(
+    --Nav-Selected-Surface,
+    color-mix(in srgb, var(--Surface-Primary) 70%, transparent)
+  );
+  box-shadow: var(
+    --Nav-Selected-Shadow,
+    inset 0 1px 0 rgba(255, 255, 255, 0.60),
+    0 1px 3px rgba(0, 0, 0, 0.08)
+  );
+}
+
+[data-tone="inverse"] [data-nav-platter] {
+  background: var(--Nav-Selected-Surface, rgba(255, 255, 255, 0.20));
+  box-shadow: var(--Nav-Selected-Shadow, inset 0 1px 0 rgba(255, 255, 255, 0.30));
+}

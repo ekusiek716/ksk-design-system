@@ -33,7 +33,10 @@ interface MobileTabBarProps<T extends string> {
 function AddTabIcon() {
   // ボタン本体（BottomTabBar の CenterActionItem がラベル無し時に正円 FAB になる）が
   // ブランド色の円を担うため、ここではアイコンのみを渡す。
-  // data-global-nav-add-icon は消費側のグローバル nav スタイルフック（belle-todo 互換）。
+  // data-global-nav-add-icon は belle-todo 互換の後方互換フック。**公開契約ではない**。
+  // 中央アクションのアイコンを狙うなら data-slot="bottom-nav-center-action-icon" を
+  // 使うこと（CenterActionItem がこのラッパーの外側に付ける。issue #471）。
+  // 既存消費側の CSS を黙って壊さないため残しているだけで、新規参照は増やさない。
   return (
     <span data-global-nav-add-icon aria-hidden="true" className="flex items-center justify-center">
       <Add size={24} variant="Linear" color="currentColor" />

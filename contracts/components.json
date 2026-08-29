@@ -2480,7 +2480,8 @@
         "sliding-selection-platter",
         "scrollEdge",
         "native Expo Router tabBar adapter",
-        "native hidden routes"
+        "native hidden routes",
+        "product theme customization (--Nav-*)"
       ],
       "rules": [
         "Mobile only. Use safe-area-inset-bottom.",
@@ -2492,11 +2493,32 @@
         "Use pillPosition='absolute' only inside controlled shells or Storybook demos; fixed is the app default.",
         "Set maxWidth to the mobile web shell width when the app is centered in a desktop viewport.",
         "Use floatingPosition='left'|'right' (variant='pill' only) when a FAB is placed on the opposite side; default 'center' keeps the existing centered float.",
-        "Native Expo Router / React Navigation consumers should use createExpoRouterTabBar instead of local floating tab bars."
+        "Native Expo Router / React Navigation consumers should use createExpoRouterTabBar instead of local floating tab bars.",
+        "寸法・面のプロダクト差分は公開 CSS 変数 --Nav-*（--Nav-Pill-* / --Nav-Item-* / --Nav-Center-Action-* / --Nav-Selected-*）で表現する。contracts/product-theme-overrides.json の nav グループが正本（issue #471）。",
+        "消費側は DS の内部マークアップ（[data-slot=\"bottom-nav-pill\"] > :is(a, button)、span:first-child / span:last-child、[data-global-nav-add-icon]）を !important や :has() で叩かない。DOM を狙う場合も公開 data-slot だけを使う。",
+        "--Nav-Item-Min-Height / --Nav-Center-Action-Size は max(44px, var(...)) で参照するため、44px（HIG のタップ領域下限）より縮まない。",
+        "--Nav-Center-Action-Surface / -Border / -Shadow と --Nav-Selected-Surface / -Shadow は宣言したときだけ DS 既定（.glass-accent / ガラスの選択プラッター）を置き換える。未宣言なら tone / dark の出し分けは DS 側が持つ。",
+        "--Nav-Pill-* の寸法が効くのは prominent レイアウト（showLabels か centerAction がある pill）。アイコンのみの compact pill は契約外で固定。"
       ],
       "props": {
         "navLabel": "string (既定 \"メインナビゲーション\") — nav 要素の aria-label（issue #428）"
-      }
+      },
+      "slots": [
+        "bottom-nav-pill",
+        "bottom-nav-item",
+        "bottom-nav-item-icon",
+        "bottom-nav-item-label",
+        "bottom-nav-center-action",
+        "bottom-nav-center-action-icon",
+        "bottom-nav-center-action-label",
+        "bottom-nav-selected-surface"
+      ],
+      "productTheme": [
+        "--Nav-Pill-*",
+        "--Nav-Item-*",
+        "--Nav-Center-Action-*",
+        "--Nav-Selected-*"
+      ]
     },
     {
       "name": "MobileTabBar",
@@ -2512,7 +2534,15 @@
       "rules": [
         "tabs は BottomTabBarItem を手組みせず MobileTabItem<T>[]（key/label/Icon）で渡す",
         "addAction 指定時はブランド色丸背景 + Add アイコンが自動で centerAction になる",
-        "floatingPosition='left'|'right' を使う場合は FAB を反対側に併置する"
+        "floatingPosition='left'|'right' を使う場合は FAB を反対側に併置する",
+        "寸法・面の上書きは BottomTabBar と同じ --Nav-* を使う（MobileTabBar は薄いラッパーなので変数はそのまま効く。issue #471）",
+        "[data-global-nav-add-icon] は belle-todo 互換の後方互換フックで公開契約ではない。中央アクションのアイコンは data-slot=\"bottom-nav-center-action-icon\" で狙う（issue #471）"
+      ],
+      "productTheme": [
+        "--Nav-Pill-*",
+        "--Nav-Item-*",
+        "--Nav-Center-Action-*",
+        "--Nav-Selected-*"
       ]
     },
     {
