@@ -56,7 +56,7 @@
 | ProgressRing | `@/components/ui/progress-ring` | — | Default, Empty, Full, AllSizes, CustomLabel, Animated |
 | Progress | `@/components/ui/progress` | — | Default, Empty, Half, Full, ColorVariants, DurationVariants, AutoColor, AllStates |
 | RadioGroup, RadioGroupItem | `@/components/ui/radio-group` | — | ThreeOptions, WithDisabled, WithDescription, HoverState, HitTarget |
-| ResponsiveDialog, ResponsiveDialogTrigger, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter, ResponsiveDialogClose | `@/components/ui/responsive-dialog` | — | Default |
+| ResponsiveDialog, ResponsiveDialogTrigger, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter, ResponsiveDialogClose, RESPONSIVE_OVERLAY_BREAKPOINT_VAR | `@/components/ui/responsive-dialog` | — | Default |
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | SectionNav | `@/components/ui/section-nav` | — | Vertical, Horizontal, StickyGuide |
 | Section | `@/components/ui/section` | **spacing**: `sm`, `md`, `lg`, `xl`<br>**background**: `none`, `subtle`, `accent-subtle` | FullBleedBandWithContainedContent |
@@ -148,6 +148,7 @@
 | AUTO_PROMPT_SUPPRESSION_EVENT, AutoPrompt, PromptCoordinatorProvider | `@/components/patterns/prompt-coordinator` | — | Default |
 | Prose | `@/components/patterns/prose` | — | PrivacyPolicy, SingleSection |
 | ActionTile, QuickActionGrid | `@/components/patterns/quick-action-grid` | — | EmojiOnly, IconAndLabel, WithMeta, IndicatorOverride, SelectedWithoutDescription, NarrowWithLongMeta, SingleSelection, MultipleSelection, LaunchersWithoutSelectionMode |
+| ResponsiveOverlayFrame, ResponsiveOverlayFooter | `@/components/patterns/responsive-overlay-frame` | — | Short form (mobile-form), Long keyboard-aware form (mobile-page), mobile-full preset, breakpoint=lg, breakpoint=product-theme, snapPoints は dialog に変換されない |
 | ReviewOverlay | `@/components/patterns/review-overlay` | — | Default, WithPins |
 | Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero |
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch, AsForm |
