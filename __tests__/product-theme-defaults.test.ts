@@ -95,6 +95,9 @@ function toPx(value: string): number {
 
   if (trimmed === "var(--radius-lg)") return 0.5 * PX_PER_REM
 
+  // `gap-1` は乗数 1 のとき calc() を挟まず var(--spacing) だけを出す
+  if (trimmed === "var(--spacing)") return 0.25 * PX_PER_REM
+
   const token = trimmed.match(/^var\((--[A-Za-z0-9-]+)\)$/)
   if (token) {
     const resolved = defaults.get(token[1])
@@ -158,6 +161,12 @@ const EQUIVALENTS: Array<[baseline: string, tokenized: string, property: string]
   ["rounded-lg", "rounded-[var(--Field-Radius)]", "border-radius"],
   // ─── AdminShell（issue #364 追補）───
   ["py-6", "py-[var(--Product-Page-Padding-Y)]", "padding-block"],
+  // ─── BottomTabBar / MobileTabBar（issue #471）───
+  ["min-h-[66px]", "min-h-[var(--Nav-Pill-Min-Height)]", "min-height"],
+  ["px-2", "px-[var(--Nav-Pill-Padding-X)]", "padding-inline"],
+  ["py-2", "py-[var(--Nav-Pill-Padding-Y)]", "padding-block"],
+  ["gap-1", "gap-[var(--Nav-Pill-Gap)]", "gap"],
+  ["gap-0.5", "gap-[var(--Nav-Item-Gap)]", "gap"],
 ]
 
 describe("product theme の既定値は origin/main の固定クラスと同一実寸 (issue #364)", () => {
@@ -177,6 +186,21 @@ describe("product theme の既定値は origin/main の固定クラスと同一�
   it("Chip のピル角丸も rounded-full 相当（rounded-full と --Chip-Radius はどちらも実質無限大）", () => {
     expect(toPx(declaration("rounded-full", "border-radius"))).toBeGreaterThanOrEqual(9999)
     expect(toPx(declaration("rounded-[var(--Chip-Radius)]", "border-radius"))).toBeGreaterThanOrEqual(9999)
+  })
+
+  it("BottomTabBar の 44px 下限つき寸法は既定値（44px 以上）を素通しする（issue #471）", () => {
+    // `max(2.75rem, var(--Nav-*))` は toPx が解けないので、既定値が下限
+    // （44px）以上であること＝旧固定クラスと同一実寸になることを直接見る。
+    expect(toPx(defaults.get("--Nav-Item-Min-Height")!)).toBe(toPx(declaration("min-h-11", "min-height")))
+    expect(toPx(defaults.get("--Nav-Center-Action-Size")!)).toBe(toPx(declaration("size-12", "height")))
+    expect(toPx(defaults.get("--Nav-Item-Min-Height")!)).toBeGreaterThanOrEqual(44)
+    expect(toPx(defaults.get("--Nav-Center-Action-Size")!)).toBeGreaterThanOrEqual(44)
+  })
+
+  it("中央アクションの角丸はピルのまま（rounded-full と --Nav-Center-Action-Radius）", () => {
+    expect(
+      toPx(declaration("rounded-[var(--Nav-Center-Action-Radius)]", "border-radius")),
+    ).toBeGreaterThanOrEqual(9999)
   })
 
   it("Tabs の pill 高さ（44px）は Control スケールの外に固定してある", () => {
