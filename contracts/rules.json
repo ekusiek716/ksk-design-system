@@ -470,9 +470,9 @@
       "pattern": "SheetContent[^>]*className=[^>]*(max-h-\\[(88|90|100)dvh\\]|rounded-t|safe-area-inset-bottom)|max-h-\\[(88|90|100)dvh\\][^\"']*SheetContent",
       "excludePaths": [".stories."],
       "excludeDsPaths": ["components/patterns/", "src/native/components/"],
-      "excludeLines": ["BottomSheetFrame", "ksk-ds-allow-custom-ui"],
+      "excludeLines": ["BottomSheetFrame", "ResponsiveOverlayFrame", "ksk-ds-allow-custom-ui"],
       "message": "Bottom sheet outer frame class recipe のローカル再実装禁止",
-      "fix": "<BottomSheetFrame preset=\"mobile-full|mobile-form|desktop-floating\"> を使用"
+      "fix": "<BottomSheetFrame preset=\"mobile-full|mobile-page|mobile-form|desktop-floating\"> を使用。PC で中央モーダルにしたい場合は <ResponsiveDialog> + <ResponsiveOverlayFrame preset=...>（消費側 CSS で position / transform / width / radius を !important 上書きしない / issue #472）"
     },
     {
       "id": "P043",

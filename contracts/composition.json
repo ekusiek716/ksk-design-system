@@ -95,7 +95,8 @@
       "viewport の sm:/md:/lg: はレイアウト切替段として使う",
       "viewport xl=1280px はコンテンツ幅の上限段。ここで新しいレイアウト変形を追加しない",
       "@md: など @ prefix は container query であり、同名の viewport breakpoint と値も用途も異なる",
-      "container query の値を変える場合は tokens.json と preset の --container-* を同時に更新する"
+      "container query の値を変える場合は tokens.json と preset の --container-* を同時に更新する",
+  "overlay（Sheet↔Dialog）の切替段は ResponsiveDialog の breakpoint prop で宣言する（既定 md=768px）。消費側 CSS のメディアクエリでシートを中央モーダルへ変換しない（issue #472）"
     ]
   },
   "formHierarchy": {

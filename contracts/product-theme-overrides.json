@@ -174,6 +174,9 @@
       "--Nav-Center-Action-Shadow",
       "--Nav-Selected-Surface",
       "--Nav-Selected-Shadow"
+    ],
+    "overlay": [
+      "--Overlay-Desktop-Breakpoint"
     ]
   },
   "dsVariableNamespaces": [
@@ -259,7 +262,9 @@
       "--Nav-Item-*",
       "--Nav-Center-Action-*",
       "--Nav-Selected-*"
-    ]
+    ],
+    "ResponsiveDialog": ["--Overlay-Desktop-Breakpoint"],
+    "ResponsiveOverlayFrame": ["--Overlay-Desktop-Breakpoint"]
   },
   "aiGuidance": [
     "プロダクト差分は、まずこの契約の CSS 変数上書きで表現する。className での個別上書きを何十箇所にも散らさない。",

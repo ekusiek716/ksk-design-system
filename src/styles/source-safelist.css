@@ -616,6 +616,9 @@
 @source inline("max-h-[calc(100dvh_-_max(env(safe-area-inset-top),2rem)_-_2rem)]");
 @source inline("max-h-[inherit]");
 @source inline("max-h-[max(0px,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))]");
+@source inline("max-h-[min(85dvh,40rem)]");
+@source inline("max-h-[min(86dvh,42rem)]");
+@source inline("max-h-[min(90dvh,44rem)]");
 @source inline("max-w-24");
 @source inline("max-w-2xl");
 @source inline("max-w-3xl");

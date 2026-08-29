@@ -53,6 +53,78 @@ npx ksk-ds check-migration ./src
 
 ## v1 系内の minor 変更（参考）
 
+### 次のリリース — `ResponsiveOverlayFrame` 追加（`BottomSheetFrame` + 消費側デスクトップ CSS からの移行 / issue #472）
+
+`BottomSheetFrame` はモバイルの preset（`mobile-full` / `mobile-page` /
+`mobile-form`）を持つ一方でデスクトップでは中央モーダルにならず、消費側は
+global CSS で `position` / `transform` / `width` / `max-height` / `radius` を
+`!important` 上書きしてシートをデスクトップモーダルへ変換していた
+（belle-todo で 25 箇所 + 変換ルール1本）。この上書きは DS 内部の `data-slot` /
+`data-side` / class 名の substring に依存するため、Sheet の内部変更で静かに壊れる。
+
+`ResponsiveOverlayFrame` は同じ preset をモバイルで保ったまま、デスクトップでは
+`DialogContent`（中央モーダル）として描画する。上書き用の CSS は不要になる。
+
+**before**（`Sheet` + `BottomSheetFrame` + 消費側 global CSS）
+
+```tsx
+<Sheet open={open} onOpenChange={setOpen}>
+  <BottomSheetFrame preset="mobile-form">
+    <DetailSheetScaffold header={…} footer={<KeyboardAwareSheetFooter>…</KeyboardAwareSheetFooter>}>
+      …
+    </DetailSheetScaffold>
+  </BottomSheetFrame>
+</Sheet>
+```
+
+```css
+/* 消費側 global CSS — 削除する */
+@media (min-width: 768px) {
+  [data-slot="sheet-content"][data-side="bottom"]:not([data-snap]) {
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: min(32rem, calc(100% - 3rem)) !important;
+    max-height: 85dvh !important;
+    border-radius: var(--Radius-Modal) !important;
+  }
+}
+```
+
+**after**
+
+```tsx
+<ResponsiveDialog open={open} onOpenChange={setOpen} breakpoint="md">
+  <ResponsiveOverlayFrame preset="mobile-form" description="タスクを編集します">
+    <DetailSheetScaffold header={…} footer={<ResponsiveOverlayFooter>…</ResponsiveOverlayFooter>}>
+      …
+    </DetailSheetScaffold>
+  </ResponsiveOverlayFrame>
+</ResponsiveDialog>
+```
+
+移行の手順:
+
+1. `<Sheet>` を `<ResponsiveDialog>` に、`<BottomSheetFrame>` を
+   `<ResponsiveOverlayFrame>` に置き換える（`preset` / `surface` はそのまま）。
+2. `<KeyboardAwareSheetFooter>` を `<ResponsiveOverlayFooter>` に置き換える
+   （モバイルでは従来どおりソフトキーボードに追従し、デスクトップでは静的フッタになる）。
+3. 消費側 global CSS のデスクトップ変換ルールを削除する。
+4. 切り替え境界が 768px でよければ指定不要。変えたい場合は
+   `breakpoint="lg"` などを指定するか、`breakpoint="product-theme"` にして
+   `:root { --Overlay-Desktop-Breakpoint: 1024px }` を product theme 側に置く。
+5. `<Sheet snapPoints={…}>` の snap シートは**変換しない**。`ResponsiveDialog` に
+   `snapPoints` を渡した場合は境界を越えてもシートのまま描画される。
+
+`description` / `autoFocus` / `restoreFocusOnClose` / `closeOnEsc` /
+`bodyScrollLock` / `zIndex` は両分岐へそのまま渡る。`container` /
+`overlayClassName` / `glassOverlay` / `swipeToClose` はシート固有なので
+デスクトップでは無視される。
+
+既存の `BottomSheetFrame` / `ResponsiveDialogContent` は非推奨ではない
+（モバイル専用面・preset 不要の面では引き続きそのまま使う）。
+
 ### 次のリリース — `typescript` が必須依存から optional peer dependency になった（issue #409）
 
 CLI の1ルール（P046）のためだけに typescript（24MB）が全 consumer の

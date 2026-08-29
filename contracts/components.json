@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 68,
-      "patterns": 60,
+      "patterns": 61,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 151
+      "total": 152
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -567,7 +567,7 @@
     {
       "name": "ResponsiveDialog",
       "path": "src/components/ui/responsive-dialog.tsx",
-      "description": "レスポンシブダイアログ。PCではDialog、モバイルではSheetに自動切り替え。useMediaQueryフック使用。",
+      "description": "レスポンシブダイアログ。PCではDialog、モバイルではSheetに自動切り替え。切り替え境界は breakpoint(\"sm\"|\"md\"(既定・768px)|\"lg\"|\"xl\"|\"product-theme\") または breakpointQuery(生のメディアクエリ)で指定する(issue #472)。判定結果は context で全サブコンポーネントに共有されるため、単一の境界で揃う。snapPoints を渡した場合は境界を越えてもSheetのまま。BottomSheetFrame の preset をモバイルで保ちたい場合は ResponsiveOverlayFrame を content として使う。",
       "subcomponents": [
         "ResponsiveDialogTrigger",
         "ResponsiveDialogContent",
@@ -578,7 +578,11 @@
         "ResponsiveDialogClose"
       ],
       "rules": [
-        "Dialog on desktop, Sheet on mobile. Use useMediaQuery hook."
+        "Dialog on desktop, Sheet on mobile. Use useMediaQuery hook.",
+        "境界を 768px 以外にしたい場合は breakpoint / breakpointQuery を使う(消費側で自前の useMediaQuery 分岐を書かない)",
+        "breakpoint=\"product-theme\" は :root の --Overlay-Desktop-Breakpoint を読む(product theme の公開変数)",
+        "snap point 付きシートは中央モーダルへ変換しない(snap は掴んで高さを変える操作そのものが機能)",
+        "モバイルで BottomSheetFrame の preset(mobile-full / mobile-page / mobile-form)を保ちたい場合は ResponsiveDialogContent ではなく ResponsiveOverlayFrame を使う"
       ]
     },
     {
@@ -2212,6 +2216,31 @@
         "長い SheetContent className recipe を consumer 側に重複させず BottomSheetFrame preset を使う",
         "フォーム/詳細の中身は DetailSheetScaffold と KeyboardAwareSheetFooter を使う",
         "native (src/native/components/BottomSheetFrame.tsx): height=\"preset\"(既定・従来の固定高)|\"fitContent\"(min/max を外して内容量に追従)。maxHeight で上限だけ明示できる。safeArea(既定 false) で bottom inset 分の内側余白、handle(既定 false) で上端のつまみを表示（issue #448）"
+      ]
+    },
+    {
+      "name": "ResponsiveOverlayFrame",
+      "path": "src/components/patterns/responsive-overlay-frame.tsx",
+      "description": "モバイルでは BottomSheetFrame の preset をそのまま保ち、デスクトップでは DialogContent(中央モーダル)として出すレスポンシブ overlay frame(issue #472)。消費側が global CSS で position / transform / width / max-height / radius を !important 上書きしてシートをデスクトップモーダルへ変換する回避策を不要にする。切り替え境界は親の <ResponsiveDialog breakpoint> が決め、snapPoints 付きのシートは境界を越えてもシートのまま。",
+      "variants": [
+        "preset: mobile-full / mobile-page / mobile-form / desktop-floating",
+        "surface: default / glass",
+        "desktopPosition: center / top / fullscreen"
+      ],
+      "features": [
+        "preset ごとのデスクトップ寸法写像(幅・max-height・角丸)",
+        "description / autoFocus / restoreFocusOnClose / closeOnEsc / zIndex を両分岐へ透過",
+        "snap sheet はデスクトップでもシートのまま",
+        "ResponsiveOverlayFooter がモバイルのみキーボード追従になる"
+      ],
+      "rules": [
+        "必ず <ResponsiveDialog> の子として使う(境界の判定は ResponsiveDialog の context が持つ)",
+        "consumer 側の global CSS でシートをデスクトップモーダルへ変換しない — この frame に置き換える",
+        "中身は DetailSheetScaffold + ResponsiveOverlayFooter で組む",
+        "デスクトップ側にだけ効かせたい className は desktopClassName、モバイル側は mobileClassName を使う"
+      ],
+      "subcomponents": [
+        "ResponsiveOverlayFooter"
       ]
     },
     {

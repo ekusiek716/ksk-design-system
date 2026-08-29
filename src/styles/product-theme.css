@@ -142,4 +142,15 @@
 
      宣言した時だけ上書きされる（宣言しなければ tone="inverse" / dark の
      出し分けを DS 側が従来どおり面倒を見る）。 */
+
+  /* ─── Overlay: レスポンシブ overlay の切り替え境界（issue #472） ───
+     <ResponsiveDialog breakpoint="product-theme"> がこの値を読み、
+     `(min-width: <値>)` にマッチしたらデスクトップ（中央モーダル）へ切り替える。
+     既定は 768px = Tailwind の md = 従来 ResponsiveDialog の固定値。
+     サイドナビが常時出る管理画面のように「もっと広くなってから中央モーダルに
+     したい」プロダクトは 1024px 等へ上げる。
+     メディアクエリは CSS 変数を直接解釈できないため、DS 側は
+     getComputedStyle でこの値を読んで matchMedia を組み立てる。長さの
+     絶対単位（px / rem）で指定すること。 */
+  --Overlay-Desktop-Breakpoint: 768px;
 }

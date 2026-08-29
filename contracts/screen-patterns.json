@@ -101,8 +101,8 @@
       "name": "レスポンシブダイアログ",
       "group": "overlay",
       "purpose": "現在の画面を維持したまま前面に重ねる軽量な作成/編集/詳細確認 UI。PC/モバイルでコンポーネントを出し分ける。",
-      "dsComponents": ["ResponsiveDialog", "Dialog", "Sheet", "BottomSheetForm", "DetailSheetScaffold", "FormField"],
-      "dsComponentsNote": "PC/モバイル自動切替が必要な場合は ResponsiveDialog を第一候補にする（PC=Dialog相当・モバイル=Sheet相当を内部で出し分ける）。フォーム系のボトムシートは BottomSheetForm、閲覧+編集の detail sheet は DetailSheetScaffold を使う。ResponsiveDialog を使わず自前で Dialog と Sheet を viewport 分岐する場合は、両方に同じ内容を実装し片方だけ更新して差分が出ないよう注意する。",
+      "dsComponents": ["ResponsiveDialog", "ResponsiveOverlayFrame", "Dialog", "Sheet", "BottomSheetFrame", "BottomSheetForm", "DetailSheetScaffold", "FormField"],
+      "dsComponentsNote": "PC/モバイル自動切替が必要な場合は ResponsiveDialog を第一候補にする（PC=Dialog相当・モバイル=Sheet相当を内部で出し分ける）。モバイル側で BottomSheetFrame の preset（mobile-full / mobile-page / mobile-form）を保ったまま PC で中央モーダルにしたい場合は、content に ResponsiveOverlayFrame を使う（issue #472。消費側 CSS で position / transform / width / radius を !important 上書きしない）。切り替え境界は ResponsiveDialog の breakpoint（既定 md=768px / lg / product-theme）で指定する。snapPoints 付きの snap シートは境界を越えてもシートのまま。フォーム系のボトムシートは BottomSheetForm、閲覧+編集の detail sheet は DetailSheetScaffold を使う。ResponsiveDialog を使わず自前で Dialog と Sheet を viewport 分岐する場合は、両方に同じ内容を実装し片方だけ更新して差分が出ないよう注意する。",
       "navigation": { "globalNav": false, "breadcrumb": false, "header": false },
       "crud": ["create", "read", "update"],
       "whenToUse": [
