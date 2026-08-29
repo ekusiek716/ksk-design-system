@@ -39,8 +39,13 @@ function RadioGroupItem({
       id={itemId}
       data-slot="radio-group-item"
       className={cn(
-        "aspect-square size-5 shrink-0 rounded-full border border-[var(--Border-Medium-Emphasis)]",
+        "relative aspect-square size-5 shrink-0 rounded-full border border-[var(--Border-Medium-Emphasis)]",
         "text-[var(--Brand-Primary)] cursor-pointer transition-colors",
+        // 見た目の円は 20px のまま、当たり判定だけを透明な before 擬似要素で 44px に広げる
+        // （Chip / pill TabsTrigger と同じ手法）。本体の width/height は変えないので
+        // レイアウトに影響しない。消費側で `[role="radio"] { min-height: 44px }` のような
+        // グローバル上書きを足すと円が縦長に潰れるため禁止（issue #470）。
+        "before:absolute before:left-1/2 before:top-1/2 before:size-11 before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']",
         // 未チェック時のみ hover で枠線をアクセント色に。チェック済みは既に
         // アクセント枠なので変化なし。disabled は hover を打ち消す（誤反応防止）。
         "hover:border-[var(--Brand-Primary)]",
