@@ -1202,7 +1202,11 @@ function splitTopLevelLogical(expr) {
     (candidate) => candidate.type === "&&" || candidate.type === "||",
   )
   if (!token) return null
-  return { rhs: expr.slice(token.index + token.type.length) }
+  return {
+    type: token.type,
+    lhs: expr.slice(0, token.index),
+    rhs: expr.slice(token.index + token.type.length),
+  }
 }
 
 function isStringLiteralExpr(expr) {
@@ -1237,7 +1241,14 @@ export function isLiteralOnlyInterpolation(expr) {
     return isLiteralOnlyInterpolation(ternary.whenTrue) && isLiteralOnlyInterpolation(ternary.whenFalse)
   }
   const logical = splitTopLevelLogical(trimmed)
-  if (logical) return isLiteralOnlyInterpolation(logical.rhs)
+  if (logical) {
+    // `&&` は左辺が条件で出力されないので右辺だけ見る。
+    // `||` は左辺が truthy ならそのまま出力されるため両辺を見る（issue #468）。
+    // `${props.className || ""}` は右辺だけならリテラルに見えてしまい、`??` 形と
+    // 判定が食い違っていた。
+    if (logical.type === "&&") return isLiteralOnlyInterpolation(logical.rhs)
+    return isLiteralOnlyInterpolation(logical.lhs) && isLiteralOnlyInterpolation(logical.rhs)
+  }
   return false
 }
 
