@@ -108,3 +108,42 @@ describe("issue #464: P029 lint CLI 統合", () => {
     expect(p029Count).toBeGreaterThanOrEqual(3)
   })
 })
+
+// issue #468 の回帰テスト。
+// `${props.className || ""}` は右辺だけ見るとリテラルなので例外扱いされ、
+// 機能的に同じ `${props.className ?? ""}` だけが検出される食い違いがあった。
+// `||` は左辺が truthy ならその値がそのまま出力されるため、両辺を見る。
+describe("issue #468: || 形の className 合成", () => {
+  it("|| の左辺が識別子なら例外にしない", () => {
+    expect(isLiteralOnlyInterpolation('props.className || ""')).toBe(false)
+    expect(isLiteralOnlyInterpolation('className || ""')).toBe(false)
+    expect(isLiteralOnlyInterpolation('getClass() || ""')).toBe(false)
+  })
+
+  it("|| の両辺がリテラルなら例外のまま", () => {
+    expect(isLiteralOnlyInterpolation('"a" || "b"')).toBe(true)
+  })
+
+  it("&& は従来どおり右辺だけを見る", () => {
+    expect(isLiteralOnlyInterpolation('props.active && "on"')).toBe(true)
+  })
+
+  it("行単位の判定でも || 形は例外にならない", () => {
+    expect(isP029TemplateLiteralExempt('className={`base ${props.className || ""}`}')).toBe(false)
+    expect(isP029TemplateLiteralExempt('className={`base ${props.className ?? ""}`}')).toBe(false)
+  })
+
+  it("lint CLI で || 形と ?? 形が同じく P029 を検出する", () => {
+    const ids = runKskLint(`
+      export function Example(props: any) {
+        return (
+          <>
+            <div className={\`base \${props.className || ""}\`}>1</div>
+            <div className={\`base \${props.className ?? ""}\`}>2</div>
+          </>
+        )
+      }
+    `)
+    expect(ids.filter((id) => id === "P029").length).toBe(2)
+  })
+})
