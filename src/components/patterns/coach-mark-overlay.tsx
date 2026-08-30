@@ -25,7 +25,27 @@ export interface CoachMarkOverlayProps {
   ringColor?: string
   /** content の最大幅 (px、既定 280) */
   maxWidth?: number
+  /**
+   * 表示文言。i18n はアプリ側で解決して string で渡す（issue #477）。
+   * 未指定キーは既定値（日本語 + aria-label は英語）を使う。
+   */
+  labels?: {
+    /** 次へボタン（既定 "次へ →"）。矢印は文言に含まれるため、渡すと矢印も置き換わる */
+    next?: string
+    /** 最終ステップの次へボタン（未指定なら next にフォールバック） */
+    done?: string
+    /** スキップボタン（既定 "スキップ"） */
+    skip?: string
+    /** overlay の aria-label（既定 "Onboarding coach mark"） */
+    ariaLabel?: string
+  }
 }
+
+const DEFAULT_LABELS = {
+  next: "次へ →",
+  skip: "スキップ",
+  ariaLabel: "Onboarding coach mark",
+} as const
 
 const COACH_KEY_DEFAULT = "ksk-coach-done"
 const COACH_VERSION_DEFAULT = "v1"
@@ -63,6 +83,19 @@ const COACH_VERSION_DEFAULT = "v1"
  *   onSkip={() => { markCoachCompleted(); setOpen(false) }}
  * />
  * ```
+ *
+ * ボタン文言・aria-label は labels prop で上書きできる（i18n はアプリ側で解決して渡す）:
+ * ```tsx
+ * <CoachMarkOverlay
+ *   labels={{
+ *     next: t("coach.next"),      // "Next →"
+ *     done: t("coach.done"),      // 最終ステップだけ "Done"
+ *     skip: t("coach.skip"),      // "Skip"
+ *     ariaLabel: t("coach.aria_label"),
+ *   }}
+ *   ...
+ * />
+ * ```
  */
 export function CoachMarkOverlay({
   steps,
@@ -72,7 +105,9 @@ export function CoachMarkOverlay({
   variant = "default",
   ringColor = "var(--Brand-Primary)",
   maxWidth = 280,
+  labels,
 }: CoachMarkOverlayProps) {
+  const resolvedLabels = { ...DEFAULT_LABELS, ...labels }
   const [idx, setIdx] = React.useState(0)
   const [rect, setRect] = React.useState<DOMRect | null>(null)
   const mounted = React.useSyncExternalStore(
@@ -166,7 +201,7 @@ export function CoachMarkOverlay({
       data-total={steps.length}
       role="dialog"
       aria-modal="true"
-      aria-label="Onboarding coach mark"
+      aria-label={resolvedLabels.ariaLabel}
     >
       {/* spotlight が無いとき (対象要素未発見) のフォールバック overlay */}
       {!hasSpotlight && (
@@ -191,6 +226,9 @@ export function CoachMarkOverlay({
         step={idx + 1}
         totalSteps={steps.length}
         onNext={handleNext}
+        nextLabel={isLast ? (resolvedLabels.done ?? resolvedLabels.next) : resolvedLabels.next}
+        skipLabel={resolvedLabels.skip}
+        ariaLabel={resolvedLabels.ariaLabel}
         showClose={!!onSkip}
         onClose={onSkip}
         className="py-4! px-4!"

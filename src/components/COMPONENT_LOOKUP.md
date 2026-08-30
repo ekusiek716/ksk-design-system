@@ -114,7 +114,7 @@
 | ChipFilterBar | `@/components/patterns/chip-filter-bar` | — | Default, CustomResultCountLabel, Sticky, Bare, TouchTargetNotClipped |
 | ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, SelectionModeSingle, SelectionModeMultiple, SelectionModeUnspecified, SingleSelectScalar, WithMax, WrappedRowsDoNotOverlap |
 | Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `xs`, `sm`, `md`, `lg`, `tile`<br>**shape**: `pill`, `rounded`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape, WithCount, TileAndSoldOut, AsLink, Real UI — Filters & Status, Touch selection stable, TileTouchTargetNotShrunk, ExtraSmall, RoundedShape |
-| CoachMarkOverlay | `@/components/patterns/coach-mark-overlay` | — | MultiStepTour, BrandVariant, MissingTarget |
+| CoachMarkOverlay | `@/components/patterns/coach-mark-overlay` | — | MultiStepTour, Localized labels (EN), BrandVariant, MissingTarget |
 | CollapsibleChipField | `@/components/patterns/collapsible-chip-field` | — | WithLabel, WithIcon, RequiredNoClear, CollapsedDisclosure, AlwaysExpanded, EscapeInsideDialog |
 | CompactFilePicker, ImageAttachmentPicker | `@/components/patterns/compact-file-picker` | — | SingleImageReplacement, MultiImageAttachments, ListPreview |
 | ConfirmDialog | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading |

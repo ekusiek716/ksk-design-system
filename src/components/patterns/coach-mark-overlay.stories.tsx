@@ -55,6 +55,51 @@ export const MultiStepTour: Story = {
   },
 }
 
+export const LocalizedLabels: Story = {
+  name: "Localized labels (EN)",
+  render: () => {
+    const [open, setOpen] = React.useState(true)
+    return (
+      <div className="flex flex-col gap-6 p-8">
+        <Button id="coach-i18n-1" variant="secondary" className="w-fit">
+          Step 1 button
+        </Button>
+        <Button id="coach-i18n-2" className="w-fit">
+          Step 2 button
+        </Button>
+        {!open && (
+          <Button variant="ghost" size="sm" className="w-fit" onClick={() => setOpen(true)}>
+            Restart tour
+          </Button>
+        )}
+        <CoachMarkOverlay
+          open={open}
+          steps={[
+            {
+              selector: "#coach-i18n-1",
+              title: "Start here",
+              desc: "This button starts the flow.",
+            },
+            {
+              selector: "#coach-i18n-2",
+              title: "Then here",
+              desc: "The last step shows the done label instead of next.",
+            },
+          ]}
+          labels={{
+            next: "Next \u2192",
+            done: "Done",
+            skip: "Skip",
+            ariaLabel: "Onboarding tour",
+          }}
+          onComplete={() => setOpen(false)}
+          onSkip={() => setOpen(false)}
+        />
+      </div>
+    )
+  },
+}
+
 export const BrandVariant: Story = {
   render: () => {
     const [open, setOpen] = React.useState(true)
