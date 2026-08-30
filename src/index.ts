@@ -191,7 +191,7 @@ export type { BottomSheetFormProps } from "./components/patterns/bottom-sheet-fo
 export { BottomSheetFrame } from "./components/patterns/bottom-sheet-frame"
 export type { BottomSheetFramePreset, BottomSheetFrameProps, SheetSurface } from "./components/patterns/bottom-sheet-frame"
 export { ResponsiveOverlayFrame, ResponsiveOverlayFooter } from "./components/patterns/responsive-overlay-frame"
-export type { ResponsiveOverlayFrameProps } from "./components/patterns/responsive-overlay-frame"
+export type { ResponsiveOverlayFrameProps, ResponsiveOverlaySide } from "./components/patterns/responsive-overlay-frame"
 export { SideDrawerFrame } from "./components/patterns/side-drawer-frame"
 export type { SideDrawerFrameProps } from "./components/patterns/side-drawer-frame"
 export { DetailSheetScaffold, DetailSheetHeader, DetailSheetBody } from "./components/patterns/detail-sheet-scaffold"

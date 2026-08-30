@@ -2230,14 +2230,16 @@
     {
       "name": "ResponsiveOverlayFrame",
       "path": "src/components/patterns/responsive-overlay-frame.tsx",
-      "description": "モバイルでは BottomSheetFrame の preset をそのまま保ち、デスクトップでは DialogContent(中央モーダル)として出すレスポンシブ overlay frame(issue #472)。消費側が global CSS で position / transform / width / max-height / radius を !important 上書きしてシートをデスクトップモーダルへ変換する回避策を不要にする。切り替え境界は親の <ResponsiveDialog breakpoint> が決め、snapPoints 付きのシートは境界を越えてもシートのまま。",
+      "description": "モバイルではシートの見た目(ボトムシート preset / float カード)をそのまま保ち、デスクトップでは DialogContent(中央モーダル)として出すレスポンシブ overlay frame(issue #472 / #479)。消費側が global CSS で position / transform / width / max-height / radius を !important 上書きしてシートをデスクトップモーダルへ変換する回避策を不要にする。切り替え境界は親の <ResponsiveDialog breakpoint> が決め、snapPoints 付きのシートは境界を越えてもシートのまま。",
       "variants": [
-        "preset: mobile-full / mobile-page / mobile-form / desktop-floating",
+        "side: bottom(既定) / float / float-glass",
+        "preset: mobile-full / mobile-page / mobile-form / desktop-floating（side=bottom のときだけ有効）",
         "surface: default / glass",
         "desktopPosition: center / top / fullscreen"
       ],
       "features": [
         "preset ごとのデスクトップ寸法写像(幅・max-height・角丸)",
+        "side=float / float-glass のデスクトップ写像(32rem / min(85dvh,46rem))。float 系は preset ではなく padding が効く",
         "description / autoFocus / restoreFocusOnClose / closeOnEsc / zIndex を両分岐へ透過",
         "snap sheet はデスクトップでもシートのまま",
         "ResponsiveOverlayFooter がモバイルのみキーボード追従になる"
@@ -2246,7 +2248,10 @@
         "必ず <ResponsiveDialog> の子として使う(境界の判定は ResponsiveDialog の context が持つ)",
         "consumer 側の global CSS でシートをデスクトップモーダルへ変換しない — この frame に置き換える",
         "中身は DetailSheetScaffold + ResponsiveOverlayFooter で組む",
-        "デスクトップ側にだけ効かせたい className は desktopClassName、モバイル側は mobileClassName を使う"
+        "デスクトップ側にだけ効かせたい className は desktopClassName、モバイル側は mobileClassName を使う",
+        "左右・下に余白を持つカード型のシートは side=\"float\"(Liquid Glass なら \"float-glass\")を使う。surface=\"glass\"(glass-strong)とは素材が別物で、float-glass との併用は型エラー(ガラスの二重適用防止)",
+        "side ごとに効く prop が判別ユニオンで分かれている: bottom は preset / surface / desktopPosition、float 系は padding。効かない組み合わせは黙って無視されずコンパイルエラーになる(型テスト test/types/responsive-overlay-frame.tsx)",
+        "float-glass の実スクロールは src/styles/sheet-keyboard.css の :is(sheet-content, dialog-content)[data-side=\"float-glass\"] が担う。.glass-specular の overflow:hidden が非レイヤー CSS で className を踏み潰すため、className だけでは効かない(#337 / #479)"
       ],
       "subcomponents": [
         "ResponsiveOverlayFooter"
