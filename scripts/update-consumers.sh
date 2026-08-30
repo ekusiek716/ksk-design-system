@@ -104,7 +104,7 @@ GH_ACCOUNT="${KSK_GH_ACCOUNT:-ekusiek716}"
 if [ -z "${GH_TOKEN:-}" ]; then
   GH_TOKEN="$(gh auth token -u "$GH_ACCOUNT" 2>/dev/null)" || true
   if [ -z "$GH_TOKEN" ]; then
-    echo -e "${RED}✗ gh のトークンを取得できません（アカウント: $GH_ACCOUNT）${NC}" >&2
+    echo -e "${RED}✗ gh のトークンを取得できません（アカウント: ${GH_ACCOUNT}）${NC}" >&2
     echo "  gh auth login で $GH_ACCOUNT にログインするか、別アカウントなら" >&2
     echo "  KSK_GH_ACCOUNT=<account> か GH_TOKEN=<token> を指定してください" >&2
     exit 1
