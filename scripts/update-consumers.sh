@@ -68,24 +68,28 @@ DEFAULT_REPOS=(
   "$HOME/localdev/todo-apps/trip-todo"
   "$HOME/localdev/todo-apps/ninshin-todo"
   "$HOME/localdev/todo-apps/okuno-todo-suite"
-  "$HOME/localdev/yokoku-app"
-  "$HOME/localdev/pawly"
+  # 2026-08-30: ローカルの配置換えに追随（yokoku-app / pawly / camera-app /
+  # aikoibito は ~/Localdev/apps/ 配下、資格アプリ群は exam-kit-apps → exam-app へ移動）。
+  # 旧パスのままだった 17 件が v1.68.0 の配布で全て "ディレクトリが存在しない" で
+  # FAIL していた。
+  "$HOME/localdev/apps/yokoku-app"
+  "$HOME/localdev/apps/pawly"
   # 2026-08-20 追加（issue #403）: 一覧から漏れて 1.53.0 のまま8バージョン取り残されていた
-  "$HOME/localdev/camera-app"
-  "$HOME/localdev/exam-kit-apps/exam-kit"
-  "$HOME/localdev/exam-kit-apps/itpassport-app"
-  "$HOME/localdev/exam-kit-apps/hcd-basic-app"
-  "$HOME/localdev/exam-kit-apps/denki1-app"
-  "$HOME/localdev/exam-kit-apps/denki2-app"
-  "$HOME/localdev/exam-kit-apps/ap-app"
-  "$HOME/localdev/exam-kit-apps/fe-app"
-  "$HOME/localdev/exam-kit-apps/sg-app"
-  "$HOME/localdev/exam-kit-apps/sharoshi-app"
-  "$HOME/localdev/exam-kit-apps/fp-app"
-  "$HOME/localdev/exam-kit-apps/takken-app"
-  "$HOME/localdev/exam-kit-apps/dental-hygienist-exam-app"
-  "$HOME/localdev/exam-kit-apps/registered-dietitian-exam-app"
-  "$HOME/localdev/ai-partner/aikoibito"
+  "$HOME/localdev/apps/camera-app"
+  "$HOME/localdev/exam-app/exam-kit"
+  "$HOME/localdev/exam-app/itpassport-app"
+  "$HOME/localdev/exam-app/hcd-basic-app"
+  "$HOME/localdev/exam-app/denki1-app"
+  "$HOME/localdev/exam-app/denki2-app"
+  "$HOME/localdev/exam-app/ap-app"
+  "$HOME/localdev/exam-app/fe-app"
+  "$HOME/localdev/exam-app/sg-app"
+  "$HOME/localdev/exam-app/sharoshi-app"
+  "$HOME/localdev/exam-app/fp-app"
+  "$HOME/localdev/exam-app/takken-app"
+  "$HOME/localdev/exam-app/dental-hygienist-exam-app"
+  "$HOME/localdev/exam-app/registered-dietitian-exam-app"
+  "$HOME/localdev/apps/aikoibito"
 )
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
@@ -104,7 +108,7 @@ GH_ACCOUNT="${KSK_GH_ACCOUNT:-ekusiek716}"
 if [ -z "${GH_TOKEN:-}" ]; then
   GH_TOKEN="$(gh auth token -u "$GH_ACCOUNT" 2>/dev/null)" || true
   if [ -z "$GH_TOKEN" ]; then
-    echo -e "${RED}✗ gh のトークンを取得できません（アカウント: $GH_ACCOUNT）${NC}" >&2
+    echo -e "${RED}✗ gh のトークンを取得できません（アカウント: ${GH_ACCOUNT}）${NC}" >&2
     echo "  gh auth login で $GH_ACCOUNT にログインするか、別アカウントなら" >&2
     echo "  KSK_GH_ACCOUNT=<account> か GH_TOKEN=<token> を指定してください" >&2
     exit 1

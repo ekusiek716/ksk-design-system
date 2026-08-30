@@ -163,7 +163,7 @@ for i in $(seq 1 20); do
 done
 
 # ── 消費リポへ配布 ─────────────────────────
-echo -e "${CYAN}→ update-consumers.sh $VERSION（npm registry 経由）${NC}"
+echo -e "${CYAN}→ update-consumers.sh ${VERSION}（npm registry 経由）${NC}"
 bash scripts/update-consumers.sh "$VERSION"
 
 echo ""
