@@ -6,6 +6,8 @@
  * 1つの API で出し分けること、snap sheet は変換されないこと、境界が
  * breakpoint / breakpointQuery / product theme 変数で差し替わることを固定する。
  */
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
 import * as React from "react"
 import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
@@ -202,6 +204,97 @@ describe("ResponsiveOverlayFrame", () => {
     )
     const desktopTitle = document.querySelector<HTMLElement>('[data-slot="dialog-title"]')
     expect(desktopTitle?.className).toContain(pageTypo)
+  })
+
+  it('side="float" はモバイルで float シート、デスクトップで中央モーダルになる', () => {
+    stubViewport(390)
+    act(() =>
+      root.render(
+        <ResponsiveDialog open onOpenChange={() => {}}>
+          <ResponsiveOverlayFrame side="float" description="テスト">
+            <div>本文</div>
+          </ResponsiveOverlayFrame>
+        </ResponsiveDialog>
+      )
+    )
+    const mobile = findFrame()
+    expect(mobile).not.toBeNull()
+    expect(mobile?.dataset.slot).toBe("sheet-content")
+    expect(mobile?.dataset.side).toBe("float")
+
+    act(() => root.unmount())
+    root = createRoot(container)
+    stubViewport(1200)
+    act(() =>
+      root.render(
+        <ResponsiveDialog open onOpenChange={() => {}}>
+          <ResponsiveOverlayFrame side="float" description="テスト">
+            <div>本文</div>
+          </ResponsiveOverlayFrame>
+        </ResponsiveDialog>
+      )
+    )
+    const desktop = findFrame()
+    expect(desktop?.dataset.slot).toBe("dialog-content")
+    // 消費側が !important で当てていた 32rem / min(85dvh,46rem) と一致させる
+    expect(desktop?.className).toContain("sm:max-w-lg")
+    expect(desktop?.className).toContain("max-h-[min(85dvh,46rem)]")
+    // float は preset ではなく padding が効く（既定 true）
+    expect(desktop?.className).toContain("p-6")
+  })
+
+  it('side="float-glass" は両分岐で glass 素材になる', () => {
+    stubViewport(1200)
+    act(() =>
+      root.render(
+        <ResponsiveDialog open onOpenChange={() => {}}>
+          <ResponsiveOverlayFrame side="float-glass" description="テスト">
+            <div>本文</div>
+          </ResponsiveOverlayFrame>
+        </ResponsiveDialog>
+      )
+    )
+    const desktop = findFrame()
+    expect(desktop?.dataset.side).toBe("float-glass")
+    const classes = desktop?.className.split(/\s+/) ?? []
+    expect(classes).toContain("glass")
+    expect(classes).toContain("glass-specular")
+    // DialogContent 既定の不透明な面が残っていない
+    expect(classes).not.toContain("bg-[var(--Surface-Primary)]")
+    expect(classes).toContain("bg-transparent")
+  })
+
+  it("float-glass のスクロール救済 CSS がデスクトップの dialog-content も対象にしている", () => {
+    // .glass-specular { overflow: hidden }（glass.css・非レイヤー CSS）が
+    // className の overflow-y-auto を常に踏み潰すため、実際のスクロールは
+    // sheet-keyboard.css の非レイヤー規則が担う。デスクトップ分岐は
+    // data-slot="dialog-content" になるので、セレクタが sheet-content だけだと
+    // 「高さキャップを超えた内容が見えないまま切れる」に戻る（#337 の再発）。
+    // jsdom は実 CSS を読まないので、契約として CSS の中身を検査する。
+    const css = readFileSync(
+      resolve(process.cwd(), "src/styles/sheet-keyboard.css"),
+      "utf8"
+    )
+    // overflow-y: auto を宣言している側のルールだけを取り出す
+    // （同じファイルにキーボード持ち上げ用の float-glass ルールもあるため）。
+    const overflowRule =
+      css.match(/([^\n{}]*\[data-side="float-glass"\][^\n{}]*)\{[^}]*overflow-y:\s*auto/)?.[1] ?? ""
+    expect(overflowRule).toContain('[data-slot="sheet-content"]')
+    expect(overflowRule).toContain('[data-slot="dialog-content"]')
+  })
+
+  it('side="float" で padding={false} を渡すと内側余白が付かない', () => {
+    stubViewport(1200)
+    act(() =>
+      root.render(
+        <ResponsiveDialog open onOpenChange={() => {}}>
+          <ResponsiveOverlayFrame side="float" padding={false} description="テスト">
+            <div>本文</div>
+          </ResponsiveOverlayFrame>
+        </ResponsiveDialog>
+      )
+    )
+    expect(findFrame()?.className).not.toContain("p-6")
   })
 
   it("フッタはモバイルでキーボード追従、デスクトップでは静的になる", () => {

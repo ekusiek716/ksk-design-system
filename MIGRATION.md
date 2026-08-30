@@ -53,6 +53,70 @@ npx ksk-ds check-migration ./src
 
 ## v1 系内の minor 変更（参考）
 
+### 次のリリース — `ResponsiveOverlayFrame` が float / float-glass シートを受けられるようになった（issue #479）
+
+#472 で入った `ResponsiveOverlayFrame` は内部で `BottomSheetFrame`（`side="bottom"` 固定）を
+使うため、左右・下に余白を持つカード型のシート（`side="float"` / `"float-glass"`）を
+受けられなかった。消費側はその形のシートだけ、デスクトップ中央モーダル化の
+global CSS（`!important`）を残す必要があった。
+
+`side` prop を足したので、float 系も同じ 1 つの API で切り替えられる。
+
+**before**（`Sheet` + `SheetContent side="float"` + 消費側 global CSS）
+
+```tsx
+<Sheet open={open} onOpenChange={setOpen}>
+  <SheetContent side="float" className="w-full max-w-md mx-auto p-6">
+    …
+  </SheetContent>
+</Sheet>
+```
+
+```css
+/* 消費側 global CSS — 削除する */
+@media (min-width: 1024px) {
+  [data-slot="sheet-content"][data-side="float"]:not([data-snap-active]) {
+    left: 50% !important; top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: min(32rem, calc(100vw - 4rem)) !important;
+    max-height: min(85vh, 46rem) !important;
+    border-radius: var(--Radius-Modal) !important;
+  }
+}
+```
+
+**after**
+
+```tsx
+<ResponsiveDialog open={open} onOpenChange={setOpen} breakpoint="lg">
+  <ResponsiveOverlayFrame side="float" className="max-w-md">
+    …
+  </ResponsiveOverlayFrame>
+</ResponsiveDialog>
+```
+
+注意点:
+
+- `side` ごとに効く prop が違い、**効かない組み合わせは型エラーになる**（黙って無視されない）。
+  - `side="bottom"`（既定）: `preset` / `surface` / `desktopPosition` が使える。`padding` は不可
+    （preset が余白を持つため）。
+  - `side="float"` / `"float-glass"`: `padding`（既定 `true` = `p-6`）が使える。
+    `preset` / `surface` / `desktopPosition` は不可。
+- `"float-glass"` の素材は `side` 自身が決める（`glass` + `glass-specular`）。
+  `surface="glass"`（`glass-strong`）とは別物で、二重に重ねると glass.css の記述順でしか
+  勝敗が決まらないため型で禁止している。
+- デスクトップの寸法は幅 `32rem`（`sm:max-w-lg`）× 高さ `min(85dvh, 46rem)`。上の global CSS が
+  当てていた値と実質同じだが、厳密には次の差がある:
+  - 高さの単位が `dvh`（DS）と `vh`（旧 CSS）で、アドレスバーが伸縮する環境では一致しない。
+  - 幅の上限は `sm:`（640px 以上）で効く。`breakpoint` を 640px 未満に解決する設定
+    （`product-theme` で小さい値を入れた場合）では DialogContent 既定の
+    `max-w-[calc(100%_-_3rem)]` が残る。`breakpoint="md"` / `"lg"` 運用なら差は出ない。
+- デスクトップでは overlay（背景の暗転）がガラスにならない（`glassOverlay` はシート固有の
+  prop なので落ちる）。面だけガラス、背景は通常の暗転になる。
+- snap point 付きのシートは #472 と同じくシートのまま。ただし DS の snap は
+  `side="bottom"` 専用なので、`snapPoints` と float 系の併用は snap もデスクトップ変換も
+  効かない「何も起きない」組み合わせになる。どちらかに寄せること。
+
 ### 次のリリース — `ResponsiveOverlayFrame` 追加（`BottomSheetFrame` + 消費側デスクトップ CSS からの移行 / issue #472）
 
 `BottomSheetFrame` はモバイルの preset（`mobile-full` / `mobile-page` /

@@ -210,3 +210,67 @@ export const SnapSheetStaysSheet: Story = {
     )
   },
 }
+
+/**
+ * `side="float"`（issue #479）。モバイルは左右・下に余白を持つカード型のまま、
+ * デスクトップでは同じ寸法（32rem / min(85dvh,46rem)）の中央モーダルになる。
+ * preset ではなく `padding` が効く。
+ */
+export const FloatSide: Story = {
+  name: "float サイド（カード型）",
+  render: function Render() {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <ResponsiveDialog open={open} onOpenChange={setOpen} breakpoint="lg">
+        <ResponsiveDialogTrigger asChild>
+          <Button>float シートを開く</Button>
+        </ResponsiveDialogTrigger>
+        <ResponsiveOverlayFrame side="float" description="操作を確認します">
+          <div className="space-y-4">
+            <ResponsiveDialogTitle>この予定を削除しますか？</ResponsiveDialogTitle>
+            <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+              削除すると元に戻せません。関連するメモも一緒に削除されます。
+            </p>
+            <div className="flex gap-3 [&>*]:flex-1">
+              <Button variant="secondary" onClick={() => setOpen(false)}>
+                キャンセル
+              </Button>
+              <Button onClick={() => setOpen(false)}>削除する</Button>
+            </div>
+          </div>
+        </ResponsiveOverlayFrame>
+      </ResponsiveDialog>
+    )
+  },
+}
+
+/** `side="float-glass"`。float の Liquid Glass 版。両分岐で同じ素材になる。 */
+export const FloatGlassSide: Story = {
+  name: "float-glass サイド（ガラス素材）",
+  render: function Render() {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <div className="min-h-64 rounded-[var(--Radius-Surface)] bg-[var(--Surface-Accent-Primary-Light)] p-6">
+        <ResponsiveDialog open={open} onOpenChange={setOpen} breakpoint="lg">
+          <ResponsiveDialogTrigger asChild>
+            <Button>float-glass シートを開く</Button>
+          </ResponsiveDialogTrigger>
+          <ResponsiveOverlayFrame side="float-glass" description="共有の設定">
+            <div className="space-y-4">
+              <ResponsiveDialogTitle>共有リンクを作成</ResponsiveDialogTitle>
+              <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+                リンクを知っている人が閲覧できます。あとから無効にできます。
+              </p>
+              <div className="flex gap-3 [&>*]:flex-1">
+                <Button variant="secondary" onClick={() => setOpen(false)}>
+                  やめる
+                </Button>
+                <Button onClick={() => setOpen(false)}>作成する</Button>
+              </div>
+            </div>
+          </ResponsiveOverlayFrame>
+        </ResponsiveDialog>
+      </div>
+    )
+  },
+}

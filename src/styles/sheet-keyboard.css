@@ -75,8 +75,13 @@ html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-sid
    `.glass-specular { overflow: hidden }`（glass.css・非レイヤー CSS）が
    @layer utilities のユーティリティを常に踏み潰すため効かない。
    同じ非レイヤーかつ glass.css より後ろに読まれるここで上書きする。
-   auto も clip 系の値なので、角丸での ::before ハイライトのクリップは保たれる。 */
-[data-slot="sheet-content"][data-side="float-glass"] {
+   auto も クリップ系の値なので、角丸での ::before ハイライトのクリップは保たれる。
+
+   #479: ResponsiveOverlayFrame は side="float-glass" をデスクトップで
+   DialogContent（data-slot="dialog-content"）として描画するため、
+   sheet-content だけを見ていると同じ踏み潰しがデスクトップ側で再発する
+   （className の overflow-y-auto は同じ理由で効かない）。両 slot を対象にする。 */
+:is([data-slot="sheet-content"], [data-slot="dialog-content"])[data-side="float-glass"] {
   overflow-y: auto;
 }
 

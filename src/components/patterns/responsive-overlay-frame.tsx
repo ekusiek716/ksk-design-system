@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { DialogContent } from "../ui/dialog"
+import { SheetContent } from "../ui/sheet"
 import { TitleSurfaceScaleProvider } from "../../lib/title-level"
 import { useResponsiveOverlayIsDesktop } from "../ui/responsive-dialog"
 import type { SheetContentProps } from "../ui/sheet"
@@ -35,24 +36,80 @@ const desktopPresetClasses: Record<BottomSheetFramePreset, string> = {
  */
 const pageScalePresets = new Set<BottomSheetFramePreset>(["mobile-full", "mobile-page"])
 
-interface ResponsiveOverlayFrameProps extends Omit<SheetContentProps, "side" | "padding"> {
-  /**
-   * モバイル側の BottomSheetFrame preset。デスクトップでも対応する
-   * 中央モーダルの寸法へ写像される。既定 "mobile-form"。
-   */
-  preset?: BottomSheetFramePreset
-  /** 面の素材。モバイル / デスクトップの両方に効く。既定 "default"。 */
-  surface?: SheetSurface
-  /** モバイル（BottomSheetFrame）側にだけ足す className。 */
+/**
+ * 面の置き方（issue #479）。
+ * - "bottom"（既定）: 画面下端に貼り付くボトムシート。`preset` が効く。
+ * - "float": 左右・下に余白を持つカード型（Sheet の side="float" と同じ）。
+ * - "float-glass": float の Liquid Glass 版（Sheet の side="float-glass" と同じ）。
+ *
+ * `surface="glass"`（= glass-strong）とは素材が別物なので畳んでいない。
+ * float 系では `preset` は効かず、代わりに `padding` が効く。
+ */
+type ResponsiveOverlaySide = "bottom" | "float" | "float-glass"
+
+const floatSides = new Set<ResponsiveOverlaySide>(["float", "float-glass"])
+
+/**
+ * float 系のデスクトップ recipe。モバイルの float
+ * （`inset-x-3 bottom-3 max-w-lg mx-auto rounded-[var(--Radius-Sheet)]`）を
+ * そのまま中央へ移した寸法。幅 32rem・高さ min(85dvh, 46rem) は、消費側が
+ * global CSS の `!important` で当てていた値と 1px も違わない（issue #479）。
+ */
+const desktopFloatClasses = "sm:max-w-lg max-h-[min(85dvh,46rem)] flex flex-col overflow-y-auto"
+
+interface ResponsiveOverlayFrameBaseProps
+  extends Omit<SheetContentProps, "side" | "padding"> {
+  /** モバイル（シート）側にだけ足す className。 */
   mobileClassName?: string
   /** デスクトップ（DialogContent）側にだけ足す className。 */
   desktopClassName?: string
-  /**
-   * デスクトップ側の縦位置。既定 "center"。
-   * preset の寸法をそのまま全画面へ広げたい場合のみ "fullscreen" を使う。
-   */
-  desktopPosition?: "center" | "top" | "fullscreen"
 }
+
+/**
+ * `side` ごとに効く prop が違うので判別ユニオンにしてある（issue #479）。
+ * 効かない prop を渡すとコンパイルエラーになる — 黙って無視されて
+ * 「なぜ効かないのか」を追う羽目にならないようにするため。
+ */
+type ResponsiveOverlayFrameProps =
+  | (ResponsiveOverlayFrameBaseProps & {
+      side?: "bottom"
+      /**
+       * モバイル側の BottomSheetFrame preset。デスクトップでも対応する
+       * 中央モーダルの寸法へ写像される。既定 "mobile-form"。
+       */
+      preset?: BottomSheetFramePreset
+      /** 面の素材。モバイル / デスクトップの両方に効く。既定 "default"。 */
+      surface?: SheetSurface
+      /**
+       * デスクトップ側の縦位置。既定 "center"。
+       * preset の寸法をそのまま全画面へ広げたい場合のみ "fullscreen" を使う。
+       */
+      desktopPosition?: "center" | "top" | "fullscreen"
+      /** side="bottom" では preset が余白を持つため指定できない。 */
+      padding?: never
+    })
+  | (ResponsiveOverlayFrameBaseProps & {
+      side: "float" | "float-glass"
+      /** float 系は preset を持たない（配置は side が決める）。 */
+      preset?: never
+      /**
+       * 内側の既定 padding（`p-6`）。既定 true。
+       * float 系だけが持つ（side="bottom" は preset が余白を持つ）。
+       */
+      padding?: boolean
+      /**
+       * float 系の素材は `side` 自身が決める（"float" = 不透明 /
+       * "float-glass" = Liquid Glass）ため、`surface` とは併用できない。
+       * 二重にガラスを重ねると glass.css の記述順でしか勝敗が決まらないため、
+       * 型で禁止している。
+       */
+      surface?: never
+      /**
+       * float 系は常に中央。"fullscreen" は float の寸法指定と噛み合わず
+       * 「幅だけ 32rem に縛られた全画面」になるため受け付けない。
+       */
+      desktopPosition?: never
+    })
 
 /**
  * BottomSheetFrame の preset をモバイルで保ったまま、デスクトップでは
@@ -79,17 +136,82 @@ interface ResponsiveOverlayFrameProps extends Omit<SheetContentProps, "side" | "
  *   </ResponsiveOverlayFrame>
  * </ResponsiveDialog>
  */
-function ResponsiveOverlayFrame({
-  preset = "mobile-form",
-  surface = "default",
-  className,
-  mobileClassName,
-  desktopClassName,
-  desktopPosition = "center",
-  children,
-  ...props
-}: ResponsiveOverlayFrameProps) {
+function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
+  const {
+    side = "bottom",
+    preset = "mobile-form",
+    surface = "default",
+    padding = true,
+    className,
+    mobileClassName,
+    desktopClassName,
+    desktopPosition = "center",
+    children,
+    ...props
+  } = allProps as ResponsiveOverlayFrameBaseProps & {
+    side?: ResponsiveOverlaySide
+    preset?: BottomSheetFramePreset
+    surface?: SheetSurface
+    padding?: boolean
+    desktopPosition?: "center" | "top" | "fullscreen"
+  }
   const isDesktop = useResponsiveOverlayIsDesktop()
+  const isFloat = floatSides.has(side)
+
+  if (isDesktop && isFloat) {
+    // float 系はシート固有の prop を落として中央モーダルへ。
+    const {
+      container: _container,
+      overlayClassName: _overlayClassName,
+      glassOverlay: _glassOverlay,
+      swipeToClose: _swipeToClose,
+      ...dialogProps
+    } = props
+    return (
+      <DialogContent
+        data-frame="responsive-overlay-frame"
+        data-side={side}
+        data-surface={surface}
+        position={desktopPosition}
+        // DialogContent 既定の padding は `flex flex-col gap-4 p-6` で、float の
+        // SheetContent（`p-6` のみ）と段間が変わる。モバイルと同じ見え方に
+        // するため既定を切り、ここで p-6 だけを足す。
+        padding={false}
+        className={cn(
+          desktopFloatClasses,
+          padding && "p-6",
+          // float-glass はシート側の素材（glass + glass-specular）を持ち込む。
+          // DialogContent 既定の不透明な面は twMerge で確実に外す。
+          // 実スクロールは sheet-keyboard.css の
+          // :is(sheet-content, dialog-content)[data-side="float-glass"] が担う
+          // （.glass-specular の overflow:hidden が非レイヤー CSS で
+          //   overflow-y-auto を踏み潰すため / #337・#479）。
+          side === "float-glass" && "bg-transparent glass glass-specular",
+          className,
+          desktopClassName
+        )}
+        {...dialogProps}
+      >
+        <TitleSurfaceScaleProvider scale="dialog">{children}</TitleSurfaceScaleProvider>
+      </DialogContent>
+    )
+  }
+
+  if (isFloat) {
+    return (
+      <SheetContent
+        data-frame="responsive-overlay-frame"
+        side={side}
+        padding={padding}
+        className={cn(className, mobileClassName)}
+        {...props}
+      >
+        {/* SheetContent 自身が children を scale="dialog" で包むため、
+            ここで包み直す必要はない（#341）。 */}
+        {children}
+      </SheetContent>
+    )
+  }
 
   if (isDesktop) {
     // シート固有の prop はデスクトップ（中央モーダル）に意味が無いので落とす。
@@ -189,6 +311,6 @@ function ResponsiveOverlayFooter({
 }
 
 export { ResponsiveOverlayFrame, ResponsiveOverlayFooter }
-export type { ResponsiveOverlayFrameProps }
+export type { ResponsiveOverlayFrameProps, ResponsiveOverlaySide }
 /** ResponsiveOverlayFooter の props（KeyboardAwareSheetFooter と同型）。 */
 export type { KeyboardAwareSheetFooterProps as ResponsiveOverlayFooterProps }

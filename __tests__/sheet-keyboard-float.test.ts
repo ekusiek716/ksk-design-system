@@ -63,9 +63,14 @@ describe("sheet-keyboard.css — float フォールバック契約", () => {
   // float-glass は `.glass-specular { overflow: hidden }`（glass.css・非レイヤー）が
   // Tailwind の overflow-y-auto を踏み潰すため、高さキャップだけ入れると
   // 溢れた内容へ到達できなくなる。非レイヤー規則での上書きが要る。
+  //
+  // #479: ResponsiveOverlayFrame が side="float-glass" をデスクトップで
+  // DialogContent（data-slot="dialog-content"）として描画するようになったため、
+  // このセレクタは両 slot をスコープする必要がある（sheet-content だけだと
+  // デスクトップ側で同じ踏み潰しが再発する）。
   it("float-glass のスクロールを非レイヤー規則で確保している", () => {
     expect(css).toMatch(
-      /\[data-slot="sheet-content"\]\[data-side="float-glass"\]\s*\{\s*overflow-y:\s*auto/
+      /:is\(\[data-slot="sheet-content"\],\s*\[data-slot="dialog-content"\]\)\[data-side="float-glass"\]\s*\{\s*overflow-y:\s*auto/
     )
   })
 })
