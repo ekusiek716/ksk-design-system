@@ -12,7 +12,8 @@
  */
 import { describe, it, expect } from "vitest"
 import { execFileSync } from "node:child_process"
-import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs"
+import { tmpdir } from "node:os"
 import { join } from "node:path"
 import {
   findDynamicClassComposition,
@@ -213,20 +214,38 @@ describe("動的クラス名合成の検出（fixture）", () => {
     // preset.css は生成物を @import しているため、CSS ローダーが素直に読むと
     // 初回生成時（ファイル未作成）に readFileSync が throw して生成に到達できない。
     // 生成対象ファイル自身を読み込み対象から外していることの回帰テスト。
-    const absolute = join(ROOT, SAFELIST_PATH)
-    const backup = readFileSync(absolute, "utf8")
+    //
+    // リポジトリ本体の src/styles/source-safelist.css は**消さない**（issue #498）。
+    // vitest はテストファイルを並列実行するため、本物を一時的に消すと、同時に
+    // src/ を走査している別のテスト（lint-escape-and-strict の self-lint）が
+    // 「列挙時にはあったのに読む時には無い」で ENOENT で落ちていた。
+    //
+    // generate-source-safelist.mjs の ROOT は import.meta.url 起点で cwd では
+    // 動かせないので、scripts と src を一時ディレクトリへ複製し、node_modules を
+    // symlink して、その複製の中だけで削除・再生成する。複製にも生成物が入った
+    // 状態から消すため、自己除外の回帰検証は従来と同じ意味を保つ。
+    const sandbox = mkdtempSync(join(tmpdir(), "ksk-safelist-bootstrap-"))
     try {
-      rmSync(absolute)
-      expect(existsSync(absolute)).toBe(false)
+      cpSync(join(ROOT, "scripts"), join(sandbox, "scripts"), { recursive: true })
+      cpSync(join(ROOT, "src"), join(sandbox, "src"), { recursive: true })
+      symlinkSync(join(ROOT, "node_modules"), join(sandbox, "node_modules"), "dir")
+
+      const generated = join(sandbox, SAFELIST_PATH)
+      const backup = readFileSync(generated, "utf8")
+      // 複製が本物と同一であることを先に確かめる（コピー漏れを取り違えないため）
+      expect(backup).toBe(safelist)
+
+      rmSync(generated)
+      expect(existsSync(generated)).toBe(false)
       execFileSync(process.execPath, ["scripts/generate-source-safelist.mjs"], {
-        cwd: ROOT,
+        cwd: sandbox,
         stdio: "pipe",
       })
-      expect(existsSync(absolute)).toBe(true)
+      expect(existsSync(generated)).toBe(true)
       // 前回の生成結果が入力に混ざらない = 生成は src の実装だけに依存する
-      expect(readFileSync(absolute, "utf8")).toBe(backup)
+      expect(readFileSync(generated, "utf8")).toBe(backup)
     } finally {
-      writeFileSync(absolute, backup)
+      rmSync(sandbox, { recursive: true, force: true })
     }
   }, 60_000)
 
