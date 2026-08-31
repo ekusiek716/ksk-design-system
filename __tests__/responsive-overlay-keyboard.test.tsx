@@ -483,6 +483,31 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     }
   })
 
+  // Sheet → Dialog へ切り替わった直後にすでにキーボードが出ている
+  // （iPad を境界跨ぎで回転した等）と、面の初回マウント時点で補正が有効。
+  // ここで実測を諦めると className 由来のキャップを緩めてしまう。
+  it("マウント時点でキーボードが出ていても className の上書きを実測する", async () => {
+    stubViewport(1024)
+    stubKeyboard(768, 300)
+    const spy = vi
+      .spyOn(window, "getComputedStyle")
+      .mockImplementation(
+        () => ({ maxHeight: "60vh" }) as unknown as CSSStyleDeclaration
+      )
+    try {
+      // フォーカスは autoFocus で最初から入る = 初回マウントから補正が有効。
+      const el = renderFrame({
+        preset: "mobile-form",
+        desktopClassName: "max-h-[60vh]",
+      } as Partial<FrameProps>)
+      await flushFocus()
+
+      expect(el.style.maxHeight).toBe(expectedMaxHeight("60vh", 300))
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
   // max-height としては妥当でも min() の被演算子にできない値がある。
   // min(none, …) のような宣言はまるごと捨てられ、補正が消えてしまう。
   it.each([["none"], ["fit-content"], ["fit-content(20rem)"], ["auto"]])(

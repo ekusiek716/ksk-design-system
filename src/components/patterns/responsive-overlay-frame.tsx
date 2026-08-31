@@ -158,8 +158,11 @@ const desktopPlainMaxHeight = "min(90dvh, 46rem)"
  * 補正が当たっていない間の computed 値を読めば、className / inline style /
  * 経路の既定のどれで決まっていても「いま効いているキャップ」が取れる。
  *
- * 測るのは補正が当たっていないとき（`active` が false）だけ。当たっている間は
- * 自分の inline 値を読み返してしまうので、直前の実測値を使い続ける。
+ * 補正が当たっている間は自分の inline 値を読み返してしまうので、その間だけ
+ * inline の max-height を外して測り、すぐ戻す（layout effect の中なので
+ * 塗り替えは挟まらない）。「Sheet からの切り替え直後にすでにキーボードが
+ * 出ている」（iPad を境界跨ぎで回転した等）ケースでも初回から実測できる
+ * ようにするため、active を理由に測定を諦めない（#487 の Codex レビュー指摘）。
  */
 function useEffectiveMaxHeight(
   el: HTMLElement | null,
@@ -167,10 +170,13 @@ function useEffectiveMaxHeight(
 ): string | undefined {
   const [measured, setMeasured] = React.useState<string | undefined>()
   React.useLayoutEffect(() => {
-    if (active) return
     if (!el || typeof window === "undefined") return
     const measure = () => {
+      // 補正中は自分が書いた inline 値が computed に出るので、その間だけ外す。
+      const ownInline = active ? el.style.maxHeight : ""
+      if (ownInline) el.style.maxHeight = ""
       const value = window.getComputedStyle(el).maxHeight
+      if (ownInline) el.style.maxHeight = ownInline
       setMeasured((prev) => (prev === value ? prev : value))
     }
     measure()
