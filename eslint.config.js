@@ -8,7 +8,10 @@ import kskIconButtonAriaLabel from "./eslint/icon-button-aria-label.js"
 
 export default tseslint.config(
   // examples/* は独自の package.json / tsconfig を持つ独立サブプロジェクト（RN/RNW）。
-  { ignores: ["dist", "storybook-static", "mcp-server/dist", "examples"] },
+  // .claude/worktrees/* は並行 Claude セッションの一時作業コピー。`eslint .` が走査すると
+  // (a) tsconfig 候補が複数見つかり tsconfigRootDir 解決エラーで大量の偽エラーになる
+  // (b) セッションの worktree 作成/削除と glob がレースし ENOENT でクラッシュする（実測 exit 2）
+  { ignores: ["dist", "storybook-static", "mcp-server/dist", "examples", ".claude/worktrees"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
