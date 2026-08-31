@@ -508,6 +508,34 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     }
   })
 
+  // 実測のために inline を外すとき、空にすると consumer が締めたキャップまで
+  // 消えて preset の緩い値を測ってしまう。consumer の宣言へ戻して測ること。
+  it("実測のあいだ consumer の inline maxHeight を保つ", async () => {
+    stubViewport(1024)
+    stubKeyboard(768, 300)
+    const seen: string[] = []
+    const spy = vi
+      .spyOn(window, "getComputedStyle")
+      .mockImplementation((node) => {
+        seen.push((node as HTMLElement).style?.maxHeight ?? "")
+        return { maxHeight: "30rem" } as unknown as CSSStyleDeclaration
+      })
+    try {
+      const el = renderFrame({
+        preset: "mobile-form",
+        style: { maxHeight: "30rem" },
+      } as Partial<FrameProps>)
+      await flushFocus()
+
+      // 補正が当たっている間の測定でも、面の inline は consumer の宣言
+      // （空ではない）に戻されている。
+      expect(seen.some((v) => v === "30rem")).toBe(true)
+      expect(el.style.maxHeight).toBe(expectedMaxHeight("30rem", 300))
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
   // max-height としては妥当でも min() の被演算子にできない値がある。
   // min(none, …) のような宣言はまるごと捨てられ、補正が消えてしまう。
   it.each([["none"], ["fit-content"], ["fit-content(20rem)"], ["auto"]])(

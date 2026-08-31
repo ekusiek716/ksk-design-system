@@ -166,15 +166,20 @@ const desktopPlainMaxHeight = "min(90dvh, 46rem)"
  */
 function useEffectiveMaxHeight(
   el: HTMLElement | null,
-  active: boolean
+  active: boolean,
+  consumerInlineMaxHeight: string
 ): string | undefined {
   const [measured, setMeasured] = React.useState<string | undefined>()
   React.useLayoutEffect(() => {
     if (!el || typeof window === "undefined") return
     const measure = () => {
       // 補正中は自分が書いた inline 値が computed に出るので、その間だけ外す。
+      // 空にするのではなく consumer の宣言へ戻す — 補正値は consumer の
+      // style.maxHeight を置き換えているので、空にすると consumer が締めた
+      // キャップまで消えて preset の緩い値を実測してしまう
+      // （#487 の Codex レビュー指摘）。
       const ownInline = active ? el.style.maxHeight : ""
-      if (ownInline) el.style.maxHeight = ""
+      if (ownInline) el.style.maxHeight = consumerInlineMaxHeight
       const value = window.getComputedStyle(el).maxHeight
       if (ownInline) el.style.maxHeight = ownInline
       setMeasured((prev) => (prev === value ? prev : value))
@@ -182,7 +187,7 @@ function useEffectiveMaxHeight(
     measure()
     window.addEventListener("resize", measure)
     return () => window.removeEventListener("resize", measure)
-  }, [el, active])
+  }, [el, active, consumerInlineMaxHeight])
   return measured
 }
 
@@ -466,12 +471,25 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   // モバイル（Sheet）分岐では素通しなのに、デスクトップ分岐だけ計測用の
   // ref で上書きすると、境界を跨いだ瞬間に consumer の ref が空になる。
   const consumerRef = (allProps as { ref?: React.Ref<HTMLDivElement> }).ref
+  // React 19 のコールバック ref は cleanup を返せるので、consumer が返した
+  // cleanup を握り潰さずに伝播させる（返すと React は ref(null) を呼ばない）。
   const setContentRef = React.useCallback(
     (node: HTMLDivElement | null) => {
       setContentEl(node)
-      if (typeof consumerRef === "function") consumerRef(node)
-      else if (consumerRef) {
-        ;(consumerRef as React.RefObject<HTMLDivElement | null>).current = node
+      const consumerCleanup =
+        typeof consumerRef === "function"
+          ? consumerRef(node)
+          : consumerRef
+            ? (((consumerRef as React.RefObject<HTMLDivElement | null>).current =
+                node),
+              undefined)
+            : undefined
+      return () => {
+        setContentEl(null)
+        if (typeof consumerCleanup === "function") consumerCleanup()
+        else if (consumerRef && typeof consumerRef !== "function") {
+          ;(consumerRef as React.RefObject<HTMLDivElement | null>).current = null
+        }
       }
     },
     [consumerRef]
@@ -501,7 +519,16 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   const keyboardActive = isDesktop && editableFocused && keyboardInset > 0
   // className（desktopClassName の max-h-[...] 等）で締められたキャップも
   // 拾うため、補正が当たっていない間の computed 値を優先する。
-  const measuredMaxHeight = useEffectiveMaxHeight(contentEl, keyboardActive)
+  const measuredMaxHeight = useEffectiveMaxHeight(
+    contentEl,
+    keyboardActive,
+    // 実測のあいだ戻す値（consumer が inline で締めていればその値）。
+    consumerMaxHeight == null
+      ? ""
+      : typeof consumerMaxHeight === "number"
+        ? `${consumerMaxHeight}px`
+        : `${consumerMaxHeight}`
+  )
   // 実測が取れたらそれが唯一の正（"none" のように計算に使えない実測は
   // 「キャップ無し」なので、宣言側へフォールバックしない）。
   const baseMaxHeight =

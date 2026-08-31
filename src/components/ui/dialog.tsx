@@ -225,12 +225,25 @@ function DialogContent({
   // 内側の contentRef（autoFocus / フォーカス復帰 / aria-describedby の紐付け）を
   // 保ったまま、呼び出し側の ref にも同じ要素を渡す（#487: ResponsiveOverlayFrame が
   // 実効 max-height を実測するのに面の DOM を要る）。
+  // React 19 のコールバック ref は cleanup を返せる。返した場合 React は
+  // ref(null) を呼ばずに cleanup を呼ぶので、呼び出し側の cleanup を
+  // そのまま伝播させつつ、内部側の解除もここで行う。
   const mergedRef = React.useCallback(
     (node: HTMLDivElement | null) => {
       setContentNode(node)
-      if (typeof ref === "function") ref(node)
-      else if (ref) {
-        ;(ref as React.RefObject<HTMLDivElement | null>).current = node
+      const consumerCleanup =
+        typeof ref === "function"
+          ? ref(node)
+          : ref
+            ? (((ref as React.RefObject<HTMLDivElement | null>).current = node),
+              undefined)
+            : undefined
+      return () => {
+        setContentNode(null)
+        if (typeof consumerCleanup === "function") consumerCleanup()
+        else if (ref && typeof ref !== "function") {
+          ;(ref as React.RefObject<HTMLDivElement | null>).current = null
+        }
       }
     },
     [setContentNode, ref]
