@@ -1,3 +1,4 @@
+import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
 import { DialogContent } from "../ui/dialog"
@@ -72,6 +73,45 @@ const desktopFloatClasses = "sm:max-w-lg max-h-[min(85dvh,46rem)] flex flex-col 
 // モバイルの素の SheetContent（bottom バリアント）は flex ではなく block なので、
 // ここでも flex 化しない（子の幅・マージン・flex-1 の解釈を揃えるため）。
 const desktopPlainClasses = "sm:max-w-lg max-h-[min(90dvh,46rem)] overflow-y-auto"
+
+/**
+ * ソフトキーボードが実際に出ている状態かを、編集可能な要素へのフォーカスで
+ * 追加判定する（issue #487 の Codex レビュー指摘）。
+ *
+ * `visualViewport.height` はピンチズームでも縮むため、
+ * `useVisualViewportKeyboardInset()` だけを見るとズームで消えた分を
+ * `keyboardInset` として拾ってしまう。iPad 横向きはまさにピンチズームを
+ * 使う端末なので、デスクトップ分岐ではフォーカスも条件に足す。
+ * ソフトキーボードは編集可能な要素にフォーカスが無ければ出ないため、
+ * 「キーボードが出ている」の必要条件として過不足がない。
+ *
+ * ⚠️ CSS フォールバック（`html[data-kb-open]` + `--kb-h`）は consumer が
+ * 明示的に立てる合図なのでこのゲートの対象外 — あちらは誤検知しない。
+ */
+const editableSelector =
+  'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]'
+
+function useEditableElementFocused(): boolean {
+  const [focused, setFocused] = React.useState(false)
+  React.useEffect(() => {
+    if (typeof document === "undefined") return
+    const check = () => {
+      const el = document.activeElement
+      setFocused(el instanceof Element && el.matches(editableSelector))
+    }
+    // focusout は次のフォーカスが確定する前に飛ぶため、activeElement が
+    // 一瞬 body になる。次のタスクで読み直して取りこぼしを防ぐ。
+    const checkLater = () => window.setTimeout(check, 0)
+    check()
+    document.addEventListener("focusin", check)
+    document.addEventListener("focusout", checkLater)
+    return () => {
+      document.removeEventListener("focusin", check)
+      document.removeEventListener("focusout", checkLater)
+    }
+  }, [])
+  return focused
+}
 
 /**
  * デスクトップ（中央モーダル）分岐のソフトキーボード補正（issue #487）。
@@ -240,9 +280,13 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   // #487: デスクトップ幅のタッチ端末でもソフトキーボードは出る。中央モーダルの
   // 高さだけを可視領域に収める（lift は当てない — 上の JSDoc 参照）。
   const { keyboardInset } = useVisualViewportKeyboardInset()
-  const desktopKeyboardStyle = isDesktop
-    ? resolveDesktopOverlayKeyboardStyle(keyboardInset, desktopPosition)
-    : undefined
+  // ピンチズームでも visualViewport は縮むため、編集可能な要素への
+  // フォーカスを AND 条件にする（useEditableElementFocused の JSDoc 参照）。
+  const editableFocused = useEditableElementFocused()
+  const desktopKeyboardStyle =
+    isDesktop && editableFocused
+      ? resolveDesktopOverlayKeyboardStyle(keyboardInset, desktopPosition)
+      : undefined
   // preset="plain" は BottomSheetFrame を通さず素の SheetContent を出す（#486）。
   const isPlain = !isFloat && preset === "plain"
 

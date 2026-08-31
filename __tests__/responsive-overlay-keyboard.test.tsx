@@ -159,7 +159,7 @@ afterEach(() => {
 
 type FrameProps = React.ComponentProps<typeof ResponsiveOverlayFrame>
 
-function renderFrame(frameProps: Partial<FrameProps>) {
+function renderFrame(frameProps: Partial<FrameProps>, focusInput = true) {
   act(() =>
     root.render(
       <ResponsiveDialog open onOpenChange={() => {}} breakpoint="lg">
@@ -168,13 +168,19 @@ function renderFrame(frameProps: Partial<FrameProps>) {
           description="テスト"
           {...(frameProps as FrameProps)}
         >
-          <div>本文</div>
+          <input data-testid="field" />
         </ResponsiveOverlayFrame>
       </ResponsiveDialog>
     )
   )
   const el = document.querySelector<HTMLElement>('[data-slot="dialog-content"]')
   if (!el) throw new Error("中央モーダル（dialog-content）が描画されていない")
+  // ソフトキーボードは編集可能な要素へのフォーカス無しには出ない。
+  // 実装もそれを AND 条件にしているので、テストでも実際にフォーカスさせる。
+  if (focusInput) {
+    const input = el.querySelector<HTMLInputElement>('[data-testid="field"]')
+    act(() => input?.focus())
+  }
   return el
 }
 
@@ -223,6 +229,24 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     expect(el.getAttribute("data-position")).toBe("fullscreen")
     expect(el.style.maxHeight).toBe("max(0px, calc(100dvh - 300px))")
     expect(el.style.bottom).toBe("")
+  })
+
+  // visualViewport はピンチズームでも縮む。iPad 横向きはズームを使う端末なので、
+  // 編集可能な要素へのフォーカスが無い縮みは補正しない（Codex レビュー指摘）。
+  it("ピンチズーム相当（入力欄にフォーカスが無い）では補正しない", async () => {
+    stubViewport(1024)
+    stubKeyboard(768, 300)
+    const el = renderFrame({ preset: "mobile-form" }, false)
+    // Dialog の autoFocus が入力欄へ入るので、ズームだけの状態を作るために外す。
+    // focusout の再判定は次のタスクで走るため、1 tick 進めてから確認する。
+    await act(async () => {
+      ;(document.activeElement as HTMLElement | null)?.blur()
+      await new Promise((r) => setTimeout(r, 0))
+    })
+    expect(document.activeElement).not.toBe(
+      el.querySelector('[data-testid="field"]')
+    )
+    expect(el.style.maxHeight).toBe("")
   })
 
   it("キーボードが出ていなければ inline の max-height は付かない", () => {
