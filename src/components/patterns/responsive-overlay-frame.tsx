@@ -96,6 +96,31 @@ const editableSelector =
   'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable]:not([contenteditable="false"])'
 
 /**
+ * デスクトップ分岐の既定の高さキャップ（`desktopPresetClasses` /
+ * `desktopFloatClasses` / `desktopPlainClasses` の `max-h-[...]` と同値）。
+ *
+ * キーボード補正は「縮める」だけであるべきなので、補正値でキャップを
+ * 置き換えず `min(既定, キーボード由来)` にする（issue #487 の Codex レビュー
+ * 指摘。インセットが小さいとき、mobile-form の min(85dvh,40rem)=640px が
+ * 800px へ *広がって* しまっていた）。
+ *
+ * 実体は CSS 変数 `--Overlay-Desktop-Base-Max-Height` として面に出す。
+ * こうすると JS の inline style と CSS フォールバックが同じ既定値を参照でき、
+ * consumer が `style={{ maxHeight }}` を渡した場合もそれが既定側に入る。
+ */
+const OVERLAY_BASE_MAX_HEIGHT_VAR = "--Overlay-Desktop-Base-Max-Height"
+
+const desktopPresetMaxHeights: Record<BottomSheetFramePreset, string> = {
+  "mobile-full": "min(90dvh, 44rem)",
+  "mobile-page": "min(90dvh, 44rem)",
+  "mobile-form": "min(85dvh, 40rem)",
+  "desktop-floating": "min(86dvh, 42rem)",
+}
+
+const desktopFloatMaxHeight = "min(85dvh, 46rem)"
+const desktopPlainMaxHeight = "min(90dvh, 46rem)"
+
+/**
  * ズームを打ち消したソフトキーボード高さ（レイアウト px / issue #487）。
  *
  * `visualViewport.height` はソフトキーボードでもピンチズームでも縮むため、
@@ -164,14 +189,18 @@ function useEditableElementFocused(): boolean {
             el.matches(editableSelector))
       )
     }
-    // focusout は次のフォーカスが確定する前に飛ぶため、activeElement が
-    // 一瞬 body になる。次のタスクで読み直して取りこぼしを防ぐ。
+    // 判定は必ず次のタスクへ逃がす。理由は 2 つ:
+    //   1. focusout は次のフォーカスが確定する前に飛ぶため、その場で読むと
+    //      activeElement が一瞬 body になり取りこぼす。
+    //   2. Radix の FocusScope は commit の中で同期的に focus() を呼ぶので、
+    //      focusin ハンドラでそのまま setState すると React が
+    //      "Should not already be working." で落ちる（#487 で実際に踏んだ）。
     const checkLater = () => window.setTimeout(check, 0)
     check()
-    document.addEventListener("focusin", check)
+    document.addEventListener("focusin", checkLater)
     document.addEventListener("focusout", checkLater)
     return () => {
-      document.removeEventListener("focusin", check)
+      document.removeEventListener("focusin", checkLater)
       document.removeEventListener("focusout", checkLater)
     }
   }, [])
@@ -202,21 +231,26 @@ function useEditableElementFocused(): boolean {
  *
  * 高さは 0 で下限を切る（負値だと「上端が抜ける」不具合を「中身が高さ 0 で
  * 消える」不具合にすり替えるだけになる — float 系と同じ判断 / #337）。
+ *
+ * 返す値は `min(baseMaxHeight, キーボード由来のキャップ)`。inline style は
+ * className の `max-h-[...]` を置き換えてしまうため、そのまま返すと
+ * インセットが小さいときに既定のキャップより *広がる*（issue #487 の
+ * Codex レビュー指摘）。補正は必ず縮める方向にだけ効かせる。
  */
 function resolveDesktopOverlayKeyboardStyle(
   keyboardInset: number,
-  position: "center" | "top" | "fullscreen"
+  position: "center" | "top" | "fullscreen",
+  baseMaxHeight: string
 ): { maxHeight: string } | undefined {
   if (keyboardInset <= 0) return undefined
-  if (position === "fullscreen") {
-    return { maxHeight: `max(0px, calc(100dvh - ${keyboardInset}px))` }
-  }
-  if (position === "top") {
-    return {
-      maxHeight: `max(0px, calc(100dvh - ${keyboardInset}px - max(env(safe-area-inset-top, 0px), 2rem) - 2rem))`,
-    }
-  }
-  return { maxHeight: `max(0px, calc(100dvh - ${keyboardInset * 2}px))` }
+  const cap =
+    position === "fullscreen"
+      ? `max(0px, calc(100dvh - ${keyboardInset}px))`
+      : position === "top"
+        ? `max(0px, calc(100dvh - ${keyboardInset}px - max(env(safe-area-inset-top, 0px), 2rem) - 2rem))`
+        : `max(0px, calc(100dvh - ${keyboardInset * 2}px))`
+  // min() で畳むので、この補正は既定のキャップを緩めることが無い。
+  return { maxHeight: `min(${baseMaxHeight}, ${cap})` }
 }
 
 interface ResponsiveOverlayFrameBaseProps
@@ -342,18 +376,39 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   }
   const isDesktop = useResponsiveOverlayIsDesktop()
   const isFloat = floatSides.has(side)
+  // preset="plain" は BottomSheetFrame を通さず素の SheetContent を出す（#486）。
+  const isPlain = !isFloat && preset === "plain"
+
   // #487: デスクトップ幅のタッチ端末でもソフトキーボードは出る。中央モーダルの
   // 高さだけを可視領域に収める（lift は当てない — 上の JSDoc 参照）。
   // ズーム分を打ち消したキーボード高さ（resolveOverlayKeyboardInset の JSDoc）と、
   // 「編集可能な要素にフォーカスがある」ゲートの AND で発火させる。
   const keyboardInset = useOverlayKeyboardInset()
   const editableFocused = useEditableElementFocused()
+  // 経路ごとの既定キャップ。consumer が style.maxHeight を渡していればそれを
+  // 既定とみなす（補正で握り潰さない / #487）。
+  const consumerMaxHeight = (allProps as { style?: React.CSSProperties }).style
+    ?.maxHeight
+  const baseMaxHeight =
+    consumerMaxHeight != null
+      ? `${consumerMaxHeight}`
+      : isFloat
+        ? desktopFloatMaxHeight
+        : isPlain
+          ? desktopPlainMaxHeight
+          : desktopPresetMaxHeights[preset as BottomSheetFramePreset]
   const desktopKeyboardStyle =
     isDesktop && editableFocused
-      ? resolveDesktopOverlayKeyboardStyle(keyboardInset, desktopPosition)
+      ? resolveDesktopOverlayKeyboardStyle(
+          keyboardInset,
+          desktopPosition,
+          baseMaxHeight
+        )
       : undefined
-  // preset="plain" は BottomSheetFrame を通さず素の SheetContent を出す（#486）。
-  const isPlain = !isFloat && preset === "plain"
+  // CSS フォールバック（html[data-kb-open] + --kb-h）にも同じ既定値を渡す。
+  const desktopBaseMaxHeightStyle = isDesktop
+    ? ({ [OVERLAY_BASE_MAX_HEIGHT_VAR]: baseMaxHeight } as React.CSSProperties)
+    : undefined
 
   if (isDesktop && isFloat) {
     // float 系はシート固有の prop を落として中央モーダルへ。
@@ -390,7 +445,11 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         {...dialogProps}
         // #487: キーボード補正は max-height だけ。style は spread より後ろに
         // 置き、consumer の style は展開して残す（丸ごと落とさない）。
-        style={{ ...dialogProps.style, ...desktopKeyboardStyle }}
+        style={{
+          ...desktopBaseMaxHeightStyle,
+          ...dialogProps.style,
+          ...desktopKeyboardStyle,
+        }}
       >
         <TitleSurfaceScaleProvider scale="dialog">{children}</TitleSurfaceScaleProvider>
       </DialogContent>
@@ -422,7 +481,11 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         {...dialogProps}
         // #487: キーボード補正は max-height だけ。style は spread より後ろに
         // 置き、consumer の style は展開して残す（丸ごと落とさない）。
-        style={{ ...dialogProps.style, ...desktopKeyboardStyle }}
+        style={{
+          ...desktopBaseMaxHeightStyle,
+          ...dialogProps.style,
+          ...desktopKeyboardStyle,
+        }}
         // data-* は spread より後ろに置く（#339: consumer が上書きすると
         // DS / 消費側の CSS セレクタが丸ごと外れる）。
         data-frame="responsive-overlay-frame"
@@ -499,7 +562,11 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         {...dialogProps}
         // #487: キーボード補正は max-height だけ。style は spread より後ろに
         // 置き、consumer の style は展開して残す（丸ごと落とさない）。
-        style={{ ...dialogProps.style, ...desktopKeyboardStyle }}
+        style={{
+          ...desktopBaseMaxHeightStyle,
+          ...dialogProps.style,
+          ...desktopKeyboardStyle,
+        }}
       >
         {/*
           DialogContent は children を "dialog" 文脈で包むため、全画面級 preset は

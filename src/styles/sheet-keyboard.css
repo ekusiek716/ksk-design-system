@@ -85,6 +85,12 @@ html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-sid
    inset-0 h-full の上端固定なのでキーボード 1 回分だけを引く（h-full は max-height に
    負けるため、面が可視領域へ縮み内側のスクロール領域は残る）。
 
+   ⚠️ 既定のキャップ（className の max-h-[...]）を緩めないよう、必ず
+   min(--Overlay-Desktop-Base-Max-Height, キーボード由来) で畳む。この変数は
+   ResponsiveOverlayFrame がデスクトップ分岐で常に inline style として出す
+   （consumer が style.maxHeight を渡した場合はそちらが入る）。畳まないと
+   インセットが小さいときに面が既定より広がる（#487 の Codex レビュー指摘）。
+
    JS 検知（responsive-overlay-frame.tsx の resolveDesktopOverlayKeyboardStyle）が
    動くときは inline style で同値を書くため二重適用にならない。visualViewport が
    inset を出せない環境では consumer の html[data-kb-open] + --kb-h でここが効く。
@@ -92,19 +98,28 @@ html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-sid
    data-frame="responsive-overlay-frame" を出すため、1 ルールで全経路に届く。 */
 html[data-kb-open]
   [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="center"] {
-  max-height: max(0px, calc(100dvh - 2 * var(--kb-h, 0px)));
+  max-height: min(
+    var(--Overlay-Desktop-Base-Max-Height, 100dvh),
+    max(0px, calc(100dvh - 2 * var(--kb-h, 0px)))
+  );
 }
 
 html[data-kb-open]
   [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="fullscreen"] {
-  max-height: max(0px, calc(100dvh - var(--kb-h, 0px)));
+  max-height: min(
+    var(--Overlay-Desktop-Base-Max-Height, 100dvh),
+    max(0px, calc(100dvh - var(--kb-h, 0px)))
+  );
 }
 
 html[data-kb-open]
   [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="top"] {
-  max-height: max(
-    0px,
-    calc(100dvh - var(--kb-h, 0px) - max(env(safe-area-inset-top, 0px), 2rem) - 2rem)
+  max-height: min(
+    var(--Overlay-Desktop-Base-Max-Height, 100dvh),
+    max(
+      0px,
+      calc(100dvh - var(--kb-h, 0px) - max(env(safe-area-inset-top, 0px), 2rem) - 2rem)
+    )
   );
 }
 
