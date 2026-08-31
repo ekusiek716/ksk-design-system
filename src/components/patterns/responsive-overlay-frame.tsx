@@ -533,12 +533,14 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
                 node),
               undefined)
             : undefined
+      // React 18 のコールバック ref は戻り値を許さない（"Unexpected return
+      // value from a callback ref" の警告になる）。cleanup を返すのは
+      // consumer が cleanup を返したときだけにする。返さない経路では
+      // React が ref(null) を呼ぶので、この関数の本体側で解除される。
+      if (typeof consumerCleanup !== "function") return
       return () => {
         setElement(null)
-        if (typeof consumerCleanup === "function") consumerCleanup()
-        else if (consumerRef && typeof consumerRef !== "function") {
-          ;(consumerRef as React.RefObject<HTMLDivElement | null>).current = null
-        }
+        consumerCleanup()
       }
     },
     [setElement, consumerRef]

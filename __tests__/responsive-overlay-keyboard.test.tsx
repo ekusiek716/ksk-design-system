@@ -461,6 +461,39 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     expect(seen).toContain(el2)
   })
 
+  // React 18 のコールバック ref は戻り値を許さない（"Unexpected return value
+  // from a callback ref" の警告）ので、cleanup を返すのは consumer が
+  // cleanup を返したときだけ。返さない場合は React が ref(null) を呼ぶ。
+  it("cleanup を返さない consumer ref にはアンマウントで null が渡る", () => {
+    stubViewport(1024)
+    const seen: Array<HTMLElement | null> = []
+    renderFrame({
+      preset: "mobile-form",
+      ref: (node: HTMLDivElement | null) => {
+        seen.push(node)
+      },
+    } as Partial<FrameProps>)
+    expect(seen.filter(Boolean)).toHaveLength(1)
+
+    act(() => root.unmount())
+    root = createRoot(container)
+    expect(seen).toContain(null)
+  })
+
+  it("cleanup を返す consumer ref はアンマウントで cleanup が呼ばれる", () => {
+    stubViewport(1024)
+    const cleanup = vi.fn()
+    renderFrame({
+      preset: "mobile-form",
+      ref: () => cleanup,
+    } as unknown as Partial<FrameProps>)
+    expect(cleanup).not.toHaveBeenCalled()
+
+    act(() => root.unmount())
+    root = createRoot(container)
+    expect(cleanup).toHaveBeenCalledTimes(1)
+  })
+
   // 既定キャップは desktopClassName でも締められる。実測（computed）を
   // 基準にしているので、className 由来の締めも緩めない。
   it("desktopClassName の高さ上書きも既定キャップとして畳む", async () => {
