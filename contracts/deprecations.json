@@ -21,8 +21,8 @@
     },
     "policy": "エントリの削除条件は「全消費リポで check-migration の残件が 0」。削除は removeIn のメジャーリリースで行う。",
     "counts": {
-      "total": 5,
-      "prop": 5,
+      "total": 6,
+      "prop": 6,
       "export": 0
     }
   },
@@ -35,7 +35,9 @@
       "since": "1.46.0",
       "replacement": "href または onClick を ListItem 自体へ渡す",
       "removeIn": "2.0.0",
-      "sources": ["src/components/patterns/list-item.tsx"],
+      "sources": [
+        "src/components/patterns/list-item.tsx"
+      ],
       "issue": "#207",
       "note": "外側の Link / button でラップする既存コードの視覚互換用に残している。"
     },
@@ -62,7 +64,9 @@
       "since": "1.49.0",
       "replacement": "onChange",
       "removeIn": "2.0.0",
-      "sources": ["src/components/ui/pill-toggle.tsx"],
+      "sources": [
+        "src/components/ui/pill-toggle.tsx"
+      ],
       "issue": "#264",
       "note": "後方互換エイリアス。onChange を併せて渡した場合は onChange が優先される。"
     },
@@ -74,7 +78,9 @@
       "since": "1.30.1",
       "replacement": "なし（v1.30.0 以降は描画されないため、渡している箇所は削除する）",
       "removeIn": "2.0.0",
-      "sources": ["src/components/patterns/commerce/product-card.tsx"],
+      "sources": [
+        "src/components/patterns/commerce/product-card.tsx"
+      ],
       "note": "既存 consumer の型互換のためだけに残している no-op prop。"
     },
     {
@@ -85,8 +91,24 @@
       "since": "1.40.1",
       "replacement": "variant",
       "removeIn": "2.0.0",
-      "sources": ["src/native/components/Progress.tsx"],
+      "sources": [
+        "src/native/components/Progress.tsx"
+      ],
       "note": "React Native 版のみ。既存 RN consumer 向けの互換。"
+    },
+    {
+      "id": "ProgressRing.thickness",
+      "kind": "prop",
+      "component": "ProgressRing",
+      "prop": "thickness",
+      "since": "unreleased",
+      "replacement": "strokeWidth（Web の同名 prop と語彙を揃えた。値の意味・既定値 6 は同じ）",
+      "removeIn": "2.0.0",
+      "sources": [
+        "src/native/components/ProgressRing.tsx"
+      ],
+      "issue": "#495",
+      "note": "Native だけが持っていた別名。同じ「線の太さ」を Web は strokeWidth と呼んでいたため、両方を触る実装者が読み替えを強いられていた。両方渡された場合は strokeWidth を優先する。"
     }
   ]
 }

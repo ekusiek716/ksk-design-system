@@ -22,6 +22,7 @@ npx ksk-ds check-migration ./src
 | `PillToggle.onValueChange` | `<PillToggle onValueChange>` | onChange | 1.49.0 | v2.0.0 |
 | `ProductCard.deliveryLabel` | `<ProductCard deliveryLabel>` | なし（v1.30.0 以降は描画されないため、渡している箇所は削除する） | 1.30.1 | v2.0.0 |
 | `Progress.tone` | `<Progress tone>` | variant | 1.40.1 | v2.0.0 |
+| `ProgressRing.thickness` | `<ProgressRing thickness>` | strokeWidth（Web の同名 prop と語彙を揃えた。値の意味・既定値 6 は同じ） | unreleased | v2.0.0 |
 
 各エントリの補足:
 
@@ -30,6 +31,7 @@ npx ksk-ds check-migration ./src
 - **PillToggle.onValueChange**（issue #264） — 後方互換エイリアス。onChange を併せて渡した場合は onChange が優先される。 実装: src/components/ui/pill-toggle.tsx
 - **ProductCard.deliveryLabel** — 既存 consumer の型互換のためだけに残している no-op prop。 実装: src/components/patterns/commerce/product-card.tsx
 - **Progress.tone** — React Native 版のみ。既存 RN consumer 向けの互換。 実装: src/native/components/Progress.tsx
+- **ProgressRing.thickness**（issue #495） — Native だけが持っていた別名。同じ「線の太さ」を Web は strokeWidth と呼んでいたため、両方を触る実装者が読み替えを強いられていた。両方渡された場合は strokeWidth を優先する。 実装: src/native/components/ProgressRing.tsx
 
 削除は「全消費リポで `check-migration` の残件が 0」を条件に、`削除予定` のメジャーリリースで行います。
 
