@@ -2251,7 +2251,7 @@
         "description / autoFocus / restoreFocusOnClose / closeOnEsc / zIndex を両分岐へ透過",
         "snap sheet はデスクトップでもシートのまま",
         "ResponsiveOverlayFooter がモバイルのみキーボード追従になる",
-        "デスクトップ(中央モーダル)分岐もソフトキーボードで max-height を縮める(issue #487)。幅 1024px 以上のタッチ端末(iPad 横向き)向け。JS(visualViewport)の inline style と html[data-kb-open] + --kb-h の CSS フォールバックの両方が効く。JS 経路はキーボード高さを layoutHeight - (visualHeight + visualOffsetTop) * scale で求め、ピンチズーム由来の縮みを倍率で打ち消す(visualViewport はズームでも縮むため)。発火は編集可能な要素へのフォーカスをゲートにする"
+        "デスクトップ(中央モーダル)分岐もソフトキーボードで max-height を縮める(issue #487)。幅 1024px 以上のタッチ端末(iPad 横向き)向け。JS(visualViewport)の inline style と html[data-kb-open] + --kb-h の CSS フォールバックの両方が効く。CSS フォールバックの --kb-h は「キーボードがビューポートを覆っている高さ」で、レイアウトビューポート自体が縮む環境(interactive-widget=resizes-content)では 0 のままにする(書くと二重に引いて面が潰れる)。JS 経路はキーボード高さを layoutHeight - (visualHeight + visualOffsetTop) * scale で求め、ピンチズーム由来の縮みを倍率で打ち消す(visualViewport はズームでも縮むため)。発火は編集可能な要素へのフォーカスをゲートにする"
       ],
       "rules": [
         "必ず <ResponsiveDialog> の子として使う(境界の判定は ResponsiveDialog の context が持つ)",

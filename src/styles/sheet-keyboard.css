@@ -21,6 +21,11 @@
    `html[data-kb-open]` + `--kb-h`（キーボード高さ px）を書けば、この CSS が
    同じ補正を適用する。belle-todo の回避実装（globals.css）と等価。
 
+   ⚠️ ここでも `--kb-h` は「キーボードが覆っている高さ」。レイアウトビューポート
+   自体が縮む環境（interactive-widget=resizes-content）では 100dvh / 画面下端が
+   既にキーボードを除いた位置なので、consumer は `--kb-h` を 0 のままにする
+   （書くと lift と max-height の両方が二重に効く）。
+
    - `bottom: var(--kb-h)` … キーボード分だけシート下端を持ち上げる
    - `max-height: calc(100dvh - var(--kb-h))` … 上端が画面外へ抜けないよう制限
    - snap モード（`[data-snap-active]`）は自前で高さ制御するため max-height
@@ -84,6 +89,16 @@ html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-sid
    「キーボード + 上オフセット + 下マージン」を引く。position="fullscreen" は
    inset-0 h-full の上端固定なのでキーボード 1 回分だけを引く（h-full は max-height に
    負けるため、面が可視領域へ縮み内側のスクロール領域は残る）。
+
+   ⚠️ `--kb-h` の意味は「キーボードがビューポートを **覆っている** 高さ」。
+   `interactive-widget=resizes-content` のようにレイアウトビューポート自体が
+   縮む環境では 100dvh が既にキーボード分を除いているので、consumer は
+   `--kb-h` を 0 のままにする（そこで覆い高さを書くと二重に引き、
+   800px のビューポート + 300px のキーボードで 500px - 600px となって
+   面が高さ 0 に潰れる / #487 の Codex レビュー指摘）。
+   逆に「キーボードが覆うだけでレイアウトは縮まない」環境は visualViewport が
+   inset を返すので JS 側が補正する。CSS フォールバックは JS 検知が使えない
+   環境向けの保険で、その場合も覆い高さを書けば正しい。
 
    ⚠️ 既定のキャップ（className の max-h-[...]）を緩めないよう、必ず
    min(--Overlay-Desktop-Base-Max-Height, キーボード由来) で畳む。この変数は

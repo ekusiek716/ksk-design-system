@@ -163,6 +163,13 @@ describe("sheet-keyboard.css — dialog-content フォールバック契約", ()
     )
   })
 
+  // --kb-h の意味を明文化しておく（レイアウトが縮む環境で覆い高さを書くと
+  // 100dvh から二重に引いて面が潰れる）。契約が消えたら気づけるようにする。
+  it("--kb-h が「覆っている高さ」であることを明記している", () => {
+    expect(css).toMatch(/覆っている高さ/)
+    expect(css).toMatch(/resizes-content/)
+  })
+
   it("実測中（data-kb-measuring）は自分を除外する", () => {
     for (const [, body] of dialogRules) {
       void body
