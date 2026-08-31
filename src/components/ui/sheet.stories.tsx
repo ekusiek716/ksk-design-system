@@ -708,3 +708,220 @@ export const OpensAndIsImmediatelyInteractive: Story = {
     await expect(canvas.getByTestId("open")).toHaveFocus()
   },
 }
+
+// ─────────────────────────────────────────────────────────────
+// aria-describedby 自動紐付けの回帰テスト（issue #485）
+// ─────────────────────────────────────────────────────────────
+
+function resolveSheetDescribedBy(sheet: HTMLElement) {
+  const id = sheet.getAttribute("aria-describedby")
+  if (!id) return null
+  return document.getElementById(id)
+}
+
+/**
+ * 子として置いた `<SheetDescription>` が `aria-describedby` に自動で紐付く（#485）。
+ */
+export const ChildDescriptionIsLinked: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </SheetTrigger>
+      <SheetContent side="bottom">
+        <SheetHeader>
+          <SheetTitle>説明の紐付け</SheetTitle>
+          <SheetDescription>子に置いた説明文です。</SheetDescription>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const sheet = await body.findByRole("dialog")
+    await waitFor(() =>
+      expect(resolveSheetDescribedBy(sheet)).toHaveTextContent("子に置いた説明文です。")
+    )
+  },
+}
+
+/** swipeToClose 版（別の Content 実装）でも同じく紐付く。 */
+export const ChildDescriptionIsLinkedWithSwipeToClose: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </SheetTrigger>
+      <SheetContent side="bottom" swipeToClose>
+        <SheetHeader>
+          <SheetTitle>スワイプで閉じるシート</SheetTitle>
+          <SheetDescription>スワイプ版の説明文です。</SheetDescription>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const sheet = await body.findByRole("dialog")
+    await waitFor(() =>
+      expect(resolveSheetDescribedBy(sheet)).toHaveTextContent("スワイプ版の説明文です。")
+    )
+  },
+}
+
+/** Description を置かないシートでは `aria-describedby` を出さない。 */
+export const NoDescriptionLeavesNoDescribedBy: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </SheetTrigger>
+      <SheetContent side="bottom">
+        <SheetHeader>
+          <SheetTitle>説明なし</SheetTitle>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const sheet = await body.findByRole("dialog")
+    await waitFor(() => expect(sheet).not.toHaveAttribute("aria-describedby"))
+  },
+}
+
+/** snap モード（SnapBottomSheetContent 実装）でも紐付く。 */
+export const ChildDescriptionIsLinkedWithSnapPoints: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: function SnapDescribedBy() {
+    const [open, setOpen] = React.useState(false)
+    const [snap, setSnap] = React.useState<number | string | null>(0.9)
+    return (
+      <div>
+        <Button data-testid="open" onClick={() => setOpen(true)}>開く</Button>
+        <Sheet
+          open={open}
+          onOpenChange={setOpen}
+          snapPoints={[0.4, 0.9]}
+          activeSnapPoint={snap}
+          setActiveSnapPoint={setSnap}
+        >
+          <SheetContent side="bottom">
+            <SheetHeader>
+              <SheetTitle>snap シート</SheetTitle>
+              <SheetDescription>snap 版の説明文です。</SheetDescription>
+            </SheetHeader>
+          </SheetContent>
+        </Sheet>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const sheet = await body.findByRole("dialog")
+    await waitFor(() =>
+      expect(resolveSheetDescribedBy(sheet)).toHaveTextContent("snap 版の説明文です。")
+    )
+  },
+}
+
+/** swipeToClose のサイドドロワー（SwipeToCloseSideDrawer 実装）でも紐付く。 */
+export const ChildDescriptionIsLinkedWithSwipeSideDrawer: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </SheetTrigger>
+      <SheetContent side="right" swipeToClose>
+        <SheetHeader>
+          <SheetTitle>サイドドロワー</SheetTitle>
+          <SheetDescription>ドロワー版の説明文です。</SheetDescription>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const sheet = await body.findByRole("dialog")
+    await waitFor(() =>
+      expect(resolveSheetDescribedBy(sheet)).toHaveTextContent("ドロワー版の説明文です。")
+    )
+  },
+}
+
+/** `description` prop 経由の sr-only 説明も従来どおり紐付く。 */
+export const DescriptionPropIsLinked: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </SheetTrigger>
+      <SheetContent side="bottom" description="prop 経由の説明です。">
+        <SheetHeader>
+          <SheetTitle>prop 経由</SheetTitle>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const sheet = await body.findByRole("dialog")
+    await waitFor(() =>
+      expect(resolveSheetDescribedBy(sheet)).toHaveTextContent("prop 経由の説明です。")
+    )
+  },
+}
+
+/** 呼び出し側が明示した `aria-describedby` は自動紐付けより優先される。 */
+export const ExplicitDescribedByWins: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div>
+      <p id="external-sheet-desc-485">シート外に置いた説明です。</p>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button data-testid="open">開く</Button>
+        </SheetTrigger>
+        <SheetContent side="bottom" aria-describedby="external-sheet-desc-485">
+          <SheetHeader>
+            <SheetTitle>明示指定</SheetTitle>
+            <SheetDescription>子の説明文（こちらは使われない）。</SheetDescription>
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const sheet = await body.findByRole("dialog")
+    await waitFor(() =>
+      expect(sheet).toHaveAttribute("aria-describedby", "external-sheet-desc-485")
+    )
+  },
+}

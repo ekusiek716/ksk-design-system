@@ -2,6 +2,7 @@ import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { usePortalContainer } from "./portal-container"
+import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
 import {
   ModalStackRegistrar,
   modalContentZ,
@@ -119,7 +120,8 @@ interface DialogContentProps
    *   Radix の "Missing Description" 警告を抑制。description が
    *   概念上不要なダイアログ用。
    * 可視の description を出したい場合は、この prop を使わず子要素として
-   * `<DialogDescription>` を直接置く。
+   * `<DialogDescription>` を直接置く（#485 以降、子に置いた Description は
+   * 自動で `aria-describedby` に紐付く。id の手当ては不要）。
    */
   description?: React.ReactNode
   /**
@@ -209,7 +211,15 @@ function DialogContent({
   // - description 渡しあり → 生成した sr-only Description の id
   // - description なし → 呼び出し側の aria-describedby（無ければ undefined を明示）
   //   undefined を明示することで Radix の "Missing Description" 警告が消える。
+  //   子に <DialogDescription> が置かれている場合は <DescribedByLinker> が
+  //   マウント後にその id を復元する（#485）。
   const ariaDescribedBy = hasInternalDesc ? autoDescId : props["aria-describedby"]
+  const autoLinkDescription = !hasInternalDesc && props["aria-describedby"] == null
+  const { setContentNode, applyDescribedBy } = useDescribedByLink(
+    contentRef,
+    "dialog-description",
+    autoLinkDescription
+  )
   const handleOpenAutoFocus = (event: Event) => {
     captureRestoreFocus(restoreFocusRef)
     props.onOpenAutoFocus?.(event)
@@ -240,7 +250,7 @@ function DialogContent({
     <DialogPortal>
       <DialogOverlay stackLevel={stackLevel} />
       <DialogPrimitive.Content
-        ref={contentRef}
+        ref={setContentNode}
         data-slot="dialog-content"
         data-position={position}
         data-safe-area={safeArea}
@@ -301,6 +311,7 @@ function DialogContent({
         onEscapeKeyDown={handleEscapeKeyDown}
       >
         <ModalStackRegistrar onLevelChange={setStackLevel} />
+        <DescribedByLinker contentRef={contentRef} applyDescribedBy={applyDescribedBy} />
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">
             {description}
