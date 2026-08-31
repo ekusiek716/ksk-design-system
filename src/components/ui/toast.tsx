@@ -148,11 +148,41 @@ function subscribeToasterMounted(listener: () => void) {
 // React hooks
 // =============================================================
 
-function useToastStoreSnapshot() {
+/**
+ * server snapshot は「毎回同じ参照」でなければならない。`() => []` は呼ばれる
+ * たびに別インスタンスを返すため、React が
+ * 「The result of getServerSnapshot should be cached to avoid an infinite loop」
+ * を警告する（issue #489）。モジュール定数で参照を固定する。
+ * freeze は「この配列は共有物なので書き換えない」ことを型の外側でも示すため。
+ */
+const EMPTY_TOASTS: readonly Toast[] = Object.freeze([]) as readonly Toast[]
+
+function useToastStoreSnapshot(): readonly Toast[] {
   const subscribe = React.useCallback((cb: () => void) => toastStore.subscribe(cb), [])
   const getSnapshot = React.useCallback(() => toastStore.toasts, [])
-  const getServerSnapshot = React.useCallback(() => [] as Toast[], [])
+  const getServerSnapshot = React.useCallback(() => EMPTY_TOASTS, [])
   return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+}
+
+/**
+ * マウント完了後にだけ true を返す。SSR/SSG された HTML への hydration では
+ * 「サーバー出力とクライアント初回 render が一致すること」が React の契約なので、
+ * portal のような client-only な出力は初回 render では出さず、effect 後に出す。
+ * `typeof document === "undefined"` を render 中に分岐すると初回 render から
+ * portal が出てしまい、必ず hydration mismatch になる（issue #489）。
+ *
+ * fire-and-forget な `toast()` の auto-mount 経路（createRoot による純 CSR）にも
+ * 同じゲートがかかるので、viewport の出現は 1 render サイクル遅れる。トースト自体は
+ * store に積まれてから描画されるので取りこぼしは無く、遅延は 1 tick（描画前）。
+ * 経路ごとに分岐させると「SSR 経路だけ直っている」状態を作り込みやすいので、
+ * 意図して viewport 側に一本化している。
+ */
+function useMounted(): boolean {
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+  return mounted
 }
 
 function useIsToasterMounted() {
@@ -182,7 +212,9 @@ function useToast(): ToastContextValue {
 
 function ToastViewport({ regionLabel, closeLabel }: { regionLabel?: string; closeLabel?: string } = {}) {
   const toasts = useToastStoreSnapshot()
-  if (typeof document === "undefined") return null
+  const mounted = useMounted()
+  // 初回 render はサーバー出力（= 何も出さない）と一致させる。
+  if (!mounted || typeof document === "undefined") return null
   return createPortal(
     <div
       data-slot="toast-viewport"
