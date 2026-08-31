@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "1.69.0",
+    "version": "1.70.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 68,
@@ -2241,7 +2241,6 @@
         "preset ごとのデスクトップ寸法写像(幅・max-height・角丸)",
         "side=float / float-glass のデスクトップ写像(32rem / min(85dvh,46rem))。float 系は preset ではなく padding が効く",
         "preset=\"plain\" は BottomSheetFrame を通さない素の bottom シート(全幅・下端固定・p-6・max-h-90dvh のまま)で、デスクトップだけ中央モーダル(32rem / min(90dvh,46rem))になる。padding が効く(issue #486)",
-        
         "description / autoFocus / restoreFocusOnClose / closeOnEsc / zIndex を両分岐へ透過",
         "snap sheet はデスクトップでもシートのまま",
         "ResponsiveOverlayFooter がモバイルのみキーボード追従になる"
