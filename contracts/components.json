@@ -2233,13 +2233,15 @@
       "description": "モバイルではシートの見た目(ボトムシート preset / float カード)をそのまま保ち、デスクトップでは DialogContent(中央モーダル)として出すレスポンシブ overlay frame(issue #472 / #479)。消費側が global CSS で position / transform / width / max-height / radius を !important 上書きしてシートをデスクトップモーダルへ変換する回避策を不要にする。切り替え境界は親の <ResponsiveDialog breakpoint> が決め、snapPoints 付きのシートは境界を越えてもシートのまま。",
       "variants": [
         "side: bottom(既定) / float / float-glass",
-        "preset: mobile-full / mobile-page / mobile-form / desktop-floating（side=bottom のときだけ有効）",
+        "preset: mobile-full / mobile-page / mobile-form / desktop-floating / plain（side=bottom のときだけ有効）",
         "surface: default / glass",
         "desktopPosition: center / top / fullscreen"
       ],
       "features": [
         "preset ごとのデスクトップ寸法写像(幅・max-height・角丸)",
         "side=float / float-glass のデスクトップ写像(32rem / min(85dvh,46rem))。float 系は preset ではなく padding が効く",
+        "preset=\"plain\" は BottomSheetFrame を通さない素の bottom シート(全幅・下端固定・p-6・max-h-90dvh のまま)で、デスクトップだけ中央モーダル(32rem / min(90dvh,46rem))になる。padding が効く(issue #486)",
+        
         "description / autoFocus / restoreFocusOnClose / closeOnEsc / zIndex を両分岐へ透過",
         "snap sheet はデスクトップでもシートのまま",
         "ResponsiveOverlayFooter がモバイルのみキーボード追従になる"
@@ -2250,7 +2252,7 @@
         "中身は DetailSheetScaffold + ResponsiveOverlayFooter で組む",
         "デスクトップ側にだけ効かせたい className は desktopClassName、モバイル側は mobileClassName を使う",
         "左右・下に余白を持つカード型のシートは side=\"float\"(Liquid Glass なら \"float-glass\")を使う。surface=\"glass\"(glass-strong)とは素材が別物で、float-glass との併用は型エラー(ガラスの二重適用防止)",
-        "side ごとに効く prop が判別ユニオンで分かれている: bottom は preset / surface / desktopPosition、float 系は padding。効かない組み合わせは黙って無視されずコンパイルエラーになる(型テスト test/types/responsive-overlay-frame.tsx)",
+        "side / preset ごとに効く prop が判別ユニオンで分かれている: preset 経路は preset / surface / desktopPosition、float 系と preset=\"plain\" は padding。効かない組み合わせは黙って無視されずコンパイルエラーになる(型テスト test/types/responsive-overlay-frame.tsx)",
         "float-glass の実スクロールは src/styles/sheet-keyboard.css の :is(sheet-content, dialog-content)[data-side=\"float-glass\"] が担う。.glass-specular の overflow:hidden が非レイヤー CSS で className を踏み潰すため、className だけでは効かない(#337 / #479)"
       ],
       "subcomponents": [

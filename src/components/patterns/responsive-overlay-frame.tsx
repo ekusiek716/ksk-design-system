@@ -57,6 +57,21 @@ const floatSides = new Set<ResponsiveOverlaySide>(["float", "float-glass"])
  */
 const desktopFloatClasses = "sm:max-w-lg max-h-[min(85dvh,46rem)] flex flex-col overflow-y-auto"
 
+/**
+ * `preset="plain"`（preset 無しの素の bottom シート）のデスクトップ recipe。
+ * モバイルは Sheet の bottom バリアント（`inset-x-0 bottom-0` / `max-h-[90dvh]` /
+ * `p-6`）そのままなので、それを中央へ移した寸法にする。
+ * 高さは 46rem でキャップする（画面が高いときに間延びさせない）。
+ *
+ * 幅の 32rem は `sm:`（640px 以上）で効く。`ResponsiveDialog` の breakpoint を
+ * 640px 未満に解決する設定（`breakpointQuery` の生指定 / `product-theme` に
+ * 小さい値）では DialogContent 既定の `max-w-[calc(100%_-_3rem)]` が残り、
+ * ほぼ全幅の中央ボックスになる。`breakpoint="md"` / `"lg"` 運用なら影響しない。
+ */
+// モバイルの素の SheetContent（bottom バリアント）は flex ではなく block なので、
+// ここでも flex 化しない（子の幅・マージン・flex-1 の解釈を揃えるため）。
+const desktopPlainClasses = "sm:max-w-lg max-h-[min(90dvh,46rem)] overflow-y-auto"
+
 interface ResponsiveOverlayFrameBaseProps
   extends Omit<SheetContentProps, "side" | "padding"> {
   /** モバイル（シート）側にだけ足す className。 */
@@ -85,8 +100,31 @@ type ResponsiveOverlayFrameProps =
        * preset の寸法をそのまま全画面へ広げたい場合のみ "fullscreen" を使う。
        */
       desktopPosition?: "center" | "top" | "fullscreen"
-      /** side="bottom" では preset が余白を持つため指定できない。 */
+      /** preset が余白を持つため指定できない（`preset="plain"` なら指定できる）。 */
       padding?: never
+    })
+  | (ResponsiveOverlayFrameBaseProps & {
+      side?: "bottom"
+      /**
+       * preset を使わない素の bottom シート（issue #486）。
+       * モバイルは `<SheetContent side="bottom">` そのまま（全幅・下端固定・
+       * `p-6`・`max-h-[90dvh]`）で、デスクトップだけ中央モーダルになる。
+       *
+       * preset は `sm:` でフロートカード化し padding も落とすため、
+       * 「タブレット幅でも全幅の下部シートのまま」でよい面には強すぎる。
+       * 既存の素の SheetContent をデスクトップ対応させたいときはこれを使う。
+       */
+      preset: "plain"
+      /** 内側の既定 padding（`p-6`）。既定 true。 */
+      padding?: boolean
+      /** 面の素材。モバイル / デスクトップの両方に効く。既定 "default"。 */
+      surface?: SheetSurface
+      /**
+       * デスクトップ側の縦位置。既定 "center"。
+       * "fullscreen" は DialogContent の `max-w-none` と plain の `sm:max-w-lg` が
+       * 別 modifier で共存し「幅だけ 32rem に縛られた全画面」になるため受け付けない。
+       */
+      desktopPosition?: "center" | "top"
     })
   | (ResponsiveOverlayFrameBaseProps & {
       side: "float" | "float-glass"
@@ -150,13 +188,15 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     ...props
   } = allProps as ResponsiveOverlayFrameBaseProps & {
     side?: ResponsiveOverlaySide
-    preset?: BottomSheetFramePreset
+    preset?: BottomSheetFramePreset | "plain"
     surface?: SheetSurface
     padding?: boolean
     desktopPosition?: "center" | "top" | "fullscreen"
   }
   const isDesktop = useResponsiveOverlayIsDesktop()
   const isFloat = floatSides.has(side)
+  // preset="plain" は BottomSheetFrame を通さず素の SheetContent を出す（#486）。
+  const isPlain = !isFloat && preset === "plain"
 
   if (isDesktop && isFloat) {
     // float 系はシート固有の prop を落として中央モーダルへ。
@@ -197,6 +237,57 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     )
   }
 
+  if (isDesktop && isPlain) {
+    const {
+      container: _container,
+      overlayClassName: _overlayClassName,
+      glassOverlay: _glassOverlay,
+      swipeToClose: _swipeToClose,
+      ...dialogProps
+    } = props
+    return (
+      <DialogContent
+        position={desktopPosition}
+        // DialogContent 既定の padding は `flex flex-col gap-4 p-6` で、素の
+        // SheetContent（`p-6` のみ）と段間が変わる。モバイルと同じ見え方に
+        // するため既定を切り、ここで p-6 だけを足す。
+        padding={false}
+        className={cn(
+          desktopPlainClasses,
+          padding && "p-6",
+          sheetSurfaceClasses[surface],
+          className,
+          desktopClassName
+        )}
+        {...dialogProps}
+        // data-* は spread より後ろに置く（#339: consumer が上書きすると
+        // DS / 消費側の CSS セレクタが丸ごと外れる）。
+        data-frame="responsive-overlay-frame"
+        data-side="bottom"
+        data-preset="plain"
+        data-surface={surface}
+      >
+        <TitleSurfaceScaleProvider scale="dialog">{children}</TitleSurfaceScaleProvider>
+      </DialogContent>
+    )
+  }
+
+  if (isPlain) {
+    return (
+      <SheetContent
+        side="bottom"
+        padding={padding}
+        className={cn(sheetSurfaceClasses[surface], className, mobileClassName)}
+        {...props}
+        data-frame="responsive-overlay-frame"
+        data-preset="plain"
+      >
+        {/* SheetContent 自身が children を scale="dialog" で包む（#341）。 */}
+        {children}
+      </SheetContent>
+    )
+  }
+
   if (isFloat) {
     return (
       <SheetContent
@@ -213,6 +304,9 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     )
   }
 
+  // ここから先は preset 経路（float / plain は上で return 済み）。
+  const framePreset = preset as BottomSheetFramePreset
+
   if (isDesktop) {
     // シート固有の prop はデスクトップ（中央モーダル）に意味が無いので落とす。
     const {
@@ -225,12 +319,12 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     return (
       <DialogContent
         data-frame="responsive-overlay-frame"
-        data-preset={preset}
+        data-preset={framePreset}
         data-surface={surface}
         position={desktopPosition}
         padding={false}
         className={cn(
-          desktopPresetClasses[preset],
+          desktopPresetClasses[framePreset],
           sheetSurfaceClasses[surface],
           className,
           desktopClassName
@@ -243,7 +337,7 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
           desktopPosition="fullscreen" は DialogContent 自身が "page" にするので
           結果は同じ（明示しても害はない）。
         */}
-        <TitleSurfaceScaleProvider scale={pageScalePresets.has(preset) ? "page" : "dialog"}>
+        <TitleSurfaceScaleProvider scale={pageScalePresets.has(framePreset) ? "page" : "dialog"}>
           {children}
         </TitleSurfaceScaleProvider>
       </DialogContent>
@@ -252,7 +346,7 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
 
   return (
     <BottomSheetFrame
-      preset={preset}
+      preset={framePreset}
       surface={surface}
       className={cn(className, mobileClassName)}
       {...props}

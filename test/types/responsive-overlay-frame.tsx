@@ -33,3 +33,20 @@ void [
   bottomDefault, bottomExplicit, float, floatNoPadding, floatGlass,
   bottomWithPadding, floatWithPreset, floatGlassWithSurface, floatFullscreen,
 ]
+
+// preset="plain" は素の bottom シート。padding が使える
+const plain = <ResponsiveOverlayFrame preset="plain">本文</ResponsiveOverlayFrame>
+const plainNoPadding = (
+  <ResponsiveOverlayFrame preset="plain" padding={false} surface="glass" desktopPosition="top">
+    本文
+  </ResponsiveOverlayFrame>
+)
+
+// @ts-expect-error preset 経路（plain 以外）は preset が余白を持つため padding を受け付けない
+const presetWithPadding = <ResponsiveOverlayFrame preset="mobile-page" padding={false}>本文</ResponsiveOverlayFrame>
+
+// @ts-expect-error float 系は preset を受け付けない（plain も含む）
+const floatPlain = <ResponsiveOverlayFrame side="float" preset="plain">本文</ResponsiveOverlayFrame>
+
+void [plain, plainNoPadding, presetWithPadding, floatPlain]
+

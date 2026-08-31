@@ -53,6 +53,52 @@ npx ksk-ds check-migration ./src
 
 ## v1 系内の minor 変更（参考）
 
+### 次のリリース — `ResponsiveOverlayFrame` に `preset="plain"` を追加（issue #486）
+
+`side="bottom"` の経路は必ず `BottomSheetFrame` の preset を通るため、
+`sm:`（640px 以上）でフロートカード化し、内側 padding も落ちる（`p-0`）。
+「タブレット幅でも全幅の下部シートのままでよい」面——素の
+`<SheetContent side="bottom">` で組んである確認シート等——には強すぎて、
+移行すると 640〜1023px の見た目が変わってしまう。
+
+`preset="plain"` はその橋渡し。モバイルは素の `<SheetContent side="bottom">`
+そのまま（全幅・下端固定・`p-6`・`max-h-[90dvh]`）で、デスクトップだけ
+中央モーダル（32rem × `min(90dvh, 46rem)`）になる。
+
+**before**
+
+```tsx
+<Sheet open={open} onOpenChange={setOpen}>
+  <SheetContent side="bottom" className="max-w-md mx-auto pb-8">
+    …
+  </SheetContent>
+</Sheet>
+```
+
+**after**
+
+```tsx
+<ResponsiveDialog open={open} onOpenChange={setOpen} breakpoint="lg">
+  <ResponsiveOverlayFrame preset="plain" className="max-w-md mx-auto pb-8">
+    …
+  </ResponsiveOverlayFrame>
+</ResponsiveDialog>
+```
+
+注意点:
+
+- `preset="plain"` では `padding`（既定 `true` = `p-6`）が使える。他の preset は
+  preset 自身が余白を持つため `padding` は型エラーになる。
+- デスクトップの角丸は `--Radius-Modal`（1.5rem）。消費側 CSS で 1rem 等に
+  していた場合は `desktopClassName` で明示する。
+- 高さは `min(90dvh, 46rem)`。モバイルの `max-h-[90dvh]` を引き継いだ値で、
+  縦 866px 以上の画面では 46rem が効く。
+- 幅の 32rem は `sm:`（640px 以上）で効く。`breakpoint` を 640px 未満に解決する
+  設定では DialogContent 既定の `max-w-[calc(100%_-_3rem)]` が残る。
+  `breakpoint="md"` / `"lg"` 運用なら影響しない。
+- `desktopPosition` は `"center"` / `"top"` のみ。`"fullscreen"` は plain の
+  幅指定と噛み合わないため型で禁止している。
+
 ### 次のリリース — `ResponsiveOverlayFrame` が float / float-glass シートを受けられるようになった（issue #479）
 
 #472 で入った `ResponsiveOverlayFrame` は内部で `BottomSheetFrame`（`side="bottom"` 固定）を
