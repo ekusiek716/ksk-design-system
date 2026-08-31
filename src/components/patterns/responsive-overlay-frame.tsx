@@ -391,7 +391,12 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     ?.maxHeight
   const baseMaxHeight =
     consumerMaxHeight != null
-      ? `${consumerMaxHeight}`
+      ? // React は数値の maxHeight を px として解釈するので、min() へ埋める
+        // ときも px を補う（"min(640, …)" は長さとして不正で、ブラウザが
+        // 宣言ごと捨てる / #487 の Codex レビュー指摘）。
+        typeof consumerMaxHeight === "number"
+        ? `${consumerMaxHeight}px`
+        : `${consumerMaxHeight}`
       : isFloat
         ? desktopFloatMaxHeight
         : isPlain

@@ -398,6 +398,28 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
       )
   })
 
+  // React は数値の maxHeight を px として解釈する。min() へそのまま埋めると
+  // "min(640, …)" になり長さとして不正なので、宣言ごと無視されてしまう。
+  it.each([
+    [640, "640px"],
+    ["30rem", "30rem"],
+  ])("consumer の maxHeight (%s) を既定キャップとして畳む", async (value, expected) => {
+    stubViewport(1024)
+    stubKeyboard(768, 300)
+    const el = renderFrame({
+      preset: "mobile-form",
+      style: { maxHeight: value },
+    } as Partial<FrameProps>)
+    await flushFocus()
+
+    expect(el.style.getPropertyValue("--Overlay-Desktop-Base-Max-Height")).toBe(
+      expected
+    )
+    expect(el.style.maxHeight).toBe(
+      `min(${expected}, max(0px, calc(100dvh - 600px)))`
+    )
+  })
+
   it("モバイル幅ではデスクトップ補正は関与しない（シートのまま）", () => {
     stubViewport(390)
     stubKeyboard(768, 300)
