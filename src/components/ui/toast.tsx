@@ -165,24 +165,29 @@ function useToastStoreSnapshot(): readonly Toast[] {
 }
 
 /**
- * マウント完了後にだけ true を返す。SSR/SSG された HTML への hydration では
+ * hydration が済んだ後にだけ true を返す。SSR/SSG された HTML への hydration では
  * 「サーバー出力とクライアント初回 render が一致すること」が React の契約なので、
- * portal のような client-only な出力は初回 render では出さず、effect 後に出す。
+ * portal のような client-only な出力は初回 render では出さず、hydration 後に出す。
  * `typeof document === "undefined"` を render 中に分岐すると初回 render から
  * portal が出てしまい、必ず hydration mismatch になる（issue #489）。
  *
- * fire-and-forget な `toast()` の auto-mount 経路（createRoot による純 CSR）にも
- * 同じゲートがかかるので、viewport の出現は 1 render サイクル遅れる。トースト自体は
- * store に積まれてから描画されるので取りこぼしは無く、遅延は 1 tick（描画前）。
- * 経路ごとに分岐させると「SSR 経路だけ直っている」状態を作り込みやすいので、
- * 意図して viewport 側に一本化している。
+ * useSyncExternalStore の getServerSnapshot は **hydration 中のクライアント初回
+ * render でも使われる**ので、hydration では false → 完了後 true になる。
+ * 一方 hydration を伴わない純 CSR（`toast()` の auto-mount は createRoot 経由）では
+ * getSnapshot が使われるため初回から true で、遅延は発生しない。
+ * useState + useEffect でも同じ結果になるが、effect 内 setState は
+ * react-hooks/set-state-in-effect に触れるうえ CSR 経路にも 1 render 余計に要る。
  */
-function useMounted(): boolean {
-  const [mounted, setMounted] = React.useState(false)
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-  return mounted
+const subscribeToNothing = () => () => {}
+const getHydratedSnapshot = () => true
+const getHydratingSnapshot = () => false
+
+function useIsHydrated(): boolean {
+  return React.useSyncExternalStore(
+    subscribeToNothing,
+    getHydratedSnapshot,
+    getHydratingSnapshot
+  )
 }
 
 function useIsToasterMounted() {
@@ -212,9 +217,9 @@ function useToast(): ToastContextValue {
 
 function ToastViewport({ regionLabel, closeLabel }: { regionLabel?: string; closeLabel?: string } = {}) {
   const toasts = useToastStoreSnapshot()
-  const mounted = useMounted()
+  const hydrated = useIsHydrated()
   // 初回 render はサーバー出力（= 何も出さない）と一致させる。
-  if (!mounted || typeof document === "undefined") return null
+  if (!hydrated || typeof document === "undefined") return null
   return createPortal(
     <div
       data-slot="toast-viewport"
