@@ -115,6 +115,22 @@ html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-sid
    inset を出せない環境では consumer の html[data-kb-open] + --kb-h でここが効く。
    side="bottom"（preset / plain）/ float / float-glass の 3 経路すべてが
    data-frame="responsive-overlay-frame" を出すため、1 ルールで全経路に届く。 */
+/* ── #487: CSS フォールバックの合図（--kb-h）を data-kb-open で閉じる ──
+   frame の inline style も var(--kb-h) の項を畳み込むが、inline からは
+   祖先の属性を見られない。consumer が data-kb-open を外しても --kb-h を
+   残す運用（規則側の活性化は属性が担うので妥当）だと、次に JS 検知した
+   キーボードで古い値まで一緒に引いてしまう（400px の次に 200px が来ると
+   古い 800px を引き続けて潰れる / Codex レビュー指摘）。
+   属性が立っている間だけ値を持つ別変数を用意し、inline はそちらを見る。 */
+[data-slot="dialog-content"][data-frame="responsive-overlay-frame"] {
+  --kb-h-active: 0px;
+}
+
+html[data-kb-open]
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"] {
+  --kb-h-active: var(--kb-h, 0px);
+}
+
 html[data-kb-open]
   [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="center"]:not([data-kb-measuring]) {
   max-height: min(

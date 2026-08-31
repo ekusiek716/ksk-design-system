@@ -47,7 +47,7 @@ function expectedMaxHeight(
         : `max(0px, calc(100dvh - ${doubled}))`
   const caps = [
     capFor(`${kb}px`, `${kb * 2}px`),
-    capFor("var(--kb-h, 0px)", "2 * var(--kb-h, 0px)"),
+    capFor("var(--kb-h-active, 0px)", "2 * var(--kb-h-active, 0px)"),
   ]
   return `min(${(base ? [base, ...caps] : caps).join(", ")})`
 }
@@ -133,12 +133,15 @@ describe("sheet-keyboard.css — dialog-content フォールバック契約", ()
     "utf8"
   )
 
-  /** `html[data-kb-open]` 配下の dialog-content ルールだけを取り出す。 */
+  /**
+   * `html[data-kb-open]` 配下で dialog-content の高さを決めているルール。
+   * カスタムプロパティだけを置くルール（--kb-h-active）は対象外。
+   */
   const dialogRules = [
     ...css.matchAll(
       /html\[data-kb-open\]\s*\n?\s*\[data-slot="dialog-content"\][^{]*\{([^}]*)\}/g
     ),
-  ]
+  ].filter(([, body]) => body.includes("max-height"))
 
   it("dialog-content 向けのキーボードルールが存在する", () => {
     expect(dialogRules.length).toBeGreaterThan(0)
@@ -165,6 +168,17 @@ describe("sheet-keyboard.css — dialog-content フォールバック契約", ()
 
   // --kb-h の意味を明文化しておく（レイアウトが縮む環境で覆い高さを書くと
   // 100dvh から二重に引いて面が潰れる）。契約が消えたら気づけるようにする。
+  // inline style は祖先の属性を見られないので、data-kb-open で開閉する
+  // 別変数（--kb-h-active）を CSS 側で用意している必要がある。
+  it("--kb-h-active を data-kb-open で開閉している", () => {
+    expect(css).toMatch(
+      /\[data-slot="dialog-content"\]\[data-frame="responsive-overlay-frame"\]\s*\{\s*--kb-h-active:\s*0px/
+    )
+    expect(css).toMatch(
+      /html\[data-kb-open\][\s\S]{0,120}--kb-h-active:\s*var\(--kb-h,\s*0px\)/
+    )
+  })
+
   it("--kb-h が「覆っている高さ」であることを明記している", () => {
     expect(css).toMatch(/覆っている高さ/)
     expect(css).toMatch(/resizes-content/)

@@ -347,7 +347,10 @@ function resolveDesktopOverlayKeyboardStyle(
         : `max(0px, calc(100dvh - ${doubled}))`
   const caps = [
     capFor(`${keyboardInset}px`, `${keyboardInset * 2}px`),
-    capFor("var(--kb-h, 0px)", "2 * var(--kb-h, 0px)"),
+    // --kb-h ではなく --kb-h-active を見る。後者は sheet-keyboard.css が
+    // html[data-kb-open] の間だけ値を持たせる変数で、consumer が属性を
+    // 外したのに --kb-h を残していても古い値を引かずに済む（#487）。
+    capFor("var(--kb-h-active, 0px)", "2 * var(--kb-h-active, 0px)"),
   ]
   // min() で畳むので、この補正は既定のキャップを緩めることが無い。
   // 既定が計算に使えない値（none / fit-content 等）のときは畳まず、
