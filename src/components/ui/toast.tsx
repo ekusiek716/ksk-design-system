@@ -148,11 +148,46 @@ function subscribeToasterMounted(listener: () => void) {
 // React hooks
 // =============================================================
 
-function useToastStoreSnapshot() {
+/**
+ * server snapshot は「毎回同じ参照」でなければならない。`() => []` は呼ばれる
+ * たびに別インスタンスを返すため、React が
+ * 「The result of getServerSnapshot should be cached to avoid an infinite loop」
+ * を警告する（issue #489）。モジュール定数で参照を固定する。
+ * freeze は「この配列は共有物なので書き換えない」ことを型の外側でも示すため。
+ */
+const EMPTY_TOASTS: readonly Toast[] = Object.freeze([]) as readonly Toast[]
+
+function useToastStoreSnapshot(): readonly Toast[] {
   const subscribe = React.useCallback((cb: () => void) => toastStore.subscribe(cb), [])
   const getSnapshot = React.useCallback(() => toastStore.toasts, [])
-  const getServerSnapshot = React.useCallback(() => [] as Toast[], [])
+  const getServerSnapshot = React.useCallback(() => EMPTY_TOASTS, [])
   return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+}
+
+/**
+ * hydration が済んだ後にだけ true を返す。SSR/SSG された HTML への hydration では
+ * 「サーバー出力とクライアント初回 render が一致すること」が React の契約なので、
+ * portal のような client-only な出力は初回 render では出さず、hydration 後に出す。
+ * `typeof document === "undefined"` を render 中に分岐すると初回 render から
+ * portal が出てしまい、必ず hydration mismatch になる（issue #489）。
+ *
+ * useSyncExternalStore の getServerSnapshot は **hydration 中のクライアント初回
+ * render でも使われる**ので、hydration では false → 完了後 true になる。
+ * 一方 hydration を伴わない純 CSR（`toast()` の auto-mount は createRoot 経由）では
+ * getSnapshot が使われるため初回から true で、遅延は発生しない。
+ * useState + useEffect でも同じ結果になるが、effect 内 setState は
+ * react-hooks/set-state-in-effect に触れるうえ CSR 経路にも 1 render 余計に要る。
+ */
+const subscribeToNothing = () => () => {}
+const getHydratedSnapshot = () => true
+const getHydratingSnapshot = () => false
+
+function useIsHydrated(): boolean {
+  return React.useSyncExternalStore(
+    subscribeToNothing,
+    getHydratedSnapshot,
+    getHydratingSnapshot
+  )
 }
 
 function useIsToasterMounted() {
@@ -182,7 +217,9 @@ function useToast(): ToastContextValue {
 
 function ToastViewport({ regionLabel, closeLabel }: { regionLabel?: string; closeLabel?: string } = {}) {
   const toasts = useToastStoreSnapshot()
-  if (typeof document === "undefined") return null
+  const hydrated = useIsHydrated()
+  // 初回 render はサーバー出力（= 何も出さない）と一致させる。
+  if (!hydrated || typeof document === "undefined") return null
   return createPortal(
     <div
       data-slot="toast-viewport"
