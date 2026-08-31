@@ -274,3 +274,38 @@ export const FloatGlassSide: Story = {
     )
   },
 }
+
+/**
+ * `preset="plain"`（issue #486）。preset を使わない素の bottom シート。
+ * モバイルは全幅・下端固定・`p-6` のまま（タブレット幅でもフロートカード化
+ * しない）で、デスクトップだけ中央モーダルになる。
+ * 既存の素の `<SheetContent side="bottom">` をデスクトップ対応させる用。
+ */
+export const PlainBottomPreset: Story = {
+  name: "plain preset（素の bottom シート）",
+  render: function Render() {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <ResponsiveDialog open={open} onOpenChange={setOpen} breakpoint="lg">
+        <ResponsiveDialogTrigger asChild>
+          <Button>plain シートを開く</Button>
+        </ResponsiveDialogTrigger>
+        <ResponsiveOverlayFrame preset="plain" description="ログアウトの確認">
+          <div className="space-y-4">
+            <ResponsiveDialogTitle>ログアウトしますか？</ResponsiveDialogTitle>
+            <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+              この端末の表示は消えますが、サーバのデータは残ります。
+            </p>
+            <div className="flex gap-3 [&>*]:flex-1">
+              <Button variant="secondary" onClick={() => setOpen(false)}>
+                キャンセル
+              </Button>
+              <Button onClick={() => setOpen(false)}>ログアウト</Button>
+            </div>
+          </div>
+        </ResponsiveOverlayFrame>
+      </ResponsiveDialog>
+    )
+  },
+}
+

@@ -148,7 +148,7 @@
 | AUTO_PROMPT_SUPPRESSION_EVENT, AutoPrompt, PromptCoordinatorProvider | `@/components/patterns/prompt-coordinator` | — | Default |
 | Prose | `@/components/patterns/prose` | — | PrivacyPolicy, SingleSection |
 | ActionTile, QuickActionGrid | `@/components/patterns/quick-action-grid` | — | EmojiOnly, IconAndLabel, WithMeta, IndicatorOverride, SelectedWithoutDescription, NarrowWithLongMeta, SingleSelection, MultipleSelection, LaunchersWithoutSelectionMode |
-| ResponsiveOverlayFrame, ResponsiveOverlayFooter | `@/components/patterns/responsive-overlay-frame` | — | Short form (mobile-form), Long keyboard-aware form (mobile-page), mobile-full preset, breakpoint=lg, breakpoint=product-theme, snapPoints は dialog に変換されない, float サイド（カード型）, float-glass サイド（ガラス素材） |
+| ResponsiveOverlayFrame, ResponsiveOverlayFooter | `@/components/patterns/responsive-overlay-frame` | — | Short form (mobile-form), Long keyboard-aware form (mobile-page), mobile-full preset, breakpoint=lg, breakpoint=product-theme, snapPoints は dialog に変換されない, float サイド（カード型）, float-glass サイド（ガラス素材）, plain preset（素の bottom シート） |
 | ReviewOverlay | `@/components/patterns/review-overlay` | — | Default, WithPins |
 | Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero |
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch, AsForm |

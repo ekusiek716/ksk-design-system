@@ -297,6 +297,62 @@ describe("ResponsiveOverlayFrame", () => {
     expect(findFrame()?.className).not.toContain("p-6")
   })
 
+  it('preset="plain" はモバイルで素の bottom シート、デスクトップで中央モーダルになる', () => {
+    stubViewport(390)
+    act(() =>
+      root.render(
+        <ResponsiveDialog open onOpenChange={() => {}}>
+          <ResponsiveOverlayFrame preset="plain" description="テスト">
+            <div>本文</div>
+          </ResponsiveOverlayFrame>
+        </ResponsiveDialog>
+      )
+    )
+    const mobile = findFrame()
+    expect(mobile?.dataset.slot).toBe("sheet-content")
+    expect(mobile?.dataset.side).toBe("bottom")
+    expect(mobile?.dataset.preset).toBe("plain")
+    // preset 経路と違い BottomSheetFrame を通さない（p-0 やフロート化をしない）
+    expect(mobile?.className).toContain("p-6")
+    expect(mobile?.className).not.toContain("sm:max-w-lg")
+
+    act(() => root.unmount())
+    root = createRoot(container)
+    stubViewport(1200)
+    act(() =>
+      root.render(
+        <ResponsiveDialog open onOpenChange={() => {}}>
+          <ResponsiveOverlayFrame preset="plain" description="テスト">
+            <div>本文</div>
+          </ResponsiveOverlayFrame>
+        </ResponsiveDialog>
+      )
+    )
+    const desktop = findFrame()
+    expect(desktop?.dataset.slot).toBe("dialog-content")
+    expect(desktop?.dataset.side).toBe("bottom")
+    expect(desktop?.className).toContain("sm:max-w-lg")
+    expect(desktop?.className).toContain("max-h-[min(90dvh,46rem)]")
+    expect(desktop?.className).toContain("p-6")
+    // モバイルの素の SheetContent（bottom バリアント）は block なので、
+    // デスクトップでも flex 化しない
+    expect(desktop?.className).not.toContain("flex-col")
+  })
+
+  it('preset="plain" で padding={false} を渡すと内側余白が付かない', () => {
+    stubViewport(1200)
+    act(() =>
+      root.render(
+        <ResponsiveDialog open onOpenChange={() => {}}>
+          <ResponsiveOverlayFrame preset="plain" padding={false} description="テスト">
+            <div>本文</div>
+          </ResponsiveOverlayFrame>
+        </ResponsiveDialog>
+      )
+    )
+    expect(findFrame()?.className).not.toContain("p-6")
+  })
+
   it("フッタはモバイルでキーボード追従、デスクトップでは静的になる", () => {
     stubViewport(390)
     renderFrame()
