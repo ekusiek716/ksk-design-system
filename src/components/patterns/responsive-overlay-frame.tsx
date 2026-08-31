@@ -92,7 +92,8 @@ const desktopPlainClasses = "sm:max-w-lg max-h-[min(90dvh,46rem)] overflow-y-aut
  *
  * `position="top"` は上端固定（`top-8` / safe-area）なので二重に引く必要はなく、
  * 「キーボード + 上オフセット + 下マージン」を引く。`position="fullscreen"` は
- * 面そのものが可視領域ではなくビューポートに合わせる指定なので対象外。
+ * `inset-0 h-full` の上端固定なのでキーボード 1 回分だけを引く（`h-full` は
+ * max-height に負けるため、面が可視領域の高さへ縮み内側のスクロール領域が残る）。
  *
  * 高さは 0 で下限を切る（負値だと「上端が抜ける」不具合を「中身が高さ 0 で
  * 消える」不具合にすり替えるだけになる — float 系と同じ判断 / #337）。
@@ -102,7 +103,9 @@ function resolveDesktopOverlayKeyboardStyle(
   position: "center" | "top" | "fullscreen"
 ): { maxHeight: string } | undefined {
   if (keyboardInset <= 0) return undefined
-  if (position === "fullscreen") return undefined
+  if (position === "fullscreen") {
+    return { maxHeight: `max(0px, calc(100dvh - ${keyboardInset}px))` }
+  }
   if (position === "top") {
     return {
       maxHeight: `max(0px, calc(100dvh - ${keyboardInset}px - max(env(safe-area-inset-top, 0px), 2rem) - 2rem))`,

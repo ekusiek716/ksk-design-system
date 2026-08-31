@@ -2260,7 +2260,7 @@
         "デスクトップ側にだけ効かせたい className は desktopClassName、モバイル側は mobileClassName を使う",
         "左右・下に余白を持つカード型のシートは side=\"float\"(Liquid Glass なら \"float-glass\")を使う。surface=\"glass\"(glass-strong)とは素材が別物で、float-glass との併用は型エラー(ガラスの二重適用防止)",
         "side / preset ごとに効く prop が判別ユニオンで分かれている: preset 経路は preset / surface / desktopPosition、float 系と preset=\"plain\" は padding。効かない組み合わせは黙って無視されずコンパイルエラーになる(型テスト test/types/responsive-overlay-frame.tsx)",
-        "デスクトップ分岐のキーボード補正は max-height だけで lift(bottom)は当てない。DialogContent は top:50% + translate-y:-50% で位置決めしているため bottom を足すと両拘束になり高さが縦一杯へ伸びる。中央寄せのキャップは 100dvh - 2*kb(100dvh - kb では下端がキーボードへ潜り込む / #487)",
+        "デスクトップ分岐のキーボード補正は max-height だけで lift(bottom)は当てない。DialogContent は top:50% + translate-y:-50% で位置決めしているため bottom を足すと両拘束になり高さが縦一杯へ伸びる。中央寄せのキャップは 100dvh - 2*kb(100dvh - kb では下端がキーボードへ潜り込む。desktopPosition=\"top\" / \"fullscreen\" は上端固定なのでキーボード 1 回分 / #487)",
         "3 つのデスクトップ分岐(preset / plain / float 系)はすべて data-frame=\"responsive-overlay-frame\" + data-side + data-position を出す。consumer が独自のキーボード補正を当てる場合もこの属性で絞る(#487)",
         "float-glass の実スクロールは src/styles/sheet-keyboard.css の :is(sheet-content, dialog-content)[data-side=\"float-glass\"] が担う。.glass-specular の overflow:hidden が非レイヤー CSS で className を踏み潰すため、className だけでは効かない(#337 / #479)"
       ],

@@ -81,7 +81,9 @@ html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-sid
    幾何: 中央寄せの面は高さ H なら [dvh/2 - H/2, dvh/2 + H/2] を占める。可視領域は
    [0, dvh - kb] なので H <= dvh - 2*kb。中央寄せではキーボード高さの 2 倍を引く
    （dvh - kb では下端がキーボードへ潜り込む）。position="top" は上端固定なので
-   「キーボード + 上オフセット + 下マージン」を引く。position="fullscreen" は対象外。
+   「キーボード + 上オフセット + 下マージン」を引く。position="fullscreen" は
+   inset-0 h-full の上端固定なのでキーボード 1 回分だけを引く（h-full は max-height に
+   負けるため、面が可視領域へ縮み内側のスクロール領域は残る）。
 
    JS 検知（responsive-overlay-frame.tsx の resolveDesktopOverlayKeyboardStyle）が
    動くときは inline style で同値を書くため二重適用にならない。visualViewport が
@@ -91,6 +93,11 @@ html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-sid
 html[data-kb-open]
   [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="center"] {
   max-height: max(0px, calc(100dvh - 2 * var(--kb-h, 0px)));
+}
+
+html[data-kb-open]
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="fullscreen"] {
+  max-height: max(0px, calc(100dvh - var(--kb-h, 0px)));
 }
 
 html[data-kb-open]

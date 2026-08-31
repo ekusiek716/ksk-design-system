@@ -54,8 +54,12 @@ describe("resolveDesktopOverlayKeyboardStyle — 中央モーダルのキーボ�
     })
   })
 
-  it("position=\"fullscreen\" は補正しない（面をビューポートに合わせる指定のため）", () => {
-    expect(resolveDesktopOverlayKeyboardStyle(300, "fullscreen")).toBeUndefined()
+  // fullscreen は inset-0 h-full の上端固定。h-full は max-height に負けるので、
+  // キーボード 1 回分を引けば面が可視領域へ縮み、内側のスクロール領域は残る。
+  it("position=\"fullscreen\" はキーボード 1 回分を引く", () => {
+    expect(resolveDesktopOverlayKeyboardStyle(300, "fullscreen")).toEqual({
+      maxHeight: "max(0px, calc(100dvh - 300px))",
+    })
   })
 
   it("キャップは 0 で下限を切る（max(0px, …) を必ず含む）", () => {
@@ -101,8 +105,11 @@ describe("sheet-keyboard.css — dialog-content フォールバック契約", ()
     )
   })
 
-  it("position=\"top\" のルールもある", () => {
+  it("position=\"top\" / \"fullscreen\" のルールもある", () => {
     expect(css).toMatch(/\[data-position="top"\]/)
+    expect(css).toMatch(
+      /\[data-position="fullscreen"\]\s*\{\s*max-height:\s*max\(0px,\s*calc\(100dvh\s*-\s*var\(--kb-h,\s*0px\)\)\)/
+    )
   })
 })
 
@@ -204,6 +211,19 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
       )
     })
   }
+
+  it("desktopPosition=\"fullscreen\" も可視領域へ縮む（内側のスクロールは残る）", () => {
+    stubViewport(1024)
+    stubKeyboard(768, 300)
+    const el = renderFrame({
+      preset: "mobile-full",
+      desktopPosition: "fullscreen",
+    } as Partial<FrameProps>)
+
+    expect(el.getAttribute("data-position")).toBe("fullscreen")
+    expect(el.style.maxHeight).toBe("max(0px, calc(100dvh - 300px))")
+    expect(el.style.bottom).toBe("")
+  })
 
   it("キーボードが出ていなければ inline の max-height は付かない", () => {
     stubViewport(1024)
