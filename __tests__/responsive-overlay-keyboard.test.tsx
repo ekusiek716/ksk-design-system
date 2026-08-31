@@ -165,11 +165,18 @@ function stubViewport(width: number) {
   })
 }
 
-/** iPad 横向き相当（1024px 幅・タッチ）でソフトキーボードが出た状態を作る。 */
-function stubKeyboard(layoutHeight: number, keyboardHeight: number, scale = 1) {
+/**
+ * iPad 横向き相当（1024px 幅・タッチ）の visualViewport を作る。
+ *
+ * `viewportDelta` は **可視高さの縮み分（CSS px）** で、キーボード高さそのもの
+ * ではない。ズーム中は `visualViewport.height` がズーム後のページ CSS px に
+ * なるため、たとえば 200% ズーム + キーボード 300px の可視高さは
+ * `(768 - 300) / 2 = 234` で、delta は `768 - 234` になる。
+ */
+function stubKeyboard(layoutHeight: number, viewportDelta: number, scale = 1) {
   vi.stubGlobal("innerHeight", layoutHeight)
   vi.stubGlobal("visualViewport", {
-    height: layoutHeight - keyboardHeight,
+    height: layoutHeight - viewportDelta,
     offsetTop: 0,
     scale,
     addEventListener: vi.fn(),
@@ -288,8 +295,8 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
   // 倍率で打ち消す側（resolveOverlayKeyboardInset）が効いている必要がある。
   it("ズームだけ（キーボード無し）では補正しない", () => {
     stubViewport(1024)
-    // 200% ズーム: 可視高さは 768 / 2 = 384。キーボードは出ていない。
-    stubKeyboard(768, 384, 2)
+    // 200% ズーム: 可視高さは 768 / 2 = 384（delta 384）。キーボードは出ていない。
+    stubKeyboard(768, 768 - 384, 2)
     const el = renderFrame({ preset: "mobile-form" })
     expect(document.activeElement).toBe(
       el.querySelector('[data-testid="field"]')
@@ -305,6 +312,40 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     const el = renderFrame({ preset: "mobile-form" })
     expect(el.style.maxHeight).toBe("max(0px, calc(100dvh - 600px))")
     expect(el.style.bottom).toBe("")
+  })
+
+  // contenteditable は "true" だけでなく値なし / "plaintext-only" も編集可能。
+  // これを取りこぼすと、リッチテキスト欄を持つ面で補正が効かない。
+  it.each([["", "値なし"], ["plaintext-only", "plaintext-only"], ["true", "true"]])(
+    'contenteditable="%s"（%s）にフォーカスしていても補正する',
+    (value) => {
+      stubViewport(1024)
+      stubKeyboard(768, 300)
+      const el = renderFrame({ preset: "mobile-form" }, false)
+      const editor = document.createElement("div")
+      editor.setAttribute("contenteditable", value)
+      editor.tabIndex = 0
+      el.appendChild(editor)
+      // 先に input のフォーカスを外し、「editor へのフォーカスだけ」で
+      // 補正が入ることを見る（初期状態からの変化を確実にする）。
+      act(() => (document.activeElement as HTMLElement | null)?.blur())
+      act(() => editor.focus())
+
+      expect(el.style.maxHeight).toBe("max(0px, calc(100dvh - 600px))")
+    }
+  )
+
+  it('contenteditable="false" は編集可能とみなさない', () => {
+    stubViewport(1024)
+    stubKeyboard(768, 300)
+    const el = renderFrame({ preset: "mobile-form" }, false)
+    const editor = document.createElement("div")
+    editor.setAttribute("contenteditable", "false")
+    editor.tabIndex = 0
+    el.appendChild(editor)
+    act(() => editor.focus())
+
+    expect(el.style.maxHeight).toBe("")
   })
 
   it("キーボードが出ていなければ inline の max-height は付かない", () => {

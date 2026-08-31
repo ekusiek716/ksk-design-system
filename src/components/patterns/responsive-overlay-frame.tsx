@@ -90,8 +90,10 @@ const desktopPlainClasses = "sm:max-w-lg max-h-[min(90dvh,46rem)] overflow-y-aut
  * ⚠️ CSS フォールバック（`html[data-kb-open]` + `--kb-h`）は consumer が
  * 明示的に立てる合図なのでこのゲートの対象外 — あちらは誤検知しない。
  */
+// contenteditable は "true" だけでなく値なし（contenteditable=""）や
+// "plaintext-only" も編集可能。"false" 以外を拾う（#487 の Codex レビュー指摘）。
 const editableSelector =
-  'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]'
+  'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable]:not([contenteditable="false"])'
 
 /**
  * ズームを打ち消したソフトキーボード高さ（レイアウト px / issue #487）。
@@ -154,7 +156,13 @@ function useEditableElementFocused(): boolean {
     if (typeof document === "undefined") return
     const check = () => {
       const el = document.activeElement
-      setFocused(el instanceof Element && el.matches(editableSelector))
+      setFocused(
+        el instanceof Element &&
+          // isContentEditable は継承された編集可能性まで拾うが、jsdom など
+          // 未実装の環境があるのでセレクタと OR にする。
+          ((el instanceof HTMLElement && el.isContentEditable) ||
+            el.matches(editableSelector))
+      )
     }
     // focusout は次のフォーカスが確定する前に飛ぶため、activeElement が
     // 一瞬 body になる。次のタスクで読み直して取りこぼしを防ぐ。
