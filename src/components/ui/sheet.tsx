@@ -775,6 +775,13 @@ function SheetContent({
   const [stackLevel, setStackLevel] = React.useState(0)
   const resolvedContentZ = zIndex ?? modalContentZ(stackLevel)
   const hasInternalDesc = description != null && description !== false
+  // #485: swipeToClose / snap への委譲（早期 return）より前に呼ぶ必要があるため、
+  // aria-describedby は分割代入前の props から直接読む。
+  const { setContentNode, applyDescribedBy } = useDescribedByLink(
+    contentRef,
+    "sheet-description",
+    !hasInternalDesc && props["aria-describedby"] == null
+  )
   // #341: 素の Sheet は「全画面のページ」ではないので、配下の SheetTitle の
   // 既定を従来サイズに保つ文脈を明示的に流す（外側の全画面サーフェスの文脈を
   // 引き継いでネストしたシートのタイトルが大きくなるのを防ぐ）。全画面級の
@@ -920,11 +927,6 @@ function SheetContent({
     "aria-describedby": ariaDescribedBy,
     ...contentProps
   } = props
-  const { setContentNode, applyDescribedBy } = useDescribedByLink(
-    contentRef,
-    "sheet-description",
-    !hasInternalDesc && ariaDescribedBy == null
-  )
 
   // side="top" の safe-area 回避。padding true/false それぞれで完結した
   // クラス集合を選ぶ（ショートハンドの padding と方向指定の padding を同時に
