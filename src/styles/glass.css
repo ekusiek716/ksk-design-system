@@ -15,6 +15,15 @@
    2026-06-12 修正）。dev は未 minify なので手元では再現しない。
    ============================================================= */
 
+/* #481: position フォールバックを載せるレイヤー。
+   ⚠️ この宣言で utilities より前に並ぶのは preset を Tailwind より先に読む構成
+   だけ。README が案内する常態（`@import "tailwindcss"` → preset）では Tailwind が
+   先に `@layer theme, base, components, utilities;` を宣言済みなので、ここで初登場
+   する ksk-glass-fallback は最後＝最優先レイヤーになる。よって Tailwind
+   ユーティリティを尊重できているのはレイヤー順ではなく、フォールバック規則が持つ
+   :not(.fixed):not(.absolute):not(.sticky) のおかげ。詳細は同規則のコメント。 */
+@layer ksk-glass-fallback;
+
 /* ─── Liquid Glass トークン ─── */
 :root {
   /* Blur — Liquid Glass は旧来のすりガラスより透明度が高い。blur を抑えめに
@@ -373,14 +382,45 @@
    * via a fallback selector below.
    */
   isolation: isolate;
+  /* ⚠️ #481 で position フォールバックだけをレイヤーへ移し、この 2 宣言は非レイヤー
+     のまま残している。overflow は sheet-keyboard.css（非レイヤー・glass.css より
+     後ろに import）の `overflow-y: auto` が「同じ非レイヤー同士の後勝ち」で上書き
+     する前提（#337 / #479）。ここをレイヤー化すると前提が崩れるので動かさない。 */
   overflow: hidden;
 }
 /*
  * Fallback: if the element is not already positioned (fixed/absolute/sticky),
  * fall back to position: relative so the ::before still anchors correctly.
+ *
+ * ⚠️ カスケード設計（issue #481。この2重の防御はどちらも外さない）:
+ *
+ * 1. `@layer ksk-glass-fallback` に入れる
+ *    glass.css は consumer 側で「非レイヤー CSS」として読まれるため、素のままだと
+ *    unlayered > layered で consumer のあらゆる指定を踏み潰す。実害: consumer が
+ *    Tailwind ではなく独自クラス（`.fab-fixed { position: fixed }` 等）で配置した
+ *    要素の position が無言で relative に戻り、right/bottom が相対オフセットとして
+ *    解釈されて逆方向にずれる（Tabipal の FAB が右下でなく左下に出た、2026-08）。
+ *    レイヤーへ入れると layered < unlayered が効き、consumer の素朴な1クラス指定
+ *    （詳細度 (0,1,0)）でも確実に勝てる。クラス名の列挙に依存しない。
+ *    ⚠️ 効くのは consumer 側の指定が「非レイヤー」のときだけ。consumer が
+ *    `@layer components { .fab-fixed { position: fixed } }` のようにレイヤー内へ
+ *    書いた場合は layered 同士の勝負になり、常態の読み込み順（Tailwind 先）では
+ *    ksk-glass-fallback が最上位に積まれるため依然としてこちらが勝つ。その場合は
+ *    consumer 側で Tailwind の `fixed` / `absolute` / `sticky` を併記するか、
+ *    非レイヤーで書いてもらう。
+ *
+ * 2. `:not(.fixed):not(.absolute):not(.sticky)` は残す
+ *    レイヤー同士の順序は consumer のビルド順に依存する（Tailwind v4 が
+ *    `@layer theme, base, components, utilities;` を先に宣言済みなら、後から現れる
+ *    ksk-glass-fallback は utilities の「後ろ」に積まれ、@layer utilities の
+ *    Tailwind `.fixed` に勝ってしまう）。DS 自身の Sheet 等が `.fixed` を使うため、
+ *    ここを落とすと元の回帰（sheet が fixed を保てない）が戻る。レイヤー順に
+ *    関係なく Tailwind ユーティリティを尊重するための保険として併用する。
  */
-.glass-specular:not(.fixed):not(.absolute):not(.sticky) {
-  position: relative;
+@layer ksk-glass-fallback {
+  .glass-specular:not(.fixed):not(.absolute):not(.sticky) {
+    position: relative;
+  }
 }
 .glass-specular::before {
   content: '';
@@ -460,15 +500,28 @@
  * z-index を尊重して除外する — コンテナ自身の :not(.fixed):not(.absolute)
  * :not(.sticky) と同じパターン。
  *
+ * ⚠️ レイヤー化の副作用（#481 の判断とセット）: この規則の `z-index: 1` は
+ * ::before(z0) と ::after(z2) の「間」へコンテンツを挟むための必須条件だが、
+ * 擬似要素側は非レイヤーのまま残しているためサンドイッチが非対称になった。
+ * consumer が非レイヤー CSS（Next.js の CSS Modules は既定で非レイヤー）で
+ * `.glass-specular` の子に `position: static` / `z-index: 0` を当てると z-lift が
+ * 負け、コンテンツがスペキュラの下に沈む。consumer の明示指定を尊重する方針を
+ * 優先した結果なので、この失敗モードは「仕様」として記録しておく。
+ *
  * 除外しないと回帰が起きる: glass.css は consumer 側で「非レイヤー CSS」として
  * 読まれ、@layer utilities 内の Tailwind `absolute` / `z-*` をカスケードで
  * 踏み潰す（unlayered > layered）。すると絶対配置オーバーレイが relative 化して
  * `right-*` が相対オフセットになり、要素が角からはみ出す（yokoku-app の詳細
  * ドロワー × ボタンが PC で左上角の外へ流れた実害、2026-06）。
+ *
+ * #481: コンテナ側と同じく @layer ksk-glass-fallback に入れて優先度を下げ、
+ * 独自クラス名で子を配置している consumer の指定も踏み潰さないようにする。
  */
-.glass-specular > *:not(.absolute):not(.fixed):not(.sticky) {
-  position: relative;
-  z-index: 1;
+@layer ksk-glass-fallback {
+  .glass-specular > *:not(.absolute):not(.fixed):not(.sticky) {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 /* ─── Interactive light response（#3: press gel + pointer 追従スペキュラ）─── */
