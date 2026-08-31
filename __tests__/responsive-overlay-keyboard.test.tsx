@@ -620,6 +620,44 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     }
   })
 
+  // preset / side / desktopPosition は recipe（= class の max-h）を決めるので、
+  // これらが変わったときも測り直す必要がある。
+  it("preset が変わったら実効キャップを測り直す", async () => {
+    stubViewport(1024)
+    stubKeyboard(768, 300)
+    let computedMaxHeight = "44rem"
+    const spy = vi
+      .spyOn(window, "getComputedStyle")
+      .mockImplementation(
+        () => ({ maxHeight: computedMaxHeight }) as unknown as CSSStyleDeclaration
+      )
+    try {
+      const render = (preset: "mobile-full" | "mobile-form") =>
+        act(() =>
+          root.render(
+            <ResponsiveDialog open onOpenChange={() => {}} breakpoint="lg">
+              <ResponsiveOverlayFrame preset={preset} description="テスト">
+                <input data-testid="field" />
+              </ResponsiveOverlayFrame>
+            </ResponsiveDialog>
+          )
+        )
+      render("mobile-full")
+      await flushFocus()
+      const el = document.querySelector<HTMLElement>(
+        '[data-slot="dialog-content"]'
+      )!
+      expect(el.style.maxHeight).toBe(expectedMaxHeight("44rem", 300))
+
+      computedMaxHeight = "40rem"
+      render("mobile-form")
+      await flushFocus()
+      expect(el.style.maxHeight).toBe(expectedMaxHeight("40rem", 300))
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
   // max-height としては妥当でも min() の被演算子にできない値がある。
   // min(none, …) のような宣言はまるごと捨てられ、補正が消えてしまう。
   it.each([["none"], ["fit-content"], ["fit-content(20rem)"], ["auto"]])(

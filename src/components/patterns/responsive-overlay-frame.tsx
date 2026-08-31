@@ -511,9 +511,10 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
       : typeof consumerMaxHeight === "number"
         ? `${consumerMaxHeight}px`
         : `${consumerMaxHeight}`,
-    // className が変わればキャップも変わりうるので測り直す
-    // （多段フォームが途中で max-h を締める等 / #487 の Codex レビュー指摘）。
-    `${className ?? ""} ${desktopClassName ?? ""}`
+    // キャップを決める入力が変わったら測り直す。consumer の className だけで
+    // なく、recipe を決める preset / side / desktopPosition も含める
+    // （mobile-full → mobile-form で 44rem → 40rem に変わる等 / #487）。
+    `${className ?? ""} ${desktopClassName ?? ""} ${side} ${preset} ${desktopPosition}`
   )
 
   // consumer の ref を握り潰さない（#487 の Codex レビュー指摘）。
