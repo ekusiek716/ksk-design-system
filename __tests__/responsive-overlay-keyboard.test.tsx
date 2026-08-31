@@ -27,6 +27,7 @@ import { ResponsiveDialog } from "../src/components/ui/responsive-dialog"
 import {
   ResponsiveOverlayFrame,
   resolveDesktopOverlayKeyboardStyle,
+  resolveOverlayKeyboardInset,
 } from "../src/components/patterns/responsive-overlay-frame"
 
 describe("resolveDesktopOverlayKeyboardStyle — 中央モーダルのキーボード補正", () => {
@@ -66,6 +67,39 @@ describe("resolveDesktopOverlayKeyboardStyle — 中央モーダルのキーボ�
     expect(resolveDesktopOverlayKeyboardStyle(9999, "center")?.maxHeight).toMatch(
       /^max\(0px,/
     )
+  })
+})
+
+describe("resolveOverlayKeyboardInset — ズームとキーボードの切り分け", () => {
+  it("等倍・キーボードなしでは 0", () => {
+    expect(resolveOverlayKeyboardInset(768, 768, 0, 1)).toBe(0)
+  })
+
+  it("等倍ではレイアウト高との差がそのままキーボード高さ", () => {
+    expect(resolveOverlayKeyboardInset(768, 468, 0, 1)).toBe(300)
+  })
+
+  // 200% ズームだけなら可視高さは半分になるが、キーボードは出ていない。
+  it("ズームだけなら 0（ズーム分は倍率で打ち消す）", () => {
+    expect(resolveOverlayKeyboardInset(768, 384, 0, 2)).toBe(0)
+  })
+
+  // ズームしたまま入力欄にフォーカスしてキーボードが出たケース。
+  // 可視高さ (768 - 300) / 2 = 234 から、キーボード分の 300 だけを取り出す。
+  it("ズーム中でもキーボード分だけを取り出す", () => {
+    expect(resolveOverlayKeyboardInset(768, 234, 0, 2)).toBe(300)
+  })
+
+  it("ズームしてスクロールした分（offsetTop）も倍率で戻す", () => {
+    expect(resolveOverlayKeyboardInset(768, 234, 50, 2)).toBe(200)
+  })
+
+  it("1px 未満のゆらぎは 0 に丸める", () => {
+    expect(resolveOverlayKeyboardInset(768, 767.6, 0, 1)).toBe(0)
+  })
+
+  it("scale が壊れていても等倍として扱う", () => {
+    expect(resolveOverlayKeyboardInset(768, 468, 0, Number.NaN)).toBe(300)
   })
 })
 
@@ -250,17 +284,27 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     expect(el.style.maxHeight).toBe("")
   })
 
-  // 入力欄にフォーカスしたままピンチズームすると focus ゲートは通ってしまう。
-  // 縮みの原因は visualViewport.scale で判別できるので、ズーム中は補正しない
-  // （200% ズームだと中央寄せのキャップが 0 になり面が消えるため）。
-  it("入力欄にフォーカスしたままのピンチズームでも補正しない", () => {
+  // 入力欄にフォーカスしたままのピンチズームは focus ゲートを素通りするので、
+  // 倍率で打ち消す側（resolveOverlayKeyboardInset）が効いている必要がある。
+  it("ズームだけ（キーボード無し）では補正しない", () => {
     stubViewport(1024)
+    // 200% ズーム: 可視高さは 768 / 2 = 384。キーボードは出ていない。
     stubKeyboard(768, 384, 2)
     const el = renderFrame({ preset: "mobile-form" })
     expect(document.activeElement).toBe(
       el.querySelector('[data-testid="field"]')
     )
     expect(el.style.maxHeight).toBe("")
+  })
+
+  // 逆に「ズームしたままキーボードが出た」を丸ごと落としてはいけない。
+  it("ズーム中にキーボードが出たらキーボード分だけ補正する", () => {
+    stubViewport(1024)
+    // 200% ズーム + キーボード 300px: 可視高さは (768 - 300) / 2 = 234。
+    stubKeyboard(768, 768 - 234, 2)
+    const el = renderFrame({ preset: "mobile-form" })
+    expect(el.style.maxHeight).toBe("max(0px, calc(100dvh - 600px))")
+    expect(el.style.bottom).toBe("")
   })
 
   it("キーボードが出ていなければ inline の max-height は付かない", () => {

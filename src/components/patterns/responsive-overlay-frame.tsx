@@ -1,6 +1,5 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
 import { DialogContent } from "../ui/dialog"
 import { SheetContent } from "../ui/sheet"
 import { TitleSurfaceScaleProvider } from "../../lib/title-level"
@@ -85,11 +84,8 @@ const desktopPlainClasses = "sm:max-w-lg max-h-[min(90dvh,46rem)] overflow-y-aut
  * ソフトキーボードは編集可能な要素にフォーカスが無ければ出ないため、
  * 「キーボードが出ている」の必要条件として過不足がない。
  *
- * ただしフォーカスだけでは足りない: 入力欄にフォーカスしたままピンチズーム
- * すると `editableFocused` は true のままなので、ズーム分がキーボード高さとして
- * 渡ってしまう（200% ズームだと中央寄せのキャップが 0 になり面が消える）。
- * 縮みの原因がズームかどうかは `visualViewport.scale` で判別できるので、
- * `useVisualViewportZoomed()` を AND 条件のもう一方に置く。
+ * ズーム由来の縮みは `resolveOverlayKeyboardInset()` が倍率で打ち消すので、
+ * こちらは「そもそもキーボードが出ない状況」を落とすためのゲート。
  *
  * ⚠️ CSS フォールバック（`html[data-kb-open]` + `--kb-h`）は consumer が
  * 明示的に立てる合図なのでこのゲートの対象外 — あちらは誤検知しない。
@@ -98,23 +94,58 @@ const editableSelector =
   'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]'
 
 /**
- * ピンチズーム中か（`visualViewport.scale > 1`）。
- * ズームでも `visualViewport.height` は縮むため、キーボード補正の判定から
- * ズーム由来の縮みを外すのに使う（issue #487 の Codex レビュー指摘）。
- * ズームは離散的な倍率ゆらぎがあるので、わずかな超過は等倍として扱う。
+ * ズームを打ち消したソフトキーボード高さ（レイアウト px / issue #487）。
+ *
+ * `visualViewport.height` はソフトキーボードでもピンチズームでも縮むため、
+ * `innerHeight - height` だけを見ると 2 つを取り違える。倍率 s でズーム中の
+ * 可視高さは「(レイアウト高 - キーボード高) / s」なので、CSS px で返ってくる
+ * `height` / `offsetTop` を s 倍してレイアウト px へ戻せば、キーボード分だけを
+ * 取り出せる:
+ *
+ *   kb = layoutHeight - (visualHeight + visualOffsetTop) * scale
+ *
+ * ズームだけなら kb ≈ 0、等倍なら従来式と一致し、「ズームしたまま入力欄に
+ * フォーカスしてキーボードが出た」場合もキーボード分だけが残る。
+ * scale で分岐するゲートだと後者を丸ごと落としてしまう（Codex レビュー指摘）。
+ *
+ * 端数は 1px 未満を 0 とみなす（倍率のゆらぎで微小値が出続けるため）。
  */
-function useVisualViewportZoomed(): boolean {
-  const [zoomed, setZoomed] = React.useState(false)
+function resolveOverlayKeyboardInset(
+  layoutHeight: number,
+  visualHeight: number,
+  visualOffsetTop: number,
+  scale: number
+): number {
+  const usableScale = Number.isFinite(scale) && scale > 0 ? scale : 1
+  const inset = layoutHeight - (visualHeight + visualOffsetTop) * usableScale
+  return inset < 1 ? 0 : inset
+}
+
+/** `resolveOverlayKeyboardInset` を visualViewport の更新に追従させる。 */
+function useOverlayKeyboardInset(): number {
+  const [inset, setInset] = React.useState(0)
   React.useEffect(() => {
     if (typeof window === "undefined") return
     const viewport = window.visualViewport
     if (!viewport) return
-    const update = () => setZoomed((viewport.scale ?? 1) > 1.01)
+    const update = () =>
+      setInset(
+        resolveOverlayKeyboardInset(
+          window.innerHeight,
+          viewport.height,
+          viewport.offsetTop,
+          viewport.scale ?? 1
+        )
+      )
     update()
     viewport.addEventListener("resize", update)
-    return () => viewport.removeEventListener("resize", update)
+    viewport.addEventListener("scroll", update)
+    return () => {
+      viewport.removeEventListener("resize", update)
+      viewport.removeEventListener("scroll", update)
+    }
   }, [])
-  return zoomed
+  return inset
 }
 
 function useEditableElementFocused(): boolean {
@@ -305,14 +336,12 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   const isFloat = floatSides.has(side)
   // #487: デスクトップ幅のタッチ端末でもソフトキーボードは出る。中央モーダルの
   // 高さだけを可視領域に収める（lift は当てない — 上の JSDoc 参照）。
-  const { keyboardInset } = useVisualViewportKeyboardInset()
-  // ピンチズームでも visualViewport は縮むため、「編集可能な要素にフォーカスが
-  // ある」かつ「ズーム中ではない」を AND 条件にする
-  // （useEditableElementFocused / useVisualViewportZoomed の JSDoc 参照）。
+  // ズーム分を打ち消したキーボード高さ（resolveOverlayKeyboardInset の JSDoc）と、
+  // 「編集可能な要素にフォーカスがある」ゲートの AND で発火させる。
+  const keyboardInset = useOverlayKeyboardInset()
   const editableFocused = useEditableElementFocused()
-  const zoomed = useVisualViewportZoomed()
   const desktopKeyboardStyle =
-    isDesktop && editableFocused && !zoomed
+    isDesktop && editableFocused
       ? resolveDesktopOverlayKeyboardStyle(keyboardInset, desktopPosition)
       : undefined
   // preset="plain" は BottomSheetFrame を通さず素の SheetContent を出す（#486）。
@@ -537,7 +566,12 @@ function ResponsiveOverlayFooter({
   )
 }
 
-export { ResponsiveOverlayFrame, ResponsiveOverlayFooter, resolveDesktopOverlayKeyboardStyle }
+export {
+  ResponsiveOverlayFrame,
+  ResponsiveOverlayFooter,
+  resolveDesktopOverlayKeyboardStyle,
+  resolveOverlayKeyboardInset,
+}
 export type { ResponsiveOverlayFrameProps, ResponsiveOverlaySide }
 /** ResponsiveOverlayFooter の props（KeyboardAwareSheetFooter と同型）。 */
 export type { KeyboardAwareSheetFooterProps as ResponsiveOverlayFooterProps }
