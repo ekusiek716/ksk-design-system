@@ -165,12 +165,26 @@ const desktopPlainMaxHeight = "min(90dvh, 46rem)"
  * ようにするため、active を理由に測定を諦めない（#487 の Codex レビュー指摘）。
  */
 function useEffectiveMaxHeight(
-  el: HTMLElement | null,
   active: boolean,
-  consumerInlineMaxHeight: string
-): string | undefined {
+  consumerInlineMaxHeight: string,
+  classSignature: string
+): {
+  setElement: (node: HTMLDivElement | null) => void
+  measured: string | undefined
+} {
+  // 面の DOM は ref で持つ。測定のあいだだけ inline style を差し替えるので、
+  // props や useState の値だと react-hooks/immutability に引っかかる
+  // （ref は React が認めている可変の逃げ道）。ただし ref だけだと
+  // マウントで effect が再実行されないため、世代カウンタを state に持つ。
+  const elRef = React.useRef<HTMLDivElement | null>(null)
+  const [mountVersion, setMountVersion] = React.useState(0)
+  const setElement = React.useCallback((node: HTMLDivElement | null) => {
+    elRef.current = node
+    setMountVersion((v) => v + 1)
+  }, [])
   const [measured, setMeasured] = React.useState<string | undefined>()
   React.useLayoutEffect(() => {
+    const el = elRef.current
     if (!el || typeof window === "undefined") return
     const measure = () => {
       // 補正中は自分が書いた inline 値が computed に出るので、その間だけ外す。
@@ -179,16 +193,22 @@ function useEffectiveMaxHeight(
       // キャップまで消えて preset の緩い値を実測してしまう
       // （#487 の Codex レビュー指摘）。
       const ownInline = active ? el.style.maxHeight : ""
+      // CSS フォールバック（html[data-kb-open]）も同じ理由で外す。inline を
+      // 剥がした瞬間に sheet-keyboard.css の補正値が出てきて、それを基準として
+      // 記録してしまうと、キーボードが小さくなっても縮んだ基準のまま残る。
+      // 規則側は :not([data-kb-measuring]) で自分を除外している。
+      el.setAttribute("data-kb-measuring", "")
       if (ownInline) el.style.maxHeight = consumerInlineMaxHeight
       const value = window.getComputedStyle(el).maxHeight
       if (ownInline) el.style.maxHeight = ownInline
+      el.removeAttribute("data-kb-measuring")
       setMeasured((prev) => (prev === value ? prev : value))
     }
     measure()
     window.addEventListener("resize", measure)
     return () => window.removeEventListener("resize", measure)
-  }, [el, active, consumerInlineMaxHeight])
-  return measured
+  }, [mountVersion, active, consumerInlineMaxHeight, classSignature])
+  return { setElement, measured }
 }
 
 /**
@@ -462,42 +482,6 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   // preset="plain" は BottomSheetFrame を通さず素の SheetContent を出す（#486）。
   const isPlain = !isFloat && preset === "plain"
 
-  // Radix の Portal / Presence は後のコミットで面をマウントするため、
-  // RefObject だと layout effect の時点で null のまま再実行されない。
-  // コールバック ref を state にして、マウントで確実に測り直す。
-  const [contentEl, setContentEl] = React.useState<HTMLDivElement | null>(null)
-
-  // consumer の ref を握り潰さない（#487 の Codex レビュー指摘）。
-  // モバイル（Sheet）分岐では素通しなのに、デスクトップ分岐だけ計測用の
-  // ref で上書きすると、境界を跨いだ瞬間に consumer の ref が空になる。
-  const consumerRef = (allProps as { ref?: React.Ref<HTMLDivElement> }).ref
-  // React 19 のコールバック ref は cleanup を返せるので、consumer が返した
-  // cleanup を握り潰さずに伝播させる（返すと React は ref(null) を呼ばない）。
-  const setContentRef = React.useCallback(
-    (node: HTMLDivElement | null) => {
-      setContentEl(node)
-      const consumerCleanup =
-        typeof consumerRef === "function"
-          ? consumerRef(node)
-          : consumerRef
-            ? (((consumerRef as React.RefObject<HTMLDivElement | null>).current =
-                node),
-              undefined)
-            : undefined
-      return () => {
-        setContentEl(null)
-        if (typeof consumerCleanup === "function") consumerCleanup()
-        else if (consumerRef && typeof consumerRef !== "function") {
-          ;(consumerRef as React.RefObject<HTMLDivElement | null>).current = null
-        }
-      }
-    },
-    [consumerRef]
-  )
-
-  // RefObject だと layout effect の時点で null のまま再実行されない。
-  // コールバック ref を state にして、マウントで確実に測り直す。
-
   // #487: デスクトップ幅のタッチ端末でもソフトキーボードは出る。中央モーダルの
   // 高さだけを可視領域に収める（lift は当てない — 上の JSDoc 参照）。
   // ズーム分を打ち消したキーボード高さ（resolveOverlayKeyboardInset の JSDoc）と、
@@ -519,16 +503,50 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   const keyboardActive = isDesktop && editableFocused && keyboardInset > 0
   // className（desktopClassName の max-h-[...] 等）で締められたキャップも
   // 拾うため、補正が当たっていない間の computed 値を優先する。
-  const measuredMaxHeight = useEffectiveMaxHeight(
-    contentEl,
+  const { setElement, measured: measuredMaxHeight } = useEffectiveMaxHeight(
     keyboardActive,
     // 実測のあいだ戻す値（consumer が inline で締めていればその値）。
     consumerMaxHeight == null
       ? ""
       : typeof consumerMaxHeight === "number"
         ? `${consumerMaxHeight}px`
-        : `${consumerMaxHeight}`
+        : `${consumerMaxHeight}`,
+    // className が変わればキャップも変わりうるので測り直す
+    // （多段フォームが途中で max-h を締める等 / #487 の Codex レビュー指摘）。
+    `${className ?? ""} ${desktopClassName ?? ""}`
   )
+
+  // consumer の ref を握り潰さない（#487 の Codex レビュー指摘）。
+  // モバイル（Sheet）分岐では素通しなのに、デスクトップ分岐だけ計測用の
+  // ref で上書きすると、境界を跨いだ瞬間に consumer の ref が空になる。
+  const consumerRef = (allProps as { ref?: React.Ref<HTMLDivElement> }).ref
+  // React 19 のコールバック ref は cleanup を返せるので、consumer が返した
+  // cleanup を握り潰さずに伝播させる（返すと React は ref(null) を呼ばない）。
+  const setContentRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      setElement(node)
+      const consumerCleanup =
+        typeof consumerRef === "function"
+          ? consumerRef(node)
+          : consumerRef
+            ? (((consumerRef as React.RefObject<HTMLDivElement | null>).current =
+                node),
+              undefined)
+            : undefined
+      return () => {
+        setElement(null)
+        if (typeof consumerCleanup === "function") consumerCleanup()
+        else if (consumerRef && typeof consumerRef !== "function") {
+          ;(consumerRef as React.RefObject<HTMLDivElement | null>).current = null
+        }
+      }
+    },
+    [setElement, consumerRef]
+  )
+
+  // RefObject だと layout effect の時点で null のまま再実行されない。
+  // コールバック ref を state にして、マウントで確実に測り直す。
+
   // 実測が取れたらそれが唯一の正（"none" のように計算に使えない実測は
   // 「キャップ無し」なので、宣言側へフォールバックしない）。
   const baseMaxHeight =

@@ -159,14 +159,22 @@ describe("sheet-keyboard.css — dialog-content フォールバック契約", ()
 
   it("中央寄せは 2 * var(--kb-h) を引く", () => {
     expect(css).toMatch(
-      /\[data-position="center"\]\s*\{\s*max-height:\s*min\(\s*var\(--Overlay-Desktop-Base-Max-Height,\s*100dvh\),\s*max\(0px,\s*calc\(100dvh\s*-\s*2\s*\*\s*var\(--kb-h,\s*0px\)\)\)/
+      /\[data-position="center"\]:not\(\[data-kb-measuring\]\)\s*\{\s*max-height:\s*min\(\s*var\(--Overlay-Desktop-Base-Max-Height,\s*100dvh\),\s*max\(0px,\s*calc\(100dvh\s*-\s*2\s*\*\s*var\(--kb-h,\s*0px\)\)\)/
     )
+  })
+
+  it("実測中（data-kb-measuring）は自分を除外する", () => {
+    for (const [, body] of dialogRules) {
+      void body
+    }
+    const matches = css.match(/\[data-position="[a-z]+"\]:not\(\[data-kb-measuring\]\)/g)
+    expect(matches?.length).toBe(3)
   })
 
   it("position=\"top\" / \"fullscreen\" のルールもある", () => {
     expect(css).toMatch(/\[data-position="top"\]/)
     expect(css).toMatch(
-      /\[data-position="fullscreen"\]\s*\{\s*max-height:\s*min\(\s*var\(--Overlay-Desktop-Base-Max-Height,\s*100dvh\),\s*max\(0px,\s*calc\(100dvh\s*-\s*var\(--kb-h,\s*0px\)\)\)/
+      /\[data-position="fullscreen"\]:not\(\[data-kb-measuring\]\)\s*\{\s*max-height:\s*min\(\s*var\(--Overlay-Desktop-Base-Max-Height,\s*100dvh\),\s*max\(0px,\s*calc\(100dvh\s*-\s*var\(--kb-h,\s*0px\)\)\)/
     )
   })
 })
@@ -531,6 +539,49 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
       // （空ではない）に戻されている。
       expect(seen.some((v) => v === "30rem")).toBe(true)
       expect(el.style.maxHeight).toBe(expectedMaxHeight("30rem", 300))
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
+  // className が途中で締まる（多段フォーム等）ときに測り直さないと、
+  // 古い基準の inline 値が新しい class を押しのけ続ける。
+  it("className が変わったら実効キャップを測り直す", async () => {
+    stubViewport(1024)
+    stubKeyboard(768, 300)
+    let computedMaxHeight = "40rem"
+    const spy = vi
+      .spyOn(window, "getComputedStyle")
+      .mockImplementation(
+        () => ({ maxHeight: computedMaxHeight }) as unknown as CSSStyleDeclaration
+      )
+    try {
+      const render = (desktopClassName: string) =>
+        act(() =>
+          root.render(
+            <ResponsiveDialog open onOpenChange={() => {}} breakpoint="lg">
+              <ResponsiveOverlayFrame
+                preset="mobile-form"
+                description="テスト"
+                desktopClassName={desktopClassName}
+              >
+                <input data-testid="field" />
+              </ResponsiveOverlayFrame>
+            </ResponsiveDialog>
+          )
+        )
+      render("max-h-[60vh]")
+      await flushFocus()
+      const el = document.querySelector<HTMLElement>(
+        '[data-slot="dialog-content"]'
+      )!
+      expect(el.style.maxHeight).toBe(expectedMaxHeight("40rem", 300))
+
+      // consumer がキャップを締める → 実測し直して新しい値で畳む。
+      computedMaxHeight = "20rem"
+      render("max-h-[40vh]")
+      await flushFocus()
+      expect(el.style.maxHeight).toBe(expectedMaxHeight("20rem", 300))
     } finally {
       spy.mockRestore()
     }

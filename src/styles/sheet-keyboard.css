@@ -91,13 +91,17 @@ html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-sid
    （consumer が style.maxHeight を渡した場合はそちらが入る）。畳まないと
    インセットが小さいときに面が既定より広がる（#487 の Codex レビュー指摘）。
 
+   `:not([data-kb-measuring])` は実効キャップの実測中だけ自分を外すための除外。
+   これが無いと、frame が inline を剥がして測った瞬間にここの補正値が出てきて、
+   それを新しい基準として記録してしまう（#487）。
+
    JS 検知（responsive-overlay-frame.tsx の resolveDesktopOverlayKeyboardStyle）が
    動くときは inline style で同値を書くため二重適用にならない。visualViewport が
    inset を出せない環境では consumer の html[data-kb-open] + --kb-h でここが効く。
    side="bottom"（preset / plain）/ float / float-glass の 3 経路すべてが
    data-frame="responsive-overlay-frame" を出すため、1 ルールで全経路に届く。 */
 html[data-kb-open]
-  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="center"] {
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="center"]:not([data-kb-measuring]) {
   max-height: min(
     var(--Overlay-Desktop-Base-Max-Height, 100dvh),
     max(0px, calc(100dvh - 2 * var(--kb-h, 0px)))
@@ -105,7 +109,7 @@ html[data-kb-open]
 }
 
 html[data-kb-open]
-  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="fullscreen"] {
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="fullscreen"]:not([data-kb-measuring]) {
   max-height: min(
     var(--Overlay-Desktop-Base-Max-Height, 100dvh),
     max(0px, calc(100dvh - var(--kb-h, 0px)))
@@ -113,7 +117,7 @@ html[data-kb-open]
 }
 
 html[data-kb-open]
-  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="top"] {
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="top"]:not([data-kb-measuring]) {
   max-height: min(
     var(--Overlay-Desktop-Base-Max-Height, 100dvh),
     max(
