@@ -594,3 +594,189 @@ export const TitleLevelCenterDefault: Story = {
     </Dialog>
   ),
 }
+
+// ─────────────────────────────────────────────────────────────
+// aria-describedby 自動紐付けの回帰テスト（issue #485）
+// ─────────────────────────────────────────────────────────────
+
+/** 紐付いた説明文のテキストを DOM から解決する。 */
+function resolveDescribedBy(dialog: HTMLElement) {
+  const id = dialog.getAttribute("aria-describedby")
+  if (!id) return null
+  return document.getElementById(id)
+}
+
+/**
+ * 子として置いた `<DialogDescription>` が `aria-describedby` に自動で紐付く。
+ *
+ * 由来: #485。`description` prop 未指定時に `aria-describedby={undefined}` を
+ * 明示する実装が Radix の自動紐付けまで打ち消し、JSDoc の案内どおり子に
+ * Description を置いてもスクリーンリーダーへ説明が届かなかった。
+ */
+export const ChildDescriptionIsLinked: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>説明の紐付け</DialogTitle>
+          <DialogDescription>子に置いた説明文です。</DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const dialog = await body.findByRole("dialog")
+
+    await waitFor(() => {
+      const described = resolveDescribedBy(dialog)
+      expect(described).not.toBeNull()
+      expect(described).toHaveTextContent("子に置いた説明文です。")
+    })
+    // 紐付け先は実在する要素なので Radix の "Missing Description" 条件には当たらない
+    await expect(dialog.contains(resolveDescribedBy(dialog))).toBe(true)
+  },
+}
+
+/**
+ * Description を置かないダイアログでは `aria-describedby` を出さない
+ * （Radix の "Missing Description" 警告抑制の回帰テスト）。
+ */
+export const NoDescriptionLeavesNoDescribedBy: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>説明なし</DialogTitle>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const dialog = await body.findByRole("dialog")
+    await waitFor(() => expect(dialog).not.toHaveAttribute("aria-describedby"))
+  },
+}
+
+/** `description` prop 経由の sr-only 説明も従来どおり紐付く。 */
+export const DescriptionPropIsLinked: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </DialogTrigger>
+      <DialogContent description="prop 経由の説明です。">
+        <DialogHeader>
+          <DialogTitle>prop 経由</DialogTitle>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const dialog = await body.findByRole("dialog")
+    await waitFor(() =>
+      expect(resolveDescribedBy(dialog)).toHaveTextContent("prop 経由の説明です。")
+    )
+  },
+}
+
+/** 呼び出し側が明示した `aria-describedby` は自動紐付けより優先される。 */
+export const ExplicitDescribedByWins: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div>
+      <p id="external-desc-485">ダイアログ外に置いた説明です。</p>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button data-testid="open">開く</Button>
+        </DialogTrigger>
+        <DialogContent aria-describedby="external-desc-485">
+          <DialogHeader>
+            <DialogTitle>明示指定</DialogTitle>
+            <DialogDescription>子の説明文（こちらは使われない）。</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const dialog = await body.findByRole("dialog")
+    await waitFor(() =>
+      expect(dialog).toHaveAttribute("aria-describedby", "external-desc-485")
+    )
+  },
+}
+
+/**
+ * 開いたあとに、子孫コンポーネントが自分の state で Description を出し入れしても
+ * 紐付けが追随する（#485）。DialogContent 自体は再レンダーされないため、
+ * MutationObserver での監視が効いていないとここで落ちる。
+ */
+export const DynamicChildDescriptionIsLinked: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => {
+    function Step() {
+      const [showDesc, setShowDesc] = useState(false)
+      return (
+        <DialogHeader>
+          <DialogTitle>あとから出る説明</DialogTitle>
+          {showDesc && <DialogDescription>あとから出した説明文です。</DialogDescription>}
+          <Button data-testid="toggle" onClick={() => setShowDesc((v) => !v)}>
+            説明を切り替え
+          </Button>
+        </DialogHeader>
+      )
+    }
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button data-testid="open">開く</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <Step />
+        </DialogContent>
+      </Dialog>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const dialog = await body.findByRole("dialog")
+    await expect(dialog).not.toHaveAttribute("aria-describedby")
+
+    await userEvent.click(within(dialog).getByTestId("toggle"))
+    await waitFor(() =>
+      expect(resolveDescribedBy(dialog)).toHaveTextContent("あとから出した説明文です。")
+    )
+
+    // 消したら参照も外れる（宙ぶらりんの aria-describedby を残さない）
+    await userEvent.click(within(dialog).getByTestId("toggle"))
+    await waitFor(() => expect(dialog).not.toHaveAttribute("aria-describedby"))
+  },
+}

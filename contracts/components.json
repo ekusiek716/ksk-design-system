@@ -372,6 +372,7 @@
         "safeArea(既定 true) で top/fullscreen の safe-area 回避を制御。false でオプトアウト",
         "autoFocus は first-input / title / ref / false を指定可能",
         "description prop は sr-only description を自動生成する",
+        "子として置いた DialogDescription は自動で aria-describedby に紐付く（#485）。呼び出し側で id / aria-describedby を明示した場合はそちらが優先。Description を置かないダイアログでは aria-describedby を出さない（Radix の Missing Description 警告抑制）",
         "DialogTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は position=\"fullscreen\" 配下で page 相当、それ以外は従来の typo-heading-lg",
         "native (src/native/components/Dialog.tsx): position=\"center\"(既定) / \"top\" / \"fullscreen\" を持ち、fullscreen は四辺・top は上端の safe-area を避ける。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）"
       ],
@@ -411,6 +412,7 @@
         "safeArea(既定 true) は上記2つの回避をまとめてオプトアウトする prop。他の side には効果なし",
         "autoFocus は first-input / title / ref / false を指定可能",
         "description prop はRadix管理IDの sr-only description を自動生成する",
+        "子として置いた SheetDescription は自動で aria-describedby に紐付く（#485）。呼び出し側で aria-describedby を明示した場合はそちらが優先。Description を置かないシートでは aria-describedby を出さない",
         "SheetTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は BottomSheetFrame preset=\"mobile-full\"|\"mobile-page\" 配下で page 相当、それ以外は従来の typo-heading-lg",
         "native (src/native/components/Sheet.tsx): safeArea(既定 true) で side=\"top\" の上端 inset 退避と、画面いっぱいに近い side=\"bottom\" の食い込み分の退避を行う。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
         "native (src/native/components/Sheet.tsx): surfaceColor でパネル（および snap モードの footer）の面色を上書きできる。未指定なら theme.surface.primary（従来どおり）。scrim の色は変えない（issue #448）"

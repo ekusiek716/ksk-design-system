@@ -3,6 +3,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { usePortalContainer } from "./portal-container"
+import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
 import {
   ModalStackRegistrar,
   modalContentZ,
@@ -682,7 +683,8 @@ interface SheetContentProps
    *   Radix の "Missing Description" 警告を抑制。description が概念上
    *   不要なシート（クイック追加 FAB、設定 sheet 等）用。
    * 可視の description を出したい場合は、この prop を使わず子要素として
-   * `<SheetDescription>` を直接置く。
+   * `<SheetDescription>` を直接置く（#485 以降、子に置いた Description は
+   * 自動で `aria-describedby` に紐付く。id の手当ては不要）。
    */
   description?: React.ReactNode
   /**
@@ -918,6 +920,11 @@ function SheetContent({
     "aria-describedby": ariaDescribedBy,
     ...contentProps
   } = props
+  const { setContentNode, applyDescribedBy } = useDescribedByLink(
+    contentRef,
+    "sheet-description",
+    !hasInternalDesc && ariaDescribedBy == null
+  )
 
   // side="top" の safe-area 回避。padding true/false それぞれで完結した
   // クラス集合を選ぶ（ショートハンドの padding と方向指定の padding を同時に
@@ -948,7 +955,7 @@ function SheetContent({
     <SheetPortal container={container}>
       <SheetOverlay glass={useGlassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
-        ref={contentRef}
+        ref={setContentNode}
         data-side={side}
         data-safe-area={safeArea}
         className={cn(
@@ -973,6 +980,7 @@ function SheetContent({
         onEscapeKeyDown={handleEscapeKeyDown}
       >
         <ModalStackRegistrar onLevelChange={setStackLevel} />
+        <DescribedByLinker contentRef={contentRef} applyDescribedBy={applyDescribedBy} />
         {hasInternalDesc && (
           <DialogPrimitive.Description className="sr-only">
             {description}
@@ -1092,6 +1100,11 @@ function SwipeToCloseBottomSheet({
   const scrollerRef = React.useRef<HTMLElement | null>(null)
   const onHandleRef = React.useRef(false)
   const sheetRef = React.useRef<HTMLDivElement>(null)
+  const { applyDescribedBy } = useDescribedByLink(
+    sheetRef,
+    "sheet-description",
+    !hasInternalDesc && ariaDescribedBy == null
+  )
   // `close()` lives on a context value whose identity can change; mirror it in
   // a ref so the once-bound touch listeners always call the current one. Synced
   // in an effect (not during render) to respect React's no-ref-writes-in-render
@@ -1239,6 +1252,9 @@ function SwipeToCloseBottomSheet({
   const attachTouchListeners = React.useCallback(
     (el: HTMLDivElement | null) => {
       sheetRef.current = el
+      // #485: ノードが DOM に現れたその瞬間に aria-describedby を確定させる
+      // （初期フォーカス前に紐付けたいので effect まで待たない）。
+      applyDescribedBy()
       detachTouchRef.current?.()
       detachTouchRef.current = null
       if (!el) return
@@ -1264,7 +1280,7 @@ function SwipeToCloseBottomSheet({
         el.removeEventListener("touchcancel", onTouchEnd)
       }
     },
-    [beginGesture, moveGesture, endGesture]
+    [beginGesture, moveGesture, endGesture, applyDescribedBy]
   )
 
   // Pointer path: mouse only. Touch is handled by the non-passive listeners
@@ -1353,6 +1369,7 @@ function SwipeToCloseBottomSheet({
         {onStackLevelChange && (
           <ModalStackRegistrar onLevelChange={onStackLevelChange} />
         )}
+        <DescribedByLinker contentRef={sheetRef} applyDescribedBy={applyDescribedBy} />
         {hasInternalDesc && (
           <DialogPrimitive.Description className="sr-only">
             {description}
@@ -1458,6 +1475,11 @@ function SwipeToCloseSideDrawer({
   // computeFlickVelocity measures close-axis velocity.
   const samplesRef = React.useRef<DragSample[]>([])
   const sheetRef = React.useRef<HTMLDivElement>(null)
+  const { applyDescribedBy } = useDescribedByLink(
+    sheetRef,
+    "sheet-description",
+    !hasInternalDesc && ariaDescribedBy == null
+  )
   const rootCtxRef = React.useRef(rootCtx)
   React.useEffect(() => {
     rootCtxRef.current = rootCtx
@@ -1561,6 +1583,9 @@ function SwipeToCloseSideDrawer({
   const attachTouchListeners = React.useCallback(
     (el: HTMLDivElement | null) => {
       sheetRef.current = el
+      // #485: ノードが DOM に現れたその瞬間に aria-describedby を確定させる
+      // （初期フォーカス前に紐付けたいので effect まで待たない）。
+      applyDescribedBy()
       detachTouchRef.current?.()
       detachTouchRef.current = null
       if (!el) return
@@ -1586,7 +1611,7 @@ function SwipeToCloseSideDrawer({
         el.removeEventListener("touchcancel", onTouchEnd)
       }
     },
-    [beginGesture, moveGesture, endGesture]
+    [beginGesture, moveGesture, endGesture, applyDescribedBy]
   )
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -1651,6 +1676,7 @@ function SwipeToCloseSideDrawer({
         {onStackLevelChange && (
           <ModalStackRegistrar onLevelChange={onStackLevelChange} />
         )}
+        <DescribedByLinker contentRef={sheetRef} applyDescribedBy={applyDescribedBy} />
         {hasInternalDesc && (
           <DialogPrimitive.Description className="sr-only">
             {description}
@@ -1747,6 +1773,11 @@ function SnapBottomSheetContent({
   const dragStartYRef = React.useRef(0)
   const dragStartRatioRef = React.useRef(activeRatio)
   const sheetRef = React.useRef<HTMLDivElement>(null)
+  const { setContentNode, applyDescribedBy } = useDescribedByLink(
+    sheetRef,
+    "sheet-description",
+    !hasInternalDesc && ariaDescribedBy == null
+  )
   const handleOpenAutoFocus = (event: Event) => {
     captureRestoreFocus(restoreFocusRef)
     props.onOpenAutoFocus?.(event)
@@ -1866,7 +1897,7 @@ function SnapBottomSheetContent({
         />
       )}
       <DialogPrimitive.Content
-        ref={sheetRef}
+        ref={setContentNode}
         data-side="bottom"
         data-snap-active={activeSnapPoint ?? undefined}
         onKeyDown={onKeyDown}
@@ -1902,6 +1933,7 @@ function SnapBottomSheetContent({
         {onStackLevelChange && (
           <ModalStackRegistrar onLevelChange={onStackLevelChange} />
         )}
+        <DescribedByLinker contentRef={sheetRef} applyDescribedBy={applyDescribedBy} />
         {hasInternalDesc && (
           <DialogPrimitive.Description className="sr-only">
             {description}
