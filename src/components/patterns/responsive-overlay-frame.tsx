@@ -117,6 +117,35 @@ const desktopPresetMaxHeights: Record<BottomSheetFramePreset, string> = {
   "desktop-floating": "min(86dvh, 42rem)",
 }
 
+/**
+ * `max-height` としては妥当だが `min()` の被演算子にできない値
+ * （issue #487 の Codex レビュー指摘）。`min(none, …)` のような宣言は
+ * まるごと捨てられるので、これらは畳まずキーボード由来のキャップだけを当てる。
+ */
+const nonCalculableMaxHeights = new Set([
+  "none",
+  "auto",
+  "fit-content",
+  "max-content",
+  "min-content",
+  "inherit",
+  "initial",
+  "revert",
+  "revert-layer",
+  "unset",
+])
+
+function toCalculableMaxHeight(value: string | number): string | undefined {
+  // React は数値の maxHeight を px として解釈するので、min() へ埋めるときも
+  // px を補う（"min(640, …)" は長さとして不正）。
+  if (typeof value === "number") return `${value}px`
+  const normalized = value.trim().toLowerCase()
+  if (nonCalculableMaxHeights.has(normalized)) return undefined
+  // fit-content(20rem) のような関数形も被演算子にできない。
+  if (normalized.startsWith("fit-content(")) return undefined
+  return value
+}
+
 const desktopFloatMaxHeight = "min(85dvh, 46rem)"
 const desktopPlainMaxHeight = "min(90dvh, 46rem)"
 
@@ -240,7 +269,7 @@ function useEditableElementFocused(): boolean {
 function resolveDesktopOverlayKeyboardStyle(
   keyboardInset: number,
   position: "center" | "top" | "fullscreen",
-  baseMaxHeight: string
+  baseMaxHeight: string | undefined
 ): { maxHeight: string } | undefined {
   if (keyboardInset <= 0) return undefined
   const cap =
@@ -250,7 +279,11 @@ function resolveDesktopOverlayKeyboardStyle(
         ? `max(0px, calc(100dvh - ${keyboardInset}px - max(env(safe-area-inset-top, 0px), 2rem) - 2rem))`
         : `max(0px, calc(100dvh - ${keyboardInset * 2}px))`
   // min() で畳むので、この補正は既定のキャップを緩めることが無い。
-  return { maxHeight: `min(${baseMaxHeight}, ${cap})` }
+  // 既定が計算に使えない値（none / fit-content 等）のときは畳まず、
+  // キーボード由来のキャップだけを当てる（min(none, …) は宣言ごと捨てられる）。
+  return {
+    maxHeight: baseMaxHeight ? `min(${baseMaxHeight}, ${cap})` : cap,
+  }
 }
 
 interface ResponsiveOverlayFrameBaseProps
@@ -391,12 +424,7 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     ?.maxHeight
   const baseMaxHeight =
     consumerMaxHeight != null
-      ? // React は数値の maxHeight を px として解釈するので、min() へ埋める
-        // ときも px を補う（"min(640, …)" は長さとして不正で、ブラウザが
-        // 宣言ごと捨てる / #487 の Codex レビュー指摘）。
-        typeof consumerMaxHeight === "number"
-        ? `${consumerMaxHeight}px`
-        : `${consumerMaxHeight}`
+      ? toCalculableMaxHeight(consumerMaxHeight)
       : isFloat
         ? desktopFloatMaxHeight
         : isPlain
@@ -411,9 +439,10 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         )
       : undefined
   // CSS フォールバック（html[data-kb-open] + --kb-h）にも同じ既定値を渡す。
-  const desktopBaseMaxHeightStyle = isDesktop
-    ? ({ [OVERLAY_BASE_MAX_HEIGHT_VAR]: baseMaxHeight } as React.CSSProperties)
-    : undefined
+  const desktopBaseMaxHeightStyle =
+    isDesktop && baseMaxHeight
+      ? ({ [OVERLAY_BASE_MAX_HEIGHT_VAR]: baseMaxHeight } as React.CSSProperties)
+      : undefined
 
   if (isDesktop && isFloat) {
     // float 系はシート固有の prop を落として中央モーダルへ。

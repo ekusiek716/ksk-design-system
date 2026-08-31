@@ -420,6 +420,38 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     )
   })
 
+  // max-height としては妥当でも min() の被演算子にできない値がある。
+  // min(none, …) のような宣言はまるごと捨てられ、補正が消えてしまう。
+  it.each([["none"], ["fit-content"], ["fit-content(20rem)"], ["auto"]])(
+    'consumer の maxHeight が "%s" なら畳まずキーボード由来だけを当てる',
+    async (value) => {
+      stubViewport(1024)
+      stubKeyboard(768, 300)
+      const el = renderFrame({
+        preset: "mobile-form",
+        style: { maxHeight: value },
+      } as Partial<FrameProps>)
+      await flushFocus()
+
+      expect(el.style.maxHeight).toBe("max(0px, calc(100dvh - 600px))")
+      expect(
+        el.style.getPropertyValue("--Overlay-Desktop-Base-Max-Height")
+      ).toBe("")
+    }
+  )
+
+  it("パーセントは計算に使えるのでそのまま畳む", async () => {
+    stubViewport(1024)
+    stubKeyboard(768, 300)
+    const el = renderFrame({
+      preset: "mobile-form",
+      style: { maxHeight: "50%" },
+    } as Partial<FrameProps>)
+    await flushFocus()
+
+    expect(el.style.maxHeight).toBe("min(50%, max(0px, calc(100dvh - 600px)))")
+  })
+
   it("モバイル幅ではデスクトップ補正は関与しない（シートのまま）", () => {
     stubViewport(390)
     stubKeyboard(768, 300)
