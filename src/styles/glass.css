@@ -15,15 +15,6 @@
    2026-06-12 修正）。dev は未 minify なので手元では再現しない。
    ============================================================= */
 
-/* #481: position フォールバックを載せるレイヤー。
-   ⚠️ この宣言で utilities より前に並ぶのは preset を Tailwind より先に読む構成
-   だけ。README が案内する常態（`@import "tailwindcss"` → preset）では Tailwind が
-   先に `@layer theme, base, components, utilities;` を宣言済みなので、ここで初登場
-   する ksk-glass-fallback は最後＝最優先レイヤーになる。よって Tailwind
-   ユーティリティを尊重できているのはレイヤー順ではなく、フォールバック規則が持つ
-   :not(.fixed):not(.absolute):not(.sticky) のおかげ。詳細は同規則のコメント。 */
-@layer ksk-glass-fallback;
-
 /* ─── Liquid Glass トークン ─── */
 :root {
   /* Blur — Liquid Glass は旧来のすりガラスより透明度が高い。blur を抑えめに
@@ -394,30 +385,36 @@
  *
  * ⚠️ カスケード設計（issue #481。この2重の防御はどちらも外さない）:
  *
- * 1. `@layer ksk-glass-fallback` に入れる
+ * 1. Tailwind 既存の `@layer base` に入れる（新しいレイヤー名は作らない）
  *    glass.css は consumer 側で「非レイヤー CSS」として読まれるため、素のままだと
  *    unlayered > layered で consumer のあらゆる指定を踏み潰す。実害: consumer が
  *    Tailwind ではなく独自クラス（`.fab-fixed { position: fixed }` 等）で配置した
  *    要素の position が無言で relative に戻り、right/bottom が相対オフセットとして
  *    解釈されて逆方向にずれる（Tabipal の FAB が右下でなく左下に出た、2026-08）。
- *    レイヤーへ入れると layered < unlayered が効き、consumer の素朴な1クラス指定
- *    （詳細度 (0,1,0)）でも確実に勝てる。クラス名の列挙に依存しない。
- *    ⚠️ 効くのは consumer 側の指定が「非レイヤー」のときだけ。consumer が
- *    `@layer components { .fab-fixed { position: fixed } }` のようにレイヤー内へ
- *    書いた場合は layered 同士の勝負になり、常態の読み込み順（Tailwind 先）では
- *    ksk-glass-fallback が最上位に積まれるため依然としてこちらが勝つ。その場合は
- *    consumer 側で Tailwind の `fixed` / `absolute` / `sticky` を併記するか、
- *    非レイヤーで書いてもらう。
+ *
+ *    レイヤーへ入れれば layered < unlayered で consumer の非レイヤー指定には勝てる
+ *    が、`ksk-glass-fallback` のような新規レイヤー名だと不十分。README が案内する
+ *    常態（`@import "tailwindcss"` → preset）では Tailwind が先に
+ *    `@layer theme, base, components, utilities;` を宣言済みで、後から初登場する
+ *    レイヤーは末尾＝最優先に積まれるため、consumer が
+ *    `@layer components { .fab-fixed { position: fixed } }` と書いた場合に
+ *    こちらが勝ってしまう。
+ *
+ *    そこで Tailwind が必ず先頭側に宣言している既存レイヤー `base` を使う。
+ *    base < components < utilities < unlayered となり、consumer が独自クラスを
+ *    どこに書いても（非レイヤー / components / utilities）必ず consumer が勝つ。
+ *    preset.css 自身も `@layer base` を使っており、扱いとして一貫している。
+ *    残る例外は consumer も `@layer base` に書いた場合だけで、その時は同一レイヤー
+ *    内の source order（= preset より後に読まれた側）で決まる。
  *
  * 2. `:not(.fixed):not(.absolute):not(.sticky)` は残す
- *    レイヤー同士の順序は consumer のビルド順に依存する（Tailwind v4 が
- *    `@layer theme, base, components, utilities;` を先に宣言済みなら、後から現れる
- *    ksk-glass-fallback は utilities の「後ろ」に積まれ、@layer utilities の
- *    Tailwind `.fixed` に勝ってしまう）。DS 自身の Sheet 等が `.fixed` を使うため、
- *    ここを落とすと元の回帰（sheet が fixed を保てない）が戻る。レイヤー順に
- *    関係なく Tailwind ユーティリティを尊重するための保険として併用する。
+ *    preset を Tailwind より「先に」読む構成では `base` が preset 由来で先に登録
+ *    され、Tailwind の utilities がその後ろに積まれる（＝この除外が無くても
+ *    Tailwind が勝つ）が、consumer のビルド順を DS からは保証できない。DS 自身の
+ *    Sheet 等が `.fixed` を使うため、ここを落とすと元の回帰（sheet が fixed を
+ *    保てない）が戻りうる。レイヤー順に依存しない保険として併用する。
  */
-@layer ksk-glass-fallback {
+@layer base {
   .glass-specular:not(.fixed):not(.absolute):not(.sticky) {
     position: relative;
   }
@@ -514,10 +511,10 @@
  * `right-*` が相対オフセットになり、要素が角からはみ出す（yokoku-app の詳細
  * ドロワー × ボタンが PC で左上角の外へ流れた実害、2026-06）。
  *
- * #481: コンテナ側と同じく @layer ksk-glass-fallback に入れて優先度を下げ、
- * 独自クラス名で子を配置している consumer の指定も踏み潰さないようにする。
+ * #481: コンテナ側と同じく @layer base に入れて優先度を下げ、独自クラス名で子を
+ * 配置している consumer の指定も踏み潰さないようにする。
  */
-@layer ksk-glass-fallback {
+@layer base {
   .glass-specular > *:not(.absolute):not(.fixed):not(.sticky) {
     position: relative;
     z-index: 1;

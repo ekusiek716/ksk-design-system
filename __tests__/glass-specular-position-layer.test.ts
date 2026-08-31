@@ -10,8 +10,11 @@
  * right/bottom が相対オフセットとして解釈されて画面左下に出た（Tabipal, 2026-08）。
  *
  * 契約（どちらも外さない）:
- * 1. フォールバックは `@layer ksk-glass-fallback` の中にあること
- *    → layered < unlayered で consumer の素朴な1クラス指定に負ける（= 尊重される）
+ * 1. フォールバックは Tailwind 既存の `@layer base` の中にあること
+ *    → base < components < utilities < unlayered となり、consumer が独自クラスを
+ *      どこに書いても consumer の指定が勝つ（= 尊重される）。新規レイヤー名だと
+ *      「初登場＝末尾＝最優先」に積まれ、consumer の @layer components に勝って
+ *      しまうので不可。
  * 2. `:not(.fixed):not(.absolute):not(.sticky)` の除外を保つこと
  *    → レイヤー順は consumer のビルド順に依存するため、Tailwind ユーティリティを
  *      尊重する保険。落とすと DS 自身の Sheet（`.fixed`）が壊れる回帰に戻る。
@@ -28,7 +31,7 @@ const raw = readFileSync(join(ROOT, "src/styles/glass.css"), "utf8")
 /** 解説コメントに同じ文字列が出るため、判定前に必ずコメントを落とす */
 const css = raw.replace(/\/\*[\s\S]*?\*\//g, "")
 
-const LAYER = "@layer ksk-glass-fallback"
+const LAYER = "@layer base"
 
 /**
  * `@layer ksk-glass-fallback { ... }` ブロックの中身（波括弧の対応を数えて抽出）。
@@ -90,7 +93,7 @@ function bodiesOf(source: string, selector: string): string[] {
 }
 
 describe("glass-specular position fallback cascade (#481)", () => {
-  it("フォールバックは @layer ksk-glass-fallback の中にある", () => {
+  it("フォールバックは @layer base の中にある", () => {
     expect(ranges.length).toBeGreaterThan(0)
     expect(inLayer).toContain(".glass-specular:not(.fixed):not(.absolute):not(.sticky)")
   })
@@ -129,9 +132,9 @@ describe("glass-specular position fallback cascade (#481)", () => {
     expect(base[0]).not.toMatch(/(^|[\s;])position\s*:/)
   })
 
-  it("レイヤー順の宣言（@layer ksk-glass-fallback;）がファイル先頭側にある", () => {
-    const decl = css.indexOf("@layer ksk-glass-fallback;")
-    expect(decl).toBeGreaterThanOrEqual(0)
-    expect(decl).toBeLessThan(css.indexOf(".glass-specular"))
+  it("新規レイヤー名ではなく Tailwind 既存の base レイヤーを使っている", () => {
+    // 新規レイヤー名は「初登場＝末尾＝最優先」に積まれるため、consumer の
+    // `@layer components { ... }` に勝ってしまい #481 が直りきらない。
+    expect(css).not.toContain("ksk-glass-fallback")
   })
 })
