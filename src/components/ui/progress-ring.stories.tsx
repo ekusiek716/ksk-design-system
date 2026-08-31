@@ -46,3 +46,36 @@ export const Animated: Story = {
     return <ProgressRing value={v} size="xl" />
   },
 }
+
+export const CustomSizeAndStroke: Story = {
+  name: "任意サイズ・ストローク",
+  render: () => (
+    <div className="flex items-end gap-6">
+      {/* 消費側の bespoke リング（88px / ストローク 6.9px）を視覚同一で置換できる */}
+      <ProgressRing value={65} size={88} strokeWidth={6.9} />
+      <ProgressRing value={65} size={88} />
+      <ProgressRing value={65} size={120} strokeWidth={12} />
+    </div>
+  ),
+}
+
+export const CustomColors: Story = {
+  name: "配色のカスタマイズ",
+  render: () => (
+    <div className="flex items-center gap-6">
+      {/* Brand-100 相当のトラック + Brand-600 相当の進捗（いずれも semantic トークン） */}
+      <ProgressRing value={65} size={88} strokeWidth={6.9} color="var(--Brand-Primary)" trackColor="var(--Brand-Light)" />
+      <ProgressRing value={40} size="lg" color="var(--Caution-Base)" trackColor="var(--Surface-Caution)" />
+      <ProgressRing value={90} size="lg" color="var(--Success-Base)" trackColor="var(--Surface-Success)" />
+      <ProgressRing value={55} size="lg" color="var(--Categorical-3-Bold)" trackColor="var(--Categorical-3-Subtle)" />
+    </div>
+  ),
+}
+
+export const StrokeClamped: Story = {
+  name: "過大なストロークの丸め",
+  render: () => (
+    // 径の半分を超える strokeWidth を渡しても描画が消えず、描ける最大に丸められる
+    <ProgressRing value={70} size={64} strokeWidth={60} />
+  ),
+}

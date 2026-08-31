@@ -620,15 +620,19 @@
     {
       "name": "ProgressRing",
       "path": "src/components/ui/progress-ring.tsx",
-      "description": "円形プログレス表示。SVGベース。0〜100の進捗を円弧で表示。中央にラベル（%またはカスタム）表示。",
+      "description": "円形プログレス表示。SVGベース。0〜100の進捗を円弧で表示。中央にラベル（%またはカスタム）表示。サイズはプリセット4種に加えて px 数値、線の太さは strokeWidth、配色は color / trackColor（semantic トークンのみ）で上書きできる（issue #480）。",
       "sizes": [
         "sm",
         "md",
         "lg",
-        "xl"
+        "xl",
+        "number(px)"
       ],
       "rules": [
-        "Use for circular progress only. Use <Progress> for linear progress bar."
+        "Use for circular progress only. Use <Progress> for linear progress bar.",
+        "size はまずプリセット（sm=32 / md=48 / lg=64 / xl=96px）から選ぶ。既存デザインの実寸に合わせる必要があるときだけ px の数値を渡す。",
+        "color / trackColor は semantic トークンの var(--...) 文字列のみ。生 hex と --Primitive-* は型で受け付けない（P015）。",
+        "strokeWidth が径の半分以上でも描画は消えず、描ける最大幅へ丸められる。"
       ]
     },
     {
