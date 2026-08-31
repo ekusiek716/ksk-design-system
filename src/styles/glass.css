@@ -404,10 +404,16 @@
  *    base < components < utilities < unlayered となり、consumer が独自クラスを
  *    どこに書いても（非レイヤー / components / utilities）必ず consumer が勝つ。
  *    preset.css 自身も `@layer base` を使っており、扱いとして一貫している。
- *    残る例外は consumer も `@layer base` に書いた場合だけで、その時は同一レイヤー
- *    内の source order（= preset より後に読まれた側）で決まる。
  *
- * 2. `:not(.fixed):not(.absolute):not(.sticky)` は残す
+ * 2. セレクタ全体を `:where()` で包んで詳細度を (0,0,0) にする
+ *    consumer も `@layer base` に書いた場合はレイヤーでは決着せず、同一レイヤー内の
+ *    詳細度勝負になる。素の `.glass-specular:not(.fixed):not(.absolute):not(.sticky)`
+ *    は (0,4,0) と高く、consumer の素朴な `.fab-fixed` (0,1,0) には source order に
+ *    関係なく勝ってしまう（#481 の実害と同じ形）。`:where()` は中身の詳細度を 0 に
+ *    するため、base レイヤー内でも consumer の 1 クラス指定が必ず勝つ。
+ *    ※ `:not()` の絞り込み自体は :where() の中でも通常どおり効く。
+ *
+ * 3. `:not(.fixed):not(.absolute):not(.sticky)` は残す
  *    preset を Tailwind より「先に」読む構成では `base` が preset 由来で先に登録
  *    され、Tailwind の utilities がその後ろに積まれる（＝この除外が無くても
  *    Tailwind が勝つ）が、consumer のビルド順を DS からは保証できない。DS 自身の
@@ -415,7 +421,7 @@
  *    保てない）が戻りうる。レイヤー順に依存しない保険として併用する。
  */
 @layer base {
-  .glass-specular:not(.fixed):not(.absolute):not(.sticky) {
+  :where(.glass-specular:not(.fixed):not(.absolute):not(.sticky)) {
     position: relative;
   }
 }
@@ -511,11 +517,11 @@
  * `right-*` が相対オフセットになり、要素が角からはみ出す（yokoku-app の詳細
  * ドロワー × ボタンが PC で左上角の外へ流れた実害、2026-06）。
  *
- * #481: コンテナ側と同じく @layer base に入れて優先度を下げ、独自クラス名で子を
- * 配置している consumer の指定も踏み潰さないようにする。
+ * #481: コンテナ側と同じく @layer base + :where()（詳細度 (0,0,0)）で優先度を下げ、
+ * 独自クラス名で子を配置している consumer の指定も踏み潰さないようにする。
  */
 @layer base {
-  .glass-specular > *:not(.absolute):not(.fixed):not(.sticky) {
+  :where(.glass-specular > *:not(.absolute):not(.fixed):not(.sticky)) {
     position: relative;
     z-index: 1;
   }

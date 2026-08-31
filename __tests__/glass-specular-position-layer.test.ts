@@ -10,11 +10,13 @@
  * right/bottom が相対オフセットとして解釈されて画面左下に出た（Tabipal, 2026-08）。
  *
  * 契約（どちらも外さない）:
- * 1. フォールバックは Tailwind 既存の `@layer base` の中にあること
+ * 1. フォールバックは Tailwind 既存の `@layer base` の中にあり、かつ `:where()` で
+ *    詳細度 (0,0,0) に落とされていること
  *    → base < components < utilities < unlayered となり、consumer が独自クラスを
  *      どこに書いても consumer の指定が勝つ（= 尊重される）。新規レイヤー名だと
  *      「初登場＝末尾＝最優先」に積まれ、consumer の @layer components に勝って
- *      しまうので不可。
+ *      しまうので不可。consumer も base に書いた場合は詳細度勝負になるため、
+ *      :where() で (0,0,0) まで落として素朴な 1 クラス指定に負けるようにする。
  * 2. `:not(.fixed):not(.absolute):not(.sticky)` の除外を保つこと
  *    → レイヤー順は consumer のビルド順に依存するため、Tailwind ユーティリティを
  *      尊重する保険。落とすと DS 自身の Sheet（`.fixed`）が壊れる回帰に戻る。
@@ -93,19 +95,19 @@ function bodiesOf(source: string, selector: string): string[] {
 }
 
 describe("glass-specular position fallback cascade (#481)", () => {
-  it("フォールバックは @layer base の中にある", () => {
+  it("フォールバックは @layer base の中にあり :where() で詳細度 0", () => {
     expect(ranges.length).toBeGreaterThan(0)
-    expect(inLayer).toContain(".glass-specular:not(.fixed):not(.absolute):not(.sticky)")
+    expect(inLayer).toContain(":where(.glass-specular:not(.fixed):not(.absolute):not(.sticky))")
   })
 
   it("Tailwind ユーティリティの除外を保っている（レイヤー順に依存しない保険）", () => {
-    const bodies = bodiesOf(inLayer, ".glass-specular:not(.fixed):not(.absolute):not(.sticky)")
+    const bodies = bodiesOf(inLayer, ":where(.glass-specular:not(.fixed):not(.absolute):not(.sticky))")
     expect(bodies.length).toBe(1)
     expect(bodies[0]).toMatch(/position:\s*relative/)
   })
 
   it("子の z-lift フォールバックも同じレイヤーに入っている", () => {
-    const bodies = bodiesOf(inLayer, ".glass-specular > *:not(.absolute):not(.fixed):not(.sticky)")
+    const bodies = bodiesOf(inLayer, ":where(.glass-specular > *:not(.absolute):not(.fixed):not(.sticky))")
     expect(bodies.length).toBe(1)
     expect(bodies[0]).toMatch(/position:\s*relative/)
     expect(bodies[0]).toMatch(/z-index:\s*1/)
@@ -130,6 +132,15 @@ describe("glass-specular position fallback cascade (#481)", () => {
     expect(base[0]).toMatch(/overflow:\s*hidden/)
     expect(base[0]).toMatch(/isolation:\s*isolate/)
     expect(base[0]).not.toMatch(/(^|[\s;])position\s*:/)
+  })
+
+  it("フォールバックのセレクタが :where() で包まれている（詳細度 (0,0,0)）", () => {
+    // 素の (0,4,0) だと、consumer が同じ base レイヤーに `.fab-fixed` (0,1,0) を
+    // 書いた場合に source order と無関係にこちらが勝ってしまう（#481 の再発）。
+    // :where() で包まれていない裸の `.glass-specular:not(...)` が残っていないこと
+    expect(css).not.toMatch(/(^|[};])\s*\.glass-specular\s*:not\(/)
+    expect(inLayer).toContain(":where(.glass-specular:not(.fixed):not(.absolute):not(.sticky))")
+    expect(inLayer).toContain(":where(.glass-specular > *:not(.absolute):not(.fixed):not(.sticky))")
   })
 
   it("新規レイヤー名ではなく Tailwind 既存の base レイヤーを使っている", () => {
