@@ -431,6 +431,28 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     expect(el.style.maxHeight).toBe(expectedMaxHeight(expected, 300))
   })
 
+  // モバイル（Sheet）分岐では ref が素通しなので、デスクトップ分岐だけ
+  // 計測用の ref で握り潰すと、境界を跨いだ瞬間に consumer の ref が空になる。
+  it("consumer の ref にも面の DOM が渡る（object / callback 両方）", () => {
+    stubViewport(1024)
+    const objectRef = React.createRef<HTMLDivElement>()
+    const seen: Array<HTMLElement | null> = []
+
+    const el = renderFrame({
+      preset: "mobile-form",
+      ref: objectRef,
+    } as Partial<FrameProps>)
+    expect(objectRef.current).toBe(el)
+
+    act(() => root.unmount())
+    root = createRoot(container)
+    const el2 = renderFrame({
+      preset: "mobile-form",
+      ref: (node: HTMLDivElement | null) => seen.push(node),
+    } as Partial<FrameProps>)
+    expect(seen).toContain(el2)
+  })
+
   // 既定キャップは desktopClassName でも締められる。実測（computed）を
   // 基準にしているので、className 由来の締めも緩めない。
   it("desktopClassName の高さ上書きも既定キャップとして畳む", async () => {

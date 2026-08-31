@@ -456,6 +456,24 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   // コールバック ref を state にして、マウントで確実に測り直す。
   const [contentEl, setContentEl] = React.useState<HTMLDivElement | null>(null)
 
+  // consumer の ref を握り潰さない（#487 の Codex レビュー指摘）。
+  // モバイル（Sheet）分岐では素通しなのに、デスクトップ分岐だけ計測用の
+  // ref で上書きすると、境界を跨いだ瞬間に consumer の ref が空になる。
+  const consumerRef = (allProps as { ref?: React.Ref<HTMLDivElement> }).ref
+  const setContentRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      setContentEl(node)
+      if (typeof consumerRef === "function") consumerRef(node)
+      else if (consumerRef) {
+        ;(consumerRef as React.RefObject<HTMLDivElement | null>).current = node
+      }
+    },
+    [consumerRef]
+  )
+
+  // RefObject だと layout effect の時点で null のまま再実行されない。
+  // コールバック ref を state にして、マウントで確実に測り直す。
+
   // #487: デスクトップ幅のタッチ端末でもソフトキーボードは出る。中央モーダルの
   // 高さだけを可視領域に収める（lift は当てない — 上の JSDoc 参照）。
   // ズーム分を打ち消したキーボード高さ（resolveOverlayKeyboardInset の JSDoc）と、
@@ -532,7 +550,7 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         {...dialogProps}
         // #487: キーボード補正は max-height だけ。style は spread より後ろに
         // 置き、consumer の style は展開して残す（丸ごと落とさない）。
-        ref={setContentEl}
+        ref={setContentRef}
         style={{
           ...desktopBaseMaxHeightStyle,
           ...dialogProps.style,
@@ -569,7 +587,7 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         {...dialogProps}
         // #487: キーボード補正は max-height だけ。style は spread より後ろに
         // 置き、consumer の style は展開して残す（丸ごと落とさない）。
-        ref={setContentEl}
+        ref={setContentRef}
         style={{
           ...desktopBaseMaxHeightStyle,
           ...dialogProps.style,
@@ -651,7 +669,7 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         {...dialogProps}
         // #487: キーボード補正は max-height だけ。style は spread より後ろに
         // 置き、consumer の style は展開して残す（丸ごと落とさない）。
-        ref={setContentEl}
+        ref={setContentRef}
         style={{
           ...desktopBaseMaxHeightStyle,
           ...dialogProps.style,
