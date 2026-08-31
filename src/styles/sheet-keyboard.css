@@ -69,6 +69,38 @@ html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-sid
   max-height: max(0px, calc(100dvh - var(--kb-h, 0px) - 1.5rem - env(safe-area-inset-top, 0px)));
 }
 
+/* ── #487: デスクトップ（中央モーダル）分岐のキーボード補正 ──
+   幅 1024px 以上のタッチ端末（iPad 横向き = 1024 / 1194 / 1366px）は
+   「デスクトップ幅なのにソフトキーボードが出る」ため、ResponsiveOverlayFrame が
+   DialogContent（data-slot="dialog-content"）を描画したまま入力欄が隠れる。
+
+   ⚠️ 中央モーダルに当ててよいのは **max-height だけ**。`bottom` lift を当てると
+   `top:50% + translate-y:-50%` と両拘束になり、高さが縦一杯へ引き伸ばされる
+   （消費側 belle-todo で実際に起きた事故）。シート系のルールを流用しないこと。
+
+   幾何: 中央寄せの面は高さ H なら [dvh/2 - H/2, dvh/2 + H/2] を占める。可視領域は
+   [0, dvh - kb] なので H <= dvh - 2*kb。中央寄せではキーボード高さの 2 倍を引く
+   （dvh - kb では下端がキーボードへ潜り込む）。position="top" は上端固定なので
+   「キーボード + 上オフセット + 下マージン」を引く。position="fullscreen" は対象外。
+
+   JS 検知（responsive-overlay-frame.tsx の resolveDesktopOverlayKeyboardStyle）が
+   動くときは inline style で同値を書くため二重適用にならない。visualViewport が
+   inset を出せない環境では consumer の html[data-kb-open] + --kb-h でここが効く。
+   side="bottom"（preset / plain）/ float / float-glass の 3 経路すべてが
+   data-frame="responsive-overlay-frame" を出すため、1 ルールで全経路に届く。 */
+html[data-kb-open]
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="center"] {
+  max-height: max(0px, calc(100dvh - 2 * var(--kb-h, 0px)));
+}
+
+html[data-kb-open]
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="top"] {
+  max-height: max(
+    0px,
+    calc(100dvh - var(--kb-h, 0px) - max(env(safe-area-inset-top, 0px), 2rem) - 2rem)
+  );
+}
+
 /* ── #337: float-glass をスクロール可能にする ──
    高さキャップは overflow が clip/auto でないと「見えないまま切れる」だけになる。
    float は Tailwind の overflow-y-auto で足りるが、float-glass は

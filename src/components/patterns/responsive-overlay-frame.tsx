@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
 import { DialogContent } from "../ui/dialog"
 import { SheetContent } from "../ui/sheet"
 import { TitleSurfaceScaleProvider } from "../../lib/title-level"
@@ -71,6 +72,44 @@ const desktopFloatClasses = "sm:max-w-lg max-h-[min(85dvh,46rem)] flex flex-col 
 // モバイルの素の SheetContent（bottom バリアント）は flex ではなく block なので、
 // ここでも flex 化しない（子の幅・マージン・flex-1 の解釈を揃えるため）。
 const desktopPlainClasses = "sm:max-w-lg max-h-[min(90dvh,46rem)] overflow-y-auto"
+
+/**
+ * デスクトップ（中央モーダル）分岐のソフトキーボード補正（issue #487）。
+ *
+ * 幅 1024px 以上のタッチ端末（iPad 横向き = 1024 / 1194 / 1366px）は
+ * 「デスクトップ幅なのにソフトキーボードが出る」ため、中央モーダルとして
+ * 描画されたまま入力欄がキーボードに隠れる。
+ *
+ * ⚠️ 中央モーダルに当ててよいのは **max-height だけ**。`DialogContent` は
+ * `top:50% + translate-y:-50%` で位置決めしているので、シート系と同じ
+ * `bottom` lift を当てると top/bottom の両拘束になり高さが縦一杯へ
+ * 引き伸ばされる（消費側 belle-todo で実際に起きた事故）。
+ *
+ * 幾何: 中央寄せの面は高さ H なら `[dvh/2 - H/2, dvh/2 + H/2]` を占める。
+ * 可視領域は `[0, dvh - kb]` なので `dvh/2 + H/2 <= dvh - kb`、つまり
+ * **H <= dvh - 2*kb**。キーボード分の 2 倍を引くのが中央寄せの正解で、
+ * `dvh - kb` では下端がキーボードへ潜り込む。
+ *
+ * `position="top"` は上端固定（`top-8` / safe-area）なので二重に引く必要はなく、
+ * 「キーボード + 上オフセット + 下マージン」を引く。`position="fullscreen"` は
+ * 面そのものが可視領域ではなくビューポートに合わせる指定なので対象外。
+ *
+ * 高さは 0 で下限を切る（負値だと「上端が抜ける」不具合を「中身が高さ 0 で
+ * 消える」不具合にすり替えるだけになる — float 系と同じ判断 / #337）。
+ */
+function resolveDesktopOverlayKeyboardStyle(
+  keyboardInset: number,
+  position: "center" | "top" | "fullscreen"
+): { maxHeight: string } | undefined {
+  if (keyboardInset <= 0) return undefined
+  if (position === "fullscreen") return undefined
+  if (position === "top") {
+    return {
+      maxHeight: `max(0px, calc(100dvh - ${keyboardInset}px - max(env(safe-area-inset-top, 0px), 2rem) - 2rem))`,
+    }
+  }
+  return { maxHeight: `max(0px, calc(100dvh - ${keyboardInset * 2}px))` }
+}
 
 interface ResponsiveOverlayFrameBaseProps
   extends Omit<SheetContentProps, "side" | "padding"> {
@@ -195,6 +234,12 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   }
   const isDesktop = useResponsiveOverlayIsDesktop()
   const isFloat = floatSides.has(side)
+  // #487: デスクトップ幅のタッチ端末でもソフトキーボードは出る。中央モーダルの
+  // 高さだけを可視領域に収める（lift は当てない — 上の JSDoc 参照）。
+  const { keyboardInset } = useVisualViewportKeyboardInset()
+  const desktopKeyboardStyle = isDesktop
+    ? resolveDesktopOverlayKeyboardStyle(keyboardInset, desktopPosition)
+    : undefined
   // preset="plain" は BottomSheetFrame を通さず素の SheetContent を出す（#486）。
   const isPlain = !isFloat && preset === "plain"
 
@@ -231,6 +276,9 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
           desktopClassName
         )}
         {...dialogProps}
+        // #487: キーボード補正は max-height だけ。style は spread より後ろに
+        // 置き、consumer の style は展開して残す（丸ごと落とさない）。
+        style={{ ...dialogProps.style, ...desktopKeyboardStyle }}
       >
         <TitleSurfaceScaleProvider scale="dialog">{children}</TitleSurfaceScaleProvider>
       </DialogContent>
@@ -260,6 +308,9 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
           desktopClassName
         )}
         {...dialogProps}
+        // #487: キーボード補正は max-height だけ。style は spread より後ろに
+        // 置き、consumer の style は展開して残す（丸ごと落とさない）。
+        style={{ ...dialogProps.style, ...desktopKeyboardStyle }}
         // data-* は spread より後ろに置く（#339: consumer が上書きすると
         // DS / 消費側の CSS セレクタが丸ごと外れる）。
         data-frame="responsive-overlay-frame"
@@ -319,6 +370,10 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     return (
       <DialogContent
         data-frame="responsive-overlay-frame"
+        // #487: preset 経路のデスクトップ分岐だけ data-side が無く、DS からも
+        // consumer からもキーボード補正のセレクタを絞れなかった。float / plain
+        // と揃えて出す（補正の実体は下の sheet-keyboard.css と style 属性）。
+        data-side="bottom"
         data-preset={framePreset}
         data-surface={surface}
         position={desktopPosition}
@@ -330,6 +385,9 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
           desktopClassName
         )}
         {...dialogProps}
+        // #487: キーボード補正は max-height だけ。style は spread より後ろに
+        // 置き、consumer の style は展開して残す（丸ごと落とさない）。
+        style={{ ...dialogProps.style, ...desktopKeyboardStyle }}
       >
         {/*
           DialogContent は children を "dialog" 文脈で包むため、全画面級 preset は
@@ -404,7 +462,7 @@ function ResponsiveOverlayFooter({
   )
 }
 
-export { ResponsiveOverlayFrame, ResponsiveOverlayFooter }
+export { ResponsiveOverlayFrame, ResponsiveOverlayFooter, resolveDesktopOverlayKeyboardStyle }
 export type { ResponsiveOverlayFrameProps, ResponsiveOverlaySide }
 /** ResponsiveOverlayFooter の props（KeyboardAwareSheetFooter と同型）。 */
 export type { KeyboardAwareSheetFooterProps as ResponsiveOverlayFooterProps }
