@@ -150,6 +150,37 @@ const desktopFloatMaxHeight = "min(85dvh, 46rem)"
 const desktopPlainMaxHeight = "min(90dvh, 46rem)"
 
 /**
+ * 面に実際に効いている `max-height`（実測値）。
+ *
+ * 既定キャップは className でも上書きできる（desktopClassName の max-h ユーティリティ）。
+ * inline style は className より強いので、経路の既定値だけを見て畳むと
+ * consumer が締めたキャップを緩めてしまう（#487 の Codex レビュー指摘）。
+ * 補正が当たっていない間の computed 値を読めば、className / inline style /
+ * 経路の既定のどれで決まっていても「いま効いているキャップ」が取れる。
+ *
+ * 測るのは補正が当たっていないとき（`active` が false）だけ。当たっている間は
+ * 自分の inline 値を読み返してしまうので、直前の実測値を使い続ける。
+ */
+function useEffectiveMaxHeight(
+  el: HTMLElement | null,
+  active: boolean
+): string | undefined {
+  const [measured, setMeasured] = React.useState<string | undefined>()
+  React.useLayoutEffect(() => {
+    if (active) return
+    if (!el || typeof window === "undefined") return
+    const measure = () => {
+      const value = window.getComputedStyle(el).maxHeight
+      setMeasured((prev) => (prev === value ? prev : value))
+    }
+    measure()
+    window.addEventListener("resize", measure)
+    return () => window.removeEventListener("resize", measure)
+  }, [el, active])
+  return measured
+}
+
+/**
  * ズームを打ち消したソフトキーボード高さ（レイアウト px / issue #487）。
  *
  * `visualViewport.height` はソフトキーボードでもピンチズームでも縮むため、
@@ -272,18 +303,26 @@ function resolveDesktopOverlayKeyboardStyle(
   baseMaxHeight: string | undefined
 ): { maxHeight: string } | undefined {
   if (keyboardInset <= 0) return undefined
-  const cap =
+  // JS 検知（px）と CSS フォールバック（--kb-h）の 2 つの合図をそれぞれ
+  // キャップにして畳む。inline style は sheet-keyboard.css より強いので、
+  // var の項をここへ入れておかないと「visualViewport が inset を出せず
+  // consumer が html[data-kb-open] を立てている」環境で補正が消える
+  // （#487 の Codex レビュー指摘）。
+  const capFor = (inset: string, doubled: string) =>
     position === "fullscreen"
-      ? `max(0px, calc(100dvh - ${keyboardInset}px))`
+      ? `max(0px, calc(100dvh - ${inset}))`
       : position === "top"
-        ? `max(0px, calc(100dvh - ${keyboardInset}px - max(env(safe-area-inset-top, 0px), 2rem) - 2rem))`
-        : `max(0px, calc(100dvh - ${keyboardInset * 2}px))`
+        ? `max(0px, calc(100dvh - ${inset} - max(env(safe-area-inset-top, 0px), 2rem) - 2rem))`
+        : `max(0px, calc(100dvh - ${doubled}))`
+  const caps = [
+    capFor(`${keyboardInset}px`, `${keyboardInset * 2}px`),
+    capFor("var(--kb-h, 0px)", "2 * var(--kb-h, 0px)"),
+  ]
   // min() で畳むので、この補正は既定のキャップを緩めることが無い。
   // 既定が計算に使えない値（none / fit-content 等）のときは畳まず、
   // キーボード由来のキャップだけを当てる（min(none, …) は宣言ごと捨てられる）。
-  return {
-    maxHeight: baseMaxHeight ? `min(${baseMaxHeight}, ${cap})` : cap,
-  }
+  const operands = baseMaxHeight ? [baseMaxHeight, ...caps] : caps
+  return { maxHeight: `min(${operands.join(", ")})` }
 }
 
 interface ResponsiveOverlayFrameBaseProps
@@ -412,6 +451,11 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   // preset="plain" は BottomSheetFrame を通さず素の SheetContent を出す（#486）。
   const isPlain = !isFloat && preset === "plain"
 
+  // Radix の Portal / Presence は後のコミットで面をマウントするため、
+  // RefObject だと layout effect の時点で null のまま再実行されない。
+  // コールバック ref を state にして、マウントで確実に測り直す。
+  const [contentEl, setContentEl] = React.useState<HTMLDivElement | null>(null)
+
   // #487: デスクトップ幅のタッチ端末でもソフトキーボードは出る。中央モーダルの
   // 高さだけを可視領域に収める（lift は当てない — 上の JSDoc 参照）。
   // ズーム分を打ち消したキーボード高さ（resolveOverlayKeyboardInset の JSDoc）と、
@@ -422,7 +466,7 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   // 既定とみなす（補正で握り潰さない / #487）。
   const consumerMaxHeight = (allProps as { style?: React.CSSProperties }).style
     ?.maxHeight
-  const baseMaxHeight =
+  const declaredMaxHeight =
     consumerMaxHeight != null
       ? toCalculableMaxHeight(consumerMaxHeight)
       : isFloat
@@ -430,14 +474,23 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         : isPlain
           ? desktopPlainMaxHeight
           : desktopPresetMaxHeights[preset as BottomSheetFramePreset]
-  const desktopKeyboardStyle =
-    isDesktop && editableFocused
-      ? resolveDesktopOverlayKeyboardStyle(
-          keyboardInset,
-          desktopPosition,
-          baseMaxHeight
-        )
-      : undefined
+  const keyboardActive = isDesktop && editableFocused && keyboardInset > 0
+  // className（desktopClassName の max-h-[...] 等）で締められたキャップも
+  // 拾うため、補正が当たっていない間の computed 値を優先する。
+  const measuredMaxHeight = useEffectiveMaxHeight(contentEl, keyboardActive)
+  // 実測が取れたらそれが唯一の正（"none" のように計算に使えない実測は
+  // 「キャップ無し」なので、宣言側へフォールバックしない）。
+  const baseMaxHeight =
+    measuredMaxHeight != null && measuredMaxHeight !== ""
+      ? toCalculableMaxHeight(measuredMaxHeight)
+      : declaredMaxHeight
+  const desktopKeyboardStyle = keyboardActive
+    ? resolveDesktopOverlayKeyboardStyle(
+        keyboardInset,
+        desktopPosition,
+        baseMaxHeight
+      )
+    : undefined
   // CSS フォールバック（html[data-kb-open] + --kb-h）にも同じ既定値を渡す。
   const desktopBaseMaxHeightStyle =
     isDesktop && baseMaxHeight
@@ -479,6 +532,7 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         {...dialogProps}
         // #487: キーボード補正は max-height だけ。style は spread より後ろに
         // 置き、consumer の style は展開して残す（丸ごと落とさない）。
+        ref={setContentEl}
         style={{
           ...desktopBaseMaxHeightStyle,
           ...dialogProps.style,
@@ -515,6 +569,7 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         {...dialogProps}
         // #487: キーボード補正は max-height だけ。style は spread より後ろに
         // 置き、consumer の style は展開して残す（丸ごと落とさない）。
+        ref={setContentEl}
         style={{
           ...desktopBaseMaxHeightStyle,
           ...dialogProps.style,
@@ -596,6 +651,7 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         {...dialogProps}
         // #487: キーボード補正は max-height だけ。style は spread より後ろに
         // 置き、consumer の style は展開して残す（丸ごと落とさない）。
+        ref={setContentEl}
         style={{
           ...desktopBaseMaxHeightStyle,
           ...dialogProps.style,

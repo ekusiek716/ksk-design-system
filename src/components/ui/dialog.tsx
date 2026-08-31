@@ -190,6 +190,7 @@ function DialogContent({
   bodyScrollLock: _bodyScrollLock = true,
   zIndex,
   style,
+  ref,
   ...props
 }: DialogContentProps) {
   const autoDescId = React.useId()
@@ -219,6 +220,20 @@ function DialogContent({
     contentRef,
     "dialog-description",
     autoLinkDescription
+  )
+
+  // 内側の contentRef（autoFocus / フォーカス復帰 / aria-describedby の紐付け）を
+  // 保ったまま、呼び出し側の ref にも同じ要素を渡す（#487: ResponsiveOverlayFrame が
+  // 実効 max-height を実測するのに面の DOM を要る）。
+  const mergedRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      setContentNode(node)
+      if (typeof ref === "function") ref(node)
+      else if (ref) {
+        ;(ref as React.RefObject<HTMLDivElement | null>).current = node
+      }
+    },
+    [setContentNode, ref]
   )
   const handleOpenAutoFocus = (event: Event) => {
     captureRestoreFocus(restoreFocusRef)
@@ -250,7 +265,7 @@ function DialogContent({
     <DialogPortal>
       <DialogOverlay stackLevel={stackLevel} />
       <DialogPrimitive.Content
-        ref={setContentNode}
+        ref={mergedRef}
         data-slot="dialog-content"
         data-position={position}
         data-safe-area={safeArea}

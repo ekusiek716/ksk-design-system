@@ -30,6 +30,28 @@ import {
   resolveOverlayKeyboardInset,
 } from "../src/components/patterns/responsive-overlay-frame"
 
+/**
+ * 期待される inline max-height。JS 検知（px）と CSS フォールバック
+ * （--kb-h）の 2 つのキャップを、既定キャップと一緒に min() で畳む。
+ */
+function expectedMaxHeight(
+  base: string | undefined,
+  kb: number,
+  position: "center" | "top" | "fullscreen" = "center"
+) {
+  const capFor = (inset: string, doubled: string) =>
+    position === "fullscreen"
+      ? `max(0px, calc(100dvh - ${inset}))`
+      : position === "top"
+        ? `max(0px, calc(100dvh - ${inset} - max(env(safe-area-inset-top, 0px), 2rem) - 2rem))`
+        : `max(0px, calc(100dvh - ${doubled}))`
+  const caps = [
+    capFor(`${kb}px`, `${kb * 2}px`),
+    capFor("var(--kb-h, 0px)", "2 * var(--kb-h, 0px)"),
+  ]
+  return `min(${(base ? [base, ...caps] : caps).join(", ")})`
+}
+
 /** preset="mobile-form" の既定キャップ（desktopPresetClasses と同値）。 */
 const BASE = "min(85dvh, 40rem)"
 
@@ -40,7 +62,7 @@ describe("resolveDesktopOverlayKeyboardStyle — 中央モーダルのキーボ�
 
   it("中央寄せはキーボード高さの 2 倍を引く（両側に均等に食われるため）", () => {
     expect(resolveDesktopOverlayKeyboardStyle(300, "center", BASE)).toEqual({
-      maxHeight: "min(min(85dvh, 40rem), max(0px, calc(100dvh - 600px)))",
+      maxHeight: expectedMaxHeight(BASE, 300),
     })
   })
 
@@ -53,8 +75,7 @@ describe("resolveDesktopOverlayKeyboardStyle — 中央モーダルのキーボ�
 
   it("position=\"top\" は上端固定なので 1 回分 + 上下オフセットを引く", () => {
     expect(resolveDesktopOverlayKeyboardStyle(300, "top", BASE)).toEqual({
-      maxHeight:
-        "min(min(85dvh, 40rem), max(0px, calc(100dvh - 300px - max(env(safe-area-inset-top, 0px), 2rem) - 2rem)))",
+      maxHeight: expectedMaxHeight(BASE, 300, "top"),
     })
   })
 
@@ -62,7 +83,7 @@ describe("resolveDesktopOverlayKeyboardStyle — 中央モーダルのキーボ�
   // キーボード 1 回分を引けば面が可視領域へ縮み、内側のスクロール領域は残る。
   it("position=\"fullscreen\" はキーボード 1 回分を引く", () => {
     expect(resolveDesktopOverlayKeyboardStyle(300, "fullscreen", BASE)).toEqual({
-      maxHeight: "min(min(85dvh, 40rem), max(0px, calc(100dvh - 300px)))",
+      maxHeight: expectedMaxHeight(BASE, 300, "fullscreen"),
     })
   })
 
@@ -258,9 +279,7 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
       await flushFocus()
 
       // 補正は既定キャップを緩めない（min で畳む / #487）。
-      expect(el.style.maxHeight).toBe(
-        `min(${base}, max(0px, calc(100dvh - 600px)))`
-      )
+      expect(el.style.maxHeight).toBe(expectedMaxHeight(base, 300))
       // lift は当てない（当てると top/bottom 両拘束で高さが飛ぶ）。
       expect(el.style.bottom).toBe("")
       expect(el.style.top).toBe("")
@@ -289,7 +308,7 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
 
     expect(el.getAttribute("data-position")).toBe("fullscreen")
     expect(el.style.maxHeight).toBe(
-      "min(min(90dvh, 44rem), max(0px, calc(100dvh - 300px)))"
+      expectedMaxHeight("min(90dvh, 44rem)", 300, "fullscreen")
     )
     expect(el.style.bottom).toBe("")
   })
@@ -332,9 +351,7 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     stubKeyboard(768, 768 - 234, 2)
     const el = renderFrame({ preset: "mobile-form" })
     await flushFocus()
-    expect(el.style.maxHeight).toBe(
-        "min(min(85dvh, 40rem), max(0px, calc(100dvh - 600px)))"
-      )
+    expect(el.style.maxHeight).toBe(expectedMaxHeight(BASE, 300))
     expect(el.style.bottom).toBe("")
   })
 
@@ -356,9 +373,7 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
       act(() => editor.focus())
       await flushFocus()
 
-      expect(el.style.maxHeight).toBe(
-        "min(min(85dvh, 40rem), max(0px, calc(100dvh - 600px)))"
-      )
+      expect(el.style.maxHeight).toBe(expectedMaxHeight(BASE, 300))
     }
   )
 
@@ -393,9 +408,7 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     } as Partial<FrameProps>)
     await flushFocus()
     expect(el.style.outlineOffset).toBe("3px")
-    expect(el.style.maxHeight).toBe(
-        "min(min(85dvh, 40rem), max(0px, calc(100dvh - 600px)))"
-      )
+    expect(el.style.maxHeight).toBe(expectedMaxHeight(BASE, 300))
   })
 
   // React は数値の maxHeight を px として解釈する。min() へそのまま埋めると
@@ -415,9 +428,37 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     expect(el.style.getPropertyValue("--Overlay-Desktop-Base-Max-Height")).toBe(
       expected
     )
-    expect(el.style.maxHeight).toBe(
-      `min(${expected}, max(0px, calc(100dvh - 600px)))`
-    )
+    expect(el.style.maxHeight).toBe(expectedMaxHeight(expected, 300))
+  })
+
+  // 既定キャップは desktopClassName でも締められる。実測（computed）を
+  // 基準にしているので、className 由来の締めも緩めない。
+  it("desktopClassName の高さ上書きも既定キャップとして畳む", async () => {
+    stubViewport(1024)
+    stubKeyboard(768, 300)
+    // jsdom は Tailwind の任意値クラスを解決しないので、computed 値を直接与える。
+    const spy = vi
+      .spyOn(window, "getComputedStyle")
+      .mockImplementation(
+        () => ({ maxHeight: "60vh" }) as unknown as CSSStyleDeclaration
+      )
+    try {
+      const el = renderFrame({
+        preset: "mobile-form",
+        // 既に safelist にあるクラスを使う（テスト専用の任意値を書くと
+        // 生成器が製品の @source inline に拾ってしまう）。
+        desktopClassName: "max-h-[60vh]",
+      } as Partial<FrameProps>)
+      await flushFocus()
+
+      // 経路の既定（40rem）ではなく実測の 60vh が基準になる。
+      expect(el.style.maxHeight).toBe(expectedMaxHeight("60vh", 300))
+      expect(
+        el.style.getPropertyValue("--Overlay-Desktop-Base-Max-Height")
+      ).toBe("60vh")
+    } finally {
+      spy.mockRestore()
+    }
   })
 
   // max-height としては妥当でも min() の被演算子にできない値がある。
@@ -433,7 +474,7 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
       } as Partial<FrameProps>)
       await flushFocus()
 
-      expect(el.style.maxHeight).toBe("max(0px, calc(100dvh - 600px))")
+      expect(el.style.maxHeight).toBe(expectedMaxHeight(undefined, 300))
       expect(
         el.style.getPropertyValue("--Overlay-Desktop-Base-Max-Height")
       ).toBe("")
@@ -449,7 +490,7 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     } as Partial<FrameProps>)
     await flushFocus()
 
-    expect(el.style.maxHeight).toBe("min(50%, max(0px, calc(100dvh - 600px)))")
+    expect(el.style.maxHeight).toBe(expectedMaxHeight("50%", 300))
   })
 
   it("モバイル幅ではデスクトップ補正は関与しない（シートのまま）", () => {
