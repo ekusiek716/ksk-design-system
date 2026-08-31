@@ -85,11 +85,37 @@ const desktopPlainClasses = "sm:max-w-lg max-h-[min(90dvh,46rem)] overflow-y-aut
  * ソフトキーボードは編集可能な要素にフォーカスが無ければ出ないため、
  * 「キーボードが出ている」の必要条件として過不足がない。
  *
+ * ただしフォーカスだけでは足りない: 入力欄にフォーカスしたままピンチズーム
+ * すると `editableFocused` は true のままなので、ズーム分がキーボード高さとして
+ * 渡ってしまう（200% ズームだと中央寄せのキャップが 0 になり面が消える）。
+ * 縮みの原因がズームかどうかは `visualViewport.scale` で判別できるので、
+ * `useVisualViewportZoomed()` を AND 条件のもう一方に置く。
+ *
  * ⚠️ CSS フォールバック（`html[data-kb-open]` + `--kb-h`）は consumer が
  * 明示的に立てる合図なのでこのゲートの対象外 — あちらは誤検知しない。
  */
 const editableSelector =
   'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]'
+
+/**
+ * ピンチズーム中か（`visualViewport.scale > 1`）。
+ * ズームでも `visualViewport.height` は縮むため、キーボード補正の判定から
+ * ズーム由来の縮みを外すのに使う（issue #487 の Codex レビュー指摘）。
+ * ズームは離散的な倍率ゆらぎがあるので、わずかな超過は等倍として扱う。
+ */
+function useVisualViewportZoomed(): boolean {
+  const [zoomed, setZoomed] = React.useState(false)
+  React.useEffect(() => {
+    if (typeof window === "undefined") return
+    const viewport = window.visualViewport
+    if (!viewport) return
+    const update = () => setZoomed((viewport.scale ?? 1) > 1.01)
+    update()
+    viewport.addEventListener("resize", update)
+    return () => viewport.removeEventListener("resize", update)
+  }, [])
+  return zoomed
+}
 
 function useEditableElementFocused(): boolean {
   const [focused, setFocused] = React.useState(false)
@@ -280,11 +306,13 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   // #487: デスクトップ幅のタッチ端末でもソフトキーボードは出る。中央モーダルの
   // 高さだけを可視領域に収める（lift は当てない — 上の JSDoc 参照）。
   const { keyboardInset } = useVisualViewportKeyboardInset()
-  // ピンチズームでも visualViewport は縮むため、編集可能な要素への
-  // フォーカスを AND 条件にする（useEditableElementFocused の JSDoc 参照）。
+  // ピンチズームでも visualViewport は縮むため、「編集可能な要素にフォーカスが
+  // ある」かつ「ズーム中ではない」を AND 条件にする
+  // （useEditableElementFocused / useVisualViewportZoomed の JSDoc 参照）。
   const editableFocused = useEditableElementFocused()
+  const zoomed = useVisualViewportZoomed()
   const desktopKeyboardStyle =
-    isDesktop && editableFocused
+    isDesktop && editableFocused && !zoomed
       ? resolveDesktopOverlayKeyboardStyle(keyboardInset, desktopPosition)
       : undefined
   // preset="plain" は BottomSheetFrame を通さず素の SheetContent を出す（#486）。

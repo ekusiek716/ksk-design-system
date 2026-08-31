@@ -132,11 +132,12 @@ function stubViewport(width: number) {
 }
 
 /** iPad 横向き相当（1024px 幅・タッチ）でソフトキーボードが出た状態を作る。 */
-function stubKeyboard(layoutHeight: number, keyboardHeight: number) {
+function stubKeyboard(layoutHeight: number, keyboardHeight: number, scale = 1) {
   vi.stubGlobal("innerHeight", layoutHeight)
   vi.stubGlobal("visualViewport", {
     height: layoutHeight - keyboardHeight,
     offsetTop: 0,
+    scale,
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
   })
@@ -244,6 +245,19 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
       await new Promise((r) => setTimeout(r, 0))
     })
     expect(document.activeElement).not.toBe(
+      el.querySelector('[data-testid="field"]')
+    )
+    expect(el.style.maxHeight).toBe("")
+  })
+
+  // 入力欄にフォーカスしたままピンチズームすると focus ゲートは通ってしまう。
+  // 縮みの原因は visualViewport.scale で判別できるので、ズーム中は補正しない
+  // （200% ズームだと中央寄せのキャップが 0 になり面が消えるため）。
+  it("入力欄にフォーカスしたままのピンチズームでも補正しない", () => {
+    stubViewport(1024)
+    stubKeyboard(768, 384, 2)
+    const el = renderFrame({ preset: "mobile-form" })
+    expect(document.activeElement).toBe(
       el.querySelector('[data-testid="field"]')
     )
     expect(el.style.maxHeight).toBe("")
