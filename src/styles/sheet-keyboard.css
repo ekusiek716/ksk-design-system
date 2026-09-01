@@ -158,6 +158,17 @@ html[data-kb-open]
   );
 }
 
+/* safeArea={false} は DialogContent 自身も top-8 固定になるので、上オフセットも
+   2rem で揃える（env() を足すと明示的な opt-out を無視して余計に縮む / #487）。
+   DialogContent は position に関わらず data-safe-area を出す。 */
+html[data-kb-open]
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="top"][data-safe-area="false"]:not([data-kb-measuring]) {
+  max-height: min(
+    var(--Overlay-Desktop-Base-Max-Height, 100dvh),
+    max(0px, calc(100dvh - var(--kb-h, 0px) - 2rem - 2rem))
+  );
+}
+
 /* ── #337: float-glass をスクロール可能にする ──
    高さキャップは overflow が clip/auto でないと「見えないまま切れる」だけになる。
    float は Tailwind の overflow-y-auto で足りるが、float-glass は

@@ -192,6 +192,18 @@ describe("sheet-keyboard.css — dialog-content フォールバック契約", ()
   // 100dvh から二重に引いて面が潰れる）。契約が消えたら気づけるようにする。
   // inline style は祖先の属性を見られないので、data-kb-open で開閉する
   // 別変数（--kb-h-active）を CSS 側で用意している必要がある。
+  // safeArea={false} は top-8 固定なので、フォールバック側も env() を足さない。
+  it("safeArea={false} 用の top ルールがある", () => {
+    expect(css).toMatch(
+      /\[data-position="top"\]\[data-safe-area="false"\]:not\(\[data-kb-measuring\]\)/
+    )
+    const rule = css.match(
+      /\[data-position="top"\]\[data-safe-area="false"\][^{]*\{([^}]*)\}/
+    )?.[1]
+    expect(rule).toBeDefined()
+    expect(rule).not.toMatch(/env\(safe-area-inset-top/)
+  })
+
   it("--kb-h-active を data-kb-open で開閉している", () => {
     expect(css).toMatch(
       /\[data-slot="dialog-content"\]\[data-frame="responsive-overlay-frame"\]\s*\{\s*--kb-h-active:\s*0px/
