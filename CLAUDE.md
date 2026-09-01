@@ -50,8 +50,9 @@ UI を書く前に必ず確認すること:
 - [ ] **インタラクティブな部品は a11y 既定値を自分で持つか**。`accessibilityRole` と、状態（selected / disabled / checked）の `accessibilityState` 反映は**呼び出し側の義務にしない**。呼び出し側の明示値が優先される形で部品が既定を持つ（#311: Chip が role を持たず、スクリーンリーダーにただのテキストとして扱われた）
 - [ ] **モードを持つ部品（単一/複数選択・開閉など）の既定値は、間違えて使うと壊れる側にしていないか**。既定で済ませた呼び出しが静かに誤動作する組み合わせ（例: ChipSelector の既定 `multiple=true` を単一選択のつもりで使うと、押しても values[0] が現在値のまま切り替わらない）は、既定を安全側へ倒すか、必須 prop にして省略をコンパイルエラーにする
 - [ ] **名前付きスロット（meta / description 等）は「何を・どこに置くか」を JSDoc に書いたか**。書いていないスロットは consumer に流用され、想定外の位置崩れになる（#309: ActionTile の meta に選択チェックを入れられ、左下に浮いた）
+- [ ] **内部で要素を掴む部品は、consumer の `ref` を `useComposedRef` で合成したか**（`src/lib/compose-ref.ts`）。自前で `typeof ref === "function" ? ref(node) : ...` と書くと consumer のコールバック ref が返した cleanup を捨てる。インラインのアロー ref も毎 render で identity が変わり detach → attach を繰り返す（#510: dialog / responsive-overlay-frame / use-value-length / quick-action-grid の4か所で同じ型を出した）
 
-いずれも lint では拾えない設計判断なので、レビューではこの4点を明示的に見る。
+いずれも lint では拾えない設計判断なので、レビューではこの5点を明示的に見る。
 
 ---
 
