@@ -21,6 +21,11 @@
    `html[data-kb-open]` + `--kb-h`（キーボード高さ px）を書けば、この CSS が
    同じ補正を適用する。belle-todo の回避実装（globals.css）と等価。
 
+   ⚠️ ここでも `--kb-h` は「キーボードが覆っている高さ」。レイアウトビューポート
+   自体が縮む環境（interactive-widget=resizes-content）では 100dvh / 画面下端が
+   既にキーボードを除いた位置なので、consumer は `--kb-h` を 0 のままにする
+   （書くと lift と max-height の両方が二重に効く）。
+
    - `bottom: var(--kb-h)` … キーボード分だけシート下端を持ち上げる
    - `max-height: calc(100dvh - var(--kb-h))` … 上端が画面外へ抜けないよう制限
    - snap モード（`[data-snap-active]`）は自前で高さ制御するため max-height
@@ -67,6 +72,101 @@ html[data-kb-open]
 html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-side="float-glass"]) {
   bottom: calc(var(--kb-h, 0px) + 0.75rem);
   max-height: max(0px, calc(100dvh - var(--kb-h, 0px) - 1.5rem - env(safe-area-inset-top, 0px)));
+}
+
+/* ── #487: デスクトップ（中央モーダル）分岐のキーボード補正 ──
+   幅 1024px 以上のタッチ端末（iPad 横向き = 1024 / 1194 / 1366px）は
+   「デスクトップ幅なのにソフトキーボードが出る」ため、ResponsiveOverlayFrame が
+   DialogContent（data-slot="dialog-content"）を描画したまま入力欄が隠れる。
+
+   ⚠️ 中央モーダルに当ててよいのは **max-height だけ**。`bottom` lift を当てると
+   `top:50% + translate-y:-50%` と両拘束になり、高さが縦一杯へ引き伸ばされる
+   （消費側 belle-todo で実際に起きた事故）。シート系のルールを流用しないこと。
+
+   幾何: 中央寄せの面は高さ H なら [dvh/2 - H/2, dvh/2 + H/2] を占める。可視領域は
+   [0, dvh - kb] なので H <= dvh - 2*kb。中央寄せではキーボード高さの 2 倍を引く
+   （dvh - kb では下端がキーボードへ潜り込む）。position="top" は上端固定なので
+   「キーボード + 上オフセット + 下マージン」を引く。position="fullscreen" は
+   inset-0 h-full の上端固定なのでキーボード 1 回分だけを引く（h-full は max-height に
+   負けるため、面が可視領域へ縮み内側のスクロール領域は残る）。
+
+   ⚠️ `--kb-h` の意味は「キーボードがビューポートを **覆っている** 高さ」。
+   `interactive-widget=resizes-content` のようにレイアウトビューポート自体が
+   縮む環境では 100dvh が既にキーボード分を除いているので、consumer は
+   `--kb-h` を 0 のままにする（そこで覆い高さを書くと二重に引き、
+   800px のビューポート + 300px のキーボードで 500px - 600px となって
+   面が高さ 0 に潰れる / #487 の Codex レビュー指摘）。
+   逆に「キーボードが覆うだけでレイアウトは縮まない」環境は visualViewport が
+   inset を返すので JS 側が補正する。CSS フォールバックは JS 検知が使えない
+   環境向けの保険で、その場合も覆い高さを書けば正しい。
+
+   ⚠️ 既定のキャップ（className の max-h-[...]）を緩めないよう、必ず
+   min(--Overlay-Desktop-Base-Max-Height, キーボード由来) で畳む。この変数は
+   ResponsiveOverlayFrame がデスクトップ分岐で常に inline style として出す
+   （consumer が style.maxHeight を渡した場合はそちらが入る）。畳まないと
+   インセットが小さいときに面が既定より広がる（#487 の Codex レビュー指摘）。
+
+   `:not([data-kb-measuring])` は実効キャップの実測中だけ自分を外すための除外。
+   これが無いと、frame が inline を剥がして測った瞬間にここの補正値が出てきて、
+   それを新しい基準として記録してしまう（#487）。
+
+   JS 検知（responsive-overlay-frame.tsx の resolveDesktopOverlayKeyboardStyle）が
+   動くときは inline style で同値を書くため二重適用にならない。visualViewport が
+   inset を出せない環境では consumer の html[data-kb-open] + --kb-h でここが効く。
+   side="bottom"（preset / plain）/ float / float-glass の 3 経路すべてが
+   data-frame="responsive-overlay-frame" を出すため、1 ルールで全経路に届く。 */
+/* ── #487: CSS フォールバックの合図（--kb-h）を data-kb-open で閉じる ──
+   frame の inline style も var(--kb-h) の項を畳み込むが、inline からは
+   祖先の属性を見られない。consumer が data-kb-open を外しても --kb-h を
+   残す運用（規則側の活性化は属性が担うので妥当）だと、次に JS 検知した
+   キーボードで古い値まで一緒に引いてしまう（400px の次に 200px が来ると
+   古い 800px を引き続けて潰れる / Codex レビュー指摘）。
+   属性が立っている間だけ値を持つ別変数を用意し、inline はそちらを見る。 */
+[data-slot="dialog-content"][data-frame="responsive-overlay-frame"] {
+  --kb-h-active: 0px;
+}
+
+html[data-kb-open]
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"] {
+  --kb-h-active: var(--kb-h, 0px);
+}
+
+html[data-kb-open]
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="center"]:not([data-kb-measuring]) {
+  max-height: min(
+    var(--Overlay-Desktop-Base-Max-Height, 100dvh),
+    max(0px, calc(100dvh - 2 * var(--kb-h, 0px)))
+  );
+}
+
+html[data-kb-open]
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="fullscreen"]:not([data-kb-measuring]) {
+  max-height: min(
+    var(--Overlay-Desktop-Base-Max-Height, 100dvh),
+    max(0px, calc(100dvh - var(--kb-h, 0px)))
+  );
+}
+
+html[data-kb-open]
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="top"]:not([data-kb-measuring]) {
+  max-height: min(
+    var(--Overlay-Desktop-Base-Max-Height, 100dvh),
+    max(
+      0px,
+      calc(100dvh - var(--kb-h, 0px) - max(env(safe-area-inset-top, 0px), 2rem) - 2rem)
+    )
+  );
+}
+
+/* safeArea={false} は DialogContent 自身も top-8 固定になるので、上オフセットも
+   2rem で揃える（env() を足すと明示的な opt-out を無視して余計に縮む / #487）。
+   DialogContent は position に関わらず data-safe-area を出す。 */
+html[data-kb-open]
+  [data-slot="dialog-content"][data-frame="responsive-overlay-frame"][data-position="top"][data-safe-area="false"]:not([data-kb-measuring]) {
+  max-height: min(
+    var(--Overlay-Desktop-Base-Max-Height, 100dvh),
+    max(0px, calc(100dvh - var(--kb-h, 0px) - 2rem - 2rem))
+  );
 }
 
 /* ── #337: float-glass をスクロール可能にする ──

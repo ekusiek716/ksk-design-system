@@ -606,6 +606,7 @@
 @source inline("max-h-(--radix-dropdown-menu-content-available-height)");
 @source inline("max-h-60");
 @source inline("max-h-96");
+@source inline("max-h-[...]");
 @source inline("max-h-[60vh]");
 @source inline("max-h-[86dvh]");
 @source inline("max-h-[88dvh]");
