@@ -638,7 +638,7 @@
         "size はまずプリセット（sm=32 / md=48 / lg=64 / xl=96px）から選ぶ。既存デザインの実寸に合わせる必要があるときだけ px の数値を渡す。",
         "color / trackColor は semantic トークンの var(--...) 文字列のみ。生 hex と --Primitive-* は型で受け付けない（P015）。",
         "strokeWidth が径の半分以上でも描画は消えず、描ける最大幅へ丸められる。",
-        "線の太さは Web / Native とも strokeWidth。Native の thickness は非推奨エイリアスで 2.0.0 で削除される（issue #495）。両方渡した場合は strokeWidth が優先される。"
+        "線の太さは Web / Native とも strokeWidth。Native の thickness は非推奨エイリアスで 3.0.0 で削除される（issue #495。2.0.0 では削除していない）。両方渡した場合は strokeWidth が優先される。"
       ]
     },
     {
