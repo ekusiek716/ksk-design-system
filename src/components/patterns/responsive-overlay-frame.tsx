@@ -165,7 +165,10 @@ const desktopPlainMaxHeight = "min(90dvh, 46rem)"
  * 出ている」（iPad を境界跨ぎで回転した等）ケースでも初回から実測できる
  * ようにするため、active を理由に測定を諦めない（#487 の Codex レビュー指摘）。
  */
-function useEffectiveMaxHeight(
+// `src/index.ts` からは出していない内部フック。ref churn 下でも state が
+// 発散しない契約（#516）を単体で固定するため、同ファイルの
+// resolveDesktopOverlayKeyboardStyle 等と同じくテストへ公開する。
+export function useEffectiveMaxHeight(
   active: boolean,
   consumerInlineMaxHeight: string,
   classSignature: string
@@ -176,12 +179,21 @@ function useEffectiveMaxHeight(
   // 面の DOM は ref で持つ。測定のあいだだけ inline style を差し替えるので、
   // props や useState の値だと react-hooks/immutability に引っかかる
   // （ref は React が認めている可変の逃げ道）。ただし ref だけだと
-  // マウントで effect が再実行されないため、世代カウンタを state に持つ。
+  // マウントで effect が再実行されないため、掴んでいる node を state にも持つ。
+  //
+  // ここは「世代カウンタ」にしてはいけない（#516 の無限ループ回帰）。
+  // Radix の DismissableLayer / FocusScope は composeRefs へ毎 render 新しい
+  // arrow を渡す版があり（consumer が古い @radix-ui/react-* を解決していると
+  // こちらになる）、その場合 React は render のたびに ref chain を
+  // detach → attach し直す。カウンタだと detach(null) + attach(node) で必ず
+  // +2 され、state が変わる → 再 render → また detach/attach … と発散する。
+  // node そのものを state にすれば、同一 commit 内の null → node は
+  // 最終値が変わらないため React が bail out し、churn が収束する。
   const elRef = React.useRef<HTMLDivElement | null>(null)
-  const [mountVersion, setMountVersion] = React.useState(0)
+  const [mountedNode, setMountedNode] = React.useState<HTMLDivElement | null>(null)
   const setElement = React.useCallback((node: HTMLDivElement | null) => {
     elRef.current = node
-    setMountVersion((v) => v + 1)
+    setMountedNode(node)
   }, [])
   const [measured, setMeasured] = React.useState<string | undefined>()
   React.useLayoutEffect(() => {
@@ -208,7 +220,7 @@ function useEffectiveMaxHeight(
     measure()
     window.addEventListener("resize", measure)
     return () => window.removeEventListener("resize", measure)
-  }, [mountVersion, active, consumerInlineMaxHeight, classSignature])
+  }, [mountedNode, active, consumerInlineMaxHeight, classSignature])
   return { setElement, measured }
 }
 
