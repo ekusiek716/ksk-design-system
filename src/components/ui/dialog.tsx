@@ -3,6 +3,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { usePortalContainer } from "./portal-container"
 import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
+import { useComposedRef } from "@/lib/compose-ref"
 import {
   ModalStackRegistrar,
   ModalityProvider,
@@ -237,31 +238,7 @@ function DialogContent({
   // 内側の contentRef（autoFocus / フォーカス復帰 / aria-describedby の紐付け）を
   // 保ったまま、呼び出し側の ref にも同じ要素を渡す（#487: ResponsiveOverlayFrame が
   // 実効 max-height を実測するのに面の DOM を要る）。
-  // React 19 のコールバック ref は cleanup を返せる。返した場合 React は
-  // ref(null) を呼ばずに cleanup を呼ぶので、呼び出し側の cleanup を
-  // そのまま伝播させつつ、内部側の解除もここで行う。
-  const mergedRef = React.useCallback(
-    (node: HTMLDivElement | null) => {
-      setContentNode(node)
-      const consumerCleanup =
-        typeof ref === "function"
-          ? ref(node)
-          : ref
-            ? (((ref as React.RefObject<HTMLDivElement | null>).current = node),
-              undefined)
-            : undefined
-      // React 18 のコールバック ref は戻り値を許さない（"Unexpected return
-      // value from a callback ref" の警告になる）。cleanup を返すのは
-      // consumer が cleanup を返したときだけにする。返さない経路では
-      // React が ref(null) を呼ぶので、この関数の本体側で解除される。
-      if (typeof consumerCleanup !== "function") return
-      return () => {
-        setContentNode(null)
-        consumerCleanup()
-      }
-    },
-    [setContentNode, ref]
-  )
+  const mergedRef = useComposedRef(setContentNode, ref)
   const handleOpenAutoFocus = (event: Event) => {
     captureRestoreFocus(restoreFocusRef)
     props.onOpenAutoFocus?.(event)

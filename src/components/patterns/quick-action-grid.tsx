@@ -3,6 +3,7 @@ import * as React from "react"
 // 選択済みの印には TickSquare（チェックボックス）を使う。
 import { TickSquare } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
+import { useComposedRef } from "@/lib/compose-ref"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { Spinner } from "@/components/ui/spinner"
 
@@ -223,6 +224,13 @@ function QuickActionGrid({
   ...props
 }: QuickActionGridProps) {
   const innerRef = React.useRef<HTMLDivElement | null>(null)
+  // 内部の innerRef（ロービング tabindex の走査に使う）と consumer の ref に
+  // 同じ node を渡す。インラインのアロー ref だと毎 render で ref 関数の
+  // identity が変わり、React が detach → attach を繰り返してしまう。
+  const setInnerElement = React.useCallback((node: HTMLDivElement | null) => {
+    innerRef.current = node
+  }, [])
+  const mergedRef = useComposedRef(setInnerElement, ref)
   const isSingle = selectionMode === "single"
 
   // roving tabindex: 選択中のタイルだけ tabIndex=0（未選択なら先頭）。
@@ -279,11 +287,7 @@ function QuickActionGrid({
   return (
     <div
       data-slot="quick-action-grid"
-      ref={(node: HTMLDivElement | null) => {
-        innerRef.current = node
-        if (typeof ref === "function") ref(node)
-        else if (ref) ref.current = node
-      }}
+      ref={mergedRef}
       role={role ?? (isSingle ? "radiogroup" : undefined)}
       data-selection-mode={selectionMode}
       onKeyDown={handleKeyDown}

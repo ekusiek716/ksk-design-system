@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 import { DialogContent } from "../ui/dialog"
 import { SheetContent } from "../ui/sheet"
 import { TitleSurfaceScaleProvider } from "../../lib/title-level"
+import { useComposedRef } from "../../lib/compose-ref"
 import { useResponsiveOverlayIsDesktop } from "../ui/responsive-dialog"
 import type { SheetContentProps } from "../ui/sheet"
 import { BottomSheetFrame, type BottomSheetFramePreset } from "./bottom-sheet-frame"
@@ -533,31 +534,11 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   // モバイル（Sheet）分岐では素通しなのに、デスクトップ分岐だけ計測用の
   // ref で上書きすると、境界を跨いだ瞬間に consumer の ref が空になる。
   const consumerRef = (allProps as { ref?: React.Ref<HTMLDivElement> }).ref
-  // React 19 のコールバック ref は cleanup を返せるので、consumer が返した
-  // cleanup を握り潰さずに伝播させる（返すと React は ref(null) を呼ばない）。
-  const setContentRef = React.useCallback(
-    (node: HTMLDivElement | null) => {
-      setElement(node)
-      const consumerCleanup =
-        typeof consumerRef === "function"
-          ? consumerRef(node)
-          : consumerRef
-            ? (((consumerRef as React.RefObject<HTMLDivElement | null>).current =
-                node),
-              undefined)
-            : undefined
-      // React 18 のコールバック ref は戻り値を許さない（"Unexpected return
-      // value from a callback ref" の警告になる）。cleanup を返すのは
-      // consumer が cleanup を返したときだけにする。返さない経路では
-      // React が ref(null) を呼ぶので、この関数の本体側で解除される。
-      if (typeof consumerCleanup !== "function") return
-      return () => {
-        setElement(null)
-        consumerCleanup()
-      }
-    },
-    [setElement, consumerRef]
-  )
+  // consumerRef は「ref の値」を合成 ref へ引き渡しているだけで、`.current` を
+  // render 中に読んではいない。react-hooks/refs は cast 経由で取り出した
+  // React.Ref を render 時の ref 読み取りと誤検出するため、ここだけ抑止する。
+  // eslint-disable-next-line react-hooks/refs
+  const setContentRef = useComposedRef(setElement, consumerRef)
 
   // RefObject だと layout effect の時点で null のまま再実行されない。
   // コールバック ref を state にして、マウントで確実に測り直す。

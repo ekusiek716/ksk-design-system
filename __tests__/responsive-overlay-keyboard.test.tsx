@@ -536,9 +536,9 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     expect(seen).toContain(el2)
   })
 
-  // React 18 のコールバック ref は戻り値を許さない（"Unexpected return value
-  // from a callback ref" の警告）ので、cleanup を返すのは consumer が
-  // cleanup を返したときだけ。返さない場合は React が ref(null) を呼ぶ。
+  // 合成 ref（useComposedRef）は常に cleanup を返すので、React は detach 時に
+  // ref(null) を呼ばない。consumer が cleanup を返さない場合は合成 ref 側が
+  // 代わりに null を書き戻す。
   it("cleanup を返さない consumer ref にはアンマウントで null が渡る", () => {
     stubViewport(1024)
     const seen: Array<HTMLElement | null> = []
