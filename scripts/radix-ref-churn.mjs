@@ -43,6 +43,7 @@
  * ので宣言レンジも検査対象。残り 3 つは `radix-ui` 経由の推移依存なので、
  * 実際にインストールされた版だけを検査する。
  */
+import semver from "semver"
 export const SAFE_FLOORS = {
   "radix-ui": "1.6.1",
   // 挙動上の下限は 1.2.5。ただし `package.json` の宣言は `^1.3.0` にしてある
@@ -88,8 +89,20 @@ export function compareVersions(a, b) {
   return 0
 }
 
-/** `^1.6.1` / `>=1.6.1` 等のレンジから、許容される最小バージョンを取り出す。 */
+/**
+ * レンジが許容する真の最小バージョンを semver で計算する。
+ *
+ * 先頭の数字 3 つを拾うだけの実装だと `^1.6.1 || ^1.0.0` や `<=1.6.1` の
+ * ような合法レンジで実際の下限より高い値を返し、検査が偽の緑になる
+ * （PR #520 の Codex レビュー指摘）。semver.minVersion はレンジ全体
+ * （|| の合併・比較演算子込み）を解釈して最小許容版を返す。
+ * 解釈できないレンジは null（呼び出し側で違反扱い）。
+ */
 export function rangeFloor(range) {
-  const match = /(\d+)\.(\d+)\.(\d+)/.exec(range)
-  return match ? `${match[1]}.${match[2]}.${match[3]}` : null
+  try {
+    const min = semver.minVersion(range)
+    return min ? min.version : null
+  } catch {
+    return null
+  }
 }
