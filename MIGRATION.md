@@ -55,6 +55,36 @@ npx ksk-ds check-migration ./src
 
 ## v1 系内の minor 変更（参考）
 
+### 次のリリース — peerDependencies を React 19 のみに狭める（issue #502）
+
+**インストール要件が変わります。** `peerDependencies` を実装の実態に合わせました:
+
+| 依存 | 変更前 | 変更後 |
+|---|---|---|
+| `react` | `^18.0.0 \|\| ^19.0.0` | `^19.0.0` |
+| `react-dom` | `^18.0.0 \|\| ^19.0.0` | `^19.0.0` |
+| `react-native` | `>=0.74.0` | `>=0.78.0` |
+
+理由: `Input` / `Textarea` / `Dialog` / `QuickActionGrid` などは React 19 の
+ref-as-prop（関数コンポーネントが `ref` を通常の prop として受け取る仕様）で書かれており、
+`forwardRef` を一切使っていません。React 18 でこれらに `ref` を渡すと
+`Function components cannot be given refs` の警告が出て `ref` は呼ばれません。
+つまり `^18.0.0` の宣言は**もともと実態と合っていませんでした**。今回は嘘の互換宣言を消す
+だけで、React 19 の利用者にとってのコード変更はありません。
+
+`react-native` を `>=0.78.0` にしたのは、React 19 を同梱する最初の RN が 0.78 のため
+（0.74〜0.77 は React 18 系で、`react: ^19.0.0` と両立しません）。
+
+**移行手順**
+
+- React 19 / RN 0.78 以上を使っている場合: **対応不要**（DS を上げるだけ）
+- React 18 のまま使いたい場合: DS を `1.70.0` 以前に固定するか、React 19 へ上げてください。
+  DS 側に React 18 互換の実装を残す予定はありません
+
+なお `examples/native-sandbox`（リポジトリ内の開発用サンドボックス。npm 配布物には含まれず、
+DS を npm から install もしません）は react-native-web 0.19 の都合で React 18 のままです。
+消費側の要件には影響しません。
+
 ### 次のリリース — `ResponsiveOverlayFrame` に `preset="plain"` を追加（issue #486）
 
 `side="bottom"` の経路は必ず `BottomSheetFrame` の preset を通るため、

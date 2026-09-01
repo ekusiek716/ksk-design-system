@@ -42,6 +42,19 @@ Tailwind 4.1 で導入された `@source inline()` を使うため）
 
 ## 🚀 使い方
 
+### 動作要件
+
+**React 19 以上が必須です。** コンポーネントは React 19 の ref-as-prop（関数コンポーネントが
+`ref` を通常の prop として受け取る仕様）を前提に実装しているため、React 18 では
+`Function components cannot be given refs` の警告が出て `ref` が届きません（issue #502）。
+
+| 依存 | 必要バージョン |
+|---|---|
+| react / react-dom | `^19.0.0` |
+| react-native（Native を使う場合） | `>=0.78.0`（React 19 を同梱する最初の RN） |
+| tailwindcss（Web を使う場合） | `^3.4.17 \|\| ^4.1.0` |
+| typescript | `>=5.0.0` |
+
 ### Web (Next.js / Vite / 任意の React 環境)
 
 ```bash
@@ -391,6 +404,8 @@ import { BottomTabBar } from "ksk-design-system"
 `pillPosition` は実アプリでは既定の `fixed`、Storybook や mobile shell 内のデモでは `absolute` を使います。safe-area は内部で `env(safe-area-inset-bottom)` を見ます。入力フォーム画面では keyboard 表示時に被らないよう、画面側で nav を隠すか bottom action に切り替えてください。
 
 ### React Native / Expo
+
+React Native は **0.78 以上**（React 19 を同梱する最初の RN）が必要です。
 
 `ksk-design-system/native/ui` から直接 RN 用コンポーネント export（134 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
 

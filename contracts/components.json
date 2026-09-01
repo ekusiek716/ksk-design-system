@@ -272,7 +272,7 @@
       "variants": [],
       "accessibility": [
         "Must pair with <Label>",
-        "native (src/native/components/CheckboxField.tsx, RadioGroup.tsx): accessibilityState に加え aria-checked / aria-disabled を既定で併記する（react-native-web 0.21 は accessibilityState を aria-* へ変換しないため。RN peerDependency >=0.74.0 の aria-* props を直接渡す）。行内の装飾用インナー Checkbox/丸印は aria-hidden も併記して二重の role=checkbox/radio を防ぐ"
+        "native (src/native/components/CheckboxField.tsx, RadioGroup.tsx): accessibilityState に加え aria-checked / aria-disabled を既定で併記する（react-native-web 0.21 は accessibilityState を aria-* へ変換しないため。RN peerDependency >=0.78.0 の aria-* props を直接渡す）。行内の装飾用インナー Checkbox/丸印は aria-hidden も併記して二重の role=checkbox/radio を防ぐ"
       ],
       "rules": [
         "label を渡すと <label> でラップされ行全体がクリッカブルになる",
