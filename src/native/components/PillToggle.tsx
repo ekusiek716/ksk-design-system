@@ -14,15 +14,26 @@ export interface PillToggleProps {
   value?: string
   onChange?: (value: string) => void
   disabled?: boolean
+  /**
+   * 横幅いっぱいに広げ、各項目を等幅にする（既定 false = ラベル幅のまま）。
+   * Web の `fullWidth` と同じ意味（issue #500）。有効時は折り返さず 1 行に収める。
+   */
+  fullWidth?: boolean
 }
 
-export function PillToggle({ options, value, onChange, disabled = false }: PillToggleProps) {
+export function PillToggle({
+  options,
+  value,
+  onChange,
+  disabled = false,
+  fullWidth = false,
+}: PillToggleProps) {
   const { theme, scales } = useTheme()
   return (
     <View
       style={{
         flexDirection: "row",
-        flexWrap: "wrap",
+        flexWrap: fullWidth ? "nowrap" : "wrap",
         gap: scales.spacing.scale[2],
       }}
     >
@@ -36,6 +47,7 @@ export function PillToggle({ options, value, onChange, disabled = false }: PillT
             style={({ pressed }) => ({
               flexDirection: "row",
               alignItems: "center",
+              ...(fullWidth ? { flex: 1, justifyContent: "center" as const, minWidth: 0 } : null),
               gap: scales.spacing.scale[1],
               paddingHorizontal: scales.spacing.scale[3],
               height: 36,
@@ -49,6 +61,9 @@ export function PillToggle({ options, value, onChange, disabled = false }: PillT
             })}
           >
             <RNText
+              // fullWidth では枠幅がラベル長で決まらないため、1行に固定して省略記号で畳む
+              numberOfLines={fullWidth ? 1 : undefined}
+              ellipsizeMode={fullWidth ? "tail" : undefined}
               style={[
                 resolveTypo("label.sm"),
                 {
