@@ -148,6 +148,14 @@ function reportStaleNextReleaseHeadings(currentDoc) {
   const tag = latestReleaseTag()
   const released = tag ? docAtTag(tag) : null
   if (!released) {
+    // shallow clone 等でタグが引けない環境。--strict では「検査したふりの成功」を
+    // 返さず fail closed にする（PR #515 の Codex レビュー指摘）。
+    if (strict) {
+      console.error(
+        `✗ --strict 指定ですが git タグから公開済み版の MIGRATION.md を読めません（fetch --tags で取得してから再実行）`,
+      )
+      process.exit(1)
+    }
     console.log(
       `  [next-release] git タグから公開済み版の MIGRATION.md を読めないため判定をスキップします（見出し ${headings.length} 件）`,
     )
