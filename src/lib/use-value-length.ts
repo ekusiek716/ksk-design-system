@@ -1,15 +1,8 @@
 import * as React from "react"
+import { useComposedRef } from "./compose-ref"
 
 type CountableElement = HTMLInputElement | HTMLTextAreaElement
 type CountableValue = string | number | readonly string[] | undefined
-
-function assignRef<T>(ref: React.Ref<T> | undefined, node: T | null) {
-  if (typeof ref === "function") {
-    ref(node)
-  } else if (ref && typeof ref === "object") {
-    ;(ref as React.RefObject<T | null>).current = node
-  }
-}
 
 /**
  * showCount 用の内部フック。
@@ -38,13 +31,12 @@ export function useValueLength<T extends CountableElement>({
   const [isComposing, setIsComposing] = React.useState(false)
   const [frozenLength, setFrozenLength] = React.useState(initialLength)
 
-  const ref = React.useCallback(
-    (node: T | null) => {
-      elementRef.current = node
-      assignRef(forwardedRef, node)
-    },
-    [forwardedRef],
-  )
+  // 内部の elementRef と consumer の ref に同じ node を渡す。
+  // consumer がコールバック ref から cleanup を返した場合も握り潰さない。
+  const setElement = React.useCallback((node: T | null) => {
+    elementRef.current = node
+  }, [])
+  const ref = useComposedRef(setElement, forwardedRef)
 
   const syncFromDom = React.useCallback(() => {
     if (composingRef.current) return
