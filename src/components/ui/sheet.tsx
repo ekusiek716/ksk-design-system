@@ -6,8 +6,10 @@ import { usePortalContainer } from "./portal-container"
 import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
 import {
   ModalStackRegistrar,
+  ModalityProvider,
   modalContentZ,
   modalOverlayZ,
+  useModality,
 } from "@/lib/modal-stack"
 import {
   TitleSurfaceScaleProvider,
@@ -378,6 +380,7 @@ function Sheet({
   onOpenChange,
   open,
   defaultOpen,
+  modal = true,
   ...props
 }: SheetProps) {
   const snapRatios = React.useMemo(
@@ -450,12 +453,19 @@ function Sheet({
   return (
     <SheetRootContext.Provider value={rootCtx}>
       <SheetSnapContext.Provider value={ctx}>
-        <DialogPrimitive.Root
-          data-slot="sheet"
-          open={actualOpen}
-          onOpenChange={handleOpenChange}
-          {...props}
-        />
+        {/*
+          #505: modal かどうかを子孫（Content）へ伝える。Radix は内部 context に
+          持っているが公開していないため、DS 側で同じ値をもう 1 本流す。
+        */}
+        <ModalityProvider value={modal}>
+          <DialogPrimitive.Root
+            data-slot="sheet"
+            open={actualOpen}
+            onOpenChange={handleOpenChange}
+            modal={modal}
+            {...props}
+          />
+        </ModalityProvider>
       </SheetSnapContext.Provider>
     </SheetRootContext.Provider>
   )
@@ -752,6 +762,7 @@ function SheetContent({
   safeArea = true,
   ...props
 }: SheetContentProps) {
+  const isModal = useModality()
   const contentRef = React.useRef<HTMLDivElement>(null)
   const restoreFocusRef = React.useRef<HTMLElement | null>(null)
   // body scroll lock は Radix (modal Dialog) の react-remove-scroll が
@@ -966,6 +977,8 @@ function SheetContent({
           floatSafeAreaMaxHeightClass,
           className
         )}
+        // #505: modal な層だけ aria-modal="true" を出す。
+        aria-modal={isModal ? true : undefined}
         {...contentProps}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
@@ -981,7 +994,7 @@ function SheetContent({
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
-        <ModalStackRegistrar onLevelChange={setStackLevel} />
+        <ModalStackRegistrar onLevelChange={setStackLevel} modal={isModal} />
         <DescribedByLinker contentRef={contentRef} applyDescribedBy={applyDescribedBy} />
         {hasInternalDesc && (
           <DialogPrimitive.Description className="sr-only">
@@ -1071,6 +1084,7 @@ function SwipeToCloseBottomSheet({
   style,
   ...props
 }: SwipeToCloseBottomSheetProps) {
+  const isModal = useModality()
   const hasInternalDesc = description != null && description !== false
   const {
     "aria-describedby": ariaDescribedBy,
@@ -1351,6 +1365,8 @@ function SwipeToCloseBottomSheet({
           willChange: "transform",
           zIndex: contentZIndex,
         }}
+        // #505: modal な層だけ aria-modal="true" を出す。
+        aria-modal={isModal ? true : undefined}
         {...contentProps}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
@@ -1369,7 +1385,7 @@ function SwipeToCloseBottomSheet({
         onEscapeKeyDown={handleEscapeKeyDown}
       >
         {onStackLevelChange && (
-          <ModalStackRegistrar onLevelChange={onStackLevelChange} />
+          <ModalStackRegistrar onLevelChange={onStackLevelChange} modal={isModal} />
         )}
         <DescribedByLinker contentRef={sheetRef} applyDescribedBy={applyDescribedBy} />
         {hasInternalDesc && (
@@ -1453,6 +1469,7 @@ function SwipeToCloseSideDrawer({
   style,
   ...props
 }: SwipeToCloseSideDrawerProps) {
+  const isModal = useModality()
   const hasInternalDesc = description != null && description !== false
   const {
     "aria-describedby": ariaDescribedBy,
@@ -1661,6 +1678,8 @@ function SwipeToCloseSideDrawer({
           willChange: "transform",
           zIndex: contentZIndex,
         }}
+        // #505: modal な層だけ aria-modal="true" を出す。
+        aria-modal={isModal ? true : undefined}
         {...contentProps}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
@@ -1676,7 +1695,7 @@ function SwipeToCloseSideDrawer({
         onEscapeKeyDown={handleEscapeKeyDown}
       >
         {onStackLevelChange && (
-          <ModalStackRegistrar onLevelChange={onStackLevelChange} />
+          <ModalStackRegistrar onLevelChange={onStackLevelChange} modal={isModal} />
         )}
         <DescribedByLinker contentRef={sheetRef} applyDescribedBy={applyDescribedBy} />
         {hasInternalDesc && (
@@ -1739,6 +1758,7 @@ function SnapBottomSheetContent({
   style,
   ...props
 }: SnapBottomSheetContentProps) {
+  const isModal = useModality()
   const hasInternalDesc = description != null && description !== false
   const {
     "aria-describedby": ariaDescribedBy,
@@ -1922,6 +1942,8 @@ function SnapBottomSheetContent({
           touchAction: "none",
           zIndex: contentZIndex,
         }}
+        // #505: modal な層だけ aria-modal="true" を出す。
+        aria-modal={isModal ? true : undefined}
         {...contentProps}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
@@ -1933,7 +1955,7 @@ function SnapBottomSheetContent({
         onEscapeKeyDown={handleEscapeKeyDown}
       >
         {onStackLevelChange && (
-          <ModalStackRegistrar onLevelChange={onStackLevelChange} />
+          <ModalStackRegistrar onLevelChange={onStackLevelChange} modal={isModal} />
         )}
         <DescribedByLinker contentRef={sheetRef} applyDescribedBy={applyDescribedBy} />
         {hasInternalDesc && (

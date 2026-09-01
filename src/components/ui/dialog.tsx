@@ -5,8 +5,10 @@ import { usePortalContainer } from "./portal-container"
 import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
 import {
   ModalStackRegistrar,
+  ModalityProvider,
   modalContentZ,
   modalOverlayZ,
+  useModality,
 } from "@/lib/modal-stack"
 import {
   TitleSurfaceScaleProvider,
@@ -51,8 +53,14 @@ function captureRestoreFocus(ref: React.RefObject<HTMLElement | null>) {
   ref.current = document.activeElement as HTMLElement | null
 }
 
-function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+function Dialog({ modal = true, ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
+  // #505: modal かどうかを子孫（Content）へ伝える。Radix は内部 context に
+  // 持っているが公開していないため、DS 側で同じ値をもう 1 本流す。
+  return (
+    <ModalityProvider value={modal}>
+      <DialogPrimitive.Root data-slot="dialog" modal={modal} {...props} />
+    </ModalityProvider>
+  )
 }
 
 function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
@@ -194,6 +202,10 @@ function DialogContent({
   ...props
 }: DialogContentProps) {
   const autoDescId = React.useId()
+  // #505: modal な層だけ aria-modal="true" を出し、公開判定（useHasOpenModal）
+  // でも modal な層としてだけ数える。`modal={false}` の Dialog は背面が生きて
+  // いるので、どちらも false 側に倒す。
+  const isModal = useModality()
   // #340: Sheet(#158) と同じグローバル open-modal スタックに参加する。
   // DialogContent 自体は開閉に関係なく毎回レンダリングされるので、枠の確保は
   // Radix の Presence が開いている間だけマウントする <ModalStackRegistrar> に
@@ -333,6 +345,7 @@ function DialogContent({
             : "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           className
         )}
+        aria-modal={isModal ? true : undefined}
         {...props}
         style={{ ...style, zIndex: resolvedContentZ }}
         aria-describedby={ariaDescribedBy}
@@ -340,7 +353,7 @@ function DialogContent({
         onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
       >
-        <ModalStackRegistrar onLevelChange={setStackLevel} />
+        <ModalStackRegistrar onLevelChange={setStackLevel} modal={isModal} />
         <DescribedByLinker contentRef={contentRef} applyDescribedBy={applyDescribedBy} />
         {hasInternalDesc && (
           <DialogPrimitive.Description id={autoDescId} className="sr-only">

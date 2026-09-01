@@ -85,26 +85,121 @@ export function alertContentZ(level: number): number {
   return resolveStackedZ(ALERT_CONTENT_BASE_Z, level, ALERT_STACK_STEP, ALERT_STACK_MAX_LEVEL)
 }
 
-const modalStackOpenIds: string[] = []
+// ----------------------------------------------------------------------------
+// レジストリ本体
+// ----------------------------------------------------------------------------
+// エントリは「開いた順」に並ぶ（index = 段数）。`modal` はその層がモーダル
+// （背面を不活性にする層）かどうかで、z の算出には使わず、#505 の公開判定
+// （useHasOpenModal / getOpenModalCount）と `aria-modal` の出力条件に使う。
+// 非 modal な Sheet / Dialog も重なり順の解決には参加するため、スタック自体
+// からは外さずフラグだけで区別する。
+type ModalStackEntry = { id: string; modal: boolean }
+
+const modalStackEntries: ModalStackEntry[] = []
 const modalStackListeners = new Set<() => void>()
 
 function modalStackNotify() {
   modalStackListeners.forEach((l) => l())
 }
 
-function modalStackOpen(id: string) {
-  if (!modalStackOpenIds.includes(id)) modalStackOpenIds.push(id)
+function modalStackOpen(id: string, modal: boolean) {
+  const existing = modalStackEntries.find((e) => e.id === id)
+  if (existing) {
+    if (existing.modal === modal) return
+    existing.modal = modal
+  } else {
+    modalStackEntries.push({ id, modal })
+  }
   modalStackNotify()
 }
 
 function modalStackClose(id: string) {
-  const idx = modalStackOpenIds.indexOf(id)
-  if (idx !== -1) modalStackOpenIds.splice(idx, 1)
+  const idx = modalStackEntries.findIndex((e) => e.id === id)
+  if (idx === -1) return
+  modalStackEntries.splice(idx, 1)
   modalStackNotify()
 }
 
 function modalStackLevelOf(id: string): number {
-  return Math.max(0, modalStackOpenIds.indexOf(id))
+  return Math.max(0, modalStackEntries.findIndex((e) => e.id === id))
+}
+
+function modalStackSubscribe(onChange: () => void) {
+  modalStackListeners.add(onChange)
+  return () => {
+    modalStackListeners.delete(onChange)
+  }
+}
+
+/**
+ * いま開いている **モーダルな** 層（Dialog / Sheet / AlertDialog のうち
+ * `modal` なもの）の数。0 なら「どのモーダルも開いていない」。
+ *
+ * React の外（グローバルな keydown ハンドラ等）から同期的に判定したい場合の
+ * 入口。React コンポーネント内では {@link useHasOpenModal} /
+ * {@link useOpenModalCount} を使う。
+ */
+export function getOpenModalCount(): number {
+  return modalStackEntries.reduce((n, e) => n + (e.modal ? 1 : 0), 0)
+}
+
+/**
+ * 開いているモーダルの増減を購読する（#505）。
+ * 戻り値を呼ぶと解除。SSR でも安全（呼ばれなければ何も起きない）。
+ */
+export function subscribeOpenModals(listener: () => void): () => void {
+  return modalStackSubscribe(listener)
+}
+
+/**
+ * いま開いているモーダルの深さ（0 = 何も開いていない / 1 = 1 枚 / 2 = 2 枚目が
+ * 上に重なっている…）を返す読み取り専用フック（#505）。
+ */
+export function useOpenModalCount(): number {
+  return React.useSyncExternalStore(
+    modalStackSubscribe,
+    getOpenModalCount,
+    // SSR: サーバー側では常に「開いていない」。
+    () => 0
+  )
+}
+
+/**
+ * モーダル（Dialog / Sheet / AlertDialog）が 1 枚でも開いているかを返す
+ * 読み取り専用フック（#505）。
+ *
+ * グローバルショートカットを「モーダルが開いている間は一律で止める」といった
+ * 横断判定に使う。消費側が `[role="dialog"][data-state="open"]` のような
+ * DS 内部実装への DOM 直参照を書かなくて済むようにするのが目的。
+ *
+ * ```tsx
+ * const hasOpenModal = useHasOpenModal()
+ * React.useEffect(() => {
+ *   if (hasOpenModal) return
+ *   const onKeyDown = (e: KeyboardEvent) => { ... }
+ *   window.addEventListener("keydown", onKeyDown)
+ *   return () => window.removeEventListener("keydown", onKeyDown)
+ * }, [hasOpenModal])
+ * ```
+ */
+export function useHasOpenModal(): boolean {
+  return useOpenModalCount() > 0
+}
+
+/**
+ * この層がモーダル（背面を不活性にする層）かどうかを子孫へ伝える文脈。
+ * Root（`Dialog` / `Sheet`）が `modal` prop の実効値を流し、Content 側が
+ * `aria-modal` の出力可否とスタックへの登録に使う（#505）。
+ * AlertDialog は Radix の仕様上つねに modal なので参照しない。
+ */
+const ModalityContext = React.createContext<boolean>(true)
+
+/** Root が `modal` の実効値を流すための Provider（内部用）。 */
+export const ModalityProvider = ModalityContext.Provider
+
+/** 直近の Root が modal かどうか。Root の外では true（既定値）。 */
+export function useModality(): boolean {
+  return React.useContext(ModalityContext)
 }
 
 /**
@@ -121,22 +216,16 @@ function modalStackLevelOf(id: string): number {
  *
  * Exported for unit testing only — not part of the public package API.
  */
-export function useModalStackLevel(): number {
+export function useModalStackLevel(modal: boolean = true): number {
   const id = React.useId()
   React.useEffect(() => {
-    modalStackOpen(id)
+    modalStackOpen(id, modal)
     return () => {
       modalStackClose(id)
     }
-  }, [id])
-  const subscribe = React.useCallback((onChange: () => void) => {
-    modalStackListeners.add(onChange)
-    return () => {
-      modalStackListeners.delete(onChange)
-    }
-  }, [])
+  }, [id, modal])
   const getSnapshot = React.useCallback(() => modalStackLevelOf(id), [id])
-  return React.useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+  return React.useSyncExternalStore(modalStackSubscribe, getSnapshot, getSnapshot)
 }
 
 /**
@@ -147,10 +236,16 @@ export function useModalStackLevel(): number {
  */
 export function ModalStackRegistrar({
   onLevelChange,
+  modal = true,
 }: {
   onLevelChange: (level: number) => void
+  /**
+   * この層がモーダルか（既定 true）。#505 の公開判定
+   * （useHasOpenModal / getOpenModalCount）が数えるのは modal な層だけ。
+   */
+  modal?: boolean
 }) {
-  const level = useModalStackLevel()
+  const level = useModalStackLevel(modal)
   React.useEffect(() => {
     onLevelChange(level)
   }, [level, onLevelChange])

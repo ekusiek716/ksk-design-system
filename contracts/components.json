@@ -374,7 +374,8 @@
         "description prop は sr-only description を自動生成する",
         "子として置いた DialogDescription は自動で aria-describedby に紐付く（#485）。呼び出し側で id / aria-describedby を明示した場合はそちらが優先。Description を置かないダイアログでは aria-describedby を出さない（Radix の Missing Description 警告抑制）",
         "DialogTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は position=\"fullscreen\" 配下で page 相当、それ以外は従来の typo-heading-lg",
-        "native (src/native/components/Dialog.tsx): position=\"center\"(既定) / \"top\" / \"fullscreen\" を持ち、fullscreen は四辺・top は上端の safe-area を避ける。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）"
+        "native (src/native/components/Dialog.tsx): position=\"center\"(既定) / \"top\" / \"fullscreen\" を持ち、fullscreen は四辺・top は上端の safe-area を避ける。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
+        "modal な Dialog の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）"
       ],
       "variants": {
         "position": [
@@ -415,7 +416,8 @@
         "子として置いた SheetDescription は自動で aria-describedby に紐付く（#485）。呼び出し側で aria-describedby を明示した場合はそちらが優先。Description を置かないシートでは aria-describedby を出さない",
         "SheetTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は BottomSheetFrame preset=\"mobile-full\"|\"mobile-page\" 配下で page 相当、それ以外は従来の typo-heading-lg",
         "native (src/native/components/Sheet.tsx): safeArea(既定 true) で side=\"top\" の上端 inset 退避と、画面いっぱいに近い side=\"bottom\" の食い込み分の退避を行う。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
-        "native (src/native/components/Sheet.tsx): surfaceColor でパネル（および snap モードの footer）の面色を上書きできる。未指定なら theme.surface.primary（従来どおり）。scrim の色は変えない（issue #448）"
+        "native (src/native/components/Sheet.tsx): surfaceColor でパネル（および snap モードの footer）の面色を上書きできる。未指定なら theme.surface.primary（従来どおり）。scrim の色は変えない（issue #448）",
+        "modal な Sheet の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）"
       ],
       "variants": {
         "titleLevel": [
@@ -871,7 +873,8 @@
       "rules": [
         "Action に variant=destructive でデストラクティブCTA",
         "Cancel は variant=tertiary デフォルト",
-        "AlertDialog open時は既存Popoverを閉じ、stale layerを確認面の上に残さない"
+        "AlertDialog open時は既存Popoverを閉じ、stale layerを確認面の上に残さない",
+        "content は常に aria-modal=\"true\"（Radix の AlertDialog は非 modal にできない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount()（#505）"
       ]
     },
     {

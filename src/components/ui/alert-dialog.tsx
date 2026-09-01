@@ -158,6 +158,8 @@ function AlertDialogContent({
         data-size={size}
         onOpenAutoFocus={(e) => e.preventDefault()}
         style={{ ...style, zIndex: resolvedContentZ }}
+        // #505: AlertDialog は Radix の仕様上つねに modal（`modal` prop が無い）。
+        aria-modal={true}
         className={cn(
           // transition-none: `duration-*` は tw-animate 由来で enter/exit の
           // アニメーション尺のために付いているが、transition-property を明示
