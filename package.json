@@ -164,6 +164,7 @@
     "lint:prefix-order": "node scripts/check-prefix-order.mjs",
     "lint:screen-contracts": "node scripts/check-screen-contracts.mjs",
     "lint:deprecations": "node scripts/check-deprecations.mjs",
+    "audit:issue-links": "node scripts/check-issue-close-links.mjs",
     "lint:migration-doc": "node scripts/generate-migration-doc.mjs --check",
     "generate:migration-doc": "node scripts/generate-migration-doc.mjs",
     "metrics": "node scripts/download-metrics.mjs",

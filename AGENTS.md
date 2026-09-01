@@ -279,6 +279,9 @@ npm run lint:design
 # 非推奨 API 台帳の整合検査（台帳 ⇔ 実ソースの @deprecated JSDoc）
 npm run lint:deprecations
 
+# `Closes #N` 誤リンク監査（gh 必須。npm run check には入っていない）
+npm run audit:issue-links -- --recent 60
+
 # MIGRATION.md の「非推奨 API 一覧」節を台帳から再生成
 npm run generate:migration-doc
 
@@ -297,6 +300,20 @@ npm run test:a11y
 # 旧 Radix 固定の回帰テスト（consumer が古い Radix を掴む条件を再現。issue #516）
 npm run test:legacy-radix
 ```
+
+**`Closes #N` 誤リンク監査について（issue #486 が由来）:**
+
+- PR 本文の `Closes #N` が**別 issue を閉じてしまう**事故を検出する。実例:
+  PR #488 が `Closes #486` を書きながら実装したのは ResponsiveOverlayFrame で、
+  issue #486（BottomTabBar pill の面）は**未実装のまま自動クローズ**され、
+  消費側がリリースされない要望を待ち続けていた。
+- 判定は `contracts/components.json` のコンポーネント名を語彙にして、
+  「PR が触った / 言及したコンポーネント」と「issue が指すコンポーネント」に
+  共通要素が 1 つも無ければ疑う。どちらかが空（インフラ・トークン系）なら
+  判定材料なしとして黙って飛ばす — **見逃してでも誤検知を出さない**方針。
+- `gh` CLI（ネットワーク）が要るため `npm run check` には**含めない**。
+  リリース前の棚卸しと、疑わしい PR を見つけたときに手で回す。
+- 単発検査は `npm run audit:issue-links -- --pr 488`。
 
 **interaction テストについて（issue #256）:**
 
