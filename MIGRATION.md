@@ -116,7 +116,7 @@ install に失敗しうるため、SemVer どおり major に倒した。
 
 ## v1 系内の minor 変更（参考）
 
-### 次のリリース — `ResponsiveOverlayFrame` に `preset="plain"` を追加（issue #486）
+### v1.70.0 — `ResponsiveOverlayFrame` に `preset="plain"` を追加（issue #486）
 
 `side="bottom"` の経路は必ず `BottomSheetFrame` の preset を通るため、
 `sm:`（640px 以上）でフロートカード化し、内側 padding も落ちる（`p-0`）。
@@ -162,7 +162,7 @@ install に失敗しうるため、SemVer どおり major に倒した。
 - `desktopPosition` は `"center"` / `"top"` のみ。`"fullscreen"` は plain の
   幅指定と噛み合わないため型で禁止している。
 
-### 次のリリース — `ResponsiveOverlayFrame` が float / float-glass シートを受けられるようになった（issue #479）
+### v1.69.0 — `ResponsiveOverlayFrame` が float / float-glass シートを受けられるようになった（issue #479）
 
 #472 で入った `ResponsiveOverlayFrame` は内部で `BottomSheetFrame`（`side="bottom"` 固定）を
 使うため、左右・下に余白を持つカード型のシート（`side="float"` / `"float-glass"`）を
@@ -226,7 +226,7 @@ global CSS（`!important`）を残す必要があった。
   `side="bottom"` 専用なので、`snapPoints` と float 系の併用は snap もデスクトップ変換も
   効かない「何も起きない」組み合わせになる。どちらかに寄せること。
 
-### 次のリリース — `ResponsiveOverlayFrame` 追加（`BottomSheetFrame` + 消費側デスクトップ CSS からの移行 / issue #472）
+### v1.67.0 — `ResponsiveOverlayFrame` 追加（`BottomSheetFrame` + 消費側デスクトップ CSS からの移行 / issue #472）
 
 `BottomSheetFrame` はモバイルの preset（`mobile-full` / `mobile-page` /
 `mobile-form`）を持つ一方でデスクトップでは中央モーダルにならず、消費側は
@@ -298,7 +298,7 @@ global CSS で `position` / `transform` / `width` / `max-height` / `radius` を
 既存の `BottomSheetFrame` / `ResponsiveDialogContent` は非推奨ではない
 （モバイル専用面・preset 不要の面では引き続きそのまま使う）。
 
-### 次のリリース — `typescript` が必須依存から optional peer dependency になった（issue #409）
+### v1.62.0 — `typescript` が必須依存から optional peer dependency になった（issue #409）
 
 CLI の1ルール（P046）のためだけに typescript（24MB）が全 consumer の
 node_modules に入っていたのを解消した。install サイズが減り、`ksk-ds lint` の
@@ -311,7 +311,7 @@ node_modules に入っていたのを解消した。install サイズが減り�
   typescript を追加すること
 
 
-### 次のリリース — `ksk-ds lint` の severity 語彙が `warn` → `warning` に統一（要確認）
+### v1.62.0 — `ksk-ds lint` の severity 語彙が `warn` → `warning` に統一（要確認）
 
 `--format json` の `results[].severity` と text 出力の severity 表記が、これまで
 `"warn"` と `"warning"` で不統一だった（contract の `contracts/rules.json` は
@@ -335,7 +335,7 @@ text 出力の要約行も `0 error / 3 warn` → `0 error / 3 warning` に変�
 - **未知のオプションはエラー終了**（従来は黙って捨てられ、CI に書いた
   `--strict` が無言で効かないまま緑になっていた）
 
-### 次のリリース — `ksk-ds lint` の escape がルール単位・行単位で書けるようになった
+### v1.62.0 — `ksk-ds lint` の escape がルール単位・行単位で書けるようになった
 
 ファイル全体・全ルールを無期限に外す `// ksk-ds-allow-custom-ui: 理由` は
 後方互換で残るが**非推奨**。新規はルール単位を使う（issue #405）:
@@ -351,7 +351,7 @@ ignore は効かない。あわせて escape マーカーは**文字列リテラ
 無効化されていた）。既に short な理由を書いていたファイルは lint が復活するので、
 理由を書き足すか違反を直すこと。
 
-### 次のリリース — 自動生成物と DS 自身のトークン CSS を lint 対象外にした
+### v1.62.0 — 自動生成物と DS 自身のトークン CSS を lint 対象外にした
 
 - 先頭 12 行に自動生成マーカー（`AUTO-GENERATED` / `DO NOT EDIT` / `自動生成` 等）を
   持つファイルは全ルールを skip する（issue #408）。直す先は生成物ではなく生成元。
@@ -359,7 +359,7 @@ ignore は効かない。あわせて escape マーカーは**文字列リテラ
   トークン定義 CSS を対象外にする（issue #407）。`vendor/ksk-design-system/**` のように
   DS を再梱包しているリポで P049 が大量に出ていたのが解消する。
 
-### 次のリリース — `Footer` の `paymentIcons` 既定値が空になった（挙動変更）
+### v1.62.0 — `Footer` の `paymentIcons` 既定値が空になった（挙動変更）
 
 `Footer` は `paymentIcons` を省略すると `["VISA", "Master", "JCB", "AmEx", "PayPay", "LINE Pay"]`
 の決済バッジを既定で描画していた。EC 以外のプロダクトでも「取り扱っていない決済手段」が
@@ -376,7 +376,7 @@ ignore は効かない。あわせて escape マーカーは**文字列リテラ
 
 `paymentIcons` を明示的に渡していた箇所は影響なし。
 
-### 次のリリース — `postinstall` による AI ルールファイル自動設置を廃止（要確認）
+### v1.60.0 — `postinstall` による AI ルールファイル自動設置を廃止（要確認）
 
 これまで `npm install ksk-design-system` の `postinstall` フックが、消費側の
 プロジェクトルートに `CLAUDE.md` / `AGENTS.md`（`node_modules` 内の DS ルールを指す
@@ -397,7 +397,7 @@ npx ksk-ds init --force  # 既存ファイルを最新テンプレートで上�
 `postinstall` を持つ限りバージョンを上げても判定が引き継がれる。あわせて
 `INIT_CWD` 参照も削除し、書き込み先はコマンドを実行したディレクトリに固定した。
 
-### 次のリリース — PillToggle の onChange/onValueChange 統一（破壊変更なし）
+### v1.49.0 — PillToggle の onChange/onValueChange 統一（破壊変更なし）
 
 `PillToggle` のみ他コンポーネント（Switch 等の native 系を除く）と異なり `onValueChange`
 を主 API として案内していたため、`onChange` に統一した（issue #264⑥）。
@@ -414,7 +414,7 @@ npx ksk-ds init --force  # 既存ファイルを最新テンプレートで上�
 `onChange` と `onValueChange` を両方渡した場合は `onChange` が優先される。
 `onValueChange` は将来のメジャーバージョンで削除予定。
 
-### 次のリリース — Tailwind 4.1 以上が必要（要確認）
+### v1.49.0 — Tailwind 4.1 以上が必要（要確認）
 
 preset に DS 内部ユーティリティの safelist（`src/styles/source-safelist.css`・自動生成）を同梱した（issue #258）。
 これにより、消費側の `@source ".../ksk-design-system/dist"` の設定漏れやパスずれで
