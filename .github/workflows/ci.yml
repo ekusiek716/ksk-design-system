@@ -44,6 +44,15 @@ jobs:
       - name: Unit tests (vitest)
         run: npm test
 
+      # ── 旧 Radix 回帰テスト（issue #516）──
+      # DS 自身の node_modules は ref churn 修正済みの Radix を解決するため、
+      # 上の `npm test` では consumer が古い Radix を掴んだときの回帰
+      # （#516 の Maximum update depth exceeded）を原理的に再現できない。
+      # belle-todo が実際に解決していた radix-ui@1.4.3 を専用ディレクトリへ
+      # install し、その Radix でオーバーレイ面が収束することを検証する。
+      - name: Legacy Radix regression tests (vitest / 旧 Radix 固定)
+        run: npm run test:legacy-radix
+
       - name: Story reuse lint
         run: npm run lint:story-reuse
 
