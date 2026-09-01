@@ -23,7 +23,7 @@
     "statusPaletteNote": "statusPalette は「消費側が DS の primitive を自分の Tailwind alias（--color-sun-800 等）の実体として使っている」ケース向けの公開段（issue #384）。@theme inline の alias は生成ユーティリティに var(--Primitive-*) が直接展開されるため、alias 側を dark で差し替えても効かず、primitive を上書きする以外の経路が無い。公開しているのは status の tint 段（-50 × 4色）と、依頼のあったアクセント段（Red-600 / Green-700）だけ。-50 は DS の .dark ブロックが一切参照していない（dark の Surface-Caution/Success/Warning/Info は -900 と実値）ので、dark 内での上書きは DS コンポーネントに対して無害。light では --Surface-Caution / --Surface-Success / --Surface-Warning / --Surface-Info を駆動するので上書きは効く。アクセント段は light / dark の両方で DS semantic を駆動するため、パレット全段ではなく依頼ベースで1段ずつ開ける。",
     "statusPaletteSideEffects": "--Primitive-Red-600 は --Caution-Base（light / dark 共通）と、dark の --Active-Destructive-Button を駆動する。dark で Red-600 を Red-500(#EF4444) より明るい値に差し替えると、destructive ボタンの active が hover より明るくなり押下の階調が反転する。差し替えるなら --Hover-Destructive-Button との明度関係を実測すること。--Primitive-Green-700 は light の --Text-Success / --Success-Base のみを駆動する（dark は Green-400 なので影響なし）。",
     "contrastResponsibility": "neutralPalette（--Primitive-Gray-* / White / Black）を差し替えたら、本文×背景のコントラストは消費プロダクト側の責任になる。Gray は --Text-High-Emphasis（本文色）・--Text-Medium-Emphasis・--Surface-Secondary・--Border-Low-Emphasis など semantic.css の 33 箇所を駆動しているため、差し替え後に本文テキスト×各 Surface が WCAG AA（4.5:1、大きい文字は 3:1）を満たすか必ず実測すること。DS 側の scripts/check-contrast.mjs は DS 既定パレット向けの検査で、消費側の差し替えは見ていない。light / dark の両方を確認する。",
-    "navSurfaceNote": "--Nav-Center-Action-Surface / -Border / -Shadow と --Nav-Selected-Surface / -Shadow は例外的に :root へ既定値を置いていない（issue #471）。DS 既定は tone=\"inverse\" / dark で出し分ける素材（.glass-accent・ガラスの選択プラッター）で、単一の :root 値に畳めないため。src/styles/bottom-nav.css が var(--Nav-*, <DS 既定>) の形で持ち、消費側が宣言したときだけ上書きされる。宣言しなければレンダリングは 1px も変わらない。"
+    "navSurfaceNote": "--Nav-Center-Action-Surface / -Border / -Shadow と --Nav-Selected-Surface / -Shadow は例外的に :root へ既定値を置いていない（issue #471）。DS 既定は tone=\"inverse\" / dark で出し分ける素材（.glass-accent・ガラスの選択プラッター）で、単一の :root 値に畳めないため。src/styles/bottom-nav.css が var(--Nav-*, <DS 既定>) の形で持ち、消費側が宣言したときだけ上書きされる。宣言しなければレンダリングは 1px も変わらない。 --Nav-Pill-Surface / -Backdrop / -Border / -Shadow / -Specular も同じ扱い（issue #486）。pill 本体の DS 既定は Liquid Glass（.glass / tone=\"inverse\" は .glass-dark）で、背後コンテンツの可読性を優先して不透明面にしたい消費側のための口。フォールバックは .glass 自身の内部変数そのものなので、宣言しなければレンダリングは 1px も変わらない。ぼかしを完全に切るなら --Nav-Pill-Backdrop: none、ガラスのスペキュラ / 屈折リムまで消すなら --Nav-Pill-Specular: none（擬似要素の content を none にして生成させない）を併せて宣言する。"
   },
   "allowedVariables": {
     "brandColor": [
@@ -165,6 +165,11 @@
       "--Nav-Pill-Padding-X",
       "--Nav-Pill-Padding-Y",
       "--Nav-Pill-Gap",
+      "--Nav-Pill-Surface",
+      "--Nav-Pill-Backdrop",
+      "--Nav-Pill-Border",
+      "--Nav-Pill-Shadow",
+      "--Nav-Pill-Specular",
       "--Nav-Item-Min-Height",
       "--Nav-Item-Gap",
       "--Nav-Center-Action-Size",
@@ -267,9 +272,15 @@
       "--Nav-Center-Action-*",
       "--Nav-Selected-*"
     ],
-    "ResponsiveDialog": ["--Overlay-Desktop-Breakpoint"],
-    "ResponsiveOverlayFrame": ["--Overlay-Desktop-Breakpoint"],
-    "Toast": ["--Toast-Viewport-Offset-Bottom"]
+    "ResponsiveDialog": [
+      "--Overlay-Desktop-Breakpoint"
+    ],
+    "ResponsiveOverlayFrame": [
+      "--Overlay-Desktop-Breakpoint"
+    ],
+    "Toast": [
+      "--Toast-Viewport-Offset-Bottom"
+    ]
   },
   "aiGuidance": [
     "プロダクト差分は、まずこの契約の CSS 変数上書きで表現する。className での個別上書きを何十箇所にも散らさない。",

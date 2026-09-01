@@ -264,6 +264,8 @@ describe("契約のドリフト検査", () => {
     // --card-surface は card.tsx 側で参照。--Nav-*-Surface / -Border / -Shadow は
     // DS 既定が tone / dark で出し分ける素材のため単一の :root 値に畳めず、
     // src/styles/bottom-nav.css が var(--Nav-*, <DS 既定>) の形で受ける（issue #471）。
+    // --Nav-Pill-Surface / -Backdrop / -Border / -Shadow / -Specular も同じ理由
+    // （既定は .glass / tone="inverse" は .glass-dark、issue #486）。
     const seams = new Set([
       "--card-surface",
       "--Nav-Center-Action-Surface",
@@ -271,6 +273,11 @@ describe("契約のドリフト検査", () => {
       "--Nav-Center-Action-Shadow",
       "--Nav-Selected-Surface",
       "--Nav-Selected-Shadow",
+      "--Nav-Pill-Surface",
+      "--Nav-Pill-Backdrop",
+      "--Nav-Pill-Border",
+      "--Nav-Pill-Shadow",
+      "--Nav-Pill-Specular",
     ])
     const missing = [...contract.allowed].filter((name) => !declared.has(name) && !seams.has(name))
     expect(missing).toEqual([])

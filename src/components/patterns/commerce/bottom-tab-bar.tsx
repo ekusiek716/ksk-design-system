@@ -160,6 +160,22 @@ function useBottomTabBarKeyboardState(keyboardBehavior: BottomTabBarKeyboardBeha
  *   `--Nav-Selected-Surface` / `-Shadow` は**宣言したときだけ** DS 既定
  *   （`.glass-accent` / ガラスの選択プラッター）を置き換える。未宣言なら
  *   tone / dark の出し分けは従来どおり DS 側が持つ。
+ * - `--Nav-Pill-Surface` / `-Backdrop` / `-Border` / `-Shadow` / `-Specular`
+ *   … pill 本体の面（issue #486）。DS 既定は Liquid Glass（`.glass`、
+ *   `tone="inverse"` は `.glass-dark`）で、これも**宣言したときだけ**効く。
+ *   背後コンテンツの可読性を優先して不透明なナビにしたい場合に使う:
+ *
+ *   ```css
+ *   :root {
+ *     --Nav-Pill-Surface: var(--Surface-Primary);
+ *     --Nav-Pill-Backdrop: none;             （ガラスのぼかしを切る）
+ *     --Nav-Pill-Specular: none;             （スペキュラ / 屈折リムも消す）
+ *     --Nav-Pill-Shadow: 0 4px 16px rgb(0 0 0 / 0.12);
+ *   }
+ *   ```
+ *
+ *   `className` で `.glass` を打ち消すことはできない（Tailwind ユーティリティ
+ *   ではないため tailwind-merge が落とせない）ので、面の変更は必ずこの変数で行う。
  * - 寸法系が効くのは prominent レイアウト（`showLabels` か `centerAction` が
  *   ある pill）。アイコンのみの compact pill は契約外で固定。
  *

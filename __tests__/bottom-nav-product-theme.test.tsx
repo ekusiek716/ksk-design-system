@@ -261,3 +261,68 @@ describe("契約が contracts に載っている", () => {
     expect(contract.wiredComponents.MobileTabBar).toBeDefined()
   })
 })
+
+describe("pill 本体の面の公開変数（issue #486）", () => {
+  it("背景・backdrop・境界・影が var(--Nav-Pill-*, DS既定) で宣言されている", () => {
+    const rule = NAV_CSS.slice(
+      NAV_CSS.indexOf('[data-slot="bottom-nav-pill"] {'),
+      NAV_CSS.indexOf('[data-slot="bottom-nav-pill"][data-tone="inverse"]'),
+    )
+    expect(rule).toContain("background: var(--Nav-Pill-Surface, var(--glass-bg))")
+    expect(rule).toContain("backdrop-filter: var(--Nav-Pill-Backdrop, var(--glass-blur))")
+    expect(rule).toContain("border: var(--Nav-Pill-Border, 0.5px solid var(--glass-border))")
+    expect(rule).toContain("box-shadow: var(--Nav-Pill-Shadow,")
+  })
+
+  it("既定値は .glass 自身の宣言と同じ内部変数を指す（未宣言なら見た目が変わらない）", () => {
+    const glass = GLASS_CSS.slice(GLASS_CSS.indexOf(".glass {"), GLASS_CSS.indexOf(".glass {") + 260)
+    // .glass が使う内部変数を、そのままフォールバックに使っていること
+    for (const v of ["--glass-bg", "--glass-blur", "--glass-border"]) {
+      expect(glass).toContain(`var(${v})`)
+      expect(NAV_CSS).toContain(`var(${v})`)
+    }
+    expect(glass).toContain("var(--glass-highlight), var(--glass-shadow)")
+    expect(NAV_CSS).toContain("var(--Nav-Pill-Shadow, var(--glass-highlight), var(--glass-shadow))")
+  })
+
+  it("tone=\"inverse\" は .glass-dark の既定へ委譲する", () => {
+    const rule = NAV_CSS.slice(NAV_CSS.indexOf('[data-slot="bottom-nav-pill"][data-tone="inverse"]'))
+    expect(rule).toContain("var(--Nav-Pill-Surface, var(--glass-bg-dark))")
+    expect(rule).toContain("var(--Nav-Pill-Backdrop, var(--glass-blur-media-dark))")
+    expect(rule).toContain("var(--Nav-Pill-Border, 0.5px solid var(--glass-border-dark))")
+  })
+
+  it("スペキュラ / 屈折リムは content 経由で切れる（既定は空文字＝生成される）", () => {
+    expect(NAV_CSS).toContain('content: var(--Nav-Pill-Specular, "")')
+  })
+
+  it("-webkit- を先・標準形を後に書いている（消費側 minifier の dedupe 対策）", () => {
+    const rule = NAV_CSS.slice(
+      NAV_CSS.indexOf('[data-slot="bottom-nav-pill"] {'),
+      NAV_CSS.indexOf('[data-slot="bottom-nav-pill"][data-tone="inverse"]'),
+    )
+    expect(rule.indexOf("-webkit-backdrop-filter")).toBeLessThan(rule.indexOf("\n  backdrop-filter"))
+  })
+
+  it("公開変数は product-theme-overrides.json の許可リストに載っている", () => {
+    const contract = JSON.parse(
+      readFileSync(join(ROOT, "contracts/product-theme-overrides.json"), "utf8"),
+    ) as { allowedVariables: { nav: string[] } }
+    for (const v of [
+      "--Nav-Pill-Surface",
+      "--Nav-Pill-Backdrop",
+      "--Nav-Pill-Border",
+      "--Nav-Pill-Shadow",
+      "--Nav-Pill-Specular",
+    ]) {
+      expect(contract.allowedVariables.nav).toContain(v)
+    }
+  })
+
+  it("既定値を :root に置いていない（宣言したときだけ効く）", () => {
+    // product-theme.css に既定値を置くと、消費側が未宣言でも DS 既定が上書きされる
+    expect(PRODUCT_THEME_CSS).not.toContain("--Nav-Pill-Surface")
+    expect(PRODUCT_THEME_CSS).not.toContain("--Nav-Pill-Backdrop")
+    expect(PRODUCT_THEME_CSS).not.toContain("--Nav-Pill-Specular")
+  })
+})
