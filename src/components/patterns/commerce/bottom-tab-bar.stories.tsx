@@ -301,3 +301,55 @@ export const KeyboardHideWithInput: Story = {
     </div>
   ),
 }
+
+/**
+ * issue #486 — pill 本体の面を公開変数で不透明にする。
+ * 背後にテキストを敷いて「透けるか / 透けないか」を並べて比較できるようにしている。
+ */
+export const OpaquePillSurface: Story = {
+  name: "Pill の面を不透明にする（--Nav-Pill-*）",
+  parameters: { layout: "fullscreen" },
+  render: () => {
+    const Backdrop = () => (
+      <div className="p-4 space-y-1">
+        {Array.from({ length: 8 }, (_, i) => (
+          <p key={i} className="typo-body-md text-[var(--Text-High-Emphasis)] tabular-nums">
+            230V / 50Hz — 変換プラグ Type C
+          </p>
+        ))}
+      </div>
+    )
+    return (
+      <div className="flex flex-col gap-6 p-4 bg-[var(--Surface-Secondary)]">
+        <div>
+          <p className="typo-label-md text-[var(--Text-Medium-Emphasis)] mb-2">
+            既定（Liquid Glass）— 背後の文字が透ける
+          </p>
+          <div className="relative h-64 overflow-hidden rounded-2xl bg-[var(--Surface-Primary)] border border-[var(--Border-Low-Emphasis)]">
+            <Backdrop />
+            <BottomTabBar variant="pill" pillPosition="absolute" items={COMPACT_ITEMS} />
+          </div>
+        </div>
+        <div>
+          <p className="typo-label-md text-[var(--Text-Medium-Emphasis)] mb-2">
+            --Nav-Pill-* 宣言時 — 不透明・ぼかしなし・リムなし
+          </p>
+          <div
+            className="relative h-64 overflow-hidden rounded-2xl bg-[var(--Surface-Primary)] border border-[var(--Border-Low-Emphasis)]"
+            style={
+              {
+                "--Nav-Pill-Surface": "var(--Surface-Primary)",
+                "--Nav-Pill-Backdrop": "none",
+                "--Nav-Pill-Specular": "none",
+                "--Nav-Pill-Shadow": "0 4px 16px rgb(0 0 0 / 0.12)",
+              } as React.CSSProperties
+            }
+          >
+            <Backdrop />
+            <BottomTabBar variant="pill" pillPosition="absolute" items={COMPACT_ITEMS} />
+          </div>
+        </div>
+      </div>
+    )
+  },
+}

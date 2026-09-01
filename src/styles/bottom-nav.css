@@ -8,7 +8,7 @@
    （belle-todo）が壊れ、`!important` の山が残った事故が由来。
 
    ── 寸法は product-theme.css の --Nav-* が担当（:root に既定値あり）。
-   ── 面（背景・境界・影）はここが担当し、**既定値を :root に置かない**。
+   ── 面（背景・backdrop・境界・影）はここが担当し、**既定値を :root に置かない**。
       var(--Nav-*, <DS 既定>) の形で書き、消費側が宣言したときだけ上書きされる。
       宣言しなければ tone="inverse" / dark の出し分けは従来どおり DS が持つ。
 
@@ -27,6 +27,50 @@
    選択プラッターの面は [data-nav-platter] が付いた要素（上記 overlay と、
    SSR / 計測前に面を兼ねるタブ本体・アイコン領域）に当たる。
    ============================================================= */
+
+/* ─── pill 本体の面（issue #486）───
+   DS 既定は Liquid Glass（`.glass` / tone="inverse" は `.glass-dark`）。
+   背後コンテンツの可読性を優先して**不透明な面**にしたい消費側が、
+   内部クラスに触らず面だけ差し替えられるようにする。
+
+   `.glass` / `.glass-dark` と同じ詳細度（0,1,0）だが、glass.css より後に
+   読み込まれるこのファイルが勝つ（中央アクションと同じ手口）。
+   フォールバックは `.glass` 自身が使う内部変数そのものなので、
+   未宣言時のレンダリングは 1px も変わらない。
+
+   backdrop-filter は `none` を宣言すればガラスのぼかしを完全に切れる。
+   -webkit- を先・標準形を後に書く（消費側 minifier の dedupe 対策）。 */
+[data-slot="bottom-nav-pill"] {
+  background: var(--Nav-Pill-Surface, var(--glass-bg));
+  -webkit-backdrop-filter: var(--Nav-Pill-Backdrop, var(--glass-blur));
+  backdrop-filter: var(--Nav-Pill-Backdrop, var(--glass-blur));
+  border: var(--Nav-Pill-Border, 0.5px solid var(--glass-border));
+  box-shadow: var(--Nav-Pill-Shadow, var(--glass-highlight), var(--glass-shadow));
+}
+
+[data-slot="bottom-nav-pill"][data-tone="inverse"] {
+  background: var(--Nav-Pill-Surface, var(--glass-bg-dark));
+  -webkit-backdrop-filter: var(--Nav-Pill-Backdrop, var(--glass-blur-media-dark));
+  backdrop-filter: var(--Nav-Pill-Backdrop, var(--glass-blur-media-dark));
+  border: var(--Nav-Pill-Border, 0.5px solid var(--glass-border-dark));
+  box-shadow: var(
+    --Nav-Pill-Shadow,
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 8px 32px rgba(0, 0, 0, 0.28)
+  );
+}
+
+/* ─── pill のスペキュラ / 屈折リム（issue #486）───
+   `.glass-specular` の ::before（レンズ上面）と ::after（エッジの屈折リム）は
+   面を不透明にしても残るため、ガラスを切りたい消費側にはノイズになる。
+
+   既定は `.glass-specular` 自身と同じ `content: ""` なので**未宣言なら何も変わらない**。
+   `--Nav-Pill-Specular: none` を宣言すると擬似要素そのものが生成されなくなり、
+   リムとスペキュラが消える。 */
+[data-slot="bottom-nav-pill"]::before,
+[data-slot="bottom-nav-pill"]::after {
+  content: var(--Nav-Pill-Specular, "");
+}
 
 /* ─── 中央アクションの面 ───
    .glass-accent と同じ詳細度（0,1,0）なので、glass.css より後に読み込まれる
