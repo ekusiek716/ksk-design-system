@@ -593,9 +593,6 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     } = props
     return (
       <DialogContent
-        data-frame="responsive-overlay-frame"
-        data-side={side}
-        data-surface={surface}
         position={desktopPosition}
         // DialogContent 既定の padding は `flex flex-col gap-4 p-6` で、float の
         // SheetContent（`p-6` のみ）と段間が変わる。モバイルと同じ見え方に
@@ -623,6 +620,12 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
           ...dialogProps.style,
           ...desktopKeyboardStyle,
         }}
+        // data-* は spread より後ろに置く（#339: consumer が上書きすると
+        // DS / 消費側の CSS セレクタが丸ごと外れる。#487 のキーボード補正も
+        // data-frame / data-side を見ているので同じ扱いにする）。
+        data-frame="responsive-overlay-frame"
+        data-side={side}
+        data-surface={surface}
       >
         <TitleSurfaceScaleProvider scale="dialog">{children}</TitleSurfaceScaleProvider>
       </DialogContent>
@@ -718,13 +721,6 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     } = props
     return (
       <DialogContent
-        data-frame="responsive-overlay-frame"
-        // #487: preset 経路のデスクトップ分岐だけ data-side が無く、DS からも
-        // consumer からもキーボード補正のセレクタを絞れなかった。float / plain
-        // と揃えて出す（補正の実体は下の sheet-keyboard.css と style 属性）。
-        data-side="bottom"
-        data-preset={framePreset}
-        data-surface={surface}
         position={desktopPosition}
         padding={false}
         className={cn(
@@ -742,6 +738,13 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
           ...dialogProps.style,
           ...desktopKeyboardStyle,
         }}
+        // data-* は spread より後ろに置く（#339 / #487）。
+        // #487: preset 経路のデスクトップ分岐だけ data-side が無く、DS からも
+        // consumer からもキーボード補正のセレクタを絞れなかったので足した。
+        data-frame="responsive-overlay-frame"
+        data-side="bottom"
+        data-preset={framePreset}
+        data-surface={surface}
       >
         {/*
           DialogContent は children を "dialog" 文脈で包むため、全画面級 preset は

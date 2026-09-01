@@ -494,6 +494,26 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
     expect(el.style.maxHeight).toBe(expectedMaxHeight(expected, 300))
   })
 
+  // consumer が data-frame / data-side を渡しても、DS のマーカーが消えると
+  // フォールバックのセレクタが丸ごと外れる（#339 と同じ型）。spread より
+  // 後ろに置いてあることを 3 経路すべてで固定する。
+  it.each([
+    [{ preset: "mobile-form" }, "bottom"],
+    [{ preset: "plain" }, "bottom"],
+    [{ side: "float" }, "float"],
+    [{ side: "float-glass" }, "float-glass"],
+  ])("consumer の data-* 上書きでマーカーが消えない (%#)", (props, side) => {
+    stubViewport(1024)
+    const el = renderFrame({
+      ...props,
+      "data-frame": "consumer-frame",
+      "data-side": "consumer-side",
+    } as Partial<FrameProps>)
+
+    expect(el.getAttribute("data-frame")).toBe("responsive-overlay-frame")
+    expect(el.getAttribute("data-side")).toBe(side)
+  })
+
   // モバイル（Sheet）分岐では ref が素通しなので、デスクトップ分岐だけ
   // 計測用の ref で握り潰すと、境界を跨いだ瞬間に consumer の ref が空になる。
   it("consumer の ref にも面の DOM が渡る（object / callback 両方）", () => {
