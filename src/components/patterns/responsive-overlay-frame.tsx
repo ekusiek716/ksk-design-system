@@ -534,6 +534,10 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   // モバイル（Sheet）分岐では素通しなのに、デスクトップ分岐だけ計測用の
   // ref で上書きすると、境界を跨いだ瞬間に consumer の ref が空になる。
   const consumerRef = (allProps as { ref?: React.Ref<HTMLDivElement> }).ref
+  // consumerRef は「ref の値」を合成 ref へ引き渡しているだけで、`.current` を
+  // render 中に読んではいない。react-hooks/refs は cast 経由で取り出した
+  // React.Ref を render 時の ref 読み取りと誤検出するため、ここだけ抑止する。
+  // eslint-disable-next-line react-hooks/refs
   const setContentRef = useComposedRef(setElement, consumerRef)
 
   // RefObject だと layout effect の時点で null のまま再実行されない。
