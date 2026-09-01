@@ -43,9 +43,10 @@ export interface CoachMarkOverlayProps {
   }
   /**
    * 表示時に最初の操作子（スキップ/次へ）へフォーカスを移すか（既定 true）。
-   * ref を渡すとその要素へ移す。false なら自動では移さない（#504）。
-   * ただしトラップ自体は効くので、false でもフォーカスを面の外へ動かすと
-   * 面の中へ引き戻される。
+   * ref を渡すとその要素へ移す。false は「操作子を自動で選ばない」の意味で、
+   * フォーカスは面自体（tabIndex=-1 のスコープ要素）へ移る（#504）。
+   * 面の外へ置いたままにはしない — トラップは一度でも面の中に入った
+   * フォーカスを引き戻す実装なので、外に置くと Tab で背面を巡回できてしまう。
    *
    * この面は `aria-modal="true"` を名乗るため、既定では Tab / Shift+Tab を
    * 面の中に閉じ込める（背面のボタンへ抜けない）。
@@ -300,9 +301,15 @@ export function CoachMarkOverlay({
         loop
         onMountAutoFocus={(event) => {
           // autoFocus を自前で解決する場合（false / ref 指定）は Radix の
-          // マウント時オートフォーカスを止める。止めないと「移さない」と
-          // 言いながら先頭候補へ飛ぶ / ref へ移す前に一度別要素へ飛ぶ。
-          if (autoFocus !== true) event.preventDefault()
+          // 既定（先頭候補を選ぶ）を止める。ref 指定は上の effect で移す。
+          if (autoFocus === true) return
+          event.preventDefault()
+          if (autoFocus !== false) return
+          // false は「操作子を自動で選ばない」であって「面の外に置いたまま」
+          // ではない。Radix のトラップは *一度でも面の中に入った* フォーカスを
+          // 引き戻す実装なので、外に置いたままだと Tab で背面を巡回できてしまう
+          // （面自体は tabIndex=-1 なので、ここへ置いても操作子は選ばれない）。
+          if (event.currentTarget instanceof HTMLElement) event.currentTarget.focus()
         }}
         onUnmountAutoFocus={(event) => {
           if (!restoreFocusOnClose) event.preventDefault()

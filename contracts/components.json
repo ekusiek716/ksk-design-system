@@ -2054,7 +2054,7 @@
       ],
       "props": {
         "labels": "{ next?, done?, skip?, ariaLabel? } — ボタン文言と overlay の aria-label。i18n はアプリ側で解決して渡す。done 未指定なら next にフォールバック（issue #477）",
-        "autoFocus": "boolean | React.RefObject<HTMLElement | null> (既定 true) — 表示時に最初の操作子へフォーカスを移す。ref 指定でその要素、false で移さない（issue #504）",
+        "autoFocus": "boolean | React.RefObject<HTMLElement | null> (既定 true) — 表示時に最初の操作子へフォーカスを移す。ref 指定でその要素、false は「操作子を自動で選ばない」でフォーカスは面自体へ移る（外に置くとトラップが成立しないため。issue #504）",
         "restoreFocusOnClose": "boolean (既定 true) — 閉じたら開く前のフォーカス位置へ戻す（issue #504）",
         "closeOnEsc": "boolean (既定 true) — Escape で onSkip（未指定なら onComplete）を呼ぶ（issue #504）"
       }

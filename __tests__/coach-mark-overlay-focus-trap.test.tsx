@@ -215,16 +215,33 @@ describe("CoachMarkOverlay のフォーカストラップ（#504）", () => {
     expect(document.activeElement).toBe(trigger)
   })
 
-  it("autoFocus={false} なら開いてもフォーカスを移さない", () => {
+  it("autoFocus={false} は操作子を自動で選ばない（面自体にフォーカスを置く）", () => {
     mount(<Scene open={false} onSkip={() => {}} />)
     const trigger = document.getElementById("behind-2") as HTMLButtonElement
     act(() => {
       trigger.focus()
     })
     rerender(<Scene open autoFocus={false} onSkip={() => {}} />)
-    // Radix FocusScope のマウント時オートフォーカスも止める（止めないと
-    // 「移さない」と言いながら面の中へ飛ぶ）
-    expect(document.activeElement).toBe(trigger)
+    // スキップ / 次へは選ばない。ただし面の外に置いたままにもしない
+    // （外に置くとトラップが成立しない。下のテスト参照）
+    expect(coachButtons()).not.toContain(document.activeElement)
+    expect(coachOverlayRoot().contains(document.activeElement)).toBe(true)
+  })
+
+  it("autoFocus={false} でもトラップは効く（面の外へ動かすと引き戻される）", () => {
+    mount(<Scene open={false} onSkip={() => {}} />)
+    const trigger = document.getElementById("behind-2") as HTMLButtonElement
+    act(() => {
+      trigger.focus()
+    })
+    rerender(<Scene open autoFocus={false} onSkip={() => {}} />)
+    expect(coachOverlayRoot().contains(document.activeElement)).toBe(true)
+
+    // 背面の別要素へフォーカスが動いた時点で面の中へ引き戻す
+    act(() => {
+      ;(document.getElementById("behind-1") as HTMLButtonElement).focus()
+    })
+    expect(coachOverlayRoot().contains(document.activeElement)).toBe(true)
   })
 
   it("開いている Dialog の上に重ねてもフォーカスを奪われない（#504 の入れ子）", () => {
