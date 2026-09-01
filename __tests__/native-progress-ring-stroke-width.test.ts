@@ -69,7 +69,9 @@ describe("native ProgressRing の strokeWidth（#495）", () => {
     expect(entry!.kind).toBe("prop")
     expect(entry!.prop).toBe("thickness")
     expect(entry!.replacement).toContain("strokeWidth")
-    expect(entry!.removeIn).toBe("2.0.0")
+    // 削除は「全消費リポで check-migration の残件が 0」を条件に次のメジャーで行う。
+    // v2.0.0（peer を React 19 専用に狭めた回・#502）では削除していないため 3.0.0。
+    expect(entry!.removeIn).toBe("3.0.0")
     expect(entry!.sources).toContain("src/native/components/ProgressRing.tsx")
   })
 })

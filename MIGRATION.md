@@ -17,12 +17,12 @@ npx ksk-ds check-migration ./src
 
 | API | 使われ方 | 移行先 | 非推奨にした版 | 削除予定 |
 | --- | --- | --- | --- | --- |
-| `ListItem.interactive` | `<ListItem interactive>` | href または onClick を ListItem 自体へ渡す | 1.46.0 | v2.0.0 |
-| `ChipSelector.multiple` | `<ChipSelector multiple>` | selectionMode（multiple={false} は selectionMode="single"、multiple は selectionMode="multiple"） | 1.71.0 | v2.0.0 |
-| `PillToggle.onValueChange` | `<PillToggle onValueChange>` | onChange | 1.49.0 | v2.0.0 |
-| `ProductCard.deliveryLabel` | `<ProductCard deliveryLabel>` | なし（v1.30.0 以降は描画されないため、渡している箇所は削除する） | 1.30.1 | v2.0.0 |
-| `Progress.tone` | `<Progress tone>` | variant | 1.40.1 | v2.0.0 |
-| `ProgressRing.thickness` | `<ProgressRing thickness>` | strokeWidth（Web の同名 prop と語彙を揃えた。値の意味・既定値 6 は同じ） | 1.71.0 | v2.0.0 |
+| `ListItem.interactive` | `<ListItem interactive>` | href または onClick を ListItem 自体へ渡す | 1.46.0 | v3.0.0 |
+| `ChipSelector.multiple` | `<ChipSelector multiple>` | selectionMode（multiple={false} は selectionMode="single"、multiple は selectionMode="multiple"） | 2.0.0 | v3.0.0 |
+| `PillToggle.onValueChange` | `<PillToggle onValueChange>` | onChange | 1.49.0 | v3.0.0 |
+| `ProductCard.deliveryLabel` | `<ProductCard deliveryLabel>` | なし（v1.30.0 以降は描画されないため、渡している箇所は削除する） | 1.30.1 | v3.0.0 |
+| `Progress.tone` | `<Progress tone>` | variant | 1.40.1 | v3.0.0 |
+| `ProgressRing.thickness` | `<ProgressRing thickness>` | strokeWidth（Web の同名 prop と語彙を揃えた。値の意味・既定値 6 は同じ） | 2.0.0 | v3.0.0 |
 
 各エントリの補足:
 
@@ -39,9 +39,31 @@ npx ksk-ds check-migration ./src
 
 ---
 
-## v2.0 (未リリース)
+## v2.0.0
 
-まだメジャー破壊変更の予定はなし。
+**破壊変更は peerDependencies の要件変更 1 点のみ。** 識別子 / prop の削除・rename は
+無いので、コードの書き換えも codemod も要りません。
+
+| 項目 | v1 系 | v2.0.0 |
+|---|---|---|
+| `react` / `react-dom` | `^18.0.0 \|\| ^19.0.0` | `^19.0.0` |
+| `react-native` | `>=0.74.0` | `>=0.78.0` |
+
+- **React 19 / RN 0.78 以上を使っている場合: 対応不要**。`npm install ksk-design-system@2`
+  で上げるだけで、API は v1.70 系＋今回の機能追加のまま
+- **React 18 のまま使いたい場合**: `ksk-design-system@^1` に固定してください。
+  v1 系に React 19 専用化は入っていません
+
+major にした理由は、`^1.x` を指定している React 18 利用者が自動で拾うと
+インストールが失敗しうるため（実装は元から React 19 の ref-as-prop 前提で、
+React 18 では `ref` が無言で無視されていた）。詳細は下の
+「peerDependencies の要件変更」節と issue #502 を参照。
+
+なお v1 系で非推奨にした prop（`ListItem.interactive` ほか 5 件）は
+**v2.0.0 では削除していません**。削除は「全消費リポで `check-migration` の
+残件が 0」を条件に v3.0.0 で行います。
+
+## v3.0 (未リリース)
 
 破壊変更を入れる際にはここに以下を書く:
 1. 削除した識別子 / prop の一覧（rename テーブル）
@@ -78,7 +100,7 @@ ref-as-prop（関数コンポーネントが `ref` を通常の prop として�
 **移行手順**
 
 - React 19 / RN 0.78 以上を使っている場合: **対応不要**（DS を上げるだけ）
-- React 18 のまま使いたい場合: DS を `1.70.0` 以前に固定するか、React 19 へ上げてください。
+- React 18 のまま使いたい場合: `ksk-design-system@^1` に固定するか、React 19 へ上げてください。
   DS 側に React 18 互換の実装を残す予定はありません
 
 なお `examples/native-sandbox`（リポジトリ内の開発用サンドボックス。npm 配布物には含まれず、
@@ -86,11 +108,9 @@ DS を npm から install もしません）は react-native-web 0.19 の都合�
 消費側の要件には影響しません。
 
 
-**リリース種別について**: この変更はランタイム API を一切変えないため React 19 利用者には無影響だが、
-React 18 / RN 0.74〜0.77 の環境では install 時の peer 解決に失敗しうる。
-実測で該当する消費リポは存在しない（`~/Localdev` 配下 40+ リポすべて React 19 系）ため
-minor で出す想定だが、SemVer の厳密解釈では major に当たる。
-**最終的な minor / major の判断はリリース時に行う**（PR #506 のレビュー議論を参照）。
+**リリース種別**: **v2.0.0（major）で公開**。ランタイム API は変わらず React 19 利用者には
+無影響だが、`^1.x` を指定している React 18 / RN 0.74〜0.77 の利用者が自動で拾うと
+install に失敗しうるため、SemVer どおり major に倒した。
 
 ---
 
