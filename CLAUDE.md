@@ -293,6 +293,9 @@ npm run test:interaction
 
 # a11y 機械検証（axe-core。全ストーリー対象。issue #261）
 npm run test:a11y
+
+# 旧 Radix 固定の回帰テスト（consumer が古い Radix を掴む条件を再現。issue #516）
+npm run test:legacy-radix
 ```
 
 **interaction テストについて（issue #256）:**
@@ -324,6 +327,20 @@ npm run test:a11y
 - icon-only の `<Button size="icon*">` に `aria-label` が無いパターンは
   `eslint/icon-button-aria-label.js`（`ksk-a11y/icon-button-aria-label`）で lint 時に検出する
   （`.stories.tsx` は対象外）。
+
+**旧 Radix 回帰テストについて（issue #516）:**
+
+- DS の node_modules は ref churn 修正済みの Radix を解決するため、`npm test` では
+  「consumer が古い Radix を掴んだときだけ落ちる」種類の回帰を**原理的に再現できない**
+  （#516 は belle-todo で初めて表面化した）。
+- `npm run test:legacy-radix` は当時 belle-todo が解決していた radix-ui@1.4.3 を
+  `node_modules/.ksk-legacy-radix` へ install し、`vitest.legacy-radix.config.ts` の
+  alias でそちらを掴ませて `test/legacy-radix/` を回す。CI では常時実行。
+- 併せて `package.json` の `radix-ui` / `@radix-ui/react-slot` の下限を安全版へ固定して
+  いる（`scripts/check-radix-floor.mjs` が `npm run check` で検査。正本データと版ごとの
+  差分は `scripts/radix-ref-churn.mjs`）。
+- **オーバーレイ系（Dialog / Sheet / ResponsiveOverlayFrame）や `useComposedRef` を
+  触ったら `npm run test:legacy-radix` を回すこと。**
 
 ---
 

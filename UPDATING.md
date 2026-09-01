@@ -202,6 +202,23 @@ publish 直後は registry への反映に数分かかることがあるため�
 `package.json#peerDependencies` の範囲を確認し、警告の対象パッケージ自体を先に更新してから
 `ksk-design-system` を上げる。警告を `--force` / `--legacy-peer-deps` で握りつぶして進めない。
 
+### Radix の版が古いまま固定されている（`Maximum update depth exceeded`）
+
+DS の依存 `radix-ui` は **`^1.6.1`**（#516 対応以降）。1.6.1 未満の Radix は
+合成 ref（`composeRefs`）を毎 render 作り直すため、DS のオーバーレイ面（Dialog / Sheet /
+ResponsiveOverlayFrame）が再描画を無限に誘発することがある（issue #516。belle-todo が
+radix-ui@1.4.3 を解決していて踏んだ）。
+
+症状が出たら、消費リポで実際に解決されている版を確認する:
+
+```bash
+npm ls radix-ui @radix-ui/react-focus-scope @radix-ui/react-presence
+```
+
+`radix-ui@1.6.1` 未満が出る場合は lockfile が古い版を固定している。`npm install` で
+DS の下限に追随させる（`overrides` で Radix を固定しているなら、その固定を外すか
+1.6.1 以上へ上げる）。
+
 ### Issue 起票先
 
 DS 本体のバグ・想定外の破壊変更に遭遇した場合は、
