@@ -50,7 +50,7 @@
 | NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis, WithBuildPageItems |
-| PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small |
+| PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small, FullWidthThree, FullWidthTwo, FullWidthFour |
 | Popover, PopoverTrigger, PopoverContent, PopoverAnchor | `@/components/ui/popover` | — | ClickToShow, SimpleContent |
 | PortalContainerProvider | `@/components/ui/portal-container` | — | Dialog がスコープ内テーマを継承する, DropdownMenu がスコープ内テーマを継承する, Select がスコープ内テーマを継承する, Provider 無しでは document.body へ描画する（後方互換） |
 | ProgressRing | `@/components/ui/progress-ring` | — | Default, Empty, Full, AllSizes, CustomLabel, Animated, 任意サイズ・ストローク, 配色のカスタマイズ, 過大なストロークの丸め |

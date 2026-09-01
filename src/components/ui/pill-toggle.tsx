@@ -1,5 +1,6 @@
 import * as React from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
 
 interface PillToggleOption<T extends string = string> {
   label: string
@@ -23,6 +24,13 @@ type PillToggleProps<T extends string = string> =
       options: PillToggleOption<T>[]
       value: T
       size?: "sm" | "md"
+      /**
+       * 横幅いっぱいに広げ、各項目を等幅にする（既定 false = ラベル幅のまま `w-fit`）。
+       * 「全幅」と「等幅」を別 prop に分けていないのは、1 行固定の segmented control では
+       * 全幅に広げた瞬間に余りをどう配るかを決める必要があり、等幅以外の配り方
+       * （ラベル比で配る等）は選択肢の当たり判定がバラつくため採らないから（issue #500）。
+       */
+      fullWidth?: boolean
       className?: string
       onChange: (value: T) => void
       /**
@@ -35,6 +43,13 @@ type PillToggleProps<T extends string = string> =
       options: PillToggleOption<T>[]
       value: T
       size?: "sm" | "md"
+      /**
+       * 横幅いっぱいに広げ、各項目を等幅にする（既定 false = ラベル幅のまま `w-fit`）。
+       * 「全幅」と「等幅」を別 prop に分けていないのは、1 行固定の segmented control では
+       * 全幅に広げた瞬間に余りをどう配るかを決める必要があり、等幅以外の配り方
+       * （ラベル比で配る等）は選択肢の当たり判定がバラつくため採らないから（issue #500）。
+       */
+      fullWidth?: boolean
       className?: string
       onChange?: undefined
       /**
@@ -62,6 +77,17 @@ type PillToggleProps<T extends string = string> =
  * （`flex-wrap` で自動的に複数行になる。支出カテゴリ 9 択など）。
  * 選択中の 1 つだけ見せて畳みたい場合は `CollapsibleChipField`（issue #419）。
  * パネル連動が要るなら `Tabs`。
+ *
+ * ### 全幅・等幅（issue #500）
+ * 既定は `w-fit` でラベル幅。行いっぱいに広げて各項目を等幅にしたいときは
+ * `fullWidth` を渡す（`className="grid w-full grid-cols-3"` のような内部構造
+ * 依存の回避策は不要）。
+ *
+ * ### 高さを外から足さないこと
+ * pill の trigger は見た目の高さ（`h-9`/`h-8`）を保ったまま、透明な `before`
+ * 擬似要素で当たり判定だけをトラック全高 44px に広げている。消費側で
+ * `[role="tab"]` に追加の `min-height` を当てると、見えている面がトラック
+ * （`h-11`）より高くなって崩れる。タップ領域は DS 側で確保済みなので足さない。
  */
 const TRIGGER_SIZE = {
   sm: "h-8 px-3 typo-label-xs",
@@ -74,6 +100,7 @@ function PillToggle<T extends string = string>({
   onChange,
   onValueChange,
   size = "md",
+  fullWidth = false,
   className,
 }: PillToggleProps<T>) {
   const handleChange = onChange ?? onValueChange
@@ -83,9 +110,16 @@ function PillToggle<T extends string = string>({
       value={value}
       onValueChange={(v) => handleChange?.(v as T)}
     >
-      <TabsList variant="pill" className={className}>
+      <TabsList
+        variant="pill"
+        className={cn(fullWidth && "flex w-full", className)}
+      >
         {options.map((opt) => (
-          <TabsTrigger key={opt.value} value={opt.value} className={TRIGGER_SIZE[size]}>
+          <TabsTrigger
+            key={opt.value}
+            value={opt.value}
+            className={cn(TRIGGER_SIZE[size], fullWidth && "flex-1 min-w-0")}
+          >
             {opt.icon && <span className="shrink-0">{opt.icon}</span>}
             {opt.label}
           </TabsTrigger>

@@ -663,9 +663,14 @@
         "sm",
         "md"
       ],
+      "props": {
+        "fullWidth": "boolean (既定 false) — 横幅いっぱいに広げ、各項目を等幅にする(issue #500)。既定はラベル幅(w-fit)"
+      },
       "rules": [
         "Use for 2-4 options only. 1行固定の segmented control で折り返せない。",
-        "5択以上・折り返しが要る単一選択は ChipSelector の selectionMode=\"single\" を使う(issue #418)。選択中の1つだけ見せて畳む場合は CollapsibleChipField(issue #419)。パネル連動が要るなら Tabs。"
+        "5択以上・折り返しが要る単一選択は ChipSelector の selectionMode=\"single\" を使う(issue #418)。選択中の1つだけ見せて畳む場合は CollapsibleChipField(issue #419)。パネル連動が要るなら Tabs。",
+        "等幅・全幅にしたいときは fullWidth を使う。className=\"grid w-full grid-cols-N\" で TabsList に届かせる回避策は内部構造依存なので使わない(issue #500)。",
+        "pill の trigger は透明な before 擬似要素でタップ領域を44pxまで確保済み。消費側で [role=\"tab\"] に追加の min-height を当てないこと(見えている面がトラックより高くなる)。"
       ]
     },
     {
