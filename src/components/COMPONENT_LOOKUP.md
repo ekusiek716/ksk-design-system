@@ -78,7 +78,7 @@
 | Tabs, TabsList, TabsTrigger, TabsContent | `@/components/ui/tabs` | — | ThreeTabs, WithDisabledTab, SwitchesByClickAndArrowKeys |
 | Textarea | `@/components/ui/textarea` | — | Default, WithPlaceholder, Disabled, Error, AutoGrow |
 | TimePicker | `@/components/ui/time-picker` | — | Default, 15分刻み |
-| Toaster | `@/components/ui/toast` | **variant**: `default`, `success`, `caution`, `warning`, `info` | Default, Success, Caution, Warning, Info, AllVariants, Fire-and-forget (no <Toaster />), AnnouncesViaLiveRegion |
+| Toaster | `@/components/ui/toast` | **variant**: `default`, `success`, `caution`, `warning`, `info` | Default, Success, Caution, Warning, Info, AllVariants, Fire-and-forget (no <Toaster />), viewport の下端 offset（--Toast-Viewport-Offset-Bottom）, AnnouncesViaLiveRegion |
 | Tooltip, TooltipTrigger, TooltipContent, TooltipProvider | `@/components/ui/tooltip` | — | HoverToShow, OnIconButton |
 
 ---

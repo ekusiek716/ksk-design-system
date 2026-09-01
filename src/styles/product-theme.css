@@ -143,6 +143,24 @@
      宣言した時だけ上書きされる（宣言しなければ tone="inverse" / dark の
      出し分けを DS 側が従来どおり面倒を見る）。 */
 
+  /* ─── Toast: viewport の下端 offset（issue #503） ───
+     トーストの viewport は画面下端に fixed で出る。モバイルアプリ的な構成
+     （下部タブバー + FAB を fixed で下端に置く）だと必ず重なり、文言や
+     「元に戻す」ボタンが読みにくくなる。消費側が DS の内部 slot
+     （[data-slot="toast-viewport"]）を CSS で直接狙わずに持ち上げられるよう、
+     位置だけを公開変数にしてある。
+
+     既定 1rem は従来の bottom-4 と同値なので、上書きしない限り見た目は
+     変わらない。ブレークポイントごとに変えたい場合はメディアクエリで宣言する:
+
+       :root { --Toast-Viewport-Offset-Bottom: calc(env(safe-area-inset-bottom) + 6.5rem); }
+       @media (min-width: 1024px) { :root { --Toast-Viewport-Offset-Bottom: 1rem; } }
+
+     `<Toaster>` を置かない fire-and-forget 経路（toast.success(...) の
+     auto-mount viewport）にも同じく効く。左右（right-4 / left-4）は必要が
+     出てから開ける。 */
+  --Toast-Viewport-Offset-Bottom: 1rem; /* 16px — bottom-4 */
+
   /* ─── Overlay: レスポンシブ overlay の切り替え境界（issue #472） ───
      <ResponsiveDialog breakpoint="product-theme"> がこの値を読み、
      `(min-width: <値>)` にマッチしたらデスクトップ（中央モーダル）へ切り替える。

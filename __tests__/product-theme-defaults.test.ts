@@ -167,6 +167,8 @@ const EQUIVALENTS: Array<[baseline: string, tokenized: string, property: string]
   ["py-2", "py-[var(--Nav-Pill-Padding-Y)]", "padding-block"],
   ["gap-1", "gap-[var(--Nav-Pill-Gap)]", "gap"],
   ["gap-0.5", "gap-[var(--Nav-Item-Gap)]", "gap"],
+  // ─── Toast viewport（issue #503）───
+  ["bottom-4", "bottom-[var(--Toast-Viewport-Offset-Bottom)]", "bottom"],
 ]
 
 describe("product theme の既定値は origin/main の固定クラスと同一実寸 (issue #364)", () => {
@@ -238,6 +240,15 @@ describe("公開変数の配線", () => {
   it("AdminShell の本文 padding が --Product-Page-Padding-Y を参照する", async () => {
     const source = readFileSync(join(ROOT, "src/components/patterns/shells/admin-shell.tsx"), "utf8")
     expect(source).toContain("py-[var(--Product-Page-Padding-Y)]")
+  })
+
+  it("Toast の viewport が --Toast-Viewport-Offset-Bottom を参照する（issue #503）", () => {
+    // 消費側が [data-slot="toast-viewport"] を CSS で直接狙わずに済むための公開シーム。
+    // fire-and-forget の auto-mount viewport も同じ ToastViewport を描画するため、
+    // ここが固定クラス（bottom-4）へ差し戻ると両経路が同時に閉じる。
+    const source = readFileSync(join(ROOT, "src/components/ui/toast.tsx"), "utf8")
+    expect(source).toContain("bottom-[var(--Toast-Viewport-Offset-Bottom)]")
+    expect(source).not.toContain('"fixed bottom-4')
   })
 
   it("固定タップ領域（icon-xl = 44px）は product theme から外してある", async () => {

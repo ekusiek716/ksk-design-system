@@ -271,6 +271,7 @@
 @source inline("bottom-[calc(env(safe-area-inset-bottom)_+_12px_+_var(--ksk-bottom-tab-bar-keyboard-inset))]");
 @source inline("bottom-[calc(env(safe-area-inset-bottom)_+_var(--ksk-fab-bottom-offset)_+_var(--ksk-fab-bottom-offset-extra,_0px)_+_var(--ksk-fab-keyboard-inset))]");
 @source inline("bottom-[max(1rem,env(safe-area-inset-bottom))]");
+@source inline("bottom-[var(--Toast-Viewport-Offset-Bottom)]");
 @source inline("bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]");
 @source inline("bottom-[var(--ksk-keyboard-inset)]");
 @source inline("break-words");

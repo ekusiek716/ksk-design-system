@@ -228,7 +228,11 @@ function ToastViewport({ regionLabel, closeLabel }: { regionLabel?: string; clos
       // 常設コンテナを live region にする（トースト要素自身への role="status" 付与は
       // 挿入時に読み上げられない SR があるため、追加を polite で通知する構成）
       aria-live="polite"
-      className="fixed bottom-4 right-4 left-4 sm:left-auto z-[var(--Z-Toast)] flex flex-col items-stretch gap-2 sm:w-full sm:max-w-sm"
+      // 下端 offset は product theme の公開変数（issue #503）。既定 1rem は
+      // 従来の bottom-4 と同値で、上書きしない限り 1px も変わらない。下部タブバーや
+      // FAB を fixed で置くプロダクトは :root で持ち上げる（fire-and-forget の
+      // auto-mount viewport にも同じく効く）。
+      className="fixed bottom-[var(--Toast-Viewport-Offset-Bottom)] right-4 left-4 sm:left-auto z-[var(--Z-Toast)] flex flex-col items-stretch gap-2 sm:w-full sm:max-w-sm"
     >
       {toasts.map((t) => (
         <div

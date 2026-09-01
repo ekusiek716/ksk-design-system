@@ -3,6 +3,7 @@
  * @description トースト通知コンポーネント。default, success, caution, warning, info の全バリアントを網羅
  */
 import type { Meta, StoryObj } from "@storybook/react"
+import * as React from "react"
 import { expect, userEvent, within } from "storybook/test"
 import { Toaster, useToast, toast } from "./toast"
 import { Button } from "./button"
@@ -230,6 +231,60 @@ function FireAndForgetDemo() {
 export const FireAndForget: Story = {
   name: "Fire-and-forget (no <Toaster />)",
   render: () => <FireAndForgetDemo />,
+}
+
+/**
+ * viewport の下端 offset（issue #503）
+ *
+ * 下部タブバーや FAB を `position: fixed` で下端に置くプロダクトでは、既定の
+ * `bottom: 1rem` だとトーストがそれらと重なる。位置は product theme の公開変数
+ * `--Toast-Viewport-Offset-Bottom` で持ち上げる（`<Toaster>` を置かない
+ * fire-and-forget 経路にも効く）。
+ *
+ * viewport は `document.body` へ portal されるので、変数は `:root` など
+ * **portal の祖先**に置くこと（story のプレビュー div に当てても届かない）。
+ * 消費側は自分の CSS に書く:
+ *
+ * ```css
+ * :root { --Toast-Viewport-Offset-Bottom: calc(env(safe-area-inset-bottom) + 6.5rem); }
+ * @media (min-width: 1024px) { :root { --Toast-Viewport-Offset-Bottom: 1rem; } }
+ * ```
+ */
+function ViewportOffsetDemo() {
+  const [lifted, setLifted] = React.useState(false)
+  React.useEffect(() => {
+    const root = document.documentElement
+    if (lifted) root.style.setProperty("--Toast-Viewport-Offset-Bottom", "6.5rem")
+    else root.style.removeProperty("--Toast-Viewport-Offset-Bottom")
+    return () => {
+      root.style.removeProperty("--Toast-Viewport-Offset-Bottom")
+    }
+  }, [lifted])
+
+  return (
+    <div className="p-6 flex flex-col gap-3">
+      <Toaster />
+      <div className="flex gap-2">
+        <Button variant="secondary" onClick={() => setLifted((v) => !v)}>
+          {lifted ? "既定（1rem）に戻す" : "下部ナビ分だけ持ち上げる（6.5rem）"}
+        </Button>
+        <Button onClick={() => toast.success("保存しました", { action: { label: "元に戻す", onClick: () => {} } })}>
+          トーストを出す
+        </Button>
+      </div>
+      <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
+        下部の擬似ナビとトーストの重なりを比べる。
+      </p>
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-[var(--Surface-Secondary)] border-t border-[var(--Border-Low-Emphasis)] flex items-center justify-center typo-label-sm text-[var(--Text-Medium-Emphasis)]">
+        下部ナビ（擬似）
+      </div>
+    </div>
+  )
+}
+
+export const ViewportOffset: Story = {
+  name: "viewport の下端 offset（--Toast-Viewport-Offset-Bottom）",
+  render: () => <ViewportOffsetDemo />,
 }
 
 // ─────────────────────────────────────────────────────────────
