@@ -607,7 +607,8 @@
         "両 API は内部で同じ singleton store を共有するため、<Toaster> がある場合はそれを優先し auto-mounted viewport は描画しない",
         "新規 action prop で右側に CTA ボタン (元に戻す / 再試行 等) を表示できる",
         "保存完了・接続復旧・同期開始など一時的な操作結果は Banner ではなく toast.* helper を使う",
-        "connectionRestored / saveComplete / retryStarted / retryFailed helper を提供"
+        "connectionRestored / saveComplete / retryStarted / retryFailed helper を提供",
+        "viewport の下端 offset は product theme の公開変数 --Toast-Viewport-Offset-Bottom（既定 1rem = 従来の bottom-4）で調整する。下部タブバー / FAB と重なるプロダクトは :root で持ち上げる。[data-slot=\"toast-viewport\"] を消費側 CSS から直接狙わない（issue #503）"
       ],
       "props": {
         "Toaster.regionLabel": "string (既定 \"通知\") — viewport (role=\"region\") の aria-label（issue #428）",

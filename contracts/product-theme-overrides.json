@@ -177,6 +177,9 @@
     ],
     "overlay": [
       "--Overlay-Desktop-Breakpoint"
+    ],
+    "toast": [
+      "--Toast-Viewport-Offset-Bottom"
     ]
   },
   "dsVariableNamespaces": [
@@ -206,7 +209,8 @@
     "--Chip-",
     "--glass-",
     "--card-surface",
-    "--Nav-"
+    "--Nav-",
+    "--Toast-"
   ],
   "namespaceNote": "P049 が「DS の変数を上書きしている」と判定する接頭辞。ここに該当し、かつ DS 自身の CSS（src/preset.css / src/styles/*.css / src/themes/*.css）に実在し、allowedVariables に無い変数を消費側 CSS が宣言していたら契約違反。接頭辞は一致するが DS に実在しない名前（消費側が DS の命名に寄せて作った独自変数。例: --Surface-Inverse-Hover）は上書きではないので対象外（issue #377）。DS の CSS が読めない環境では接頭辞一致だけで判定する。shadcn 互換の小文字ブリッジ（--primary / --border 等）は消費側アプリが同名変数を持つことがあるため対象外。",
   "wiredComponents": {
@@ -264,7 +268,8 @@
       "--Nav-Selected-*"
     ],
     "ResponsiveDialog": ["--Overlay-Desktop-Breakpoint"],
-    "ResponsiveOverlayFrame": ["--Overlay-Desktop-Breakpoint"]
+    "ResponsiveOverlayFrame": ["--Overlay-Desktop-Breakpoint"],
+    "Toast": ["--Toast-Viewport-Offset-Bottom"]
   },
   "aiGuidance": [
     "プロダクト差分は、まずこの契約の CSS 変数上書きで表現する。className での個別上書きを何十箇所にも散らさない。",
@@ -280,6 +285,7 @@
     "AppShell / MarketingShell / MobileAppShell はページ本文の padding をシェル自身が持たない（Container の gutter か呼び出し側の contentClassName に委ねている）ため product theme の対象外。AdminShell の <main> だけが --Product-Page-Padding-Y を持つ。",
     "--Product-Type-Scale は typo-* の font-size に一律で掛かる乗数（既定 1）。文字倍率を上げたら Control（Button）/ Field（Input 等）の高さ・padding も --Control-Height-* / --Field-Height-* 等で別途上げること。この変数はコントロールの寸法には自動連動しない（文字だけ大きくして枠が追従しないと窮屈になるため、意図的に分離してある）。Web のみが対象で React Native（native/scales.ts）には効かない。",
     "BottomTabBar / MobileTabBar の寸法・面は --Nav-* で変える。DS の内部マークアップ（[data-slot=\"bottom-nav-pill\"] > :is(a, button) や span:first-child / span:last-child のような子孫順、[data-global-nav-add-icon]）を !important で叩かない。DOM を狙う必要が残る場合も、公開している data-slot（bottom-nav-item / -item-icon / -item-label / bottom-nav-center-action / -icon / -label / bottom-nav-selected-surface）だけを使う（issue #471）。",
-    "--Nav-Item-Min-Height / --Nav-Center-Action-Size は max(44px, var(...)) で参照しているため、44px（HIG のタップ領域下限）より小さくはならない。ナビを詰めたい場合も当たり判定は 44px を保つ。"
+    "--Nav-Item-Min-Height / --Nav-Center-Action-Size は max(44px, var(...)) で参照しているため、44px（HIG のタップ領域下限）より小さくはならない。ナビを詰めたい場合も当たり判定は 44px を保つ。",
+    "トーストが下部タブバーや FAB と重なるときは --Toast-Viewport-Offset-Bottom で持ち上げる（issue #503）。[data-slot=\"toast-viewport\"] を消費側 CSS から直接狙わない。<Toaster> を置かない fire-and-forget 経路にも効くので、prop ではなく変数で調整する。safe-area を含めたい場合は calc(env(safe-area-inset-bottom) + ...) を消費側で書く（DS 既定は従来と同値の 1rem）。"
   ]
 }
