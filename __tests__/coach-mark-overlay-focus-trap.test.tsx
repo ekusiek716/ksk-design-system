@@ -116,11 +116,13 @@ function Scene({
   onSkip,
   onComplete,
   closeOnEsc,
+  autoFocus,
 }: {
   open: boolean
   onSkip?: () => void
   onComplete?: () => void
   closeOnEsc?: boolean
+  autoFocus?: boolean
 }) {
   return (
     <>
@@ -134,6 +136,7 @@ function Scene({
       <CoachMarkOverlay
         open={open}
         closeOnEsc={closeOnEsc}
+        autoFocus={autoFocus}
         steps={[
           { selector: "#target", title: "ここ", desc: "説明" },
           { selector: "#target", title: "つぎ", desc: "説明" },
@@ -209,6 +212,18 @@ describe("CoachMarkOverlay のフォーカストラップ（#504）", () => {
     expect(document.activeElement).not.toBe(trigger)
 
     rerender(<Scene open={false} onSkip={() => {}} />)
+    expect(document.activeElement).toBe(trigger)
+  })
+
+  it("autoFocus={false} なら開いてもフォーカスを移さない", () => {
+    mount(<Scene open={false} onSkip={() => {}} />)
+    const trigger = document.getElementById("behind-2") as HTMLButtonElement
+    act(() => {
+      trigger.focus()
+    })
+    rerender(<Scene open autoFocus={false} onSkip={() => {}} />)
+    // Radix FocusScope のマウント時オートフォーカスも止める（止めないと
+    // 「移さない」と言いながら面の中へ飛ぶ）
     expect(document.activeElement).toBe(trigger)
   })
 

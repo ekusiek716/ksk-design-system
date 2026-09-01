@@ -43,7 +43,9 @@ export interface CoachMarkOverlayProps {
   }
   /**
    * 表示時に最初の操作子（スキップ/次へ）へフォーカスを移すか（既定 true）。
-   * ref を渡すとその要素へ移す。false で自動フォーカスしない（#504）。
+   * ref を渡すとその要素へ移す。false なら自動では移さない（#504）。
+   * ただしトラップ自体は効くので、false でもフォーカスを面の外へ動かすと
+   * 面の中へ引き戻される。
    *
    * この面は `aria-modal="true"` を名乗るため、既定では Tab / Shift+Tab を
    * 面の中に閉じ込める（背面のボタンへ抜けない）。
@@ -296,6 +298,12 @@ export function CoachMarkOverlay({
         ref={setScopeNode}
         trapped
         loop
+        onMountAutoFocus={(event) => {
+          // autoFocus を自前で解決する場合（false / ref 指定）は Radix の
+          // マウント時オートフォーカスを止める。止めないと「移さない」と
+          // 言いながら先頭候補へ飛ぶ / ref へ移す前に一度別要素へ飛ぶ。
+          if (autoFocus !== true) event.preventDefault()
+        }}
         onUnmountAutoFocus={(event) => {
           if (!restoreFocusOnClose) event.preventDefault()
         }}
