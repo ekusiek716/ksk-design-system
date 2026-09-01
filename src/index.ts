@@ -436,6 +436,16 @@ export type { ReviewOverlayProps, ReviewPin } from "./components/patterns/review
 
 // ─── Utilities ───
 export { cn } from "./lib/utils"
+
+// #505: 開いているモーダル（Dialog / Sheet / AlertDialog）の横断判定。
+// 消費側が `[role="dialog"][data-state="open"]` のような DS 内部実装への
+// DOM 直参照を書かずに「いま何か開いているか」を判定するための入口。
+export {
+  useHasOpenModal,
+  useOpenModalCount,
+  getOpenModalCount,
+  subscribeOpenModals,
+} from "./lib/modal-stack"
 // 消費側が独自の入力欄に同じ IME ガードを張れるように公開する（issue #301）
 export { isImeComposing } from "./lib/ime"
 export type { ImeComposableKeyEvent } from "./lib/ime"
