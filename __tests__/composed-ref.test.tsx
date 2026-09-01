@@ -18,6 +18,7 @@ import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { useComposedRef } from "../src/lib/compose-ref"
 import { Input } from "../src/components/ui/input"
 import { Textarea } from "../src/components/ui/textarea"
 import { QuickActionGrid, ActionTile } from "../src/components/patterns/quick-action-grid"
@@ -88,5 +89,67 @@ describe.each(cases)("%s の合成 ref", (_name, render) => {
     act(() => root.unmount())
     root = createRoot(container)
     expect(cleanup).toHaveBeenCalledTimes(1)
+  })
+})
+
+/**
+ * issue #516: 合成 ref の identity が render のたびに変わると、React は
+ * detach → re-attach を繰り返す。内部 setter がそのたびに state を
+ * 更新する構成（ResponsiveOverlayFrame の実効キャップ計測など）では
+ * これが無限ループの燃料になるため、identity は固定する契約にした。
+ */
+describe("useComposedRef の identity（#516）", () => {
+  it("external が毎 render 変わってもコールバック ref の identity は変わらない", () => {
+    const identities = new Set<unknown>()
+    const internalCalls: Array<HTMLDivElement | null> = []
+    let rerender: (() => void) | null = null
+
+    function Probe() {
+      const [, setTick] = React.useState(0)
+      React.useEffect(() => {
+        rerender = () => setTick((t) => t + 1)
+      })
+      const internal = React.useCallback((node: HTMLDivElement | null) => {
+        internalCalls.push(node)
+      }, [])
+      // 毎 render 新しい関数（Radix の composeRefs が返す合成関数と同じ形）。
+      const composed = useComposedRef<HTMLDivElement>(internal, (node) => void node)
+      identities.add(composed)
+      return <div ref={composed} />
+    }
+
+    mount(<Probe />)
+    act(() => rerender?.())
+    act(() => rerender?.())
+
+    expect(identities.size).toBe(1)
+    // attach は最初の 1 回だけ（detach/attach を繰り返していない）。
+    expect(internalCalls).toHaveLength(1)
+    expect(internalCalls[0]).toBeInstanceOf(HTMLDivElement)
+  })
+
+  it("external を差し替えると新しい ref へ node が渡り、旧 ref は解除される", () => {
+    const seenA: Array<HTMLDivElement | null> = []
+    const seenB: Array<HTMLDivElement | null> = []
+
+    function Probe({ which }: { which: "a" | "b" }) {
+      const internal = React.useCallback(() => {}, [])
+      const a = React.useCallback((node: HTMLDivElement | null) => {
+        seenA.push(node)
+      }, [])
+      const b = React.useCallback((node: HTMLDivElement | null) => {
+        seenB.push(node)
+      }, [])
+      const composed = useComposedRef<HTMLDivElement>(internal, which === "a" ? a : b)
+      return <div ref={composed} />
+    }
+
+    mount(<Probe which="a" />)
+    expect(seenA.filter(Boolean)).toHaveLength(1)
+    expect(seenB).toHaveLength(0)
+
+    mount(<Probe which="b" />)
+    expect(seenA).toContain(null)
+    expect(seenB.filter(Boolean)).toHaveLength(1)
   })
 })
