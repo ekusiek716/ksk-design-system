@@ -37,13 +37,16 @@ import {
 function expectedMaxHeight(
   base: string | undefined,
   kb: number,
-  position: "center" | "top" | "fullscreen" = "center"
+  position: "center" | "top" | "fullscreen" = "center",
+  safeArea = true
 ) {
   const capFor = (inset: string, doubled: string) =>
     position === "fullscreen"
       ? `max(0px, calc(100dvh - ${inset}))`
       : position === "top"
-        ? `max(0px, calc(100dvh - ${inset} - max(env(safe-area-inset-top, 0px), 2rem) - 2rem))`
+        ? `max(0px, calc(100dvh - ${inset} - ${
+            safeArea ? "max(env(safe-area-inset-top, 0px), 2rem)" : "2rem"
+          } - 2rem))`
         : `max(0px, calc(100dvh - ${doubled}))`
   const caps = [
     capFor(`${kb}px`, `${kb * 2}px`),
@@ -57,11 +60,11 @@ const BASE = "min(85dvh, 40rem)"
 
 describe("resolveDesktopOverlayKeyboardStyle — 中央モーダルのキーボード補正", () => {
   it("キーボード非表示ではスタイルを返さない", () => {
-    expect(resolveDesktopOverlayKeyboardStyle(0, "center", BASE)).toBeUndefined()
+    expect(resolveDesktopOverlayKeyboardStyle(0, "center", BASE, true)).toBeUndefined()
   })
 
   it("中央寄せはキーボード高さの 2 倍を引く（両側に均等に食われるため）", () => {
-    expect(resolveDesktopOverlayKeyboardStyle(300, "center", BASE)).toEqual({
+    expect(resolveDesktopOverlayKeyboardStyle(300, "center", BASE, true)).toEqual({
       maxHeight: expectedMaxHeight(BASE, 300),
     })
   })
@@ -74,7 +77,7 @@ describe("resolveDesktopOverlayKeyboardStyle — 中央モーダルのキーボ�
   })
 
   it("position=\"top\" は上端固定なので 1 回分 + 上下オフセットを引く", () => {
-    expect(resolveDesktopOverlayKeyboardStyle(300, "top", BASE)).toEqual({
+    expect(resolveDesktopOverlayKeyboardStyle(300, "top", BASE, true)).toEqual({
       maxHeight: expectedMaxHeight(BASE, 300, "top"),
     })
   })
@@ -82,15 +85,34 @@ describe("resolveDesktopOverlayKeyboardStyle — 中央モーダルのキーボ�
   // fullscreen は inset-0 h-full の上端固定。h-full は max-height に負けるので、
   // キーボード 1 回分を引けば面が可視領域へ縮み、内側のスクロール領域は残る。
   it("position=\"fullscreen\" はキーボード 1 回分を引く", () => {
-    expect(resolveDesktopOverlayKeyboardStyle(300, "fullscreen", BASE)).toEqual({
+    expect(resolveDesktopOverlayKeyboardStyle(300, "fullscreen", BASE, true)).toEqual({
       maxHeight: expectedMaxHeight(BASE, 300, "fullscreen"),
     })
   })
 
   it("キャップは 0 で下限を切る（max(0px, …) を必ず含む）", () => {
-    expect(resolveDesktopOverlayKeyboardStyle(9999, "center", BASE)?.maxHeight).toContain(
+    expect(resolveDesktopOverlayKeyboardStyle(9999, "center", BASE, true)?.maxHeight).toContain(
       "max(0px,"
     )
+  })
+})
+
+describe("resolveDesktopOverlayKeyboardStyle — safeArea の opt-out", () => {
+  // safeArea={false} のとき DialogContent は top-8 固定になるので、
+  // キャップ側も env() を足さない（明示的な opt-out を無視して縮めない）。
+  it("position=\"top\" + safeArea={false} は 2rem 固定で引く", () => {
+    expect(
+      resolveDesktopOverlayKeyboardStyle(300, "top", BASE, false)?.maxHeight
+    ).toBe(expectedMaxHeight(BASE, 300, "top", false))
+    expect(
+      resolveDesktopOverlayKeyboardStyle(300, "top", BASE, false)?.maxHeight
+    ).not.toMatch(/env\(safe-area-inset-top/)
+  })
+
+  it("safeArea 既定（true）では env() を含む", () => {
+    expect(
+      resolveDesktopOverlayKeyboardStyle(300, "top", BASE, true)?.maxHeight
+    ).toMatch(/env\(safe-area-inset-top/)
   })
 })
 

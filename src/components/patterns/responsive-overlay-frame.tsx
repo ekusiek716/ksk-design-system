@@ -316,7 +316,8 @@ function useEditableElementFocused(): boolean {
  * `dvh - kb` では下端がキーボードへ潜り込む。
  *
  * `position="top"` は上端固定（`top-8` / safe-area）なので二重に引く必要はなく、
- * 「キーボード + 上オフセット + 下マージン」を引く。`position="fullscreen"` は
+ * 「キーボード + 上オフセット + 下マージン」を引く。上オフセットは
+ * `safeArea` の指定に合わせる（`safeArea={false}` なら `top-8` 固定なので 2rem）。`position="fullscreen"` は
  * `inset-0 h-full` の上端固定なのでキーボード 1 回分だけを引く（`h-full` は
  * max-height に負けるため、面が可視領域の高さへ縮み内側のスクロール領域が残る）。
  *
@@ -331,7 +332,8 @@ function useEditableElementFocused(): boolean {
 function resolveDesktopOverlayKeyboardStyle(
   keyboardInset: number,
   position: "center" | "top" | "fullscreen",
-  baseMaxHeight: string | undefined
+  baseMaxHeight: string | undefined,
+  safeArea: boolean
 ): { maxHeight: string } | undefined {
   if (keyboardInset <= 0) return undefined
   // JS 検知（px）と CSS フォールバック（--kb-h）の 2 つの合図をそれぞれ
@@ -343,7 +345,12 @@ function resolveDesktopOverlayKeyboardStyle(
     position === "fullscreen"
       ? `max(0px, calc(100dvh - ${inset}))`
       : position === "top"
-        ? `max(0px, calc(100dvh - ${inset} - max(env(safe-area-inset-top, 0px), 2rem) - 2rem))`
+        ? // safeArea={false} のときは DialogContent 自身も top-8 固定になるので、
+          // ここも env() を足さない（明示的な opt-out を無視して余計に縮めない
+          // / #487 の Codex レビュー指摘）。
+          `max(0px, calc(100dvh - ${inset} - ${
+            safeArea ? "max(env(safe-area-inset-top, 0px), 2rem)" : "2rem"
+          } - 2rem))`
         : `max(0px, calc(100dvh - ${doubled}))`
   const caps = [
     capFor(`${keyboardInset}px`, `${keyboardInset * 2}px`),
@@ -495,6 +502,8 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   // 既定とみなす（補正で握り潰さない / #487）。
   const consumerMaxHeight = (allProps as { style?: React.CSSProperties }).style
     ?.maxHeight
+  // DialogContent と同じ既定（true）。position="top" の上オフセット計算に使う。
+  const safeArea = (allProps as { safeArea?: boolean }).safeArea ?? true
   const declaredMaxHeight =
     consumerMaxHeight != null
       ? toCalculableMaxHeight(consumerMaxHeight)
@@ -563,7 +572,8 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     ? resolveDesktopOverlayKeyboardStyle(
         keyboardInset,
         desktopPosition,
-        baseMaxHeight
+        baseMaxHeight,
+        safeArea
       )
     : undefined
   // CSS フォールバック（html[data-kb-open] + --kb-h）にも同じ既定値を渡す。
