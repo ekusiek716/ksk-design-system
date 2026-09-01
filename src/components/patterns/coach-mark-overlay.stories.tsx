@@ -5,6 +5,7 @@
  */
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, userEvent, waitFor } from "storybook/test"
 import { CoachMarkOverlay } from "./coach-mark-overlay"
 import { Button } from "@/components/ui/button"
 
@@ -154,5 +155,62 @@ export const MissingTarget: Story = {
         />
       </div>
     )
+  },
+}
+
+/**
+ * #504: `aria-modal="true"` を名乗る以上、Tab は面の中に閉じ込める。
+ * 操作子（スキップ / 次へ）は Portal で overlay の外に描画されるため、
+ * 実ブラウザで「背面のボタンへ抜けない」ことを確かめる。
+ */
+export const FocusTrap: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [open, setOpen] = React.useState(true)
+    return (
+      <div className="flex flex-col gap-6 p-8">
+        <Button id="coach-trap-target" variant="secondary" className="w-fit">
+          対象のボタン
+        </Button>
+        <Button data-testid="behind" className="w-fit">
+          背面のボタン
+        </Button>
+        <CoachMarkOverlay
+          open={open}
+          steps={[
+            {
+              selector: "#coach-trap-target",
+              title: "ここから始めます",
+              desc: "Tab を押しても背面には出ません。",
+            },
+          ]}
+          onComplete={() => setOpen(false)}
+          onSkip={() => setOpen(false)}
+        />
+      </div>
+    )
+  },
+  play: async () => {
+    const balloon = await waitFor(() => {
+      const el = document.querySelector<HTMLElement>('[data-slot="coach-mark"]')
+      if (!el) throw new Error("コーチマークのバルーンが見つからない")
+      return el
+    })
+    const buttons = Array.from(balloon.querySelectorAll("button"))
+    await expect(buttons).toHaveLength(2)
+
+    // 開いた時点で面の中の操作子にフォーカスが移っている
+    await waitFor(() => expect(document.activeElement).toBe(buttons[0]))
+
+    // Tab を面の要素数より多く押しても、背面のボタンへは出ない
+    for (let i = 0; i < 4; i++) {
+      await userEvent.tab()
+      await expect(buttons).toContain(document.activeElement as HTMLButtonElement)
+    }
+    // 逆方向も同じ
+    for (let i = 0; i < 3; i++) {
+      await userEvent.tab({ shift: true })
+      await expect(buttons).toContain(document.activeElement as HTMLButtonElement)
+    }
   },
 }

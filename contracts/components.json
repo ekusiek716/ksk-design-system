@@ -731,7 +731,8 @@
       "props": {
         "nextLabel": "string (既定 \"次へ →\") — 次へボタンの文言。矢印は文言に含まれる（issue #477）",
         "skipLabel": "string (既定 \"スキップ\") — スキップボタンの文言（issue #477）",
-        "ariaLabel": "string — バルーンの aria-label。未指定時は content が string ならその文字列、それ以外は \"コーチマーク\"（issue #477）"
+        "ariaLabel": "string — バルーンの aria-label。未指定時は content が string ならその文字列、それ以外は \"コーチマーク\"（issue #477）",
+        "contentRef": "React.Ref<HTMLDivElement> — Portal 先に描画されるバルーン本体の DOM を受け取る。フォーカストラップ等、面の DOM をまとめて扱う側が実体を掴むため（issue #504）"
       }
     },
     {
@@ -2039,15 +2040,24 @@
       "accessibility": [
         "role=dialog",
         "aria-modal",
-        "aria-label"
+        "aria-label",
+        "フォーカストラップ（Tab/Shift+Tab を面の中で循環）",
+        "Escape で離脱",
+        "閉じたら元の位置へフォーカス復帰"
       ],
       "rules": [
         "isCoachCompleted/markCoachCompleted で完了状態を永続化",
         "対象要素が見つからない step は画面中央フォールバック",
-        "ボタン文言・aria-label の i18n は labels prop で渡す（未指定は既定文言のまま・後方互換）"
+        "ボタン文言・aria-label の i18n は labels prop で渡す（未指定は既定文言のまま・後方互換）",
+        "aria-modal=\"true\" を名乗るため、既定で Tab/Shift+Tab を面の中に閉じ込める。操作子は CoachMark が Portal で外に描画するので、トラップは overlay ルート + バルーンの2コンテナで張る（issue #504）",
+        "autoFocus / restoreFocusOnClose / closeOnEsc は Dialog / Sheet と同じ prop 名・既定 true。Escape は onSkip（未指定なら onComplete）を呼ぶ",
+        "Dialog に収まらない自前のモーダル面を作る場合は、consumer 側でトラップを書かず useFocusTrap（公開 API）を使う"
       ],
       "props": {
-        "labels": "{ next?, done?, skip?, ariaLabel? } — ボタン文言と overlay の aria-label。i18n はアプリ側で解決して渡す。done 未指定なら next にフォールバック（issue #477）"
+        "labels": "{ next?, done?, skip?, ariaLabel? } — ボタン文言と overlay の aria-label。i18n はアプリ側で解決して渡す。done 未指定なら next にフォールバック（issue #477）",
+        "autoFocus": "boolean | React.RefObject<HTMLElement | null> (既定 true) — 表示時に最初の操作子へフォーカスを移す。ref 指定でその要素、false で移さない（issue #504）",
+        "restoreFocusOnClose": "boolean (既定 true) — 閉じたら開く前のフォーカス位置へ戻す（issue #504）",
+        "closeOnEsc": "boolean (既定 true) — Escape で onSkip（未指定なら onComplete）を呼ぶ（issue #504）"
       }
     },
     {

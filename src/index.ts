@@ -437,6 +437,12 @@ export type { ReviewOverlayProps, ReviewPin } from "./components/patterns/review
 // ─── Utilities ───
 export { cn } from "./lib/utils"
 
+// #504: Dialog / Sheet に収まらない自前のモーダル面（スポットライト型の
+// オンボーディング等）で使うフォーカストラップ。CoachMarkOverlay が内部で
+// 使っているものと同じ実体を公開する。
+export { useFocusTrap } from "./lib/use-focus-trap"
+export type { UseFocusTrapOptions, FocusTrapContainer } from "./lib/use-focus-trap"
+
 // #505: 開いているモーダル（Dialog / Sheet / AlertDialog）の横断判定。
 // 消費側が `[role="dialog"][data-state="open"]` のような DS 内部実装への
 // DOM 直参照を書かずに「いま何か開いているか」を判定するための入口。

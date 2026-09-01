@@ -2,6 +2,7 @@ import * as React from "react"
 import { createPortal } from "react-dom"
 import { CoachMark, type CoachMarkVariant } from "../ui/coach-mark"
 import { cn } from "@/lib/utils"
+import { useFocusTrap } from "@/lib/use-focus-trap"
 
 export interface CoachStep {
   /** querySelector で要素を特定。要素が無ければ画面中央にフォールバック表示。 */
@@ -39,6 +40,22 @@ export interface CoachMarkOverlayProps {
     /** overlay の aria-label（既定 "Onboarding coach mark"） */
     ariaLabel?: string
   }
+  /**
+   * 表示時に最初の操作子（スキップ/次へ）へフォーカスを移すか（既定 true）。
+   * ref を渡すとその要素へ移す。false で自動フォーカスしない（#504）。
+   *
+   * この面は `aria-modal="true"` を名乗るため、既定では Tab / Shift+Tab を
+   * 面の中に閉じ込める（背面のボタンへ抜けない）。
+   */
+  autoFocus?: boolean | React.RefObject<HTMLElement | null>
+  /** 閉じたあと、開く前のフォーカス位置へ戻すか（既定 true。#504）。 */
+  restoreFocusOnClose?: boolean
+  /**
+   * Escape で終了できるようにするか（既定 true。#504）。
+   * 押されたときは `onSkip`（未指定なら `onComplete`）を呼ぶ
+   * ＝「ツアーを離脱する」扱いで、次のステップへは進めない。
+   */
+  closeOnEsc?: boolean
 }
 
 const DEFAULT_LABELS = {
@@ -106,10 +123,34 @@ export function CoachMarkOverlay({
   ringColor = "var(--Brand-Primary)",
   maxWidth = 280,
   labels,
+  autoFocus = true,
+  restoreFocusOnClose = true,
+  closeOnEsc = true,
 }: CoachMarkOverlayProps) {
   const resolvedLabels = { ...DEFAULT_LABELS, ...labels }
   const [idx, setIdx] = React.useState(0)
   const [rect, setRect] = React.useState<DOMRect | null>(null)
+  // #504: aria-modal="true" を名乗る以上、Tab は面の中に閉じ込める。
+  // 操作子（スキップ/次へ）は CoachMark が Portal で外に描画するので、
+  // overlay のルートだけでは掴めない。バルーンの実体も併せてトラップ対象にする。
+  const rootRef = React.useRef<HTMLDivElement>(null)
+  const [balloonNode, setBalloonNode] = React.useState<HTMLElement | null>(null)
+  const trapContainers = React.useMemo(
+    () => [rootRef, balloonNode],
+    [balloonNode]
+  )
+  const handleEscape = React.useCallback(() => {
+    // ツアーの離脱。onSkip が無いアプリでは完了扱いにする（開いたままにしない）。
+    if (onSkip) onSkip()
+    else onComplete()
+  }, [onSkip, onComplete])
+  useFocusTrap({
+    active: open,
+    containers: trapContainers,
+    autoFocus,
+    restoreFocusOnClose,
+    onEscape: closeOnEsc ? handleEscape : undefined,
+  })
   const mounted = React.useSyncExternalStore(
     React.useCallback(() => () => {}, []),
     React.useCallback(() => true, []),
@@ -196,6 +237,7 @@ export function CoachMarkOverlay({
 
   return createPortal(
     <div
+      ref={rootRef}
       data-slot="coach-mark-overlay"
       data-step={idx + 1}
       data-total={steps.length}
@@ -231,6 +273,7 @@ export function CoachMarkOverlay({
         ariaLabel={resolvedLabels.ariaLabel}
         showClose={!!onSkip}
         onClose={onSkip}
+        contentRef={setBalloonNode}
         className="py-4! px-4!"
       >
         <span

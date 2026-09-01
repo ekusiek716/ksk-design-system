@@ -38,6 +38,12 @@ interface CoachMarkProps {
   ariaLabel?: string
   delayDuration?: number
   className?: string
+  /**
+   * バルーン本体（Portal 先に描画される Content）の DOM を受け取る ref。
+   * バルーンは Portal で呼び出し元の外に出るため、フォーカストラップのように
+   * 「面の DOM をまとめて扱いたい」側が実体を掴めるようにする（#504）。
+   */
+  contentRef?: React.Ref<HTMLDivElement>
 }
 
 const sideMap: Record<CoachMarkPlacement, "top" | "bottom" | "left" | "right"> = {
@@ -64,6 +70,7 @@ function CoachMark({
   ariaLabel: ariaLabelProp,
   delayDuration = 0,
   className,
+  contentRef,
 }: CoachMarkProps) {
   const isOnboarding = step !== undefined
 
@@ -88,6 +95,7 @@ function CoachMark({
         </TooltipPrimitive.Trigger>
         <TooltipPrimitive.Portal container={portalContainer}>
           <TooltipPrimitive.Content
+            ref={contentRef}
             data-slot="coach-mark"
             data-variant={variant}
             aria-label={ariaLabel}
