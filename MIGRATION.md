@@ -18,11 +18,11 @@ npx ksk-ds check-migration ./src
 | API | 使われ方 | 移行先 | 非推奨にした版 | 削除予定 |
 | --- | --- | --- | --- | --- |
 | `ListItem.interactive` | `<ListItem interactive>` | href または onClick を ListItem 自体へ渡す | 1.46.0 | v2.0.0 |
-| `ChipSelector.multiple` | `<ChipSelector multiple>` | selectionMode（multiple={false} は selectionMode="single"、multiple は selectionMode="multiple"） | unreleased | v2.0.0 |
+| `ChipSelector.multiple` | `<ChipSelector multiple>` | selectionMode（multiple={false} は selectionMode="single"、multiple は selectionMode="multiple"） | 1.71.0 | v2.0.0 |
 | `PillToggle.onValueChange` | `<PillToggle onValueChange>` | onChange | 1.49.0 | v2.0.0 |
 | `ProductCard.deliveryLabel` | `<ProductCard deliveryLabel>` | なし（v1.30.0 以降は描画されないため、渡している箇所は削除する） | 1.30.1 | v2.0.0 |
 | `Progress.tone` | `<Progress tone>` | variant | 1.40.1 | v2.0.0 |
-| `ProgressRing.thickness` | `<ProgressRing thickness>` | strokeWidth（Web の同名 prop と語彙を揃えた。値の意味・既定値 6 は同じ） | unreleased | v2.0.0 |
+| `ProgressRing.thickness` | `<ProgressRing thickness>` | strokeWidth（Web の同名 prop と語彙を揃えた。値の意味・既定値 6 は同じ） | 1.71.0 | v2.0.0 |
 
 各エントリの補足:
 

@@ -46,7 +46,7 @@
       "kind": "prop",
       "component": "ChipSelector",
       "prop": "multiple",
-      "since": "unreleased",
+      "since": "1.71.0",
       "replacement": "selectionMode（multiple={false} は selectionMode=\"single\"、multiple は selectionMode=\"multiple\"）",
       "removeIn": "2.0.0",
       "sources": [
@@ -101,7 +101,7 @@
       "kind": "prop",
       "component": "ProgressRing",
       "prop": "thickness",
-      "since": "unreleased",
+      "since": "1.71.0",
       "replacement": "strokeWidth（Web の同名 prop と語彙を揃えた。値の意味・既定値 6 は同じ）",
       "removeIn": "2.0.0",
       "sources": [
