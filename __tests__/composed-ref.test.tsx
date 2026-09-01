@@ -152,4 +152,36 @@ describe("useComposedRef の identity（#516）", () => {
     expect(seenA).toContain(null)
     expect(seenB.filter(Boolean)).toHaveLength(1)
   })
+
+  // PR #517 の Codex レビュー指摘: internal も差し替え時に旧 setter へ null →
+  // 新 setter へ node を渡す。渡さないと旧 setter 側の状態（DialogContent の
+  // setContentNode が積む appliedRef 等）が stale なまま残る。
+  it("internal を差し替えると旧 setter に null・新 setter に node が渡る", () => {
+    const seenA: Array<HTMLDivElement | null> = []
+    const seenB: Array<HTMLDivElement | null> = []
+
+    function Probe({ which }: { which: "a" | "b" }) {
+      const a = React.useCallback((node: HTMLDivElement | null) => {
+        seenA.push(node)
+      }, [])
+      const b = React.useCallback((node: HTMLDivElement | null) => {
+        seenB.push(node)
+      }, [])
+      const composed = useComposedRef<HTMLDivElement>(which === "a" ? a : b, undefined)
+      return <div ref={composed} />
+    }
+
+    mount(<Probe which="a" />)
+    expect(seenA.filter(Boolean)).toHaveLength(1)
+    expect(seenB).toHaveLength(0)
+
+    mount(<Probe which="b" />)
+    expect(seenA[seenA.length - 1]).toBeNull()
+    expect(seenB.filter(Boolean)).toHaveLength(1)
+
+    // アンマウントでは新 setter（現在 attach 中の側）にだけ null が渡る
+    act(() => root.unmount())
+    root = createRoot(container)
+    expect(seenB[seenB.length - 1]).toBeNull()
+  })
 })
