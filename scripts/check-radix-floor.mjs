@@ -51,6 +51,21 @@ const metaManifestPath = `${rootDir}node_modules/radix-ui/package.json`
 const metaManifest = existsSync(metaManifestPath)
   ? JSON.parse(readFileSync(metaManifestPath, "utf8"))
   : null
+// 推移依存は「radix-ui が宣言している版」ではなく「実際にインストールされた
+// manifest の version」を読む。root の overrides 等で宣言と実体がズレても
+// 偽の緑にならないようにする（PR #520 の Codex レビュー指摘）。
+// Radix の exports は "./package.json" を公開しないため require.resolve は使えず、
+// npm の物理配置（radix-ui 配下へのネスト → root への hoist）の順で直接引く。
+function installedTransitiveVersion(name) {
+  const candidates = [
+    `${rootDir}node_modules/radix-ui/node_modules/${name}/package.json`,
+    `${rootDir}node_modules/${name}/package.json`,
+  ]
+  for (const manifestPath of candidates) {
+    if (existsSync(manifestPath)) return JSON.parse(readFileSync(manifestPath, "utf8")).version
+  }
+  return null
+}
 
 const resolved = []
 for (const [name, floor] of Object.entries(SAFE_FLOORS)) {
@@ -59,7 +74,13 @@ for (const [name, floor] of Object.entries(SAFE_FLOORS)) {
     const manifestPath = `${rootDir}node_modules/${name}/package.json`
     if (existsSync(manifestPath)) version = JSON.parse(readFileSync(manifestPath, "utf8")).version
   } else {
-    version = metaManifest?.dependencies?.[name] ?? null
+    version = installedTransitiveVersion(name)
+    // 実体と宣言の両方を見る: 宣言が exact でない場合は従来どおり保証不能として弾く
+    const declared = metaManifest?.dependencies?.[name] ?? null
+    if (declared && !/^\d+\.\d+\.\d+$/.test(declared)) {
+      errors.push(`${name}: radix-ui が exact 以外（"${declared}"）で宣言しています。下限を保証できません`)
+      continue
+    }
   }
 
   if (!version) {
