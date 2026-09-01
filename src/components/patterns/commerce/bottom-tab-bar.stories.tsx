@@ -353,3 +353,36 @@ export const OpaquePillSurface: Story = {
     )
   },
 }
+
+/**
+ * issue #486 — デスクトップ用シェルを持たないアプリ向けに、lg 幅でもナビを出す。
+ * Storybook のツールバーでビューポートを変えるか、ブラウザ幅を 1024px 以上に
+ * 広げると差が出る（既定は消え、showOnDesktop は残る）。
+ */
+export const ShowOnDesktop: Story = {
+  name: "デスクトップ幅でも表示する（showOnDesktop）",
+  parameters: { layout: "fullscreen" },
+  render: () => (
+    <div className="flex flex-col gap-6 p-4 bg-[var(--Surface-Secondary)]">
+      <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+        幅 1024px 以上で比較すること。既定はモバイル専用のため消える。
+      </p>
+      <div>
+        <p className="typo-label-md text-[var(--Text-Medium-Emphasis)] mb-2">
+          既定（lg 以上で非表示）
+        </p>
+        <div className="relative h-40 overflow-hidden rounded-2xl bg-[var(--Surface-Primary)] border border-[var(--Border-Low-Emphasis)]">
+          <BottomTabBar variant="pill" pillPosition="absolute" items={COMPACT_ITEMS} />
+        </div>
+      </div>
+      <div>
+        <p className="typo-label-md text-[var(--Text-Medium-Emphasis)] mb-2">
+          showOnDesktop（lg 以上でも表示）
+        </p>
+        <div className="relative h-40 overflow-hidden rounded-2xl bg-[var(--Surface-Primary)] border border-[var(--Border-Low-Emphasis)]">
+          <BottomTabBar variant="pill" pillPosition="absolute" items={COMPACT_ITEMS} showOnDesktop />
+        </div>
+      </div>
+    </div>
+  ),
+}
