@@ -61,6 +61,9 @@ export function PillToggle({
             })}
           >
             <RNText
+              // fullWidth では枠幅がラベル長で決まらないため、1行に固定して省略記号で畳む
+              numberOfLines={fullWidth ? 1 : undefined}
+              ellipsizeMode={fullWidth ? "tail" : undefined}
               style={[
                 resolveTypo("label.sm"),
                 {

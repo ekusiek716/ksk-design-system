@@ -76,7 +76,7 @@ export const FullWidthThree: Story = {
           fullWidth
           options={[
             { label: "すべて", value: "all" },
-            { label: "進行中のタスク", value: "active" },
+            { label: "進行中のタスク（長いラベル）", value: "active" },
             { label: "完了", value: "done" },
           ]}
           value={v}
@@ -96,6 +96,10 @@ export const FullWidthThree: Story = {
     const list = canvasElement.querySelector<HTMLElement>('[data-slot="tabs-list"]')!
     // 親（360px）いっぱいに広がっている
     await expect(Math.round(list.getBoundingClientRect().width)).toBe(360)
+    // 長いラベルでも折り返さず、trigger の高さは md の h-9(36px) のまま
+    for (const t of tabs) {
+      await expect(Math.round(t.getBoundingClientRect().height)).toBe(36)
+    }
   },
 }
 

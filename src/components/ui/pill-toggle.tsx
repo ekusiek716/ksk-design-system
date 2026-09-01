@@ -81,7 +81,10 @@ type PillToggleProps<T extends string = string> =
  * ### 全幅・等幅（issue #500）
  * 既定は `w-fit` でラベル幅。行いっぱいに広げて各項目を等幅にしたいときは
  * `fullWidth` を渡す（`className="grid w-full grid-cols-3"` のような内部構造
- * 依存の回避策は不要）。
+ * 依存の回避策は不要）。列数に応じた動的クラスは作らず、各 trigger を
+ * `flex-1`（basis 0）にして等分するので選択肢数に依存しない。枠に収まらない
+ * 長いラベルは省略記号で畳まれる（折り返しはしない）ので、`fullWidth` では
+ * 短いラベルを使うこと。
  *
  * ### 高さを外から足さないこと
  * pill の trigger は見た目の高さ（`h-9`/`h-8`）を保ったまま、透明な `before`
@@ -118,10 +121,13 @@ function PillToggle<T extends string = string>({
           <TabsTrigger
             key={opt.value}
             value={opt.value}
-            className={cn(TRIGGER_SIZE[size], fullWidth && "flex-1 min-w-0")}
+            className={cn(TRIGGER_SIZE[size], fullWidth && "flex-1 min-w-0 overflow-hidden")}
           >
             {opt.icon && <span className="shrink-0">{opt.icon}</span>}
-            {opt.label}
+            {/* fullWidth では枠幅がラベル長で決まらないため、長いラベルは省略記号で畳む。
+                TabsTrigger は既定で whitespace-nowrap なので折り返して高さが崩れることはなく、
+                truncate を足すことで枠外へはみ出す代わりに「…」で収める。 */}
+            <span className={cn(fullWidth && "truncate")}>{opt.label}</span>
           </TabsTrigger>
         ))}
       </TabsList>
