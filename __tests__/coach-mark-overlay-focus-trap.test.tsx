@@ -18,6 +18,7 @@ import { createRoot, type Root } from "react-dom/client"
 import * as React from "react"
 
 import { CoachMarkOverlay } from "../src/components/patterns/coach-mark-overlay"
+import { Dialog, DialogContent, DialogTitle } from "../src/components/ui/dialog"
 
 // jsdom には ResizeObserver / DOMRect の実体が無い（Radix Tooltip が使う）。
 if (typeof globalThis.ResizeObserver === "undefined") {
@@ -73,6 +74,12 @@ function coachButtons(): HTMLButtonElement[] {
   const balloon = document.querySelector('[data-slot="coach-mark"]')
   expect(balloon, "コーチマークのバルーンが見つからない").not.toBeNull()
   return Array.from(balloon!.querySelectorAll("button"))
+}
+
+function coachOverlayRoot(): HTMLElement {
+  const el = document.querySelector<HTMLElement>('[data-slot="coach-mark-overlay"]')
+  expect(el, "coach-mark-overlay が見つからない").not.toBeNull()
+  return el!
 }
 
 beforeEach(() => {
@@ -165,15 +172,13 @@ describe("CoachMarkOverlay のフォーカストラップ（#504）", () => {
     expect(document.activeElement).toBe(buttons[1])
   })
 
-  it("面の外へフォーカスが逃げていても Tab で面の中へ引き戻す", () => {
+  it("面の外の要素へフォーカスしても面の中へ引き戻される", () => {
     mount(<Scene open onSkip={() => {}} />)
     const behind = document.getElementById("behind-1") as HTMLButtonElement
     act(() => {
       behind.focus()
     })
-    expect(document.activeElement).toBe(behind)
-    pressTab()
-    expect(document.activeElement).toBe(coachButtons()[0])
+    expect(coachOverlayRoot().contains(document.activeElement)).toBe(true)
   })
 
   it("Escape で onSkip を呼ぶ（closeOnEsc=false なら呼ばない）", () => {
@@ -205,5 +210,47 @@ describe("CoachMarkOverlay のフォーカストラップ（#504）", () => {
 
     rerender(<Scene open={false} onSkip={() => {}} />)
     expect(document.activeElement).toBe(trigger)
+  })
+
+  it("開いている Dialog の上に重ねてもフォーカスを奪われない（#504 の入れ子）", () => {
+    // 「先に開いている Dialog」→「あとからツアーを開く」という実際の順序で見る。
+    // Radix のフォーカススコープは後から載った側が下を pause するので、
+    // ツアーが下のダイアログへ引き戻されない。
+    function Nested({ tourOpen }: { tourOpen: boolean }) {
+      return (
+        <>
+          <Dialog open>
+            <DialogContent description="下地のダイアログ">
+              <DialogTitle>下地</DialogTitle>
+              <button type="button" id="in-dialog">
+                ダイアログ内のボタン
+              </button>
+            </DialogContent>
+          </Dialog>
+          <div id="target">対象</div>
+          <CoachMarkOverlay
+            open={tourOpen}
+            steps={[{ selector: "#target", title: "ここ", desc: "説明" }]}
+            onComplete={() => {}}
+            onSkip={() => {}}
+          />
+        </>
+      )
+    }
+    mount(<Nested tourOpen={false} />)
+    expect(document.getElementById("in-dialog")).not.toBeNull()
+
+    rerender(<Nested tourOpen />)
+    const buttons = coachButtons()
+    expect(buttons.length).toBeGreaterThan(0)
+    // 下の Dialog の FocusScope に引き戻されず、コーチマークの操作子に居る
+    expect(coachOverlayRoot().contains(document.activeElement)).toBe(true)
+
+    // 端での Tab もコーチマークの中で折り返す（ダイアログへ出ない）
+    act(() => {
+      buttons[buttons.length - 1].focus()
+    })
+    pressTab()
+    expect(coachOverlayRoot().contains(document.activeElement)).toBe(true)
   })
 })

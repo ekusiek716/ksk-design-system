@@ -2,7 +2,8 @@ import * as React from "react"
 import { createPortal } from "react-dom"
 import { CoachMark, type CoachMarkVariant } from "../ui/coach-mark"
 import { cn } from "@/lib/utils"
-import { useFocusTrap } from "@/lib/use-focus-trap"
+import { FocusScope } from "radix-ui/internal"
+import { PortalContainerProvider } from "../ui/portal-container"
 
 export interface CoachStep {
   /** querySelector で要素を特定。要素が無ければ画面中央にフォールバック表示。 */
@@ -131,26 +132,67 @@ export function CoachMarkOverlay({
   const [idx, setIdx] = React.useState(0)
   const [rect, setRect] = React.useState<DOMRect | null>(null)
   // #504: aria-modal="true" を名乗る以上、Tab は面の中に閉じ込める。
-  // 操作子（スキップ/次へ）は CoachMark が Portal で外に描画するので、
-  // overlay のルートだけでは掴めない。バルーンの実体も併せてトラップ対象にする。
-  const rootRef = React.useRef<HTMLDivElement>(null)
-  const [balloonNode, setBalloonNode] = React.useState<HTMLElement | null>(null)
-  const trapContainers = React.useMemo(
-    () => [rootRef, balloonNode],
-    [balloonNode]
-  )
+  // トラップは自前で書かず Radix の FocusScope に載せる。理由は入れ子:
+  // この面は Dialog / Sheet の上に重ねられる（z も専用段を持っている）が、
+  // 下の Radix モーダルの FocusScope は生きたままなので、独立した自前トラップ
+  // だとフォーカスの取り合いになり、下のモーダルへ引き戻されて「次へ / スキップ」
+  // が操作できない。FocusScope は Radix のスコープ・スタックに参加し、上に載った
+  // 側が下を pause するため、この取り合いが起きない。
+  const [scopeNode, setScopeNode] = React.useState<HTMLDivElement | null>(null)
   const handleEscape = React.useCallback(() => {
     // ツアーの離脱。onSkip が無いアプリでは完了扱いにする（開いたままにしない）。
     if (onSkip) onSkip()
     else onComplete()
   }, [onSkip, onComplete])
-  useFocusTrap({
-    active: open,
-    containers: trapContainers,
-    autoFocus,
-    restoreFocusOnClose,
-    onEscape: closeOnEsc ? handleEscape : undefined,
+  React.useEffect(() => {
+    if (!open || !closeOnEsc) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return
+      event.preventDefault()
+      handleEscape()
+    }
+    // capture: 背面のコンポーネントが keydown を止めていても離脱できるようにする。
+    document.addEventListener("keydown", onKeyDown, true)
+    return () => document.removeEventListener("keydown", onKeyDown, true)
+  }, [open, closeOnEsc, handleEscape])
+
+  // バルーン（CoachMark の Content）は Portal で描画されるので、スコープの外に
+  // 出ると FocusScope に閉じ込められない。描画先をスコープ要素へ向ける。
+  // scopeNode が付くのは 2 レンダー目なので、初期フォーカスはそのあと当てる。
+  const autoFocusRef = React.useRef(autoFocus)
+  React.useEffect(() => {
+    autoFocusRef.current = autoFocus
   })
+  React.useEffect(() => {
+    if (!open || !scopeNode) return
+    const target = autoFocusRef.current
+    if (target === false) return
+    let raf = 0
+    let attempts = 0
+    const focusInitial = () => {
+      if (target !== true && target?.current) {
+        target.current.focus()
+        return
+      }
+      // FocusScope のマウント時オートフォーカスはスコープ要素自体に当たる
+      // （バルーンがまだ Portal されていないため）。操作子が生えたら移す。
+      // tabIndex < 0 は Tab 順に居ないので初期フォーカスの対象にもしない
+      // （`button:not([disabled])` 等のセレクタだけでは tabindex="-1" を弾けない）。
+      const first = Array.from(
+        scopeNode.querySelectorAll<HTMLElement>(
+          "button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]"
+        )
+      ).find((el) => el.tabIndex >= 0)
+      if (first) {
+        first.focus()
+        return
+      }
+      if (attempts++ < 5) raf = requestAnimationFrame(focusInitial)
+    }
+    raf = requestAnimationFrame(focusInitial)
+    return () => cancelAnimationFrame(raf)
+  }, [open, scopeNode])
+
   const mounted = React.useSyncExternalStore(
     React.useCallback(() => () => {}, []),
     React.useCallback(() => true, []),
@@ -237,7 +279,6 @@ export function CoachMarkOverlay({
 
   return createPortal(
     <div
-      ref={rootRef}
       data-slot="coach-mark-overlay"
       data-step={idx + 1}
       data-total={steps.length}
@@ -245,47 +286,64 @@ export function CoachMarkOverlay({
       aria-modal="true"
       aria-label={resolvedLabels.ariaLabel}
     >
-      {/* spotlight が無いとき (対象要素未発見) のフォールバック overlay */}
-      {!hasSpotlight && (
-        <div
-          className="fixed inset-0 bg-black/55 z-[var(--Z-Coachmark-Overlay)] pointer-events-none"
-          aria-hidden="true"
-        />
-      )}
-      <div style={targetStyle} />
-      <CoachMark
-        content={
-          <div className={cn("max-w-xs")} style={{ maxWidth }}>
-            <p className="typo-label-md text-[var(--Text-on-Inverse)] mb-1">{step.title}</p>
-            <p className="typo-body-sm text-[var(--Text-on-Inverse)] whitespace-pre-line">
-              {step.desc}
-            </p>
-          </div>
-        }
-        placement={resolvedPlacement}
-        variant={variant}
-        open
-        step={idx + 1}
-        totalSteps={steps.length}
-        onNext={handleNext}
-        nextLabel={isLast ? (resolvedLabels.done ?? resolvedLabels.next) : resolvedLabels.next}
-        skipLabel={resolvedLabels.skip}
-        ariaLabel={resolvedLabels.ariaLabel}
-        showClose={!!onSkip}
-        onClose={onSkip}
-        contentRef={setBalloonNode}
-        className="py-4! px-4!"
+      {/*
+        #504: trapped + loop で Tab / Shift+Tab をこの中に閉じ込め、
+        unmount で開く前の要素へフォーカスを戻す（restoreFocusOnClose）。
+        マウント時のオートフォーカスは、バルーンがまだ Portal されていない
+        タイミングなので上の effect 側で当て直す。
+      */}
+      <FocusScope.FocusScope
+        ref={setScopeNode}
+        trapped
+        loop
+        onUnmountAutoFocus={(event) => {
+          if (!restoreFocusOnClose) event.preventDefault()
+        }}
       >
-        <span
-          className="fixed pointer-events-none"
-          style={
-            hasSpotlight && rect
-              ? { top: rect.top, left: rect.left + rect.width / 2, width: 1, height: 1 }
-              : { top: "50%", left: "50%" }
+        {/* spotlight が無いとき (対象要素未発見) のフォールバック overlay */}
+        {!hasSpotlight && (
+          <div
+            className="fixed inset-0 bg-black/55 z-[var(--Z-Coachmark-Overlay)] pointer-events-none"
+            aria-hidden="true"
+          />
+        )}
+        <div style={targetStyle} />
+        {/* バルーンをスコープの中へ描画させる（外に出るとトラップの対象外になる） */}
+        <PortalContainerProvider container={scopeNode}>
+        <CoachMark
+          content={
+            <div className={cn("max-w-xs")} style={{ maxWidth }}>
+              <p className="typo-label-md text-[var(--Text-on-Inverse)] mb-1">{step.title}</p>
+              <p className="typo-body-sm text-[var(--Text-on-Inverse)] whitespace-pre-line">
+                {step.desc}
+              </p>
+            </div>
           }
-          aria-hidden="true"
-        />
-      </CoachMark>
+          placement={resolvedPlacement}
+          variant={variant}
+          open
+          step={idx + 1}
+          totalSteps={steps.length}
+          onNext={handleNext}
+          nextLabel={isLast ? (resolvedLabels.done ?? resolvedLabels.next) : resolvedLabels.next}
+          skipLabel={resolvedLabels.skip}
+          ariaLabel={resolvedLabels.ariaLabel}
+          showClose={!!onSkip}
+          onClose={onSkip}
+          className="py-4! px-4!"
+        >
+          <span
+            className="fixed pointer-events-none"
+            style={
+              hasSpotlight && rect
+                ? { top: rect.top, left: rect.left + rect.width / 2, width: 1, height: 1 }
+                : { top: "50%", left: "50%" }
+            }
+            aria-hidden="true"
+          />
+        </CoachMark>
+        </PortalContainerProvider>
+      </FocusScope.FocusScope>
     </div>,
     document.body,
   )

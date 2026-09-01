@@ -49,6 +49,10 @@ export default defineConfig({
         "clsx",
         "tailwind-merge",
         "radix-ui",
+        // FocusScope（radix-ui/internal）は Radix のフォーカススコープ・スタックを
+        // 共有する必要があるため必ず external に置く。バンドルすると DS 側と
+        // Dialog 側で別インスタンスになり、入れ子時の pause/resume が壊れる（#504）。
+        "radix-ui/internal",
         "@radix-ui/react-slot",
       ],
       output: {
