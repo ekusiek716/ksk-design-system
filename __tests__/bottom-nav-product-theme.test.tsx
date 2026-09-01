@@ -326,3 +326,46 @@ describe("pill 本体の面の公開変数（issue #486）", () => {
     expect(PRODUCT_THEME_CSS).not.toContain("--Nav-Pill-Specular")
   })
 })
+
+describe("デスクトップ幅での表示切り替え（issue #486）", () => {
+  const SOURCES = {
+    bar: SOURCE,
+    mobile: readFileSync(
+      join(ROOT, "src/components/patterns/commerce/mobile-tab-bar.tsx"),
+      "utf8",
+    ),
+  }
+
+  it("既定は従来どおり lg:hidden（モバイル専用）", () => {
+    // 既定値を落とすと全消費側のデスクトップ表示が無言で変わる
+    expect(SOURCES.bar).toContain("showOnDesktop = false")
+    const occurrences = SOURCES.bar.match(/showOnDesktop \? "lg:(block|flex)" : "lg:hidden"/g) ?? []
+    // default variant の nav / pill の scroll edge 帯 / pill 本体の 3 箇所
+    expect(occurrences).toHaveLength(3)
+  })
+
+  it("表示側のクラスは各要素の既定 display に合わせる（display の回帰を防ぐ）", () => {
+    // pill 本体は flex、display 指定を持たない nav と装飾帯は block。
+    // 一律 lg:flex にすると 1024px 以上でだけ display が変わる。
+    expect(SOURCES.bar).toContain('showOnDesktop ? "lg:flex" : "lg:hidden"')
+    expect(SOURCES.bar.match(/showOnDesktop \? "lg:block" : "lg:hidden"/g) ?? []).toHaveLength(2)
+    expect(SOURCES.bar.match(/showOnDesktop \? "lg:flex" : "lg:hidden"/g) ?? []).toHaveLength(1)
+  })
+
+  it("クラス名は完全な文字列で書く（動的合成しない）", () => {
+    expect(SOURCES.bar).not.toMatch(/`lg:\$\{/)
+    expect(SOURCES.mobile).not.toMatch(/`lg:\$\{/)
+  })
+
+  it("MobileTabBar は showOnDesktop をパススルーし、自前の lg:hidden を落とす", () => {
+    expect(SOURCES.mobile).toContain("showOnDesktop = false")
+    expect(SOURCES.mobile).toContain("showOnDesktop={showOnDesktop}")
+    // showOnDesktop のときはベタ書きの lg:hidden を付けない
+    expect(SOURCES.mobile).toMatch(/showOnDesktop\s*\?\s*className/)
+  })
+
+  it("BottomTabBar / MobileTabBar の両方が prop を公開している", () => {
+    expect(SOURCES.bar).toMatch(/showOnDesktop\?: boolean/)
+    expect(SOURCES.mobile).toMatch(/showOnDesktop\?: boolean/)
+  })
+})

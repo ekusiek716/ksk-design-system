@@ -27,6 +27,11 @@ interface MobileTabBarProps<T extends string> {
    * addAction と併用しない片側フロート + FAB 併置レイアウトで使う。
    */
   floatingPosition?: BottomTabBarFloatingPosition
+  /**
+   * デスクトップ幅（`lg` = 1024px 以上）でもナビを表示するか（issue #486）。
+   * BottomTabBar へそのままパススルーする。@default false
+   */
+  showOnDesktop?: boolean
   className?: string
 }
 
@@ -60,6 +65,7 @@ function MobileTabBar<T extends string>({
   onSelect,
   addAction,
   floatingPosition = "center",
+  showOnDesktop = false,
   className,
 }: MobileTabBarProps<T>) {
   const handlePointerUpCapture = React.useCallback((event: React.PointerEvent<HTMLElement>) => {
@@ -94,7 +100,16 @@ function MobileTabBar<T extends string>({
 
   return (
     <BottomTabBar
-      className={className ? `lg:hidden ${className}` : "lg:hidden"}
+      // showOnDesktop 時に lg:hidden を残すと BottomTabBar 側の lg:flex と
+      // 同じ詳細度でぶつかり、CSS の記述順で勝敗が決まってしまうので落とす。
+      // （ここは cn() を通していないため tailwind-merge も効かない）
+      className={
+        showOnDesktop
+          ? className
+          : className
+            ? `lg:hidden ${className}`
+            : "lg:hidden"
+      }
       variant="pill"
       pillPosition="fixed"
       floatingPosition={floatingPosition}
@@ -103,6 +118,7 @@ function MobileTabBar<T extends string>({
       onPointerUpCapture={handlePointerUpCapture}
       items={tabItems}
       centerAction={centerAction}
+      showOnDesktop={showOnDesktop}
     />
   )
 }

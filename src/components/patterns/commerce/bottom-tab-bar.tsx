@@ -84,6 +84,20 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
   scrollEdge?: boolean
   /** nav 要素の aria-label。@default "メインナビゲーション" */
   navLabel?: string
+  /**
+   * デスクトップ幅（`lg` = 1024px 以上）でもナビを表示するか（issue #486）。
+   *
+   * DS の既定はモバイル専用（`lg:hidden`）。PC ではサイドナビや
+   * ヘッダーナビへ切り替えるアプリを想定しているため。
+   * **デスクトップ用シェルを持たず、全幅でこのナビを出し続けたいアプリ**
+   * （消費側でこれを `className="lg:flex"` で毎回打ち消していた）は
+   * `showOnDesktop` を渡す。
+   *
+   * `variant="pill"` では scroll edge の装飾帯も一緒に追従する。
+   *
+   * @default false（従来どおり lg 以上で非表示）
+   */
+  showOnDesktop?: boolean
 }
 
 // 選択プラッター（水滴カプセル）の面。色は「背後のメディア」に相対する
@@ -219,6 +233,7 @@ function BottomTabBar({
   keyboardBehavior = "stay",
   scrollEdge = false,
   navLabel = "メインナビゲーション",
+  showOnDesktop = false,
   ...props
 }: BottomTabBarProps) {
   const keyboardState = useBottomTabBarKeyboardState(keyboardBehavior)
@@ -237,11 +252,21 @@ function BottomTabBar({
         scrollEdge={scrollEdge}
         keyboardState={keyboardState}
         navLabel={navLabel}
+        showOnDesktop={showOnDesktop}
         {...props}
       />
     )
   }
-  return <BottomTabBarDefault className={className} items={items} keyboardState={keyboardState} navLabel={navLabel} {...props} />
+  return (
+    <BottomTabBarDefault
+      className={className}
+      items={items}
+      keyboardState={keyboardState}
+      navLabel={navLabel}
+      showOnDesktop={showOnDesktop}
+      {...props}
+    />
+  )
 }
 
 // ─── Default variant (従来型) ─────────────────────────────────────────────────
@@ -252,6 +277,7 @@ function BottomTabBarDefault({
   keyboardState,
   style,
   navLabel = "メインナビゲーション",
+  showOnDesktop = false,
   ...props
 }: Omit<BottomTabBarProps, "variant" | "keyboardBehavior"> & { keyboardState: BottomTabBarKeyboardState }) {
   return (
@@ -266,7 +292,11 @@ function BottomTabBarDefault({
           ? "bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]"
           : "bottom-0",
         "border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
-        "pb-[env(safe-area-inset-bottom)] lg:hidden",
+        "pb-[env(safe-area-inset-bottom)]",
+        // クラス名は完全な文字列で書く（動的合成は静的抽出できない）。
+        // この nav は display 指定を持たない（= block）ので、表示側は lg:block。
+        // lg:flex にすると 1024px 以上でだけ display が変わる回帰になる。
+        showOnDesktop ? "lg:block" : "lg:hidden",
         keyboardState.shouldHide && "translate-y-2 opacity-0 pointer-events-none invisible",
         className
       )}
@@ -305,6 +335,7 @@ function BottomTabBarPill({
   keyboardState,
   style,
   navLabel = "メインナビゲーション",
+  showOnDesktop = false,
   ...props
 }: Omit<BottomTabBarProps, "variant" | "keyboardBehavior"> & { keyboardState: BottomTabBarKeyboardState }) {
   const hasProminentLayout = Boolean(centerAction) || showLabels === true
@@ -389,7 +420,8 @@ function BottomTabBarPill({
         <div
           aria-hidden="true"
           className={cn(
-            "inset-x-0 bottom-0 z-[var(--Z-Sticky)] h-28 lg:hidden",
+            "inset-x-0 bottom-0 z-[var(--Z-Sticky)] h-28",
+            showOnDesktop ? "lg:block" : "lg:hidden",
             "glass-scroll-edge-bottom",
             "transition-opacity duration-[var(--Motion-Duration-Base)]",
             pillPosition === "fixed" ? "fixed" : "absolute",
@@ -404,7 +436,8 @@ function BottomTabBarPill({
       data-keyboard-open={keyboardState.isKeyboardOpen || undefined}
       aria-label={navLabel}
       className={cn(
-        "z-[var(--Z-Nav)] lg:hidden transition-all duration-[var(--Motion-Duration-Base)]",
+        "z-[var(--Z-Nav)] transition-all duration-[var(--Motion-Duration-Base)]",
+        showOnDesktop ? "lg:flex" : "lg:hidden",
         pillPosition === "fixed" ? "fixed" : "absolute",
         // 位置: 画面下部に余白を持ってフロート
         keyboardState.keyboardBehavior === "lift"
