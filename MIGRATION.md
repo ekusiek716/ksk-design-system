@@ -53,9 +53,9 @@ npx ksk-ds check-migration ./src
 
 ---
 
-## v1 系内の minor 変更（参考）
+## peerDependencies の要件変更（インストールに影響）
 
-### 次のリリース — peerDependencies を React 19 のみに狭める（issue #502）
+### peerDependencies を React 19 のみに狭める（issue #502）
 
 **インストール要件が変わります。** `peerDependencies` を実装の実態に合わせました:
 
@@ -84,6 +84,17 @@ ref-as-prop（関数コンポーネントが `ref` を通常の prop として�
 なお `examples/native-sandbox`（リポジトリ内の開発用サンドボックス。npm 配布物には含まれず、
 DS を npm から install もしません）は react-native-web 0.19 の都合で React 18 のままです。
 消費側の要件には影響しません。
+
+
+**リリース種別について**: この変更はランタイム API を一切変えないため React 19 利用者には無影響だが、
+React 18 / RN 0.74〜0.77 の環境では install 時の peer 解決に失敗しうる。
+実測で該当する消費リポは存在しない（`~/Localdev` 配下 40+ リポすべて React 19 系）ため
+minor で出す想定だが、SemVer の厳密解釈では major に当たる。
+**最終的な minor / major の判断はリリース時に行う**（PR #506 のレビュー議論を参照）。
+
+---
+
+## v1 系内の minor 変更（参考）
 
 ### 次のリリース — `ResponsiveOverlayFrame` に `preset="plain"` を追加（issue #486）
 
