@@ -2039,15 +2039,24 @@
       "accessibility": [
         "role=dialog",
         "aria-modal",
-        "aria-label"
+        "aria-label",
+        "フォーカストラップ（Tab/Shift+Tab を面の中で循環）",
+        "Escape で離脱",
+        "閉じたら元の位置へフォーカス復帰"
       ],
       "rules": [
         "isCoachCompleted/markCoachCompleted で完了状態を永続化",
         "対象要素が見つからない step は画面中央フォールバック",
-        "ボタン文言・aria-label の i18n は labels prop で渡す（未指定は既定文言のまま・後方互換）"
+        "ボタン文言・aria-label の i18n は labels prop で渡す（未指定は既定文言のまま・後方互換）",
+        "autoFocus / restoreFocusOnClose / closeOnEsc は Dialog / Sheet と同じ prop 名・既定 true。Escape は onSkip（未指定なら onComplete）を呼ぶ",
+        "aria-modal=\"true\" を名乗るため、Tab/Shift+Tab を面の中に閉じ込める。トラップは Radix の FocusScope（trapped + loop）に載せる＝下に開いている Dialog / Sheet のスコープを pause できる。自前の document リスナーだとフォーカスの取り合いになり、下のモーダルへ引き戻される（issue #504）",
+        "バルーン（CoachMark の Content）は PortalContainerProvider で FocusScope の中へ描画する。スコープ外に出るとトラップの対象から外れる（issue #504）"
       ],
       "props": {
-        "labels": "{ next?, done?, skip?, ariaLabel? } — ボタン文言と overlay の aria-label。i18n はアプリ側で解決して渡す。done 未指定なら next にフォールバック（issue #477）"
+        "labels": "{ next?, done?, skip?, ariaLabel? } — ボタン文言と overlay の aria-label。i18n はアプリ側で解決して渡す。done 未指定なら next にフォールバック（issue #477）",
+        "autoFocus": "boolean (既定 true) — 表示時に最初の操作子へフォーカスを移す。false は「操作子を自動で選ばない」でフォーカスは面自体へ移る（外に置くとトラップが成立しないため）。Dialog / Sheet と違い ref は受けない（面の中に消費側の要素が無いため。issue #504）",
+        "restoreFocusOnClose": "boolean (既定 true) — 閉じたら開く前のフォーカス位置へ戻す（issue #504）",
+        "closeOnEsc": "boolean (既定 true) — Escape で onSkip（未指定なら onComplete）を呼ぶ（issue #504）"
       }
     },
     {
