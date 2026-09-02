@@ -48,6 +48,19 @@
   box-shadow: var(--Nav-Pill-Shadow, var(--glass-highlight), var(--glass-shadow));
 }
 
+/* ── ダーク / 暗背景宣言区画での詳細度対策（issue #486 の実測バグ）──
+   glass.css の @supports ブロックが `.dark .glass` / `[data-glass-backdrop="dark"] .glass`
+   という **2 クラスセレクタ (0,2,0)** で backdrop-filter を上書きしている。
+   上の `[data-slot="bottom-nav-pill"]` は (0,1,0) なので、宣言順に関係なく
+   詳細度で負け、**ダークでだけ --Nav-Pill-Backdrop が無視される**（v2.1.0 で実測）。
+   同じ 2 クラス相当のセレクタで受け直す。フォールバックは glass.css の
+   ダーク側の値そのままなので、未宣言時のレンダリングは変わらない。 */
+.dark [data-slot="bottom-nav-pill"],
+[data-glass-backdrop="dark"] [data-slot="bottom-nav-pill"] {
+  -webkit-backdrop-filter: var(--Nav-Pill-Backdrop, var(--glass-blur) var(--glass-refract-dark));
+  backdrop-filter: var(--Nav-Pill-Backdrop, var(--glass-blur) var(--glass-refract-dark));
+}
+
 [data-slot="bottom-nav-pill"][data-tone="inverse"] {
   background: var(--Nav-Pill-Surface, var(--glass-bg-dark));
   -webkit-backdrop-filter: var(--Nav-Pill-Backdrop, var(--glass-blur-media-dark));
