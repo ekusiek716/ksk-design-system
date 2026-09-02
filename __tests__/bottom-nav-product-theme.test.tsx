@@ -292,6 +292,28 @@ describe("pill 本体の面の公開変数（issue #486）", () => {
     expect(rule).toContain("var(--Nav-Pill-Border, 0.5px solid var(--glass-border-dark))")
   })
 
+  it("ダーク / 暗背景区画でも --Nav-Pill-Backdrop が勝つ（issue #486 の実測バグ）", () => {
+    // glass.css の @supports が `.dark .glass` (0,2,0) で backdrop-filter を
+    // 上書きするため、(0,1,0) の [data-slot] だけでは宣言順に関係なく負ける。
+    // v2.1.0 では実際にダークでだけ --Nav-Pill-Backdrop が無視されていた。
+    expect(NAV_CSS).toContain('.dark [data-slot="bottom-nav-pill"]')
+    expect(NAV_CSS).toContain('[data-glass-backdrop="dark"] [data-slot="bottom-nav-pill"]')
+    const darkRule = NAV_CSS.slice(NAV_CSS.indexOf('.dark [data-slot="bottom-nav-pill"]'))
+    expect(darkRule).toContain(
+      "backdrop-filter: var(--Nav-Pill-Backdrop, var(--glass-blur) var(--glass-refract-dark))",
+    )
+  })
+
+  it("glass.css のダーク上書きセレクタと対になっている（片方だけ増やさない）", () => {
+    // glass.css 側が .dark / [data-glass-backdrop="dark"] の2系統で上書きしている限り、
+    // bottom-nav.css も同じ2系統を持っていないと片方の環境で取りこぼす。
+    for (const sel of ['.dark .glass', '[data-glass-backdrop="dark"] .glass']) {
+      expect(GLASS_CSS).toContain(sel)
+    }
+    expect(NAV_CSS).toContain('.dark [data-slot="bottom-nav-pill"]')
+    expect(NAV_CSS).toContain('[data-glass-backdrop="dark"] [data-slot="bottom-nav-pill"]')
+  })
+
   it("スペキュラ / 屈折リムは content 経由で切れる（既定は空文字＝生成される）", () => {
     expect(NAV_CSS).toContain('content: var(--Nav-Pill-Specular, "")')
   })
