@@ -131,9 +131,21 @@ resolve_repo() {
     printf '%s' "$arg"
     return 0
   fi
-  # 再編後のカテゴリフォルダを順に探す（issue #403）
+  # 探索先は DEFAULT_REPOS の親ディレクトリから導出する。
+  # 以前は "$HOME/localdev/exam-kit-apps" 等をここに直書きしていたが、
+  # ローカルの配置換え（exam-kit-apps → exam-app、apps/ の新設）に追随できず、
+  # DEFAULT_REPOS だけ直した状態でリポ名を渡すと FAIL (not found) になっていた
+  # （2.1.1 の配布で yokoku-app / pawly / aikoibito が実際に落ちた）。
+  # 正本を DEFAULT_REPOS 1 箇所に集約し、次の配置換えでここを直し忘れても効くようにする。
   local base
-  for base in "$HOME/localdev" "$HOME/localdev/exam-kit-apps" "$HOME/localdev/todo-apps" "$HOME/localdev/trading-bots" "$HOME/localdev/ai-partner" "$HOME/localdev/devtools"; do
+  for base in $(printf '%s\n' "${DEFAULT_REPOS[@]}" | xargs -n1 dirname | sort -u); do
+    if [ -d "$base/$arg" ]; then
+      printf '%s' "$base/$arg"
+      return 0
+    fi
+  done
+  # DEFAULT_REPOS に無いリポを名前で渡された場合の保険（カテゴリ直下を一段だけ見る）
+  for base in "$HOME/localdev" "$HOME/localdev/apps" "$HOME/localdev/todo-apps" "$HOME/localdev/exam-app" "$HOME/localdev/tools"; do
     if [ -d "$base/$arg" ]; then
       printf '%s' "$base/$arg"
       return 0
@@ -150,7 +162,7 @@ else
     if path="$(resolve_repo "$arg")"; then
       REPOS+=("$path")
     else
-      echo -e "${RED}FAIL: '$arg' が見つからない（LocalDev / Examination 配下に無い）${NC}"
+      echo -e "${RED}FAIL: '$arg' が見つからない（DEFAULT_REPOS の親ディレクトリ配下に無い）${NC}"
       RESULTS+=("$arg: FAIL (not found)")
     fi
   done
