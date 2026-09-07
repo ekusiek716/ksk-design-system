@@ -86,7 +86,8 @@ export function Button({
     secondary: {
       bg: theme.surface["accent-primary-light"],
       bgActive: theme.active["secondary-button"],
-      fg: theme.text["accent-primary"],
+      // Dark accent text fails 4.5:1 on the secondary surface/pressed fill (#537).
+      fg: mode === "dark" ? theme.text["high-emphasis"] : theme.text["accent-primary"],
       border: theme.border["accent-primary"],
       bottomBorder: theme.active["secondary-button"],
     },
