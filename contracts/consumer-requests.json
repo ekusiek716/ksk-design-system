@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "requests": [
+    {
+      "dsIssue": 531,
+      "consumerIssue": "https://github.com/ekusiek716/trip-todo/issues/168",
+      "fixPr": 532
+    }
+  ]
+}

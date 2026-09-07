@@ -244,6 +244,14 @@ publish.yml が失敗・スタックした場合の実行可能な手順は次�
 それでも解消しない場合は、npm 側の障害か Trusted Publishing 設定（npmjs.com の
 Trusted Publisher 登録）を疑い、対応後に再度 workflow_dispatch で実行する。
 
+## 依頼元appへの公開通知
+
+app側に追従issueを作成し、DS正本で `npx ksk-ds register-consumer-request --ds-issue N --consumer-issue URL` によりpending登録する。修正PR作成後に `--fix-pr N` を付けて同じ依頼を更新し、通常のPRにregistry変更を含める。`--dry-run` で事前確認できる。台帳は累積保持し、公開後も削除しない。
+
+appへの導入は `npx ksk-ds init-release-notices` の明示実行のみ。生成された2ファイルをappのdefault branchへ取り込む。npm公開後にappが約6時間ごとに公開commitのregistryと修正PRの包含を確認して、自repoのissueへコメントと `ds:released` を付ける。任意の `ds:waiting` は登録済みの追従issueに使う。未公開fixやregistryの無い旧versionは待機no-op。app issueは取り込み・動作確認完了まで閉じない。
+
+DS側からのcross-repo書き込みtokenは不要。手動通知はappのActionsから `workflow_dispatch`、ローカル確認は `--apply` なしのdry-runに限る。schedule遅延・休止時の復旧を含む詳細は [consumer-release-notices.md](https://github.com/ekusiek716/ksk-design-system/blob/main/docs/consumer-release-notices.md) を参照。通知機能の導入自体ではversion bumpやpublishを行わない。
+
 ## 関連
 
 - [UPDATING.md](./UPDATING.md) — 消費側（DS を npm 依存に持つプロジェクト）向けのアップデート手順

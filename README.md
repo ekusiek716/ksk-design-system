@@ -474,6 +474,14 @@ npm run metrics -- --range last-year
 
 > npm は匿名集計のため、CI やミラーの重複を含む **install 回数の目安** です（ユニークユーザー数ではありません）。
 
+## DS公開通知
+
+DSに依頼した修正のnpm公開を、依頼元appのissueへ通知できます。app issueを作成し、DS正本で `npx ksk-ds register-consumer-request --ds-issue N --consumer-issue URL` によりpending登録、修正PR作成後に `--fix-pr N` を紐付けます。app側は `npx ksk-ds init-release-notices` でworkflowとscriptを明示導入します。
+
+GitHubの標準API tokenはrepoに限定されるため、app側が公開情報を取得して自repoへ書くreceiver方式です。cross-repo tokenは不要です。約6時間ごとのscheduleにはGitHub側の実行遅延があり、public repoは60日間の非活動でscheduleが無効化されることがあります。Actionsの **DS release notices** を有効化して **Run workflow**（`workflow_dispatch`）を実行すると復旧・手動再確認できます。ローカルは `--apply` なしのdry-runのみです。
+
+未公開fixやregistryの無い旧versionでは待機します。公開通知は `ds:released` を付けますが、app issueは取り込み・動作確認まで閉じません。詳しくは [公開通知手順](docs/consumer-release-notices.md) を参照してください。
+
 ## 📄 ライセンス
 
 [MIT](./LICENSE) © 奥野圭祐 (Keisuke Okuno)
