@@ -1,52 +1,46 @@
 # ConsumerへのDS公開通知
 
-DS修正のnpm公開を、依頼元appのGitHub issueへ知らせる仕組みです。現在の対象は `ekusiek716` 配下です。DS側は累積台帳を配布し、app側が公開状況を取得して自分のrepoにコメントと `ds:released` ラベルを付けます。app issueは依存更新・取り込み・動作確認が終わるまで閉じません。
+対象は `ekusiek716` 配下です。依頼登録でapp issueを公開待ちにし、DSの一括bump時だけ公開通知します。appの取り込み完了とは区別します。
 
-## 依頼の登録と修正PRの紐付け
+## 依頼を登録する
 
-1. app repoに取り込みを追跡するissueを作り、対応するDS issueを記載します。
-2. DS正本repoルートでpending登録します。登録済みのapp追従issueには任意で `ds:waiting` を設定できます。
-
-```bash
-npx ksk-ds register-consumer-request --ds-issue 531 --consumer-issue https://github.com/ekusiek716/trip-todo/issues/168
-```
-
-3. 修正PRを作成したら、同じ依頼に `fixPr` を紐付けます。
+1. DSの通常issueと、app側の取り込みを追跡する通常issueを作ります。PRのURL・番号は依頼issueとして使えません。
+2. DS正本repoの作業ブランチで、sourceのCLIを実行します。未publishのCLIではnpxが旧公開版を拾うため、次のコマンドを使います。
 
 ```bash
-npx ksk-ds register-consumer-request --ds-issue 531 --consumer-issue https://github.com/ekusiek716/trip-todo/issues/168 --fix-pr 532
+node bin/init.js register-consumer-request --ds-issue 531 --consumer-issue https://github.com/ekusiek716/trip-todo/issues/168
 ```
 
-変更前に `--dry-run` を追加するとJSONのプレビューのみ表示します。CLIはネットワークを使用しません。`package.json` の名前が `ksk-design-system` で、`.git` と `contracts/` がある正本ルートでのみ登録可能です。consumerの `node_modules` 内を直接編集しません。
+登録は既存の `gh` 認証を使います。両repoのissueを読めて、appのラベルを作成・付与できる権限が必要です。両方が通常issueであることを確認して台帳を保存し、app issueへ `ds:waiting` を自動で付けます。ラベルが無ければ作成します。closedまたは `ds:released` のissueには待機ラベルを付けません。既存ラベルを置き換えたりissueを再開したりしません。
 
-`contracts/consumer-requests.json` は `{schemaVersion:1,requests:[{dsIssue,consumerIssue,fixPr}]}` の累積台帳です。新規で修正PR未定なら `fixPr:null`、既存登録への `--fix-pr` 省略は値を維持します。同じDS issueとapp issueは重複追加せず更新し、複数appの登録を保持します。URLは小文字に正規化し、正の安全な整数とGitHub issue URLだけを受け付けます。公開後も過去のentryを削除しません。実物の台帳も `npm test` で検証します。
-
-## app側への明示導入
-
-通知CLIを含むDSを用意し、app repoのルートで実行します。
+3. 修正PRの番号が決まったら同じ依頼に紐付け、台帳変更をDSのPRに含めます。
 
 ```bash
-npx ksk-ds init-release-notices
+node bin/init.js register-consumer-request --ds-issue 531 --consumer-issue https://github.com/ekusiek716/trip-todo/issues/168 --fix-pr 532
 ```
 
-`.github/workflows/ds-release-notices.yml` と `.github/scripts/check-ds-release.mjs` をtemplateから配置します。この2ファイルをappのdefault branchへ取り込みます。既存ファイルが同内容ならno-op、異なるなら書き込まず失敗します。差分を確認して手動で統合してください。`--force` はありません。通常のinstall/postinstallや `ksk-ds init` では導入しません。
+CLI公開後は `npx ksk-ds register-consumer-request` に同じ引数を渡すこともできます。`--dry-run` は通信も書き込みも行わず、変更後のJSONだけ表示します。そのためissueの実在・通常issueかどうか・gh権限はdry-runでは未確認です。
 
-workflowはNode 24で動き、npm install不要です。権限は `contents:read` と `issues:write`、そのrepoの `GITHUB_TOKEN` を `GH_TOKEN` として渡します。GitHubの標準tokenはrepoに限定されるため、DS repoから別appへ書く方式にはせず、app側のreceiverが自分のissueへ通知します。cross-repo tokenは不要です。
+認証・API・ファイル操作の失敗は非zeroで終了します。ラベル付与だけ失敗した場合は保存済み台帳が残ります。ghの認証・権限を直して同じ登録コマンドを再実行すると、台帳を重複追加せずラベルを再試行できます。途中の成功を全体成功とは扱いません。
 
-## 公開判定・通知・復旧
+## 台帳の契約
 
-通常のnpm公開後、app workflowが約6時間ごとにnpm公開metadataと公開commitのregistryを取得します。修正PRのmerge commitが公開gitHeadに含まれることを確認するので、mainに登録・マージされただけの未公開fixは通知しません。既存の公開versionにregistryが無い場合は待機no-opです。pendingや未マージ・未公開の修正も待機します。
+`contracts/consumer-requests.json` は `{schemaVersion:1,requests:[{dsIssue,consumerIssue,fixPr}]}` の累積台帳です。新規の修正PR未定は `fixPr:null`、既存登録への `--fix-pr` 省略は値を維持します。同じDS issueとapp issueは更新し、複数appの登録を保持します。URLは小文字に正規化し、issue・PR番号は正の安全な整数だけを受け付けます。公開後も過去のentryを削除しません。実物の台帳もruntime共通validatorを通じて `npm test` で検証します。
 
-公開済みならapp issueにコメントと `ds:released` を付け、`ds:waiting` があれば外します。これはDS公開の通知であり、app取り込み完了ではありません。app issueを自動で閉じません。
+登録は `package.json` の名前が `ksk-design-system` で、`.git` と `contracts/` があるDS正本ルートでのみ可能です。consumerやnode_modulesの台帳は編集しません。
 
-scheduleは約6時間分の検知待ちに加えGitHub側の遅延があり、即時性は保証されません。public repoでは60日間の非活動によりscheduleが無効化されることがあります。Actions画面で **DS release notices** を有効化し、**Run workflow**（`workflow_dispatch`）で再実行してください。急ぐ場合や失敗後の再試行も同じ手順です。
+## 一括bump時の公開通知
 
-ローカルではdry-runのみ実行します（`--apply` は付けません）。
+通常のnpm公開後、DSの `scripts/update-consumers.sh VERSION` による一括bumpで通知します。指定versionの公開metadata・公開commitの台帳・修正PRの包含を確認し、該当app issueへbump PR付きの公開済みコメントと `ds:released` を付けます。同じapp issueに複数のDS依頼がある場合、公開台帳内の該当依頼がすべて公開・通知済みになるまで `ds:waiting` を残します。その間は `ds:released` と併存する場合があります。不正entryや処理失敗がある場合も待機ラベルを保持します。未公開fix・pending・未マージの修正は通知対象にしません。旧公開versionに台帳が無ければ待機します。
 
-```bash
-node .github/scripts/check-ds-release.mjs --repo ekusiek716/trip-todo
-```
+通知runtimeの引数契約は `--repo owner/repo --version VERSION --bump-pr URL [--apply]` です。通知は一括bumpの処理に任せ、単独の実通知は運用手順にしません。登録CLIは公開済みコメントを投稿しません。appは依存更新・暫定回避策撤去・動作確認を終えてから追従issueを閉じます。
 
-実通知はGitHub Actions内でのみ実行します。ローカルPATによる通知はbotと投稿者が異なり重複判定が不一致になるため、手動通知も必ず `workflow_dispatch` を使います。
+通知にはrepo owner本人（`ekusiek716`）のPATによるgh認証を使用します。対象repoのissue書き込み権限が必要で、別ユーザーやGitHub Appのinstallation tokenは通知主体に使いません。
 
-参考: [GitHub標準tokenの権限範囲](https://docs.github.com/en/actions/concepts/security/github_token)、[scheduleの実行条件](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)。
+通知に失敗した場合は作成済みbump PRを保持し、原因を解消して同じversion・対象repoの一括bumpを再実行します。既存PRを再利用して、未完了の通知・ラベル処理を修復します。runtime単独での実通知や、一括bumpとruntimeを並列実行する運用は禁止です。重複投稿を避けるため、同じ対象への一括bumpも直列で実行します。
+
+## 旧pollingからの移行
+
+app側の `.github/workflows/ds-release-notices.yml` と `.github/scripts/check-ds-release.mjs` は削除してください。6時間scheduleもworkflow_dispatchも使用しません。`init-release-notices` は廃止案内を出して非zero終了し、ファイルを配置しません。通常のinstall/postinstallでも配置しません。
+
+GitHub Actionsのrepo限定tokenを使うreceiver方式は廃止しました。登録・一括bumpには操作者の既存gh認証を使い、対象repoへの権限を確認します。この変更自体ではversion bump・publish・実通知は行いません。

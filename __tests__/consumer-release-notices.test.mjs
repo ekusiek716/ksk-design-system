@@ -6,6 +6,8 @@ const repo = 'ekusiek716/trip-todo';
 const head = 'a'.repeat(40);
 const merge = 'b'.repeat(40);
 const token = 'secret-test-token';
+const bumpPr = `https://github.com/${repo}/pull/200`;
+const owner = { id: 42, login: 'ekusiek716', type: 'User' };
 const entry = (number = 168, app = repo) => ({ dsIssue: 531, consumerIssue: `https://github.com/${app}/issues/${number}`, fixPr: 532 });
 const marker = noticeMarker(531, 168);
 const botComment = { user: { login: 'github-actions[bot]', type: 'Bot' }, body: marker };
@@ -30,11 +32,24 @@ function fixture(options = {}) {
     }
     if (u.hostname === 'registry.npmjs.org') {
       assert.equal(init.headers.Authorization, undefined);
-      assert.equal(path, '/ksk-design-system/latest');
+      assert.equal(path, `/ksk-design-system/${options.release?.version ?? '1.99.0'}`);
       return json(options.release ?? { version: '1.99.0', gitHead: head, dist: { integrity: 'sha512-YWJjZA==' } });
     }
     assert.equal(u.origin, 'https://api.github.com');
     assert.equal(init.headers.Authorization, `Bearer ${token}`);
+    if (path === '/user') return json(options.author ?? owner);
+    if (path === `/repos/${repo}/pulls/200`) return json(options.bump ?? { state: 'open', merged: false,
+      head: { ref: `chore/bump-ds-${options.release?.version ?? '1.99.0'}`, sha: head, repo: { full_name: repo } },
+      base: { ref: 'main', repo: { full_name: repo } } });
+    if (path === `/repos/${repo}/pulls/200/files`) return json(options.files ?? [{ filename: 'package.json' }, { filename: 'package-lock.json' }]);
+    if (path === `/repos/${repo}/contents/package.json` || path === `/repos/${repo}/contents/package-lock.json`) {
+      assert.equal(u.searchParams.get('ref'), head);
+      const version = options.release?.version ?? '1.99.0';
+      const pkg = path.endsWith('package-lock.json')
+        ? options.lock ?? { packages: { 'node_modules/ksk-design-system': { version, integrity: 'sha512-YWJjZA==' } } }
+        : options.package ?? { dependencies: { 'ksk-design-system': `^${version}` } };
+      return json({ encoding: 'base64', content: Buffer.from(JSON.stringify(pkg)).toString('base64') });
+    }
     if (method !== 'GET') assert.ok(path.startsWith(`/repos/${repo}/issues/`) || path === `/repos/${repo}/labels`);
     if (path === `/repos/${DS_REPO}/contents/contracts/consumer-requests.json`) {
       assert.equal(u.searchParams.get('ref'), options.release?.gitHead ?? head);
@@ -57,7 +72,7 @@ function fixture(options = {}) {
         const page = Number(u.searchParams.get('page'));
         return json(comments.get(number).slice((page - 1) * 100, page * 100));
       }
-      if (suffix === '/comments' && method === 'POST') { comments.get(number).push({ ...botComment, body: body.body }); return json({}, 201); }
+      if (suffix === '/comments' && method === 'POST') { comments.get(number).push({ user: owner, body: body.body }); return json({}, 201); }
       if (suffix === '/labels' && method === 'GET') {
         const page = Number(u.searchParams.get('page'));
         return json(labels.get(number).slice((page - 1) * 100, page * 100));
@@ -72,7 +87,7 @@ function fixture(options = {}) {
     }
     assert.fail(`Unexpected request: ${method} ${url}`);
   };
-  return { calls, comments, labels, fetchImpl, exec: (overrides = {}) => run({ repo, apply: true, env: { GH_TOKEN: token, GITHUB_REPOSITORY: repo, GITHUB_ACTIONS: 'true' }, fetchImpl, ...overrides }) };
+  return { calls, comments, labels, fetchImpl, exec: (overrides = {}) => run({ repo, version: options.release?.version ?? '1.99.0', bumpPr, apply: true, env: { GH_TOKEN: token, GITHUB_REPOSITORY: repo }, fetchImpl, ...overrides }) };
 }
 const writes = (f) => f.calls.filter((call) => call.method !== 'GET');
 const posts = (f) => f.calls.filter((call) => call.method === 'POST' && call.path.endsWith('/comments'));
@@ -116,7 +131,26 @@ test('複数appのうち対象repoのみ処理', async () => {
 test('対象外repoだけならDS PRも読まない', async () => {
   const f = fixture({ entries: [entry(99, 'ekusiek716/other-app')] });
   assert.deepEqual((await f.exec()).results, []);
-  assert.equal(f.calls.length, 2);
+  assert.ok(!f.calls.some((call) => call.path === `/repos/${DS_REPO}/pulls/532`));
+});
+test('旧版・登録なし・unfixedのみはpackage変更のないPRでも検証前にno-op', async () => {
+  for (const options of [{ legacy: true }, { entries: [] },
+    { entries: [entry(99, 'ekusiek716/other-app')] },
+    { entries: [{ ...entry(), fixPr: null }] }]) {
+    const f = fixture({ ...options, files: [{ filename: 'package-lock.json' }],
+      package: { dependencies: { 'ksk-design-system': '*' } } });
+    const result = await f.exec();
+    assert.equal(result.exitCode, 0);
+    assert.equal(writes(f).length, 0);
+    assert.ok(!f.calls.some((call) => call.path.startsWith(`/repos/${repo}/`) || call.path === '/user'));
+  }
+});
+test('対象依頼がなくても未知schemaや不正entryを成功扱いしない', async () => {
+  for (const contract of [{ schemaVersion: 2, requests: [] }, { schemaVersion: 1, requests: [{ ...entry(), fixPr: -1 }] }]) {
+    const f = fixture({ contract });
+    assert.equal((await f.exec()).exitCode, 1);
+    assert.equal(writes(f).length, 0);
+  }
 });
 test('コメントを全ページ走査し、次のversionでも重複しない', async () => {
   const release = { version: '1.99.0', gitHead: head, dist: { integrity: 'sha512-YWJjZA==' } };
@@ -124,8 +158,31 @@ test('コメントを全ページ走査し、次のversionでも重複しない'
   assert.equal((await f.exec()).exitCode, 0);
   release.version = '2.0.0';
   assert.equal((await f.exec()).exitCode, 0);
-  assert.equal(posts(f).length, 0);
+  assert.equal(posts(f).length, 1);
+  assert.ok(posts(f)[0].body.body.includes('<!-- ksk-ds-bump-pr-notice:531:168 -->'));
+  assert.ok(posts(f)[0].body.body.includes(bumpPr));
   assert.ok(f.calls.some((call) => call.url.includes('/comments?per_page=100&page=2')));
+});
+test('PRリンク付き通知は補足不要、他人の偽補足markerは無効', async () => {
+  const complete = fixture({ comments: [{ ...botComment, body: `${marker}\nアプリ取り込みPR: ${bumpPr}` }] });
+  assert.equal((await complete.exec()).exitCode, 0);
+  assert.equal(posts(complete).length, 0);
+  const forged = fixture({ comments: [botComment, { user: { id: 999, login: 'someone', type: 'User' }, body: '<!-- ksk-ds-bump-pr-notice:531:168 -->' }] });
+  assert.equal((await forged.exec()).exitCode, 0);
+  assert.equal(posts(forged).length, 1);
+});
+test('旧通知補足後のラベル失敗も補足を重複させず修復する', async () => {
+  const f = fixture({ comments: [botComment], labelFailures: 1 });
+  assert.equal((await f.exec()).exitCode, 1);
+  assert.equal(posts(f).length, 1);
+  assert.equal((await f.exec()).exitCode, 0);
+  assert.equal(posts(f).length, 1);
+});
+test('旧通知の補足はdry-runで書き込まない', async () => {
+  const f = fixture({ comments: [botComment] });
+  const result = await f.exec({ apply: false });
+  assert.equal(result.results[0].status, 'would-supplement-bump-pr');
+  assert.equal(writes(f).length, 0);
 });
 test('人が書いた偽markerは重複扱いしない', async () => {
   const f = fixture({ comments: [{ body: marker, user: { login: 'ekusiek716', type: 'User' } }] });
@@ -160,15 +217,13 @@ test('同じapp issueでも別dsIssueならそれぞれ通知する', async () =
   assert.equal((await f.exec()).exitCode, 0);
   assert.equal(posts(f).length, 2);
 });
-test('ローカルPATのapplyを通信前にrejectしdry-runは許可', async () => {
+test('ownerのローカルPATでapplyでき再実行は重複しない', async () => {
   const f = fixture();
   const env = { GH_TOKEN: token, GITHUB_REPOSITORY: repo };
   const result = await f.exec({ env });
-  assert.equal(result.exitCode, 1);
-  assert.match(result.errors[0].message, /workflow_dispatch/);
-  assert.equal(f.calls.length, 0);
-  assert.equal((await f.exec({ env, apply: false })).exitCode, 0);
-  assert.equal(writes(f).length, 0);
+  assert.equal(result.exitCode, 0);
+  assert.equal((await f.exec({ env })).exitCode, 0);
+  assert.equal(posts(f).length, 1);
 });
 test('closed app issueはskip、PRはreject', async () => {
   for (const [issue, exitCode, status] of [[{ state: 'closed' }, 0, 'closed'], [{ state: 'closed', pull_request: {} }, 1, undefined]]) {
@@ -192,7 +247,7 @@ test('不正SHA・prerelease・integrityをreject', async () => {
     assert.throws(() => validateRelease(release));
     const f = fixture({ release });
     assert.equal((await f.exec()).exitCode, 1);
-    assert.equal(f.calls.length, 1);
+    assert.ok(f.calls.length <= 1);
   }
   const f = fixture({ pr: { merged: true, merge_commit_sha: 'main' } });
   assert.equal((await f.exec()).exitCode, 1);
@@ -243,8 +298,9 @@ test('dry-runは通知/修復とも一切書き込まない', async () => {
     assert.equal((await f.exec({ apply: false })).exitCode, 0);
     assert.equal(writes(f).length, 0);
   }
-  assert.deepEqual(parseArgs(['--repo', repo]), { repo, apply: false });
-  assert.deepEqual(parseArgs(['--repo', repo, '--apply']), { repo, apply: true });
+  const args = ['--repo', repo, '--version', '1.99.0', '--bump-pr', bumpPr];
+  assert.deepEqual(parseArgs(args), { repo, version: '1.99.0', bumpPr, apply: false });
+  assert.deepEqual(parseArgs([...args, '--apply']), { repo, version: '1.99.0', bumpPr, apply: true });
   for (const args of [[], ['--repo', repo, '--unknown'], ['--repo', 'evil/app']]) assert.throws(() => parseArgs(args));
 });
 test('GITHUB_REPOSITORY不一致・owner違反・tokenなしは通信前にreject', async () => {
@@ -268,4 +324,53 @@ test('issue labelsも全ページ取得しwaitingを削除', async () => {
   assert.equal((await f.exec()).exitCode, 0);
   assert.ok(f.calls.some((call) => call.url.includes('/labels?per_page=100&page=2')));
   assert.ok(!f.labels.get(168).some((label) => label.name === 'ds:waiting'));
+});
+
+test('versionとbump PRは必須、不正URLは通信前に拒否', async () => {
+  for (const overrides of [{ version: undefined }, { bumpPr: undefined }, { bumpPr: 'https://github.com/ekusiek716/other/pull/200' }, { version: 'latest' }]) {
+    const f = fixture();
+    assert.equal((await f.exec(overrides)).exitCode, 1);
+    assert.equal(f.calls.length, 0);
+  }
+});
+test('registryが別versionを返したら書き込まない', async () => {
+  const f = fixture({ intercept: ({ url, json }) => url.includes('registry.npmjs.org')
+    ? json({ version: '2.0.0', gitHead: head, dist: { integrity: 'sha512-YWJjZA==' } }) : undefined });
+  assert.equal((await f.exec()).exitCode, 1);
+  assert.equal(writes(f).length, 0);
+});
+test('bump PRのrepo/branch/base/未merge closeが不正なら書き込まない', async () => {
+  const valid = { state: 'open', merged: false, head: { ref: 'chore/bump-ds-1.99.0', sha: head, repo: { full_name: repo } }, base: { ref: 'main', repo: { full_name: repo } } };
+  for (const bump of [{ ...valid, state: 'closed' }, { ...valid, head: { ...valid.head, ref: 'feature/x' } },
+    { ...valid, head: { ...valid.head, repo: { full_name: 'evil/fork' } } }, { ...valid, base: { ...valid.base, ref: 'develop' } }]) {
+    const f = fixture({ bump });
+    assert.equal((await f.exec()).exitCode, 1);
+    assert.equal(writes(f).length, 0);
+  }
+  const merged = fixture({ bump: { ...valid, state: 'closed', merged: true } });
+  assert.equal((await merged.exec()).exitCode, 0);
+  assert.ok(posts(merged)[0].body.body.includes(bumpPr));
+});
+test('実PRのpackage/lock version・integrity不一致や変更欠落を拒否', async () => {
+  for (const options of [{ package: { dependencies: { 'ksk-design-system': '^1.0.0' } } },
+    { lock: { packages: { 'node_modules/ksk-design-system': { version: '1.0.0', integrity: 'sha512-YWJjZA==' } } } },
+    { lock: { packages: { 'node_modules/ksk-design-system': { version: '1.99.0', integrity: 'sha512-ZA==' } } } }, { files: [] }]) {
+    const f = fixture(options);
+    assert.equal((await f.exec()).exitCode, 1);
+    assert.equal(writes(f).length, 0);
+  }
+});
+test('owner以外のPATは拒否・中央DS環境からowner PATは許可', async () => {
+  const other = fixture({ author: { id: 999, login: 'other', type: 'User' } });
+  assert.equal((await other.exec()).exitCode, 1);
+  assert.equal(writes(other).length, 0);
+  const central = fixture();
+  assert.equal((await central.exec({ env: { GH_TOKEN: token, GITHUB_REPOSITORY: DS_REPO } })).exitCode, 0);
+});
+test('同一app issueに未修正依頼が残ればwaitingを保持', async () => {
+  const f = fixture({ entries: [entry(), { ...entry(), dsIssue: 533, fixPr: null }] });
+  assert.equal((await f.exec()).exitCode, 0);
+  assert.equal(posts(f).length, 1);
+  assert.ok(f.labels.get(168).some((label) => label.name === 'ds:waiting'));
+  assert.ok(!f.calls.some((call) => call.method === 'DELETE'));
 });

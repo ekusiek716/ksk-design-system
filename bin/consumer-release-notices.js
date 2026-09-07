@@ -1,5 +1,6 @@
-import { existsSync, lstatSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { dirname, join, relative, resolve } from "node:path"
+import { existsSync, lstatSync, readFileSync, writeFileSync } from "node:fs"
+import { join, relative, resolve } from "node:path"
+import { spawnSync } from "node:child_process"
 import { parseConsumerIssue, validateContract } from "../templates/consumer-release-notices/check-ds-release.mjs"
 
 function positiveInt(value, name) {
@@ -40,7 +41,45 @@ export function validateConsumerRequests(registry) {
   return registry
 }
 
-function register(args, cwd) {
+function github(runGh) {
+  return (endpoint, method = "GET", fields = {}, paginate = false) => {
+    const args = ["api", "--hostname", "github.com", endpoint, "--method", method]
+    if (paginate) args.push("--paginate", "--slurp")
+    for (const [key, value] of Object.entries(fields)) args.push("-f", `${key}=${value}`)
+    const result = runGh("gh", args, { encoding: "utf8", timeout: 30000, maxBuffer: 8 * 1024 * 1024 })
+    // Do not echo gh stderr: it may include credentials or private response details.
+    if (result.error || result.status !== 0) throw new Error(`GitHub ${method} failed: ${endpoint}. Check gh authentication/permissions and retry the same command.`)
+    try { return JSON.parse(result.stdout) } catch { throw new Error(`Invalid GitHub response: ${endpoint}`) }
+  }
+}
+
+function readIssue(api, repo, number) {
+  const issue = api(`repos/${repo}/issues/${number}`)
+  if (!issue || issue.pull_request || issue.number !== number ||
+      typeof issue.html_url !== "string" || issueUrl(issue.html_url) !== `https://github.com/${repo}/issues/${number}` ||
+      !["open", "closed"].includes(issue.state)) throw new Error(`Expected a regular issue: ${repo}#${number}`)
+  return issue
+}
+
+function ensureWaiting(api, repo, number) {
+  // Re-read after writing the registry so a retry cannot downgrade released/closed work.
+  const issue = readIssue(api, repo, number)
+  if (issue.state === "closed") return
+  const pages = api(`repos/${repo}/issues/${number}/labels?per_page=100`, "GET", {}, true)
+  if (!Array.isArray(pages) || pages.some((page) => !Array.isArray(page))) throw new Error("Invalid issue label response")
+  const labels = pages.flat()
+  if (labels.some((label) => typeof label?.name !== "string")) throw new Error("Invalid issue label response")
+  if (labels.some((label) => ["ds:released", "ds:waiting"].includes(label.name.toLowerCase()))) return
+  const endpoint = `repos/${repo}/labels/ds%3Awaiting`
+  try { api(endpoint) } catch {
+    try { api(`repos/${repo}/labels`, "POST", { name: "ds:waiting", color: "fbca04", description: "DS修正版の公開待ち" }) }
+    catch { api(endpoint) } // Another registration may have created the label concurrently.
+  }
+  api(`repos/${repo}/issues/${number}/labels`, "POST", { "labels[]": "ds:waiting" })
+  console.log(`Ensured ds:waiting on ${repo}#${number}`)
+}
+
+function register(args, cwd, runGh) {
   const options = new Map()
   for (let i = 0; i < args.length; i++) {
     const key = args[i]
@@ -74,40 +113,22 @@ function register(args, cwd) {
     if (fixPr !== undefined) existing.fixPr = fixPr
   } else registry.requests.push({ dsIssue, consumerIssue, fixPr: fixPr ?? null })
   const after = JSON.stringify(registry, null, 2) + "\n"
-  if (options.has("--dry-run")) console.log(after.trimEnd())
-  else if (before === null || JSON.stringify(JSON.parse(before)) !== JSON.stringify(registry)) {
+  if (options.has("--dry-run")) { console.log(after.trimEnd()); return }
+  const api = github(runGh)
+  const target = parseConsumerIssue(consumerIssue)
+  readIssue(api, "ekusiek716/ksk-design-system", dsIssue)
+  readIssue(api, target.repo, target.number)
+  if (before === null || JSON.stringify(JSON.parse(before)) !== JSON.stringify(registry)) {
     writeFileSync(path, after)
     console.log(`Updated ${path}`)
   } else console.log("Consumer request already registered (no-op)")
+  ensureWaiting(api, target.repo, target.number)
 }
 
-function install(args, cwd, pkgRoot) {
-  if (args.length) throw new Error(`init-release-notices accepts no options: ${args.join(" ")}`)
-  if (!existsSync(join(cwd, ".git"))) throw new Error("Run init-release-notices at the consumer repo root (.git required)")
-  const files = [
-    ["workflow.yml", ".github/workflows/ds-release-notices.yml"],
-    ["check-ds-release.mjs", ".github/scripts/check-ds-release.mjs"],
-  ].map(([source, target]) => {
-    const path = join(cwd, target)
-    safePath(cwd, path)
-    const content = readFileSync(join(pkgRoot, "templates/consumer-release-notices", source))
-    const stat = statOrNull(path)
-    if (stat && (!stat.isFile() || !readFileSync(path).equals(content))) throw new Error(`Existing file differs; resolve manually: ${path}`)
-    return { path, content, exists: Boolean(stat) }
-  })
-  // Preflight both files before creating directories or writing either destination.
-  for (const file of files) {
-    if (file.exists) { console.log(`Unchanged ${file.path}`); continue }
-    mkdirSync(dirname(file.path), { recursive: true })
-    writeFileSync(file.path, file.content, { flag: "wx" })
-    console.log(`Created ${file.path}`)
-  }
-}
-
-export function runConsumerReleaseNoticesCli(command, args, { cwd, pkgRoot }) {
+export function runConsumerReleaseNoticesCli(command, args, { cwd, runGh = spawnSync }) {
   try {
-    if (command === "register-consumer-request") register(args, resolve(cwd))
-    else if (command === "init-release-notices") install(args, resolve(cwd), resolve(pkgRoot))
+    if (command === "register-consumer-request") register(args, resolve(cwd), runGh)
+    else if (command === "init-release-notices") throw new Error("init-release-notices is retired: remove the consumer polling workflow/script. Release notices run only during the DS bulk bump (scripts/update-consumers.sh).")
     else throw new Error(`Unknown command: ${command}`)
     return 0
   } catch (error) {
