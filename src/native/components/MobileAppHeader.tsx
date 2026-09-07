@@ -10,6 +10,8 @@ export interface MobileAppHeaderProps {
   actions?: React.ReactNode
   children?: React.ReactNode
   bordered?: boolean
+  /** Header row alignment. Right-side status and actions remain vertically centered. */
+  verticalAlignment?: "center" | "top"
   style?: StyleProp<ViewStyle>
 }
 
@@ -21,6 +23,7 @@ export function MobileAppHeader({
   actions,
   children,
   bordered = true,
+  verticalAlignment = "center",
   style,
 }: MobileAppHeaderProps) {
   const { theme, scales } = useTheme()
@@ -41,7 +44,7 @@ export function MobileAppHeader({
           minHeight: 56,
           paddingHorizontal: scales.spacing.scale[4],
           flexDirection: "row",
-          alignItems: "center",
+          alignItems: verticalAlignment === "top" ? "flex-start" : "center",
           gap: scales.spacing.scale[2],
         }}
       >
