@@ -185,7 +185,9 @@ export function CoachMarkOverlay({
         )
       ).find((el) => el.tabIndex >= 0)
       if (first) {
-        first.focus()
+        // step の scrollIntoView で決めた位置を維持する。Radix の Popper は
+        // 初回の位置計算前に画面外へ置かれるため、focus に再スクロールさせない。
+        first.focus({ preventScroll: true })
         return
       }
       if (attempts++ < 5) raf = requestAnimationFrame(focusInitial)
@@ -306,7 +308,7 @@ export function CoachMarkOverlay({
           // ではない。Radix のトラップは *一度でも面の中に入った* フォーカスを
           // 引き戻す実装なので、外に置いたままだと Tab で背面を巡回できてしまう
           // （面自体は tabIndex=-1 なので、ここへ置いても操作子は選ばれない）。
-          if (event.currentTarget instanceof HTMLElement) event.currentTarget.focus()
+          if (event.currentTarget instanceof HTMLElement) event.currentTarget.focus({ preventScroll: true })
         }}
         onUnmountAutoFocus={(event) => {
           if (!restoreFocusOnClose) event.preventDefault()
@@ -346,9 +348,11 @@ export function CoachMarkOverlay({
         >
           <span
             className="fixed pointer-events-none"
+            // #531: 点ではなく対象矩形を渡し、Radix が各 placement の外縁と
+            // 中央を基準に配置できるようにする。padding は spotlight 専用。
             style={
               hasSpotlight && rect
-                ? { top: rect.top, left: rect.left + rect.width / 2, width: 1, height: 1 }
+                ? { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
                 : { top: "50%", left: "50%" }
             }
             aria-hidden="true"

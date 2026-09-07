@@ -108,6 +108,7 @@ afterEach(() => {
   }
   document.body.innerHTML = ""
   vi.useRealTimers()
+  vi.restoreAllMocks()
   vi.unstubAllGlobals()
 })
 
@@ -150,10 +151,14 @@ function Scene({
 
 describe("CoachMarkOverlay のフォーカストラップ（#504）", () => {
   it("開くと面の中の操作子へフォーカスが移る", () => {
+    const focus = vi.spyOn(HTMLElement.prototype, "focus")
     mount(<Scene open onSkip={() => {}} />)
     const buttons = coachButtons()
     expect(buttons.length).toBeGreaterThan(0)
     expect(document.activeElement).toBe(buttons[0])
+    const initialFocusCalls = focus.mock.calls.filter((_, index) => focus.mock.contexts[index] === buttons[0])
+    expect(initialFocusCalls.length).toBeGreaterThan(0)
+    for (const args of initialFocusCalls) expect(args).toEqual([{ preventScroll: true }])
   })
 
   it("端での Tab / Shift+Tab が面の中で折り返し、背面のボタンへ抜けない", () => {
@@ -216,6 +221,7 @@ describe("CoachMarkOverlay のフォーカストラップ（#504）", () => {
   })
 
   it("autoFocus={false} は操作子を自動で選ばない（面自体にフォーカスを置く）", () => {
+    const focus = vi.spyOn(HTMLElement.prototype, "focus")
     mount(<Scene open={false} onSkip={() => {}} />)
     const trigger = document.getElementById("behind-2") as HTMLButtonElement
     act(() => {
@@ -226,6 +232,9 @@ describe("CoachMarkOverlay のフォーカストラップ（#504）", () => {
     // （外に置くとトラップが成立しない。下のテスト参照）
     expect(coachButtons()).not.toContain(document.activeElement)
     expect(coachOverlayRoot().contains(document.activeElement)).toBe(true)
+    const scopeFocus = focus.mock.contexts.findIndex((node) => node === document.activeElement)
+    expect(scopeFocus).toBeGreaterThanOrEqual(0)
+    expect(focus.mock.calls[scopeFocus]).toEqual([{ preventScroll: true }])
   })
 
   it("autoFocus={false} でもトラップは効く（面の外へ動かすと引き戻される）", () => {
