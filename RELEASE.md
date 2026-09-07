@@ -74,6 +74,10 @@ GitHub Release の作成をスキップしてしまう。そのため:
 ローカルから `npm publish` を直接叩く経路は廃止した（publish.yml への一本化。
 下記参照）。
 
+## 未公開の修正
+
+- [#529](https://github.com/ekusiek716/ksk-design-system/issues/529): native Dialog のダークモードで、中央・上寄せの確認面が背景と同化する問題を修正。パネルに `surface.secondary` を使い、余白と角丸を見分けられるようにする。light・fullscreen の背景、寸法、safe-area は維持。公開後に利用アプリへ取り込み、実機で確認する。
+
 ## ホットフィックス履歴
 
 | 日付 | バージョン | 内容 | 影響 |

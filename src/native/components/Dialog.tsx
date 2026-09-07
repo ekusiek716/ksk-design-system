@@ -44,7 +44,7 @@ export function Dialog({
   position = "center",
   safeArea = true,
 }: DialogProps) {
-  const { theme, scales } = useTheme()
+  const { theme, scales, mode } = useTheme()
   const insets = useSafeAreaInsets()
   const isFullscreen = position === "fullscreen"
   const fullscreenPadding = resolveFullscreenDialogPadding(
@@ -80,7 +80,8 @@ export function Dialog({
           onPress={() => {}}
           style={{
             width: "100%",
-            backgroundColor: theme.surface.primary,
+            // Dark primary matches the scrim over a primary screen; lift floating panels (#529).
+            backgroundColor: !isFullscreen && mode === "dark" ? theme.surface.secondary : theme.surface.primary,
             gap: scales.spacing.scale[3],
             ...(isFullscreen
               ? { flex: 1, borderRadius: 0, ...fullscreenPadding }
