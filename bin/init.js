@@ -60,8 +60,8 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   npx ksk-design-system init          AI ルールファイルを設置
   npx ksk-design-system init --force  既存ファイルを上書き
   npx ksk-ds register-consumer-request --ds-issue N --consumer-issue URL [--fix-pr N] [--dry-run]
-                                     DS 正本の公開通知依頼を登録
-  npx ksk-ds init-release-notices     consumer に公開通知 workflow を明示導入
+                                     DS依頼を登録しapp issueへds:waitingを付与（gh認証使用）
+  npx ksk-ds init-release-notices     廃止済み。一括bump時の公開通知へ移行
   npx ksk-design-system demo [dir]    DS リポを clone + npm install（お試し）
                                       dir 省略時は ./ksk-ds-demo
   npx ksk-ds lint src                 DS-first ルール違反を検査

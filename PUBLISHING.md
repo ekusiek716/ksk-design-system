@@ -246,11 +246,13 @@ Trusted Publisher 登録）を疑い、対応後に再度 workflow_dispatch で�
 
 ## 依頼元appへの公開通知
 
-app側に追従issueを作成し、DS正本で `npx ksk-ds register-consumer-request --ds-issue N --consumer-issue URL` によりpending登録する。修正PR作成後に `--fix-pr N` を付けて同じ依頼を更新し、通常のPRにregistry変更を含める。`--dry-run` で事前確認できる。台帳は累積保持し、公開後も削除しない。
+DSへ依頼するときは、DSの通常issueとappの取り込み待ち通常issueを作成する。DS正本の作業ブランチで `node bin/init.js register-consumer-request --ds-issue N --consumer-issue URL` を実行し、台帳変更をPRに含める。未公開CLIで古いnpm版を起動しないようsourceのコマンドを使う。公開済みCLIでは `npx ksk-ds register-consumer-request` も同じ引数で使える。
 
-appへの導入は `npx ksk-ds init-release-notices` の明示実行のみ。生成された2ファイルをappのdefault branchへ取り込む。npm公開後にappが約6時間ごとに公開commitのregistryと修正PRの包含を確認して、自repoのissueへコメントと `ds:released` を付ける。任意の `ds:waiting` は登録済みの追従issueに使う。未公開fixやregistryの無い旧versionは待機no-op。app issueは取り込み・動作確認完了まで閉じない。
+登録CLIは既存のgh認証で両issueを確認し、app issueへ `ds:waiting` を自動付与する。closedまたは `ds:released` のissueは降格させない。修正PR作成後は同じコマンドに `--fix-pr N` を付けて紐付ける。省略時は既存fixPrを維持し、累積台帳を削除しない。`--dry-run` は通信・書き込みなしのローカルプレビューで、issue実在や権限は確認しない。失敗は非zero。台帳保存後のラベル失敗は同じコマンドで再試行する。
 
-DS側からのcross-repo書き込みtokenは不要。手動通知はappのActionsから `workflow_dispatch`、ローカル確認は `--apply` なしのdry-runに限る。schedule遅延・休止時の復旧を含む詳細は [consumer-release-notices.md](https://github.com/ekusiek716/ksk-design-system/blob/main/docs/consumer-release-notices.md) を参照。通知機能の導入自体ではversion bumpやpublishを行わない。
+公開通知はDSの一括bump（`scripts/update-consumers.sh VERSION`）時だけ実行する。公開版に修正が含まれることを確認し、bump PR付きの通知と `ds:released` を付ける。6時間pollingとapp側workflow/scriptは廃止し、`init-release-notices` は移行案内を出して停止する。app側の取り込み・動作確認が完了するまで追従issueは閉じない。詳しくは [公開通知手順](https://github.com/ekusiek716/ksk-design-system/blob/main/docs/consumer-release-notices.md) を参照。
+
+同じapp issueに複数のDS依頼がある場合、公開台帳内の該当依頼がすべて公開・通知済みになるまで `ds:waiting` を残す（`ds:released` と併存する場合あり）。通知はrepo owner本人 `ekusiek716` のPAT認証が前提。通知失敗時は既存bump PRを保持して同じversion・対象repoの一括bumpを再実行し、通知runtime単独実行・並列実行はしない。
 
 ## 関連
 

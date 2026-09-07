@@ -57,6 +57,11 @@ set -uo pipefail
 VERSION="${1:?usage: update-consumers.sh <version> [repos...]}"
 shift || true
 ARGS=("$@")
+if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+  echo 'FAIL: 安定版versionを指定してください' >&2
+  exit 1
+fi
+NOTICE_RUNTIME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/templates/consumer-release-notices/check-ds-release.mjs"
 
 # ── 既定対象リポ（フルパス21箇所）──
 # 2026-08-20 全面更新（issue #403）: ローカル再編（~/localdev/exam-kit-apps/ 等への集約）に追従。
@@ -95,6 +100,15 @@ DEFAULT_REPOS=(
 GREEN='\033[0;32m'; RED='\033[0;31m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
 RESULTS=()
 
+# This updater's worktrees/branches and GitHub's comment API require serialized runs.
+# Call only after install/version checks AND a successful push/PR (or verified no-op).
+notify_release() {
+  local worktree="$1" bump_url="$2" target_repo
+  [ -n "${DRY_RUN:-}" ] && return 0
+  target_repo="$(cd "$worktree" && gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)" || return 1
+  node "$NOTICE_RUNTIME" --repo "$target_repo" --version "$VERSION" --bump-pr "$bump_url" --apply
+}
+
 # ── gh のアカウント固定 ──
 # gh の active account が実行中に別アカウント（keisukeokuno-cpu 等）へ振れると、
 # private リポが見えず gh pr create が
@@ -119,9 +133,14 @@ fi
 
 # 中断（Ctrl-C 等）時も処理中リポの一時 worktree を残さない。
 # cleanup はループ内で毎回 $repo / $wt を掴んで再定義される。
+RUN_LOCK="/tmp/ksk-ds-update-consumers-$(id -u).lock"
+if ! mkdir "$RUN_LOCK" 2>/dev/null; then
+  echo "FAIL: 一括bumpは同時実行できません。実行中プロセスが無い場合のみ $RUN_LOCK を確認してください" >&2
+  exit 1
+fi
 cleanup() { :; }
-trap 'cleanup' EXIT
-trap 'cleanup; trap - INT TERM EXIT; exit 130' INT TERM
+trap 'cleanup; rmdir "$RUN_LOCK"' EXIT
+trap 'exit 130' INT TERM
 
 # ── 引数 → 対象リポのパス解決 ──
 resolve_repo() {
@@ -333,8 +352,13 @@ for repo in "${REPOS[@]}"; do
   # lockfile が新規生成された場合は -u で拾えないので明示的に add
   git -C "$wt" add -- 'package-lock.json' ':(glob)**/package-lock.json' >/dev/null 2>&1
   if git -C "$wt" diff --staged --quiet; then
-    existing_pr="$(cd "$wt" && gh pr list --state open --head "$branch" --json url -q '.[0].url' 2>/dev/null)"
+    existing_pr="$(cd "$wt" && gh pr list --state all --base main --head "$branch" --json url,state -q '[.[] | select(.state == "OPEN" or .state == "MERGED")][0].url' 2>/dev/null)"
     echo -e "${YELLOW}→ 変更なし${NC} ${existing_pr:-}"
+    if [ -n "$existing_pr" ] && ! notify_release "$wt" "$existing_pr"; then
+      RESULTS+=("$name: FAIL (release notice; PR保持: $existing_pr)")
+      cleanup
+      continue
+    fi
     cleanup
     RESULTS+=("$name: SKIP (no-op${existing_pr:+: $existing_pr})")
     continue
@@ -410,6 +434,7 @@ EOF
   if [ -z "$pr_url" ]; then
     pr_note="新規"
     pr_url="$(cd "$wt" && gh pr create \
+      --base main --head "$branch" \
       --title "chore: ksk-design-system v${VERSION} に bump" \
       --body-file "$pr_body_file" \
       2>"$pr_err" | tail -1)"
@@ -437,6 +462,12 @@ EOF
   esac
   rm -f "$pr_err"
 
+  if ! notify_release "$wt" "$pr_url"; then
+    RESULTS+=("$name: FAIL (release notice; PR保持: $pr_url)")
+    echo -e "${RED}FAIL: 公開通知（bump PRは保持。再実行で通知を修復）${NC} $pr_url"
+    cleanup
+    continue
+  fi
   cleanup
   RESULTS+=("$name: OK ($pr_note) $pr_url")
   echo -e "${GREEN}OK${NC} $pr_url"

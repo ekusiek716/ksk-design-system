@@ -179,7 +179,7 @@
     "check:native": "tsc -p tsconfig.native.json --noEmit",
     "check:native-parity": "node scripts/check-native-parity.mjs",
     "check:native-lookup": "node scripts/generate-native-component-lookup.mjs --check",
-    "test": "node --test __tests__/consumer-release-notices.test.mjs && vitest run",
+    "test": "node --test __tests__/consumer-release-notices.test.mjs __tests__/update-consumers-notices.test.mjs && vitest run",
     "test:legacy-radix": "node scripts/test-legacy-radix.mjs",
     "test:consumer:web": "npm run build:lib && node scripts/test-packed-web-consumer.mjs",
     "test:consumer:native": "npm run build:lib && node scripts/test-packed-native-consumer.mjs",
