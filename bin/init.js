@@ -59,6 +59,9 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
 使い方:
   npx ksk-design-system init          AI ルールファイルを設置
   npx ksk-design-system init --force  既存ファイルを上書き
+  npx ksk-ds register-consumer-request --ds-issue N --consumer-issue URL [--fix-pr N] [--dry-run]
+                                     DS 正本の公開通知依頼を登録
+  npx ksk-ds init-release-notices     consumer に公開通知 workflow を明示導入
   npx ksk-design-system demo [dir]    DS リポを clone + npm install（お試し）
                                       dir 省略時は ./ksk-ds-demo
   npx ksk-ds lint src                 DS-first ルール違反を検査
@@ -73,6 +76,11 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   npx ksk-ds codemod <name> [DIR]      破壊変更の自動移行（書き込み）
 `)
   await exitWith(0)
+}
+
+if (cmd === "register-consumer-request" || cmd === "init-release-notices") {
+  const { runConsumerReleaseNoticesCli } = await import("./consumer-release-notices.js")
+  await exitWith(runConsumerReleaseNoticesCli(cmd, args.slice(1), { cwd: process.cwd(), pkgRoot }))
 }
 
 if (cmd === "lint") {

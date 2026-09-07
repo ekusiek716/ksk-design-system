@@ -56,6 +56,14 @@ UI を書く前に必ず確認すること:
 
 ---
 
+## DS公開通知
+
+依頼元appに追従issueを作り、DS正本で `npx ksk-ds register-consumer-request --ds-issue N --consumer-issue URL` によりpending登録する。修正PR作成後に同じコマンドへ `--fix-pr N` を追加して紐付ける。`--dry-run` はプレビューのみ。累積registryを保持し、修正PRの省略で既存の紐付けを消さない。
+
+appでは `npx ksk-ds init-release-notices` を明示実行し、生成されたworkflowとscriptをdefault branchへ取り込む。同内容はno-op、異なる既存ファイルは上書きせず停止する。install/postinstallでは導入しない。登録済みapp issueの `ds:waiting` は任意。npm公開後にapp側が約6時間ごとに確認して `ds:released` を付けるが、取り込みと動作確認が終わるまでapp issueは閉じない。未公開fixやregistryの無い旧公開versionは待機する。
+
+実通知の手動再実行はActionsの `workflow_dispatch` を使い、ローカルは `--apply` なしのdry-runのみ。詳しくは [公開通知手順](https://github.com/ekusiek716/ksk-design-system/blob/main/docs/consumer-release-notices.md) を参照。
+
 ## このDSについて
 
 **KSK Design System** は、フリーランスデザイナー / エンジニア / PdM が **複数クライアント案件を1つのDSで高速に回す** ために設計された統合デザインシステムです。
