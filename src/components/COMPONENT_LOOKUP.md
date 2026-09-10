@@ -138,7 +138,7 @@
 | ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | Default, WithoutFilter, FewRows |
 | MediaActionCluster | `@/components/patterns/media-action-cluster` | — | Vertical, Horizontal, Auto orientation, No auto-hide |
 | MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
-| MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount |
+| MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount, WithTopAlignment |
 | MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff |
 | MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline, Full width CTA, With ad banner offset (bottomOffsetExtra) |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
