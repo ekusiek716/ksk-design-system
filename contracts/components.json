@@ -2380,10 +2380,13 @@
         "grid",
         "list"
       ],
+      "props": {
+        "loadingLabel": "ReactNode (既定 \"処理中\") — loading 時にボタンへ表示する文言。i18n対応（issue #539）。native は既定値を持たず、未指定時は native Button の spinner のみを表示する（web/native で意図的に非対称。scripts/check-native-parity.mjs の INTENTIONAL_DEFAULT_GAPS 参照）"
+      },
       "accessibility": [
         "img alt",
         "remove button aria-label",
-        "aria-busy on trigger button while loading"
+        "aria-busy on trigger button while loading（テスト/自動化向けの状態フック。loading 中はボタン自体が disabled になるため、スクリーンリーダーへの読み上げ効果は限定的）"
       ],
       "rules": [
         "consumer 側で hidden input + Button trigger を重複実装しない",
@@ -2394,10 +2397,7 @@
       "subcomponents": [
         "CompactFilePicker",
         "ImageAttachmentPicker"
-      ],
-      "props": {
-        "loadingLabel": "ReactNode (既定 \"処理中\") — loading 時にボタンへ表示する文言。i18n対応（issue #539）"
-      }
+      ]
     },
     {
       "name": "QuickActionGrid / ActionTile",
