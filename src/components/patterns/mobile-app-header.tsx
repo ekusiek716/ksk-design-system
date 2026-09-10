@@ -17,6 +17,14 @@ interface MobileAppHeaderProps extends Omit<React.ComponentProps<"header">, "ref
    * @default true
    */
   landmark?: boolean
+  /**
+   * ヘッダー行の縦位置。複数行の brand（見出し+サブテキスト等）に対して
+   * status / actions が行全体の中央へ下がるのを避けたいときに `"top"` を指定する。
+   * `"top"` でも status / actions 内部（バッジとボタン同士）は中央揃えのまま
+   * （native の同名 prop と同じ仕様。issue #536）。
+   * @default "center"
+   */
+  verticalAlignment?: "center" | "top"
 }
 
 function MobileAppHeader({
@@ -29,6 +37,7 @@ function MobileAppHeader({
   sticky = true,
   bordered = true,
   landmark = true,
+  verticalAlignment = "center",
   children,
   ...props
 }: MobileAppHeaderProps) {
@@ -44,7 +53,12 @@ function MobileAppHeader({
       )}
       {...props}
     >
-      <div className="flex min-h-14 items-center gap-2 px-4">
+      <div
+        className={cn(
+          "flex min-h-14 gap-2 px-4",
+          verticalAlignment === "top" ? "items-start" : "items-center"
+        )}
+      >
         {leading && (
           <div data-slot="mobile-app-header-leading" className="flex shrink-0 items-center">
             {leading}

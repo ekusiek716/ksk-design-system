@@ -38,3 +38,26 @@ export const WithPendingCount: Story = {
     />
   ),
 }
+
+export const WithTopAlignment: Story = {
+  render: () => (
+    <MobileAppHeader
+      sticky={false}
+      verticalAlignment="top"
+      brand={
+        <span className="flex flex-col">
+          <span className="typo-heading-md truncate">電工1種</span>
+          <span className="typo-label-sm text-[var(--Text-Medium-Emphasis)] truncate">
+            第一種電気工事士 試験対策
+          </span>
+        </span>
+      }
+      compactStatus={<StatusActionBadge state="offline" label="オフラインで編集中" compact asStatus />}
+      actions={
+        <Button size="icon" variant="ghost" aria-label="メニュー">
+          <More size={18} />
+        </Button>
+      }
+    />
+  ),
+}
