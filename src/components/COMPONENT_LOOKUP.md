@@ -116,7 +116,7 @@
 | Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `xs`, `sm`, `md`, `lg`, `tile`<br>**shape**: `pill`, `rounded`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape, WithCount, TileAndSoldOut, AsLink, Real UI — Filters & Status, Touch selection stable, TileTouchTargetNotShrunk, ExtraSmall, RoundedShape |
 | CoachMarkOverlay | `@/components/patterns/coach-mark-overlay` | — | MultiStepTour, Localized labels (EN), BrandVariant, MissingTarget, FocusTrap |
 | CollapsibleChipField | `@/components/patterns/collapsible-chip-field` | — | WithLabel, WithIcon, RequiredNoClear, CollapsedDisclosure, AlwaysExpanded, EscapeInsideDialog |
-| CompactFilePicker, ImageAttachmentPicker | `@/components/patterns/compact-file-picker` | — | SingleImageReplacement, MultiImageAttachments, ListPreview |
+| CompactFilePicker, ImageAttachmentPicker | `@/components/patterns/compact-file-picker` | — | SingleImageReplacement, MultiImageAttachments, ListPreview, LoadingWithCustomLabel |
 | ConfirmDialog | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading |
 | ContentCarousel | `@/components/patterns/content-carousel` | — | Default, AutoPlay, WithoutControls |
 | CookieConsent | `@/components/patterns/cookie-consent` | — | Default, CustomLabels, OnDecideCallback |

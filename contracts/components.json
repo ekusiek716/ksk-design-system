@@ -2382,7 +2382,8 @@
       ],
       "accessibility": [
         "img alt",
-        "remove button aria-label"
+        "remove button aria-label",
+        "aria-busy on trigger button while loading"
       ],
       "rules": [
         "consumer 側で hidden input + Button trigger を重複実装しない",
@@ -2393,7 +2394,10 @@
       "subcomponents": [
         "CompactFilePicker",
         "ImageAttachmentPicker"
-      ]
+      ],
+      "props": {
+        "loadingLabel": "ReactNode (既定 \"処理中\") — loading 時にボタンへ表示する文言。i18n対応（issue #539）"
+      }
     },
     {
       "name": "QuickActionGrid / ActionTile",

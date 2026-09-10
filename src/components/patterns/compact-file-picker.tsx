@@ -8,6 +8,12 @@ interface CompactFilePickerProps
   label?: React.ReactNode
   description?: React.ReactNode
   triggerLabel?: React.ReactNode
+  /**
+   * loading 時にボタンへ表示する文言。
+   * i18n 対応: 英語では "Processing…" など任意文字列を渡す。
+   * @default "処理中"
+   */
+  loadingLabel?: React.ReactNode
   icon?: React.ReactNode
   loading?: boolean
   onFilesChange?: (files: File[]) => void
@@ -36,6 +42,7 @@ function CompactFilePicker({
   label = "ファイル",
   description,
   triggerLabel = "選択する",
+  loadingLabel = "処理中",
   icon,
   loading = false,
   disabled,
@@ -85,9 +92,10 @@ function CompactFilePicker({
         variant="secondary"
         size="sm"
         disabled={isDisabled}
+        aria-busy={loading || undefined}
         onClick={() => inputRef.current?.click()}
       >
-        {loading ? "処理中" : triggerLabel}
+        {loading ? loadingLabel : triggerLabel}
       </Button>
     </div>
   )
