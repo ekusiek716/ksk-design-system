@@ -182,6 +182,8 @@ import { Button, PhotoHero, Screen } from "ksk-design-system/native/ui"
 
 Web では `CompactFilePicker` / `ImageAttachmentPicker` が hidden file input、trigger、preview、remove affordance を持ちます。Native では DocumentPicker / ImagePicker の起動だけ consumer が渡し、trigger と preview は DS が持ちます。
 
+`loadingLabel`（loading 中にボタンへ表示する文言）は web の既定が `"処理中"` なのに対し、native には既定値が無く、未指定時は native Button の spinner のみが表示されます（issue #539。web/native で意図的に非対称）。
+
 ```tsx
 <ImageAttachmentPicker
   multiple

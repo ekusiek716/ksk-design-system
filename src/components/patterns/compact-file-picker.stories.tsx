@@ -64,3 +64,17 @@ export const ListPreview: Story = {
     </div>
   ),
 }
+
+export const LoadingWithCustomLabel: Story = {
+  render: () => (
+    <div className="max-w-md rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4">
+      {/* loadingLabel は i18n 対応の口（issue #539）。英語 UI では "Uploading…" 等を渡す。 */}
+      <CompactFilePicker
+        label="Profile photo"
+        description="Uploading in progress"
+        loading
+        loadingLabel="Uploading…"
+      />
+    </div>
+  ),
+}

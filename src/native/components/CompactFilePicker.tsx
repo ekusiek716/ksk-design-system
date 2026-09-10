@@ -16,6 +16,11 @@ export interface CompactFilePickerProps {
   label?: React.ReactNode
   description?: React.ReactNode
   triggerLabel?: string
+  /**
+   * loading 中に spinner と併せて表示する文言。未指定なら spinner のみ
+   * （Button.loadingLabel と同じ挙動・既定は変更しない）。i18n 対応（issue #539）。
+   */
+  loadingLabel?: string
   icon?: React.ReactNode
   loading?: boolean
   disabled?: boolean
@@ -42,6 +47,7 @@ export function CompactFilePicker({
   label = "ファイル",
   description,
   triggerLabel = "選択する",
+  loadingLabel,
   icon,
   loading = false,
   disabled = false,
@@ -96,7 +102,13 @@ export function CompactFilePicker({
             description
           ))}
       </View>
-      <Button variant="secondary" disabled={isDisabled} loading={loading} onPress={onPress}>
+      <Button
+        variant="secondary"
+        disabled={isDisabled}
+        loading={loading}
+        loadingLabel={loadingLabel}
+        onPress={onPress}
+      >
         {triggerLabel}
       </Button>
     </Pressable>

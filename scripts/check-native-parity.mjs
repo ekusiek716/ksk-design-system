@@ -247,6 +247,9 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
   ["CoachMark", [
     { prop: "nextLabel", reason: "Web's default text carries the trailing arrow (\"次へ →\") because the Web balloon's next button is a text-only link-ish control where the arrow is the only affordance; Native's button is a filled pill with its own visual affordance, so its default is the bare \"次へ\" (issue #477). Consumers passing an i18n string replace the whole label on either platform." },
   ]],
+  ["CompactFilePicker", [
+    { prop: "loadingLabel", reason: "Web's default \"処理中\" (issue #539) is required because this file's Web Button has no spinner concept at all (see the Button entry above: loading/loadingLabel are Native-only) — CompactFilePicker swaps the trigger's own text for `loadingLabel` while loading, so an unset default would render a blank-looking button. Native instead forwards loading/loadingLabel straight into Native Button's own `loading` prop, whose ButtonContent renders an ActivityIndicator and only appends a text node when `loadingLabel` is explicitly passed (src/native/components/Button.tsx) — the spinner alone already signals busy state there, so no default caption is needed. Each platform's own Button loading API decides whether a default is required, not a missed port." },
+  ]],
   ["ErrorState", [
     { prop: "title", reason: `Web has no destructure default but falls back to the *same* text ("エラーが発生しました") via \`title ?? (notFound ? … : "エラーが発生しました")\` inside the function body. ${RD_BLIND_SPOT} — verified identical effective text, not just a shape artifact.` },
     { prop: "description", reason: `Web has no destructure default but falls back (non-notFound case) to \`description ?? "しばらくしてからもう一度お試しください"\` inside the function body; Native's destructure default was aligned to the identical text (2026-08-10, previously "時間をおいて再度お試しください。"). ${RD_BLIND_SPOT} — verified identical effective text after alignment.` },
