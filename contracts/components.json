@@ -1657,10 +1657,14 @@
         "compactStatus",
         "actions"
       ],
+      "props": {
+        "verticalAlignment": "\"center\" | \"top\" (既定 \"center\") — ヘッダー行の縦位置。複数行 brand で status/actions が中央へ下がるのを防ぐ。top でも status/actions 内部は中央揃えのまま（native と同仕様。issue #536）"
+      },
       "rules": [
         "ブランド/ロゴは brand slot に置く",
         "長い同期状態は status と compactStatus の両方を渡す",
-        "右側 actions のために brand に flex-shrink をかけない"
+        "右側 actions のために brand に flex-shrink をかけない",
+        "複数行になり得る brand を使うときは verticalAlignment=\"top\" を検討する（既定は上下中央）"
       ]
     },
     {
