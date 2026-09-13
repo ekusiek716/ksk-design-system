@@ -165,10 +165,12 @@ function ShareButtons({
     result: ShareCopyResult
   } | null>(null)
   const feedbackTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const copyRequestRef = React.useRef(0)
   const activeProviders = providers ?? REGION_PROVIDERS[region]
 
   React.useEffect(() => {
     return () => {
+      copyRequestRef.current += 1
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
     }
   }, [])
@@ -176,7 +178,6 @@ function ShareButtons({
   const markCopyResult = (provider: ShareProvider, result: ShareCopyResult) => {
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
     setCopyFeedback({ provider, result })
-    onCopy?.(result)
     feedbackTimerRef.current = setTimeout(() => {
       setCopyFeedback(null)
       feedbackTimerRef.current = null
@@ -184,15 +185,20 @@ function ShareButtons({
   }
 
   const copyUrl = async (provider: ShareProvider) => {
+    const request = ++copyRequestRef.current
+    let result: ShareCopyResult = "success"
     try {
       if (typeof navigator === "undefined" || !navigator.clipboard?.writeText) {
         throw new Error("Clipboard API is unavailable")
       }
       await navigator.clipboard.writeText(url)
-      markCopyResult(provider, "success")
+      // Only clipboard failures belong to the error result.
     } catch {
-      markCopyResult(provider, "error")
+      result = "error"
     }
+    if (request === copyRequestRef.current) markCopyResult(provider, result)
+    // Analytics receives every completed attempt; only visual feedback is latest-only.
+    onCopy?.(result)
   }
 
   const handleClick = async (provider: ShareProvider) => {
