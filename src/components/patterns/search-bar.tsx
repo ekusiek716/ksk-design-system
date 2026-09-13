@@ -18,20 +18,25 @@ function SearchBar({
   className,
   onSearch,
   asForm = false,
+  onKeyDown,
+  onCompositionStart,
+  onCompositionEnd,
   ...props
 }: SearchBarProps) {
+  const composingRef = React.useRef(false)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // asForm=true のときは submit イベントに任せるため、ここでは何もしない（二重発火防止）
-    if (asForm) return
-    // 変換確定の Enter で未確定文字のまま検索が走らないようにする（issue #301 と同一原因）
-    if (e.key === "Enter" && !isImeComposing(e) && onSearch) {
-      onSearch(e.currentTarget.value)
+    onKeyDown?.(e)
+    if (e.defaultPrevented || e.key !== "Enter") return
+    if (composingRef.current || isImeComposing(e)) {
+      e.preventDefault()
+      return
     }
+    if (!asForm) onSearch?.(e.currentTarget.value)
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (onSearch) {
+    if (!composingRef.current && onSearch) {
       const input = e.currentTarget.elements.namedItem("search") as HTMLInputElement | null
       onSearch(input?.value ?? "")
     }
@@ -64,6 +69,14 @@ function SearchBar({
         "disabled:cursor-not-allowed disabled:opacity-50"
       )}
       onKeyDown={handleKeyDown}
+      onCompositionStart={(event) => {
+        composingRef.current = true
+        onCompositionStart?.(event)
+      }}
+      onCompositionEnd={(event) => {
+        composingRef.current = false
+        onCompositionEnd?.(event)
+      }}
       {...props}
     />
   )

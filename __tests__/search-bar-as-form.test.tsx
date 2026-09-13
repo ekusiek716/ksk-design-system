@@ -87,3 +87,42 @@ describe("SearchBar asForm", () => {
     expect(onSearch).toHaveBeenCalledWith("bar")
   })
 })
+
+for (const asForm of [false, true]) {
+  it(`IME composition Enter is canceled (asForm=${asForm})`, () => {
+    const onSearch = vi.fn()
+    const onKeyDown = vi.fn()
+    mount(<SearchBar asForm={asForm} onSearch={onSearch} onKeyDown={onKeyDown} />)
+    const input = container.querySelector("input")!
+    act(() => { input.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true })) })
+    const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })
+    act(() => { input.dispatchEvent(event) })
+    expect(event.defaultPrevented).toBe(true)
+    if (asForm) act(() => { container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })) })
+    expect(onSearch).not.toHaveBeenCalled()
+    expect(onKeyDown).toHaveBeenCalledTimes(1)
+    act(() => { input.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true })) })
+    pressEnter(input)
+    if (asForm) act(() => { container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })) })
+    expect(onSearch).toHaveBeenCalledTimes(1)
+  })
+}
+
+it("consumer keydown cancellation prevents search", () => {
+  const onSearch = vi.fn()
+  mount(<SearchBar onSearch={onSearch} onKeyDown={(event) => event.preventDefault()} />)
+  pressEnter(container.querySelector("input")!)
+  expect(onSearch).not.toHaveBeenCalled()
+})
+
+it.each([false, true])("native IME flags prevent default submission (asForm=%s)", (asForm) => {
+  const onSearch = vi.fn()
+  mount(<SearchBar asForm={asForm} onSearch={onSearch} />)
+  const input = container.querySelector("input")!
+  for (const flags of [{ isComposing: true }, { keyCode: 229 }]) {
+    const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true, ...flags })
+    act(() => { input.dispatchEvent(event) })
+    expect(event.defaultPrevented).toBe(true)
+  }
+  expect(onSearch).not.toHaveBeenCalled()
+})

@@ -81,7 +81,27 @@ export function AutoGrowTextarea({
   React.useEffect(() => {
     const onResize = () => resize()
     window.addEventListener("resize", onResize)
-    return () => window.removeEventListener("resize", onResize)
+    const textarea = ref.current
+    let width = textarea?.getBoundingClientRect().width
+    let frame: number | null = null
+    // Write height outside observer delivery to avoid resize-loop warnings.
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
+      const nextWidth = textarea?.getBoundingClientRect().width
+      if (nextWidth !== width) {
+        width = nextWidth
+        if (frame !== null) cancelAnimationFrame(frame)
+        frame = requestAnimationFrame(() => {
+          frame = null
+          resize()
+        })
+      }
+    })
+    if (textarea) observer?.observe(textarea)
+    return () => {
+      window.removeEventListener("resize", onResize)
+      observer?.disconnect()
+      if (frame !== null) cancelAnimationFrame(frame)
+    }
   }, [resize])
 
   const ratio = maxLength != null && maxLength > 0 ? value.length / maxLength : 0
