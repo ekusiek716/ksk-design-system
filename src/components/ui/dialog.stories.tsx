@@ -12,6 +12,7 @@ import { Input } from "./input"
 import { Label } from "./label"
 import { RadioGroup, RadioGroupItem } from "./radio-group"
 import { Sheet, SheetContent, SheetTitle } from "./sheet"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
 import { ConfirmDialog } from "../patterns/confirm-dialog"
 
 const meta: Meta<typeof Dialog> = {
@@ -778,5 +779,85 @@ export const DynamicChildDescriptionIsLinked: Story = {
     // 消したら参照も外れる（宙ぶらりんの aria-describedby を残さない）
     await userEvent.click(within(dialog).getByTestId("toggle"))
     await waitFor(() => expect(dialog).not.toHaveAttribute("aria-describedby"))
+  },
+}
+
+/** Dialog 内の Select を閉じても、外側の操作とフォーカスを失わない。 */
+export const NestedSelectKeyboard: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>カテゴリ設定を開く</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>カテゴリ設定</DialogTitle>
+          <DialogDescription>カテゴリを選択してください。</DialogDescription>
+        </DialogHeader>
+        <Select defaultValue="design">
+          <SelectTrigger aria-label="カテゴリ">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="design">デザイン</SelectItem>
+            <SelectItem value="development">開発</SelectItem>
+          </SelectContent>
+        </Select>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="secondary">閉じる</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+    const opener = canvas.getByRole("button", { name: "カテゴリ設定を開く" })
+    await userEvent.click(opener)
+    const dialog = await body.findByRole("dialog", { name: "カテゴリ設定" })
+    // 入場 zoom 中の寸法計測と Select の位置調整が競合しないよう、
+    // 実際の animation 完了を待ってから複合操作を始める。
+    await Promise.all(dialog.getAnimations().map((animation) => animation.finished))
+    const trigger = within(dialog).getByRole("combobox", { name: "カテゴリ" })
+    trigger.focus()
+    await expect(trigger).toHaveFocus()
+    await userEvent.keyboard("{Enter}")
+    await body.findByRole("listbox")
+    await waitFor(() => expect(body.getByRole("option", { name: "デザイン" })).toHaveFocus())
+    await userEvent.keyboard("{ArrowDown}")
+    await waitFor(() => expect(body.getByRole("option", { name: "開発" })).toHaveFocus())
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => expect(body.queryByRole("listbox")).toBeNull())
+    await expect(dialog).toBeInTheDocument()
+    await expect(trigger).toHaveTextContent("デザイン")
+    await waitFor(() => expect(trigger).toHaveFocus())
+
+    await userEvent.keyboard("{Enter}")
+    await body.findByRole("listbox")
+    await waitFor(() => expect(body.getByRole("option", { name: "デザイン" })).toHaveFocus())
+    await userEvent.keyboard("{ArrowDown}")
+    await waitFor(() => expect(body.getByRole("option", { name: "開発" })).toHaveFocus())
+    await userEvent.keyboard("{Enter}")
+    await waitFor(() => expect(body.queryByRole("listbox")).toBeNull())
+    await expect(trigger).toHaveTextContent("開発")
+    await waitFor(() => expect(trigger).toHaveFocus())
+
+    // この fixture の Tab 順序は Select → 閉じる。到達先と境界の折り返しを
+    // 明示し、閉じた Select の focus scope が Tab を止める退行も検出する。
+    const close = within(dialog).getByRole("button", { name: "閉じる" })
+    await userEvent.tab()
+    await expect(close).toHaveFocus()
+    await userEvent.tab()
+    await expect(trigger).toHaveFocus()
+    await userEvent.tab({ shift: true })
+    await expect(close).toHaveFocus()
+    await userEvent.tab({ shift: true })
+    await expect(trigger).toHaveFocus()
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => expect(body.queryByRole("dialog", { name: "カテゴリ設定" })).toBeNull())
+    await waitFor(() => expect(opener).toHaveFocus())
   },
 }
