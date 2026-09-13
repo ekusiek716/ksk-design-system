@@ -89,7 +89,7 @@ describe("SearchBar asForm", () => {
 })
 
 for (const asForm of [false, true]) {
-  it(`IME composition Enter is canceled (asForm=${asForm})`, () => {
+  it(`IME composition Enter keeps its default action without searching (asForm=${asForm})`, () => {
     const onSearch = vi.fn()
     const onKeyDown = vi.fn()
     mount(<SearchBar asForm={asForm} onSearch={onSearch} onKeyDown={onKeyDown} />)
@@ -97,7 +97,7 @@ for (const asForm of [false, true]) {
     act(() => { input.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true })) })
     const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })
     act(() => { input.dispatchEvent(event) })
-    expect(event.defaultPrevented).toBe(true)
+    expect(event.defaultPrevented).toBe(false)
     if (asForm) act(() => { container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })) })
     expect(onSearch).not.toHaveBeenCalled()
     expect(onKeyDown).toHaveBeenCalledTimes(1)
@@ -115,14 +115,48 @@ it("consumer keydown cancellation prevents search", () => {
   expect(onSearch).not.toHaveBeenCalled()
 })
 
-it.each([false, true])("native IME flags prevent default submission (asForm=%s)", (asForm) => {
+it.each([false, true])("native IME flags suppress submit without canceling the key (asForm=%s)", (asForm) => {
   const onSearch = vi.fn()
   mount(<SearchBar asForm={asForm} onSearch={onSearch} />)
   const input = container.querySelector("input")!
   for (const flags of [{ isComposing: true }, { keyCode: 229 }]) {
     const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true, ...flags })
     act(() => { input.dispatchEvent(event) })
-    expect(event.defaultPrevented).toBe(true)
+    expect(event.defaultPrevented).toBe(false)
+    if (asForm) act(() => { container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })) })
   }
   expect(onSearch).not.toHaveBeenCalled()
+})
+
+
+it("compositionend before submit still suppresses the same IME Enter task", () => {
+  const onSearch = vi.fn()
+  mount(<SearchBar asForm onSearch={onSearch} />)
+  const input = container.querySelector("input")!
+  act(() => {
+    input.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }))
+    pressEnter(input)
+    input.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true }))
+    container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
+  })
+  expect(onSearch).not.toHaveBeenCalled()
+  pressEnter(input)
+  act(() => { container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })) })
+  expect(onSearch).toHaveBeenCalledTimes(1)
+})
+
+it("IME submission suppression expires after its task", () => {
+  vi.useFakeTimers()
+  try {
+    const onSearch = vi.fn()
+    mount(<SearchBar asForm onSearch={onSearch} />)
+    act(() => { container.querySelector("input")!.dispatchEvent(new KeyboardEvent("keydown", {
+      key: "Enter", keyCode: 229, bubbles: true, cancelable: true,
+    })) })
+    act(() => vi.runOnlyPendingTimers())
+    act(() => { container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })) })
+    expect(onSearch).toHaveBeenCalledTimes(1)
+  } finally {
+    vi.useRealTimers()
+  }
 })

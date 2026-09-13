@@ -24,19 +24,35 @@ function SearchBar({
   ...props
 }: SearchBarProps) {
   const composingRef = React.useRef(false)
+  const suppressSubmitRef = React.useRef(false)
+  const submitTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  React.useEffect(() => () => {
+    if (submitTimerRef.current !== null) clearTimeout(submitTimerRef.current)
+  }, [])
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     onKeyDown?.(e)
     if (e.defaultPrevented || e.key !== "Enter") return
     if (composingRef.current || isImeComposing(e)) {
-      e.preventDefault()
+      // Keep the composition key's default action; suppress only our submit.
+      suppressSubmitRef.current = true
+      if (submitTimerRef.current !== null) clearTimeout(submitTimerRef.current)
+      submitTimerRef.current = setTimeout(() => {
+        suppressSubmitRef.current = false
+        submitTimerRef.current = null
+      }, 0)
       return
+    }
+    suppressSubmitRef.current = false
+    if (submitTimerRef.current !== null) {
+      clearTimeout(submitTimerRef.current)
+      submitTimerRef.current = null
     }
     if (!asForm) onSearch?.(e.currentTarget.value)
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!composingRef.current && onSearch) {
+    if (!composingRef.current && !suppressSubmitRef.current && onSearch) {
       const input = e.currentTarget.elements.namedItem("search") as HTMLInputElement | null
       onSearch(input?.value ?? "")
     }
