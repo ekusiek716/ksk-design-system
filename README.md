@@ -76,14 +76,17 @@ DS のルールが適用されません。既存ファイルはスキップさ�
 > として Critical 判定されるためです（LPM Firewall が 1.49.2 / 1.51.1 をこの理由でブロック判定）。
 > v1.59.0 以前から更新する場合、既に設置済みのファイルはそのまま使えます。
 
+<!-- consumer-example:css:start -->
 ```css
-/* globals.css / app.css（CSS の場所に応じて ../../ の数を調整） */
+/* src/styles/app.css（アプリのルートで一度だけ読み込む） */
 @import "tailwindcss";
 @import "ksk-design-system/preset";
 @import "ksk-design-system/themes/default";
-@import "./themes/my-client.css"; /* Brand 色を差し替えたテーマ */
 @source "../../node_modules/ksk-design-system/dist";
 ```
+<!-- consumer-example:css:end -->
+
+独自ブランドのテーマを使う場合は、この後にテーマCSSをimportしてください。
 
 Tailwind CSS v4 は `node_modules` を既定では走査しません。`@source` がないと、
 DS 内部だけで使うレイアウト・サイズ・状態クラスが生成されず、コンポーネントの表示や操作が崩れます。
@@ -94,9 +97,23 @@ consumer 側の Tailwind と DS を同じビルドで処理するため、上記
 DS のクラス CSS は生成されます（issue #258）。ただし consumer 自身のコードは
 consumer 側の走査対象なので、`@source` は引き続き推奨構成です。
 
+<!-- consumer-example:tsx:start -->
 ```tsx
-import { Button, Card, Input, FormField } from "ksk-design-system"
+import { Button, Input, Label } from "ksk-design-system"
+
+export function Example() {
+  return (
+    <form>
+      <Label htmlFor="company">会社名</Label>
+      <Input id="company" name="company" defaultValue="サンプル株式会社" />
+      <Button type="submit">保存</Button>
+    </form>
+  )
+}
 ```
+<!-- consumer-example:tsx:end -->
+
+DSリポジトリの開発者向け検査として、`npm run test:consumer:web` は、配布READMEの上記例を空consumerで型検査・CSSビルドし、Node SSRからChromiumへのhydrationと操作を検査します。初回は `npx playwright install chromium` が必要です。
 
 新規クライアント案件では、テーマファイルで `--Primitive-Brand-500` などブランドカラーの 10 行を定義するだけで、全コンポーネントがそのブランドカラーで動作します。
 
