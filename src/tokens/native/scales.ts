@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:95b75c72d9f6)
+// source: tokens.json v2.1.0 (sha256:835527d72350)
 // =============================================================
 
 export const scales = {
@@ -234,15 +234,15 @@ export const scales = {
       "elevation": 3
     },
     "lg": {
-      "boxShadow": "0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12)",
+      "boxShadow": "0px 12px 32px -4px rgba(24, 24, 27, 0.12), 0px 8px 16px -6px rgba(24, 24, 27, 0.12)",
       "elevation": 8
     },
     "dialog": {
-      "boxShadow": "0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2)",
+      "boxShadow": "0px 12px 32px -4px rgba(24, 24, 27, 0.12), 0px 8px 16px -6px rgba(24, 24, 27, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2)",
       "elevation": 12
     },
     "tooltip": {
-      "boxShadow": "0px 8px 8px -4px rgba(17, 24, 39, 0.08), 0px 4px 6px -4px rgba(17, 24, 39, 0.12)",
+      "boxShadow": "0px 8px 8px -4px rgba(24, 24, 27, 0.08), 0px 4px 6px -4px rgba(24, 24, 27, 0.12)",
       "elevation": 6
     },
     "sticky-inline-start": {

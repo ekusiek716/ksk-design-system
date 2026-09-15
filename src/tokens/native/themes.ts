@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:95b75c72d9f6)
+// source: tokens.json v2.1.0 (sha256:835527d72350)
 // =============================================================
 
 export const themes = {
@@ -10,10 +10,10 @@ export const themes = {
     "light": {
       "surface": {
         "primary": "#FFFFFF",
-        "secondary": "#F9FAFB",
-        "tertiary": "#F3F4F6",
-        "quaternary": "#E5E7EB",
-        "inverse": "#111827",
+        "secondary": "#FAFAFA",
+        "tertiary": "#F4F4F5",
+        "quaternary": "#E4E4E7",
+        "inverse": "#18181B",
         "accent-primary": "#3B82F6",
         "accent-primary-light": "#EFF6FF",
         "caution": "#FEF2F2",
@@ -28,13 +28,13 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F3F4F6"
+        "disable": "#F4F4F5"
       },
       "text": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#374151",
-        "low-emphasis": "#4B5563",
-        "disable": "#9CA3AF",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#3F3F46",
+        "low-emphasis": "#52525B",
+        "disable": "#A1A1AA",
         "on-inverse": "#FFFFFF",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
@@ -49,10 +49,10 @@ export const themes = {
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)"
       },
       "object": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#4B5563",
-        "low-emphasis": "#9CA3AF",
-        "disable": "#D1D5DB",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#52525B",
+        "low-emphasis": "#A1A1AA",
+        "disable": "#D4D4D8",
         "on-inverse": "#FFFFFF",
         "accent-primary": "#3B82F6",
         "caution": "#EF4444",
@@ -62,9 +62,9 @@ export const themes = {
         "rating": "#F59E0B"
       },
       "border": {
-        "high-emphasis": "#374151",
-        "medium-emphasis": "#D1D5DB",
-        "low-emphasis": "#E5E7EB",
+        "high-emphasis": "#3F3F46",
+        "medium-emphasis": "#D4D4D8",
+        "low-emphasis": "#E4E4E7",
         "accent-primary": "#3B82F6",
         "caution": "#EF4444",
         "success": "#22C55E",
@@ -84,20 +84,20 @@ export const themes = {
       "hover": {
         "primary-button": "#1D4ED8",
         "secondary-button": "#EFF6FF",
-        "tertiary-button": "#F3F4F6",
-        "ghost-button": "#F3F4F6",
+        "tertiary-button": "#F4F4F5",
+        "ghost-button": "#F4F4F5",
         "destructive-button": "#B91C1C"
       },
       "active": {
         "primary-button": "#1E40AF",
         "destructive-button": "#991B1B",
         "secondary-button": "#DBEAFE",
-        "tertiary-button": "#E5E7EB"
+        "tertiary-button": "#E4E4E7"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.64)",
-        "medium": "rgba(17, 24, 39, 0.36)",
-        "light": "rgba(17, 24, 39, 0.08)"
+        "dark": "rgba(24, 24, 27, 0.64)",
+        "medium": "rgba(24, 24, 27, 0.36)",
+        "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
         "high-emphasis": "#60A5FA"
@@ -118,10 +118,10 @@ export const themes = {
     },
     "dark": {
       "surface": {
-        "primary": "#111827",
-        "secondary": "#1F2937",
-        "tertiary": "#374151",
-        "quaternary": "#4B5563",
+        "primary": "#18181B",
+        "secondary": "#27272A",
+        "tertiary": "#3F3F46",
+        "quaternary": "#52525B",
         "inverse": "#FFFFFF",
         "accent-primary": "#3B82F6",
         "accent-primary-light": "#1E3A8A",
@@ -137,14 +137,14 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#1F2937"
+        "disable": "#27272A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.80)",
         "low-emphasis": "rgba(255, 255, 255, 0.48)",
         "disable": "rgba(255, 255, 255, 0.24)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
@@ -155,14 +155,14 @@ export const themes = {
         "warning": "#FB923C",
         "info": "#60A5FA",
         "caution-on-inverse": "#B91C1C",
-        "on-inverse-secondary": "#374151"
+        "on-inverse-secondary": "#3F3F46"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.64)",
         "low-emphasis": "rgba(255, 255, 255, 0.36)",
         "disable": "rgba(255, 255, 255, 0.16)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "accent-primary": "#60A5FA",
         "caution": "#F87171",
         "success": "#4ADE80",
@@ -200,9 +200,9 @@ export const themes = {
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.80)",
-        "medium": "rgba(17, 24, 39, 0.48)",
-        "light": "rgba(17, 24, 39, 0.16)"
+        "dark": "rgba(24, 24, 27, 0.80)",
+        "medium": "rgba(24, 24, 27, 0.48)",
+        "light": "rgba(24, 24, 27, 0.16)"
       },
       "focus": {
         "high-emphasis": "#60A5FA"
@@ -226,10 +226,10 @@ export const themes = {
     "light": {
       "surface": {
         "primary": "#FFFFFF",
-        "secondary": "#F9FAFB",
-        "tertiary": "#F3F4F6",
-        "quaternary": "#E5E7EB",
-        "inverse": "#111827",
+        "secondary": "#FAFAFA",
+        "tertiary": "#F4F4F5",
+        "quaternary": "#E4E4E7",
+        "inverse": "#18181B",
         "accent-primary": "#3B82F6",
         "accent-primary-light": "#EFF6FF",
         "caution": "#FEF2F2",
@@ -244,13 +244,13 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F3F4F6"
+        "disable": "#F4F4F5"
       },
       "text": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#374151",
-        "low-emphasis": "#4B5563",
-        "disable": "#9CA3AF",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#3F3F46",
+        "low-emphasis": "#52525B",
+        "disable": "#A1A1AA",
         "on-inverse": "#FFFFFF",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
@@ -265,10 +265,10 @@ export const themes = {
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)"
       },
       "object": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#4B5563",
-        "low-emphasis": "#9CA3AF",
-        "disable": "#D1D5DB",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#52525B",
+        "low-emphasis": "#A1A1AA",
+        "disable": "#D4D4D8",
         "on-inverse": "#FFFFFF",
         "accent-primary": "#3B82F6",
         "caution": "#EF4444",
@@ -278,9 +278,9 @@ export const themes = {
         "rating": "#F59E0B"
       },
       "border": {
-        "high-emphasis": "#374151",
-        "medium-emphasis": "#D1D5DB",
-        "low-emphasis": "#E5E7EB",
+        "high-emphasis": "#3F3F46",
+        "medium-emphasis": "#D4D4D8",
+        "low-emphasis": "#E4E4E7",
         "accent-primary": "#3B82F6",
         "caution": "#EF4444",
         "success": "#22C55E",
@@ -300,20 +300,20 @@ export const themes = {
       "hover": {
         "primary-button": "#1D4ED8",
         "secondary-button": "#EFF6FF",
-        "tertiary-button": "#F3F4F6",
-        "ghost-button": "#F3F4F6",
+        "tertiary-button": "#F4F4F5",
+        "ghost-button": "#F4F4F5",
         "destructive-button": "#B91C1C"
       },
       "active": {
         "primary-button": "#1E40AF",
         "destructive-button": "#991B1B",
         "secondary-button": "#DBEAFE",
-        "tertiary-button": "#E5E7EB"
+        "tertiary-button": "#E4E4E7"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.64)",
-        "medium": "rgba(17, 24, 39, 0.36)",
-        "light": "rgba(17, 24, 39, 0.08)"
+        "dark": "rgba(24, 24, 27, 0.64)",
+        "medium": "rgba(24, 24, 27, 0.36)",
+        "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
         "high-emphasis": "#60A5FA"
@@ -334,10 +334,10 @@ export const themes = {
     },
     "dark": {
       "surface": {
-        "primary": "#111827",
-        "secondary": "#1F2937",
-        "tertiary": "#374151",
-        "quaternary": "#4B5563",
+        "primary": "#18181B",
+        "secondary": "#27272A",
+        "tertiary": "#3F3F46",
+        "quaternary": "#52525B",
         "inverse": "#FFFFFF",
         "accent-primary": "#3B82F6",
         "accent-primary-light": "#1E3A8A",
@@ -353,14 +353,14 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#1F2937"
+        "disable": "#27272A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.80)",
         "low-emphasis": "rgba(255, 255, 255, 0.48)",
         "disable": "rgba(255, 255, 255, 0.24)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
@@ -371,14 +371,14 @@ export const themes = {
         "warning": "#FB923C",
         "info": "#60A5FA",
         "caution-on-inverse": "#B91C1C",
-        "on-inverse-secondary": "#374151"
+        "on-inverse-secondary": "#3F3F46"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.64)",
         "low-emphasis": "rgba(255, 255, 255, 0.36)",
         "disable": "rgba(255, 255, 255, 0.16)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "accent-primary": "#60A5FA",
         "caution": "#F87171",
         "success": "#4ADE80",
@@ -416,9 +416,9 @@ export const themes = {
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.80)",
-        "medium": "rgba(17, 24, 39, 0.48)",
-        "light": "rgba(17, 24, 39, 0.16)"
+        "dark": "rgba(24, 24, 27, 0.80)",
+        "medium": "rgba(24, 24, 27, 0.48)",
+        "light": "rgba(24, 24, 27, 0.16)"
       },
       "focus": {
         "high-emphasis": "#60A5FA"
@@ -442,10 +442,10 @@ export const themes = {
     "light": {
       "surface": {
         "primary": "#FFFFFF",
-        "secondary": "#F9FAFB",
-        "tertiary": "#F3F4F6",
-        "quaternary": "#E5E7EB",
-        "inverse": "#111827",
+        "secondary": "#FAFAFA",
+        "tertiary": "#F4F4F5",
+        "quaternary": "#E4E4E7",
+        "inverse": "#18181B",
         "accent-primary": "#2053F5",
         "accent-primary-light": "#EEF3FF",
         "caution": "#FEF2F2",
@@ -460,13 +460,13 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F3F4F6"
+        "disable": "#F4F4F5"
       },
       "text": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#374151",
-        "low-emphasis": "#4B5563",
-        "disable": "#9CA3AF",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#3F3F46",
+        "low-emphasis": "#52525B",
+        "disable": "#A1A1AA",
         "on-inverse": "#FFFFFF",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
@@ -481,10 +481,10 @@ export const themes = {
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)"
       },
       "object": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#4B5563",
-        "low-emphasis": "#9CA3AF",
-        "disable": "#D1D5DB",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#52525B",
+        "low-emphasis": "#A1A1AA",
+        "disable": "#D4D4D8",
         "on-inverse": "#FFFFFF",
         "accent-primary": "#2053F5",
         "caution": "#EF4444",
@@ -494,9 +494,9 @@ export const themes = {
         "rating": "#F59E0B"
       },
       "border": {
-        "high-emphasis": "#374151",
-        "medium-emphasis": "#D1D5DB",
-        "low-emphasis": "#E5E7EB",
+        "high-emphasis": "#3F3F46",
+        "medium-emphasis": "#D4D4D8",
+        "low-emphasis": "#E4E4E7",
         "accent-primary": "#2053F5",
         "caution": "#EF4444",
         "success": "#22C55E",
@@ -516,20 +516,20 @@ export const themes = {
       "hover": {
         "primary-button": "#1234EE",
         "secondary-button": "#EEF3FF",
-        "tertiary-button": "#F3F4F6",
-        "ghost-button": "#F3F4F6",
+        "tertiary-button": "#F4F4F5",
+        "ghost-button": "#F4F4F5",
         "destructive-button": "#B91C1C"
       },
       "active": {
         "primary-button": "#0B25A4",
         "destructive-button": "#991B1B",
         "secondary-button": "#D9E5FE",
-        "tertiary-button": "#E5E7EB"
+        "tertiary-button": "#E4E4E7"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.64)",
-        "medium": "rgba(17, 24, 39, 0.36)",
-        "light": "rgba(17, 24, 39, 0.08)"
+        "dark": "rgba(24, 24, 27, 0.64)",
+        "medium": "rgba(24, 24, 27, 0.36)",
+        "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
         "high-emphasis": "#4398F8"
@@ -550,10 +550,10 @@ export const themes = {
     },
     "dark": {
       "surface": {
-        "primary": "#111827",
-        "secondary": "#1F2937",
-        "tertiary": "#374151",
-        "quaternary": "#4B5563",
+        "primary": "#18181B",
+        "secondary": "#27272A",
+        "tertiary": "#3F3F46",
+        "quaternary": "#52525B",
         "inverse": "#FFFFFF",
         "accent-primary": "#2053F5",
         "accent-primary-light": "#03155A",
@@ -569,14 +569,14 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#1F2937"
+        "disable": "#27272A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.80)",
         "low-emphasis": "rgba(255, 255, 255, 0.48)",
         "disable": "rgba(255, 255, 255, 0.24)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
@@ -587,14 +587,14 @@ export const themes = {
         "warning": "#FB923C",
         "info": "#60A5FA",
         "caution-on-inverse": "#B91C1C",
-        "on-inverse-secondary": "#374151"
+        "on-inverse-secondary": "#3F3F46"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.64)",
         "low-emphasis": "rgba(255, 255, 255, 0.36)",
         "disable": "rgba(255, 255, 255, 0.16)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "accent-primary": "#4398F8",
         "caution": "#F87171",
         "success": "#4ADE80",
@@ -632,9 +632,9 @@ export const themes = {
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.80)",
-        "medium": "rgba(17, 24, 39, 0.48)",
-        "light": "rgba(17, 24, 39, 0.16)"
+        "dark": "rgba(24, 24, 27, 0.80)",
+        "medium": "rgba(24, 24, 27, 0.48)",
+        "light": "rgba(24, 24, 27, 0.16)"
       },
       "focus": {
         "high-emphasis": "#4398F8"
@@ -658,10 +658,10 @@ export const themes = {
     "light": {
       "surface": {
         "primary": "#FFFFFF",
-        "secondary": "#F9FAFB",
-        "tertiary": "#F3F4F6",
-        "quaternary": "#E5E7EB",
-        "inverse": "#111827",
+        "secondary": "#FAFAFA",
+        "tertiary": "#F4F4F5",
+        "quaternary": "#E4E4E7",
+        "inverse": "#18181B",
         "accent-primary": "#F97316",
         "accent-primary-light": "#FFF7ED",
         "caution": "#FEF2F2",
@@ -676,13 +676,13 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F3F4F6"
+        "disable": "#F4F4F5"
       },
       "text": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#374151",
-        "low-emphasis": "#4B5563",
-        "disable": "#9CA3AF",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#3F3F46",
+        "low-emphasis": "#52525B",
+        "disable": "#A1A1AA",
         "on-inverse": "#FFFFFF",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
@@ -697,10 +697,10 @@ export const themes = {
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)"
       },
       "object": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#4B5563",
-        "low-emphasis": "#9CA3AF",
-        "disable": "#D1D5DB",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#52525B",
+        "low-emphasis": "#A1A1AA",
+        "disable": "#D4D4D8",
         "on-inverse": "#FFFFFF",
         "accent-primary": "#F97316",
         "caution": "#EF4444",
@@ -710,9 +710,9 @@ export const themes = {
         "rating": "#F59E0B"
       },
       "border": {
-        "high-emphasis": "#374151",
-        "medium-emphasis": "#D1D5DB",
-        "low-emphasis": "#E5E7EB",
+        "high-emphasis": "#3F3F46",
+        "medium-emphasis": "#D4D4D8",
+        "low-emphasis": "#E4E4E7",
         "accent-primary": "#F97316",
         "caution": "#EF4444",
         "success": "#22C55E",
@@ -732,20 +732,20 @@ export const themes = {
       "hover": {
         "primary-button": "#9A3412",
         "secondary-button": "#FFF7ED",
-        "tertiary-button": "#F3F4F6",
-        "ghost-button": "#F3F4F6",
+        "tertiary-button": "#F4F4F5",
+        "ghost-button": "#F4F4F5",
         "destructive-button": "#B91C1C"
       },
       "active": {
         "primary-button": "#7C2D12",
         "destructive-button": "#991B1B",
         "secondary-button": "#FFEDD5",
-        "tertiary-button": "#E5E7EB"
+        "tertiary-button": "#E4E4E7"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.64)",
-        "medium": "rgba(17, 24, 39, 0.36)",
-        "light": "rgba(17, 24, 39, 0.08)"
+        "dark": "rgba(24, 24, 27, 0.64)",
+        "medium": "rgba(24, 24, 27, 0.36)",
+        "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
         "high-emphasis": "#FB923C"
@@ -766,10 +766,10 @@ export const themes = {
     },
     "dark": {
       "surface": {
-        "primary": "#111827",
-        "secondary": "#1F2937",
-        "tertiary": "#374151",
-        "quaternary": "#4B5563",
+        "primary": "#18181B",
+        "secondary": "#27272A",
+        "tertiary": "#3F3F46",
+        "quaternary": "#52525B",
         "inverse": "#FFFFFF",
         "accent-primary": "#F97316",
         "accent-primary-light": "#431407",
@@ -785,14 +785,14 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#1F2937"
+        "disable": "#27272A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.80)",
         "low-emphasis": "rgba(255, 255, 255, 0.48)",
         "disable": "rgba(255, 255, 255, 0.24)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
@@ -803,14 +803,14 @@ export const themes = {
         "warning": "#FB923C",
         "info": "#60A5FA",
         "caution-on-inverse": "#B91C1C",
-        "on-inverse-secondary": "#374151"
+        "on-inverse-secondary": "#3F3F46"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.64)",
         "low-emphasis": "rgba(255, 255, 255, 0.36)",
         "disable": "rgba(255, 255, 255, 0.16)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "accent-primary": "#FB923C",
         "caution": "#F87171",
         "success": "#4ADE80",
@@ -848,9 +848,9 @@ export const themes = {
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.80)",
-        "medium": "rgba(17, 24, 39, 0.48)",
-        "light": "rgba(17, 24, 39, 0.16)"
+        "dark": "rgba(24, 24, 27, 0.80)",
+        "medium": "rgba(24, 24, 27, 0.48)",
+        "light": "rgba(24, 24, 27, 0.16)"
       },
       "focus": {
         "high-emphasis": "#FB923C"
@@ -874,10 +874,10 @@ export const themes = {
     "light": {
       "surface": {
         "primary": "#FFFFFF",
-        "secondary": "#F9FAFB",
-        "tertiary": "#F3F4F6",
-        "quaternary": "#E5E7EB",
-        "inverse": "#111827",
+        "secondary": "#FAFAFA",
+        "tertiary": "#F4F4F5",
+        "quaternary": "#E4E4E7",
+        "inverse": "#18181B",
         "accent-primary": "#16A34A",
         "accent-primary-light": "#F0FDF4",
         "caution": "#FEF2F2",
@@ -892,13 +892,13 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F3F4F6"
+        "disable": "#F4F4F5"
       },
       "text": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#374151",
-        "low-emphasis": "#4B5563",
-        "disable": "#9CA3AF",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#3F3F46",
+        "low-emphasis": "#52525B",
+        "disable": "#A1A1AA",
         "on-inverse": "#FFFFFF",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
@@ -913,10 +913,10 @@ export const themes = {
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)"
       },
       "object": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#4B5563",
-        "low-emphasis": "#9CA3AF",
-        "disable": "#D1D5DB",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#52525B",
+        "low-emphasis": "#A1A1AA",
+        "disable": "#D4D4D8",
         "on-inverse": "#FFFFFF",
         "accent-primary": "#16A34A",
         "caution": "#EF4444",
@@ -926,9 +926,9 @@ export const themes = {
         "rating": "#F59E0B"
       },
       "border": {
-        "high-emphasis": "#374151",
-        "medium-emphasis": "#D1D5DB",
-        "low-emphasis": "#E5E7EB",
+        "high-emphasis": "#3F3F46",
+        "medium-emphasis": "#D4D4D8",
+        "low-emphasis": "#E4E4E7",
         "accent-primary": "#16A34A",
         "caution": "#EF4444",
         "success": "#22C55E",
@@ -948,20 +948,20 @@ export const themes = {
       "hover": {
         "primary-button": "#166534",
         "secondary-button": "#F0FDF4",
-        "tertiary-button": "#F3F4F6",
-        "ghost-button": "#F3F4F6",
+        "tertiary-button": "#F4F4F5",
+        "ghost-button": "#F4F4F5",
         "destructive-button": "#B91C1C"
       },
       "active": {
         "primary-button": "#14532D",
         "destructive-button": "#991B1B",
         "secondary-button": "#DCFCE7",
-        "tertiary-button": "#E5E7EB"
+        "tertiary-button": "#E4E4E7"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.64)",
-        "medium": "rgba(17, 24, 39, 0.36)",
-        "light": "rgba(17, 24, 39, 0.08)"
+        "dark": "rgba(24, 24, 27, 0.64)",
+        "medium": "rgba(24, 24, 27, 0.36)",
+        "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
         "high-emphasis": "#4ADE80"
@@ -982,10 +982,10 @@ export const themes = {
     },
     "dark": {
       "surface": {
-        "primary": "#111827",
-        "secondary": "#1F2937",
-        "tertiary": "#374151",
-        "quaternary": "#4B5563",
+        "primary": "#18181B",
+        "secondary": "#27272A",
+        "tertiary": "#3F3F46",
+        "quaternary": "#52525B",
         "inverse": "#FFFFFF",
         "accent-primary": "#16A34A",
         "accent-primary-light": "#052E16",
@@ -1001,14 +1001,14 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#1F2937"
+        "disable": "#27272A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.80)",
         "low-emphasis": "rgba(255, 255, 255, 0.48)",
         "disable": "rgba(255, 255, 255, 0.24)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
@@ -1019,14 +1019,14 @@ export const themes = {
         "warning": "#FB923C",
         "info": "#60A5FA",
         "caution-on-inverse": "#B91C1C",
-        "on-inverse-secondary": "#374151"
+        "on-inverse-secondary": "#3F3F46"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.64)",
         "low-emphasis": "rgba(255, 255, 255, 0.36)",
         "disable": "rgba(255, 255, 255, 0.16)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "accent-primary": "#4ADE80",
         "caution": "#F87171",
         "success": "#4ADE80",
@@ -1064,9 +1064,9 @@ export const themes = {
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.80)",
-        "medium": "rgba(17, 24, 39, 0.48)",
-        "light": "rgba(17, 24, 39, 0.16)"
+        "dark": "rgba(24, 24, 27, 0.80)",
+        "medium": "rgba(24, 24, 27, 0.48)",
+        "light": "rgba(24, 24, 27, 0.16)"
       },
       "focus": {
         "high-emphasis": "#4ADE80"
@@ -1090,10 +1090,10 @@ export const themes = {
     "light": {
       "surface": {
         "primary": "#FFFFFF",
-        "secondary": "#F9FAFB",
-        "tertiary": "#F3F4F6",
-        "quaternary": "#E5E7EB",
-        "inverse": "#111827",
+        "secondary": "#FAFAFA",
+        "tertiary": "#F4F4F5",
+        "quaternary": "#E4E4E7",
+        "inverse": "#18181B",
         "accent-primary": "#7C3AED",
         "accent-primary-light": "#F5F3FF",
         "caution": "#FEF2F2",
@@ -1108,13 +1108,13 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F3F4F6"
+        "disable": "#F4F4F5"
       },
       "text": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#374151",
-        "low-emphasis": "#4B5563",
-        "disable": "#9CA3AF",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#3F3F46",
+        "low-emphasis": "#52525B",
+        "disable": "#A1A1AA",
         "on-inverse": "#FFFFFF",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
@@ -1129,10 +1129,10 @@ export const themes = {
         "on-inverse-secondary": "rgba(255, 255, 255, 0.80)"
       },
       "object": {
-        "high-emphasis": "#111827",
-        "medium-emphasis": "#4B5563",
-        "low-emphasis": "#9CA3AF",
-        "disable": "#D1D5DB",
+        "high-emphasis": "#18181B",
+        "medium-emphasis": "#52525B",
+        "low-emphasis": "#A1A1AA",
+        "disable": "#D4D4D8",
         "on-inverse": "#FFFFFF",
         "accent-primary": "#7C3AED",
         "caution": "#EF4444",
@@ -1142,9 +1142,9 @@ export const themes = {
         "rating": "#F59E0B"
       },
       "border": {
-        "high-emphasis": "#374151",
-        "medium-emphasis": "#D1D5DB",
-        "low-emphasis": "#E5E7EB",
+        "high-emphasis": "#3F3F46",
+        "medium-emphasis": "#D4D4D8",
+        "low-emphasis": "#E4E4E7",
         "accent-primary": "#7C3AED",
         "caution": "#EF4444",
         "success": "#22C55E",
@@ -1164,20 +1164,20 @@ export const themes = {
       "hover": {
         "primary-button": "#5B21B6",
         "secondary-button": "#F5F3FF",
-        "tertiary-button": "#F3F4F6",
-        "ghost-button": "#F3F4F6",
+        "tertiary-button": "#F4F4F5",
+        "ghost-button": "#F4F4F5",
         "destructive-button": "#B91C1C"
       },
       "active": {
         "primary-button": "#4C1D95",
         "destructive-button": "#991B1B",
         "secondary-button": "#EDE9FE",
-        "tertiary-button": "#E5E7EB"
+        "tertiary-button": "#E4E4E7"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.64)",
-        "medium": "rgba(17, 24, 39, 0.36)",
-        "light": "rgba(17, 24, 39, 0.08)"
+        "dark": "rgba(24, 24, 27, 0.64)",
+        "medium": "rgba(24, 24, 27, 0.36)",
+        "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
         "high-emphasis": "#A78BFA"
@@ -1198,10 +1198,10 @@ export const themes = {
     },
     "dark": {
       "surface": {
-        "primary": "#111827",
-        "secondary": "#1F2937",
-        "tertiary": "#374151",
-        "quaternary": "#4B5563",
+        "primary": "#18181B",
+        "secondary": "#27272A",
+        "tertiary": "#3F3F46",
+        "quaternary": "#52525B",
         "inverse": "#FFFFFF",
         "accent-primary": "#7C3AED",
         "accent-primary-light": "#3B0764",
@@ -1217,14 +1217,14 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#1F2937"
+        "disable": "#27272A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.80)",
         "low-emphasis": "rgba(255, 255, 255, 0.48)",
         "disable": "rgba(255, 255, 255, 0.24)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "on-media": "#FFFFFF",
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
@@ -1235,14 +1235,14 @@ export const themes = {
         "warning": "#FB923C",
         "info": "#60A5FA",
         "caution-on-inverse": "#B91C1C",
-        "on-inverse-secondary": "#374151"
+        "on-inverse-secondary": "#3F3F46"
       },
       "object": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
         "medium-emphasis": "rgba(255, 255, 255, 0.64)",
         "low-emphasis": "rgba(255, 255, 255, 0.36)",
         "disable": "rgba(255, 255, 255, 0.16)",
-        "on-inverse": "#111827",
+        "on-inverse": "#18181B",
         "accent-primary": "#A78BFA",
         "caution": "#F87171",
         "success": "#4ADE80",
@@ -1280,9 +1280,9 @@ export const themes = {
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
       "overlay": {
-        "dark": "rgba(17, 24, 39, 0.80)",
-        "medium": "rgba(17, 24, 39, 0.48)",
-        "light": "rgba(17, 24, 39, 0.16)"
+        "dark": "rgba(24, 24, 27, 0.80)",
+        "medium": "rgba(24, 24, 27, 0.48)",
+        "light": "rgba(24, 24, 27, 0.16)"
       },
       "focus": {
         "high-emphasis": "#A78BFA"
