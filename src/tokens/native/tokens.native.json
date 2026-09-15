@@ -1525,11 +1525,11 @@
     },
     "borderRadius": {
       "none": 0,
-      "sm": 4,
-      "md": 6,
-      "lg": 8,
-      "xl": 12,
-      "2xl": 16,
+      "sm": 6,
+      "md": 10,
+      "lg": 14,
+      "xl": 18,
+      "2xl": 22,
       "full": 9999
     },
     "typography": {

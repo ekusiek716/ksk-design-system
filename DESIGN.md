@@ -39,7 +39,7 @@ typography:
   caption:  { fontSize: "11px", lineHeight: "1.5",  fontWeight: 400 }   # typo-caption（注釈/法的表記専用。本文の下限は body=12px。10px の typo-body-xs は補助ラベル専用で本文禁止）
 rounded:
   sm: "4px"
-  surface: "8px"   # Card / Input / Popover  → var(--Radius-Surface)
+  surface: "14px"  # Card / Input / Popover  → var(--Radius-Surface)
   modal: "24px"    # 中央 Dialog / AlertDialog → var(--Radius-Modal)
   sheet: "32px"    # bottom / float Sheet     → var(--Radius-Sheet)
   full: "9999px"   # Button / Chip
