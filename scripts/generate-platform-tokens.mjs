@@ -275,8 +275,10 @@ const scales = {
     section: convertSectionSpacing(tokens.spacing.section),
   },
   breakpoints: convertBreakpoints(tokens.breakpoints),
+  // native は Tailwind クラスの px ミラー制約が無いため、borderRadiusNative が
+  // あればそちらを優先する（web の borderRadius は Tailwind 実描画 px の正本）。
   borderRadius: Object.fromEntries(
-    Object.entries(tokens.borderRadius)
+    Object.entries(tokens.borderRadiusNative ?? tokens.borderRadius)
       .filter(([k]) => k !== '_doc')
       .map(([k, v]) => [k, pxNum(v)])
   ),

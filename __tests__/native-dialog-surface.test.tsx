@@ -49,7 +49,7 @@ describe.each(themeNames)("native Dialog surface — %s (#529)", (name) => {
       } else {
         expect(hosts.transparent).toBe(true)
         expect(backdrop).toMatchObject({ backgroundColor: theme.overlay.dark, padding: 16 })
-        expect(panel).toMatchObject({ width: "100%", maxWidth: 480, borderRadius: 16, padding: 20 })
+        expect(panel).toMatchObject({ width: "100%", maxWidth: 480, borderRadius: 22, padding: 20 })
         if (mode === "dark") {
           // A primary-colored screen underneath the dark scrim must not merge with the panel.
           expect(panel.backgroundColor).not.toBe(theme.surface.primary)

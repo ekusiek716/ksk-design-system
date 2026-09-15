@@ -113,7 +113,7 @@
    テーマ非依存（Brand / Light-Dark で変わらない固定値）。
    面 < モーダル < シート の順に丸くなる階層。 */
 :root {
-  --Radius-Surface: 0.5rem;  /* 8px  — Card / Popover パネル / 面の既定。丸くしたいならここを上げる */
+  --Radius-Surface: 0.875rem; /* 14px  — Card / Popover パネル / 面の既定。丸くしたいならここを上げる */
   --Radius-Modal:   1.5rem;  /* 24px — 中央モーダル（Dialog / AlertDialog）。ピル/シートの丸い言語に合わせる */
   --Radius-Sheet:   2rem;    /* 32px — 端寄せ Sheet（bottom / float） */
 }
