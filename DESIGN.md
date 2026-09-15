@@ -12,18 +12,18 @@ colors:
   onPrimary: "#FFFFFF"
   # --- Neutral scale ---
   neutral0: "#FFFFFF"
-  neutral50: "#F9FAFB"
-  neutral100: "#F3F4F6"
-  neutral200: "#E5E7EB"
-  neutral500: "#6B7280"
-  neutral900: "#111827"
+  neutral50: "#FAFAFA"
+  neutral100: "#F4F4F5"
+  neutral200: "#E4E4E7"
+  neutral500: "#71717A"
+  neutral900: "#18181B"
   # --- Surface / Text / Border（semantic） ---
   surface: "#FFFFFF"          # var(--Surface-Primary)
-  surfaceMuted: "#F9FAFB"     # var(--Surface-Secondary)
-  textHigh: "#111827"         # var(--Text-High-Emphasis)
-  textMedium: "#374151"       # var(--Text-Medium-Emphasis)
-  textLow: "#4B5563"          # var(--Text-Low-Emphasis)
-  border: "#E5E7EB"           # var(--Border-Low-Emphasis)
+  surfaceMuted: "#FAFAFA"     # var(--Surface-Secondary)
+  textHigh: "#18181B"         # var(--Text-High-Emphasis)
+  textMedium: "#3F3F46"       # var(--Text-Medium-Emphasis)
+  textLow: "#52525B"          # var(--Text-Low-Emphasis)
+  border: "#E4E4E7"           # var(--Border-Low-Emphasis)
   focus: "#60A5FA"            # var(--Focus-High-Emphasis)
   # --- Semantic（status） ---
   success: "#15803D"
@@ -50,8 +50,8 @@ spacing:
 elevation:                                          # 影色は neutral（Gray-900 ベース rgba(17,24,39,…)）でテーマ非依存
   sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
   md: "0 0 8px rgba(20, 20, 20, 0.08)"
-  lg: "0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12)"
-  dialog: "0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2)"
+  lg: "0px 12px 32px -4px rgba(24, 24, 27, 0.12), 0px 8px 16px -6px rgba(24, 24, 27, 0.12)"
+  dialog: "0px 12px 32px -4px rgba(24, 24, 27, 0.12), 0px 8px 16px -6px rgba(24, 24, 27, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2)"
 motion:                                            # 実体は var(--Motion-*)（src/styles/motion.css）
   microIn: "150ms ease-out"                        # --Motion-Duration-Fast  / fade-in / scale-in
   enter: "200ms ease-out"                          # --Motion-Duration-Base  / fade-in-up / slide-in
@@ -135,9 +135,9 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 | 用途 | トークン | 既定値(Blue) |
 |---|---|---|
 | ブランド | `var(--Brand-Primary)` | `#2563EB` |
-| 背景(白/薄灰) | `var(--Surface-Primary)` / `-Secondary` | `#FFFFFF` / `#F9FAFB` |
-| 文字(強/中/弱) | `var(--Text-High/Medium/Low-Emphasis)` <!-- docs-drift-ignore: --Text-High/Medium/Low-Emphasis --> | `#111827` / `#374151` / `#4B5563` |
-| 罫線 | `var(--Border-Low-Emphasis)` | `#E5E7EB` |
+| 背景(白/薄灰) | `var(--Surface-Primary)` / `-Secondary` | `#FFFFFF` / `#FAFAFA` |
+| 文字(強/中/弱) | `var(--Text-High/Medium/Low-Emphasis)` <!-- docs-drift-ignore: --Text-High/Medium/Low-Emphasis --> | `#18181B` / `#3F3F46` / `#52525B` |
+| 罫線 | `var(--Border-Low-Emphasis)` | `#E4E4E7` |
 | 状態 | `--Success/Warning/Caution/Info-Base` <!-- docs-drift-ignore: --Success/Warning/Caution/Info-Base --> | `#15803D` / `#C2410C` / `#DC2626` / `#2563EB` |
 
 - **状態色の正本**: 上記は `*-Base`。Caution/Info は Primitive **600**、Success/Warning は白文字 AA(4.5:1) 確保のため Primitive **700**（600 だと 3.3〜3.6:1）。`tokens.json` を正本とし、本表はその要約。
