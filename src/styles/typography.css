@@ -66,28 +66,28 @@
 /* ─── Body（本文） ─── */
 
 @utility typo-body-lg {
-  font-size: calc(16px * var(--Product-Type-Scale, 1));
+  font-size: calc(18px * var(--Product-Type-Scale, 1));
   line-height: 1.75;
   font-weight: 400;
 }
 
 @utility typo-body-md {
-  font-size: calc(14px * var(--Product-Type-Scale, 1));
+  font-size: calc(16px * var(--Product-Type-Scale, 1));
   line-height: 1.75;
   font-weight: 400;
 }
 
 @utility typo-body-sm {
-  font-size: calc(12px * var(--Product-Type-Scale, 1));
+  font-size: calc(14px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 400;
 }
 
-/* body-xs(10px) は本文禁止 — 補助ラベル/メタ情報専用。
-   本文の最小は typo-body-sm(12px)。10px を本文に使うとモバイル可読性の
+/* body-xs(12px) は本文禁止 — 補助ラベル/メタ情報専用。
+   本文の最小は typo-body-sm(14px)。12px を本文に使うとモバイル可読性の
    下限（iOS HIG ~11pt / WCAG 観点）を割る。 */
 @utility typo-body-xs {
-  font-size: calc(10px * var(--Product-Type-Scale, 1));
+  font-size: calc(12px * var(--Product-Type-Scale, 1));
   line-height: 1.5;
   font-weight: 400;
 }

@@ -1573,24 +1573,24 @@
       },
       "body": {
         "lg": {
+          "fontSize": 18,
+          "fontWeight": "400",
+          "lineHeight": 32
+        },
+        "md": {
           "fontSize": 16,
           "fontWeight": "400",
           "lineHeight": 28
         },
-        "md": {
+        "sm": {
           "fontSize": 14,
           "fontWeight": "400",
-          "lineHeight": 25
+          "lineHeight": 21
         },
-        "sm": {
+        "xs": {
           "fontSize": 12,
           "fontWeight": "400",
           "lineHeight": 18
-        },
-        "xs": {
-          "fontSize": 10,
-          "fontWeight": "400",
-          "lineHeight": 15
         }
       },
       "label": {

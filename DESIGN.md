@@ -34,9 +34,9 @@ typography:
   fontFamily: "system-ui, -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif"
   display:  { fontSize: "48px", lineHeight: "1.25", fontWeight: 700 }   # typo-display-xl
   heading:  { fontSize: "18px", lineHeight: "1.5",  fontWeight: 700 }   # typo-heading-lg（基準）
-  body:     { fontSize: "14px", lineHeight: "1.75", fontWeight: 400 }   # typo-body-md（基準）
+  body:     { fontSize: "16px", lineHeight: "1.75", fontWeight: 400 }   # typo-body-md（基準）
   label:    { fontSize: "12px", lineHeight: "1.5",  fontWeight: 500 }   # typo-label-sm
-  caption:  { fontSize: "11px", lineHeight: "1.5",  fontWeight: 400 }   # typo-caption（注釈/法的表記専用。本文の下限は body=12px。10px の typo-body-xs は補助ラベル専用で本文禁止）
+  caption:  { fontSize: "11px", lineHeight: "1.5",  fontWeight: 400 }   # typo-caption（注釈/法的表記専用。本文の下限は body=14px。12px の typo-body-xs は補助ラベル専用で本文禁止）
 rounded:
   sm: "4px"
   surface: "14px"  # Card / Input / Popover  → var(--Radius-Surface)
@@ -153,7 +153,7 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 `typo-*` ユーティリティ1クラスに size/line-height/weight/tracking を集約。`text-sm`/`font-bold` 等の個別指定は禁止。
 
 - 見出し: `typo-heading-{sm..3xl}`（14→28px, line-height 1.5, 700）
-- 本文: `typo-body-{xs..lg}`（10→16px, line-height 1.75 系）
+- 本文: `typo-body-{xs..lg}`（12→18px, line-height 1.75 系）
 - ラベル: `typo-label-{xs..lg}`（10→16px, 500）/ 特大: `typo-display-xl`(48px)
 - 色は別指定: `className="typo-body-sm text-[var(--Text-Low-Emphasis)]"`
 
