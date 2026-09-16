@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:38d9cb7b3578)
+// source: tokens.json v2.1.0 (sha256:331189a5fa88)
 // =============================================================
 
 export const scales = {
@@ -150,24 +150,24 @@ export const scales = {
     },
     "body": {
       "lg": {
+        "fontSize": 18,
+        "fontWeight": "400",
+        "lineHeight": 32
+      },
+      "md": {
         "fontSize": 16,
         "fontWeight": "400",
         "lineHeight": 28
       },
-      "md": {
+      "sm": {
         "fontSize": 14,
         "fontWeight": "400",
-        "lineHeight": 25
+        "lineHeight": 21
       },
-      "sm": {
+      "xs": {
         "fontSize": 12,
         "fontWeight": "400",
         "lineHeight": 18
-      },
-      "xs": {
-        "fontSize": 10,
-        "fontWeight": "400",
-        "lineHeight": 15
       }
     },
     "label": {

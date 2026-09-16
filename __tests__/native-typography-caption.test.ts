@@ -23,6 +23,6 @@ describe("native Text typo variants (#146, #148)", () => {
     const heading = resolveTypo("heading.md")
     const body = resolveTypo("body.md")
     expect(heading.fontSize).toBe(16)
-    expect(body.fontSize).toBe(14)
+    expect(body.fontSize).toBe(16)
   })
 })
