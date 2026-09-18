@@ -97,6 +97,10 @@
       "import": "./src/styles/product-theme.css",
       "default": "./src/styles/product-theme.css"
     },
+    "./tokens/radius": {
+      "import": "./src/styles/radius.css",
+      "default": "./src/styles/radius.css"
+    },
     "./glass": {
       "import": "./src/styles/glass.css",
       "default": "./src/styles/glass.css"

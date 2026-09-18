@@ -53,7 +53,22 @@ function readJson(path) {
 const tokens = readJson("tokens.json")
 const components = readJson("contracts/components.json")
 const designContext = readJson("contracts/design-context.json")
-const presetCss = readFileSync(join(ROOT, "src/preset.css"), "utf8")
+/** preset.css と、そこから相対 @import された CSS を1本に連結して返す。
+ *  トークン定義は styles/*.css へ切り出されているため（issue #553 の
+ *  styles/radius.css 等）、preset.css 本体だけを読むと取りこぼす。 */
+function readCssWithImports(path, seen = new Set()) {
+  const abs = join(ROOT, path)
+  if (seen.has(abs)) return ""
+  seen.add(abs)
+  // コメント内の @import（使い方の例示）を実 import と誤認しないよう先に落とす
+  const source = readFileSync(abs, "utf8").replace(/\/\*[\s\S]*?\*\//g, "")
+  const dir = dirname(path)
+  return source.replace(/@import\s+"(\.[^"]+)"\s*;/g, (match, relative) =>
+    readCssWithImports(join(dir, relative), seen),
+  )
+}
+
+const presetCss = readCssWithImports("src/preset.css")
 
 function extractFrontMatter(source) {
   const lines = source.split(/\r?\n/)
