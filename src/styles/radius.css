@@ -1,0 +1,23 @@
+/* =============================================================
+   KSK Design System — Radius Tokens（issue #553）
+
+   角丸の意味別トークン。コンポーネントは rounded-[var(--Radius-*)] で参照し、
+   rounded-lg / rounded-[32px] のベタ書き（＝ドリフトの元）を避ける。
+   テーマ非依存（Brand / Light-Dark で変わらない固定値）。
+   面 < モーダル < シート の順に丸くなる階層。
+
+   このファイルが Radius トークンの**唯一の定義元**。`preset.css` と
+   `product-theme.css` の両方から読み込まれる（同値の再定義なので二重読み込みは
+   無害。consumer が preset の後ろで上書きすれば従来どおり後勝ちで効く）。
+
+   preset を使わずトークン CSS を個別 import する消費側は、
+   `tokens/product-theme` を読めば自動的に含まれる。Radius だけを取りたい場合は:
+
+     @import "ksk-design-system/tokens/radius";
+   ============================================================= */
+
+:root {
+  --Radius-Surface: 0.875rem; /* 14px  — Card / Popover パネル / 面の既定。丸くしたいならここを上げる */
+  --Radius-Modal:   1.5rem;  /* 24px — 中央モーダル（Dialog / AlertDialog）。ピル/シートの丸い言語に合わせる */
+  --Radius-Sheet:   2rem;    /* 32px — 端寄せ Sheet（bottom / float） */
+}

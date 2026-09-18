@@ -88,6 +88,12 @@ DS のルールが適用されません。既存ファイルはスキップさ�
 
 独自ブランドのテーマを使う場合は、この後にテーマCSSをimportしてください。
 
+`preset` を使わずトークン CSS を個別 subpath で import する構成では、角丸トークン
+（`--Radius-Surface` / `--Radius-Modal` / `--Radius-Sheet`）は
+`ksk-design-system/tokens/product-theme` に含まれます（issue #553）。
+product-theme を読まず Radius だけが欲しい場合は
+`@import "ksk-design-system/tokens/radius";` を使ってください。
+
 Tailwind CSS v4 は `node_modules` を既定では走査しません。`@source` がないと、
 DS 内部だけで使うレイアウト・サイズ・状態クラスが生成されず、コンポーネントの表示や操作が崩れます。
 consumer 側の Tailwind と DS を同じビルドで処理するため、上記の設定をセットで使用してください。

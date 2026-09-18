@@ -35,6 +35,12 @@
      prop 追加も要らない（Server Component のまま使える）。
    ============================================================= */
 
+/* 角丸の意味別トークン（--Radius-Surface / -Modal / -Sheet）。preset を使わず
+   個別 subpath だけを import する消費側でも角丸が 0 にならないよう、ここから
+   読み込む（issue #553）。定義元は radius.css の1箇所で、値はテーマ非依存の
+   固定値。Radius だけが欲しい場合は "ksk-design-system/tokens/radius" を使う。 */
+@import "./radius.css";
+
 :root {
   /* ─── Control: Button 系の内寸 ───
      5段スケール。Button の size バリアント xs / sm / default(=Md) / lg / xl と

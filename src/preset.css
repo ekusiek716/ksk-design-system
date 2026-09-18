@@ -15,6 +15,9 @@
    ============================================================= */
 
 @import "./styles/primitive.css";
+/* 角丸の意味別トークン（issue #553）。定義元は styles/radius.css の1箇所で、
+   product-theme.css からも読み込まれる（個別 subpath 構成の消費側対策）。 */
+@import "./styles/radius.css";
 @import "./styles/semantic.css";
 @import "./styles/categorical.css";
 @import "./styles/typography.css";
@@ -108,15 +111,8 @@
 }
 
 /* ─── Radius Tokens ───
-   角丸の意味別トークン。コンポーネントは rounded-[var(--Radius-*)] で参照し、
-   rounded-lg / rounded-[32px] のベタ書き（＝ドリフトの元）を避ける。
-   テーマ非依存（Brand / Light-Dark で変わらない固定値）。
-   面 < モーダル < シート の順に丸くなる階層。 */
-:root {
-  --Radius-Surface: 0.875rem; /* 14px  — Card / Popover パネル / 面の既定。丸くしたいならここを上げる */
-  --Radius-Modal:   1.5rem;  /* 24px — 中央モーダル（Dialog / AlertDialog）。ピル/シートの丸い言語に合わせる */
-  --Radius-Sheet:   2rem;    /* 32px — 端寄せ Sheet（bottom / float） */
-}
+   定義はこのファイルから styles/radius.css へ切り出した（issue #553）。
+   ファイル先頭の @import 群で読み込んでいる。 */
 
 /* ─── Section Spacing Tokens ───
    コンポーネント内の 4px scale と分離した、ページセクション間の縦リズム。
