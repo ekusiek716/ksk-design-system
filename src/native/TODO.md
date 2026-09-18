@@ -11,8 +11,13 @@ Avatar / Chip / Tag / Spinner / Separator / Skeleton(+SkeletonText) / Progress /
 ### Phase 2: 基本フォーム（13）✅
 Label / Input / Textarea / AutoGrowTextarea / Switch / Checkbox / CheckboxField / CheckboxCard / CheckboxGroup / RadioGroup / Slider / NumberInput / FormField
 
-### Phase 3: オーバーレイ（14）✅
-Alert / Dialog / AlertDialog / Sheet / ResponsiveDialog / Popover / DropdownMenu / Toast(+ToastProvider/useToast) / MenuDrawer / ConfirmDialog / BottomSheetForm / ReviewOverlay / CoachMark / CoachMarkOverlay
+### Phase 3: オーバーレイ（15）✅
+Alert / Dialog / AlertDialog / Sheet / ResponsiveDialog / Popover / DropdownMenu / Toast(+ToastProvider/useToast) / MenuDrawer / ConfirmDialog / BottomSheetForm / ReviewOverlay / CoachMark / CoachMarkOverlay / Scrim
+
+- Scrim は native 専用（web に対応部品なし、issue #555）。RN Modal を作らない全面スクリム単体で、
+  Dialog を使えない画面（別 Modal の内側 / ViewShot キャプチャ）から背景タップ閉じだけを再利用する。
+  root（素の View）＋押下面 Pressable＋children の兄弟構造で、パネル内へ支援技術のフォーカスが入る。
+  背面へのタッチは常に塞ぐ（素通しさせる用途は対象外）。
 
 ### Phase 4: 選択（13）✅
 Select / Combobox / MultiSelect / DropdownFilter / PillToggle / Tabs(+List/Trigger/Content) / Calendar / DatePicker / TimePicker / Accordion / Collapsible / ScrollArea / Pagination / SimplePagination

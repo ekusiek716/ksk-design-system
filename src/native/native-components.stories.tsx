@@ -6,6 +6,7 @@ import { SafeAreaInsetsProvider } from "./theme/SafeAreaInsetsProvider"
 import { AppHeader } from "./components/AppHeader"
 import { Button } from "./components/Button"
 import { Dialog } from "./components/Dialog"
+import { Scrim } from "./components/Scrim"
 import { ActionTile, QuickActionGrid } from "./components/QuickActionGrid"
 import { CheckboxGroup } from "./components/CheckboxGroup"
 import { RadioGroup } from "./components/RadioGroup"
@@ -244,4 +245,34 @@ function DialogFullscreenDemo() {
 /** issue #351: web の `DialogContent position="fullscreen"` に対応する native プリセット。 */
 export const DialogFullscreen: Story = {
   render: () => <DialogFullscreenDemo />,
+}
+
+function ScrimDemo() {
+  const [open, setOpen] = React.useState(true)
+  return (
+    <View style={{ height: 360, borderRadius: 12, overflow: "hidden" }}>
+      <Card>
+        <RNText>背面のコンテンツ（スクリムは Modal を作らないので、この親の中に重なる）</RNText>
+        <Button onPress={() => setOpen(true)}>スクリムを出す</Button>
+      </Card>
+      {open && (
+        <Scrim onPress={() => setOpen(false)} accessibilityLabel="閉じる">
+          <Card>
+            <RNText>パネルは押下面の兄弟として前面に置かれ、パネル上のタップは閉じない</RNText>
+            <Button onPress={() => setOpen(false)}>閉じる</Button>
+          </Card>
+        </Scrim>
+      )}
+    </View>
+  )
+}
+
+/**
+ * issue #555: RN Modal を生成しない単体のスクリム。別の Modal の内側や
+ * 画面内オーバーレイに重ねられる。濃さは Dialog と同じ overlay.dark。
+ * root は素の View で、押下面（Pressable）と children は兄弟。パネル内の
+ * ボタン・入力欄へ支援技術が個別にフォーカスできる。
+ */
+export const ScrimStandalone: Story = {
+  render: () => <ScrimDemo />,
 }

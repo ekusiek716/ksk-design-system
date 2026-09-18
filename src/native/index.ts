@@ -26,4 +26,10 @@ export {
   type SafeAreaInsets,
 } from "./safe-area"
 export { resolveTypo, type TypoVariant, type TypoStyle } from "./typography"
+export {
+  resolveScrimAlignment,
+  resolveScrimContentStyle,
+  type ScrimAlignmentStyle,
+  type ScrimContentStyle,
+} from "./scrim-layout"
 export * from "./components"

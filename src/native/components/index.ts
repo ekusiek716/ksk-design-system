@@ -83,6 +83,7 @@ export {
 // Phase 3: Overlay
 export { Alert, type AlertProps, type AlertTone } from "./Alert"
 export { Dialog, type DialogProps, type DialogPosition } from "./Dialog"
+export { Scrim, type ScrimProps, type ScrimAlign } from "./Scrim"
 export { AlertDialog, type AlertDialogProps } from "./AlertDialog"
 export { Sheet, type SheetProps, type SheetSide } from "./Sheet"
 export {
