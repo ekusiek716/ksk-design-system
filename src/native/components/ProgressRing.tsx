@@ -10,6 +10,7 @@ import {
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import {
+  getProgressRingAccessibilityValue,
   getProgressRingGeometry,
   getProgressRingMaskRotations,
   progressRingPct,
@@ -107,18 +108,34 @@ export interface ProgressRingProps {
   label?: React.ReactNode
   showLabel?: boolean
   /**
-   * ルート View をひとつの読み上げ要素にまとめる（issue #559）。
-   * リングを含むカード側で説明文を組み立てている場合、`accessible={false}` を渡して
-   * 中央ラベルの文字が個別に読み上げられるのを抑える。
+   * ルート View をひとつの読み上げ要素にまとめる（issue #559 / #564）。
    *
-   * 既定では何も付けない（従来どおり RN の既定の振る舞い）。
+   * 既定（未指定）は `true`。Web の `role="progressbar"` が読み上げ上の葉になるのと同じく、
+   * リング全体をひとつの進捗として読ませ、中央ラベルの文字は個別に読ませない。
+   *
+   * リングを含むカード側で説明文を組み立てている場合は `accessible={false}` を渡す。
+   * このとき役割・値・名前の既定も付かず、#564 以前と同じ「ただの図形＋文字」に戻る。
    */
   accessible?: boolean
-  /** ルート View の読み上げ名。既定では付けない。 */
+  /**
+   * ルート View の読み上げ名。
+   * 既定は Web の `aria-label` と同じ決め方で、`label` が文字列ならその文字列、
+   * それ以外（未指定・ReactNode）は `"進捗"`（issue #564）。
+   * `"✓"` のような記号を `label` に置く場合は意味の通る名前を明示すること。
+   * 同じ画面に複数のリングを並べる場合も、既定のままだとすべて同じ名前で読まれて
+   * 区別できないため、リングごとに（例: `"正解数"` / `"正答率"`）明示すること。
+   */
   accessibilityLabel?: string
-  /** ルート View の役割。進捗として読ませたいときに `"progressbar"` 等を渡す。既定では付けない。 */
+  /**
+   * ルート View の役割。既定は `"progressbar"`（issue #564。Web の `role="progressbar"` と対称）。
+   * 明示した値が優先される。
+   */
   accessibilityRole?: AccessibilityRole
-  /** ルート View の読み上げ値（`{ min, max, now }` 等）。既定では付けない。 */
+  /**
+   * ルート View の読み上げ値。
+   * 既定は `{ min: 0, max, now: <クランプ後の value> }`（issue #564）。
+   * `max` が 0 以下・非有限のときは Web と同じ 0〜100 の尺度へ落とす。明示した値が優先される。
+   */
   accessibilityValue?: AccessibilityValue
   /** iOS: ルート配下をアクセシビリティツリーから隠す。既定では付けない。 */
   accessibilityElementsHidden?: boolean
@@ -166,6 +183,32 @@ export function ProgressRing({
     )
   }
   const pct = progressRingPct(value, max)
+
+  /**
+   * 読み上げの既定（issue #564）。Web は常に `role="progressbar"` + `aria-valuenow` を持つのに、
+   * Native は何も付かず「図形＋中央の文字」として読まれていた非対称の解消。
+   *
+   * `accessible={false}`（周りのカードが説明文を持つ場合）のときは、役割・値・名前の既定も付けない。
+   * 読み上げから外したい意図なので、#564 以前とまったく同じ結果になる。
+   */
+  const isAccessibleGroup = accessible ?? true
+  const resolvedAccessibilityRole = isAccessibleGroup
+    ? (accessibilityRole ?? "progressbar")
+    : accessibilityRole
+  const resolvedAccessibilityValue = isAccessibleGroup
+    ? (accessibilityValue ?? getProgressRingAccessibilityValue(value, max))
+    : accessibilityValue
+  // 名前の決め方は Web の `aria-label ?? (typeof label === "string" ? label : "進捗")` と同じ。
+  const resolvedAccessibilityLabel = isAccessibleGroup
+    ? (accessibilityLabel ?? (typeof label === "string" ? label : "進捗"))
+    : accessibilityLabel
+  /**
+   * 二重読みの回避（issue #564）。役割と値を持つ要素の中に「80%」の文字があると、
+   * 名前（label）と中央の文字で同じ数字が 2 回読まれる。Web は `role="progressbar"` が
+   * 読み上げ上の葉になり中央 span が読まれないので、Native も中央だけをツリーから隠して揃える。
+   * `accessible={false}` のときは隠さない（従来の読まれ方を保つ）。
+   */
+  const hideCenterFromA11y = isAccessibleGroup
   const geometry = getProgressRingGeometry(value, max, size, resolvedStrokeWidth)
   const { rightRotation, leftRotation } = getProgressRingMaskRotations(value, max)
 
@@ -239,11 +282,11 @@ export function ProgressRing({
         justifyContent: "center",
       }}
       // 読み上げ系は明示的に受けた分だけルートへ渡す（...rest の無差別素通しはしない）。
-      // 未指定なら undefined のままで、RN 側にも属性が付かない＝従来の振る舞い。
-      accessible={accessible}
-      accessibilityLabel={accessibilityLabel}
-      accessibilityRole={accessibilityRole}
-      accessibilityValue={accessibilityValue}
+      // 役割・値・名前・グループ化は既定を持つ（issue #564）。利用側の指定は必ず優先される。
+      accessible={accessible ?? true}
+      accessibilityLabel={resolvedAccessibilityLabel}
+      accessibilityRole={resolvedAccessibilityRole}
+      accessibilityValue={resolvedAccessibilityValue}
       accessibilityElementsHidden={accessibilityElementsHidden}
       importantForAccessibility={importantForAccessibility}
       testID={testID}
@@ -303,6 +346,9 @@ export function ProgressRing({
           alignItems: "center",
           justifyContent: "center",
         }}
+        // 二重読みの回避（issue #564）。ルートが進捗として読まれるので中央の文字は読ませない。
+        accessibilityElementsHidden={hideCenterFromA11y || undefined}
+        importantForAccessibility={hideCenterFromA11y ? "no-hide-descendants" : undefined}
       >
         {showLabel &&
           (label === undefined ? (

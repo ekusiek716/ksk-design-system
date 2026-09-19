@@ -319,7 +319,8 @@ function NativeProgressRingShowcase() {
           strokeWidth={10}
           tone="success"
           lineCap="round"
-          // 周りのカードが説明文を読み上げるので、リング内の文字は個別に読ませない
+          // 周りのカードが説明文を読み上げるので、リング自体は読み上げから外す
+          // （issue #564: 既定は "progressbar" + 値。accessible={false} で役割・値ごと外れる）
           accessible={false}
           label={
             <View style={{ alignItems: "center" }}>
@@ -346,7 +347,13 @@ function NativeProgressRingShowcase() {
         {/* 0% は lineCap="round" でも点が出ない */}
         <ProgressRing value={0} size={64} lineCap="round" tone="success" />
         {/* 既定（tone / label 未指定）は従来どおり brand 色 + パーセント表示 */}
+        {/* 読み上げは既定で「進捗 / progressbar / 72（0〜100）」。中央の "72%" は二重に読まれない（#564） */}
         <ProgressRing value={72} size={64} />
+      </View>
+      {/* issue #564: 読み上げ名の既定は文字列 label。記号だけの label には名前を明示する */}
+      <View style={{ flexDirection: "row", gap: 16, alignItems: "center" }}>
+        <ProgressRing value={100} size={64} tone="success" label="✓" accessibilityLabel="アップロード進捗 完了" />
+        <ProgressRing value={8} max={10} size={64} accessibilityLabel="正解数" />
       </View>
     </View>
   )

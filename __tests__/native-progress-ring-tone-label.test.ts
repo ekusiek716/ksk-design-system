@@ -170,23 +170,28 @@ describe("native ProgressRing の lineCap（#559）", () => {
 
 describe("native ProgressRing の accessibility 受け渡し（#559）", () => {
   it("読み上げ系 props はルート View へ明示的に渡す（...rest の素通しにしない）", () => {
+    // そのまま素通しする props。
     for (const prop of [
-      "accessible",
-      "accessibilityLabel",
-      "accessibilityRole",
-      "accessibilityValue",
       "accessibilityElementsHidden",
       "importantForAccessibility",
       "testID",
     ]) {
       expect(nativeSource).toContain(`${prop}={${prop}}`)
     }
+    // #564 で既定値を持つようになった props。素通しではなく解決済みの値を渡す
+    // （既定の挙動は native-progress-ring-a11y.test.ts が固定する）。
+    expect(nativeSource).toContain("accessible={accessible ?? true}")
+    for (const prop of ["accessibilityLabel", "accessibilityRole", "accessibilityValue"]) {
+      const resolved = `resolved${prop[0].toUpperCase()}${prop.slice(1)}`
+      expect(nativeSource).toContain(`${prop}={${resolved}}`)
+      expect(nativeSource).toContain(`const ${resolved} =`)
+    }
     // JSX での無差別なスプレッド（`{...rest}` / `{...props}`）は使わない。
     expect(nativeSource).not.toMatch(/\{\.\.\.\w+\}/)
   })
 
-  it("既定値を持たない＝未指定なら undefined のままルートに属性が付かない", () => {
-    // 既定値を与えると常に属性が付き、従来の読み上げが変わってしまう。
+  it("読み上げ系 props は分割代入の既定値では埋めない（#564 の既定はレンダー本体で解決する）", () => {
+    // 分割代入で埋めると「利用側が明示したか」を判別できず、accessible={false} で外せなくなる。
     const signature = nativeSource.slice(
       nativeSource.indexOf("export function ProgressRing({"),
       nativeSource.indexOf("}: ProgressRingProps)"),

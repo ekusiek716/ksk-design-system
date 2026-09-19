@@ -12,6 +12,22 @@ export function clampProgressValue(value: number, max: number): number {
   return Math.min(max, Math.max(0, value))
 }
 
+/**
+ * 読み上げ用の進捗値（issue #564）。Native の `accessibilityValue` 既定値になる。
+ *
+ * Web の `role="progressbar"` は `aria-valuemin/max/now` を常に持つので、Native も
+ * 既定で同じ意味づけを持たせる。`max` が 0 以下・非有限のときは値域として成立しないため、
+ * Web と同じ 0〜100 の尺度へ落とし、`now` はクランプ済みの 0 にする
+ * （`{ max: 0 }` や `{ now: NaN }` を読み上げへ渡さない）。
+ */
+export function getProgressRingAccessibilityValue(
+  value: number,
+  max: number
+): { min: number; max: number; now: number } {
+  const safeMax = Number.isFinite(max) && max > 0 ? max : 100
+  return { min: 0, max: safeMax, now: clampProgressValue(value, max) }
+}
+
 /** 0〜100 の実効パーセンテージ。 */
 export function progressRingPct(value: number, max: number): number {
   if (!Number.isFinite(max) || max <= 0) return 0
