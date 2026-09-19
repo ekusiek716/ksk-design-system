@@ -9,12 +9,14 @@ import { describe, expect, it } from "vitest"
  * のように、実機で開いてみるまで気づけない壊れ方をする。issue #263。
  */
 
-const preset = readFileSync("src/preset.css", "utf8")
+// 定義元は issue #563 で styles/z-index.css へ切り出した
+// （preset.css / product-theme.css からは @import で読み込む）。
+const zIndexCss = readFileSync("src/styles/z-index.css", "utf8")
 const modalStack = readFileSync("src/lib/modal-stack.ts", "utf8")
 
 function z(name: string): number {
-  const m = preset.match(new RegExp(`--Z-${name}:\\s*(-?\\d+);`))
-  if (!m) throw new Error(`--Z-${name} が preset.css に無い`)
+  const m = zIndexCss.match(new RegExp(`--Z-${name}:\\s*(-?\\d+);`))
+  if (!m) throw new Error(`--Z-${name} が z-index.css に無い`)
   return Number(m[1])
 }
 

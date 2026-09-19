@@ -3,16 +3,20 @@ import { dirname, join } from "node:path"
 import { describe, expect, it } from "vitest"
 
 /**
- * Section Spacing トークンの配布経路の不変条件。issue #560（#553 と同型）。
+ * Section Spacing / Z-Index / Shadow トークンの配布経路の不変条件。
+ * issue #560（#553 と同型）・issue #563（#553 / #560 と同型・最後の20件）。
  *
- * `--Space-Section-*` は preset.css 本体に直書きされていたため、`./preset`
- * ではなく個別 subpath（tokens/primitive + themes/* + tokens/semantic +
- * tokens/product-theme + glass）だけを import する consumer では未定義に
- * なり、セクション間の余白が静かに 0px になっていた。
+ * `--Space-Section-*` / `--Z-*` / `--shadow-*` は preset.css 本体に直書き
+ * されていたため、`./preset` ではなく個別 subpath（tokens/primitive +
+ * themes/* + tokens/semantic + tokens/product-theme + glass）だけを import
+ * する consumer では未定義になり、セクション間の余白が静かに 0px になったり、
+ * モーダルが他要素の下に隠れたり、影が消えたりしていた。
  *
  * 「ビルドは通るのに見た目だけ壊れる」型なので、import グラフを辿って
- * 「どの公開 subpath 構成でも safelist が参照する Space-Section 系が
- * 定義される」ことをここで固定する。
+ * 「どの公開 subpath 構成でも safelist が参照する Space-Section / Z-Index /
+ * Shadow 系が定義される」ことをここで固定する。ファイル名は #560 当時のまま
+ * だが、#563 で Z-Index / Shadow の検査も同じファイルへ追加した
+ * （検査の仕組み・resolveCss 等のヘルパーを共有するため、リネームはしない）。
  */
 
 const pkg = JSON.parse(readFileSync("package.json", "utf8")) as {
@@ -59,7 +63,7 @@ const EXPECTED: Record<string, string> = {
   "--Space-Section-2xl": "80px",
 }
 
-/** issue #553 / #560 の再現構成（yokoku.app の globals.css 相当） */
+/** issue #553 / #560 / #563 の再現構成（yokoku.app の globals.css 相当） */
 const INDIVIDUAL_SUBPATHS = [
   "./tokens/primitive",
   "./themes/violet",
@@ -67,6 +71,14 @@ const INDIVIDUAL_SUBPATHS = [
   "./tokens/product-theme",
   "./glass",
 ]
+
+const Z_INDEX_EXPECTED: Record<string, string> = {
+  "--Z-Modal": "60",
+}
+
+const SHADOW_EXPECTED: Record<string, string> = {
+  "--shadow-md": "0 0 8px rgba(20, 20, 20, 0.08)",
+}
 
 describe("Section Spacing トークンの配布経路（issue #560）", () => {
   it("個別 subpath 構成でも 6 トークンが解決される", () => {
@@ -117,6 +129,48 @@ describe("Section Spacing トークンの配布経路（issue #560）", () => {
   })
 })
 
+describe("Z-Index トークンの配布経路（issue #563）", () => {
+  it("個別 subpath 構成でも --Z-Modal が解決される", () => {
+    const css = resolveSubpaths(INDIVIDUAL_SUBPATHS)
+    for (const [name, value] of Object.entries(Z_INDEX_EXPECTED)) {
+      expect(definedValue(css, name), `${name} が未定義`).toBe(value)
+    }
+  })
+
+  it("./preset 構成の値が従来どおり（回帰なし）", () => {
+    const css = resolveCss(fileForSubpath("./preset"))
+    for (const [name, value] of Object.entries(Z_INDEX_EXPECTED)) {
+      expect(definedValue(css, name)).toBe(value)
+    }
+  })
+
+  it("定義元は z-index.css の1箇所（preset.css に直書きを戻さない）", () => {
+    const preset = readFileSync("src/preset.css", "utf8")
+    expect(preset.includes("--Z-Modal:")).toBe(false)
+  })
+})
+
+describe("Shadow トークンの配布経路（issue #563）", () => {
+  it("個別 subpath 構成でも --shadow-md が解決される", () => {
+    const css = resolveSubpaths(INDIVIDUAL_SUBPATHS)
+    for (const [name, value] of Object.entries(SHADOW_EXPECTED)) {
+      expect(definedValue(css, name), `${name} が未定義`).toBe(value)
+    }
+  })
+
+  it("./preset 構成の値が従来どおり（回帰なし）", () => {
+    const css = resolveCss(fileForSubpath("./preset"))
+    for (const [name, value] of Object.entries(SHADOW_EXPECTED)) {
+      expect(definedValue(css, name)).toBe(value)
+    }
+  })
+
+  it("定義元は shadow.css の1箇所（preset.css に直書きを戻さない）", () => {
+    const preset = readFileSync("src/preset.css", "utf8")
+    expect(preset.includes("--shadow-md:")).toBe(false)
+  })
+})
+
 /** `./preset` を除く、CSS ファイルを指す exports subpath を package.json から
  *  実際に読んで列挙する（ワイルドカードではなく個別に定義されている構成な
  *  ので、themes/* は6テーマ全部を読む）。「どの subpath からも取得できない
@@ -156,38 +210,15 @@ describe("safelist 変数の subpath 網羅性（issue #560 完了条件4）", (
       .filter((name) => definedValue(presetCss, name) && !definedValue(allSubpathCss, name))
       .sort()
 
-    // 本当の穴（exports の CSS subpath を全部読んでも取得できない）は
-    // Z-Index スケールと shadow トークンの計20件。どちらも preset.css 本体
-    // にのみ直書きされており、専用の tokens/* subpath が無い。
-    // Radius(#553) / Section Spacing(#560) と同型の穴だが、この issue の
-    // スコープ外のため今回は直さない。別issueで #553/#560 と同方式（専用
-    // ファイルへの切り出し + product-theme.css からの @import）で塞ぐ。
+    // Z-Index スケールと shadow トークンの計20件は issue #563 で
+    // styles/z-index.css / styles/shadow.css へ切り出し、preset.css /
+    // product-theme.css の両方から @import するようにした（#553 / #560 と
+    // 同方式）。現時点で取りこぼしはゼロ。
     //
     // Categorical（./tokens/categorical）と Motion（./tokens/motion）は
     // 専用 subpath から取得できるため「穴」ではない（個別 subpath の
     // "再現構成"だけを見た前回の判定は誤りだった）。
-    const KNOWN_EXCEPTIONS: string[] = [
-      "--Z-Alert",
-      "--Z-Alert-Overlay",
-      "--Z-Coachmark",
-      "--Z-Coachmark-Overlay",
-      "--Z-Floating",
-      "--Z-Modal",
-      "--Z-Nav",
-      "--Z-Overlay",
-      "--Z-Popover",
-      "--Z-SkipLink",
-      "--Z-Sticky",
-      "--Z-Toast",
-      "--Z-Tooltip",
-      "--shadow-dialog",
-      "--shadow-lg",
-      "--shadow-md",
-      "--shadow-sm",
-      "--shadow-sticky-inline-end",
-      "--shadow-sticky-inline-start",
-      "--shadow-tooltip",
-    ]
+    const KNOWN_EXCEPTIONS: string[] = []
 
     // `--ksk-fab-bottom-offset` はトークンの穴ではなく、
     // MobileFloatingActionButton（src/components/ui/mobile-floating-action-button.tsx

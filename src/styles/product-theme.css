@@ -48,6 +48,18 @@
    "ksk-design-system/tokens/section-spacing" を使う。 */
 @import "./section-spacing.css";
 
+/* 重なり順（--Z-*）。preset を使わず個別 subpath だけを import する消費側
+   でも重なり順が未定義にならないよう、ここから読み込む（issue #563）。
+   定義元は z-index.css の1箇所。Z-Index だけが欲しい場合は
+   "ksk-design-system/tokens/z-index" を使う。 */
+@import "./z-index.css";
+
+/* 影（--shadow-*）。preset を使わず個別 subpath だけを import する消費側
+   でも影が未定義にならないよう、ここから読み込む（issue #563）。
+   定義元は shadow.css の1箇所。Shadow だけが欲しい場合は
+   "ksk-design-system/tokens/shadow" を使う。 */
+@import "./shadow.css";
+
 :root {
   /* ─── Control: Button 系の内寸 ───
      5段スケール。Button の size バリアント xs / sm / default(=Md) / lg / xl と

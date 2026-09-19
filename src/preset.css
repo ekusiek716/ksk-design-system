@@ -22,6 +22,12 @@
    styles/section-spacing.css の1箇所で、product-theme.css からも読み込まれる
    （個別 subpath 構成の消費側対策）。 */
 @import "./styles/section-spacing.css";
+/* 重なり順（issue #563）。定義元は styles/z-index.css の1箇所で、
+   product-theme.css からも読み込まれる（個別 subpath 構成の消費側対策）。 */
+@import "./styles/z-index.css";
+/* 影（issue #563）。定義元は styles/shadow.css の1箇所で、
+   product-theme.css からも読み込まれる（個別 subpath 構成の消費側対策）。 */
+@import "./styles/shadow.css";
 @import "./styles/semantic.css";
 @import "./styles/categorical.css";
 @import "./styles/typography.css";
@@ -123,93 +129,12 @@
    ファイル先頭の @import 群で読み込んでいる。 */
 
 /* ─── Z-Index Scale ───
-   重なり順の意図をトークン化する。Portal に載る要素（Dialog / Sheet /
-   Popover / Toast 等）は DOM 上の親子関係を失うため、`z-50` を一律に振ると
-   勝敗が Portal のマウント順＝開いた順に依存してしまう。意味ごとに段を分けて
-   「常にこの順で重なる」を保証する。
-
-   下から:
-     Base    0   … 通常フロー
-     Raised  10  … カード内の重なり（画像上のバッジ、カルーセル矢印など）
-     Sticky  30  … スクロール追従のフィルタバー / サブナビ
-     Nav     40  … アプリシェルの固定ヘッダ・ボトムタブ（シェルが敷く固定ナビ）
-     Floating 45 … ナビの上に浮く一時的な操作面（FAB / 一括操作バー / 同意バナー）。
-                   Nav と同じ段だと、シェルがナビを後から描画する構造上ナビに隠れる
-     Overlay 50  … Dialog / Sheet の scrim（背面を覆う暗幕）
-     Modal   60  … Dialog / Sheet 本体。必ず自分の scrim より上
-     Alert-Overlay 900 … AlertDialog / ConfirmDialog の scrim
-     Alert   910 … AlertDialog / ConfirmDialog 本体
-     Coachmark-Overlay 950 … CoachMarkOverlay の scrim / スポットライト
-     Coachmark 960 … CoachMark の吹き出し
-     Popover 1000 … Select / Popover / DropdownMenu / HoverCard。
-                    Modal / Alert の中から開くので両方より上。Alertを開く時点で
-                    既存Popoverを閉じ、stale layerだけを残さない
-     Toast   1100 … 通知。Modal 表示中でも読めるよう Modal / Popover より上
-     Tooltip 1200 … 補助情報。他の何かの上に出るのが役目なので実質最上位
-     SkipLink 1300 … キーボード操作の最初の逃げ道。何にも隠されてはいけない
-
-   Modal(60) と Alert-Overlay(900) の間が大きく空いているのは意図的。
-   Sheet / Dialog はネストすると `Overlay + level*20` / `Modal + level*20` で
-   段を積む（src/lib/modal-stack.ts の MODAL_*、issue #158 / #340）。
-   ここを空けておくことで、多段モーダルが Alert 以上の層を突き抜けない。
-   AlertDialog も同じスタックに参加するが、基底は Alert-* のまま 12 刻みで積む
-   （ALERT_*）。これらの定数は下の :root と対で維持すること
-   （__tests__/z-index-scale-contract.test.ts が一致を検査する）。
-
-   CoachMark も同じ理由で専用の 950/960。オンボーディングは Dialog や Sheet を
-   開いた状態の上から重ねることがあり、scrim が Modal より下だと「暗転していない
-   モーダルの上に説明だけが浮く」状態になる。scrim / スポットライトと吹き出しを
-   対で持つのは、スポットライト（boxShadow で周囲を暗くする矩形）が scrim の
-   役割を兼ねるため。
-
-   AlertDialog / ConfirmDialog が Modal(60) ではなく専用の 900/910 に居るのは、
-   これらが「Dialog や Sheet の中から開かれる割り込み確認」だから。Modal と同じ段だと
-   自分の scrim が親コンテンツの下に潜り、親が暗転しないまま確認だけが浮く
-   （＝どの操作を確認しているのか分からない状態になる）。逆に Alert から
-   Dialog / Sheet を開くフローは想定していない（Alert は終端の確認）。
-   Popover(1000) はAlert内の詳細・選択UIを隠さないためAlertより上を維持する。
-   Alertを開く瞬間に既存Popoverを閉じるlayer coordinationと対にすることで、
-   stale Popoverだけが確認面より上に残る問題も防ぐ。
-
-   z-10 / z-20 など小さい素の値は「コンポーネント内部の重なり」用途で、
-   このグローバルスケールの対象外（カード内のバッジ、カルーセル矢印など）。
-
-   Tailwind からは z-[var(--Z-Modal)] の形で参照する。 */
-:root {
-  --Z-Base:     0;
-  --Z-Raised:   10;
-  --Z-Sticky:   30;
-  --Z-Nav:      40;
-  --Z-Floating: 45;
-  --Z-Overlay:  50;
-  --Z-Modal:    60;
-  --Z-Alert-Overlay: 900;
-  --Z-Alert:    910;
-  --Z-Coachmark-Overlay: 950;
-  --Z-Coachmark: 960;
-  --Z-Popover:  1000;
-  --Z-Toast:    1100;
-  --Z-Tooltip:  1200;
-  --Z-SkipLink: 1300;
-}
+   定義はこのファイルから styles/z-index.css へ切り出した（issue #563）。
+   ファイル先頭の @import 群で読み込んでいる。 */
 
 /* ─── Shadow Tokens ───
-   影色はテーマ非依存の neutral（Gray-900 ベース rgba(17,24,39,…)）。
-   旧来の青寄り rgba(24,39,75) は default=Blue 前提で、violet/orange/green
-   テーマや地の色とわずかにケンカするため neutral に統一。
-   ダークモードでは黒影が機能しない（glow 方向が必要）ため、.dark 側は別途調整する。 */
-:root {
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 0 8px rgba(20, 20, 20, 0.08);
-  --shadow-lg: 0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12);
-  --shadow-dialog: 0px 12px 32px -4px rgba(17, 24, 39, 0.12), 0px 8px 16px -6px rgba(17, 24, 39, 0.12), 0px 1px 4px 1px rgba(0, 0, 0, 0.2);
-  --shadow-tooltip: 0px 8px 8px -4px rgba(17, 24, 39, 0.08), 0px 4px 6px -4px rgba(17, 24, 39, 0.12);
-  /* 固定列（sticky column）がスクロール領域に落とす方向付きの影。
-     論理方向で命名する（RTL でも「行の先頭側/末尾側」の意味が保たれる）。
-     inline-start = 先頭側に固定された列が、末尾方向へ落とす影。 */
-  --shadow-sticky-inline-start: 8px 0 12px -3px rgba(0, 0, 0, 0.3);
-  --shadow-sticky-inline-end: -8px 0 12px -3px rgba(0, 0, 0, 0.3);
-}
+   定義はこのファイルから styles/shadow.css へ切り出した（issue #563）。
+   ファイル先頭の @import 群で読み込んでいる。 */
 
 /* ─── Animation ─── */
 @keyframes slide-in-right {

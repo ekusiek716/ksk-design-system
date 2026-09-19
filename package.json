@@ -105,6 +105,14 @@
       "import": "./src/styles/section-spacing.css",
       "default": "./src/styles/section-spacing.css"
     },
+    "./tokens/z-index": {
+      "import": "./src/styles/z-index.css",
+      "default": "./src/styles/z-index.css"
+    },
+    "./tokens/shadow": {
+      "import": "./src/styles/shadow.css",
+      "default": "./src/styles/shadow.css"
+    },
     "./glass": {
       "import": "./src/styles/glass.css",
       "default": "./src/styles/glass.css"
