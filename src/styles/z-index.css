@@ -1,0 +1,84 @@
+/* =============================================================
+   KSK Design System — Z-Index Scale（issue #563）
+
+   重なり順の意図をトークン化する。Portal に載る要素（Dialog / Sheet /
+   Popover / Toast 等）は DOM 上の親子関係を失うため、`z-50` を一律に振ると
+   勝敗が Portal のマウント順＝開いた順に依存してしまう。意味ごとに段を分けて
+   「常にこの順で重なる」を保証する。
+
+   下から:
+     Base    0   … 通常フロー
+     Raised  10  … カード内の重なり（画像上のバッジ、カルーセル矢印など）
+     Sticky  30  … スクロール追従のフィルタバー / サブナビ
+     Nav     40  … アプリシェルの固定ヘッダ・ボトムタブ（シェルが敷く固定ナビ）
+     Floating 45 … ナビの上に浮く一時的な操作面（FAB / 一括操作バー / 同意バナー）。
+                   Nav と同じ段だと、シェルがナビを後から描画する構造上ナビに隠れる
+     Overlay 50  … Dialog / Sheet の scrim（背面を覆う暗幕）
+     Modal   60  … Dialog / Sheet 本体。必ず自分の scrim より上
+     Alert-Overlay 900 … AlertDialog / ConfirmDialog の scrim
+     Alert   910 … AlertDialog / ConfirmDialog 本体
+     Coachmark-Overlay 950 … CoachMarkOverlay の scrim / スポットライト
+     Coachmark 960 … CoachMark の吹き出し
+     Popover 1000 … Select / Popover / DropdownMenu / HoverCard。
+                    Modal / Alert の中から開くので両方より上。Alertを開く時点で
+                    既存Popoverを閉じ、stale layerだけを残さない
+     Toast   1100 … 通知。Modal 表示中でも読めるよう Modal / Popover より上
+     Tooltip 1200 … 補助情報。他の何かの上に出るのが役目なので実質最上位
+     SkipLink 1300 … キーボード操作の最初の逃げ道。何にも隠されてはいけない
+
+   Modal(60) と Alert-Overlay(900) の間が大きく空いているのは意図的。
+   Sheet / Dialog はネストすると `Overlay + level*20` / `Modal + level*20` で
+   段を積む（src/lib/modal-stack.ts の MODAL_*、issue #158 / #340）。
+   ここを空けておくことで、多段モーダルが Alert 以上の層を突き抜けない。
+   AlertDialog も同じスタックに参加するが、基底は Alert-* のまま 12 刻みで積む
+   （ALERT_*）。これらの定数は下の :root と対で維持すること
+   （__tests__/z-index-scale-contract.test.ts が一致を検査する）。
+
+   CoachMark も同じ理由で専用の 950/960。オンボーディングは Dialog や Sheet を
+   開いた状態の上から重ねることがあり、scrim が Modal より下だと「暗転していない
+   モーダルの上に説明だけが浮く」状態になる。scrim / スポットライトと吹き出しを
+   対で持つのは、スポットライト（boxShadow で周囲を暗くする矩形）が scrim の
+   役割を兼ねるため。
+
+   AlertDialog / ConfirmDialog が Modal(60) ではなく専用の 900/910 に居るのは、
+   これらが「Dialog や Sheet の中から開かれる割り込み確認」だから。Modal と同じ段だと
+   自分の scrim が親コンテンツの下に潜り、親が暗転しないまま確認だけが浮く
+   （＝どの操作を確認しているのか分からない状態になる）。逆に Alert から
+   Dialog / Sheet を開くフローは想定していない（Alert は終端の確認）。
+   Popover(1000) はAlert内の詳細・選択UIを隠さないためAlertより上を維持する。
+   Alertを開く瞬間に既存Popoverを閉じるlayer coordinationと対にすることで、
+   stale Popoverだけが確認面より上に残る問題も防ぐ。
+
+   z-10 / z-20 など小さい素の値は「コンポーネント内部の重なり」用途で、
+   このグローバルスケールの対象外（カード内のバッジ、カルーセル矢印など）。
+
+   Tailwind からは z-[var(--Z-Modal)] の形で参照する。
+
+   このファイルが Z-Index トークンの**唯一の定義元**。`preset.css` と
+   `product-theme.css` の両方から読み込まれる（同値の再定義なので二重読み込みは
+   無害。consumer が preset の後ろで上書きすれば従来どおり後勝ちで効く）。
+
+   preset を使わずトークン CSS を個別 import する消費側は、
+   `tokens/product-theme` を読めば自動的に含まれる。Z-Index だけを
+   取りたい場合は:
+
+     @import "ksk-design-system/tokens/z-index";
+   ============================================================= */
+
+:root {
+  --Z-Base:     0;
+  --Z-Raised:   10;
+  --Z-Sticky:   30;
+  --Z-Nav:      40;
+  --Z-Floating: 45;
+  --Z-Overlay:  50;
+  --Z-Modal:    60;
+  --Z-Alert-Overlay: 900;
+  --Z-Alert:    910;
+  --Z-Coachmark-Overlay: 950;
+  --Z-Coachmark: 960;
+  --Z-Popover:  1000;
+  --Z-Toast:    1100;
+  --Z-Tooltip:  1200;
+  --Z-SkipLink: 1300;
+}
