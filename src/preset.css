@@ -18,6 +18,10 @@
 /* 角丸の意味別トークン（issue #553）。定義元は styles/radius.css の1箇所で、
    product-theme.css からも読み込まれる（個別 subpath 構成の消費側対策）。 */
 @import "./styles/radius.css";
+/* ページセクション間の縦リズム（issue #560）。定義元は
+   styles/section-spacing.css の1箇所で、product-theme.css からも読み込まれる
+   （個別 subpath 構成の消費側対策）。 */
+@import "./styles/section-spacing.css";
 @import "./styles/semantic.css";
 @import "./styles/categorical.css";
 @import "./styles/typography.css";
@@ -115,16 +119,8 @@
    ファイル先頭の @import 群で読み込んでいる。 */
 
 /* ─── Section Spacing Tokens ───
-   コンポーネント内の 4px scale と分離した、ページセクション間の縦リズム。
-   Tailwind を使わない consumer も var(--Space-Section-*) で参照できる。 */
-:root {
-  --Space-Section-xs:  32px;
-  --Space-Section-sm:  40px;
-  --Space-Section-md:  48px;
-  --Space-Section-lg:  56px;
-  --Space-Section-xl:  64px;
-  --Space-Section-2xl: 80px;
-}
+   定義はこのファイルから styles/section-spacing.css へ切り出した（issue #560）。
+   ファイル先頭の @import 群で読み込んでいる。 */
 
 /* ─── Z-Index Scale ───
    重なり順の意図をトークン化する。Portal に載る要素（Dialog / Sheet /

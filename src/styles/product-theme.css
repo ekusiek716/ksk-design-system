@@ -41,6 +41,13 @@
    固定値。Radius だけが欲しい場合は "ksk-design-system/tokens/radius" を使う。 */
 @import "./radius.css";
 
+/* ページセクション間の縦リズム（--Space-Section-*）。preset を使わず
+   個別 subpath だけを import する消費側でもセクション余白が未定義になら
+   ないよう、ここから読み込む（issue #560）。定義元は section-spacing.css の
+   1箇所。Section Spacing だけが欲しい場合は
+   "ksk-design-system/tokens/section-spacing" を使う。 */
+@import "./section-spacing.css";
+
 :root {
   /* ─── Control: Button 系の内寸 ───
      5段スケール。Button の size バリアント xs / sm / default(=Md) / lg / xl と

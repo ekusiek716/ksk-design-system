@@ -101,6 +101,10 @@
       "import": "./src/styles/radius.css",
       "default": "./src/styles/radius.css"
     },
+    "./tokens/section-spacing": {
+      "import": "./src/styles/section-spacing.css",
+      "default": "./src/styles/section-spacing.css"
+    },
     "./glass": {
       "import": "./src/styles/glass.css",
       "default": "./src/styles/glass.css"

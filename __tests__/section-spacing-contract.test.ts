@@ -2,7 +2,9 @@ import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
 
 const tokens = JSON.parse(readFileSync("tokens.json", "utf8"))
-const preset = readFileSync("src/preset.css", "utf8")
+// 定義元は issue #560 で styles/section-spacing.css へ切り出した
+// （preset.css / product-theme.css からは @import で読み込む）。
+const sectionSpacingCss = readFileSync("src/styles/section-spacing.css", "utf8")
 const sectionSource = readFileSync("src/components/ui/section.tsx", "utf8")
 
 const expected = {
@@ -15,11 +17,11 @@ const expected = {
 }
 
 describe("section spacing token contract", () => {
-  it("tokens.json と Tailwind 非依存の preset CSS が一致する", () => {
+  it("tokens.json と Tailwind 非依存の section-spacing CSS が一致する", () => {
     expect(tokens.spacing.section).toEqual(expected)
 
     for (const [name, value] of Object.entries(expected)) {
-      expect(preset).toMatch(
+      expect(sectionSpacingCss).toMatch(
         new RegExp(`--Space-Section-${name}:\\s+${value.replace(".", "\\.")}`),
       )
     }

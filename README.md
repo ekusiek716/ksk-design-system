@@ -93,6 +93,10 @@ DS のルールが適用されません。既存ファイルはスキップさ�
 `ksk-design-system/tokens/product-theme` に含まれます（issue #553）。
 product-theme を読まず Radius だけが欲しい場合は
 `@import "ksk-design-system/tokens/radius";` を使ってください。
+同様にセクション余白トークン（`--Space-Section-*`）も
+`ksk-design-system/tokens/product-theme` に含まれます（issue #560）。
+Section Spacing だけが欲しい場合は
+`@import "ksk-design-system/tokens/section-spacing";` を使ってください。
 
 Tailwind CSS v4 は `node_modules` を既定では走査しません。`@source` がないと、
 DS 内部だけで使うレイアウト・サイズ・状態クラスが生成されず、コンポーネントの表示や操作が崩れます。
