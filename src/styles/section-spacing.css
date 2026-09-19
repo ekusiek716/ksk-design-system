@@ -1,0 +1,25 @@
+/* =============================================================
+   KSK Design System — Section Spacing Tokens（issue #560）
+
+   コンポーネント内の 4px scale と分離した、ページセクション間の縦リズム。
+   Tailwind を使わない consumer も var(--Space-Section-*) で参照できる。
+
+   このファイルが Section Spacing トークンの**唯一の定義元**。`preset.css` と
+   `product-theme.css` の両方から読み込まれる（同値の再定義なので二重読み込みは
+   無害。consumer が preset の後ろで上書きすれば従来どおり後勝ちで効く）。
+
+   preset を使わずトークン CSS を個別 import する消費側は、
+   `tokens/product-theme` を読めば自動的に含まれる。Section Spacing だけを
+   取りたい場合は:
+
+     @import "ksk-design-system/tokens/section-spacing";
+   ============================================================= */
+
+:root {
+  --Space-Section-xs:  32px;
+  --Space-Section-sm:  40px;
+  --Space-Section-md:  48px;
+  --Space-Section-lg:  56px;
+  --Space-Section-xl:  64px;
+  --Space-Section-2xl: 80px;
+}
