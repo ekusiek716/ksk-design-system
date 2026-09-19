@@ -631,7 +631,7 @@
         "color": "ProgressRingColorToken（Web のみ）— semantic トークンを直接指定する逃げ道。指定時は tone より優先する",
         "colors": "{ fill?: string; track?: string; center?: string }（Native のみ）— consumer 所有の brand palette や DS トークンに無い意味色を注入する逃げ道（Calendar.colors / Sheet.surfaceColor と同じ位置づけ）。fill は tone より優先する。center は react-native-svg が無い環境のフォールバック描画でのみ使う中央の塗り",
         "lineCap": "\"butt\" | \"round\"（Web 既定 \"round\" / Native 既定 \"butt\"）— 円弧の線端。各プラットフォームの従来の見た目を保つため既定が異なる。Native のフォールバック描画では常に butt 相当",
-        "accessible / accessibilityLabel / accessibilityRole / accessibilityValue / accessibilityElementsHidden / importantForAccessibility / testID": "（Native のみ）ルート View へ渡す読み上げ系 props。既定では何も付けない。周りのカードが説明文を持つ場合は accessible={false} で中央ラベルの個別読み上げを抑える",
+        "accessible / accessibilityLabel / accessibilityRole / accessibilityValue / accessibilityElementsHidden / importantForAccessibility / testID": "（Native のみ）ルート View へ渡す読み上げ系 props。既定は accessible=true / accessibilityRole=\"progressbar\" / accessibilityValue={ min: 0, max, now: クランプ後の value } / accessibilityLabel は文字列 label かフォールバックの「進捗」で、Web の role=\"progressbar\" と対称（issue #564）。指定した値は必ず優先される。周りのカードが説明文を持つ場合は accessible={false} を渡すと役割・値・名前の既定ごと外れる",
         "label": "React.ReactNode — リング中央に置く要素。省略時はパーセント表示。showLabel={false} のときは描画しない"
       },
       "sizes": [
@@ -649,6 +649,7 @@
         "リング中央へ任意の要素を置くときは label（ReactNode）を使う。中央領域はリングの内径で、はみ出しは切らない（収める責任は利用側）。",
         "Native は SVG 描画時に中央を塗らない（面の色が透ける）。react-native-svg が無い環境のフォールバック描画だけ中央の円板が要るので、面の色と違う場合は colors.center を渡す（issue #559）。",
         "strokeWidth が径の半分以上でも描画は消えず、描ける最大幅へ丸められる。",
+        "読み上げは Web / Native とも既定で進捗として伝わる（Web は role=\"progressbar\" + aria-valuenow、Native は accessibilityRole=\"progressbar\" + accessibilityValue）。中央ラベルの文字は読み上げから隠して値と二重に読まれないようにしてある。装飾としてだけ使う・周りが説明文を持つ場合は Native では accessible={false}（issue #564）。",
         "線の太さは Web / Native とも strokeWidth。Native の thickness は非推奨エイリアスで 3.0.0 で削除される（issue #495。2.0.0 では削除していない）。両方渡した場合は strokeWidth が優先される。"
       ]
     },
