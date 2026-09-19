@@ -120,7 +120,11 @@ export { useCommitDraft } from "./components/ui/use-commit-draft"
 export type { UseCommitDraftResult } from "./components/ui/use-commit-draft"
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./components/ui/tooltip"
 export { ProgressRing } from "./components/ui/progress-ring"
-export type { ProgressRingProps } from "./components/ui/progress-ring"
+export type {
+  ProgressRingProps,
+  ProgressRingTone,
+  ProgressRingLineCap,
+} from "./components/ui/progress-ring"
 export { NumberInput } from "./components/ui/number-input"
 export type { NumberInputProps } from "./components/ui/number-input"
 export { PillToggle } from "./components/ui/pill-toggle"

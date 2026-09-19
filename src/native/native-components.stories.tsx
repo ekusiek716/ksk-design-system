@@ -14,6 +14,7 @@ import { StatusActionBadge } from "./components/StatusActionBadge"
 import { CardHeader } from "./components/CardHeader"
 import { Card } from "./components/Card"
 import { GradientSurface } from "./components/GradientSurface"
+import { ProgressRing } from "./components/ProgressRing"
 
 /**
  * native コンポーネント（`src/native/**`）を react-native-web 経由でブラウザ描画する。
@@ -275,4 +276,78 @@ function ScrimDemo() {
  */
 export const ScrimStandalone: Story = {
   render: () => <ScrimDemo />,
+}
+
+/**
+ * issue #559: ProgressRing の `tone`（意味名の色指定）と `label`（中央スロット）。
+ *
+ * 消費側（exam-kit の「今回の結果」カード）は「正解数＝brand / 正答率＝success」の
+ * 2 色を同じ画面に並べ、中央へ 2 行テキストやアイコンを置く必要があり、
+ * この 2 つが無い間は react-native-svg で自前描画していた。
+ */
+export const ProgressRingToneAndLabel: Story = {
+  render: () => (
+    <NativeProgressRingShowcase />
+  ),
+}
+
+function NativeProgressRingShowcase() {
+  const { theme } = useTheme()
+  const caption = { fontSize: 14, fontWeight: "700" as const, color: theme.text["medium-emphasis"] }
+  const figure = { fontSize: 28, fontWeight: "800" as const, color: theme.text["high-emphasis"] }
+  return (
+    <View style={{ gap: 24 }}>
+      {/* 色違い 2 連 + 中央 2 行テキスト（exam-kit の 2 連ドーナツ相当） */}
+      <View style={{ flexDirection: "row", gap: 16, alignItems: "center" }}>
+        <ProgressRing
+          value={8}
+          max={10}
+          size={132}
+          strokeWidth={10}
+          tone="accent"
+          lineCap="round"
+          label={
+            <View style={{ alignItems: "center" }}>
+              <RNText style={caption}>正解数</RNText>
+              <RNText style={figure}>8/10</RNText>
+            </View>
+          }
+        />
+        <ProgressRing
+          value={80}
+          size={132}
+          strokeWidth={10}
+          tone="success"
+          lineCap="round"
+          // 周りのカードが説明文を読み上げるので、リング内の文字は個別に読ませない
+          accessible={false}
+          label={
+            <View style={{ alignItems: "center" }}>
+              <RNText style={caption}>正答率</RNText>
+              <RNText style={figure}>80%</RNText>
+            </View>
+          }
+        />
+      </View>
+      {/* 中央にアイコン（単連版のトロフィー相当）。文字列 label は既定と同じ体裁で包まれる */}
+      <View style={{ flexDirection: "row", gap: 16, alignItems: "center" }}>
+        <ProgressRing value={80} size={104} strokeWidth={10} label={<RNText style={figure}>🏆</RNText>} />
+        <ProgressRing value={40} size={64} tone="caution" />
+        <ProgressRing value={60} size={64} tone="warning" />
+        <ProgressRing value={90} size={64} tone="info" label="A+" />
+        {/* DS theme に無い色（consumer の brand palette / 学習体験の correct 緑）は colors で注入する */}
+        {/* colors.center は react-native-svg が無い環境のフォールバック描画でのみ効く（面の色に合わせる） */}
+        <ProgressRing
+          value={80}
+          size={64}
+          lineCap="round"
+          colors={{ fill: "#58CC02", track: "#E5E5E5", center: "#F7F7F7" }}
+        />
+        {/* 0% は lineCap="round" でも点が出ない */}
+        <ProgressRing value={0} size={64} lineCap="round" tone="success" />
+        {/* 既定（tone / label 未指定）は従来どおり brand 色 + パーセント表示 */}
+        <ProgressRing value={72} size={64} />
+      </View>
+    </View>
+  )
 }

@@ -39,7 +39,12 @@ export {
   type ProgressTone,
   type ProgressVariant,
 } from "./Progress"
-export { ProgressRing, type ProgressRingProps } from "./ProgressRing"
+export {
+  ProgressRing,
+  type ProgressRingProps,
+  type ProgressRingTone,
+  type ProgressRingLineCap,
+} from "./ProgressRing"
 export { StarRating, type StarRatingProps } from "./StarRating"
 export { NotificationBadge, type NotificationBadgeProps } from "./NotificationBadge"
 export { StatCard, type StatCardProps } from "./StatCard"

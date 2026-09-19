@@ -118,3 +118,89 @@ describe("ProgressRing のカスタマイズ", () => {
     expect(html).toContain('aria-label="出発まで"')
   })
 })
+
+/**
+ * issue #559: 色を意味名で撃ち分ける `tone`。Native の同名 prop と語彙・意味を揃えており、
+ * Native は同じ役割を ThemeProvider から解決する（var() 文字列は RN で解決できないため）。
+ */
+describe("ProgressRing の tone（#559）", () => {
+  it("全 tone が対応する semantic トークンへ解決される", () => {
+    const expected = {
+      accent: "var(--Brand-Primary)",
+      success: "var(--Success-Base)",
+      caution: "var(--Caution-Base)",
+      warning: "var(--Warning-Base)",
+      info: "var(--Info-Base)",
+    } as const
+    for (const [tone, token] of Object.entries(expected)) {
+      const [, progress] = circles(
+        renderToStaticMarkup(<ProgressRing value={50} tone={tone as "accent"} />)
+      )
+      expect(progress.stroke).toBe(token)
+    }
+  })
+
+  it("tone 未指定の既定は従来の Brand-Primary のまま（破壊的変更なし）", () => {
+    const [, withoutTone] = circles(renderToStaticMarkup(<ProgressRing value={50} />))
+    const [, withAccent] = circles(renderToStaticMarkup(<ProgressRing value={50} tone="accent" />))
+    expect(withoutTone.stroke).toBe("var(--Brand-Primary)")
+    expect(withAccent.stroke).toBe(withoutTone.stroke)
+  })
+
+  it("color を明示したら tone より優先される（トークン直指定の逃げ道）", () => {
+    const [, progress] = circles(
+      renderToStaticMarkup(
+        <ProgressRing value={50} tone="success" color="var(--Categorical-3-Bold)" />
+      )
+    )
+    expect(progress.stroke).toBe("var(--Categorical-3-Bold)")
+  })
+
+  it("tone はトラックの色を変えない", () => {
+    const [track] = circles(renderToStaticMarkup(<ProgressRing value={50} tone="caution" />))
+    expect(track.stroke).toBe("var(--Border-Low-Emphasis)")
+  })
+
+  it("label に ReactNode を渡すと既定のパーセント表示より優先される", () => {
+    const html = renderToStaticMarkup(
+      <ProgressRing
+        value={80}
+        tone="success"
+        aria-label="正答率 80パーセント"
+        label={
+          <span>
+            <span>正答率</span>
+            <span>8/10</span>
+          </span>
+        }
+      />
+    )
+    expect(html).toContain("正答率")
+    expect(html).toContain("8/10")
+    // 既定のパーセント表示（"80%"）は label に置き換わる。
+    expect(html).not.toContain("80%")
+    expect(html).toContain('aria-label="正答率 80パーセント"')
+  })
+})
+
+/** issue #559: 線端。Web の既定は従来どおり round で、明示すれば butt にできる。 */
+describe("ProgressRing の lineCap（#559）", () => {
+  function linecaps(html: string) {
+    return [...html.matchAll(/stroke-linecap="([^"]*)"/g)].map((m) => m[1])
+  }
+
+  it("既定は round のまま（従来の見た目を変えない）", () => {
+    expect(linecaps(renderToStaticMarkup(<ProgressRing value={50} />))).toEqual(["round"])
+  })
+
+  it("butt を指定すると SVG の stroke-linecap に渡る", () => {
+    expect(linecaps(renderToStaticMarkup(<ProgressRing value={50} lineCap="butt" />))).toEqual([
+      "butt",
+    ])
+  })
+
+  it("トラック側には線端を付けない（閉じた円なので不要）", () => {
+    const html = renderToStaticMarkup(<ProgressRing value={50} lineCap="round" />)
+    expect(linecaps(html)).toHaveLength(1)
+  })
+})
