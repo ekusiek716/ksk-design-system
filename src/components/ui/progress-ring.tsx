@@ -30,6 +30,32 @@ type ProgressRingColorToken =
   | `var(--Info-${string})`
 
 /**
+ * リングの塗り色を意味名で指定するためのトーン（issue #559）。
+ * Badge / Tag と同じ語彙（brand 色は `accent`）で、Native の `ProgressRingTone` と同名・同義。
+ */
+type ProgressRingTone = "accent" | "success" | "caution" | "warning" | "info"
+
+/**
+ * 円弧の線端（issue #559）。SVG の `stroke-linecap` に渡る。Native の同名 prop と同じ意味。
+ *
+ * Web の既定は従来どおり `"round"`。Native の既定は `"butt"`（各プラットフォームの
+ * 従来の見た目を保つための意図的な差で、contracts / parity 台帳に記録してある）。
+ */
+type ProgressRingLineCap = "butt" | "round"
+
+/**
+ * tone → semantic トークンの対応表。Native の `resolveProgressRingFill` と同じ役割を指す。
+ * 既定の `accent` は従来の既定色 `var(--Brand-Primary)` そのままで、見た目は変わらない。
+ */
+const TONE_COLORS: Record<ProgressRingTone, ProgressRingColorToken> = {
+  accent: "var(--Brand-Primary)",
+  success: "var(--Success-Base)",
+  caution: "var(--Caution-Base)",
+  warning: "var(--Warning-Base)",
+  info: "var(--Info-Base)",
+}
+
+/**
  * 開発ビルド判定。DS は node の型を持たないので globalThis 経由で参照する
  * （chip-selector / quick-action-grid と同じ形）。`proc` の存在を先に必須に
  * しないと、process が無い環境で本番でも警告が出続ける。
@@ -78,8 +104,17 @@ interface ProgressRingProps {
    * 径の半分以上は円が潰れるため、`size / 2` 未満に丸めて描画する。
    */
   strokeWidth?: number
-  /** 進捗円弧の色。既定 `var(--Brand-Primary)` */
+  /**
+   * 進捗円弧の色を意味名で指定する（issue #559）。既定 `"accent"`（= `var(--Brand-Primary)`）。
+   * Native の同名 prop と同じ語彙・同じ意味。`color` を明示した場合はそちらが優先される。
+   */
+  tone?: ProgressRingTone
+  /** 進捗円弧の色。既定は `tone` から決まる（未指定なら `var(--Brand-Primary)`）。 */
   color?: ProgressRingColorToken
+  /**
+   * 円弧の線端（issue #559）。既定 `"round"` で従来どおり。Native の同名 prop と同じ意味。
+   */
+  lineCap?: ProgressRingLineCap
   /** 背面トラックの色。既定 `var(--Border-Low-Emphasis)` */
   trackColor?: ProgressRingColorToken
   /** 中央テキスト（省略時は % 表示）。"✓" のような記号や ReactNode も許容 */
@@ -100,7 +135,9 @@ function ProgressRing({
   value,
   size = "md",
   strokeWidth,
-  color = "var(--Brand-Primary)",
+  tone,
+  color,
+  lineCap = "round",
   trackColor = "var(--Border-Low-Emphasis)",
   label,
   showLabel = true,
@@ -121,6 +158,9 @@ function ProgressRing({
   // 0.5 は radius を必ず正に保つための余白（px/2 ちょうどだと radius が 0 になる）。
   const stroke = Math.min(strokeIsValid ? rawStroke : SIZE_MAP.md.stroke, px / 2 - 0.5)
 
+  // tone は意味名の入口、color はトークン直指定の逃げ道。両方来たら明示の color を採る。
+  const resolvedColor: ProgressRingColorToken = color ?? TONE_COLORS[tone ?? "accent"]
+
   if (isDev()) {
     if (!pxIsValid) {
       console.warn(
@@ -132,7 +172,7 @@ function ProgressRing({
         `[ProgressRing] strokeWidth に描画できない値（${String(rawStroke)}）が渡されました。0 以上の有限な数値を指定してください。`
       )
     }
-    for (const [name, token] of [["color", color], ["trackColor", trackColor]] as const) {
+    for (const [name, token] of [["color", resolvedColor], ["trackColor", trackColor]] as const) {
       // `var(--Brand-Primary, #ff0000)` のようにフォールバックへ生値を書くと
       // 型は通るがテーマ切替から外れる（rules.json P015 と同じ問題）。
       if (/#|\brgba?\(|\bhsla?\(|\boklch\(/.test(token) || token.includes("--Primitive-")) {
@@ -175,9 +215,9 @@ function ProgressRing({
           cy={px / 2}
           r={radius}
           fill="none"
-          stroke={color}
+          stroke={resolvedColor}
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap={lineCap}
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
           // 元の `0.4s ease` を値そのままトークン化。Default は CSS の ease キーワードと
@@ -203,4 +243,10 @@ function ProgressRing({
 }
 
 export { ProgressRing }
-export type { ProgressRingProps, ProgressRingSize, ProgressRingColorToken }
+export type {
+  ProgressRingProps,
+  ProgressRingSize,
+  ProgressRingColorToken,
+  ProgressRingTone,
+  ProgressRingLineCap,
+}

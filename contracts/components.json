@@ -625,7 +625,15 @@
     {
       "name": "ProgressRing",
       "path": "src/components/ui/progress-ring.tsx",
-      "description": "円形プログレス表示。SVGベース。0〜100の進捗を円弧で表示。中央にラベル（%またはカスタム）表示。サイズはプリセット4種に加えて px 数値、線の太さは strokeWidth、配色は color / trackColor（semantic トークンのみ）で上書きできる（issue #480）。",
+      "description": "円形プログレス表示。SVGベース。0〜100の進捗を円弧で表示。中央にラベル（%またはカスタム ReactNode）表示。サイズはプリセット4種に加えて px 数値、線の太さは strokeWidth、配色は tone（意味名）または color / trackColor（semantic トークンのみ）で上書きできる（issue #480 / #559）。",
+      "props": {
+        "tone": "\"accent\" | \"success\" | \"caution\" | \"warning\" | \"info\"（既定 \"accent\"）— リングの塗り色を意味名で指定する（issue #559）。Web/Native 共通の語彙で、Web は semantic トークン、Native は theme の同じ役割へ解決する",
+        "color": "ProgressRingColorToken（Web のみ）— semantic トークンを直接指定する逃げ道。指定時は tone より優先する",
+        "colors": "{ fill?: string; track?: string; center?: string }（Native のみ）— consumer 所有の brand palette や DS トークンに無い意味色を注入する逃げ道（Calendar.colors / Sheet.surfaceColor と同じ位置づけ）。fill は tone より優先する。center は react-native-svg が無い環境のフォールバック描画でのみ使う中央の塗り",
+        "lineCap": "\"butt\" | \"round\"（Web 既定 \"round\" / Native 既定 \"butt\"）— 円弧の線端。各プラットフォームの従来の見た目を保つため既定が異なる。Native のフォールバック描画では常に butt 相当",
+        "accessible / accessibilityLabel / accessibilityRole / accessibilityValue / accessibilityElementsHidden / importantForAccessibility / testID": "（Native のみ）ルート View へ渡す読み上げ系 props。既定では何も付けない。周りのカードが説明文を持つ場合は accessible={false} で中央ラベルの個別読み上げを抑える",
+        "label": "React.ReactNode — リング中央に置く要素。省略時はパーセント表示。showLabel={false} のときは描画しない"
+      },
       "sizes": [
         "sm",
         "md",
@@ -636,7 +644,10 @@
       "rules": [
         "Use for circular progress only. Use <Progress> for linear progress bar.",
         "size はまずプリセット（sm=32 / md=48 / lg=64 / xl=96px）から選ぶ。既存デザインの実寸に合わせる必要があるときだけ px の数値を渡す。",
-        "color / trackColor は semantic トークンの var(--...) 文字列のみ。生 hex と --Primitive-* は型で受け付けない（P015）。",
+        "色は原則 tone（意味名）で指定する。同じ画面に色違いのリングを並べる用途はこれで足りる（issue #559）。Native の colors（生値注入）は、必要な色が DS theme に無いとき（consumer の brand palette / DS トークンに無い意味色）だけに使う。",
+        "color / trackColor は Web のみで、semantic トークンの var(--...) 文字列だけを受け付ける。生 hex と --Primitive-* は型で受け付けない（P015）。Native は var() を解決できないため tone を使う。",
+        "リング中央へ任意の要素を置くときは label（ReactNode）を使う。中央領域はリングの内径で、はみ出しは切らない（収める責任は利用側）。",
+        "Native は SVG 描画時に中央を塗らない（面の色が透ける）。react-native-svg が無い環境のフォールバック描画だけ中央の円板が要るので、面の色と違う場合は colors.center を渡す（issue #559）。",
         "strokeWidth が径の半分以上でも描画は消えず、描ける最大幅へ丸められる。",
         "線の太さは Web / Native とも strokeWidth。Native の thickness は非推奨エイリアスで 3.0.0 で削除される（issue #495。2.0.0 では削除していない）。両方渡した場合は strokeWidth が優先される。"
       ]

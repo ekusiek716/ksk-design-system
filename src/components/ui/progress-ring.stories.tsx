@@ -79,3 +79,59 @@ export const StrokeClamped: Story = {
     <ProgressRing value={70} size={64} strokeWidth={60} />
   ),
 }
+
+export const Tone: Story = {
+  name: "トーン（意味名の色指定）",
+  render: () => (
+    <div className="flex flex-col gap-6">
+      {/* 色違い2連 + 中央2行テキスト。Native の同名 prop と同じ語彙で書ける（issue #559） */}
+      <div className="flex items-center gap-4">
+        <ProgressRing
+          value={80}
+          size={132}
+          strokeWidth={10}
+          tone="accent"
+          aria-label="正解数 10問中8問"
+          label={
+            <span className="flex flex-col items-center">
+              <span className="typo-label-sm text-[var(--Text-Medium-Emphasis)]">正解数</span>
+              <span className="typo-heading-md">8/10</span>
+            </span>
+          }
+        />
+        <ProgressRing
+          value={80}
+          size={132}
+          strokeWidth={10}
+          tone="success"
+          aria-label="正答率 80パーセント"
+          label={
+            <span className="flex flex-col items-center">
+              <span className="typo-label-sm text-[var(--Text-Medium-Emphasis)]">正答率</span>
+              <span className="typo-heading-md">80%</span>
+            </span>
+          }
+        />
+      </div>
+      <div className="flex items-center gap-6">
+        <ProgressRing value={65} size="lg" tone="accent" />
+        <ProgressRing value={65} size="lg" tone="success" />
+        <ProgressRing value={65} size="lg" tone="caution" />
+        <ProgressRing value={65} size="lg" tone="warning" />
+        <ProgressRing value={65} size="lg" tone="info" />
+      </div>
+    </div>
+  ),
+}
+
+export const LineCap: Story = {
+  name: "線端",
+  render: () => (
+    <div className="flex items-center gap-6">
+      {/* 既定は round（従来どおり）。butt は Native の既定と同じ角ばった線端 */}
+      <ProgressRing value={35} size="lg" />
+      <ProgressRing value={35} size="lg" lineCap="butt" />
+      <ProgressRing value={100} size="lg" lineCap="round" />
+    </div>
+  ),
+}
