@@ -54,6 +54,13 @@ export default defineConfig({
         // Dialog 側で別インスタンスになり、入れ子時の pause/resume が壊れる（#504）。
         "radix-ui/internal",
         "@radix-ui/react-slot",
+        // native の optional peer は external に置く。external に無いと Vite が
+        // 「必ず例外を投げるスタブ」へ差し替えてしまい、利用側が実際に
+        // インストールしていても require が失敗する（#540/#559 の SVG 描画が
+        // どの consumer でも動かず、常にフォールバック描画になっていた）。
+        "react-native-svg",
+        "expo-blur",
+        "expo-glass-effect",
       ],
       output: {
         // src/lib/server-variants/* に置いた pure cva 定義を独立チャンクに
