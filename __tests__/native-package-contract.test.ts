@@ -58,4 +58,24 @@ describe("native package contract", () => {
     expect(packageJson.peerDependencies["react-dom"]).toBeTypeOf("string")
     expect(packageJson.peerDependenciesMeta["react-dom"]?.optional).toBe(true)
   })
+
+  // 配布物に optional peer のスタブが残ると、利用側が実際にインストールしていても
+  // require が必ず失敗し、コンポーネントが黙ってフォールバック描画になる。
+  // ProgressRing の SVG 描画（#540 / #559）がどの consumer でも動かず、
+  // 中央の円板と butt の線端のまま出ていたのはこれが原因（#565 で実機から発見）。
+  it("native bundle keeps optional peers as real imports, not throwing stubs", () => {
+    const bundle = readFileSync("dist/native/ui.js", "utf8")
+    expect(
+      bundle.includes("__vite-optional-peer-dep"),
+      "external 未指定の optional peer が「必ず throw するスタブ」に置き換わっている。" +
+        "vite.config.lib.ts の rollupOptions.external へ追加すること",
+    ).toBe(false)
+  })
+
+  it("native optional peers are declared external in the library build", () => {
+    const viteConfig = readFileSync("vite.config.lib.ts", "utf8")
+    for (const peer of ["react-native-svg", "expo-blur", "expo-glass-effect"]) {
+      expect(viteConfig.includes(`"${peer}"`), `${peer} must be external`).toBe(true)
+    }
+  })
 })
