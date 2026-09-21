@@ -6,8 +6,34 @@ import { fileURLToPath } from "node:url"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+// native の optional peer。external に置いたうえで、出力でも素の require("…") を残す。
+const NATIVE_OPTIONAL_PEERS = ["react-native-svg", "expo-blur", "expo-glass-effect"]
+
+/**
+ * ESM 出力では bundler が require("x") を独自の補助関数 n("x") へ書き換える。
+ * Metro は素の require 呼び出ししか依存として拾わないため、書き換え後は
+ * 利用側に peer が入っていても bundle に含まれず、実行時に unknown module で
+ * 致命エラー（dev は赤画面、release はクラッシュ）になる。optional peer に限り
+ * 素の require へ戻す。try/catch 内なので Metro は optional 依存として扱い、
+ * 未インストールでも bundle は失敗しない。
+ */
+function keepLiteralOptionalPeerRequire() {
+  const pattern = new RegExp(
+    `\\b[A-Za-z_$][\\w$]*\\((["'])(${NATIVE_OPTIONAL_PEERS.join("|")})\\1\\)`,
+    "g",
+  )
+  return {
+    name: "keep-literal-optional-peer-require",
+    renderChunk(code: string) {
+      if (!NATIVE_OPTIONAL_PEERS.some((peer) => code.includes(peer))) return null
+      const next = code.replace(pattern, (_m, q, peer) => `require(${q}${peer}${q})`)
+      return next === code ? null : { code: next, map: null }
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), keepLiteralOptionalPeerRequire()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -58,9 +84,7 @@ export default defineConfig({
         // 「必ず例外を投げるスタブ」へ差し替えてしまい、利用側が実際に
         // インストールしていても require が失敗する（#540/#559 の SVG 描画が
         // どの consumer でも動かず、常にフォールバック描画になっていた）。
-        "react-native-svg",
-        "expo-blur",
-        "expo-glass-effect",
+        ...NATIVE_OPTIONAL_PEERS,
       ],
       output: {
         // src/lib/server-variants/* に置いた pure cva 定義を独立チャンクに
