@@ -72,6 +72,20 @@ describe("native package contract", () => {
     ).toBe(false)
   })
 
+  it("native bundle requires optional peers with a literal require Metro can see", () => {
+    const bundle = readFileSync("dist/native/ui.js", "utf8")
+    for (const peer of ["react-native-svg", "expo-blur", "expo-glass-effect"]) {
+      const calls = [...bundle.matchAll(new RegExp(`([\\w$.]+)\\(["']${peer}["']\\)`, "g"))]
+      expect(calls.length, `${peer} の require が出力に無い`).toBeGreaterThan(0)
+      for (const [, callee] of calls) {
+        expect(
+          callee,
+          `${peer} が補助関数経由で読まれている。Metro が依存を拾えず実行時に unknown module になる`,
+        ).toBe("require")
+      }
+    }
+  })
+
   it("native optional peers are declared external in the library build", () => {
     const viteConfig = readFileSync("vite.config.lib.ts", "utf8")
     for (const peer of ["react-native-svg", "expo-blur", "expo-glass-effect"]) {
