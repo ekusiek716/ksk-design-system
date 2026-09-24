@@ -82,18 +82,15 @@ export interface QuickActionGridProps {
 }
 
 /**
- * 選択インジケータのチェックボックス（web の iconsax `TickSquare` と同形）。
+ * 選択インジケータの枠なし tick（web / native Checkbox と同じチェックマーク）。
  *
- * 文字の「✓」グリフは端末のフォントに形が依存し、DS のアイコン（web は iconsax）と
- * 太さ・比率が揃わない。native には icon ライブラリを入れない方針なので、角丸の枠と、
- * 2 辺だけ残して 45° 回した View の組み合わせで描く。フォント非依存で線の太さも
- * 指定できる。
+ * 文字の「✓」グリフは端末のフォントに形が依存するため、native Checkbox と同様に
+ * 2 辺だけ残して回転した View で描く。外枠を持たず、タイルそのものを選択対象として示す。
  *
  * 装飾なので支援技術からは隠す（選択状態は accessibilityState の checked / selected
  * が伝える）。
  */
 function CheckMark({ color, size = 16 }: { color: string; size?: number }) {
-  const tickSize = size * 0.55
   return (
     <View
       pointerEvents="none"
@@ -105,22 +102,16 @@ function CheckMark({ color, size = 16 }: { color: string; size?: number }) {
         height: size,
         alignItems: "center",
         justifyContent: "center",
-        // web の TickSquare と同じ「枠 + チェック」。枠が無いと web と形が揃わない
-        borderWidth: 1.5,
-        borderColor: color,
-        borderRadius: size * 0.28,
       }}
     >
       <View
         style={{
-          width: tickSize * 0.42,
-          height: tickSize * 0.72,
-          borderRightWidth: 1.5,
-          borderBottomWidth: 1.5,
+          width: size * 0.65,
+          height: size * 0.3,
+          borderLeftWidth: 2,
+          borderBottomWidth: 2,
           borderColor: color,
-          transform: [{ rotate: "45deg" }],
-          // 回転で下がる分を戻して枠の中心に合わせる
-          marginTop: -tickSize * 0.1,
+          transform: [{ rotate: "-45deg" }, { translateY: -1 }],
         }}
       />
     </View>

@@ -14,6 +14,7 @@ interface SettingsListRowProps
   extends Omit<React.ComponentProps<"div">, "title" | "onClick"> {
   title: React.ReactNode
   description?: React.ReactNode
+  /** 行頭のアイコンやアバター。寸法は渡した要素を保ち、装飾用の余白を追加しない。 */
   leading?: React.ReactNode
   rightSlot?: React.ReactNode
   interactive?: boolean
@@ -42,7 +43,7 @@ function SettingsSection({
       {(title || description || action) && (
         <div
           data-slot="settings-section-header"
-          className="flex items-start justify-between gap-3 px-1"
+          className="flex items-start justify-between gap-3 px-4"
         >
           <div className="min-w-0 flex-1">
             {title && (
@@ -103,7 +104,7 @@ function SettingsListRow({
   const content = (
     <>
       {leading && (
-        <div data-slot="settings-list-row-leading" className="flex size-10 shrink-0 items-center justify-center">
+        <div data-slot="settings-list-row-leading" className="flex shrink-0 items-center justify-center">
           {leading}
         </div>
       )}

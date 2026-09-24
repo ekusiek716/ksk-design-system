@@ -90,10 +90,17 @@ export const Removable: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const removeButtons = canvas.getAllByRole("button", { name: /^削除:/ })
+    const mouseOnly = window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+      !window.matchMedia("(any-pointer: coarse)").matches
 
     for (const button of removeButtons) {
-      await expect(button.getBoundingClientRect().width).toBeGreaterThanOrEqual(44)
+      const bounds = button.getBoundingClientRect()
+      await expect(bounds.width).toBe(mouseOnly ? 32 : 44)
       await expect(getComputedStyle(button, "::before").minHeight).toBe("44px")
+      // 本体との境界を重ねず、見た目を詰めても選択と削除を独立させる。
+      const labelAction = button.previousElementSibling!
+      await expect(labelAction.getBoundingClientRect().right).toBeLessThanOrEqual(bounds.left)
+      await expect(labelAction.contains(button)).toBe(false)
     }
   },
 }
