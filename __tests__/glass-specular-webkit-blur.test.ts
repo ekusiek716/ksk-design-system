@@ -1,23 +1,13 @@
 /**
- * Liquid Glass リム blur の Safari(WebKit) 回帰ガード
+ * Liquid Glass の前景ぼけ回帰ガード（全ブラウザー）
  *
- * `.glass-specular::after` は conic リムを描く 1px の枠で、その枠だけに
- * `backdrop-filter: blur(4px)` を効かせて「光を導く切断面」を作る。適用域の
- * 限定は mask(exclude) に依存している。
+ * `.glass-specular::after` は本文より上に重ねる conic リムの装飾。
+ * ここに backdrop-filter を置くと本文もぼかす対象になり、mask(exclude) に
+ * よる縁への適用域制限が効かない描画環境では、文字やボタン全体がぼやける。
  *
- * ⚠️ 回帰（yokoku-app Safari, 2026-07 / このガードの発端）:
- * WebKit は mask で backdrop-filter のサンプリング域をクリップしない。よって
- * この ::after（z-index:2、コンテンツ z1 の上）の blur(4px) がシート全面に
- * かかり、前景テキスト（Liquid Glass シート内のボタン文字など）を潰す。Blink は
- * mask で適用域も 1px に限定するため出ない、ブラウザ差分バグ。
- *
- * 対策: ::after の backdrop-filter は Chromium 限定の
- * `@supports (-webkit-app-region: none)` ゲート内でのみ供給し、非対応
- * （Safari/Firefox）では conic リムのみに安全劣化させる。conic リム背景自体は
- * WebKit でも mask で正しく 1px に切り取られるので割れない。
- *
- * この契約（base ::after は backdrop-filter を持たない / ゲート内でのみ持つ）が
- * 壊れていないか静的に検証する。DOM 非依存。
+ * Safari 向けの回避だけではなく、Chromium 向けルールにも禁止を適用する。
+ * 背景のガラス効果は素材クラス側で維持し、前景をぼかす装飾だけをなくす。
+ * この契約を静的に検証する。実際の文字の鮮明度はブラウザーで別途確認する。
  *
  * 実行: npm run test
  */
@@ -31,8 +21,6 @@ const css = readFileSync(join(ROOT, "src/styles/glass.css"), "utf8")
 const GATE = "@supports (-webkit-app-region: none)"
 const gateIndex = css.indexOf(GATE)
 
-/** ゲートより前（＝全ブラウザ共通に適用される）の CSS 断片 */
-const ungated = gateIndex === -1 ? css : css.slice(0, gateIndex)
 /** ゲート以降（＝Chromium 限定で追加適用される）の CSS 断片 */
 const gated = gateIndex === -1 ? "" : css.slice(gateIndex)
 
@@ -51,27 +39,24 @@ function afterRuleBodies(source: string): string[] {
   return bodies
 }
 
-describe("Liquid Glass リム blur の WebKit 回帰ガード", () => {
+describe("Liquid Glass の前景ぼけ回帰ガード", () => {
   it("Chromium 限定ゲート（-webkit-app-region）が存在する", () => {
     expect(gateIndex).toBeGreaterThan(-1)
   })
 
-  it("ゲート外の .glass-specular::after は backdrop-filter を持たない（Safari で全面ぼやけ→前景テキストが潰れる地雷）", () => {
-    const bodies = afterRuleBodies(ungated)
+  it("すべての .glass-specular::after は backdrop-filter を持たない", () => {
+    const bodies = afterRuleBodies(css)
     expect(bodies.length).toBeGreaterThan(0)
     for (const body of bodies) {
       expect(
         /backdrop-filter/.test(body),
-        `ゲート外の .glass-specular::after に backdrop-filter が復活している。WebKit は mask で適用域を切らないためシート全面がぼやけ前景テキストが潰れる。backdrop-filter は @supports (-webkit-app-region: none) 内でのみ供給すること。`
+        `前景より上の .glass-specular::after に backdrop-filter が復活している。マスクで縁に限定される前提に依存せず、ぼかしは本文より下の素材クラスにだけ適用すること。`
       ).toBe(false)
     }
   })
 
-  it("Chromium ゲート内で .glass-specular::after に backdrop-filter を供給している（リムの progressive blur は維持）", () => {
-    expect(gated).toMatch(/\.glass-specular::after/)
-    const bodies = afterRuleBodies(gated)
-    expect(bodies.some((b) => /backdrop-filter:\s*blur/.test(b))).toBe(true)
-    // -webkit- 先・標準後の宣言順も維持する（consumer minifier dedupe 対策）
-    expect(gated).toMatch(/-webkit-backdrop-filter:\s*blur[^;]*;\s*\n?\s*backdrop-filter:\s*blur/)
+  it("素材本体の背景ぼかし・屈折は Chromium ゲート内で維持する", () => {
+    const material = stripComments(gated).match(/\.glass\s*\{([^}]*)\}/)?.[1]
+    expect(material).toMatch(/-webkit-backdrop-filter:\s*var\(--glass-blur\) var\(--glass-refract\);\s*backdrop-filter:\s*var\(--glass-blur\) var\(--glass-refract\)/)
   })
 })

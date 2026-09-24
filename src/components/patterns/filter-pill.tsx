@@ -85,9 +85,11 @@ const SIZE_CLASS: Record<FilterPillSize, string> = {
  *   タップ領域は sm でも 32px 高 + 44px 幅相当の padding を確保する。
  *
  * @example
+ * ```tsx
  * <FilterPill label="エリア" value={area ?? undefined} onClear={() => setArea(null)}>
  *   <CheckboxGroup ... />
  * </FilterPill>
+ * ```
  */
 function FilterPill({
   label,
