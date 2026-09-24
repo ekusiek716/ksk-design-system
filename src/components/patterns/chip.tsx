@@ -184,8 +184,9 @@ function Chip({
   const soldOutStyles = isSoldOut &&
     "border border-[var(--Text-Disable)] bg-[var(--Surface-Secondary)]! text-[var(--Text-Disable)]! cursor-not-allowed"
 
-  // × は独立した操作なのでA004の横44pxを優先する。ラベルとの密度は少し下がるが、
-  // 32px幅のまま見た目だけ寄せるより、運動障害・片手操作時の誤タップを防ぐ。
+  // × は独立した操作なので、タッチ環境は横44pxを維持する。
+  // マウス専用環境では32pxへ詰める。タッチ併用PCは any-pointer:coarse の
+  // min-widthで44pxを保ち、横へ当たり判定をはみ出させず隣の操作と分離する。
   // × も独立したタップ対象なので、縦は本体と同じく透明 before 擬似要素で 44px に拡張する。
   const removeTouchTarget =
     "before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']"
@@ -210,7 +211,7 @@ function Chip({
       chipVariants({ variant, size, shape }),
       "rounded-r-none",
       // × を本体ラベル直後に寄せるため右パディングを詰める
-      actualSize !== "tile" && "pr-1.5",
+      actualSize !== "tile" && "pr-1",
       variant === "outline" && "border-r-0",
       selectedStyles,
       soldOutStyles,
@@ -258,6 +259,7 @@ function Chip({
             !selected && variant === "outline" && "border border-l-0 border-[var(--Border-Medium-Emphasis)] bg-transparent text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]",
             selected && "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Active-Primary-Button)] hover:text-[var(--Text-on-Inverse)]",
             removeButtonSize,
+            actualSize !== "tile" && "[@media(hover:hover)_and_(pointer:fine)]:w-8 [@media(any-pointer:coarse)]:min-w-11",
             removeButtonShape,
           )}
         >

@@ -73,7 +73,9 @@
 @source inline("[--ksk-fab-bottom-offset:5rem]");
 @source inline("[--ksk-fab-bottom-offset:6rem]");
 @source inline("[-webkit-tap-highlight-color:transparent]");
+@source inline("[@media(any-pointer:coarse)]:min-w-11");
 @source inline("[@media(hover:hover)]:transition-colors");
+@source inline("[@media(hover:hover)_and_(pointer:fine)]:w-8");
 @source inline("[scrollbar-width:none]");
 @source inline("absolute");
 @source inline("active:bg-[var(--Active-Destructive-Button)]");

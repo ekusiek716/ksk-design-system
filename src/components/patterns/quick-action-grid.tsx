@@ -1,7 +1,4 @@
 import * as React from "react"
-// iconsax の `Check` は「小切手（checkbook）」のアイコンで、チェックマークではない。
-// 選択済みの印には TickSquare（チェックボックス）を使う。
-import { TickSquare } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
 import { useComposedRef } from "@/lib/compose-ref"
 import { IconBadge } from "@/components/ui/icon-badge"
@@ -175,10 +172,12 @@ function ActionTile({
             {indicator}
           </span>
         ) : isSelected ? (
-          // 文字の「✓」グリフはフォント依存で DS のアイコンと太さ・比率が揃わないため
-          // iconsax を使う（native は icon ライブラリを持たないので同形を View で描画）
+          // Checkbox と同じ枠なし tick。iconsax の Check は小切手、TickSquare は枠付きなので使わない。
+          // ksk-ds-allow-custom-ui: DS 既存 Checkbox の tick path を再利用（native は同じ印を View で描画）。
           <span className="shrink-0 text-[var(--Text-Accent-Primary)]" aria-hidden>
-            <TickSquare size={16} />
+            <svg width="16" height="16" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </span>
         ) : null}
       </span>
