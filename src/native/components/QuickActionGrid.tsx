@@ -189,6 +189,10 @@ export function ActionTile({
         busy: loading,
         ...accessibilityState,
       }}
+      // react-native-web 0.21 は accessibilityState を aria-* に変換しない。
+      aria-checked={isRadio ? (accessibilityState?.checked ?? isSelected) : undefined}
+      aria-disabled={accessibilityState?.disabled ?? isDisabled}
+      aria-busy={accessibilityState?.busy ?? loading}
       {...accessibilityProps}
       style={({ pressed }) => [
         {

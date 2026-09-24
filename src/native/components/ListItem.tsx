@@ -30,10 +30,21 @@ export type ListItemAlign = "start" | "center"
  */
 export type ListItemDensity = "comfortable" | "compact"
 
+export type ListItemTone = "default" | "accent" | "caution"
+export type ListItemDivider = "none" | "inset" | "full"
+
 export interface ListItemProps extends AccessibilityProps {
   leading?: React.ReactNode
+  /** 文字列にはDSタイポを適用。ReactNodeはレイアウト互換のためそのまま描画する。 */
   title: React.ReactNode
+  /** 文字列にはDSタイポを適用。ReactNodeのスタイルは呼び出し側が管理する。 */
   description?: React.ReactNode
+  /** 文字列の見出しの色。ReactNodeには適用しない。 */
+  titleTone?: ListItemTone
+  /** 文字列の説明の色。ReactNodeには適用しない。 */
+  descriptionTone?: ListItemTone
+  /** 下端の区切り線。insetは左右の行余白に追随（leadingの幅は含まない）。既定none。 */
+  divider?: ListItemDivider
   trailing?: React.ReactNode
   /**
    * title / description と同じ列に置く下段スロットではなく、
@@ -51,6 +62,9 @@ export interface ListItemProps extends AccessibilityProps {
 export function ListItem({
   leading,
   title,
+  titleTone = "default",
+  descriptionTone = "default",
+  divider = "none",
   description,
   trailing,
   footerSlot,
@@ -70,6 +84,10 @@ export function ListItem({
   const isCompact = density === "compact"
   const hasFooter = footerSlot !== undefined && footerSlot !== null && footerSlot !== false
 
+  const inset = isCompact ? scales.spacing.scale[3] : scales.spacing.scale[4]
+  const toneColor = (tone: ListItemTone, fallback: "high-emphasis" | "medium-emphasis") =>
+    theme.text[tone === "accent" ? "accent-primary" : tone === "caution" ? "caution" : fallback]
+
   const row = (
     <>
       {leading}
@@ -82,7 +100,7 @@ export function ListItem({
           <RNText
             style={[
               resolveTypo("body.md"),
-              { color: theme.text["high-emphasis"] },
+              { color: toneColor(titleTone, "high-emphasis") },
               isCentered ? { textAlign: "center" as const } : null,
             ]}
           >
@@ -95,7 +113,7 @@ export function ListItem({
           <RNText
             style={[
               resolveTypo("body.sm"),
-              { color: theme.text["medium-emphasis"] },
+              { color: toneColor(descriptionTone, "medium-emphasis") },
               isCentered ? { textAlign: "center" as const } : null,
             ]}
           >
@@ -125,6 +143,14 @@ export function ListItem({
         opacity: disabled ? 0.5 : 1,
       }}
     >
+      {divider !== "none" && (
+        <View
+          pointerEvents="none"
+          accessible={false}
+          aria-hidden
+          style={{ position: "absolute", bottom: 0, left: divider === "inset" ? inset : 0, right: divider === "inset" ? inset : 0, height: 1, backgroundColor: theme.border["low-emphasis"] }}
+        />
+      )}
       {hasFooter ? (
         <>
           <View
