@@ -4,7 +4,7 @@
 
 React Native / Expo consumer は、新規 UI を作る前にこの一覧で既存コンポーネントを確認してください。すべて `ksk-design-system/native/ui` から import します。
 
-- Public native component exports: 151
+- Public native component exports: 152
 - Import: `import { Button, Screen } from "ksk-design-system/native/ui"`
 
 | Component | Source | Section |
@@ -50,6 +50,7 @@ React Native / Expo consumer は、新規 UI を作る前にこの一覧で既�
 | `Input` | `src/native/components/Input.tsx` | Phase 2: Basic Form |
 | `Label` | `src/native/components/Label.tsx` | Phase 2: Basic Form |
 | `NumberInput` | `src/native/components/NumberInput.tsx` | Phase 2: Basic Form |
+| `Radio` | `src/native/components/Radio.tsx` | Phase 2: Basic Form |
 | `RadioGroup` | `src/native/components/RadioGroup.tsx` | Phase 2: Basic Form |
 | `Slider` | `src/native/components/Slider.tsx` | Phase 2: Basic Form |
 | `Switch` | `src/native/components/Switch.tsx` | Phase 2: Basic Form |

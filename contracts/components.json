@@ -288,6 +288,9 @@
       "accessibility": [
         "Must pair with <Label> for each item",
         "RadioGroupItem は見た目 20px の円のまま ::before で 44x44px の当たり判定を内蔵する。消費側で [role=\"radio\"] のグローバル寸法上書きを追加しない（issue #470）"
+      ],
+      "rules": [
+        "Native は単体 Radio（ksk-design-system/native/ui）を共用。selected/onChange/size/disabled/decorative を持つ。decorative は親 radio の操作と読み上げに委ねる。単体使用では accessibilityLabel を指定し、onChange は常に true（排他制御は親）。"
       ]
     },
     {
@@ -1338,7 +1341,8 @@
         "leftSlot 幅にインデントされない全幅の下段要素（進捗バー等）は footerSlot、title 列の内側に置くものは bottomSlot",
         "押せる行（href / onClick）の中に削除ボタン等の別操作を置く場合は secondaryAction を使う。rightSlot に button を入れると button の入れ子で不正な HTML になる",
         "secondaryAction 指定時はルートが div になり、行全体を覆う不可視の a/button（stretched link）+ 副アクションの兄弟配置に切り替わる",
-        "バッジ・日時・シェブロンなど押せない表示は secondaryAction ではなく rightSlot"
+        "バッジ・日時・シェブロンなど押せない表示は secondaryAction ではなく rightSlot",
+        "Native: titleTone / descriptionTone は default | accent | caution（既定 default）。文字列にのみ DS typography と semantic text 色を適用し、ReactNode は従来通り無加工。divider は none（既定）| inset | full。inset は density の左右 padding に追随し、leading 幅は含めない。footerSlot がある場合も行全体の下端。外置き Separator の full-bleed 既定は変更しない。"
       ]
     },
     {

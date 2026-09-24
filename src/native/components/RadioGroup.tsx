@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, View, Text as RNText } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { Radio } from "./Radio"
 import { resolveTypo } from "../typography"
 
 export interface RadioOption {
@@ -49,34 +50,8 @@ export function RadioGroup({ options, value, onChange, disabled = false }: Radio
             aria-checked={selected}
             aria-disabled={itemDisabled || undefined}
           >
-            <View
-              pointerEvents="none"
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-              // react-native-web は上記2つの native 専用プロパティを尊重しないため、
-              // web でも効く aria-hidden を併記して装飾用の丸印を支援技術から隠す
-              aria-hidden
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: 10,
-                borderWidth: 2,
-                borderColor: selected ? theme.brand.primary : theme.border["medium-emphasis"],
-                alignItems: "center",
-                justifyContent: "center",
-                marginTop: o.description ? 2 : 0,
-              }}
-            >
-              {selected && (
-                <View
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    backgroundColor: theme.brand.primary,
-                  }}
-                />
-              )}
+            <View style={{ marginTop: o.description ? 2 : 0 }}>
+              <Radio selected={selected} decorative />
             </View>
             <View style={{ flex: 1, gap: 2 }}>
               <RNText style={[resolveTypo("body.md"), { color: theme.text["high-emphasis"] }]}>

@@ -9,6 +9,8 @@ import { Dialog } from "./components/Dialog"
 import { Scrim } from "./components/Scrim"
 import { ActionTile, QuickActionGrid } from "./components/QuickActionGrid"
 import { CheckboxGroup } from "./components/CheckboxGroup"
+import { Radio } from "./components/Radio"
+import { ListItem } from "./components/ListItem"
 import { RadioGroup } from "./components/RadioGroup"
 import { StatusActionBadge } from "./components/StatusActionBadge"
 import { CardHeader } from "./components/CardHeader"
@@ -357,4 +359,34 @@ function NativeProgressRingShowcase() {
       </View>
     </View>
   )
+}
+
+/** #571: 単体と親に意味を委ねた装飾の両方を確認する。 */
+export const StandaloneRadio: Story = {
+  render: function Render() {
+    const [selected, setSelected] = React.useState(false)
+    return (
+      <View style={{ gap: 24 }}>
+        <Radio selected={selected} onChange={setSelected} accessibilityLabel="単体の選択肢" />
+        <Radio selected disabled accessibilityLabel="選択済み・無効" />
+        <QuickActionGrid columns={2}>
+          <ActionTile label="選択済み" selected selectionMode="single" indicator={<Radio selected decorative />} />
+          <ActionTile label="未選択" selectionMode="single" indicator={<Radio decorative />} />
+        </QuickActionGrid>
+      </View>
+    )
+  },
+}
+
+/** #572 / #573: tone は文字列の typography を保持し、線は行の密度に追随する。 */
+export const ListItemTonesAndDividers: Story = {
+  render: () => (
+    <View>
+      <ListItem title="標準の行" description="区切り線なし（既定）" />
+      <ListItem title="出典・参考資料" description="アクセントの文字列" titleTone="accent" divider="inset" />
+      <ListItem title="コンパクトな行" description="説明は注意色" descriptionTone="caution" density="compact" divider="inset" />
+      <ListItem title="全幅の区切り線" align="center" divider="full" />
+      <ListItem title="下段スロット付き" divider="inset" footerSlot={<ProgressRing value={60} />} />
+    </View>
+  ),
 }
