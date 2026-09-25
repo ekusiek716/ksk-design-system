@@ -41,6 +41,11 @@ export const Input = React.forwardRef<TextInput, InputProps>(function Input(
 ) {
   const { theme, scales } = useTheme()
   const [focused, setFocused] = useState(false)
+  const typography = resolveTypo("body.md")
+  // A native single-line field centers its font metrics itself. A paragraph
+  // lineHeight adds leading to its baseline (especially visible with Japanese
+  // text on iOS). Keep paragraph rhythm for multiline and browser inputs.
+  if (Platform.OS !== "web" && !rest.multiline) delete typography.lineHeight
 
   const borderColor = invalid
     ? theme.border.caution
@@ -80,7 +85,7 @@ export const Input = React.forwardRef<TextInput, InputProps>(function Input(
         }}
         placeholderTextColor={theme.text["low-emphasis"]}
         style={[
-          resolveTypo("body.md"),
+          typography,
           { flex: 1, color: theme.text["high-emphasis"], paddingVertical: 0 },
           WEB_INPUT_RESET as TextInputProps["style"],
           inputStyle,
