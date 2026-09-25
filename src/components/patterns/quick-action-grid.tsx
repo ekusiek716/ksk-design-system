@@ -1,3 +1,4 @@
+import { SemanticIcon } from "../ui/semantic-icon"
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useComposedRef } from "@/lib/compose-ref"
@@ -175,9 +176,7 @@ function ActionTile({
           // Checkbox と同じ枠なし tick。iconsax の Check は小切手、TickSquare は枠付きなので使わない。
           // ksk-ds-allow-custom-ui: DS 既存 Checkbox の tick path を再利用（native は同じ印を View で描画）。
           <span className="shrink-0 text-[var(--Text-Accent-Primary)]" aria-hidden>
-            <svg width="16" height="16" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <SemanticIcon name="selected" size={16} className="text-[var(--Text-Accent-Primary)]" />
           </span>
         ) : null}
       </span>

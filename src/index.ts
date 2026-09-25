@@ -469,3 +469,6 @@ export {
   categoricalVar,
 } from "./lib/categorical"
 export type { CategoricalIndex } from "./lib/categorical"
+
+export { SemanticIcon, SEMANTIC_ICONS } from "./components/ui/semantic-icon"
+export type { SemanticIconProps, SemanticIconName } from "./components/ui/semantic-icon"

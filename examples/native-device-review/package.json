@@ -1,0 +1,27 @@
+{
+  "name": "ksk-native-device-review",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo run:ios",
+    "android": "expo run:android",
+    "check": "tsc --noEmit",
+    "export:ios": "expo export --platform ios",
+    "export:android": "expo export --platform android"
+  },
+  "dependencies": {
+    "expo": "57.0.25",
+    "expo-blur": "~57.0.3",
+    "expo-glass-effect": "~57.0.4",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-svg": "15.15.4"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "@types/react": "^19.2.7"
+  }
+}

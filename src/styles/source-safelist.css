@@ -75,7 +75,7 @@
 @source inline("[-webkit-tap-highlight-color:transparent]");
 @source inline("[@media(any-pointer:coarse)]:min-w-11");
 @source inline("[@media(hover:hover)]:transition-colors");
-@source inline("[@media(hover:hover)_and_(pointer:fine)]:w-8");
+@source inline("[@media(hover:hover)_and_(pointer:fine)]:w-[max(2rem,var(--Chip-Remove-Width))]");
 @source inline("[scrollbar-width:none]");
 @source inline("absolute");
 @source inline("active:bg-[var(--Active-Destructive-Button)]");
@@ -431,6 +431,7 @@
 @source inline("gap-[var(--Nav-Item-Gap)]");
 @source inline("gap-[var(--Nav-Pill-Gap)]");
 @source inline("gap-[var(--Product-Card-Gap)]");
+@source inline("gap-[var(--Settings-Row-Gap)]");
 @source inline("gap-x-2");
 @source inline("gap-x-4");
 @source inline("gap-y-1");
@@ -670,6 +671,7 @@
 @source inline("min-h-[80px]");
 @source inline("min-h-[inherit]");
 @source inline("min-h-[max(2.75rem,var(--Nav-Item-Min-Height))]");
+@source inline("min-h-[max(2.75rem,var(--Settings-Row-Min-Height))]");
 @source inline("min-h-[var(--Control-Height-Xl)]");
 @source inline("min-h-[var(--Field-Min-Height)]");
 @source inline("min-h-[var(--Nav-Pill-Min-Height)]");
@@ -828,6 +830,7 @@
 @source inline("px-[var(--Field-Padding-X-Md)]");
 @source inline("px-[var(--Field-Padding-X-Sm)]");
 @source inline("px-[var(--Nav-Pill-Padding-X)]");
+@source inline("px-[var(--Settings-Row-Padding-X)]");
 @source inline("py-0.5");
 @source inline("py-1");
 @source inline("py-1.5");
@@ -846,6 +849,7 @@
 @source inline("py-[var(--Field-Padding-Y)]");
 @source inline("py-[var(--Nav-Pill-Padding-Y)]");
 @source inline("py-[var(--Product-Page-Padding-Y)]");
+@source inline("py-[var(--Settings-Row-Padding-Y)]");
 @source inline("py-[var(--Space-Section-2xl)]");
 @source inline("py-[var(--Space-Section-md)]");
 @source inline("py-[var(--Space-Section-xl)]");

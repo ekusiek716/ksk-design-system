@@ -1,0 +1,73 @@
+{
+  "description": "迷いやすい部品の使い分け。基本用途とルールはcomponents.jsonを参照する。",
+  "groups": [
+    {
+      "names": [
+        "Sheet",
+        "ResponsiveOverlayFrame",
+        "ResponsiveDialog"
+      ],
+      "difference": "Sheetは幅に追従するシート。ResponsiveDialogとResponsiveOverlayFrameの組み合わせはモバイルのシートをPCでは中央ダイアログに切り替える。シートのままでよい場合はSheetを選ぶ。",
+      "avoid": "削除など取り消せない操作の確認にはAlertDialogを使う。"
+    },
+    {
+      "names": [
+        "ChipSelector",
+        "PillToggle",
+        "Select",
+        "FilterPill",
+        "FilterChip"
+      ],
+      "difference": "ChipSelectorは複数または単一の選択肢を並べる。PillToggleは少数の値を単一選択する。Selectは候補を開いて選ぶ。FilterPillは条件設定パネルを開く操作と解除、FilterChipは適用中の条件の表示に使う。",
+      "avoid": "選択と画面遷移を混ぜない。画面の切り替えにはTabs、ページ移動にはナビゲーションを使う。"
+    },
+    {
+      "names": [
+        "FormField",
+        "RhfFormField"
+      ],
+      "difference": "patterns/form-fieldのFormFieldはラベル・説明・エラーを入力に関連付ける。RhfFormFieldはreact-hook-formのController連携用。単純なフォームでは前者を使う。",
+      "avoid": "react-hook-formを使わないフォームにRhfFormFieldを導入しない。"
+    },
+    {
+      "names": [
+        "Button",
+        "IconButton",
+        "ActionTile",
+        "QuickActionGrid"
+      ],
+      "difference": "Buttonは文言で操作を示す。IconButtonは意味が明確な短い操作に使いアクセシブルな名前を付ける。ActionTileは説明や選択状態を持つタイル、QuickActionGridはその配置に使う。",
+      "avoid": "単なる説明を押せるボタンにしない。複数の値選択は専用の選択コンポーネントを使う。"
+    },
+    {
+      "names": [
+        "EmptyState",
+        "ErrorState",
+        "Skeleton",
+        "Spinner"
+      ],
+      "difference": "取得成功で0件ならEmptyState、取得失敗ならErrorStateと再試行。Skeletonは内容の形が分かる読み込み、Spinnerは処理の進行中を示す。",
+      "avoid": "取得に失敗した状態を「0件」と表示しない。"
+    },
+    {
+      "names": [
+        "Input",
+        "Textarea",
+        "AutoGrowTextarea",
+        "NumberInput",
+        "DateField"
+      ],
+      "difference": "Inputは短い自由入力、Textareaは複数行、AutoGrowTextareaは内容に応じて高さが伸びる複数行入力です。数値の増減にはNumberInput、日付にはDateFieldを使います。ラベル・説明・エラーはFormFieldで関連付けます。",
+      "avoid": "決まった候補から選ぶ場合はSelectやRadioGroupを使います。長い文章の入力を1行のInputに押し込めず、複数行の入力欄を使います。"
+    },
+    {
+      "names": [
+        "SubNav",
+        "SectionNav",
+        "Tabs"
+      ],
+      "difference": "TabsとSubNavは同じ画面内の表示内容を切り替えるための部品です。SubNavは横スクロールする項目列、Tabsは項目と対応する表示領域を組み合わせます。SectionNavは同じページ内の見出しへ移動する目次です。",
+      "avoid": "ページ内の見出しへスクロールするだけの操作をタブ切り替えとして実装しないでください。別ページへ移動する場合はリンクを使います。"
+    }
+  ]
+}

@@ -4,12 +4,12 @@
     "version": "2.6.3",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 68,
+      "ui": 69,
       "patterns": 61,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 152
+      "total": 153
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -1220,6 +1220,29 @@
         "最大幅・中央寄せ・左右 gutter は内側の Container に委ねる",
         "footer の全幅背景帯には as=\"footer\" を使える"
       ]
+    },
+    {
+      "name": "SemanticIcon",
+      "description": "用途から選ぶ装飾アイコン。情報i・警告!・枠なし選択tickを区別。NativeはSVG依存なしのView描画で同じ意味を提供。",
+      "variants": [
+        "selected",
+        "selectedSquare",
+        "success",
+        "close",
+        "info",
+        "warning"
+      ],
+      "rules": [
+        "装飾は既定で読み上げない。単独の情報画像にはaria-labelを指定する。",
+        "アイコンのみの操作はButton / native IconButtonに操作名を付ける。",
+        "Nativeの警告は円形の感嘆符、Webはiconsax Danger。意味は同一だが描画素材に合わせて器の形が異なる。"
+      ],
+      "path": "src/components/ui/semantic-icon.tsx",
+      "props": {
+        "name": "selected | selectedSquare | success | close | info | warning — 意味を必ず指定",
+        "size": "number | string (Web), number (Native) — 既定24",
+        "accessibilityLabel": "string — 単独の情報画像に付ける名前。Webはaria-labelを優先"
+      }
     }
   ],
   "patterns": [

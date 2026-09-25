@@ -1,0 +1,8 @@
+[
+  { "name": "chip-narrow-light", "story": "verification-visual-fixtures--chip-long-label", "width": 390, "height": 260, "mode": "light" },
+  { "name": "chip-wide-dark-hostile", "story": "verification-visual-fixtures--chip-long-label", "width": 960, "height": 260, "mode": "dark", "hostile": "loud" },
+  { "name": "settings-narrow-dark", "story": "verification-visual-fixtures--settings-long-description", "width": 390, "height": 520, "mode": "dark" },
+  { "name": "settings-wide-light-hostile", "story": "verification-visual-fixtures--settings-long-description", "width": 960, "height": 400, "mode": "light", "hostile": "loud" },
+  { "name": "sheet-narrow-light", "story": "verification-visual-fixtures--sheet-long-description", "width": 390, "height": 720, "mode": "light", "dialog": true },
+  { "name": "sheet-wide-dark", "story": "verification-visual-fixtures--sheet-long-description", "width": 960, "height": 720, "mode": "dark", "dialog": true }
+]

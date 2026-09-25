@@ -61,6 +61,7 @@
 | SectionNav | `@/components/ui/section-nav` | — | Vertical, Horizontal, StickyGuide |
 | Section | `@/components/ui/section` | **spacing**: `sm`, `md`, `lg`, `xl`<br>**background**: `none`, `subtle`, `accent-subtle` | FullBleedBandWithContainedContent |
 | Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard |
+| SEMANTIC_ICONS, SemanticIcon | `@/components/ui/semantic-icon` | — | — |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
 | Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass` | BottomSheet, FloatSheet, TopSheet, FloatSheetTallContent, RightSheet, A11yOptions, TitleAutoFocusAppearance, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, Float — 仮想キーボード追従, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158), OpensAndIsImmediatelyInteractive, ChildDescriptionIsLinked, ChildDescriptionIsLinkedWithSwipeToClose, NoDescriptionLeavesNoDescribedBy, ChildDescriptionIsLinkedWithSnapPoints, ChildDescriptionIsLinkedWithSwipeSideDrawer, DescriptionPropIsLinked, ExplicitDescribedByWins |
 | Skeleton, SkeletonText | `@/components/ui/skeleton` | — | CardSkeleton, TextSkeleton, SkeletonText (5 lines) |
@@ -153,7 +154,7 @@
 | Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero |
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch, AsForm |
 | SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
-| SettingsSection, SettingsListRow | `@/components/patterns/settings-section` | — | Group, Card, Danger |
+| SettingsSection, SettingsListRow | `@/components/patterns/settings-section` | — | Group, Card, Danger, CompactSpacing |
 | ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders, With onShare tracking |
 | SideDrawerFrame | `@/components/patterns/side-drawer-frame` | — | RightDrawer, LeftDrawer, RightDrawer — swipeToClose, LeftDrawer — swipeToClose, Glass |
 | SimplePagination | `@/components/patterns/simple-pagination` | — | アイテム数指定 (items), ページ数指定 (pages), compact (モバイル省略表示), 境界での disabled, 0 件 |

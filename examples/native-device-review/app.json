@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "KSK Native Device Review",
+    "slug": "ksk-native-device-review",
+    "version": "0.0.0",
+    "scheme": "ksk-native-review",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "ios": { "bundleIdentifier": "dev.ksk.designsystem.review", "supportsTablet": true },
+    "android": { "package": "dev.ksk.designsystem.review" }
+  }
+}

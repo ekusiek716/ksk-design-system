@@ -259,7 +259,7 @@ function Chip({
             !selected && variant === "outline" && "border border-l-0 border-[var(--Border-Medium-Emphasis)] bg-transparent text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]",
             selected && "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Active-Primary-Button)] hover:text-[var(--Text-on-Inverse)]",
             removeButtonSize,
-            actualSize !== "tile" && "[@media(hover:hover)_and_(pointer:fine)]:w-8 [@media(any-pointer:coarse)]:min-w-11",
+            actualSize !== "tile" && "[@media(hover:hover)_and_(pointer:fine)]:w-[max(2rem,var(--Chip-Remove-Width))] [@media(any-pointer:coarse)]:min-w-11",
             removeButtonShape,
           )}
         >

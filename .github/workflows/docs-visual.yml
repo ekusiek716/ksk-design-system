@@ -1,0 +1,70 @@
+name: Docs and visual regression
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - '.storybook/**'
+      - 'contracts/**'
+      - 'scripts/**'
+      - 'test/visual/**'
+      - 'examples/native-device-review/**'
+      - 'package*.json'
+      - '.github/workflows/docs-visual.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  docs-visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.0-noble@sha256:baed2032d533817f3dbe6425de795788430ba345e819a1201337009ba17c9d07
+      options: --ipc=host
+    env:
+      KSK_VISUAL_ENV: playwright-1.62.0-noble
+      STORYBOOK_URL: http://127.0.0.1:6010
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build-storybook
+      - name: Start static Storybook
+        id: server
+        run: |
+          node scripts/serve-storybook.mjs storybook-static 6010 > /tmp/storybook.log 2>&1 &
+          node --input-type=module -e 'for(let i=0;i<30;i++){try{if((await fetch("http://127.0.0.1:6010/index.json")).ok)process.exit(0)}catch{}await new Promise(r=>setTimeout(r,1000))}process.exit(1)'
+      - run: npm run test:visual:guards
+      - run: npm run test:visual
+      - name: Render every Docs page
+        if: always() && steps.server.outcome == 'success'
+        run: npm run test:docs
+      - name: Upload timing and image differences
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: docs-visual-report
+          path: artifacts/
+          retention-days: 14
+  native-device-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            examples/native-device-review/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix examples/native-device-review
+      - run: npm run check --prefix examples/native-device-review
+      - run: npm run export:ios --prefix examples/native-device-review
+      - run: npm run export:android --prefix examples/native-device-review
+      # JS bundling is deliberately not reported as an actual OS/device pass.

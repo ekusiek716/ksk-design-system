@@ -61,6 +61,14 @@
 @import "./shadow.css";
 
 :root {
+  /* Settings rows: independent of button dimensions; 44px floor in the component. */
+  --Settings-Row-Min-Height: 3.5rem;
+  --Settings-Row-Gap: 0.75rem;
+  --Settings-Row-Padding-X: 1rem;
+  --Settings-Row-Padding-Y: 0.75rem;
+  /* Pointer-only chip removal. Coarse pointers retain a 44px target. */
+  --Chip-Remove-Width: 2rem;
+
   /* ─── Control: Button 系の内寸 ───
      5段スケール。Button の size バリアント xs / sm / default(=Md) / lg / xl と
      1対1で対応する。既定値は h-6/h-8/h-10/h-12/h-14・px-2/px-3/px-4/px-6/px-8。 */

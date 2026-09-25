@@ -339,3 +339,5 @@ export { ReviewSummary, type ReviewSummaryProps } from "./ReviewSummary"
 // Phase 8: Shells
 export { AppShell, type AppShellProps } from "./AppShell"
 export { MarketingShell, type MarketingShellProps } from "./MarketingShell"
+
+export { SemanticIcon, SEMANTIC_ICONS, type SemanticIconProps, type SemanticIconName } from "./SemanticIcon"

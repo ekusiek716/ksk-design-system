@@ -1,0 +1,8 @@
+{
+  "environment": "playwright-1.62.0-noble",
+  "arch": "x64",
+  "browser": "151.0.7922.34",
+  "deviceScaleFactor": 1,
+  "locale": "ja-JP",
+  "timezoneId": "Asia/Tokyo"
+}

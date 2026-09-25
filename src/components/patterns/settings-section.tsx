@@ -141,7 +141,7 @@ function SettingsListRow({
     </>
   )
   const classes = cn(
-    "flex min-h-14 w-full items-center gap-3 border-b border-[var(--Border-Low-Emphasis)] px-4 py-3 text-left last:border-b-0",
+    "flex min-h-[max(2.75rem,var(--Settings-Row-Min-Height))] w-full items-center gap-[var(--Settings-Row-Gap)] border-b border-[var(--Border-Low-Emphasis)] px-[var(--Settings-Row-Padding-X)] py-[var(--Settings-Row-Padding-Y)] text-left last:border-b-0",
     interactive && !disabled && "cursor-pointer transition-colors hover:bg-[var(--Surface-Secondary)]",
     destructive && interactive && !disabled && "hover:bg-[var(--Surface-Caution-Subtle)]",
     disabled && "cursor-not-allowed opacity-50",
