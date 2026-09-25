@@ -126,3 +126,8 @@ export function resolveRelease(
   }
   return { kind: "snap", snap: best }
 }
+
+/** The dedicated handle is draggable even when body content is scrolled. */
+export function shouldStartHandleDrag(animating: boolean, keyboardReducedViewport: boolean): boolean {
+  return !animating && !keyboardReducedViewport
+}
