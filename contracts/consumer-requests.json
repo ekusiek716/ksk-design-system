@@ -38,7 +38,8 @@
     },
     {
       "dsIssue": 586,
-      "consumerIssue": "https://github.com/ekusiek716/camera-app/issues/248"
+      "consumerIssue": "https://github.com/ekusiek716/camera-app/issues/248",
+      "fixPr": 587
     }
   ]
 }
