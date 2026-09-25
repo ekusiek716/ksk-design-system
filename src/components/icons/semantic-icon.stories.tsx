@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { SemanticIcon, SEMANTIC_ICONS, type SemanticIconName } from "../ui/semantic-icon"
 
 const meta = {
-  title: "Foundations/Semantic Icons",
+  title: "Foundation/Semantic Icons",
   component: SemanticIcon,
   tags: ["autodocs"],
   parameters: { layout: "padded", docs: { description: { component: "名前ではなく用途と実物から選びます。選択は枠なしtick、完了はTickCircle、情報はi、警告は感嘆符です。装飾は読み上げず、アイコンだけの操作にはButtonのaria-labelを指定します。" } } },
