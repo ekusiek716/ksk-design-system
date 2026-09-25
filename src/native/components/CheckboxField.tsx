@@ -1,5 +1,5 @@
 import React from "react"
-import { Pressable, View, Text as RNText } from "react-native"
+import { Pressable, View, Text as RNText, useWindowDimensions } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { Checkbox } from "./Checkbox"
@@ -24,6 +24,12 @@ export function CheckboxField({
   accessibilityHint,
 }: CheckboxFieldProps) {
   const { theme, scales } = useTheme()
+  const { fontScale } = useWindowDimensions()
+  const labelTypo = resolveTypo("body.md")
+  const checkboxSize = 20
+  // Center the fixed-size indicator in the first label line, including Dynamic Type.
+  // Centering against the whole text block would move it down when descriptions wrap.
+  const checkboxOffset = Math.max(0, ((labelTypo.lineHeight ?? checkboxSize) * fontScale - checkboxSize) / 2)
   return (
     <Pressable
       onPress={() => !disabled && onChange?.(!checked)}
@@ -54,12 +60,12 @@ export function CheckboxField({
         // react-native-web は上記2つの native 専用プロパティを尊重しないため、
         // web でも効く aria-hidden を併記して内側の装飾用 Checkbox を支援技術から隠す
         aria-hidden
-        style={{ paddingTop: description ? 2 : 0 }}
+        style={{ paddingTop: description ? checkboxOffset : 0 }}
       >
-        <Checkbox checked={checked} disabled={disabled} decorative />
+        <Checkbox checked={checked} disabled={disabled} size={checkboxSize} decorative />
       </View>
       <View style={{ flex: 1, gap: 2 }}>
-        <RNText style={[resolveTypo("body.md"), { color: theme.text["high-emphasis"] }]}>{label}</RNText>
+        <RNText style={[labelTypo, { color: theme.text["high-emphasis"] }]}>{label}</RNText>
         {description && (
           <RNText style={[resolveTypo("body.sm"), { color: theme.text["medium-emphasis"] }]}>
             {description}
