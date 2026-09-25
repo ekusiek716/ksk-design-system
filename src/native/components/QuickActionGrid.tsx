@@ -1,3 +1,4 @@
+import { SemanticIcon } from "./SemanticIcon"
 import React from "react"
 import {
   Pressable,
@@ -91,31 +92,7 @@ export interface QuickActionGridProps {
  * が伝える）。
  */
 function CheckMark({ color, size = 16 }: { color: string; size?: number }) {
-  return (
-    <View
-      pointerEvents="none"
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      aria-hidden
-      style={{
-        width: size,
-        height: size,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <View
-        style={{
-          width: size * 0.65,
-          height: size * 0.3,
-          borderLeftWidth: 2,
-          borderBottomWidth: 2,
-          borderColor: color,
-          transform: [{ rotate: "-45deg" }, { translateY: -1 }],
-        }}
-      />
-    </View>
-  )
+  return <SemanticIcon name="selected" color={color} size={size} />
 }
 
 function colorsForVariant(

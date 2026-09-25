@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "policy": "Record only observations actually performed on the exact revision and stated OS, including failed checks. Bundling, typechecks and React Native Web are not device verification.",
+  "checks": [
+    { "id": "safe-area", "components": ["Sheet", "Screen"], "procedure": "Open sheet at both snap points; rotate; confirm title and footer avoid notch and home indicator." },
+    { "id": "keyboard", "components": ["Input", "KeyboardAwareSheetFooter", "Sheet"], "procedure": "Focus first/last input, enter Japanese, scroll and dismiss keyboard; verify focused field and submit remain reachable, no double inset." },
+    { "id": "font-scale", "components": ["Text", "Button", "Input", "Sheet"], "procedure": "Set OS accessibility text size to largest, reopen app; verify full labels wrap and controls remain reachable." },
+    { "id": "sheet-gesture", "components": ["Sheet"], "procedure": "Drag handle between 0.5 and 0.9, scroll inner content, dismiss and reopen five times; ensure no invisible input-blocking modal." },
+    { "id": "screen-reader", "components": ["Button", "Input", "Sheet"], "procedure": "Enable VoiceOver/TalkBack; verify names, modal focus, field labels and close action." }
+  ],
+  "observations": []
+}

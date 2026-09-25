@@ -66,3 +66,15 @@ export const Danger: Story = {
     </div>
   ),
 }
+
+/** Public spacing overrides keep a 44px floor even when a product requests a shorter row. */
+export const CompactSpacing: Story = {
+  render: () => (
+    <div className="max-w-md bg-[var(--Surface-Primary)] [--Settings-Row-Min-Height:2rem] [--Settings-Row-Gap:0.5rem] [--Settings-Row-Padding-X:0.75rem] [--Settings-Row-Padding-Y:0.5rem]">
+      <SettingsSection title="コンパクトな設定行" description="余白を調整しても操作領域は44px以上を保ちます" variant="card">
+        <SettingsListRow title="通知" leading={<Notification size={20} className="text-[var(--Text-Medium-Emphasis)]" />} rightSlot={<Switch aria-label="通知" />} />
+        <SettingsListRow title="プロフィール" description="長い説明文はアイコンと操作の間で折り返します" leading={<Setting2 size={20} className="text-[var(--Text-Medium-Emphasis)]" />} rightSlot={<Button size="sm" variant="secondary">編集</Button>} />
+      </SettingsSection>
+    </div>
+  ),
+}

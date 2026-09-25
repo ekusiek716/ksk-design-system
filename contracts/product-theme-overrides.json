@@ -149,7 +149,8 @@
       "--Space-Section-2xl"
     ],
     "chip": [
-      "--Chip-Radius"
+      "--Chip-Radius",
+      "--Chip-Remove-Width"
     ],
     "productTypography": [
       "--Product-Type-Scale"
@@ -185,6 +186,12 @@
     ],
     "toast": [
       "--Toast-Viewport-Offset-Bottom"
+    ],
+    "settingsRow": [
+      "--Settings-Row-Min-Height",
+      "--Settings-Row-Gap",
+      "--Settings-Row-Padding-X",
+      "--Settings-Row-Padding-Y"
     ]
   },
   "dsVariableNamespaces": [
@@ -212,6 +219,7 @@
     "--Field-",
     "--Product-",
     "--Chip-",
+    "--Settings-",
     "--glass-",
     "--card-surface",
     "--Nav-",

@@ -574,6 +574,43 @@ function diffProps(name, webPath, nativePath) {
 
 const { names: contractNames, pathByName: webPathByName } = componentEntriesFromContracts()
 const { names: nativeExportNames, fileByName: nativeFileByName } = nativeValueExports()
+// Public report reuses the exact same extraction and intentional-gap sources as CI.
+if (process.argv.includes("--report-json")) {
+  const webExports = new Map()
+  const source = fs.readFileSync(path.join(ROOT, "src/index.ts"), "utf8")
+  for (const match of source.matchAll(/export\s*\{([\s\S]*?)\}\s*from\s*["']([^"']+)["']/g)) {
+    for (const raw of match[1].split(",")) {
+      const part = raw.trim()
+      if (!part || part.startsWith("type ")) continue
+      const name = part.split(/\s+as\s+/).pop().trim()
+      if (!/^[A-Z]/.test(name) || /^[A-Z0-9_]+$/.test(name)) continue
+      const stem = path.posix.join("src", match[2])
+      const file = [stem + ".tsx", stem + ".ts", stem + "/index.ts"].find(candidate => fs.existsSync(path.join(ROOT, candidate)))
+      webExports.set(name, file ?? null)
+    }
+  }
+  const records = [...new Set([...contractNames, ...webExports.keys(), ...[...nativeExportNames].filter(name => !/^[A-Z0-9_]+$/.test(name))])].sort().map(name => {
+    const webPath = webExports.get(name) ?? webPathByName.get(name)
+    const nativeFile = nativeFileByName.get(name)
+    const webProps = webPath ? extractOwnProps(path.join(ROOT, webPath), `${name}Props`) : null
+    const nativeProps = nativeFile ? extractOwnProps(path.join(ROOT, "src/native/components", nativeFile + (path.extname(nativeFile) ? "" : ".tsx")), `${name}Props`) : null
+    return {
+      name, webExport: webExports.has(name), webPath: webPath ?? null, nativePath: nativeFile ? `src/native/components/${nativeFile}` : null,
+      nativeExport: nativeExportNames.has(name),
+      intentionalDifference: INTENTIONAL_NATIVE_GAPS.get(name) ?? null,
+      ownProps: { web: webProps, native: nativeProps },
+      propDifference: webProps && nativeProps ? {
+        webOnly: webProps.filter(prop => !nativeProps.includes(prop)),
+        nativeOnly: nativeProps.filter(prop => !webProps.includes(prop)),
+      } : null,
+      documentedPropDifference: INTENTIONAL_PROP_GAPS.get(name) ?? null,
+      documentedDefaultDifference: INTENTIONAL_DEFAULT_GAPS.get(name) ?? null,
+    }
+  })
+  fs.writeSync(1, JSON.stringify({ schemaVersion: 1, limitation: "Own prop names only; inherited props, types, defaults and runtime behavior are not established by this report. null means not extracted, not equal.", records }, null, 2))
+  process.exit(0)
+}
+
 const missing = contractNames.filter((name) => !nativeExportNames.has(name) && !INTENTIONAL_NATIVE_GAPS.has(name))
 const requiredMissing = REQUIRED_NATIVE_EXPORTS.filter((name) => !nativeExportNames.has(name))
 

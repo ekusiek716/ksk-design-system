@@ -1,4 +1,5 @@
 import * as React from "react"
+import { ComponentDocsPage } from "./docs-page"
 import type { Preview } from "@storybook/react-vite"
 import "../src/index.css"
 import "./preview.css"
@@ -112,6 +113,7 @@ const preview: Preview = {
   // 個別ストーリーで opt-out したい場合は story 側で `tags: ['!autodocs']` を指定する。
   tags: ["autodocs"],
   parameters: {
+    docs: { page: ComponentDocsPage },
     layout: "fullscreen",
     backgrounds: {
       options: {
@@ -147,7 +149,7 @@ const preview: Preview = {
     },
     options: {
       storySort: {
-        order: ["Foundation", ["Guidelines", "Showcase", "Gallery", "*"], "Components", "Shells", "*"],
+        order: ["Guides", "Foundation", ["Guidelines", "Showcase", "Gallery", "*"], "Components", "Shells", "*"],
       },
     },
   },
