@@ -1,6 +1,7 @@
 import React from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { StatCard } from "../src/native/components/StatCard"
 import { Radio } from "../src/native/components/Radio"
 import { RadioGroup } from "../src/native/components/RadioGroup"
 import { ActionTile, QuickActionGrid } from "../src/native/components/QuickActionGrid"
@@ -109,5 +110,20 @@ describe("native ActionTile radio state on react-native-web", () => {
     expect(button.props.accessibilityRole).toBe("button")
     expect(button.props["aria-checked"]).toBeUndefined()
     expect(button.props.accessibilityState).toMatchObject({ selected: true })
+  })
+})
+
+
+describe("native StatCard equal-height composition", () => {
+  it("keeps labels unconstrained while exposing natural layout and a minimum slot", () => {
+    const onLabelLayout = vi.fn()
+    render(<StatCard label="長いラベル" value={12} style={{ flex: 1 }} labelMinHeight={48} onLabelLayout={onLabelLayout} />)
+    expect(hosts.records[0].style.flex).toBe(1)
+    const label = hosts.records.find(r => r.host === "Text" && r.children === "長いラベル")!
+    expect(label.props.numberOfLines).toBeUndefined()
+    expect(label.style.height).toBeUndefined()
+    expect(label.style.maxHeight).toBeUndefined()
+    expect(label.props.onLayout).toBe(onLabelLayout)
+    expect(hosts.records.some(r => r.style.minHeight === 48)).toBe(true)
   })
 })
