@@ -8,5 +8,22 @@
     { "id": "sheet-gesture", "components": ["Sheet"], "procedure": "Drag handle between 0.5 and 0.9, scroll inner content, dismiss and reopen five times; ensure no invisible input-blocking modal." },
     { "id": "screen-reader", "components": ["Button", "Input", "Sheet"], "procedure": "Enable VoiceOver/TalkBack; verify names, modal focus, field labels and close action." }
   ],
-  "observations": []
+  "observations": [
+    {
+      "checkId": "keyboard",
+      "components": [
+        "Input",
+        "KeyboardAwareSheetFooter",
+        "Sheet"
+      ],
+      "platform": "ios",
+      "os": "26.5",
+      "device": "iPhone 17 Pro Simulator",
+      "revision": "906f830c278bcef8703bcc2f4179139eec9b58bb",
+      "checkedAt": "2026-09-25T05:12:00Z",
+      "status": "failed",
+      "evidence": "docs/native-review-2026-09-25.md",
+      "notes": "項目1への日本語入力後、ソフトキーボードで保存フッターが隠れた。"
+    }
+  ]
 }

@@ -14,12 +14,14 @@ npm run android    # Android SDK + emulator / 接続端末
 
 Expo Goを使用する場合は `npm start`。このアプリと同じSDKをサポートするExpo Goが必要です。`ios`/`android`は専用開発ビルドを作るためGoの版に依存しません。既存アプリとは異なるbundle IDを使用します。
 
+iOS SimulatorでMetroがIPv6 localhostだけに待ち受け、`127.0.0.1`のbundle取得が失敗する場合は、`REACT_NATIVE_PACKAGER_HOSTNAME=127.0.0.1 npm run start -- --host lan`で起動し、Expo Goのホームから開き直してください。この指定は同じMacのSimulator用で、別端末からは接続できません。
+
 `npm run export:ios` / `npm run export:android` はJSをbundleするだけです。実OSの合格判定には使いません。
 
 ## 確認項目
 
 1. ノッチ付き端末で上下のsafe area値が0でないこと、回転後に追従することを確認。
-2. シートを開き、最初と最後の項目に日本語入力。ソフトキーボードを表示したまま対象欄と保存ボタンへ到達できるか確認。シミュレータはハードウェアキーボード接続を解除。
+2. シートを開き、最初と最後の項目に日本語入力。ソフトキーボードを表示したまま対象欄と保存ボタンへ到達できるか確認。iOS SimulatorではI/Oメニューの「Toggle Software Keyboard」で表示できます。
 3. シートを0.5と0.9の高さへドラッグ。本文スクロールと競合しないこと、閉じて再表示を5回繰り返して見えないModalが操作を塞がないことを確認。
 4. OSのアクセシビリティ設定で文字を最大に拡大。ラベル・説明・ボタンが欠けず、操作へ到達できることを確認。アプリ内の文字倍率表示で設定反映を確認。
 5. ライト/ダーク両方で文字・入力境界・押せる面を確認。
