@@ -5,6 +5,7 @@ import {
   resolveDragTranslateY,
   resolveRelease,
   shouldCaptureDrag,
+  shouldStartHandleDrag,
   type SnapGestureConfig,
 } from "../src/native/sheet-snap-gesture"
 
@@ -120,5 +121,16 @@ describe("resolveRelease", () => {
     // 0.65 相当の位置で微小移動 → 0.65 に戻る
     const ty = (three.maxSnap - 0.65) * three.H
     expect(resolveRelease(ty, 10, 0.65, three)).toEqual({ kind: "snap", snap: 0.65 })
+  })
+})
+
+describe("dedicated handle capture", () => {
+  it("captures touch before move, regardless of body scroll position", () => {
+    expect(shouldCaptureDrag(0, { active: .92, maxSnap: .92, scrollTop: 120, animating: false })).toBe(false)
+    expect(shouldStartHandleDrag(false, false)).toBe(true)
+  })
+  it("does not interrupt animation or keyboard viewport", () => {
+    expect(shouldStartHandleDrag(true, false)).toBe(false)
+    expect(shouldStartHandleDrag(false, true)).toBe(false)
   })
 })

@@ -13,6 +13,7 @@ import {
   ScrollView,
   Text as RNText,
   View,
+  type PanResponderCallbacks,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native"
@@ -26,6 +27,7 @@ import {
   resolveDragTranslateY,
   resolveRelease,
   shouldCaptureDrag,
+  shouldStartHandleDrag,
   type SnapGestureConfig,
 } from "../sheet-snap-gesture"
 
@@ -456,8 +458,8 @@ function SnapBottomSheet({
   // rule cannot see that boundary and otherwise treats passing the callbacks
   // to React Native as a render-time ref read.
   // eslint-disable-next-line react-hooks/refs
-  const [pan] = useState(() =>
-    PanResponder.create({
+  const [pan] = useState(() => {
+    const handlers: PanResponderCallbacks = {
       onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (_, g) =>
         !keyboardReducedViewportRef.current && shouldCaptureDrag(g.dy, {
@@ -496,8 +498,21 @@ function SnapBottomSheet({
         }
         moveTo(action.snap)
       },
-    }),
-  )
+    }
+    return {
+      body: PanResponder.create(handlers),
+      handle: PanResponder.create({
+        ...handlers,
+        // The handle owns its touch from the start, independently of the
+        // ScrollView responder and its scroll offset. Body scrolling keeps
+        // the existing move threshold and full-snap rules.
+        onStartShouldSetPanResponder: () => shouldStartHandleDrag(
+          animatingRef.current, keyboardReducedViewportRef.current,
+        ),
+        onPanResponderTerminationRequest: () => false,
+      }),
+    }
+  })
 
   // overlay opacity：translateY に追従（フル=濃く、閉=透明）
   const overlayOpacity = translateY.interpolate({
@@ -551,7 +566,7 @@ function SnapBottomSheet({
           {/* panel：bottom anchor + 高さ固定 + transform で snap 位置。
               footer は外側にレイヤしてパネル translation の影響を受けない */}
           <Animated.View
-            {...pan.panHandlers}
+            {...pan.body.panHandlers}
             style={{
               position: "absolute",
               left: 0,
@@ -565,7 +580,9 @@ function SnapBottomSheet({
             }}
           >
             <View
+              {...pan.handle.panHandlers}
               style={{
+                minHeight: scales.touchTargets.iconButton.min,
                 paddingHorizontal: scales.spacing.scale[4],
                 // 最大 snap が画面いっぱいに近いとき、パネル上端が safe-area に
                 // 食い込む分だけハンドル／タイトルを下げる（届かないときは 0）。
