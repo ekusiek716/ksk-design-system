@@ -4,6 +4,10 @@ import {
   Dimensions,
   Easing,
   Modal,
+  KeyboardAvoidingView,
+  Keyboard,
+  TextInput,
+  Platform,
   PanResponder,
   Pressable,
   ScrollView,
@@ -16,6 +20,7 @@ import { useTheme } from "../theme/ThemeProvider"
 import { useSafeAreaInsets } from "../theme/SafeAreaInsetsProvider"
 import { resolveBottomSheetTopInset, resolveTopSheetPaddingTop } from "../safe-area"
 import { resolveTypo } from "../typography"
+import { resolveSheetViewportLayout } from "../sheet-viewport-layout"
 import { createRevealLifecycle } from "../modal-reveal-lifecycle"
 import {
   resolveDragTranslateY,
@@ -46,6 +51,8 @@ export interface SheetProps {
    * シート下端に固定で表示する要素（例：「つづける」ボタン）。
    * children の ScrollView と分離されるためコンテンツのスクロールに
    * 追従しない。snap mode（bottom + snapPoints）でのみ有効。
+   * ソフトキーボード表示中はその上に固定し、本文を一時拡張する。
+   * キーボード回避は Sheet が所有するため footer に追加 inset は不要。
    */
   footer?: React.ReactNode
   /**
@@ -260,12 +267,53 @@ function SnapBottomSheet({
     typeof globalThis !== "undefined" &&
     (globalThis as unknown as { window?: { innerHeight?: number } }).window
       ?.innerHeight
-  const H = dimsH > 0 ? dimsH : winH && winH > 0 ? winH : 700
+  const [H] = useState(() => dimsH > 0 ? dimsH : winH && winH > 0 ? winH : 700)
   const panelH = Math.round(H * maxSnap)
-  const safeAreaTopInset = resolveBottomSheetTopInset(insets, safeArea, H, panelH)
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null)
+  const [fullViewportHeight, setFullViewportHeight] = useState<number | null>(null)
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
+  const scrollRef = useRef<ScrollView>(null)
+  const scrollTopRef = useRef(0)
+  useEffect(() => {
+    const show = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow", () => setKeyboardOpen(true))
+    const hide = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide", () => setKeyboardOpen(false))
+    return () => { show.remove(); hide.remove() }
+  }, [])
+  const {
+    availableHeight,
+    panelHeight: visiblePanelHeight,
+    expandToViewport: keyboardReducedViewport,
+  } = resolveSheetViewportLayout(fullViewportHeight ?? H, panelH, viewportHeight, keyboardOpen)
+  // Keep the user's snap translation intact while the keyboard temporarily
+  // expands the panel. Restoring the viewport restores the previous snap.
+  const safeAreaTopInset = resolveBottomSheetTopInset(
+    insets, safeArea, availableHeight, visiblePanelHeight,
+  )
 
   // footer の実測高。onLayout で取得し ScrollView の paddingBottom に反映する。
   const [footerH, setFooterH] = useState(0)
+  // Measure the actual visible body, not screen keyboard coordinates: the
+  // Modal has already been resized and its header/footer occupy part of it.
+  const revealFocusedInput = useCallback(() => {
+    const input = TextInput.State.currentlyFocusedInput?.()
+    const scroll = scrollRef.current
+    if (!input || !scroll || !keyboardOpen) return
+    scroll.getNativeScrollRef()?.measureInWindow((_x, bodyTop, _width, bodyHeight) => {
+      input.measureInWindow((_inputX, inputTop, _inputWidth, inputHeight) => {
+        if (TextInput.State.currentlyFocusedInput?.() !== input || scrollRef.current !== scroll) return
+        const visibleBottom = bodyTop + bodyHeight - footerH - scales.spacing.scale[4]
+        const delta = inputTop < bodyTop
+          ? inputTop - bodyTop
+          : Math.max(0, inputTop + inputHeight - visibleBottom)
+        if (delta !== 0) scroll.scrollTo({ y: Math.max(0, scrollTopRef.current + delta), animated: true })
+      })
+    })
+  }, [keyboardOpen, footerH, scales.spacing.scale])
+  useEffect(() => {
+    if (!keyboardOpen) return
+    const frame = requestAnimationFrame(revealFocusedInput)
+    return () => cancelAnimationFrame(frame)
+  }, [keyboardOpen, viewportHeight, revealFocusedInput])
   // footer 下に取る追加マージン（コンテンツ末尾と footer の物理的距離）
   const FOOTER_GAP = 60
 
@@ -283,7 +331,10 @@ function SnapBottomSheet({
   // snap アニメーション実行中フラグ。実行中は gesture を受け取らない。
   const animatingRef = useRef(false)
   const openRef = useRef(open)
-  const scrollTopRef = useRef(0)
+  const keyboardReducedViewportRef = useRef(false)
+  useEffect(() => {
+    keyboardReducedViewportRef.current = keyboardReducedViewport
+  }, [keyboardReducedViewport])
   // PanResponder / onShow のクロージャは生成時の props を掴み続けるため、
   // 可変値はこの ref 経由で読む（dismissible の後からの切り替え・onClose の
   // 最新参照が gesture に反映されないのを防ぐ）。
@@ -314,6 +365,15 @@ function SnapBottomSheet({
     },
     [translateY],
   )
+
+  useEffect(() => {
+    if (!keyboardReducedViewport) return
+    // A keyboard can appear in the middle of a drag. Discard the transient
+    // gesture offset so dismissal restores an actual snap, not a half-drag.
+    translateY.stopAnimation()
+    animatingRef.current = false
+    setTranslateY((maxSnap - activeRef.current) * H)
+  }, [keyboardReducedViewport, translateY, setTranslateY, maxSnap, H])
 
   const animateTo = useCallback(
     (
@@ -400,20 +460,23 @@ function SnapBottomSheet({
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (_, g) =>
-        shouldCaptureDrag(g.dy, {
+        !keyboardReducedViewportRef.current && shouldCaptureDrag(g.dy, {
           active: activeRef.current,
           maxSnap: configRef.current.maxSnap,
           scrollTop: scrollTopRef.current,
           animating: animatingRef.current,
         }),
       onPanResponderGrant: () => {
+        if (keyboardReducedViewportRef.current) return
         startTYRef.current = translateYRef.current
         startActiveRef.current = activeRef.current
       },
       onPanResponderMove: (_, g) => {
+        if (keyboardReducedViewportRef.current) return
         setTranslateY(resolveDragTranslateY(startTYRef.current, g.dy, configRef.current))
       },
       onPanResponderRelease: (_, g) => {
+        if (keyboardReducedViewportRef.current) return
         const config = configRef.current
         const action = resolveRelease(
           startTYRef.current,
@@ -467,91 +530,114 @@ function SnapBottomSheet({
         <Pressable onPress={dismissible ? onClose : () => {}} style={{ flex: 1 }} />
       </Animated.View>
 
-      {/* panel：bottom anchor + 高さ固定 + transform で snap 位置。
-          footer は外側にレイヤしてパネル translation の影響を受けない */}
-      <Animated.View
-        {...pan.panHandlers}
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: panelH,
-          backgroundColor: surfaceColor ?? theme.surface.primary,
-          borderTopLeftRadius: scales.borderRadius["2xl"],
-          borderTopRightRadius: scales.borderRadius["2xl"],
-          transform: [{ translateY }],
-        }}
+      {/* iOS overlays the keyboard; Android Modal already uses adjustResize.
+          This is the sole keyboard inset owner: footer must not add it again. */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "height" : undefined}
+        enabled={Platform.OS === "ios"}
+        pointerEvents="box-none"
+        style={{ flex: 1 }}
       >
         <View
-          style={{
-            paddingHorizontal: scales.spacing.scale[4],
-            // 最大 snap が画面いっぱいに近いとき、パネル上端が safe-area に
-            // 食い込む分だけハンドル／タイトルを下げる（届かないときは 0）。
-            paddingTop: scales.spacing.scale[3] + safeAreaTopInset,
+          pointerEvents="box-none"
+          style={{ flex: 1 }}
+          onLayout={(event) => {
+            const height = event.nativeEvent.layout.height
+            if (height <= 0) return
+            setViewportHeight(height)
+            if (!keyboardOpen) setFullViewportHeight((previous) => Math.max(previous ?? 0, height))
           }}
         >
-          <View
+          {/* panel：bottom anchor + 高さ固定 + transform で snap 位置。
+              footer は外側にレイヤしてパネル translation の影響を受けない */}
+          <Animated.View
+            {...pan.panHandlers}
             style={{
-              width: 40,
-              height: 4,
-              borderRadius: 2,
-              backgroundColor: theme.border["medium-emphasis"],
-              alignSelf: "center",
-              marginBottom: scales.spacing.scale[2],
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: visiblePanelHeight,
+              backgroundColor: surfaceColor ?? theme.surface.primary,
+              borderTopLeftRadius: scales.borderRadius["2xl"],
+              borderTopRightRadius: scales.borderRadius["2xl"],
+              transform: [{ translateY: keyboardReducedViewport ? 0 : translateY }],
             }}
-          />
-          {title && (
-            <RNText
-              style={[
-                resolveTypo("heading.md"),
-                { color: theme.text["high-emphasis"], marginBottom: scales.spacing.scale[2] },
-              ]}
+          >
+            <View
+              style={{
+                paddingHorizontal: scales.spacing.scale[4],
+                // 最大 snap が画面いっぱいに近いとき、パネル上端が safe-area に
+                // 食い込む分だけハンドル／タイトルを下げる（届かないときは 0）。
+                paddingTop: scales.spacing.scale[3] + safeAreaTopInset,
+              }}
             >
-              {title}
-            </RNText>
+              <View
+                style={{
+                  width: 40,
+                  height: 4,
+                  borderRadius: 2,
+                  backgroundColor: theme.border["medium-emphasis"],
+                  alignSelf: "center",
+                  marginBottom: scales.spacing.scale[2],
+                }}
+              />
+              {title && (
+                <RNText
+                  style={[
+                    resolveTypo("heading.md"),
+                    { color: theme.text["high-emphasis"], marginBottom: scales.spacing.scale[2] },
+                  ]}
+                >
+                  {title}
+                </RNText>
+              )}
+            </View>
+            <ScrollView
+              ref={scrollRef}
+              onFocus={revealFocusedInput}
+              style={{ flex: 1 }}
+              contentContainerStyle={{
+                paddingHorizontal: scales.spacing.scale[4],
+                // footer 実測高 + 60px の余白を空け、コンテンツ末尾が footer に
+                // 重ならない・ぶつからないようにする。
+                paddingBottom: footer ? footerH + FOOTER_GAP : scales.spacing.scale[4],
+              }}
+              onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
+                scrollTopRef.current = e.nativeEvent.contentOffset.y
+              }}
+              scrollEventThrottle={16}
+              keyboardShouldPersistTaps="handled"
+              automaticallyAdjustKeyboardInsets={false}
+            >
+              {children}
+            </ScrollView>
+          </Animated.View>
+
+          {/* footer：パネルの translation 影響を受けない独立レイヤ。
+              keyboard 回避済みの作業領域下端に固定。高さを onLayout で測って ScrollView に伝える */}
+          {footer && (
+            <View
+              pointerEvents="box-none"
+              onLayout={(e) => setFooterH(e.nativeEvent.layout.height)}
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: 0,
+                paddingHorizontal: scales.spacing.scale[4],
+                paddingTop: scales.spacing.scale[3],
+                paddingBottom: scales.spacing.scale[4],
+                borderTopWidth: 1,
+                borderTopColor: theme.border["low-emphasis"],
+                backgroundColor: surfaceColor ?? theme.surface.primary,
+              }}
+            >
+              {footer}
+            </View>
           )}
         </View>
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingHorizontal: scales.spacing.scale[4],
-            // footer 実測高 + 60px の余白を空け、コンテンツ末尾が footer に
-            // 重ならない・ぶつからないようにする。
-            paddingBottom: footer ? footerH + FOOTER_GAP : scales.spacing.scale[4],
-          }}
-          onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
-            scrollTopRef.current = e.nativeEvent.contentOffset.y
-          }}
-          scrollEventThrottle={16}
-          keyboardShouldPersistTaps="handled"
-        >
-          {children}
-        </ScrollView>
-      </Animated.View>
-
-      {/* footer：パネルの translation 影響を受けない独立レイヤ。
-          常に viewport 下端に固定。高さを onLayout で測って ScrollView に伝える */}
-      {footer && (
-        <View
-          pointerEvents="box-none"
-          onLayout={(e) => setFooterH(e.nativeEvent.layout.height)}
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingHorizontal: scales.spacing.scale[4],
-            paddingTop: scales.spacing.scale[3],
-            paddingBottom: scales.spacing.scale[4],
-            borderTopWidth: 1,
-            borderTopColor: theme.border["low-emphasis"],
-            backgroundColor: surfaceColor ?? theme.surface.primary,
-          }}
-        >
-          {footer}
-        </View>
-      )}
+      </KeyboardAvoidingView>
     </Modal>
   )
 }
