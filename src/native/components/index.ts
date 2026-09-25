@@ -87,7 +87,7 @@ export {
 } from "./Form"
 
 // Phase 3: Overlay
-export { Alert, type AlertProps, type AlertTone } from "./Alert"
+export { Alert, type AlertProps, type AlertTone, type AlertVariant } from "./Alert"
 export { Dialog, type DialogProps, type DialogPosition } from "./Dialog"
 export { Scrim, type ScrimProps, type ScrimAlign } from "./Scrim"
 export { AlertDialog, type AlertDialogProps } from "./AlertDialog"
