@@ -65,7 +65,7 @@ React 18 では `ref` が無言で無視されていた）。詳細は下の
 
 ## v2 系内の追加（参考）
 
-### 次のリリース — CSS の入口 `preset-core` / `safelist` を追加（追加のみ・破壊的変更なし）
+### v2.7.0 — CSS の入口 `preset-core` / `safelist` を追加（追加のみ・破壊的変更なし）
 
 `ksk-design-system/preset` から DS 部品用の safelist（`src/styles/source-safelist.css`）だけを
 除いた `ksk-design-system/preset-core` と、safelist 単体の `ksk-design-system/safelist` を
