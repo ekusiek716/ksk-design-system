@@ -24,7 +24,7 @@ describe("responsive breakpoint contract", () => {
   })
 
   it("使用中の container query 値を配布 preset に固定する", () => {
-    const preset = readFileSync("src/preset.css", "utf8")
+    const preset = readFileSync("src/preset-core.css", "utf8")
 
     for (const [name, breakpoint] of Object.entries(tokens.breakpoints.container)) {
       if (name === "_doc") continue

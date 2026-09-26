@@ -281,8 +281,8 @@ describe("公開変数の配線", () => {
     expect(missing).toEqual([])
   })
 
-  it("preset.css が product-theme.css を読み込む（消費側の追加設定なしで既定値が効く）", () => {
-    const preset = readFileSync(join(ROOT, "src/preset.css"), "utf8")
+  it("preset-core.css が product-theme.css を読み込む（消費側の追加設定なしで既定値が効く）", () => {
+    const preset = readFileSync(join(ROOT, "src/preset-core.css"), "utf8")
     expect(preset).toContain(`@import "./styles/product-theme.css";`)
   })
 })

@@ -103,6 +103,11 @@ consumer側Tailwindを重ねる二重ビルド方式にも切り替えないこ�
 DS 内部だけで使われるクラス（`pointer-events-auto` 等）については、preset に safelist
 （`src/styles/source-safelist.css`・自動生成）が同梱されているため `@source` の有無に依存しない（issue #258）。
 
+DS 部品を 1 つも使わない consumer（トークンと `ksk-design-system/class-names` だけで UI を組む構成）は、
+`ksk-design-system/preset` の代わりに safelist だけを除いた `ksk-design-system/preset-core` を使える
+（追加のみ・破壊的変更なし。`preset` の中身は `preset-core` + `safelist` で従来と同じ）。
+使い分けは README の「DS 部品を使わない consumer は `preset-core`」節を参照。
+
 > **必要な Tailwind バージョン**: この safelist は Tailwind 4.1 で導入された `@source inline()` を使う。
 > このため次のリリース以降、peerDependencies は `tailwindcss@^4.1.0` となる。
 > 4.0.x を使っている場合は、DS を上げる前に `npm install -D tailwindcss@^4.1` で Tailwind を先に上げること。

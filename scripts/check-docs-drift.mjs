@@ -348,6 +348,7 @@ for (const dir of ["src/styles", "src/themes"]) {
   }
 }
 extractCssDeclarations(join(ROOT, "src/preset.css"), definedVars)
+extractCssDeclarations(join(ROOT, "src/preset-core.css"), definedVars)
 extractTokensJsonVars(join(ROOT, "tokens.json"), definedVars)
 
 // プレースホルダー表現のトークン除去（--Surface-* / --Categorical-{1..16} /

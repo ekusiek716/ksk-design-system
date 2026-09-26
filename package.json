@@ -26,6 +26,7 @@
     "CLAUDE.md",
     "DESIGN.md",
     "src/preset.css",
+    "src/preset-core.css",
     "src/styles",
     "src/themes",
     "src/components/COMPONENT_LOOKUP.md",
@@ -64,6 +65,14 @@
     "./preset": {
       "import": "./src/preset.css",
       "default": "./src/preset.css"
+    },
+    "./preset-core": {
+      "import": "./src/preset-core.css",
+      "default": "./src/preset-core.css"
+    },
+    "./safelist": {
+      "import": "./src/styles/source-safelist.css",
+      "default": "./src/styles/source-safelist.css"
     },
     "./styles": {
       "import": "./src/preset.css",

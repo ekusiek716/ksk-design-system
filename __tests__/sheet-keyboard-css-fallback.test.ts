@@ -17,10 +17,10 @@ import { join } from "node:path"
 
 const ROOT = join(__dirname, "..")
 const css = readFileSync(join(ROOT, "src/styles/sheet-keyboard.css"), "utf8")
-const preset = readFileSync(join(ROOT, "src/preset.css"), "utf8")
+const preset = readFileSync(join(ROOT, "src/preset-core.css"), "utf8")
 
 describe("sheet-keyboard.css フォールバック契約", () => {
-  it("preset.css から import されている（consumer が preset だけで有効化できる）", () => {
+  it("preset-core.css（preset の本体）から import されている（consumer が preset だけで有効化できる）", () => {
     expect(preset).toMatch(/@import\s+["'].\/styles\/sheet-keyboard\.css["']/)
   })
 
