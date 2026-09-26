@@ -216,8 +216,8 @@ describe("面の上書きは var(--Nav-*, DS既定) で、未宣言なら見た�
     expect(SOURCE).not.toContain("[background:color-mix(in_srgb,var(--Surface-Primary)_70%,transparent)]")
   })
 
-  it("preset.css が bottom-nav.css を glass.css の後に読み込む（詳細度同点の順序勝ち）", () => {
-    const preset = readFileSync(join(ROOT, "src/preset.css"), "utf8")
+  it("preset-core.css が bottom-nav.css を glass.css の後に読み込む（詳細度同点の順序勝ち）", () => {
+    const preset = readFileSync(join(ROOT, "src/preset-core.css"), "utf8")
     expect(preset).toContain(`@import "./styles/bottom-nav.css";`)
     expect(preset.indexOf(`@import "./styles/bottom-nav.css";`)).toBeGreaterThan(
       preset.indexOf(`@import "./styles/glass.css";`),

@@ -92,7 +92,7 @@ describe("Radius トークンの配布経路（issue #553）", () => {
   })
 
   it("定義元は radius.css の1箇所（preset.css に直書きを戻さない）", () => {
-    const preset = readFileSync("src/preset.css", "utf8")
+    const preset = readFileSync("src/preset.css", "utf8") + readFileSync("src/preset-core.css", "utf8")
     for (const name of Object.keys(EXPECTED)) {
       expect(preset.includes(`${name}:`)).toBe(false)
     }

@@ -63,6 +63,22 @@ React 18 では `ref` が無言で無視されていた）。詳細は下の
 **v2.0.0 では削除していません**。削除は「全消費リポで `check-migration` の
 残件が 0」を条件に v3.0.0 で行います。
 
+## v2 系内の追加（参考）
+
+### 次のリリース — CSS の入口 `preset-core` / `safelist` を追加（追加のみ・破壊的変更なし）
+
+`ksk-design-system/preset` から DS 部品用の safelist（`src/styles/source-safelist.css`）だけを
+除いた `ksk-design-system/preset-core` と、safelist 単体の `ksk-design-system/safelist` を
+exports に足した。
+
+- **既存 consumer: 対応不要**。`preset` は `preset-core` + `safelist` を読み込む形に組み替えたが、
+  生成される CSS は従来と同じ
+- DS 部品を 1 つも使わない consumer は `preset` を `preset-core` に置き換えると、
+  部品用の utility（safelist 約 1,150 クラス分）が出力から消える。部品を使うルートが 1 つでもある
+  ビルドでは `preset` のままにする（詳細は README の「DS 部品を使わない consumer は `preset-core`」節）
+- DS 本体の CSS を編集するときは、トークン・base layer 等は `src/preset-core.css` に書く
+  （`src/preset.css` は 2 つを読み込むだけの入口）
+
 ## v3.0 (未リリース)
 
 破壊変更を入れる際にはここに以下を書く:

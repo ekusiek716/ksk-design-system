@@ -107,7 +107,7 @@ describe("Section Spacing トークンの配布経路（issue #560）", () => {
   })
 
   it("定義元は section-spacing.css の1箇所（preset.css に直書きを戻さない）", () => {
-    const preset = readFileSync("src/preset.css", "utf8")
+    const preset = readFileSync("src/preset.css", "utf8") + readFileSync("src/preset-core.css", "utf8")
     for (const name of Object.keys(EXPECTED)) {
       expect(preset.includes(`${name}:`)).toBe(false)
     }
@@ -145,7 +145,7 @@ describe("Z-Index トークンの配布経路（issue #563）", () => {
   })
 
   it("定義元は z-index.css の1箇所（preset.css に直書きを戻さない）", () => {
-    const preset = readFileSync("src/preset.css", "utf8")
+    const preset = readFileSync("src/preset.css", "utf8") + readFileSync("src/preset-core.css", "utf8")
     expect(preset.includes("--Z-Modal:")).toBe(false)
   })
 })
@@ -166,21 +166,24 @@ describe("Shadow トークンの配布経路（issue #563）", () => {
   })
 
   it("定義元は shadow.css の1箇所（preset.css に直書きを戻さない）", () => {
-    const preset = readFileSync("src/preset.css", "utf8")
+    const preset = readFileSync("src/preset.css", "utf8") + readFileSync("src/preset-core.css", "utf8")
     expect(preset.includes("--shadow-md:")).toBe(false)
   })
 })
 
-/** `./preset` を除く、CSS ファイルを指す exports subpath を package.json から
+/** `./preset` / `./preset-core` を除く、CSS ファイルを指す exports subpath を package.json から
  *  実際に読んで列挙する（ワイルドカードではなく個別に定義されている構成な
  *  ので、themes/* は6テーマ全部を読む）。「どの subpath からも取得できない
  *  変数＝本当の穴」を判定するための、最も網羅的な構成。 */
 function allCssSubpaths(): string[] {
   return Object.entries(pkg.exports)
     .filter(([subpath, entry]) => {
-      if (subpath === "./preset") return false
+      if (subpath === "./preset" || subpath === "./preset-core") return false
+      // safelist は変数を定義しない（`@source inline("[--x:1rem]")` の文字列が
+      // 宣言に見えて誤検知するので、トークンの供給元から外す）
+      if (subpath === "./safelist") return false
       const file = typeof entry === "string" ? entry : entry.default
-      return typeof file === "string" && file.endsWith(".css") && file !== "./src/preset.css"
+      return typeof file === "string" && file.endsWith(".css") && file !== "./src/preset.css" && file !== "./src/preset-core.css"
     })
     .map(([subpath]) => subpath)
 }

@@ -30,7 +30,7 @@ const DECLARATION = /(^|[;{}\s])(--[A-Za-z0-9_-]+)\s*:/g
  * 生成ファイルを増やさずに実行時へ集めるので、DS 側の CSS を足してもドリフトしない。
  */
 const DS_CSS_DIRS = ["src/styles", "src/themes"]
-const DS_CSS_FILES = ["src/preset.css"]
+const DS_CSS_FILES = ["src/preset.css", "src/preset-core.css"]
 
 /** CSS コメントを、行数を保ったまま空白に置き換える */
 function stripCssComments(source) {

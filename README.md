@@ -112,6 +112,32 @@ consumer 側の Tailwind と DS を同じビルドで処理するため、上記
 DS のクラス CSS は生成されます（issue #258）。ただし consumer 自身のコードは
 consumer 側の走査対象なので、`@source` は引き続き推奨構成です。
 
+#### DS 部品を使わない consumer は `preset-core`
+
+safelist は DS 部品（`Button` 等）が内部で使う Tailwind クラスを、consumer が 1 つも
+部品を使っていなくても生成します（safelist は約 1,150 クラス。consumer のクラスが無い状態の
+実測で、出力 CSS が `preset` 179KB → `preset-core` 54KB、gzip 25.8KB → 9.8KB）。**DS 部品を import しない
+consumer**（`ksk-design-system/class-names` とトークンだけで UI を組む公開ページ等）は、
+safelist だけを除いた `preset-core` を使えます。トークン・shadcn 互換の変数・アニメーション・
+container 幅・`scrollbar-hide`・base layer のボーダー色の保険は `preset` と同じです。
+
+```css
+@import "tailwindcss";
+@import "ksk-design-system/preset-core";
+@import "ksk-design-system/themes/default";
+```
+
+| consumer | 使う入口 |
+|---|---|
+| DS 部品を 1 つでも使う（どこか 1 ルートでも） | `ksk-design-system/preset`（従来どおり。`preset-core` + `safelist` と同じ） |
+| DS 部品を使わない（トークン・`class-names` だけ） | `ksk-design-system/preset-core` |
+
+Tailwind は CSS を 1 本にまとめるため、DS 部品を使うルートが 1 つでもあるビルドでは
+`preset` を使ってください（`preset-core` を選ぶと、そのルートで部品の見た目が崩れます）。
+`preset-core` と safelist を分けて読みたい場合は
+`@import "ksk-design-system/preset-core"; @import "ksk-design-system/safelist";` が
+`preset` と同じ結果になります。
+
 <!-- consumer-example:tsx:start -->
 ```tsx
 import { Button, Input, Label } from "ksk-design-system"
@@ -334,7 +360,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     "\\.(css|less|sass|scss)$": "<rootDir>/test/style-mock.cjs",
-    "^ksk-design-system/(preset|styles(?:\\.css)?|glass|tokens/(?:primitive|semantic|typography|categorical|motion)|themes/(?:default|blue|orange|green|violet|cobalt))$":
+    "^ksk-design-system/(preset(?:-core)?|safelist|styles(?:\\.css)?|glass|tokens/(?:primitive|semantic|typography|categorical|motion)|themes/(?:default|blue|orange|green|violet|cobalt))$":
       "<rootDir>/test/style-mock.cjs",
   },
 }

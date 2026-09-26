@@ -9,7 +9,8 @@ import { describe, expect, it } from "vitest"
  */
 
 const motion = readFileSync("src/styles/motion.css", "utf8")
-const preset = readFileSync("src/preset.css", "utf8")
+// 本体は preset-core.css（preset.css は preset-core + safelist の薄い入口）
+const preset = readFileSync("src/preset-core.css", "utf8")
 
 /** :root ブロック（reduced-motion の再定義より前）から拾う */
 const rootBlock = motion.slice(0, motion.indexOf("@media"))
@@ -99,7 +100,7 @@ describe("motion トークン contract", () => {
     }
   })
 
-  it("preset.css が motion.css を読み込んでいる", () => {
+  it("preset-core.css が motion.css を読み込んでいる", () => {
     expect(preset).toContain('@import "./styles/motion.css"')
   })
 

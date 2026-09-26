@@ -46,6 +46,47 @@ describe("@source safelist の同梱（issue #258）", () => {
     expect(pkg.files).toContain("src/styles")
   })
 
+  // DS 部品を使わない consumer 向けに、safelist を除いた入口を分けた。
+  // preset = preset-core + safelist の関係を崩すと、どちらかの consumer が静かに壊れる。
+  describe("preset-core（safelist を除いた入口）", () => {
+    const presetCore = read("src/preset-core.css")
+    const pkgFull = JSON.parse(read("package.json")) as {
+      files: string[]
+      exports: Record<string, { default?: string } | string>
+    }
+    const stripComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "")
+    const imports = (css: string) =>
+      [...stripComments(css).matchAll(/@import\s+"([^"]+)"\s*;/g)].map((m) => m[1])
+
+    it("preset.css は preset-core と safelist を読み込むだけの入口", () => {
+      expect(imports(preset)).toEqual(["./preset-core.css", "./styles/source-safelist.css"])
+      const body = stripComments(preset).replace(/@import\s+"[^"]+"\s*;/g, "").trim()
+      expect(body).toBe("")
+    })
+
+    it("preset-core.css は safelist を読み込まない", () => {
+      expect(imports(presetCore)).not.toContain("./styles/source-safelist.css")
+      expect(stripComments(presetCore)).not.toMatch(/@source/)
+    })
+
+    it("preset-core.css はトークン・container 幅・base layer を持つ", () => {
+      expect(imports(presetCore)).toContain("./styles/semantic.css")
+      expect(presetCore).toMatch(/--container-sm:\s*24rem;/)
+      expect(presetCore).toMatch(/@layer base\s*\{/)
+    })
+
+    it("exports と files に preset-core / safelist がある", () => {
+      const target = (subpath: string) => {
+        const entry = pkgFull.exports[subpath]
+        return typeof entry === "string" ? entry : entry?.default
+      }
+      expect(target("./preset")).toBe("./src/preset.css")
+      expect(target("./preset-core")).toBe("./src/preset-core.css")
+      expect(target("./safelist")).toBe("./src/styles/source-safelist.css")
+      expect(pkgFull.files).toContain("src/preset-core.css")
+    })
+  })
+
   it("npm run check がドリフト検査を含む", () => {
     expect(pkg.scripts.check).toContain("scripts/generate-source-safelist.mjs --check")
   })
