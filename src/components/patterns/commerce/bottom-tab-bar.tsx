@@ -322,6 +322,29 @@ interface PlatterRect {
   h: number
 }
 
+/**
+ * platter overlay の配置量を求める。
+ *
+ * overlay は nav の絶対配置子 (`absolute left-0 top-0`) なので、原点は nav の
+ * **padding box**。一方 rect 同士の差は **border box** 基準なので、そのまま
+ * translate に渡すと nav の border 分だけ右下にずれる (#591)。border 幅
+ * (clientLeft / clientTop) を引いて padding box 基準へ揃える。
+ *
+ * テストから参照するため named export（公開 API ではない）。
+ */
+export function computePlatterOffset(
+  navBox: { left: number; top: number },
+  anchorBox: { left: number; top: number; width: number; height: number },
+  navBorder: { left: number; top: number },
+): PlatterRect {
+  return {
+    x: anchorBox.left - navBox.left - navBorder.left,
+    y: anchorBox.top - navBox.top - navBorder.top,
+    w: anchorBox.width,
+    h: anchorBox.height,
+  }
+}
+
 function BottomTabBarPill({
   className,
   items,
@@ -367,12 +390,10 @@ function BottomTabBarPill({
     const navBox = nav.getBoundingClientRect()
     const box = anchor.getBoundingClientRect()
     setPlatterRect((prev) => {
-      const next = {
-        x: box.left - navBox.left,
-        y: box.top - navBox.top,
-        w: box.width,
-        h: box.height,
-      }
+      const next = computePlatterOffset(navBox, box, {
+        left: nav.clientLeft,
+        top: nav.clientTop,
+      })
       // サブピクセル差の再セットで無限再レンダーしないようガード
       if (
         prev &&
