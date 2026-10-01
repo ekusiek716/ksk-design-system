@@ -60,9 +60,12 @@ function DateField({ value, onChange, placeholder, disabled, className, dateForm
     <div
       data-slot="date-field"
       className={cn(
-        // DatePicker トリガーは内部 width が auto のため、長い placeholder と
-        // 組み合わせると縦に潰れて見える。ここで幅・高さ・角丸・paddingを担保する。
-        "w-full [&>button]:w-full [&>button]:h-12 [&>button]:rounded-lg [&>button]:px-3",
+        // 幅だけを担保する。高さ・角丸・左右 padding は DatePicker トリガー自身が
+        // --Field-Height-Md / --Field-Radius / --Field-Padding-X-Md で持つ (#594)。
+        // ここで h-12 / rounded-lg / px-3 を子セレクタで被せると、トリガー側の
+        // Field 変数より優先され、consumer が --Field-Radius 等を変えても日付欄だけ
+        // 追従しない (belle-todo で --radius-lg=12〜16px のため 8px の入力欄とずれた)。
+        "w-full [&>button]:w-full",
         className
       )}
     >
