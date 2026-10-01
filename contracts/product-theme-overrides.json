@@ -303,6 +303,11 @@
       "--Field-Height-Md",
       "--Field-Padding-X-Md",
       "--Field-Radius"
+    ],
+    "DateField": [
+      "--Field-Height-Md",
+      "--Field-Padding-X-Md",
+      "--Field-Radius"
     ]
   },
   "aiGuidance": [

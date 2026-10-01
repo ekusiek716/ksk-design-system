@@ -38,12 +38,9 @@
 @source inline("[&>*]:shrink-0");
 @source inline("[&>button]:bg-[var(--Brand-Primary)]");
 @source inline("[&>button]:bg-transparent!");
-@source inline("[&>button]:h-12");
 @source inline("[&>button]:hover:bg-[var(--Brand-Primary)]");
 @source inline("[&>button]:hover:bg-[var(--Brand-Ultra-Light)]!");
 @source inline("[&>button]:hover:text-[var(--Text-on-Inverse)]");
-@source inline("[&>button]:px-3");
-@source inline("[&>button]:rounded-lg");
 @source inline("[&>button]:rounded-none");
 @source inline("[&>button]:text-[var(--Brand-Primary)]");
 @source inline("[&>button]:text-[var(--Text-High-Emphasis)]!");
