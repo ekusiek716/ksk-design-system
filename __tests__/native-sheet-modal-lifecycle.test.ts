@@ -38,6 +38,38 @@ describe("native Sheet Modal lifecycle contract (#248 / #250)", () => {
   })
 })
 
+// #588: iOS の Modal 内で Animated.View の transform の最終値が見た目に反映されず、
+// plain mode のパネルが画面外（translateY = 画面高）に残った。native / JS どちらの
+// driver でも再現し、onShow 起点でも直らなかったため、入場完了後は animated transform を
+// 外して固定の 0 で描く。RN のレンダリング基盤が無いのでソース契約で固定する。
+describe("native Sheet plain mode の入場完了後の固定 transform (#588)", () => {
+  const plainSource = source.slice(
+    source.indexOf("function PlainSheet("),
+    source.indexOf("/* ─", source.indexOf("function PlainSheet(")),
+  )
+
+  it("revealed なら animated 値を使わず translate 0 の固定値で描く", () => {
+    expect(plainSource).toMatch(
+      /transform: revealed\s*\?\s*\[\{ translateX: 0 \}, \{ translateY: 0 \}\]/,
+    )
+  })
+
+  it("アニメーション完了時と保険（最終状態への復旧）の両方で revealed に切り替える", () => {
+    expect(plainSource).toMatch(/if \(finished && openRef\.current\) setRevealed\(true\)/)
+    const revealOpened = plainSource.slice(
+      plainSource.indexOf("const revealOpened"),
+      plainSource.indexOf("}, [anim])"),
+    )
+    expect(revealOpened).toContain("setRevealed(true)")
+  })
+
+  it("open が変わるたびに入場前（animated transform）へ戻す", () => {
+    expect(plainSource).toMatch(
+      /if \(prevOpen !== open\) \{\s*setPrevOpen\(open\)\s*setRevealed\(false\)/,
+    )
+  })
+})
+
 describe("createRevealLifecycle", () => {
   afterEach(() => {
     vi.useRealTimers()
