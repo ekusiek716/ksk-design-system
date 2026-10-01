@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:331189a5fa88)
+// source: tokens.json v2.1.0 (sha256:29fa6b65a58e)
 // =============================================================
 
 export const themes = {
@@ -79,6 +79,8 @@ export const themes = {
         "line": "#06C755",
         "google-border": "#DADCE0",
         "apple": "#000000",
+        "apple-surface": "#000000",
+        "on-apple": "#FFFFFF",
         "amazon": "#232F3E"
       },
       "hover": {
@@ -184,7 +186,9 @@ export const themes = {
         "primary": "#60A5FA",
         "action": "#93C5FD",
         "light": "#1E3A8A",
-        "ultra-light": "#1E3A8A"
+        "ultra-light": "#1E3A8A",
+        "apple-surface": "#FFFFFF",
+        "on-apple": "#000000"
       },
       "hover": {
         "primary-button": "#3B82F6",
@@ -295,6 +299,8 @@ export const themes = {
         "line": "#06C755",
         "google-border": "#DADCE0",
         "apple": "#000000",
+        "apple-surface": "#000000",
+        "on-apple": "#FFFFFF",
         "amazon": "#232F3E"
       },
       "hover": {
@@ -400,7 +406,9 @@ export const themes = {
         "primary": "#60A5FA",
         "action": "#93C5FD",
         "light": "#1E3A8A",
-        "ultra-light": "#1E3A8A"
+        "ultra-light": "#1E3A8A",
+        "apple-surface": "#FFFFFF",
+        "on-apple": "#000000"
       },
       "hover": {
         "primary-button": "#3B82F6",
@@ -511,6 +519,8 @@ export const themes = {
         "line": "#06C755",
         "google-border": "#DADCE0",
         "apple": "#000000",
+        "apple-surface": "#000000",
+        "on-apple": "#FFFFFF",
         "amazon": "#232F3E"
       },
       "hover": {
@@ -616,7 +626,9 @@ export const themes = {
         "primary": "#4398F8",
         "action": "#7FAAFB",
         "light": "#03155A",
-        "ultra-light": "#03155A"
+        "ultra-light": "#03155A",
+        "apple-surface": "#FFFFFF",
+        "on-apple": "#000000"
       },
       "hover": {
         "primary-button": "#2053F5",
@@ -727,6 +739,8 @@ export const themes = {
         "line": "#06C755",
         "google-border": "#DADCE0",
         "apple": "#000000",
+        "apple-surface": "#000000",
+        "on-apple": "#FFFFFF",
         "amazon": "#232F3E"
       },
       "hover": {
@@ -832,7 +846,9 @@ export const themes = {
         "primary": "#FB923C",
         "action": "#FDBA74",
         "light": "#431407",
-        "ultra-light": "#431407"
+        "ultra-light": "#431407",
+        "apple-surface": "#FFFFFF",
+        "on-apple": "#000000"
       },
       "hover": {
         "primary-button": "#F97316",
@@ -943,6 +959,8 @@ export const themes = {
         "line": "#06C755",
         "google-border": "#DADCE0",
         "apple": "#000000",
+        "apple-surface": "#000000",
+        "on-apple": "#FFFFFF",
         "amazon": "#232F3E"
       },
       "hover": {
@@ -1048,7 +1066,9 @@ export const themes = {
         "primary": "#4ADE80",
         "action": "#86EFAC",
         "light": "#052E16",
-        "ultra-light": "#052E16"
+        "ultra-light": "#052E16",
+        "apple-surface": "#FFFFFF",
+        "on-apple": "#000000"
       },
       "hover": {
         "primary-button": "#16A34A",
@@ -1159,6 +1179,8 @@ export const themes = {
         "line": "#06C755",
         "google-border": "#DADCE0",
         "apple": "#000000",
+        "apple-surface": "#000000",
+        "on-apple": "#FFFFFF",
         "amazon": "#232F3E"
       },
       "hover": {
@@ -1264,7 +1286,9 @@ export const themes = {
         "primary": "#A78BFA",
         "action": "#C4B5FD",
         "light": "#3B0764",
-        "ultra-light": "#3B0764"
+        "ultra-light": "#3B0764",
+        "apple-surface": "#FFFFFF",
+        "on-apple": "#000000"
       },
       "hover": {
         "primary-button": "#7C3AED",

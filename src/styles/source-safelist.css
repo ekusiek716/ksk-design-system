@@ -126,7 +126,7 @@
 @source inline("bg-[color-mix(in_srgb,var(--Text-on-Inverse)_30%,transparent)]");
 @source inline("bg-[var(--Border-Low-Emphasis)]");
 @source inline("bg-[var(--Border-Medium-Emphasis)]");
-@source inline("bg-[var(--Brand-Apple)]");
+@source inline("bg-[var(--Brand-Apple-Surface)]");
 @source inline("bg-[var(--Brand-Line)]");
 @source inline("bg-[var(--Brand-Primary)]");
 @source inline("bg-[var(--Brand-Primary)]!");
@@ -227,7 +227,7 @@
 @source inline("border-[var(--Border-Success)]");
 @source inline("border-[var(--Border-Warning)]");
 @source inline("border-[var(--Brand-Amazon)]");
-@source inline("border-[var(--Brand-Apple)]");
+@source inline("border-[var(--Brand-Apple-Surface)]");
 @source inline("border-[var(--Brand-Google-Border)]");
 @source inline("border-[var(--Brand-Line)]");
 @source inline("border-[var(--Brand-Primary)]");
@@ -993,6 +993,7 @@
 @source inline("text-8xl");
 @source inline("text-[var(--Border-Medium-Emphasis)]");
 @source inline("text-[var(--Brand-Primary)]");
+@source inline("text-[var(--Brand-on-Apple)]");
 @source inline("text-[var(--Categorical-1-Bold)]");
 @source inline("text-[var(--Categorical-10-Bold)]");
 @source inline("text-[var(--Categorical-11-Bold)]");

@@ -69,7 +69,7 @@
 | Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Range — 最小値/最大値を別々にラベル付け, Disabled |
 | SOCIAL_ICON_LABELS, SOCIAL_ICON_DATA, SOCIAL_ICON_PLATFORMS | `@/components/ui/social-icon-data` | — | — |
 | SocialIcon, SOCIAL_ICON_PLATFORMS, SOCIAL_ICON_LABELS | `@/components/ui/social-icon` | — | Default, AllPlatforms, AllMono, Tones |
-| SocialLoginButton | `@/components/ui/social-login-button` | — | Line, Google, Apple, Amazon, AllProviders, Loading |
+| SocialLoginButton | `@/components/ui/social-login-button` | — | Line, Google, Apple, Amazon, AllProviders, LightAndDark, Loading |
 | Spinner | `@/components/ui/spinner` | — | Default, AllSizes |
 | StarRating | `@/components/ui/star-rating` | — | Interactive, AllowClear, ReadOnly, Sizes |
 | StatusActionBadge, SyncStatusButton | `@/components/ui/status-action-badge` | — | AllStates, Actionable, Compact |
