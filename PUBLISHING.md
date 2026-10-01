@@ -7,7 +7,9 @@
 > 一本化しており、`main` への version 変更 push が公開の唯一のトリガー。
 > 各消費リポジトリの `package.json` は `ksk-design-system@X.Y.Z` を参照する。
 > 対象の消費リポ一覧は `scripts/update-consumers.sh` の `DEFAULT_REPOS` が正本
-> （単体リポ・monorepo が混在し、`~/LocalDev/` と `~/LocalDev/Examination/` 配下にまたがる）。
+> （単体リポ・monorepo が混在する。ExamKit 本体と資格アプリは含めず、ExamKit で
+> `npm i ksk-design-system@X.Y.Z --save-exact` → `kit:bump` → `kit:rollout` の順で届ける。
+> 資格アプリは DS を ExamKit と同じ版に完全固定しているため、`^X.Y.Z` を書く一括 bump を流すと版がずれる）。
 
 ## 前提
 
