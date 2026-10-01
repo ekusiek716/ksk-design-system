@@ -40,6 +40,11 @@
       "dsIssue": 586,
       "consumerIssue": "https://github.com/ekusiek716/camera-app/issues/248",
       "fixPr": 587
+    },
+    {
+      "dsIssue": 595,
+      "consumerIssue": "https://github.com/ekusiek716/yokoku-app/issues/321",
+      "fixPr": null
     }
   ]
 }

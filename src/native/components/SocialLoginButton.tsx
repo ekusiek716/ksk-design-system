@@ -30,6 +30,11 @@ export function SocialLoginButton({
   const { theme, scales } = useTheme()
   const external = scales.brandExternal
 
+  // 固定のブランド色面（line / amazon）の上の文字は mode に関わらず白にする。
+  // text["on-inverse"] は dark で黒系に反転するため、固定面と組むと読めなくなる（issue #595）。
+  // apple は Apple HIG に従い dark で白ボタンへ反転する専用トークンを使う。
+  const onFixedBrand = theme.text["on-media"]
+
   const styleMap = {
     google: {
       bg: theme.surface.primary,
@@ -37,18 +42,18 @@ export function SocialLoginButton({
       border: external.googleBorder,
     },
     apple: {
-      bg: external.apple,
-      fg: theme.text["on-inverse"],
-      border: external.apple,
+      bg: theme.brand["apple-surface"],
+      fg: theme.brand["on-apple"],
+      border: theme.brand["apple-surface"],
     },
     line: {
       bg: external.line,
-      fg: theme.text["on-inverse"],
+      fg: onFixedBrand,
       border: external.line,
     },
     amazon: {
       bg: external.amazon,
-      fg: theme.text["on-inverse"],
+      fg: onFixedBrand,
       border: external.amazon,
     },
     github: {

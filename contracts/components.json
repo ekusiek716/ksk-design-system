@@ -793,16 +793,19 @@
     {
       "name": "SocialLoginButton",
       "path": "src/components/ui/social-login-button.tsx",
-      "description": "ソーシャルログインボタン (Google / Apple / Line)。OAuthフロー開始用。",
+      "description": "ソーシャルログインボタン (Google / Apple / Line / Amazon)。OAuthフロー開始用。",
       "variants": [
         "google",
         "apple",
-        "line"
+        "line",
+        "amazon"
       ],
       "accessibility": [
         "aria-label with provider name"
       ],
-      "rules": []
+      "rules": [
+        "apple は Apple HIG に従いライト背景で黒ボタン・ダーク背景（.dark）で白ボタンに自動反転する（--Brand-Apple-Surface / --Brand-on-Apple）。consumer は className で配色を上書きしない"
+      ]
     },
     {
       "name": "SubNav",

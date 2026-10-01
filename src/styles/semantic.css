@@ -111,6 +111,12 @@
   --Brand-Google-Border:     #DADCE0; /* Google ボタンの罫線（Google 推奨グレー） */
   --Brand-Apple:             #000000;
   --Brand-Amazon:            #232F3E;
+  /* Sign in with Apple のボタン面と前景（文字・ロゴ）。Apple HIG に従い
+     ライト背景では黒ボタン、ダーク背景では白ボタンにするため mode で反転する
+     （.dark 側で上書き）。--Text-on-Inverse は他用途の反転色で、Apple の固定黒面と
+     組み合わせるとダークで黒地に黒文字になる（issue #595）。 */
+  --Brand-Apple-Surface:     var(--Primitive-Black);
+  --Brand-on-Apple:          var(--Primitive-White);
 
   /* ─── Interactive States ─── */
   --Hover-Primary-Button:    var(--Primitive-Brand-700);
@@ -213,6 +219,9 @@
   --Brand-Action:            var(--Primitive-Brand-300);
   --Brand-Light:             var(--Primitive-Brand-900);
   --Brand-Ultra-Light:       var(--Primitive-Brand-900);
+  /* Apple HIG: ダーク背景では白い Sign in with Apple ボタン（issue #595） */
+  --Brand-Apple-Surface:     var(--Primitive-White);
+  --Brand-on-Apple:          var(--Primitive-Black);
 
   --Hover-Primary-Button:    var(--Primitive-Brand-500);
   --Active-Primary-Button:   var(--Primitive-Brand-600);

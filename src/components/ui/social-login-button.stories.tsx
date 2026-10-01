@@ -26,6 +26,38 @@ export const AllProviders: Story = {
   ),
 }
 
+/**
+ * Apple HIG に従い、apple はライト背景で黒ボタン・ダーク背景で白ボタンに反転する
+ * （`--Brand-Apple-Surface` / `--Brand-on-Apple` が `.dark` で入れ替わる。issue #595）。
+ * 右側は `.dark` スコープ内に置いた例で、黒い画面でもボタンが見えることを確認する。
+ */
+export const LightAndDark: Story = {
+  parameters: { layout: "padded" },
+  render: () => (
+    <div className="flex flex-wrap gap-4">
+      {(["light", "dark"] as const).map((mode) => (
+        <div
+          key={mode}
+          data-testid={`social-login-${mode}`}
+          className={
+            mode === "dark"
+              ? "dark flex flex-col gap-3 w-72 rounded-xl p-4 bg-[var(--Surface-Primary)]"
+              : "flex flex-col gap-3 w-72 rounded-xl p-4 bg-[var(--Surface-Primary)]"
+          }
+        >
+          <span className="typo-label-sm text-[var(--Text-Medium-Emphasis)]">
+            {mode === "dark" ? "Dark（.dark）" : "Light"}
+          </span>
+          <SocialLoginButton provider="apple" fullWidth />
+          <SocialLoginButton provider="google" fullWidth />
+          <SocialLoginButton provider="line" fullWidth />
+          <SocialLoginButton provider="amazon" fullWidth />
+        </div>
+      ))}
+    </div>
+  ),
+}
+
 export const Loading: Story = {
   render: () => (
     <div className="flex flex-col gap-3 w-72">

@@ -33,10 +33,12 @@ const PROVIDER_CONFIG: Record<
   apple: {
     label: "Appleでログイン",
     platform: "apple",
-    // Apple ロゴは黒背景上に置くため白（mono = currentColor、ボタンの text-on-inverse に追従）
+    // Apple HIG: ライトでは黒ボタン（白文字）、ダークでは白ボタン（黒文字）。
+    // 面と前景は .dark で反転する専用トークン。ロゴは mono（currentColor）で文字色に追従。
+    // --Text-on-Inverse は固定黒の --Brand-Apple と組むとダークで黒地に黒文字になる（issue #595）。
     iconTone: "mono",
     className:
-      "border-[var(--Brand-Apple)] text-[var(--Text-on-Inverse)] bg-[var(--Brand-Apple)] hover:opacity-90",
+      "border-[var(--Brand-Apple-Surface)] text-[var(--Brand-on-Apple)] bg-[var(--Brand-Apple-Surface)] hover:opacity-90",
   },
   amazon: {
     label: "Amazonでログイン",
