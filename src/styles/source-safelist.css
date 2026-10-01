@@ -434,6 +434,7 @@
 @source inline("gap-[var(--Settings-Row-Gap)]");
 @source inline("gap-x-2");
 @source inline("gap-x-4");
+@source inline("gap-y-0");
 @source inline("gap-y-1");
 @source inline("grid");
 @source inline("grid-cols-1");

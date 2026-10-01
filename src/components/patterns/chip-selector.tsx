@@ -253,7 +253,12 @@ function ChipSelector<T extends string = string>({
       // 単一選択は radiogroup。未指定 + multiple 既定なら従来どおり group（非破壊）
       role={isSingle ? "radiogroup" : "group"}
       onKeyDown={handleKeyDown}
-      className={cn("flex flex-wrap gap-2", className)}
+      // 行間 (row-gap) は 0。Chip は sm/md/lg とも「実高さ + 上下 margin = 44px」
+      // (h-7 my-2 / h-8 my-1.5 / h-9 my-1) でタッチ領域ぶんの縦余白を自前で持つため、
+      // ここで gap-2 を縦にも掛けると行間が margin×2 + 8px (md で 20px) に膨らみ、
+      // 横 8px との差で間延びして見える。row-gap 0 でも各行の 44px 当たり判定は
+      // 接するだけで重ならない (WrappedRowsDoNotOverlap)。
+      className={cn("flex flex-wrap gap-x-2 gap-y-0", className)}
     >
       {options.map((opt) => {
         const selected = selectedValues.includes(opt.value)
