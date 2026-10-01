@@ -12,9 +12,8 @@
 # 前提: ksk-design-system@<version> が npm registry に publish 済み
 #
 # 対象リポ（既定）:
-#   引数を省略すると下の DEFAULT_REPOS（フルパス20箇所）が対象。
-#   単体リポと monorepo が混在し、~/LocalDev/ 直下と ~/LocalDev/Examination/
-#   配下にまたがる。ディレクトリ名が日本語でも、PR は各リポ内で
+#   引数を省略すると下の DEFAULT_REPOS（フルパス8箇所。ExamKit 系は除く）が対象。
+#   単体リポと monorepo が混在する。ディレクトリ名が日本語でも、PR は各リポ内で
 #   `gh pr create` するため GitHub remote から英語リポ名が自動解決される。
 #
 # 引数で repo を渡した場合の解決:
@@ -63,38 +62,31 @@ if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; th
 fi
 NOTICE_RUNTIME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/templates/consumer-release-notices/check-ds-release.mjs"
 
-# ── 既定対象リポ（フルパス21箇所）──
-# 2026-08-20 全面更新（issue #403）: ローカル再編（~/localdev/exam-kit-apps/ 等への集約）に追従。
-# 正本の考え方: 「package.json に ksk-design-system 依存を持つ全リポ」。一覧の検算は
-#   grep -l '"ksk-design-system"' ~/localdev/*/package.json ~/localdev/*/*/package.json ~/localdev/*/*/*/package.json
-# で行う（node_modules と ksk-design-system 自身を除く）。
+# ── 既定対象リポ（フルパス8箇所）──
+# 正本の考え方: 「package.json に ksk-design-system 依存を持つ全リポ」のうち、
+# ExamKit 系（ExamKit 本体と資格アプリ）を除いたもの。一覧の検算は
+#   grep -l '"ksk-design-system"' ~/LocalDev/*/package.json ~/LocalDev/*/*/package.json ~/LocalDev/*/*/*/package.json
+# で行う（node_modules と ksk-design-system 自身を除く。monorepo は apps/* まで見る）。
+#
+# 2026-10-02: ローカルの配置が ~/LocalDev 直下のフラット構成に戻っており、
+# 旧パス（~/localdev/apps/・todo-apps/・exam-app/）が全件「ディレクトリが存在しない」で
+# FAIL する状態だった（2.8.0 の配布で発覚）。実在パスへ更新。
+#
+# ExamKit 系はここに入れない（2026-10-02）: ExamKit 本体は DS を完全固定
+# （--save-exact）し、資格アプリは kit:rollout が ExamKit の package-lock.json と同じ版へ
+# 固定する（ExamKit docs/ops/kit-rollout.md）。このスクリプトは "^x.y.z" を書くため、
+# 資格アプリへ直接流すと ExamKit と版がずれる。資格アプリへは
+#   ExamKit で npm i ksk-design-system@<v> --save-exact → kit:bump → kit:rollout
+# の順で届ける。誤って渡されても下の ExamKit ガードが SKIP する。
 DEFAULT_REPOS=(
-  "$HOME/localdev/todo-apps/belle-todo"
-  "$HOME/localdev/todo-apps/trip-todo"
-  "$HOME/localdev/todo-apps/ninshin-todo"
-  "$HOME/localdev/todo-apps/okuno-todo-suite"
-  # 2026-08-30: ローカルの配置換えに追随（yokoku-app / pawly / camera-app /
-  # aikoibito は ~/Localdev/apps/ 配下、資格アプリ群は exam-kit-apps → exam-app へ移動）。
-  # 旧パスのままだった 17 件が v1.68.0 の配布で全て "ディレクトリが存在しない" で
-  # FAIL していた。
-  "$HOME/localdev/apps/yokoku-app"
-  "$HOME/localdev/apps/pawly"
-  # 2026-08-20 追加（issue #403）: 一覧から漏れて 1.53.0 のまま8バージョン取り残されていた
-  "$HOME/localdev/apps/camera-app"
-  "$HOME/localdev/exam-app/exam-kit"
-  "$HOME/localdev/exam-app/itpassport-app"
-  "$HOME/localdev/exam-app/hcd-basic-app"
-  "$HOME/localdev/exam-app/denki1-app"
-  "$HOME/localdev/exam-app/denki2-app"
-  "$HOME/localdev/exam-app/ap-app"
-  "$HOME/localdev/exam-app/fe-app"
-  "$HOME/localdev/exam-app/sg-app"
-  "$HOME/localdev/exam-app/sharoshi-app"
-  "$HOME/localdev/exam-app/fp-app"
-  "$HOME/localdev/exam-app/takken-app"
-  "$HOME/localdev/exam-app/dental-hygienist-exam-app"
-  "$HOME/localdev/exam-app/registered-dietitian-exam-app"
-  "$HOME/localdev/apps/aikoibito"
+  "$HOME/LocalDev/belle-todo"
+  "$HOME/LocalDev/trip_todo"
+  "$HOME/LocalDev/ninshin-todo"
+  "$HOME/LocalDev/okuno-todo-suite"
+  "$HOME/LocalDev/yokoku-app"
+  "$HOME/LocalDev/pawly"
+  "$HOME/LocalDev/camera-app"
+  "$HOME/LocalDev/aikoibito"
 )
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
@@ -164,7 +156,7 @@ resolve_repo() {
     fi
   done
   # DEFAULT_REPOS に無いリポを名前で渡された場合の保険（カテゴリ直下を一段だけ見る）
-  for base in "$HOME/localdev" "$HOME/localdev/apps" "$HOME/localdev/todo-apps" "$HOME/localdev/exam-app" "$HOME/localdev/tools"; do
+  for base in "$HOME/LocalDev" "$HOME/LocalDev/Examination"; do
     if [ -d "$base/$arg" ]; then
       printf '%s' "$base/$arg"
       return 0
@@ -262,6 +254,17 @@ for repo in "${REPOS[@]}"; do
     echo -e "${RED}FAIL: worktree add${NC}"
     cleanup
     RESULTS+=("$name: FAIL (worktree)")
+    continue
+  fi
+
+  # ── ExamKit 系ガード ──
+  # ExamKit 本体（exam-kit-version.json）と資格アプリ（exam-kit.lock.json）は DS を
+  # 完全固定し、kit:rollout で ExamKit と同じ版へ揃える。ここで "^x.y.z" を書くと
+  # ExamKit と版がずれるため触らない（DEFAULT_REPOS の注記参照）。
+  if [ -f "$wt/exam-kit-version.json" ] || [ -f "$wt/exam-kit.lock.json" ]; then
+    echo -e "${YELLOW}SKIP: ExamKit 系は ExamKit 経由（--save-exact → kit:bump → kit:rollout）で配布する${NC}"
+    cleanup
+    RESULTS+=("$name: SKIP (ExamKit 系)")
     continue
   fi
 
