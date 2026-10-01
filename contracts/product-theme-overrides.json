@@ -288,6 +288,21 @@
     ],
     "Toast": [
       "--Toast-Viewport-Offset-Bottom"
+    ],
+    "DatePicker": [
+      "--Field-Height-Md",
+      "--Field-Padding-X-Md",
+      "--Field-Radius"
+    ],
+    "TimePicker": [
+      "--Field-Height-Md",
+      "--Field-Padding-X-Md",
+      "--Field-Radius"
+    ],
+    "Combobox": [
+      "--Field-Height-Md",
+      "--Field-Padding-X-Md",
+      "--Field-Radius"
     ]
   },
   "aiGuidance": [
