@@ -125,10 +125,24 @@ function PlainSheet({
     }),
   )
 
+  // 入場が終わったらパネルを animated transform から外し、固定の 0 で描く。
+  // iOS の Modal 内では Animated.View の transform の最終値が見た目に反映されず、
+  // パネルが初期値（画面外）に残ることがある（#588。native / JS どちらの driver でも
+  // 再現し、onShow 起点（#248 / #250）でも直らない）。完了後は animated node に頼らない。
+  const [revealed, setRevealed] = useState(false)
+  // open が変わったら入場前（animated transform）へ戻す。effect 内 setState を避け、
+  // render 中に前回値と比べてリセットする。
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (prevOpen !== open) {
+    setPrevOpen(open)
+    setRevealed(false)
+  }
+
   const revealOpened = useCallback(() => {
     if (!openRef.current) return
     anim.stopAnimation()
     anim.setValue(1)
+    setRevealed(true)
   }, [anim])
 
   useEffect(() => {
@@ -149,7 +163,11 @@ function PlainSheet({
         toValue: 1,
         duration: PLAIN_DUR,
         useNativeDriver: true,
-      }).start(({ finished }) => complete(finished))
+      }).start(({ finished }) => {
+        complete(finished)
+        // 未完了（中断）なら complete 側が revealOpened で最終状態へ復旧する
+        if (finished && openRef.current) setRevealed(true)
+      })
     }, revealOpened)
   }
 
@@ -182,10 +200,12 @@ function PlainSheet({
       >
         <Animated.View
           style={{
-            transform: [
-              offset[side].translateX ? { translateX: offset[side].translateX } : { translateX: 0 },
-              offset[side].translateY ? { translateY: offset[side].translateY } : { translateY: 0 },
-            ],
+            transform: revealed
+              ? [{ translateX: 0 }, { translateY: 0 }]
+              : [
+                  offset[side].translateX ? { translateX: offset[side].translateX } : { translateX: 0 },
+                  offset[side].translateY ? { translateY: offset[side].translateY } : { translateY: 0 },
+                ],
             backgroundColor: surfaceColor ?? theme.surface.primary,
             ...(side === "bottom" || side === "top"
               ? { width: "100%", borderTopLeftRadius: scales.borderRadius["2xl"], borderTopRightRadius: scales.borderRadius["2xl"] }
