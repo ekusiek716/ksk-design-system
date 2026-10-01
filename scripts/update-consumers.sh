@@ -285,14 +285,17 @@ for repo in "${REPOS[@]}"; do
         const old = pkg[k]["@ksk/design-system"];
         // 値が "*" / "workspace:" 始まりのものは触らない
         const skip = (v) => typeof v === "string" && (v === "*" || v.startsWith("workspace:"));
+        // 完全固定（"2.6.4" のような範囲指定なし）の consumer は完全固定のまま上げる。
+        // camera-app は依存の完全固定を CI で検査しており、"^x.y.z" を書くと落ちた（2.8.0 配布）。
+        const spec = (v) => (typeof v === "string" && /^\d/.test(v) ? version : "^" + version);
         if (old !== undefined) {
           if (skip(old)) continue;
           delete pkg[k]["@ksk/design-system"];
-          pkg[k]["ksk-design-system"] = "^" + version;
+          pkg[k]["ksk-design-system"] = spec(old);
           changed = true;
         } else if (cur !== undefined) {
           if (skip(cur)) continue;
-          pkg[k]["ksk-design-system"] = "^" + version;
+          pkg[k]["ksk-design-system"] = spec(cur);
           changed = true;
         }
       }
