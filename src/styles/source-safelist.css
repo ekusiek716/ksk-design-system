@@ -118,7 +118,9 @@
 @source inline("before:inset-x-0");
 @source inline("before:left-1/2");
 @source inline("before:min-h-11");
+@source inline("before:min-w-11");
 @source inline("before:size-11");
+@source inline("before:size-full");
 @source inline("before:top-1/2");
 @source inline("bg-[color-mix(in_srgb,var(--Text-on-Inverse)_30%,transparent)]");
 @source inline("bg-[var(--Border-Low-Emphasis)]");

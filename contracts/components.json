@@ -82,6 +82,7 @@
         "variant=glass-inverse は暗い写真・動画・濃色面上の Liquid Glass CTA 専用",
         "variant=inverse / ghost-inverse は暗背景・ヒーローセクション専用",
         "size=hero は hero / final-CTA 専用（ピル型 56px）",
+        "size=xs / sm / icon-sm は透明な before 擬似要素で当たり判定を 44×44px に広げる（見た目の寸法は不変・issue #601）。隣と重ねないには見た目の端同士を sm / icon-sm で gap-3、xs で gap-5 以上空ける。glass 系 variant と overflow-hidden を足したボタンでは拡張されない",
         "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（variant / size は無視され、focus ring 以外の視覚クラスを出さない）"
       ]
     },

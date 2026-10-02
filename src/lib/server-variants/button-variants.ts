@@ -18,6 +18,42 @@ import { cva, type VariantProps } from "class-variance-authority"
  * 何十箇所も書き換えずにボタンの寸法を自分の製品に合わせられる。
  * 許可リストの正本は contracts/product-theme-overrides.json。
  */
+/**
+ * 見た目より小さいボタン（xs / sm / icon-sm）の当たり判定を 44×44px まで広げる
+ * 透明な before 擬似要素（issue #601。Chip と同じ方式）。
+ *
+ * - 見た目の寸法・レイアウトは変えない（ボタンの中心から上下左右に 44px 四方へ
+ *   はみ出すだけ）。Chip のように縦 margin で行の高さを予約する方式は、既存
+ *   consumer の全レイアウトが動くので採らない。
+ * - 隣のボタンと当たり判定を重ねたくない場合は、見た目の端同士を
+ *   「44px − 見た目の寸法」以上空ける（sm / icon-sm: 12px = gap-3、xs: 20px = gap-5）。
+ *   それより詰めると、間の帯は DOM で後ろのボタンが取る。間隔が拡張量の半分
+ *   （sm / icon-sm: 6px、xs: 10px）未満だと隣の見た目の端まで取るので避ける
+ *   （TouchTargetsDoNotOverlap ストーリーで固定）。
+ * - glass 系（glass / glass-inverse / glass-accent）には付けない。`.glass-specular` が
+ *   非レイヤー CSS で ::before（スペキュラ）/ ::after（縁の光）を使い、さらに
+ *   `overflow: hidden` を持つため、拡張しても切り取られるうえ、min-h / translate が
+ *   スペキュラ層に効いてハイライトがずれる。glass で小さい操作子が要る場合は
+ *   icon / icon-lg / icon-xl を使う。
+ * - consumer が `overflow-hidden` を足すと拡張部分が切られて効かなくなる。
+ */
+const TOUCH_TARGET_EXTENSION =
+  "relative before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:size-full before:min-h-11 before:min-w-11 before:content-['']"
+
+/** 当たり判定拡張を付ける variant（glass 系を除く全部）。 */
+const TOUCH_TARGET_VARIANTS = [
+  "default",
+  "secondary",
+  "secondary-switch",
+  "tertiary",
+  "ghost",
+  "destructive",
+  "link",
+  "accent",
+  "inverse",
+  "ghost-inverse",
+] as const
+
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-[var(--Control-Gap)] whitespace-nowrap typo-label-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 cursor-pointer",
   {
@@ -73,6 +109,13 @@ const buttonVariants = cva(
         vertical: "flex-col gap-1 h-[var(--Control-Height-Xl)] rounded-2xl py-2 typo-label-sm",
       },
     },
+    compoundVariants: [
+      {
+        variant: [...TOUCH_TARGET_VARIANTS],
+        size: ["xs", "sm", "icon-sm"],
+        className: TOUCH_TARGET_EXTENSION,
+      },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",

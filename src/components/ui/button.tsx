@@ -58,6 +58,10 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
  * - `xs` / `sm` / `default` / `lg` / `xl`: 一般用途。
  * - `hero`: トップ hero / final-CTA 向けのピル型特大 CTA。
  * - `icon` / `icon-sm` / `icon-lg` / `icon-xl`: アイコンのみのボタン（aria-label 必須）。
+ * - `xs` / `sm` / `icon-sm` は見た目が 44px 未満なので、透明な before 擬似要素で
+ *   当たり判定だけ 44×44px に広げる（issue #601）。隣と当たり判定を重ねないには
+ *   見た目の端同士を sm / icon-sm で 12px（gap-3）、xs で 20px（gap-5）以上空ける。
+ *   glass 系 variant では `.glass-specular` が疑似要素と overflow:hidden を使うため拡張しない。
  *
  * 段階移行:
  * - `unstyled`: 既存の手書き CSS を持つ画面を移行するとき、見た目を DS 側で一切
