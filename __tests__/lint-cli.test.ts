@@ -63,4 +63,42 @@ describe("ksk-ds lint", () => {
     expect(result.status).toBe(0)
     expect(result.stdout).not.toContain("P046")
   })
+
+  it("plain / float の ResponsiveOverlayFrame + Footer で padding={false} が無いと P051 を警告する（issue #619）", () => {
+    const result = runPublicLint(`
+      import { Button, ResponsiveOverlayFrame, ResponsiveOverlayFooter } from "ksk-design-system"
+      export function Example() {
+        return (
+          <ResponsiveOverlayFrame side="float" description="確認">
+            <ResponsiveOverlayFooter><Button>OK</Button></ResponsiveOverlayFooter>
+          </ResponsiveOverlayFrame>
+        )
+      }
+    `)
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain("warning P051")
+  })
+
+  it("padding={false} / 式 / spread props では P051 を出さない（issue #619）", () => {
+    const result = runPublicLint(`
+      import { Button, ResponsiveOverlayFrame, ResponsiveOverlayFooter } from "ksk-design-system"
+      export function Example(props: { cond: boolean }) {
+        return (
+          <>
+            <ResponsiveOverlayFrame side="float" padding={false}>
+              <ResponsiveOverlayFooter><Button>OK</Button></ResponsiveOverlayFooter>
+            </ResponsiveOverlayFrame>
+            <ResponsiveOverlayFrame preset="plain" padding={props.cond}>
+              <ResponsiveOverlayFooter><Button>OK</Button></ResponsiveOverlayFooter>
+            </ResponsiveOverlayFrame>
+            <ResponsiveOverlayFrame side="float-glass" {...props}>
+              <ResponsiveOverlayFooter><Button>OK</Button></ResponsiveOverlayFooter>
+            </ResponsiveOverlayFrame>
+          </>
+        )
+      }
+    `)
+    expect(result.status).toBe(0)
+    expect(result.stdout).not.toContain("P051")
+  })
 })

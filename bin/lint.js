@@ -7,19 +7,39 @@ import {
   loadProductThemeContract,
 } from "./product-theme-override.js"
 
-// card-child-spacing.js は `import ts from "typescript"` している（P046 専用エンジン）。
-// typescript は 24MB 前後あり、59ルール中 P046 の1つにしか使わないため、
-// P046 が実際に有効なとき（rules.json に該当ルールがあり、対象ファイルも存在するとき）
+// card-child-spacing.js / overlay-footer-padding.js は `import ts from "typescript"` している
+// （P046 / P051 専用エンジン）。typescript は 24MB 前後あり、AST が要るのはこの2ルールだけなので、
+// 該当ルールが実際に有効なとき（rules.json に該当ルールがあり、対象ファイルも存在するとき）
 // だけ動的 import する（issue #409）。typescript が未インストールの consumer では
-// ERR_MODULE_NOT_FOUND で落とさず、P046 だけを skip して案内を1行出す。
-let cardChildSpacingModulePromise = null
-async function loadCardChildSpacing() {
-  if (!cardChildSpacingModulePromise) {
-    cardChildSpacingModulePromise = import("./card-child-spacing.js").catch((error) => {
-      return { __unavailable: true, error }
-    })
+// ERR_MODULE_NOT_FOUND で落とさず、該当ルールだけを skip して案内を1行出す。
+const tsEngineModulePromises = new Map()
+function loadTsEngine(specifier) {
+  if (!tsEngineModulePromises.has(specifier)) {
+    tsEngineModulePromises.set(
+      specifier,
+      import(specifier).catch((error) => {
+        return { __unavailable: true, error }
+      }),
+    )
   }
-  return cardChildSpacingModulePromise
+  return tsEngineModulePromises.get(specifier)
+}
+
+/**
+ * TypeScript AST を使うエンジン。engine 名 → { module, export, label }。
+ * label は typescript 不在で skip するときの案内文に使う。
+ */
+const TS_ENGINES = {
+  "card-direct-child-spacing": {
+    module: "./card-child-spacing.js",
+    exportName: "inspectCardChildSpacing",
+    label: "P046（Card 直下の子要素スペーシング）",
+  },
+  "overlay-footer-padding": {
+    module: "./overlay-footer-padding.js",
+    exportName: "inspectOverlayFooterPadding",
+    label: "P051（ResponsiveOverlayFrame + Footer の padding={false} 付け忘れ）",
+  },
 }
 
 const DEFAULT_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx"])
@@ -369,20 +389,20 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
   // DS 自身 / ベンダリングされた DS の CSS を P049 の対象から外すための材料（issue #407）
   const dsCssIdentity = cssRules.length > 0 ? collectDsCssIdentity(pkgRoot) : null
 
-  // P046（card-direct-child-spacing）が有効なときだけ typescript を動的 import する。
-  // 未インストール環境では ERR_MODULE_NOT_FOUND で落とさず、P046 だけ skip して1行案内する（issue #409）。
-  let inspectCardChildSpacing = null
-  const hasCardSpacingRule = sourceRules.some((rule) => rule.engine === "card-direct-child-spacing")
-  if (hasCardSpacingRule) {
-    const mod = await loadCardChildSpacing()
+  // TypeScript AST エンジン（P046 / P051）は有効なときだけ typescript を動的 import する。
+  // 未インストール環境では ERR_MODULE_NOT_FOUND で落とさず、該当ルールだけ skip して1行案内する（issue #409）。
+  const tsInspectors = {}
+  for (const [engine, spec] of Object.entries(TS_ENGINES)) {
+    if (!sourceRules.some((rule) => rule.engine === engine)) continue
+    const mod = await loadTsEngine(spec.module)
     if (mod.__unavailable) {
       console.log(
-        `[ksk-ds lint] typescript が見つからないため P046（Card 直下の子要素スペーシング）を skip します。` +
+        `[ksk-ds lint] typescript が見つからないため ${spec.label} を skip します。` +
           `devDependencies に typescript を追加すると検査対象になります。`,
       )
-      sourceRules = sourceRules.filter((rule) => rule.engine !== "card-direct-child-spacing")
+      sourceRules = sourceRules.filter((rule) => rule.engine !== engine)
     } else {
-      inspectCardChildSpacing = mod.inspectCardChildSpacing
+      tsInspectors[engine] = mod[spec.exportName]
     }
   }
 
@@ -422,7 +442,7 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
         continue
       }
       findings.push(
-        ...lintFile(file, cwd, sourceRules, { ...options, inspectCardChildSpacing, pkgRoot }),
+        ...lintFile(file, cwd, sourceRules, { ...options, tsInspectors, pkgRoot }),
       )
     } catch (error) {
       if (error && error.code === "ENOENT") {
@@ -781,9 +801,10 @@ function lintFile(file, cwd, rules, options = {}) {
 
   for (const rule of rules) {
     if (!ruleAppliesTo(rule, { capabilities, filePath: rel })) continue
-    if (rule.engine === "card-direct-child-spacing") {
-      if (!options.inspectCardChildSpacing) continue
-      for (const finding of options.inspectCardChildSpacing(source, file)) {
+    if (rule.engine && Object.hasOwn(TS_ENGINES, rule.engine)) {
+      const inspect = options.tsInspectors?.[rule.engine]
+      if (!inspect) continue
+      for (const finding of inspect(source, file)) {
         const line = lines[finding.line - 1] ?? ""
         if (ignores.suppresses(rule.id ?? "UNKNOWN", finding.line)) continue
         if (!matchesRuleExclude(rule, { file: rel, line, isDsFile })) {

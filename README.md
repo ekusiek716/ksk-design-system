@@ -285,6 +285,20 @@ DS 名前空間に属さないカスタムプロパティへ色値（`#hex` / `r
 ように DS トークンを参照しているだけのものはカウントしません。意図的な独立パレット
 （LINE 風チャット画面のライトなど）は `// ksk-ds-lint-ignore P050 -- 理由` で抑制できます。
 
+#### P051: ResponsiveOverlayFrame + Footer の `padding={false}` 付け忘れ（issue #619）
+
+`preset="plain"` / `side="float"` / `side="float-glass"` の `ResponsiveOverlayFrame` は、
+既定で `p-6` と safe-area 込みの下余白を持ちます。`ResponsiveOverlayFooter` も自前で
+safe-area 込みの下余白を持つため、併用するときは Frame に `padding={false}` が必要です。
+付け忘れると下の余白が二重になるので、P051 が warn します。
+
+誤検知を出さない方を優先し、`side` / `preset` が文字列リテラルで確定していて、Frame に
+spread props（`{...props}`）が無く、`padding` が未指定・値なし・`{true}` で、Footer が
+Frame の JSX の中に直接書かれているときだけ報告します。`padding={cond}` のような式、
+Footer を別コンポーネントに切り出した構成、preset 経路（`mobile-form` 等。余白を持たない）は
+対象外です。P046 と同じく TypeScript の構文解析を使うため、`typescript` が無いプロジェクトでは
+P051 だけ skip して案内を1行出します。
+
 #### ルールごとの除外（rules.json の excludes 系）
 
 `contracts/rules.json` の除外指定は、当てる対象ごとに 3 つに分かれています。
