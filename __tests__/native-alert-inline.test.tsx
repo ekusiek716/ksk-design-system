@@ -27,16 +27,30 @@ describe("native Alert inline variants", () => {
         expect(output).toContain("Action")
         const theme = getTheme("default", mode)
         const tone = variant === "inline-info" ? "tertiary" : variant === "inline-warning" ? "warning" : "caution"
-        expect(hosts.styles[0]).toMatchObject({ borderLeftWidth: 0, backgroundColor: theme.surface[tone] })
+        expect(hosts.styles[0].borderLeftWidth).toBeUndefined()
+        expect(hosts.styles[0]).toMatchObject({ backgroundColor: theme.surface[tone] })
         expect(hosts.styles[2].color).toBe(variant === "inline-info" ? theme.text["medium-emphasis"] : theme.text[tone as "warning" | "caution"])
         expect(hosts.styles[1].color).toBe(variant === "inline-info" ? theme.text["high-emphasis"] : theme.text[tone as "warning" | "caution"])
       })
     }
   }
   for (const tone of ["info", "success", "warning", "caution"] as const) {
-    it(`legacy ${tone} keeps its appearance`, () => {
+    it(`tone-only ${tone} has no left band and matches its borderless inline display (#617)`, () => {
       render(<Alert tone={tone} title="Legacy" />)
-      expect(hosts.styles[0]).toMatchObject({ borderLeftWidth: 4, backgroundColor: getTheme("default", "light").surface[tone] })
+      const theme = getTheme("default", "light")
+      const expectedBg = tone === "info" ? theme.surface.tertiary : theme.surface[tone]
+      expect(hosts.styles[0]).not.toHaveProperty("borderLeftWidth")
+      expect(hosts.styles[0]).toMatchObject({ backgroundColor: expectedBg })
+    })
+  }
+
+  for (const tone of ["info", "success", "warning", "caution"] as const) {
+    it(`tone-only ${tone} never renders borderLeftWidth, regardless of theme mode (#617)`, () => {
+      for (const mode of ["light", "dark"] as const) {
+        hosts.styles = []
+        render(<Alert tone={tone} title="Legacy" />, mode)
+        expect(hosts.styles[0].borderLeftWidth).toBeUndefined()
+      }
     })
   }
 })
