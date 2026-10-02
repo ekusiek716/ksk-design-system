@@ -36,6 +36,9 @@
 #   （旧名 @ksk/design-system 含む）を持つ package.json を全部書き換える。
 #   ただし値が "*" や "workspace:" で始まるものは触らない
 #   （例: okuno-todo-suite の packages/todo-shared が "*" 参照）。
+#   書き換え後の指定方式は既存値に合わせる:
+#     完全固定 "2.8.0" → "2.9.0" / "^2.8.0" → "^2.9.0" / "~2.8.0" → "~2.9.0"
+#     それ以外（">=" や "latest" 等）→ "^2.9.0"
 #
 # DRY_RUN=1:
 #   push / gh pr create をスキップ。package.json 書換・npm install・commit
@@ -74,8 +77,8 @@ NOTICE_RUNTIME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/templates/consu
 #
 # ExamKit 系はここに入れない（2026-10-02）: ExamKit 本体は DS を完全固定
 # （--save-exact）し、資格アプリは kit:rollout が ExamKit の package-lock.json と同じ版へ
-# 固定する（ExamKit docs/ops/kit-rollout.md）。このスクリプトは "^x.y.z" を書くため、
-# 資格アプリへ直接流すと ExamKit と版がずれる。資格アプリへは
+# 固定する（ExamKit docs/ops/kit-rollout.md）。このスクリプトが資格アプリを直接上げると、
+# ExamKit と版がずれる。資格アプリへは
 #   ExamKit で npm i ksk-design-system@<v> --save-exact → kit:bump → kit:rollout
 # の順で届ける。誤って渡されても下の ExamKit ガードが SKIP する。
 DEFAULT_REPOS=(
@@ -125,7 +128,8 @@ fi
 
 # 中断（Ctrl-C 等）時も処理中リポの一時 worktree を残さない。
 # cleanup はループ内で毎回 $repo / $wt を掴んで再定義される。
-RUN_LOCK="/tmp/ksk-ds-update-consumers-$(id -u).lock"
+# KSK_UPDATE_CONSUMERS_LOCK はテスト（__tests__/update-consumers-spec.test.mjs）が実運用の lock と衝突しないための差し替え口。
+RUN_LOCK="${KSK_UPDATE_CONSUMERS_LOCK:-/tmp/ksk-ds-update-consumers-$(id -u).lock}"
 if ! mkdir "$RUN_LOCK" 2>/dev/null; then
   echo "FAIL: 一括bumpは同時実行できません。実行中プロセスが無い場合のみ $RUN_LOCK を確認してください" >&2
   exit 1
@@ -259,7 +263,7 @@ for repo in "${REPOS[@]}"; do
 
   # ── ExamKit 系ガード ──
   # ExamKit 本体（exam-kit-version.json）と資格アプリ（exam-kit.lock.json）は DS を
-  # 完全固定し、kit:rollout で ExamKit と同じ版へ揃える。ここで "^x.y.z" を書くと
+  # 完全固定し、kit:rollout で ExamKit と同じ版へ揃える。ここで直接上げると
   # ExamKit と版がずれるため触らない（DEFAULT_REPOS の注記参照）。
   if [ -f "$wt/exam-kit-version.json" ] || [ -f "$wt/exam-kit.lock.json" ]; then
     echo -e "${YELLOW}SKIP: ExamKit 系は ExamKit 経由（--save-exact → kit:bump → kit:rollout）で配布する${NC}"
@@ -271,39 +275,51 @@ for repo in "${REPOS[@]}"; do
   # ── package.json 群を書き換え（monorepo 対応）──
   # ksk-design-system / 旧名 @ksk/design-system を deps/devDeps/peerDeps に
   # 持つファイルを全部書き換え。値が "*" / "workspace:" 始まりは除外。
+  # 書き換えた指定（"<file> <dep 種別>: <spec>"）を SPEC_LINES に貯め、commit / PR 本文へ載せる。
   CHANGED_COUNT=0
+  SPEC_LINES=""
   while IFS= read -r pkgrel; do
     [ -z "$pkgrel" ] && continue
-    if node -e '
+    if written="$(node -e '
       const fs = require("fs");
       const [file, version] = process.argv.slice(1);
       const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
       let changed = false;
+      const written = [];
       for (const k of ["dependencies", "devDependencies", "peerDependencies"]) {
         if (!pkg[k]) continue;
         const cur = pkg[k]["ksk-design-system"];
         const old = pkg[k]["@ksk/design-system"];
         // 値が "*" / "workspace:" 始まりのものは触らない
         const skip = (v) => typeof v === "string" && (v === "*" || v.startsWith("workspace:"));
-        // 完全固定（"2.6.4" のような範囲指定なし）の consumer は完全固定のまま上げる。
-        // camera-app は依存の完全固定を CI で検査しており、"^x.y.z" を書くと落ちた（2.8.0 配布）。
-        const spec = (v) => (typeof v === "string" && /^\d/.test(v) ? version : "^" + version);
+        // 既存の指定方式を保つ。完全固定（"2.6.4" のような範囲指定なし）は完全固定、
+        // "^" / "~" はその接頭辞のまま上げる。camera-app は依存の完全固定を CI で検査しており、
+        // "^x.y.z" を書くと落ちた（2.8.0 / 2.9.0 配布）。それ以外（">=" 等）は従来どおり "^"。
+        const spec = (v) => {
+          if (typeof v !== "string") return "^" + version;
+          if (/^\d/.test(v)) return version;
+          const prefix = v.match(/^[\^~]/);
+          return (prefix ? prefix[0] : "^") + version;
+        };
+        let next;
         if (old !== undefined) {
           if (skip(old)) continue;
           delete pkg[k]["@ksk/design-system"];
-          pkg[k]["ksk-design-system"] = spec(old);
-          changed = true;
+          next = pkg[k]["ksk-design-system"] = spec(old);
         } else if (cur !== undefined) {
           if (skip(cur)) continue;
-          pkg[k]["ksk-design-system"] = spec(cur);
-          changed = true;
-        }
+          next = pkg[k]["ksk-design-system"] = spec(cur);
+        } else continue;
+        changed = true;
+        written.push(k + ": " + next);
       }
       if (!changed) process.exit(2);
       fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n");
-    ' "$wt/$pkgrel" "$VERSION" 2>/dev/null; then
+      process.stdout.write(written.join(", "));
+    ' "$wt/$pkgrel" "$VERSION" 2>/dev/null)"; then
       CHANGED_COUNT=$((CHANGED_COUNT + 1))
-      echo "→ 書換: $pkgrel"
+      SPEC_LINES+="- \`$pkgrel\` $written"$'\n'
+      echo "→ 書換: $pkgrel ($written)"
     fi
   done < <(git -C "$wt" ls-files '*package.json')
 
@@ -323,11 +339,23 @@ for repo in "${REPOS[@]}"; do
   fi
 
   # ── npm install（worktree ルート）──
+  # パッケージ名を渡さない `npm install` は package.json の指定を書き換えず、上で書いた
+  # 指定（完全固定なら "x.y.z"）どおりに lockfile を解決する。`npm install ksk-design-system@x`
+  # の形にすると save-prefix で "^" が付き完全固定が崩れるため、この形を変えないこと
+  # （完全固定の consumer には --save-exact 相当になる）。念のため install 前後で指定が
+  # 変わっていないことも確かめる。
+  specs_before="$(cd "$wt" && git ls-files '*package.json' | xargs cat | shasum)"
   echo "→ npm install (npm registry から取得)"
   if ! (cd "$wt" && npm install --no-audit --no-fund >/dev/null 2>&1); then
     echo -e "${RED}FAIL: npm install${NC}"
     cleanup
     RESULTS+=("$name: FAIL (npm install)")
+    continue
+  fi
+  if [ "$(cd "$wt" && git ls-files '*package.json' | xargs cat | shasum)" != "$specs_before" ]; then
+    echo -e "${RED}FAIL: npm install が package.json の依存指定を書き換えた${NC}"
+    cleanup
+    RESULTS+=("$name: FAIL (npm install rewrote package.json)")
     continue
   fi
 
@@ -372,8 +400,8 @@ for repo in "${REPOS[@]}"; do
 
   if ! git -C "$wt" commit -m "chore: ksk-design-system を v$VERSION に bump
 
-- package.json の ksk-design-system 依存を ^$VERSION に更新（monorepo は全 package.json）
-- package-lock.json を npm registry のメタ情報で更新
+- package.json の ksk-design-system 依存を v$VERSION に更新（既存の指定方式を保持: 完全固定は完全固定、^ / ~ は接頭辞を維持）
+${SPEC_LINES}- package-lock.json を npm registry のメタ情報で更新
 - vendor/ksk-design-system-*.tgz が残っていれば削除（過去版は git history で追える）" >/dev/null 2>&1; then
     echo -e "${RED}FAIL: commit（pre-commit hook / git identity 等）${NC}"
     cleanup
@@ -414,7 +442,8 @@ for repo in "${REPOS[@]}"; do
 ksk-design-system を v__VERSION__ に bump。
 
 ## 変更
-- `package.json` の `ksk-design-system` 依存を `^__VERSION__` に更新（monorepo は対象の全 `package.json`）
+- `package.json` の `ksk-design-system` 依存を v__VERSION__ に更新（monorepo は対象の全 `package.json`）。既存の指定方式を保持（完全固定は完全固定、`^` / `~` は接頭辞を維持）
+__SPECS__
 - `package-lock.json` を npm registry のメタ情報で更新
 - `vendor/ksk-design-system-*.tgz` が残っていれば削除（過去版は git history で復元可能）
 
@@ -426,9 +455,9 @@ ksk-design-system を v__VERSION__ に bump。
 EOF
   node -e '
     const fs = require("fs");
-    const [file, version] = process.argv.slice(1);
-    fs.writeFileSync(file, fs.readFileSync(file, "utf8").replaceAll("__VERSION__", version));
-  ' "$pr_body_file" "$VERSION"
+    const [file, version, specs] = process.argv.slice(1);
+    fs.writeFileSync(file, fs.readFileSync(file, "utf8").replaceAll("__VERSION__", version).replace("__SPECS__\n", () => specs));
+  ' "$pr_body_file" "$VERSION" "$SPEC_LINES"
 
   # gh pr create が失敗しても branch は push 済みなので、ここを成功扱いにすると
   # 配布漏れがログを目視するまで気づけない（2026-08-20 の 1.60.0 配布で
