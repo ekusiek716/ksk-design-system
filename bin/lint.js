@@ -6,6 +6,7 @@ import {
   inspectProductThemeOverrides,
   loadProductThemeContract,
 } from "./product-theme-override.js"
+import { inspectUnlayeredGlobalOverrides } from "./unlayered-global-override.js"
 
 // card-child-spacing.js / overlay-footer-padding.js は `import ts from "typescript"` している
 // （P046 / P051 専用エンジン）。typescript は 24MB 前後あり、AST が要るのはこの2ルールだけなので、
@@ -39,6 +40,11 @@ const TS_ENGINES = {
     module: "./overlay-footer-padding.js",
     exportName: "inspectOverlayFooterPadding",
     label: "P051（ResponsiveOverlayFrame + Footer の padding={false} 付け忘れ）",
+  },
+  "ds-shape-override": {
+    module: "./ds-shape-override.js",
+    exportName: "inspectDsShapeOverrides",
+    label: "P052（DS 部品の className での角丸・高さ・左右 padding の上書き）",
   },
 }
 
@@ -381,7 +387,8 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
   // CSS 専用エンジン一覧。P049（product-theme-override）と P050（parallel-palette、
   // issue #393）はどちらも .css だけを対象にした独自エンジンで、TSX 向けの
   // 正規表現エンジンとは別の走査経路（lintCssFile）を通す。
-  const CSS_ENGINES = new Set(["product-theme-override", "parallel-palette"])
+  // P053（unlayered-global-override）も .css だけを見る独自エンジン。
+  const CSS_ENGINES = new Set(["product-theme-override", "parallel-palette", "unlayered-global-override"])
   const rules = loadRules(rulesPath)
   const cssRules = rules.filter((rule) => CSS_ENGINES.has(rule.engine))
   let sourceRules = rules.filter((rule) => !CSS_ENGINES.has(rule.engine))
@@ -735,6 +742,18 @@ function lintCssFile(file, cwd, cssRules, contract, dsCssIdentity = null, pkgRoo
     // capability タグを含まないので、この判定でも従来どおり P049/P050 が当たる。
     if (!ruleAppliesTo(rule, { capabilities: CSS_CAPABILITIES, filePath: rel })) continue
 
+    if (rule.engine === "unlayered-global-override") {
+      for (const violation of inspectUnlayeredGlobalOverrides(source)) {
+        if (matchesRuleExclude(rule, { file: rel, line: violation.selector, isDsFile })) continue
+        if (ignores.suppresses(rule.id ?? "UNKNOWN", violation.line)) continue
+        findings.push({
+          ...toFinding(rule, rel, violation.line, "web"),
+          message: `${rule.message ?? "@layer 外のグローバル CSS が DS 部品の形を変えています"}: ${violation.selector} { ${violation.property} }`,
+        })
+      }
+      continue
+    }
+
     if (rule.engine === "parallel-palette") {
       // contract が読めない（DS の名前空間一覧が無い）と何が DS 名前空間かを
       // 判定できず false positive しか出せないので、その場合は skip する。
@@ -808,7 +827,9 @@ function lintFile(file, cwd, rules, options = {}) {
         const line = lines[finding.line - 1] ?? ""
         if (ignores.suppresses(rule.id ?? "UNKNOWN", finding.line)) continue
         if (!matchesRuleExclude(rule, { file: rel, line, isDsFile })) {
-          findings.push(toFinding(rule, rel, finding.line, platform))
+          const base = toFinding(rule, rel, finding.line, platform)
+          // エンジンが該当箇所の具体（どの部品のどのクラスか等）を返すときはメッセージに添える（P052）
+          findings.push(finding.detail ? { ...base, message: `${base.message}: ${finding.detail}` } : base)
         }
       }
       continue

@@ -2,7 +2,7 @@
   "meta": {
     "name": "KSK Design System — Rules Contracts",
     "version": "1.2.0",
-    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン51件・AIアンチパターン10件。"
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン53件・AIアンチパターン10件。"
   },
   "prohibited": [
     {
@@ -580,6 +580,30 @@
       "message": "ResponsiveOverlayFrame（preset=\"plain\" / side=\"float\" 系）の中に ResponsiveOverlayFooter を置くのに padding={false} が無い（下余白が二重になる）",
       "fix": "Frame に padding={false} を付ける。ResponsiveOverlayFooter が safe-area 込みの下余白を自前で持つため、Frame 側の p-6 と safe-area の下余白は不要",
       "note": "issue #619。#599 / #613 で plain / float 系の Frame が既定で p-6 + safe-area 込みの下余白を持つようになったため、Footer と併用すると二重になる。公開 CLI と lint-scratch.sh は共通の TypeScript AST 検査（bin/overlay-footer-padding.js）。誤検知を出さない方を優先し、side / preset が文字列リテラルで plain / float 系と確定し、Frame に spread props が無く、padding が未指定・値なし・{true} で、Footer が Frame の JSX 子孫に直接書かれているときだけ報告する。padding={cond} のような式・{...props}・Footer を別コンポーネントに切り出した構成・preset 経路（mobile-form 等。padding を受け付けず余白も持たない）は対象外"
+    },
+    {
+      "id": "P052",
+      "severity": "warning",
+      "category": "component",
+      "appliesTo": ["tailwind"],
+      "pattern": "ds-shape-override",
+      "engine": "ds-shape-override",
+      "excludeLines": [],
+      "message": "DS 部品の className で角丸・高さ・左右 padding を上書きしている（同じ画面の他の DS 部品と形がずれる）",
+      "fix": "上書きを外して DS の既定に任せる。アプリ全体で形を変えたいときは部品ごとに被せず、product theme override API（--Control-Radius / --Field-Radius / --Field-Height-* / --Field-Padding-X-* / --Settings-Row-*）で 1 箇所だけ変える。枠なしのインライン編集欄は unstyled、記号やボタンを入力欄に併置するときは startAdornment / endAdornment、ボタンの高さは size（lg / icon-lg 等）、Skeleton の角丸は rounded prop を使う",
+      "note": "belle-todo（2026-10-01）で、Button に rounded-2xl / rounded-lg を 46 箇所、入力欄に rounded-2xl / h-10〜14 / px-4 を多数被せた結果、同じ画面でボタンの形が pill と角丸長方形で混在し、入力欄も欄ごとに角丸・高さがずれていた。公開 CLI は TypeScript AST 検査（bin/ds-shape-override.js）。誤検知を出さない方を優先し、\"ksk-design-system\" から import した部品（Button / Input / Textarea / AutoGrowTextarea / Commit* / SelectTrigger / DateField / DatePicker / TimePicker / Combobox / Chip / ChipSelector / SettingsListRow / Skeleton）の className 属性に書かれた文字列リテラル（cn() / 三項 / テンプレートの固定部分を含む）だけを見る。unstyled を付けた部品、h-auto / h-full / min-h-0 等のレイアウト用の高さ、変数経由のクラスは対象外。ボタンをカード状のタイルとして使う等の正当な例外は // ksk-ds-lint-ignore P052 -- 理由 で外す"
+    },
+    {
+      "id": "P053",
+      "severity": "warning",
+      "category": "theme",
+      "appliesTo": ["*.css"],
+      "pattern": "unlayered-global-override",
+      "engine": "unlayered-global-override",
+      "excludeLines": [],
+      "message": "@layer の外でタグ / role / 汎用属性セレクタに寸法・余白・角丸・文字サイズ・outline を当てている（DS 部品の className では打ち消せない）",
+      "fix": "アプリ共通の既定は @layer base { … } の中に書く（DS / Tailwind のユーティリティが後から勝つ）。layer 外に残す必要があるなら :not([data-slot]) で DS 部品を外すか、DS の公開 data-slot を明示的に狙う",
+      "note": "CSS の仕様上、layer 外の宣言は @layer の中の宣言（Tailwind / DS のユーティリティは @layer utilities）に詳細度と無関係に勝つ。belle-todo（2026-10-01）で、layer 外の [role=\"radio\"] { min-height } が DS Chip を 32px → 44〜52px に膨らませ、:focus-visible { border-radius } が pill のボタンをフォーカス中だけ角ばらせ、DS 部品のフォーカス枠を二重にし、nav { padding-bottom: safe-area } が浮いたタブバーに safe-area を二重に足していた。@layer / @theme の中、クラスで始まるセレクタ（消費側の独自クラス）、html / body / :root / *、keyframes、data-slot を含むセレクタは対象外。DS 自身 / ベンダリングされた DS の CSS は P049 と同じく lint 側で対象外"
     }
   ],
   "aiPatterns": {
