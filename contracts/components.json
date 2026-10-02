@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 69,
-      "patterns": 61,
+      "patterns": 62,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 153
+      "total": 154
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -2421,6 +2421,27 @@
       "rules": [
         "BottomTabBar + MobileFloatingActionButton の geometry を consumer CSS で手組みしない",
         "既に fixed な nav を渡す場合は bottomNavMode=external を使う"
+      ]
+    },
+    {
+      "name": "SidebarNav",
+      "path": "src/components/patterns/sidebar-nav.tsx",
+      "description": "PC 表示の左サイドバーに縦に並べるナビ項目。行高 44px・角丸・選択中の面/文字色・アイコン位置・件数バッジを DS が持つ。items は BottomTabBarItem と同じ形で、モバイルの BottomTabBar と同じ配列を渡せる。collapsed でアイコンだけのレール表示。",
+      "variants": [
+        "collapsed: false / true"
+      ],
+      "accessibility": [
+        "nav に aria-label（既定 \"サイドナビゲーション\"）を付与",
+        "isActive の項目に aria-current=\"page\" を付与",
+        "role=tab / aria-selected は使わない",
+        "collapsed 時はラベルを aria-label と title に移す",
+        "行の高さは 44px 以上"
+      ],
+      "rules": [
+        "MobileAppShell の desktopSidebar / AdminShell の sidebar slot に置く。Button を行の形へ上書きして代用しない",
+        "モバイルの BottomTabBar と同じ items 配列を渡す",
+        "ページ内アンカーの目次は SectionNav、ビュー状態の切替は SubNav を使う",
+        "ロゴ行・フッターは部品に含めず slot 側で並べる"
       ]
     },
     {

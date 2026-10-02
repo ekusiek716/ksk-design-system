@@ -1,6 +1,6 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { ArrowLeft2, ArrowRight2 } from "iconsax-reactjs"
+import { ArrowLeft2, ArrowRight2, Box, Category, People, Setting2, ShoppingCart } from "iconsax-reactjs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Breadcrumb,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { SectionHeader } from "@/components/patterns/section-header"
+import { SidebarNav, type SidebarNavItem } from "@/components/patterns/sidebar-nav"
 import { AdminShell } from "./admin-shell"
 
 const meta: Meta<typeof AdminShell> = {
@@ -40,8 +41,13 @@ const meta: Meta<typeof AdminShell> = {
 export default meta
 type Story = StoryObj<typeof AdminShell>
 
-const NAV_ITEMS = ["ダッシュボード", "注文管理", "商品管理", "顧客管理", "設定"]
-const ACTIVE_INDEX = 1
+const NAV_ITEMS: SidebarNavItem[] = [
+  { label: "ダッシュボード", icon: <Category size={20} />, href: "#main-content" },
+  { label: "注文管理", icon: <ShoppingCart size={20} />, href: "#main-content", isActive: true, badgeCount: 3 },
+  { label: "商品管理", icon: <Box size={20} />, href: "#main-content" },
+  { label: "顧客管理", icon: <People size={20} />, href: "#main-content" },
+  { label: "設定", icon: <Setting2 size={20} />, href: "#main-content" },
+]
 
 interface SidebarContentProps {
   collapsed: boolean
@@ -82,34 +88,8 @@ const SidebarContent = ({ collapsed, onToggle }: SidebarContentProps) => (
           メニュー
         </div>
       )}
-      {NAV_ITEMS.map((item, i) => {
-        const active = i === ACTIVE_INDEX
-        // 生 <a> / <button> は使わず Button asChild。h-11 = 44px（#254-4）
-        return (
-          <Button
-            key={item}
-            asChild
-            variant="ghost"
-            className={[
-              "h-11 rounded-lg typo-body-sm",
-              collapsed ? "w-11 justify-center px-0" : "w-full justify-start gap-3 px-3",
-              active
-                ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)]"
-                : "text-[var(--Text-High-Emphasis)]",
-            ].join(" ")}
-          >
-            <a
-              href="#main-content"
-              aria-current={active ? "page" : undefined}
-              aria-label={collapsed ? item : undefined}
-              title={collapsed ? item : undefined}
-            >
-              <span className="size-5 shrink-0 rounded-full bg-[var(--Surface-Secondary)]" />
-              {!collapsed && item}
-            </a>
-          </Button>
-        )
-      })}
+      {/* 行の高さ 44px・選択中の面・aria-current は SidebarNav が持つ（#254-4 / #611） */}
+      <SidebarNav items={NAV_ITEMS} collapsed={collapsed} />
     </div>
 
     {/* フッターにも上罫線を入れない（#254-1）。分離は余白が担う */}
