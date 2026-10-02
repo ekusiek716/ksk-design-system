@@ -159,7 +159,7 @@ afterEach フックが全ストーリー（tags フィルタなし）に対し�
 （AA 未達トークンの darken と opacity 減衰の廃止により全ストーリー通過。
 トークンペアの正本チェックは `scripts/check-contrast.mjs`）。CI では常時実行される。
 
-**オーバーレイ系や `outline-hidden` のフォーカス表示を触ったら `npm run test:forced-colors` も実行:**
+**Button など、フォーカス表示の `outline-none` / `outline-hidden` 系クラスを触ったら `npm run test:forced-colors` も実行:**
 
 ```bash
 npm run test:forced-colors
@@ -383,8 +383,10 @@ npm run test:forced-colors
   chromium 実機で確認する。設定は `vitest.forced-colors.config.ts`（`vitest.config.ts`
   の既定テストからは `__tests__/browser/**` を除外し、`npm run test:forced-colors` で
   個別に実行する）。
-- DS コンポーネント本体で `focus(-visible):outline-none` の新規追加が無いことは
-  `__tests__/focus-ring-outline-pairing.test.ts` の機械検証（`npm test`）で検出する。
+- DS コンポーネント本体で `outline-none`（前置バリアント付き含む）の新規追加が
+  無いことは `__tests__/focus-ring-outline-pairing.test.ts` の機械検証（`npm test`）で
+  検出する。consumer 向けの `outline-none` 検出は `contracts/rules.json` P023（`bin/lint.js`）
+  と `scripts/lint-scratch.sh` W7 が担う。
 
 **旧 Radix 回帰テストについて（issue #516）:**
 

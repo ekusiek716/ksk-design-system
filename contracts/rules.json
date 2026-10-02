@@ -260,10 +260,9 @@
       "pattern": "outline-none\\b",
       "excludePaths": [".stories."],
       "excludeDsPaths": ["components/ui/", "components/patterns/"],
-      "excludeLines": ["focus-visible"],
       "message": "outline-none 禁止（フォーカスリング削除はアクセシビリティ違反。強制配色モードでは outline-hidden でないと枠が消える）",
       "fix": "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
-      "note": "issue #620。Tailwind v4 で outline-none は常に outline-style: none（強制配色モードでも非表示のまま）。outline-hidden は通常時 none だが forced-colors 時だけ outline: 2px solid transparent になり OS 色へ置換されるため、box-shadow の ring が描画されない強制配色モードでも枠が残る。DS コンポーネント本体（components/ui・components/patterns）はこのルールの対象外で、__tests__/focus-ring-outline-pairing.test.ts が outline-hidden 必須を機械検証する"
+      "note": "issue #620。Tailwind v4 で outline-none は常に outline-style: none（強制配色モードでも非表示のまま）。outline-hidden は通常時 none だが forced-colors 時だけ outline: 2px solid transparent になり OS 色へ置換されるため、box-shadow の ring が描画されない強制配色モードでも枠が残る。以前は excludeLines: [\"focus-visible\"] で `focus-visible:outline-none` を含む行を丸ごと素通りさせていたため、まさに forced-colors で問題になるパターン（outline-none + ring の組み合わせ）を検出できていなかった（レビュー指摘）。前置バリアント（`md:` / `data-[...]:` / `group-focus-visible:` / `!` 等）付きでも `outline-none` 部分文字列があれば検出する。DS コンポーネント本体（components/ui・components/patterns）はこのルールの対象外で、__tests__/focus-ring-outline-pairing.test.ts が outline-hidden 必須を機械検証する"
     },
     {
       "id": "P024",

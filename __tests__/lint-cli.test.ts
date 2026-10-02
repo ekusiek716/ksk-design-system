@@ -79,6 +79,49 @@ describe("ksk-ds lint", () => {
     expect(result.stdout).toContain("warning P051")
   })
 
+  it("focus-visible:outline-none + ring でも P023 を警告する（issue #620 フォローアップ）", () => {
+    // 以前は excludeLines: ["focus-visible"] で、まさにこの「outline-none + ring」
+    // パターンの行を丸ごと素通りさせていた。forced-colors モードでは ring
+    // （box-shadow）も outline-none も効かず枠が完全に消えるため、ring と
+    // ペアでも警告する必要がある。
+    const result = runPublicLint(`
+      export function Example() {
+        return <div className="focus-visible:outline-none focus-visible:ring-2">x</div>
+      }
+    `)
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain("warning P023")
+  })
+
+  it("前置バリアント付きの outline-none も P023 を検出する（md: / data-[...] / group-focus-visible: / !）", () => {
+    const result = runPublicLint(`
+      export function Example() {
+        return (
+          <>
+            <div className="md:focus-visible:outline-none">a</div>
+            <div className="data-[state=open]:focus-visible:outline-none">b</div>
+            <div className="group-focus-visible:outline-none">c</div>
+            <div className="!outline-none">d</div>
+            <div className="focus:outline-none">e</div>
+          </>
+        )
+      }
+    `)
+    expect(result.status).toBe(0)
+    const matches = result.stdout.match(/warning P023/g) ?? []
+    expect(matches).toHaveLength(5)
+  })
+
+  it("outline-hidden は P023 を警告しない（forced-colors 対応の正しい指定）", () => {
+    const result = runPublicLint(`
+      export function Example() {
+        return <div className="focus-visible:outline-hidden focus-visible:ring-2">x</div>
+      }
+    `)
+    expect(result.status).toBe(0)
+    expect(result.stdout).not.toContain("P023")
+  })
+
   it("padding={false} / 式 / spread props では P051 を出さない（issue #619）", () => {
     const result = runPublicLint(`
       import { Button, ResponsiveOverlayFrame, ResponsiveOverlayFooter } from "ksk-design-system"
