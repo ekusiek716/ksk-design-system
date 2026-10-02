@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils"
 type AccordionSize = "default" | "lg"
 
 /**
- * issue #600: Accordion の size は Root で指定し、Item/Trigger/Content へ
- * context 経由で伝える（第一候補）。Trigger/Content の個別 size prop での
+ * issue #600: Accordion の size は Root で指定し、Trigger / Content へ
+ * context 経由で伝える（第一候補）。Trigger / Content の個別 size prop での
  * 上書きも許可する — LP の FAQ の中で一部の項目だけ強調したい、といった
  * 部分的な混在を禁止する理由が無く、他の DS コンポーネント（Button 等）も
  * 個別指定を妨げないため。既定値は "default" で、指定しなければ見た目は
@@ -19,10 +19,11 @@ function useAccordionSize(sizeProp: AccordionSize | undefined): AccordionSize {
   return sizeProp ?? contextSize
 }
 
-function Accordion({
-  size = "default",
-  ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Root> & { size?: AccordionSize }) {
+type AccordionProps = React.ComponentProps<typeof AccordionPrimitive.Root> & {
+  size?: AccordionSize
+}
+
+function Accordion({ size = "default", ...props }: AccordionProps) {
   return (
     <AccordionSizeContext.Provider value={size}>
       <AccordionPrimitive.Root data-slot="accordion" {...props} />
@@ -53,8 +54,14 @@ function AccordionTrigger({
         data-slot="accordion-trigger"
         data-size={resolvedSize}
         className={cn(
-          "flex flex-1 items-center justify-between text-[var(--Text-High-Emphasis)] transition-all cursor-pointer",
+          "flex flex-1 items-center justify-between",
           resolvedSize === "lg" ? "py-6 typo-label-lg" : "py-4 typo-label-md",
+          "text-[var(--Text-High-Emphasis)] transition-all cursor-pointer",
+          // lg は LP の FAQ 等、長めの質問文が複数行に折り返される想定。<button> の
+          // UA 既定 text-align:center のまま複数行になると行ごとに中央寄せされて
+          // しまうため、lg のときだけ text-left を明示する（issue #600 レビュー指摘）。
+          // default は既存の見た目を変えないためそのまま。
+          resolvedSize === "lg" && "text-left",
           "hover:underline [&[data-state=open]>svg]:rotate-180",
           className
         )}
@@ -81,8 +88,9 @@ function AccordionContent({
       data-slot="accordion-content"
       data-size={resolvedSize}
       className={cn(
-        "overflow-hidden text-[var(--Text-High-Emphasis)] data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up",
-        resolvedSize === "lg" ? "typo-body-lg" : "typo-body-md"
+        "overflow-hidden",
+        resolvedSize === "lg" ? "typo-body-lg" : "typo-body-md",
+        "text-[var(--Text-High-Emphasis)] data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up"
       )}
       {...props}
     >
@@ -92,4 +100,4 @@ function AccordionContent({
 }
 
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
-export type { AccordionSize }
+export type { AccordionSize, AccordionProps }

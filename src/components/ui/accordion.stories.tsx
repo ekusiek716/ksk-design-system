@@ -8,6 +8,14 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "./
 const meta: Meta<typeof Accordion> = {
   title: "Components/Accordion",
   component: Accordion,
+  argTypes: {
+    size: {
+      control: "radio",
+      options: ["default", "lg"],
+      description:
+        "Trigger/Content へ context 経由で伝わる表示サイズ（issue #600）。既定は \"default\"。",
+    },
+  },
 }
 export default meta
 
@@ -66,15 +74,15 @@ export const Large: Story = {
   render: () => (
     <Accordion type="single" collapsible size="lg" defaultValue="item-1">
       <AccordionItem value="item-1">
-        <AccordionTrigger>プレハナビは無料で使えますか？</AccordionTrigger>
+        <AccordionTrigger>無料プランでも使えますか？</AccordionTrigger>
         <AccordionContent>
-          基本機能は無料でご利用いただけます。一部のプレミアム機能は有料プランでご提供しています。
+          基本機能は無料でご利用いただけます。一部の機能は有料プランでご提供しています。
         </AccordionContent>
       </AccordionItem>
       <AccordionItem value="item-2">
-        <AccordionTrigger>複数人で編集できますか？</AccordionTrigger>
+        <AccordionTrigger>複数人で同時に編集できますか？</AccordionTrigger>
         <AccordionContent>
-          招待リンクを共有することで、パートナーや家族と同じ準備リストを編集できます。
+          招待リンクを共有することで、チームメンバーと同じ内容を編集できます。
         </AccordionContent>
       </AccordionItem>
     </Accordion>
