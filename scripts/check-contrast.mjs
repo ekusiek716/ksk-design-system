@@ -87,6 +87,16 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   }
 }
 
+// destructive ボタン（Button variant destructive。背景は Caution-Base、文字は
+// Text-on-Inverse・issue #618）。hover/active キーは `destructive-button`
+// （caution-button ではない）なので info/warning/success とは別ループにする。
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const fg = resolve(s.text["on-inverse"])
+  pairs.push([fg, resolve(s.caution.base), `${mode}: Text-on-Inverse / Caution-Base (destructive)`, 4.5])
+  pairs.push([fg, resolve(s.hover["destructive-button"]), `${mode}: Text-on-Inverse / Hover-Destructive-Button`, 4.5])
+  pairs.push([fg, resolve(s.active["destructive-button"]), `${mode}: Text-on-Inverse / Active-Destructive-Button`, 4.5])
+}
+
 // Categorical: Bold は文字用 → 白背景 & 自分の Subtle 背景で AA
 const cat = sem.categorical || {}
 for (const k of Object.keys(cat)) {

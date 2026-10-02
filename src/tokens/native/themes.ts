@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:c7ec9db2f57f)
+// source: tokens.json v2.1.0 (sha256:458455fd9b8a)
 // =============================================================
 
 export const themes = {
@@ -201,14 +201,14 @@ export const themes = {
         "secondary-button": "#1E3A8A",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444",
+        "destructive-button": "#FCA5A5",
         "info-button": "#93C5FD",
         "warning-button": "#FDBA74",
         "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#2563EB",
-        "destructive-button": "#DC2626",
+        "destructive-button": "#FECACA",
         "info-button": "#BFDBFE",
         "warning-button": "#FED7AA",
         "success-button": "#BBF7D0",
@@ -433,14 +433,14 @@ export const themes = {
         "secondary-button": "#1E3A8A",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444",
+        "destructive-button": "#FCA5A5",
         "info-button": "#93C5FD",
         "warning-button": "#FDBA74",
         "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#2563EB",
-        "destructive-button": "#DC2626",
+        "destructive-button": "#FECACA",
         "info-button": "#BFDBFE",
         "warning-button": "#FED7AA",
         "success-button": "#BBF7D0",
@@ -665,14 +665,14 @@ export const themes = {
         "secondary-button": "#03155A",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444",
+        "destructive-button": "#FCA5A5",
         "info-button": "#93C5FD",
         "warning-button": "#FDBA74",
         "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#163FF4",
-        "destructive-button": "#DC2626",
+        "destructive-button": "#FECACA",
         "info-button": "#BFDBFE",
         "warning-button": "#FED7AA",
         "success-button": "#BBF7D0",
@@ -897,14 +897,14 @@ export const themes = {
         "secondary-button": "#431407",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444",
+        "destructive-button": "#FCA5A5",
         "info-button": "#93C5FD",
         "warning-button": "#FDBA74",
         "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#C2410C",
-        "destructive-button": "#DC2626",
+        "destructive-button": "#FECACA",
         "info-button": "#BFDBFE",
         "warning-button": "#FED7AA",
         "success-button": "#BBF7D0",
@@ -1129,14 +1129,14 @@ export const themes = {
         "secondary-button": "#052E16",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444",
+        "destructive-button": "#FCA5A5",
         "info-button": "#93C5FD",
         "warning-button": "#FDBA74",
         "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#15803D",
-        "destructive-button": "#DC2626",
+        "destructive-button": "#FECACA",
         "info-button": "#BFDBFE",
         "warning-button": "#FED7AA",
         "success-button": "#BBF7D0",
@@ -1361,14 +1361,14 @@ export const themes = {
         "secondary-button": "#3B0764",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444",
+        "destructive-button": "#FCA5A5",
         "info-button": "#93C5FD",
         "warning-button": "#FDBA74",
         "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#6D28D9",
-        "destructive-button": "#DC2626",
+        "destructive-button": "#FECACA",
         "info-button": "#BFDBFE",
         "warning-button": "#FED7AA",
         "success-button": "#BBF7D0",
