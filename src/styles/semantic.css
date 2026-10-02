@@ -239,8 +239,11 @@
   --Hover-Tertiary-Button:   var(--Primitive-White-Alpha-100);
   --Active-Tertiary-Button:  var(--Primitive-White-Alpha-200);
   --Hover-Ghost-Button:      var(--Primitive-White-Alpha-100);
-  --Hover-Destructive-Button: var(--Primitive-Red-500);
-  --Active-Destructive-Button: var(--Primitive-Red-600);
+  /* dark の文字（--Text-on-Inverse）は Gray-900。500→600 は Gray-900 との
+     コントラストが 4.71:1→3.67:1 まで落ちて active が AA 未達になるため、
+     info/warning/success（issue #598）と同じく dark は押すほど明るくする（issue #618）。 */
+  --Hover-Destructive-Button: var(--Primitive-Red-300);
+  --Active-Destructive-Button: var(--Primitive-Red-200);
   /* dark の文字（--Text-on-Inverse）は Gray-900。背景を濃くすると 400→500→600 で
      3.4:1 まで落ちて AA 未達になるため、dark は押すほど明るくする（300 / 200）。 */
   --Hover-Info-Button:       var(--Primitive-Blue-300);
