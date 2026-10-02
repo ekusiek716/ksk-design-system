@@ -110,6 +110,11 @@ const INTENTIONAL_PROP_GAPS = new Map([
     nativeOnly: ["disabled"],
     reason: `onValueChange is a deprecated backward-compat alias for onChange (issue #264⑥), intentionally Web-only. size/className are Web CSS sizing/styling. Native's disabled (whole-group disable) has no Web port yet — tracked as a real follow-up, not urgent.`,
   }],
+  ["Accordion", {
+    webOnly: ["size"],
+    nativeOnly: ["items", "type", "defaultOpenKeys", "openKeys", "onOpenChange", "style"],
+    reason: `${R_INDEPENDENT} (Web: compound components Accordion/AccordionItem/AccordionTrigger/AccordionContent with children composition; Native: single Accordion taking an \`items\` array + \`type\`/\`defaultOpenKeys\`/\`openKeys\`/\`onOpenChange\`/\`style\`). size (issue #600) adds a Web-only "lg" display variant for LP FAQ sections (larger label/body typography + padding); Native's fixed-size Pressable/RNText rendering has no equivalent yet — tracked as a real follow-up, not urgent.`,
+  }],
   ["ActionTile", { webOnly: [], nativeOnly: ["disabled", "onPress", "style"], reason: R_INTERACTION + "; " + R_STYLE }],
   ["Alert", { webOnly: ["icon", "action"], nativeOnly: ["tone", "children", "variant"], reason: R_INDEPENDENT + " (Web: icon/action prop API; Native: tone + children composition API). " + R_VARIANT_ARTIFACT + "; Native inline-info/inline-warning/inline-caution (issue #586) mirror Web alertVariants; Web declares variant through VariantProps<typeof alertVariants>, so this own-props-only extractor cannot see it." }],
   ["AppHeader", { webOnly: ["layout", "logo", "centerSlot", "rightSlot", "nav", "bottomSlot", "sticky", "bordered", "variant", "className"], nativeOnly: ["onBack", "centered", "safeArea"], reason: R_INDEPENDENT + " (Web: slot-composition header; Native: simpler back-button header). safeArea (issue #351) is Native-only because the Web header is a plain in-page element with no status-bar overlap — the notch avoidance lives in the Web page shell's CSS env(safe-area-inset-*), while RN headers draw under the status bar and need the inset themselves" }],

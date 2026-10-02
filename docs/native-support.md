@@ -9,7 +9,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 
 | 部品 | Web | Native | Webのみの直接props | Nativeのみの直接props | 意図した差・注意 | 実OSの検証記録 |
 |---|---|---|---|---|---|---|
-| Accordion | あり | あり | 抽出不可 | 抽出不可 |  | 未検証 |
+| Accordion | あり | あり | size | items, type, defaultOpenKeys, openKeys, onOpenChange, style | Web and Native implementations were designed independently for this component (pre-dates this check); prop vocabulary diverges by design and is tracked here as the established baseline, not a new regression (Web: compound components Accordion/AccordionItem/AccordionTrigger/AccordionContent with children composition; Native: single Accordion taking an `items` array + `type`/`defaultOpenKeys`/`openKeys`/`onOpenChange`/`style`). size (issue #600) adds a Web-only "lg" display variant for LP FAQ sections (larger label/body typography + padding); Native's fixed-size Pressable/RNText rendering has no equivalent yet — tracked as a real follow-up, not urgent. | 未検証 |
 | AccordionContent | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | AccordionItem | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | AccordionTrigger | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |

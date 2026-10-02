@@ -499,12 +499,19 @@
     {
       "name": "Accordion",
       "path": "src/components/ui/accordion.tsx",
-      "description": "アコーディオン。FAQ・設定項目など折りたたみコンテンツに使用。",
+      "description": "アコーディオン。FAQ・設定項目など折りたたみコンテンツに使用。size=\"lg\" で LP の「よくある質問」のような大きめの見せ方にできる（issue #600）。",
       "subcomponents": [
         "AccordionItem",
         "AccordionTrigger",
         "AccordionContent"
-      ]
+      ],
+      "sizes": [
+        "default",
+        "lg"
+      ],
+      "props": {
+        "size": "\"default\" | \"lg\" — Accordion ルートで指定すると context 経由で Trigger/Content へ伝わる（既定 \"default\"）。Trigger/Content に直接渡すと個別上書きできる。lg は Trigger: typo-label-lg py-6 / Content: typo-body-lg"
+      }
     },
     {
       "name": "Separator",
