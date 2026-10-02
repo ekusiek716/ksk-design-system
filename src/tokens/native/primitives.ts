@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:29fa6b65a58e)
+// source: tokens.json v2.1.0 (sha256:c7ec9db2f57f)
 // =============================================================
 
 export const primitives = {

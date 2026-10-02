@@ -76,8 +76,11 @@
 @source inline("[scrollbar-width:none]");
 @source inline("absolute");
 @source inline("active:bg-[var(--Active-Destructive-Button)]");
+@source inline("active:bg-[var(--Active-Info-Button)]");
 @source inline("active:bg-[var(--Active-Primary-Button)]");
 @source inline("active:bg-[var(--Active-Primary-Button)]!");
+@source inline("active:bg-[var(--Active-Success-Button)]");
+@source inline("active:bg-[var(--Active-Warning-Button)]");
 @source inline("active:bg-[var(--Primitive-White-Alpha-300)]");
 @source inline("active:bg-[var(--Primitive-White-Alpha-800)]");
 @source inline("active:brightness-110");
@@ -511,9 +514,12 @@
 @source inline("hover:bg-[var(--Categorical-9-Subtle)]");
 @source inline("hover:bg-[var(--Hover-Destructive-Button)]");
 @source inline("hover:bg-[var(--Hover-Ghost-Button)]");
+@source inline("hover:bg-[var(--Hover-Info-Button)]");
 @source inline("hover:bg-[var(--Hover-Primary-Button)]");
 @source inline("hover:bg-[var(--Hover-Secondary-Button)]");
+@source inline("hover:bg-[var(--Hover-Success-Button)]");
 @source inline("hover:bg-[var(--Hover-Tertiary-Button)]");
+@source inline("hover:bg-[var(--Hover-Warning-Button)]");
 @source inline("hover:bg-[var(--Object-on-Inverse)]/20");
 @source inline("hover:bg-[var(--Overlay-Medium)]");
 @source inline("hover:bg-[var(--Primitive-White-Alpha-200)]");

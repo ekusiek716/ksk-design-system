@@ -49,6 +49,9 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
  * - `secondary` / `tertiary`: 並列の選択肢・キャンセル。
  * - `ghost` / `link`: 文字寄りの controls。
  * - `destructive`: 削除・取り消しなど不可逆操作。
+ * - `info` / `warning` / `success`: 状態色で種類や意味を伝えるボタン（issue #598）。
+ *   ブランドに連動しない固定の状態色で、hover / active / disabled / focus ring まで DS が持つ。
+ *   className で背景色を上書きしない。不可逆操作には warning ではなく destructive を使う。
  * - `glass` / `glass-inverse` / `glass-accent` / `accent`: モバイル / ヒーローセクション向け装飾系。
  *   `glass-accent` はブランドカラーをティントした glass。FAB（円形アイコンボタン）等、
  *   中立色の glass より一段強い存在感を出したい主要アクションに使う。

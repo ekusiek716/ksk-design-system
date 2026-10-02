@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:29fa6b65a58e)
+// source: tokens.json v2.1.0 (sha256:c7ec9db2f57f)
 // =============================================================
 
 export const themes = {
@@ -88,11 +88,17 @@ export const themes = {
         "secondary-button": "#EFF6FF",
         "tertiary-button": "#F4F4F5",
         "ghost-button": "#F4F4F5",
-        "destructive-button": "#B91C1C"
+        "destructive-button": "#B91C1C",
+        "info-button": "#1D4ED8",
+        "warning-button": "#9A3412",
+        "success-button": "#166534"
       },
       "active": {
         "primary-button": "#1E40AF",
         "destructive-button": "#991B1B",
+        "info-button": "#1E40AF",
+        "warning-button": "#7C2D12",
+        "success-button": "#14532D",
         "secondary-button": "#DBEAFE",
         "tertiary-button": "#E4E4E7"
       },
@@ -195,11 +201,17 @@ export const themes = {
         "secondary-button": "#1E3A8A",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444"
+        "destructive-button": "#EF4444",
+        "info-button": "#93C5FD",
+        "warning-button": "#FDBA74",
+        "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#2563EB",
         "destructive-button": "#DC2626",
+        "info-button": "#BFDBFE",
+        "warning-button": "#FED7AA",
+        "success-button": "#BBF7D0",
         "secondary-button": "#1E40AF",
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
@@ -308,11 +320,17 @@ export const themes = {
         "secondary-button": "#EFF6FF",
         "tertiary-button": "#F4F4F5",
         "ghost-button": "#F4F4F5",
-        "destructive-button": "#B91C1C"
+        "destructive-button": "#B91C1C",
+        "info-button": "#1D4ED8",
+        "warning-button": "#9A3412",
+        "success-button": "#166534"
       },
       "active": {
         "primary-button": "#1E40AF",
         "destructive-button": "#991B1B",
+        "info-button": "#1E40AF",
+        "warning-button": "#7C2D12",
+        "success-button": "#14532D",
         "secondary-button": "#DBEAFE",
         "tertiary-button": "#E4E4E7"
       },
@@ -415,11 +433,17 @@ export const themes = {
         "secondary-button": "#1E3A8A",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444"
+        "destructive-button": "#EF4444",
+        "info-button": "#93C5FD",
+        "warning-button": "#FDBA74",
+        "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#2563EB",
         "destructive-button": "#DC2626",
+        "info-button": "#BFDBFE",
+        "warning-button": "#FED7AA",
+        "success-button": "#BBF7D0",
         "secondary-button": "#1E40AF",
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
@@ -528,11 +552,17 @@ export const themes = {
         "secondary-button": "#EEF3FF",
         "tertiary-button": "#F4F4F5",
         "ghost-button": "#F4F4F5",
-        "destructive-button": "#B91C1C"
+        "destructive-button": "#B91C1C",
+        "info-button": "#1D4ED8",
+        "warning-button": "#9A3412",
+        "success-button": "#166534"
       },
       "active": {
         "primary-button": "#0B25A4",
         "destructive-button": "#991B1B",
+        "info-button": "#1E40AF",
+        "warning-button": "#7C2D12",
+        "success-button": "#14532D",
         "secondary-button": "#D9E5FE",
         "tertiary-button": "#E4E4E7"
       },
@@ -635,11 +665,17 @@ export const themes = {
         "secondary-button": "#03155A",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444"
+        "destructive-button": "#EF4444",
+        "info-button": "#93C5FD",
+        "warning-button": "#FDBA74",
+        "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#163FF4",
         "destructive-button": "#DC2626",
+        "info-button": "#BFDBFE",
+        "warning-button": "#FED7AA",
+        "success-button": "#BBF7D0",
         "secondary-button": "#0B25A4",
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
@@ -748,11 +784,17 @@ export const themes = {
         "secondary-button": "#FFF7ED",
         "tertiary-button": "#F4F4F5",
         "ghost-button": "#F4F4F5",
-        "destructive-button": "#B91C1C"
+        "destructive-button": "#B91C1C",
+        "info-button": "#1D4ED8",
+        "warning-button": "#9A3412",
+        "success-button": "#166534"
       },
       "active": {
         "primary-button": "#7C2D12",
         "destructive-button": "#991B1B",
+        "info-button": "#1E40AF",
+        "warning-button": "#7C2D12",
+        "success-button": "#14532D",
         "secondary-button": "#FFEDD5",
         "tertiary-button": "#E4E4E7"
       },
@@ -855,11 +897,17 @@ export const themes = {
         "secondary-button": "#431407",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444"
+        "destructive-button": "#EF4444",
+        "info-button": "#93C5FD",
+        "warning-button": "#FDBA74",
+        "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#C2410C",
         "destructive-button": "#DC2626",
+        "info-button": "#BFDBFE",
+        "warning-button": "#FED7AA",
+        "success-button": "#BBF7D0",
         "secondary-button": "#7C2D12",
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
@@ -968,11 +1016,17 @@ export const themes = {
         "secondary-button": "#F0FDF4",
         "tertiary-button": "#F4F4F5",
         "ghost-button": "#F4F4F5",
-        "destructive-button": "#B91C1C"
+        "destructive-button": "#B91C1C",
+        "info-button": "#1D4ED8",
+        "warning-button": "#9A3412",
+        "success-button": "#166534"
       },
       "active": {
         "primary-button": "#14532D",
         "destructive-button": "#991B1B",
+        "info-button": "#1E40AF",
+        "warning-button": "#7C2D12",
+        "success-button": "#14532D",
         "secondary-button": "#DCFCE7",
         "tertiary-button": "#E4E4E7"
       },
@@ -1075,11 +1129,17 @@ export const themes = {
         "secondary-button": "#052E16",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444"
+        "destructive-button": "#EF4444",
+        "info-button": "#93C5FD",
+        "warning-button": "#FDBA74",
+        "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#15803D",
         "destructive-button": "#DC2626",
+        "info-button": "#BFDBFE",
+        "warning-button": "#FED7AA",
+        "success-button": "#BBF7D0",
         "secondary-button": "#14532D",
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },
@@ -1188,11 +1248,17 @@ export const themes = {
         "secondary-button": "#F5F3FF",
         "tertiary-button": "#F4F4F5",
         "ghost-button": "#F4F4F5",
-        "destructive-button": "#B91C1C"
+        "destructive-button": "#B91C1C",
+        "info-button": "#1D4ED8",
+        "warning-button": "#9A3412",
+        "success-button": "#166534"
       },
       "active": {
         "primary-button": "#4C1D95",
         "destructive-button": "#991B1B",
+        "info-button": "#1E40AF",
+        "warning-button": "#7C2D12",
+        "success-button": "#14532D",
         "secondary-button": "#EDE9FE",
         "tertiary-button": "#E4E4E7"
       },
@@ -1295,11 +1361,17 @@ export const themes = {
         "secondary-button": "#3B0764",
         "tertiary-button": "rgba(255, 255, 255, 0.04)",
         "ghost-button": "rgba(255, 255, 255, 0.04)",
-        "destructive-button": "#EF4444"
+        "destructive-button": "#EF4444",
+        "info-button": "#93C5FD",
+        "warning-button": "#FDBA74",
+        "success-button": "#86EFAC"
       },
       "active": {
         "primary-button": "#6D28D9",
         "destructive-button": "#DC2626",
+        "info-button": "#BFDBFE",
+        "warning-button": "#FED7AA",
+        "success-button": "#BBF7D0",
         "secondary-button": "#4C1D95",
         "tertiary-button": "rgba(255, 255, 255, 0.08)"
       },

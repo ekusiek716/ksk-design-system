@@ -20,6 +20,9 @@ const meta: Meta<typeof Button> = {
         "tertiary",
         "ghost",
         "destructive",
+        "info",
+        "warning",
+        "success",
         "link",
         "glass",
         "glass-inverse",
@@ -77,7 +80,33 @@ export const AllVariants: Story = {
       <Button variant="tertiary">Tertiary</Button>
       <Button variant="ghost">Ghost</Button>
       <Button variant="destructive">Destructive</Button>
+      <Button variant="info">Info</Button>
+      <Button variant="warning">Warning</Button>
+      <Button variant="success">Success</Button>
       <Button variant="link">Link</Button>
+    </div>
+  ),
+}
+
+/**
+ * 状態色のボタン（issue #598）。種類ごとの色分け（打ち合わせメモ＝info、
+ * ふだんのメモ＝warning 等）に使う。hover / active / disabled / focus ring は DS が持つので、
+ * className で背景色を上書きしない。取り消せない操作は destructive を使う。
+ */
+export const StatusVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {(["info", "warning", "success", "destructive"] as const).map((variant) => (
+        <div key={variant} className="flex flex-wrap items-center gap-3">
+          <Button variant={variant} size="lg">{variant}</Button>
+          <Button variant={variant}>{variant}</Button>
+          <Button variant={variant} size="sm">{variant}</Button>
+          <Button variant={variant} disabled>disabled</Button>
+          <Button variant={variant} size="icon" aria-label={`${variant} を追加`}>
+            <Add size={20} />
+          </Button>
+        </div>
+      ))}
     </div>
   ),
 }
@@ -151,6 +180,9 @@ export const DisabledAllVariants: Story = {
       <Button variant="tertiary" disabled>Tertiary</Button>
       <Button variant="ghost" disabled>Ghost</Button>
       <Button variant="destructive" disabled>Destructive</Button>
+      <Button variant="info" disabled>Info</Button>
+      <Button variant="warning" disabled>Warning</Button>
+      <Button variant="success" disabled>Success</Button>
       <Button variant="link" disabled>Link</Button>
     </div>
   ),
