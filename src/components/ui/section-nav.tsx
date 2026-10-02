@@ -70,7 +70,7 @@ function SectionNav({
                 aria-current={active ? "location" : undefined}
                 onClick={(event) => onItemClick?.(item.key, event)}
                 className={cn(
-                  "flex min-h-11 items-center transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+                  "flex min-h-11 items-center transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
                   horizontal
                     ? "border-b-2 border-transparent px-4 py-3 typo-label-md whitespace-nowrap"
                     : "border-l-2 border-transparent px-3 py-2 typo-body-md",

@@ -144,7 +144,7 @@ function ThumbnailCard({
 
   const overlayClassName = cn(
     "absolute inset-0 z-[1] rounded-[var(--Radius-Surface)]",
-    "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+    "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
     disabled ? "cursor-not-allowed" : "cursor-pointer",
   )
 

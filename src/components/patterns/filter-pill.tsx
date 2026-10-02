@@ -138,7 +138,7 @@ function FilterPill({
                 ? "text-[var(--Text-on-Inverse)]"
                 : "text-[var(--Text-Medium-Emphasis)]",
               showClear ? "pr-1.5" : "pr-4",
-              "cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+              "cursor-pointer focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
               "disabled:cursor-not-allowed disabled:pointer-events-none",
             )}
           >
@@ -173,7 +173,7 @@ function FilterPill({
             "mr-1 flex size-7 shrink-0 items-center justify-center rounded-full text-[var(--Text-on-Inverse)]",
             "cursor-pointer transition-colors duration-[var(--Motion-Duration-Fast)]",
             "hover:bg-[var(--Text-on-Inverse)]/20",
-            "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+            "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
             "disabled:cursor-not-allowed disabled:pointer-events-none",
           )}
         >

@@ -128,7 +128,7 @@ function ActionTile({
         // 高さを揃えるための下限なので、ラベルだけのタイルには効かせない（中身に対して余る）。
         // ラベルのみのときは上下 16px のパディングで内容にフィットさせる
         hasBottomRow ? "min-h-24 py-3" : "py-4",
-        "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:outline-none",
+        "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:outline-hidden",
         "hover:bg-[var(--Surface-Secondary)]",
         actionTileVariants[variant],
         isDisabled && "cursor-not-allowed opacity-50",

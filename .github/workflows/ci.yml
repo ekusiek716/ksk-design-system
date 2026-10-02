@@ -84,6 +84,13 @@ jobs:
       - name: a11y tests (axe-core via Storybook / vitest browser)
         run: npm run test:a11y
 
+      # ── 強制配色（forced-colors）モードのフォーカス表示検証（issue #620）──
+      # CDP で forced-colors を有効化し、outline-hidden の Button がキーボード
+      # フォーカス時に outline を出すことを実 chromium で確認する。Playwright
+      # chromium は上の interaction テストのステップで導入済み。
+      - name: Forced-colors focus tests (vitest browser)
+        run: npm run test:forced-colors
+
       - name: Packed package Web consumer install and build
         run: npm run test:consumer:web
 

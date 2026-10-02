@@ -1928,7 +1928,7 @@ function SnapBottomSheetContent({
           "bg-[var(--Surface-Primary)] rounded-t-[var(--Radius-Sheet)] shadow-[var(--shadow-dialog)]",
           // Suppress Radix open/close fade — we manage transform ourselves
           "data-[state=open]:animate-none data-[state=closed]:animate-none",
-          "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+          "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
           className
         )}
         style={{
@@ -2054,7 +2054,7 @@ function SheetTitle({ className, level, ...props }: SheetTitleProps) {
       className={cn(
         typoClass,
         "text-[var(--Text-High-Emphasis)]",
-        "focus:outline-none focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus:outline-hidden focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         className
       )}
       {...props}

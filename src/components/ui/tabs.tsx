@@ -62,7 +62,7 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
         // 透明な before 擬似要素で拡張する。本体の height は変更しない（belle-todo 事例の再発防止）。
         variant === "pill" &&
           "before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
-        "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         "disabled:pointer-events-none disabled:opacity-50",
         "data-[state=active]:bg-[var(--Surface-Primary)] data-[state=active]:text-[var(--Text-High-Emphasis)] data-[state=active]:shadow-sm",
         variant === "default" && "hover:text-[var(--Text-High-Emphasis)]",
@@ -78,7 +78,7 @@ function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPr
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("mt-2 focus-visible:outline-none", className)}
+      className={cn("mt-2 focus-visible:outline-hidden", className)}
       {...props}
     />
   )

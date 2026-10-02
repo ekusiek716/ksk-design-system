@@ -18,6 +18,6 @@
  * フック・createContext を持ち込まないこと（__tests__/client-boundary.test.ts）。
  */
 const UNSTYLED_FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+  "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
 
 export { UNSTYLED_FOCUS_RING }

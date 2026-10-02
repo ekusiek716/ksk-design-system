@@ -12,7 +12,7 @@ import { ListItem } from "../src/components/patterns/list-item"
  * 出力していた文字列をそのまま固定している。ここが変わる差分は、既存 consumer の
  * CSS を壊す可能性があるので、意図的な変更でない限り通してはいけない。
  *
- * issue #597: actionable 行の focus-visible:outline-none 追加は意図的な変更
+ * issue #597: actionable 行の focus-visible:outline-hidden 追加は意図的な変更
  * （UA 既定 outline とリングの二重表示を解消するため）。BASELINE_ACTIONABLE_SUFFIX
  * に反映済み。
  */
@@ -20,7 +20,7 @@ const BASELINE_ROOT =
   "flex w-full items-start gap-3 border-b border-[var(--Border-Low-Emphasis)] px-4 py-3 text-left"
 const BASELINE_ACTIONABLE_SUFFIX =
   " cursor-pointer transition-colors hover:bg-[var(--Surface-Secondary)]" +
-  " min-h-11 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+  " min-h-11 focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
 
 describe("ListItem 既定値の非破壊性 (issue #355)", () => {
   it("静的行は従来どおりのルート class / 構造を出力する", () => {

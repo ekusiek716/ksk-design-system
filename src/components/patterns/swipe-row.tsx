@@ -104,7 +104,7 @@ function SwipeRow({ children, actions = [], side = "right", className, actionsLa
             onClick={() => { action.onClick(); close() }}
             className={cn(
               "flex flex-col items-center justify-center gap-1 w-[72px] typo-label-xs font-medium transition-colors",
-              "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+              "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
               action.variant === "destructive"
                 ? "bg-[var(--Caution-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Destructive-Button)]"
                 : "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Border-Medium-Emphasis)]"

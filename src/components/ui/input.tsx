@@ -48,7 +48,7 @@ const inputBaseClass = [
   "flex h-[var(--Field-Height-Md)] w-full rounded-[var(--Field-Radius)] border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-[var(--Field-Padding-X-Md)] typo-body-md text-[var(--Text-High-Emphasis)] transition-colors",
   "file:border-0 file:bg-transparent file:typo-body-md",
   "placeholder:text-[var(--Text-Low-Emphasis)]",
-  "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:border-[var(--Border-Accent-Primary)]",
+  "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:border-[var(--Border-Accent-Primary)]",
   "disabled:cursor-not-allowed disabled:opacity-50",
   "aria-invalid:border-[var(--Border-Caution)] aria-invalid:ring-[var(--Caution-Base)]/20",
 ].join(" ")
