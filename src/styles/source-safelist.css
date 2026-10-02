@@ -598,6 +598,7 @@
 @source inline("lg:grid-cols-4");
 @source inline("lg:group-hover/carousel:opacity-100");
 @source inline("lg:hidden");
+@source inline("lg:max-h-[min(85dvh,46rem)]");
 @source inline("lg:opacity-0");
 @source inline("lg:px-0");
 @source inline("lg:px-16");
@@ -610,6 +611,7 @@
 @source inline("max-h-96");
 @source inline("max-h-[...]");
 @source inline("max-h-[60vh]");
+@source inline("max-h-[85dvh]");
 @source inline("max-h-[86dvh]");
 @source inline("max-h-[88dvh]");
 @source inline("max-h-[90dvh]");
@@ -621,6 +623,7 @@
 @source inline("max-h-[max(0px,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))]");
 @source inline("max-h-[min(85dvh,40rem)]");
 @source inline("max-h-[min(85dvh,46rem)]");
+@source inline("max-h-[min(85dvh,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))]");
 @source inline("max-h-[min(86dvh,42rem)]");
 @source inline("max-h-[min(90dvh,44rem)]");
 @source inline("max-h-[min(90dvh,46rem)]");
@@ -770,6 +773,7 @@
 @source inline("pb-[env(safe-area-inset-bottom)]");
 @source inline("pb-[env(safe-area-inset-bottom,0px)]");
 @source inline("pb-[max(0.75rem,env(safe-area-inset-bottom))]");
+@source inline("pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]");
 @source inline("pb-[max(1rem,env(safe-area-inset-bottom))]");
 @source inline("peer-disabled:cursor-not-allowed");
 @source inline("peer-disabled:opacity-50");
