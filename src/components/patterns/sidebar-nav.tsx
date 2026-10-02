@@ -76,7 +76,7 @@ function SidebarNavRow({ item, collapsed }: { item: SidebarNavItem; collapsed: b
         // 行高 44px は DS のタッチターゲット方針（AdminShell の合成規範 #7 と同じ）
         "relative flex min-h-11 items-center rounded-lg typo-label-md",
         "transition-colors duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
-        "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         collapsed ? "size-11 justify-center" : "w-full gap-3 px-3 text-left",
         item.isActive
           ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)]"
