@@ -299,6 +299,67 @@ Footer を別コンポーネントに切り出した構成、preset 経路（`mo
 対象外です。P046 と同じく TypeScript の構文解析を使うため、`typescript` が無いプロジェクトでは
 P051 だけ skip して案内を1行出します。
 
+#### P052: DS 部品の `className` で形（角丸・高さ・左右 padding）を上書きしない
+
+`Button` / `Input` / `Textarea` / `SelectTrigger` / `DateField` / `Chip` / `Skeleton` などの角丸・高さ・
+左右 padding は DS が token（`--Control-Radius` / `--Field-Radius` / `--Field-Height-*` /
+`--Field-Padding-X-*`）と prop（`size` / `rounded` / `unstyled` / `startAdornment`）で持っています。
+部品ごとに `rounded-2xl` / `h-12` / `px-4` を被せると、同じ画面の他の部品と形が揃わなくなるため
+P052 が warn します（belle-todo で、ボタンが pill と角丸長方形で混在し、入力欄も欄ごとに角丸・高さが
+ずれていた事例が由来）。
+
+```tsx
+// ❌ 部品単位で形を被せる
+<Button className="w-full rounded-2xl">保存</Button>
+<Input className="h-12 rounded-2xl pl-8" />      // ¥ を自前で絶対配置
+
+// ✅ 既定に任せ、変えたいときは product theme で 1 箇所だけ
+<Button className="w-full">保存</Button>
+<Input startAdornment="¥" />
+```
+
+アプリ全体でボタンや入力欄の角丸を変えたいときは、`--Control-Radius` / `--Field-Radius` を
+product theme（P049 の許可リスト）で上書きします。枠なしのインライン編集欄は `unstyled`、
+`Skeleton` の角丸は `rounded` prop を使います。
+
+`"ksk-design-system"` から import した部品の `className` に書かれた文字列リテラル（`cn()` / 三項 /
+テンプレートの固定部分を含む）だけを見ます。`unstyled` を付けた部品、`h-auto` / `h-full` / `min-h-0`
+等のレイアウト用の高さ、変数経由のクラスは対象外です。ボタンをカード状のタイルとして使う等の
+正当な例外は `// ksk-ds-lint-ignore P052 -- 理由` で外します。P046 / P051 と同じく
+`typescript` が無いプロジェクトでは skip します。
+
+#### P053: `@layer` の外のグローバル CSS で DS 部品の形を変えない
+
+CSS の仕様上、`@layer` の外に書いた宣言は `@layer` の中の宣言（Tailwind / DS のユーティリティは
+`@layer utilities`）に**詳細度と無関係に勝ちます**。消費側の `globals.css` に layer 外で
+タグ / role / 汎用属性セレクタの寸法・余白・角丸・文字サイズ・outline を書くと、DS 部品の
+`className` では打ち消せず、DS 部品の形が壊れます。belle-todo では次がすべてこれでした。
+
+| layer 外のルール | 起きたこと |
+|---|---|
+| `[role="radio"] { min-height: var(--touch-min) }` | DS Chip（32px）が 44〜52px に膨らむ |
+| `:focus-visible { border-radius: 8px }` | pill のボタンがフォーカス中だけ角ばる / DS 部品のフォーカス枠が二重 |
+| `input:focus-visible { border-radius: 16px }` | 入力欄の角丸がフォーカス中だけ変わる |
+| `nav { padding-bottom: env(safe-area-inset-bottom) }` | 浮いたタブバーに safe-area が二重 |
+
+```css
+/* ❌ layer 外 */
+:focus-visible { outline: 2px solid var(--Brand-Primary); }
+
+/* ✅ base に置けば DS 部品は DS のフォーカスリングが勝ち、素の要素だけにこの outline が当たる */
+@layer base {
+  :focus-visible { outline: 2px solid var(--Brand-Primary); }
+}
+
+/* ✅ layer 外に残すなら DS 部品を外す */
+a:not([data-slot]) { min-height: 44px; }
+```
+
+`@layer` / `@theme` の中、クラスで始まるセレクタ（消費側の独自クラス）、`html` / `body` / `:root` /
+`*`、keyframes、`data-slot` を含むセレクタ（DS の公開 data-slot を明示的に狙う・外す）は対象外です。
+DS 自身 / ベンダリングされた DS の CSS も P049 と同じく対象外。例外は
+`/* ksk-ds-lint-ignore P053 -- 理由 */` で外します。
+
 #### ルールごとの除外（rules.json の excludes 系）
 
 `contracts/rules.json` の除外指定は、当てる対象ごとに 3 つに分かれています。

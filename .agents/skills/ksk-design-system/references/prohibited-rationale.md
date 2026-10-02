@@ -13,11 +13,11 @@
 | タグ | 意味 | 付けるルール |
 |---|---|---|
 | `dom` | 小文字の HTML 生タグ・`href` / `type` 等の DOM 属性が書ける | P001–P007, P024, P025, P027, P039, P045, P051, AI8 |
-| `tailwind` | `className` に Tailwind クラスを書く（web ＋ **NativeWind** の RN） | P009–P013, P016–P023, P028–P032, P041, P042, P044, P046, P048, AI1–AI6, AI9 |
+| `tailwind` | `className` に Tailwind クラスを書く（web ＋ **NativeWind** の RN） | P009–P013, P016–P023, P028–P032, P041, P042, P044, P046, P048, P052, AI1–AI6, AI9 |
 | `web` | CSS 変数・CSS 単位が効く純 web | P015, AI7 |
 | `native` | React Native のファイル | （現時点で専用ルールなし） |
 
-`"*.css"` のようなグロブも書ける（P049 が使用）。旧語彙の `"web"` / `"native"` も
+`"*.css"` のようなグロブも書ける（P049 / P053 が使用）。旧語彙の `"web"` / `"native"` も
 capability として引き続き解釈される。
 
 ### なぜ platform 二値ではないのか
