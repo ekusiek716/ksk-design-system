@@ -56,3 +56,49 @@ export const MultipleOpen: Story = {
     </Accordion>
   ),
 }
+
+/**
+ * issue #600: LP の「よくある質問」のような大きめの見せ方。
+ * size="lg" を Accordion ルートに指定すると、Trigger / Content へ
+ * context 経由で伝わり、個別に className を上書きしなくてよくなる。
+ */
+export const Large: Story = {
+  render: () => (
+    <Accordion type="single" collapsible size="lg" defaultValue="item-1">
+      <AccordionItem value="item-1">
+        <AccordionTrigger>プレハナビは無料で使えますか？</AccordionTrigger>
+        <AccordionContent>
+          基本機能は無料でご利用いただけます。一部のプレミアム機能は有料プランでご提供しています。
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-2">
+        <AccordionTrigger>複数人で編集できますか？</AccordionTrigger>
+        <AccordionContent>
+          招待リンクを共有することで、パートナーや家族と同じ準備リストを編集できます。
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  ),
+}
+
+/**
+ * Trigger / Content だけ個別に size を上書きできることの確認
+ * （Accordion ルートの size を既定のままにし、1項目だけ lg にする）。
+ */
+export const MixedSizeOverride: Story = {
+  render: () => (
+    <Accordion type="single" collapsible defaultValue="item-1">
+      <AccordionItem value="item-1">
+        <AccordionTrigger size="lg">この項目だけ lg</AccordionTrigger>
+        <AccordionContent size="lg">
+          Trigger / Content に直接 size を渡すと、Accordion ルートの既定値より
+          優先される。
+        </AccordionContent>
+      </AccordionItem>
+      <AccordionItem value="item-2">
+        <AccordionTrigger>他の項目は既定（default）のまま</AccordionTrigger>
+        <AccordionContent>個別指定しなければ Accordion ルートの size に従う。</AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  ),
+}
