@@ -510,3 +510,87 @@ export const FocusRingIsVisible: Story = {
     ).toBe(true)
   },
 }
+
+/**
+ * 小さいサイズ（xs / sm / icon-sm）の当たり判定は 44×44px（issue #601）。
+ *
+ * 見た目の寸法は変えず、透明な before 擬似要素で中心から 44px 四方へ広げる。
+ * 隣と重ねないには、見た目の端同士を「44px − 見た目の寸法」以上空ける
+ * （sm / icon-sm: gap-3、xs: gap-5）。このストーリーはその推奨間隔で並べ、
+ * - 見た目の高さは 32px / 24px のまま
+ * - 当たり判定は縦横とも 44px 以上
+ * - 隣同士の当たり判定が重ならない
+ * - 見た目の外側（拡張部分）を押しても、そのボタン自身に当たる
+ * を固定する。並べ方は Chip の WrappedRowsDoNotOverlap と同じ検査。
+ */
+export const TouchTargetsDoNotOverlap: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    // 点線は当たり判定（before 擬似要素）の可視化。見た目の寸法には影響しない。
+    <div className="flex flex-col items-start gap-8 p-6 [&_[data-slot=button]]:before:outline-dashed [&_[data-slot=button]]:before:outline-1 [&_[data-slot=button]]:before:outline-[var(--Border-Medium-Emphasis)]">
+      <div data-testid="icon-row" className="flex items-center gap-3">
+        {["設定", "編集", "共有", "削除"].map((label) => (
+          <Button key={label} size="icon-sm" variant="ghost" aria-label={label}>
+            <Add size={16} />
+          </Button>
+        ))}
+      </div>
+      <div data-testid="sm-stack" className="flex flex-col items-start gap-3">
+        <Button size="sm" variant="secondary">保存</Button>
+        <Button size="sm" variant="link">利用規約</Button>
+        <Button size="sm">送信</Button>
+      </div>
+      <div data-testid="xs-stack" className="flex flex-col items-start gap-5">
+        <Button size="xs" variant="tertiary">OK</Button>
+        <Button size="xs" variant="ghost">詳細</Button>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const groups = [
+      { id: "icon-row", visual: 32 },
+      { id: "sm-stack", visual: 32 },
+      { id: "xs-stack", visual: 24 },
+    ]
+
+    for (const { id, visual } of groups) {
+      const buttons = [
+        ...canvas.getByTestId(id).querySelectorAll<HTMLElement>('[data-slot="button"]'),
+      ]
+      await expect(buttons.length).toBeGreaterThan(1)
+
+      const boxes = buttons.map((el) => {
+        const r = el.getBoundingClientRect()
+        const before = getComputedStyle(el, "::before")
+        const w = parseFloat(before.width) || 0
+        const h = parseFloat(before.height) || 0
+        const cx = r.left + r.width / 2
+        const cy = r.top + r.height / 2
+        return { el, r, w, h, left: cx - w / 2, right: cx + w / 2, top: cy - h / 2, bottom: cy + h / 2 }
+      })
+
+      for (const b of boxes) {
+        // 見た目は変えない
+        await expect(Math.round(b.r.height)).toBe(visual)
+        // 当たり判定は縦横 44px 以上
+        await expect(Math.round(b.h)).toBeGreaterThanOrEqual(44)
+        await expect(Math.round(b.w)).toBeGreaterThanOrEqual(44)
+        // 拡張部分（見た目の上端より 4px 外）を押してもそのボタンに当たる
+        const hitAbove = document.elementFromPoint(b.r.left + b.r.width / 2, b.r.top - 4)
+        await expect(hitAbove?.closest('[data-slot="button"]')).toBe(b.el)
+      }
+
+      // 隣同士の当たり判定が重ならない
+      for (let i = 0; i < boxes.length; i++) {
+        for (let j = i + 1; j < boxes.length; j++) {
+          const a = boxes[i]
+          const c = boxes[j]
+          const v = a.bottom > c.top + 0.5 && c.bottom > a.top + 0.5
+          const hz = a.right > c.left + 0.5 && c.right > a.left + 0.5
+          await expect(v && hz, `${id}: ${i} と ${j} の当たり判定が重なる`).toBe(false)
+        }
+      }
+    }
+  },
+}
