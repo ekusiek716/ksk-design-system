@@ -19,7 +19,10 @@ export default defineConfig({
     // mcp-server/ は独立パッケージだが、参照する contracts/ は本体と同じ正本なので
     // 契約ズレを同じ `npm run test` で検出できるようにここに含める。
     include: ["__tests__/**/*.test.{ts,tsx}", "mcp-server/__tests__/**/*.test.ts"],
-    exclude: ["node_modules", "dist", "storybook-static", "**/*.stories.tsx"],
+    // __tests__/browser/ は vitest.forced-colors.config.ts 専用の browser mode
+    // テスト（issue #620）。`vitest/browser` を forks pool で import するとエラーに
+    // なるため、既定の `npm test` からは除外し `npm run test:forced-colors` で回す。
+    exclude: ["node_modules", "dist", "storybook-static", "**/*.stories.tsx", "__tests__/browser/**"],
     // 既定の 5s だと、bin/init.js / lint-scratch.sh 等の CLI を spawnSync する
     // テスト（consumer-lint-cli / lint-scratch / check-migration / lint-cli を含む
     // 14 ファイルが該当）が高負荷・並列実行時に数秒かかりタイムアウトする

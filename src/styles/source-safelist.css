@@ -392,7 +392,6 @@
 @source inline("focus-visible:border-[var(--Border-Accent-Primary)]");
 @source inline("focus-visible:border-[var(--Object-Accent-Primary)]");
 @source inline("focus-visible:outline-hidden");
-@source inline("focus-visible:outline-none");
 @source inline("focus-visible:ring-0");
 @source inline("focus-visible:ring-2");
 @source inline("focus-visible:ring-4");
@@ -410,7 +409,7 @@
 @source inline("focus-within:ring-[var(--Focus-High-Emphasis)]/50");
 @source inline("focus-within:z-20");
 @source inline("focus:bg-[var(--Surface-Secondary)]");
-@source inline("focus:outline-none");
+@source inline("focus:outline-hidden");
 @source inline("focus:text-[var(--Text-High-Emphasis)]");
 @source inline("focus:translate-y-0");
 @source inline("font-black");

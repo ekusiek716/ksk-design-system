@@ -19,6 +19,14 @@ import { join } from "node:path"
  *   複数の文字列引数に分かれているケース（例: checkbox-card.tsx）も許容するため、
  *   判定単位は「文字列リテラル単体」ではなく「それを含む cn()/clsx()/cva() 呼び出し全体」。
  *   それらで包まれていない素の className="...ring..." は文字列リテラル単体で判定する。
+ *
+ * issue #620: Tailwind v4 の `outline-none` は常に `outline-style: none`（強制配色/
+ * forced-colors モードでも非表示のまま）。`outline-hidden` は通常時は同じ `none` だが
+ * `@media (forced-colors: active)` のときだけ `outline: 2px solid transparent` になり、
+ * OS が transparent をシステム色へ置換するため枠が見える。DS のフォーカス表示は
+ * box-shadow ベースの `ring-*` で、forced-colors モードでは描画されない。そのため
+ * フォーカス用途の outline 解除は `outline-hidden` 必須とし、`focus(-visible):outline-none`
+ * の新規追加を下の別テストで検出する。
  */
 
 const ROOT = process.cwd()
@@ -375,5 +383,81 @@ describe("focus-visible:ring / focus:ring と outline 解除のペア (issue #59
   it("hover:outline-none はペアとして数えない（無関係な pseudo-class）", () => {
     const violations = findViolations(`cn("hover:outline-none focus-visible:ring-2")`)
     expect(violations).toHaveLength(1)
+  })
+})
+
+/**
+ * issue #620: フォーカス用途の outline 解除は `outline-hidden` 必須。
+ * ring とペアになっていても `outline-none` では強制配色モードで枠が消えるため、
+ * 上の「ring とペアか」だけでは検出できない（`outline-none` も outline 解除と
+ * みなしてペア扱いしてしまう）。ここでは `focus:outline-none` /
+ * `focus-visible:outline-none` の新規追加そのものを別途検出する。
+ * `.stories.tsx` も対象（collapsible.stories.tsx 等で実際に使われていた）。
+ */
+const FOCUS_OUTLINE_NONE_RE = /(^|[\s"'`,(])focus(?:-visible)?:outline-none\b/g
+
+function collectFilesIncludingStories(dir: string): string[] {
+  const files: string[] = []
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name)
+    const stat = statSync(full)
+    if (stat.isDirectory()) {
+      files.push(...collectFilesIncludingStories(full))
+      continue
+    }
+    if (!/\.(tsx|ts)$/.test(name)) continue
+    if (name.endsWith(".test.tsx") || name.endsWith(".test.ts") || name.endsWith(".d.ts")) continue
+    files.push(full)
+  }
+  return files
+}
+
+function findFocusOutlineNoneUsages(rawSource: string): string[] {
+  const source = stripComments(rawSource)
+  const hits: string[] = []
+  FOCUS_OUTLINE_NONE_RE.lastIndex = 0
+  for (const match of source.matchAll(FOCUS_OUTLINE_NONE_RE)) {
+    const idx = match.index ?? 0
+    hits.push(source.slice(Math.max(0, idx - 20), idx + 60).trim())
+  }
+  return hits
+}
+
+describe("フォーカス用途の outline 解除は outline-hidden 必須 (issue #620)", () => {
+  it("DS コンポーネント・ストーリーに focus(-visible):outline-none の新規追加が無い", () => {
+    const files = TARGET_DIRS.flatMap((dir) => collectFilesIncludingStories(join(ROOT, dir)))
+    expect(files.length).toBeGreaterThan(0)
+
+    const report: string[] = []
+    for (const file of files) {
+      const source = readFileSync(file, "utf8")
+      const hits = findFocusOutlineNoneUsages(source)
+      if (hits.length > 0) {
+        const rel = file.replace(`${ROOT}/`, "")
+        for (const h of hits) report.push(`${rel}: ${h}`)
+      }
+    }
+
+    expect(report).toEqual([])
+  })
+
+  it("リグレッション確認: focus-visible:outline-none を書くと検出される", () => {
+    const hits = findFocusOutlineNoneUsages(`cn("focus-visible:outline-none focus-visible:ring-2")`)
+    expect(hits).toHaveLength(1)
+  })
+
+  it("focus:outline-none も検出対象", () => {
+    const hits = findFocusOutlineNoneUsages(`cn("focus:outline-none focus:ring-2")`)
+    expect(hits).toHaveLength(1)
+  })
+
+  it("outline-hidden は検出しない", () => {
+    const hits = findFocusOutlineNoneUsages(`cn("focus-visible:outline-hidden focus-visible:ring-2")`)
+    expect(hits).toHaveLength(0)
+  })
+
+  it("hover:outline-none は無関係な pseudo-class のため検出しない", () => {
+    const hits = findFocusOutlineNoneUsages(`cn("hover:outline-none")`)
+    expect(hits).toHaveLength(0)
   })
 })

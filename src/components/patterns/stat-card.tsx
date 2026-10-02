@@ -100,7 +100,7 @@ function StatCard({
           "w-full appearance-none cursor-pointer transition-all",
           styles.hoverBg,
           "active:scale-[0.98]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2",
+          "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2",
         ],
         className,
       )}

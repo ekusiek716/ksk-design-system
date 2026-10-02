@@ -132,7 +132,7 @@ function ProductCard({
     <a
       href={href}
       data-slot="card-link"
-      className="absolute inset-0 z-[1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] rounded-lg"
+      className="absolute inset-0 z-[1] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] rounded-lg"
       aria-label={name}
     >
       <span className="sr-only">{name}</span>
@@ -141,7 +141,7 @@ function ProductCard({
     <button
       type="button"
       data-slot="card-link"
-      className="absolute inset-0 z-[1] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] rounded-lg"
+      className="absolute inset-0 z-[1] cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] rounded-lg"
       aria-label={name}
       onClick={onCardClick}
     >

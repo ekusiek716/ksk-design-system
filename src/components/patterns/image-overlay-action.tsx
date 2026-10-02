@@ -125,7 +125,7 @@ function ImageOverlayAction({
       }}
       className={cn(
         "z-[var(--Z-Nav)] flex size-11 cursor-pointer items-center justify-center rounded-full",
-        "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         "disabled:pointer-events-none disabled:opacity-50",
         PLACEMENT_CLASS[placement],
         className,

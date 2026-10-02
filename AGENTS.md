@@ -179,6 +179,19 @@ afterEach フックが全ストーリー（tags フィルタなし）に対し�
 （AA 未達トークンの darken と opacity 減衰の廃止により全ストーリー通過。
 トークンペアの正本チェックは `scripts/check-contrast.mjs`）。CI では常時実行される。
 
+**オーバーレイ系や `outline-hidden` のフォーカス表示を触ったら `npm run test:forced-colors` も実行:**
+
+```bash
+npm run test:forced-colors
+```
+
+強制配色（forced-colors / Windows ハイコントラスト等）モードでのフォーカス表示を
+chromium 実機で検証する（issue #620）。axe-core はフォーカスリングの視認性を
+検証できないため、CDP で forced-colors を有効化し、`outline-hidden` を使う
+コンポーネント（対象例: Button）がキーボードフォーカス時に outline を出すことを
+`__tests__/browser/` の専用テストで確認する。設定は `vitest.forced-colors.config.ts`。
+CI では常時実行される。
+
 エラーが出た場合は修正してから次に進むこと。
 
 ---
@@ -309,6 +322,9 @@ npm run test:a11y
 
 # 旧 Radix 固定の回帰テスト（consumer が古い Radix を掴む条件を再現。issue #516）
 npm run test:legacy-radix
+
+# 強制配色モードのフォーカス表示検証（chromium の CDP で forced-colors を再現。issue #620）
+npm run test:forced-colors
 ```
 
 **`Closes #N` 誤リンク監査について（issue #486 が由来）:**
@@ -354,6 +370,21 @@ npm run test:legacy-radix
 - icon-only の `<Button size="icon*">` に `aria-label` が無いパターンは
   `eslint/icon-button-aria-label.js`（`ksk-a11y/icon-button-aria-label`）で lint 時に検出する
   （`.stories.tsx` は対象外）。
+
+**forced-colors（強制配色）テストについて（issue #620）:**
+
+- axe-core はフォーカスリングが実際に見えるかまでは検証しない。DS のフォーカス表示は
+  `focus-visible:ring-*`（box-shadow）だが、box-shadow は forced-colors モードで
+  描画されないため、`focus-visible:outline-hidden` を併用し、forced-colors 時だけ
+  `outline: 2px solid transparent` を出して OS 側の枠に委ねる（`outline-none` では
+  このメディアクエリ自体が生成されず枠が消えたままになる）。
+- `__tests__/browser/` に置いた専用テストが CDP (`Emulation.setEmulatedMedia`) で
+  forced-colors を有効化し、Tab フォーカス後の `outlineStyle` が `none` でないことを
+  chromium 実機で確認する。設定は `vitest.forced-colors.config.ts`（`vitest.config.ts`
+  の既定テストからは `__tests__/browser/**` を除外し、`npm run test:forced-colors` で
+  個別に実行する）。
+- DS コンポーネント本体で `focus(-visible):outline-none` の新規追加が無いことは
+  `__tests__/focus-ring-outline-pairing.test.ts` の機械検証（`npm test`）で検出する。
 
 **旧 Radix 回帰テストについて（issue #516）:**
 

@@ -104,7 +104,7 @@ web 前提の fix 文言が native で実行不能なルールは `fixNative` �
 
 ## accessibility / form（P023–P027）
 
-- **P023 `outline-none`** → フォーカスリング削除はキーボード利用者に「今どこにいるか」を消す WCAG 違反。`focus-visible:ring-[3px] ring-[var(--Focus-High-Emphasis)]/50` に置換
+- **P023 `outline-none`** → フォーカスリング削除はキーボード利用者に「今どこにいるか」を消す WCAG 違反。`focus-visible:outline-hidden focus-visible:ring-[3px] ring-[var(--Focus-High-Emphasis)]/50` に置換（`outline-none` は強制配色モードでも枠が出ない。`outline-hidden` は forced-colors 時だけ OS 色の枠が出る。issue #620）
 - **P024 `<div onClick>`** → キーボード・スクリーンリーダーから操作不能。`<Button>`
 - **P025 `<img>` alt なし** → SR が読めない。装飾は `alt=""` を明示
 - **P026 placeholder のみでラベル省略** → SR は placeholder を読まない。入力中に説明が消える。`<Label htmlFor>` + `id`、または `aria-label` / `aria-labelledby` を必須。React Native は `accessibilityLabel` / `accessibilityLabelledBy`（lint は入力タグ内の id / aria-* / accessibility* の有無で判定）

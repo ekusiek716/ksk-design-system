@@ -951,7 +951,7 @@ function DataTableRow({
         "border-l-2 border-l-transparent transition-colors hover:bg-[var(--Surface-Secondary)]/50",
         selected && "bg-[var(--Surface-Accent-Primary-Light)] border-l-[var(--Brand-Primary)]",
         isInteractive &&
-          "cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+          "cursor-pointer focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         className
       )}
       {...props}
@@ -1006,7 +1006,7 @@ function DataTableHead({
         <button
           type="button"
           onClick={onSort}
-          className="inline-flex items-center gap-1 cursor-pointer select-none rounded-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 hover:text-[var(--Text-High-Emphasis)] transition-colors"
+          className="inline-flex items-center gap-1 cursor-pointer select-none rounded-sm focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 hover:text-[var(--Text-High-Emphasis)] transition-colors"
         >
           {children}
           <SortIcon direction={sortDirection ?? null} />
@@ -1440,7 +1440,7 @@ function DataTableInputCell({
         className={cn(
           "w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 typo-body-md text-[var(--Text-High-Emphasis)]",
           "hover:border-[var(--Border-Low-Emphasis)]",
-          "focus-visible:border-[var(--Border-Accent-Primary)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+          "focus-visible:border-[var(--Border-Accent-Primary)] focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
           "placeholder:text-[var(--Text-Low-Emphasis)]"
         )}
       />
@@ -1740,7 +1740,7 @@ function DataTableSectionRow({
           <button
             type="button"
             className={cn(
-              "inline-flex items-center gap-2 text-[var(--Text-High-Emphasis)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+              "inline-flex items-center gap-2 text-[var(--Text-High-Emphasis)] focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
               dataTableSectionHeadingClass[headingSize],
               buttonClassName
             )}

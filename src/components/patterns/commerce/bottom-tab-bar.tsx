@@ -585,7 +585,7 @@ function NavItem({
         "relative flex min-h-[max(2.75rem,var(--Nav-Item-Min-Height))] flex-col items-center justify-center gap-[var(--Nav-Item-Gap)] rounded-full",
         // iOS 26 のガラスは押下で沈む（ゲル感）。opacity だけでなく scale も入れる
         "transition-[transform,opacity] duration-[var(--Motion-Duration-Fast)] active:scale-95 active:opacity-80",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
+        "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
         compact ? (isLabelVisible ? "h-full min-w-0 flex-1 px-2 py-1" : "h-full w-14") : "min-w-0 flex-1 pb-1 pt-1",
         // 影は上端のインセットハイライト 1 枚のみ。外側ドロップシャドウを足すと
         // ピル本体（.glass）の影と二重になり煩く見える
@@ -665,7 +665,7 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
         // src/styles/bottom-nav.css 側で上書きされる（issue #471）。
         "glass-accent glass-specular text-[var(--Text-on-Inverse)]",
         "typo-label-sm transition-transform duration-[var(--Motion-Duration-Fast)] active:scale-[0.96]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+        "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
       )}
       aria-label={item.ariaLabel ?? item.label}
       {...tagProps}

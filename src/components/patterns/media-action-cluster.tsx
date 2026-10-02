@@ -222,7 +222,7 @@ function MediaActionClusterButton({
 
   const className = cn(
     "group inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full",
-    "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+    "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
     "disabled:pointer-events-none disabled:opacity-50",
     itemDirection,
   )

@@ -118,7 +118,7 @@ function StatusActionBadge({
     // 上下が余り縦に間延びする（issue #316。native 側と同じ構造の不具合）
     interactive && "min-h-9",
     interactive && "cursor-pointer transition-colors hover:bg-[var(--Surface-Tertiary)]",
-    interactive && "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+    interactive && "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
     disabled && "opacity-50",
     compact && interactive && "min-w-9 px-2",
     // compact の非対話は左右パディングだけが残ると横長の楕円になるため、上下と同値にして正円を保つ

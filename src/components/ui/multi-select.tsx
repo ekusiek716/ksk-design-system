@@ -81,7 +81,7 @@ function MultiSelect({
             aria-haspopup="listbox"
             aria-label={triggerLabel ?? (value.length === 0 ? placeholder : undefined)}
             className={cn(
-              "relative flex min-h-12 w-full flex-wrap items-center gap-1.5 rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-3 py-2 pr-10 typo-body-md transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 text-left",
+              "relative flex min-h-12 w-full flex-wrap items-center gap-1.5 rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-3 py-2 pr-10 typo-body-md transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 text-left",
               showClearButton && "pr-16",
               open
                 ? "border-[var(--Border-Accent-Primary)] ring-[3px] ring-[var(--Focus-High-Emphasis)]/50"
@@ -127,7 +127,7 @@ function MultiSelect({
             data-slot="multi-select-clear"
             aria-label={clearLabel}
             onClick={() => onChange?.([])}
-            className="absolute right-9 top-1/2 z-[1] flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] transition-colors hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Object-High-Emphasis)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
+            className="absolute right-9 top-1/2 z-[1] flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] transition-colors hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Object-High-Emphasis)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
               <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
@@ -151,7 +151,7 @@ function MultiSelect({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={searchPlaceholder}
-            className="flex h-10 flex-1 bg-transparent focus-visible:outline-none typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)]"
+            className="flex h-10 flex-1 bg-transparent focus-visible:outline-hidden typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)]"
           />
         </div>
         {/* List — 常時表示のスクロールバー付き（type="always"） */}
@@ -170,7 +170,7 @@ function MultiSelect({
                   disabled={opt.disabled}
                   onClick={() => toggle(opt.value)}
                   className={cn(
-                    "relative flex w-full cursor-default items-center gap-3 rounded-sm py-2 px-3 typo-body-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 transition-colors text-left",
+                    "relative flex w-full cursor-default items-center gap-3 rounded-sm py-2 px-3 typo-body-md focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 transition-colors text-left",
                     "hover:bg-[var(--Surface-Secondary)] focus:bg-[var(--Surface-Secondary)]",
                     "disabled:pointer-events-none disabled:opacity-50"
                   )}

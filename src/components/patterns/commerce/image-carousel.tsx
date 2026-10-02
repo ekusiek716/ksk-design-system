@@ -59,7 +59,7 @@ function ImageCarousel({
           できるようにする（axe: scrollable-region-focusable）。 */}
       <div
         ref={scrollRef}
-        className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+        className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
         style={{ scrollbarWidth: "none" }}
         tabIndex={0}
         role="region"

@@ -204,7 +204,7 @@ export const LiquidGlassScrollEdge: Story = {
       {/* デモ用のスクロール背景。キーボードでも到達できるようにする
           （axe: scrollable-region-focusable）。 */}
       <div
-        className="h-full overflow-y-auto px-6 py-6 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+        className="h-full overflow-y-auto px-6 py-6 focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
         tabIndex={0}
         role="region"
         aria-label="スクロール可能なコンテンツ"

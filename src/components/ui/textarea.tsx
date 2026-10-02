@@ -88,7 +88,7 @@ function Textarea({
               // 既定値は従来の min-h-[80px] / px-3 / py-2 / rounded-lg と同値（issue #364）。
               "flex min-h-[var(--Field-Min-Height)] w-full rounded-[var(--Field-Radius)] border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-[var(--Field-Padding-X-Md)] py-[var(--Field-Padding-Y)] typo-body-md text-[var(--Text-High-Emphasis)] transition-colors",
               "placeholder:text-[var(--Text-Low-Emphasis)]",
-              "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:border-[var(--Border-Accent-Primary)]",
+              "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:border-[var(--Border-Accent-Primary)]",
               "disabled:cursor-not-allowed disabled:opacity-50",
               "aria-invalid:border-[var(--Border-Caution)]",
             ],

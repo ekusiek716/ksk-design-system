@@ -37,7 +37,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         day_button: cn(
           "h-9 w-9 typo-body-sm rounded-full transition-colors text-[var(--Text-High-Emphasis)]",
           "hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
+          "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
         ),
         // 通常選択（単一 or range の start/end）
         selected:

@@ -51,7 +51,7 @@ export const FAQ: Story = {
           <Collapsible key={item.q}>
             <div className="rounded-lg border border-[var(--Border-Low-Emphasis)]">
               {/* トリガーを行全体に広げ、見出し全体をクリック可能にする */}
-              <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 px-4 py-3 text-left cursor-pointer rounded-lg transition-colors hover:bg-[var(--Surface-Secondary)] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50">
+              <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 px-4 py-3 text-left cursor-pointer rounded-lg transition-colors hover:bg-[var(--Surface-Secondary)] focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50">
                 <span className="typo-body-md text-[var(--Text-High-Emphasis)]">{item.q}</span>
                 <span className="text-lg leading-none text-[var(--Text-Accent-Primary)] transition-transform group-data-[state=open]:rotate-45">
                   +
