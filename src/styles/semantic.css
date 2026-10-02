@@ -128,6 +128,15 @@
   --Hover-Ghost-Button:      var(--Primitive-Gray-100);
   --Hover-Destructive-Button: var(--Primitive-Red-700);
   --Active-Destructive-Button: var(--Primitive-Red-800);
+  /* 状態色ボタン（Button variant info / warning / success・issue #598）。
+     背景は --Info-Base / --Warning-Base / --Success-Base、文字は --Text-on-Inverse。
+     light は押すほど濃く（白文字が 5:1 以上を保つ）。 */
+  --Hover-Info-Button:       var(--Primitive-Blue-700);
+  --Active-Info-Button:      var(--Primitive-Blue-800);
+  --Hover-Warning-Button:    var(--Primitive-Orange-800);
+  --Active-Warning-Button:   var(--Primitive-Orange-900);
+  --Hover-Success-Button:    var(--Primitive-Green-800);
+  --Active-Success-Button:   var(--Primitive-Green-900);
 
   /* ─── Overlay ─── */
   --Overlay-Dark:   var(--Primitive-Gray-Alpha-800);
@@ -232,6 +241,14 @@
   --Hover-Ghost-Button:      var(--Primitive-White-Alpha-100);
   --Hover-Destructive-Button: var(--Primitive-Red-500);
   --Active-Destructive-Button: var(--Primitive-Red-600);
+  /* dark の文字（--Text-on-Inverse）は Gray-900。背景を濃くすると 400→500→600 で
+     3.4:1 まで落ちて AA 未達になるため、dark は押すほど明るくする（300 / 200）。 */
+  --Hover-Info-Button:       var(--Primitive-Blue-300);
+  --Active-Info-Button:      var(--Primitive-Blue-200);
+  --Hover-Warning-Button:    var(--Primitive-Orange-300);
+  --Active-Warning-Button:   var(--Primitive-Orange-200);
+  --Hover-Success-Button:    var(--Primitive-Green-300);
+  --Active-Success-Button:   var(--Primitive-Green-200);
 
   --Overlay-Dark:   var(--Primitive-Gray-Alpha-900);
   --Overlay-Medium: var(--Primitive-Gray-Alpha-700);

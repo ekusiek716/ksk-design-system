@@ -74,6 +74,19 @@ for (const theme of themes) {
   ])
 }
 
+// 状態色ボタン（Button variant info / warning / success・issue #598）。
+// 文字は Text-on-Inverse。背景・hover・active の全段を light / dark の両方で検査する
+// （dark は Text-on-Inverse が濃色になるので、背景を濃くする方向だと AA を割る）。
+const semDark = tokens.colors.semanticDark
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const fg = resolve(s.text["on-inverse"])
+  for (const kind of ["info", "warning", "success"]) {
+    pairs.push([fg, resolve(s[kind].base), `${mode}: Text-on-Inverse / ${kind}-Base`, 4.5])
+    pairs.push([fg, resolve(s.hover[`${kind}-button`]), `${mode}: Text-on-Inverse / Hover-${kind}-Button`, 4.5])
+    pairs.push([fg, resolve(s.active[`${kind}-button`]), `${mode}: Text-on-Inverse / Active-${kind}-Button`, 4.5])
+  }
+}
+
 // Categorical: Bold は文字用 → 白背景 & 自分の Subtle 背景で AA
 const cat = sem.categorical || {}
 for (const k of Object.keys(cat)) {

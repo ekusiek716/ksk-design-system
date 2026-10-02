@@ -48,6 +48,9 @@ const TOUCH_TARGET_VARIANTS = [
   "tertiary",
   "ghost",
   "destructive",
+  "info",
+  "warning",
+  "success",
   "link",
   "accent",
   "inverse",
@@ -65,6 +68,13 @@ const buttonVariants = cva(
         tertiary: "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] border border-[var(--Border-Medium-Emphasis)] hover:bg-[var(--Hover-Tertiary-Button)] rounded-[var(--Control-Radius)]",
         ghost: "text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Ghost-Button)] rounded-[var(--Control-Radius)]",
         destructive: "bg-[var(--Caution-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Destructive-Button)] active:bg-[var(--Active-Destructive-Button)] rounded-[var(--Control-Radius)]",
+        // info / warning / success — 状態色で意味を伝えるボタン（issue #598）。
+        // ブランドに連動しない固定の状態色。文字は --Text-on-Inverse で、light / dark とも
+        // 背景・hover・active の全段で WCAG AA（scripts/check-contrast.mjs で検査）。
+        // 取り消せない操作は destructive を使う（warning は「注意を促す」用途）。
+        info: "bg-[var(--Info-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Info-Button)] active:bg-[var(--Active-Info-Button)] rounded-[var(--Control-Radius)]",
+        warning: "bg-[var(--Warning-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Warning-Button)] active:bg-[var(--Active-Warning-Button)] rounded-[var(--Control-Radius)]",
+        success: "bg-[var(--Success-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Success-Button)] active:bg-[var(--Active-Success-Button)] rounded-[var(--Control-Radius)]",
         link: "text-[var(--Text-Accent-Primary)] underline-offset-4 hover:underline",
         // glass の押下は不透明度を落とさず「わずかに縮んで増光」させる
         // （iOS の Liquid Glass はタップでガラスがハイライトする挙動）。

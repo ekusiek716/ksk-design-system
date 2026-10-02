@@ -335,7 +335,7 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
 
 代表例（トークン参照で構成）。
 
-- **Button**: bg `{colors.primary}` / text 白 / `rounded-full` / 高さ 48px。variant: default·secondary·tertiary·ghost·destructive·link。
+- **Button**: bg `{colors.primary}` / text 白 / `rounded-full` / 高さ 48px。variant: default·secondary·tertiary·ghost·destructive·info·warning·success·link（info・warning・success は状態色。不可逆操作は destructive）。
 - **Card**: bg `{colors.surface}` ＋ 1px `{colors.border}` ＋ `{elevation.md}` ＋ `{rounded.surface}`。
 - **Dialog（中央モーダル）**= タスク面（フォーム/絞り込み）。`role="dialog"`、`{rounded.modal}`。
 - **AlertDialog / ConfirmDialog（割り込み確認）**= 削除等の"止める"操作。`role="alertdialog"`、背景タップで閉じない・中央表示。
