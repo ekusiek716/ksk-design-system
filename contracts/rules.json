@@ -2,7 +2,7 @@
   "meta": {
     "name": "KSK Design System — Rules Contracts",
     "version": "1.2.0",
-    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン50件・AIアンチパターン10件。"
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン51件・AIアンチパターン10件。"
   },
   "prohibited": [
     {
@@ -568,6 +568,18 @@
       "message": "DS を参照しない並行パレットの疑い（DS 名前空間に属さないカスタムプロパティに色値を5個以上定義）",
       "fix": "ksk-design-system/preset + テーマの導入、または既存変数の値を DS トークン参照へ置換",
       "note": "P049 は DS 名前空間（--Primitive- 等）に触れる CSS だけを違反にするため、DS を一切使わない独自パレット（--bg / --accent / --surface 等）を敷いた CSS には無言だった（issue #393）。:root / .dark / [data-theme=...] のようなルート的セレクタの中で、DS 名前空間（contracts/product-theme-overrides.json の dsVariableNamespaces）に属さないカスタムプロパティへ色値（hex / rgb() / hsl() / oklch()）を minColorVars 個以上定義していたら warn する。値が var(--Primitive-...) のように DS トークンを参照しているだけのものはカウントしない。意図的な独立パレット（チャット画面の LINE 風ライト等）は // ksk-ds-lint-ignore P050 -- 理由 で抑制できる。DS 自身 / ベンダリングされた DS の CSS は P049 と同じ判定（issue #407）で対象外"
+    },
+    {
+      "id": "P051",
+      "severity": "warning",
+      "category": "spacing",
+      "appliesTo": ["dom"],
+      "pattern": "overlay-footer-padding",
+      "engine": "overlay-footer-padding",
+      "excludeLines": [],
+      "message": "ResponsiveOverlayFrame（preset=\"plain\" / side=\"float\" 系）の中に ResponsiveOverlayFooter を置くのに padding={false} が無い（下余白が二重になる）",
+      "fix": "Frame に padding={false} を付ける。ResponsiveOverlayFooter が safe-area 込みの下余白を自前で持つため、Frame 側の p-6 と safe-area の下余白は不要",
+      "note": "issue #619。#599 / #613 で plain / float 系の Frame が既定で p-6 + safe-area 込みの下余白を持つようになったため、Footer と併用すると二重になる。公開 CLI と lint-scratch.sh は共通の TypeScript AST 検査（bin/overlay-footer-padding.js）。誤検知を出さない方を優先し、side / preset が文字列リテラルで plain / float 系と確定し、Frame に spread props が無く、padding が未指定・値なし・{true} で、Footer が Frame の JSX 子孫に直接書かれているときだけ報告する。padding={cond} のような式・{...props}・Footer を別コンポーネントに切り出した構成・preset 経路（mobile-form 等。padding を受け付けず余白も持たない）は対象外"
     }
   ],
   "aiPatterns": {

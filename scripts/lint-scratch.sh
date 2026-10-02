@@ -400,6 +400,17 @@ if [ -n "$MATCHES" ]; then
   WARNINGS=$((WARNINGS + WARNING_COUNT))
 fi
 
+# W14. ResponsiveOverlayFrame（plain / float 系）+ ResponsiveOverlayFooter の padding={false} 付け忘れ
+# （P051 / issue #619）。公開 CLI と共通の TypeScript AST 検査。Frame の side / preset が
+# リテラルで確定し、spread props が無く、Footer が JSX 子孫に直接ある場合だけ報告する。
+MATCHES=$(node "$ROOT/scripts/check-overlay-footer-padding.mjs" $FILES 2>/dev/null || true)
+if [ -n "$MATCHES" ]; then
+  echo -e "${YELLOW}⚠️  ResponsiveOverlayFooter を置く plain / float の ResponsiveOverlayFrame に padding={false} が無い → 下余白が二重になる${NC}"
+  echo "$MATCHES" | head -3
+  WARNING_COUNT=$(printf "%s\n" "$MATCHES" | sed '/^[[:space:]]*$/d' | wc -l | tr -d ' ')
+  WARNINGS=$((WARNINGS + WARNING_COUNT))
+fi
+
 # border 色指定チェック（scripts/check-border-color.mjs）。
 # package.json の "check" スクリプトは変更せず、lint-scratch.sh 経由で
 # npm run check に組み込む（lint-scratch.sh は check の中で既に呼ばれている）。

@@ -2341,7 +2341,7 @@
         "デスクトップ分岐のキーボード補正は max-height だけで lift(bottom)は当てない。DialogContent は top:50% + translate-y:-50% で位置決めしているため bottom を足すと両拘束になり高さが縦一杯へ伸びる。中央寄せのキャップは 100dvh - 2*kb(100dvh - kb では下端がキーボードへ潜り込む。desktopPosition=\"top\" / \"fullscreen\" は上端固定なのでキーボード 1 回分 / #487)",
         "3 つのデスクトップ分岐(preset / plain / float 系)はすべて data-frame=\"responsive-overlay-frame\" + data-side + data-position を出す。consumer が独自のキーボード補正を当てる場合もこの属性で絞る(#487)",
         "float-glass の実スクロールは src/styles/sheet-keyboard.css の :is(sheet-content, dialog-content)[data-side=\"float-glass\"] が担う。.glass-specular の overflow:hidden が非レイヤー CSS で className を踏み潰すため、className だけでは効かない(#337 / #479)",
-        "モバイルの下余白(safe-area)や float の最大高さを consumer 側で pb-8 / max-h-[85dvh] overflow-y-auto と書き足さない(#599 で既定化)。値を変えたいときだけ className / mobileClassName の pb-* / max-h-* で上書きする(twMerge で既定と置き換わり二重にならない)。ResponsiveOverlayFooter を使う面は padding={false} にする(フッタ自身が safe-area を持つ)"
+        "モバイルの下余白(safe-area)や float の最大高さを consumer 側で pb-8 / max-h-[85dvh] overflow-y-auto と書き足さない(#599 で既定化)。値を変えたいときだけ className / mobileClassName の pb-* / max-h-* で上書きする(twMerge で既定と置き換わり二重にならない)。ResponsiveOverlayFooter を使う面は padding={false} にする(フッタ自身が safe-area を持つ。付け忘れは npx ksk-ds lint の P051 が warn)"
       ],
       "subcomponents": [
         "ResponsiveOverlayFooter"
