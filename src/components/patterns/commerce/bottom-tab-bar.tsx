@@ -214,7 +214,10 @@ function useBottomTabBarKeyboardState(keyboardBehavior: BottomTabBarKeyboardBeha
  *
  * - `nav` に `aria-label`（`navLabel`。既定「メインナビゲーション」）
  * - アクティブなタブに `aria-current="page"`
- * - ラベル非表示時はタブに `aria-label`（`ariaLabel ?? label`）
+ * - タブには表示形態（ラベル表示/非表示）に関わらず `aria-label` を組み立てる:
+ *   `ariaLabel ?? label` + 件数バッジ（`badgeCount > 0` のとき「（N）」、100 以上は
+ *   「99+」。書式は SidebarNav の collapsed 表示と同じ）。バッジの span 自体は
+ *   `aria-hidden="true"` で二重読み上げを防ぐ（issue #627）
  * - 中央アクションに `aria-label`（`ariaLabel ?? label`）
  * - タップ領域は 44px（HIG 下限）を下回らない
  *
@@ -572,6 +575,15 @@ function NavItem({
   // スライド overlay の計測アンカー（プラッターが包むべき矩形）
   const isPlatterAnchorTag = compact && isLabelVisible && item.isActive
   const isPlatterAnchorIcon = compact && !isLabelVisible && item.isActive
+  // アクセシブルネームは表示形態（ラベル表示/非表示）に関わらず部品側で組み立てる
+  // （呼び出し側の義務にしない）。書式は SidebarNav（sidebar-nav.tsx, issue #624）の
+  // collapsed 表示と同じ: 「ariaLabel ?? label」+ 件数（1以上のときのみ「（N）」、
+  // 100以上は「99+」）。バッジの span 自体は aria-hidden（下記アイコン領域）にして
+  // 二重に読み上げさせない。
+  const badgeCount = item.badgeCount ?? 0
+  const hasBadge = badgeCount > 0
+  const badgeText = badgeCount > 99 ? "99+" : String(badgeCount)
+  const accessibleName = `${item.ariaLabel ?? item.label}${hasBadge ? `（${badgeText}）` : ""}`
 
   return (
     <Tag
@@ -598,7 +610,7 @@ function NavItem({
             ? "text-[var(--Text-on-Inverse)] opacity-75"
             : "text-[var(--Text-High-Emphasis)] opacity-60"
       )}
-      aria-label={isLabelVisible ? item.ariaLabel : item.ariaLabel ?? item.label}
+      aria-label={accessibleName}
       aria-current={item.isActive ? "page" : undefined}
       {...tagProps}
     >
@@ -616,10 +628,14 @@ function NavItem({
         )}
       >
         {item.isActive && item.activeIcon ? item.activeIcon : item.icon}
-        {/* バッジカウント */}
-        {item.badgeCount != null && item.badgeCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-[var(--Caution-Base)] typo-label-xs text-[var(--Text-on-Inverse)]">
-            {item.badgeCount > 99 ? "99+" : item.badgeCount}
+        {/* バッジカウント。件数は Tag の aria-label（accessibleName）側で読み上げるため、
+            この span は aria-hidden にして二重読み上げを防ぐ */}
+        {hasBadge && (
+          <span
+            aria-hidden="true"
+            className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-[var(--Caution-Base)] typo-label-xs text-[var(--Text-on-Inverse)]"
+          >
+            {badgeText}
           </span>
         )}
       </span>
