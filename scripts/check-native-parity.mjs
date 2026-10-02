@@ -49,6 +49,7 @@ const INTENTIONAL_NATIVE_GAPS = new Map([
   ["SearchPanel", "admin search panel is Web-only"],
   ["Section", "full-width CSS background band and responsive vertical rhythm primitive is Web-only; native uses View layout"],
   ["SectionNav", "hash-anchor navigation and aria-current=location are Web-only; native screens use SectionList or explicit scroll handlers"],
+  ["SidebarNav", "PC 表示（lg 以上）の左サイドバー専用のナビ項目（issue #611）。native のアプリ内ナビは BottomTabBar / LiquidBottomTabBar が担い、常設サイドバーのレイアウトを持たないため移植しない"],
   ["SkipLink", "skip navigation targets DOM landmarks and is Web-only"],
   ["SideDrawerFrame", "side detail drawer is a desktop/web layout; native mobile uses BottomSheetFrame snap sheet instead"],
   ["StatusTabs", "admin status tabs are Web-only"],

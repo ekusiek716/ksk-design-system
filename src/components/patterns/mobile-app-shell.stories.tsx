@@ -4,6 +4,7 @@ import { BottomTabBar } from "./commerce/bottom-tab-bar"
 import { MobileFloatingActionButton } from "./mobile-floating-action-button"
 import { MobileAppHeader } from "./mobile-app-header"
 import { MobileAppShell } from "./mobile-app-shell"
+import { SidebarNav } from "./sidebar-nav"
 
 const meta: Meta<typeof MobileAppShell> = {
   title: "Components/MobileAppShell",
@@ -67,14 +68,8 @@ export const DesktopSidebarHandoff: Story = {
     <MobileAppShell
       maxWidth="100%"
       desktopSidebar={
-        <div className="space-y-2 p-4">
-          {tabItems.map((item) => (
-            <div key={item.label} className="flex items-center gap-2 rounded-lg px-3 py-2 typo-label-md text-[var(--Text-High-Emphasis)]">
-              {item.icon}
-              {item.label}
-            </div>
-          ))}
-        </div>
+        // モバイルの BottomTabBar と同じ items 配列をそのまま渡す（issue #611）
+        <SidebarNav items={tabItems} className="p-3" />
       }
       header={<MobileAppHeader brand={<p className="typo-heading-md text-[var(--Text-High-Emphasis)]">Settings</p>} />}
       bottomNavMode="inline"
