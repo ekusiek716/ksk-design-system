@@ -247,7 +247,7 @@ function ShareButtons({
               type="button"
               onClick={() => void handleClick(p)}
               aria-label={meta.label}
-              className="flex min-h-11 shrink-0 flex-col items-center gap-2 rounded-lg cursor-pointer focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+              className="flex min-h-11 shrink-0 flex-col items-center gap-2 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
             >
               <span className={cn(
                 "size-12 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 active:scale-95",
@@ -293,7 +293,7 @@ function ShareButtons({
             onClick={() => void handleClick(p)}
             aria-label={meta.label}
             className={cn(
-              "inline-flex min-h-11 items-center gap-2 px-3 py-2 rounded-full border border-[var(--Border-Medium-Emphasis)] typo-label-xs transition-colors focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+              "inline-flex min-h-11 items-center gap-2 px-3 py-2 rounded-full border border-[var(--Border-Medium-Emphasis)] typo-label-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
               meta.inlineClass
             )}
           >

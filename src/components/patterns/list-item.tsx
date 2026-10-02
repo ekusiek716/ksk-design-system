@@ -142,8 +142,8 @@ function ListItem({
     ),
     actionable && (
       isCompact
-        ? "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
-        : "min-h-11 focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+        ? "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+        : "min-h-11 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
     ),
     disabled && "cursor-not-allowed opacity-50",
     className,
