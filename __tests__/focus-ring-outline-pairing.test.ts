@@ -387,14 +387,24 @@ describe("focus-visible:ring / focus:ring と outline 解除のペア (issue #59
 })
 
 /**
- * issue #620: フォーカス用途の outline 解除は `outline-hidden` 必須。
- * ring とペアになっていても `outline-none` では強制配色モードで枠が消えるため、
- * 上の「ring とペアか」だけでは検出できない（`outline-none` も outline 解除と
- * みなしてペア扱いしてしまう）。ここでは `focus:outline-none` /
- * `focus-visible:outline-none` の新規追加そのものを別途検出する。
- * `.stories.tsx` も対象（collapsible.stories.tsx 等で実際に使われていた）。
+ * issue #620 フォローアップ（レビュー指摘）: 当初はここを
+ * `focus(?:-visible)?:outline-none` という前置バリアント非対応の正規表現で
+ * 検出していたため、`md:focus-visible:outline-none` /
+ * `data-[state=open]:focus-visible:outline-none` /
+ * `group-focus-visible:outline-none` のような前置バリアント付きの指定を
+ * 見逃していた。DS 本体（src/components・src/lib/server-variants）には
+ * forced-colors 対応前から `outline-none` を使う正当な理由が無く、
+ * 現状も 0 件（`outline-hidden` に統一済み）なので、前置バリアントの
+ * 網羅を気にする複雑な正規表現ではなく「`outline-none` という部分文字列を
+ * 一切禁止」という単純なルールに倒す。`.stories.tsx` も対象
+ * （collapsible.stories.tsx 等で実際に使われていた）。
+ *
+ * 将来 DS 内部実装でどうしても `outline-none` が必要になった場合は、同じ行に
+ * `// ksk-ds-lint-ignore OUTLINE_NONE -- 理由` を書けば対象から除外できる
+ * （contracts/rules.json の `ksk-ds-lint-ignore <ID> -- 理由` と同じ書式）。
  */
-const FOCUS_OUTLINE_NONE_RE = /(^|[\s"'`,(])focus(?:-visible)?:outline-none\b/g
+const OUTLINE_NONE_RE = /\boutline-none\b/
+const OUTLINE_NONE_IGNORE_RE = /ksk-ds-lint-ignore\s+OUTLINE_NONE\s+--\s*\S/
 
 function collectFilesIncludingStories(dir: string): string[] {
   const files: string[] = []
@@ -412,26 +422,28 @@ function collectFilesIncludingStories(dir: string): string[] {
   return files
 }
 
-function findFocusOutlineNoneUsages(rawSource: string): string[] {
+function findOutlineNoneUsages(rawSource: string): string[] {
   const source = stripComments(rawSource)
+  const rawLines = rawSource.split(/\r?\n/)
   const hits: string[] = []
-  FOCUS_OUTLINE_NONE_RE.lastIndex = 0
-  for (const match of source.matchAll(FOCUS_OUTLINE_NONE_RE)) {
-    const idx = match.index ?? 0
-    hits.push(source.slice(Math.max(0, idx - 20), idx + 60).trim())
-  }
+  source.split(/\r?\n/).forEach((line, index) => {
+    if (!OUTLINE_NONE_RE.test(line)) return
+    const rawLine = rawLines[index] ?? line
+    if (OUTLINE_NONE_IGNORE_RE.test(rawLine)) return
+    hits.push(line.trim())
+  })
   return hits
 }
 
-describe("フォーカス用途の outline 解除は outline-hidden 必須 (issue #620)", () => {
-  it("DS コンポーネント・ストーリーに focus(-visible):outline-none の新規追加が無い", () => {
+describe("DS 本体で outline-none を一切禁止 (issue #620 フォローアップ)", () => {
+  it("DS コンポーネント・ストーリーに outline-none が無い", () => {
     const files = TARGET_DIRS.flatMap((dir) => collectFilesIncludingStories(join(ROOT, dir)))
     expect(files.length).toBeGreaterThan(0)
 
     const report: string[] = []
     for (const file of files) {
       const source = readFileSync(file, "utf8")
-      const hits = findFocusOutlineNoneUsages(source)
+      const hits = findOutlineNoneUsages(source)
       if (hits.length > 0) {
         const rel = file.replace(`${ROOT}/`, "")
         for (const h of hits) report.push(`${rel}: ${h}`)
@@ -442,22 +454,27 @@ describe("フォーカス用途の outline 解除は outline-hidden 必須 (issu
   })
 
   it("リグレッション確認: focus-visible:outline-none を書くと検出される", () => {
-    const hits = findFocusOutlineNoneUsages(`cn("focus-visible:outline-none focus-visible:ring-2")`)
-    expect(hits).toHaveLength(1)
+    expect(findOutlineNoneUsages(`cn("focus-visible:outline-none focus-visible:ring-2")`)).toHaveLength(1)
   })
 
-  it("focus:outline-none も検出対象", () => {
-    const hits = findFocusOutlineNoneUsages(`cn("focus:outline-none focus:ring-2")`)
-    expect(hits).toHaveLength(1)
+  it("前置バリアント付き（md: / data-[...] / group-focus-visible: / !）も検出する", () => {
+    expect(findOutlineNoneUsages(`className="md:focus-visible:outline-none"`)).toHaveLength(1)
+    expect(findOutlineNoneUsages(`className="data-[state=open]:focus-visible:outline-none"`)).toHaveLength(1)
+    expect(findOutlineNoneUsages(`className="group-focus-visible:outline-none"`)).toHaveLength(1)
+    expect(findOutlineNoneUsages(`className="!outline-none"`)).toHaveLength(1)
   })
 
   it("outline-hidden は検出しない", () => {
-    const hits = findFocusOutlineNoneUsages(`cn("focus-visible:outline-hidden focus-visible:ring-2")`)
-    expect(hits).toHaveLength(0)
+    expect(findOutlineNoneUsages(`cn("focus-visible:outline-hidden focus-visible:ring-2")`)).toHaveLength(0)
   })
 
-  it("hover:outline-none は無関係な pseudo-class のため検出しない", () => {
-    const hits = findFocusOutlineNoneUsages(`cn("hover:outline-none")`)
-    expect(hits).toHaveLength(0)
+  it("コメント中の outline-none は誤検出しない", () => {
+    expect(findOutlineNoneUsages(`// outline-none は禁止\nconst x = 1`)).toHaveLength(0)
+  })
+
+  it("ksk-ds-lint-ignore OUTLINE_NONE -- 理由 が同じ行にあれば除外する", () => {
+    expect(
+      findOutlineNoneUsages(`className="outline-none" // ksk-ds-lint-ignore OUTLINE_NONE -- 理由`),
+    ).toHaveLength(0)
   })
 })

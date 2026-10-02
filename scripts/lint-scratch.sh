@@ -240,11 +240,15 @@ for FILE in $FILES; do
     WARNINGS=$((WARNINGS + 1))
   fi
 
-  # W7. outline-none（フォーカスリング削除）
+  # W7. outline-none（フォーカスリング削除。issue #620 フォローアップ）
+  # 以前は `grep -Ev "focus-visible|..."` で focus-visible:outline-none を
+  # 含む行ごと除外していたため、まさに forced-colors モードで問題になる
+  # 「outline-none + ring」の組み合わせを見逃していた（レビュー指摘）。
+  # outline-hidden は別の文字列なのでこのパターンには元々マッチしない。
   MATCHES=$(grep -nE "${CLASS_START}outline-none${CLASS_END}" "$FILE" 2>/dev/null \
-    | grep -Ev "focus-visible|$COMMENT_LINE" || true)
+    | grep -Ev "$COMMENT_LINE" || true)
   if [ -n "$MATCHES" ]; then
-    echo -e "${YELLOW}⚠️  $FILE: outline-none → focus-visible:ring で代替${NC}"
+    echo -e "${YELLOW}⚠️  $FILE: outline-none → outline-hidden + focus-visible:ring で代替（強制配色モードでは outline-none だと枠が消える。issue #620）${NC}"
     echo "$MATCHES" | head -3
     WARNINGS=$((WARNINGS + 1))
   fi

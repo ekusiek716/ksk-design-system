@@ -21,3 +21,7 @@ dist-preview
 # Browser quality reports
 artifacts/
 debug-storybook.log
+
+# vitest browser mode の実行時生成物（issue #620 の test:forced-colors 等）
+.vitest-attachments/
+__tests__/browser/__screenshots__/
