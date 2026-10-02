@@ -2317,6 +2317,8 @@
         "preset ごとのデスクトップ寸法写像(幅・max-height・角丸)",
         "side=float / float-glass のデスクトップ写像(32rem / min(85dvh,46rem))。float 系は preset ではなく padding が効く",
         "preset=\"plain\" は BottomSheetFrame を通さない素の bottom シート(全幅・下端固定・p-6・max-h-90dvh のまま)で、デスクトップだけ中央モーダル(32rem / min(90dvh,46rem))になる。padding が効く(issue #486)",
+        "モバイル分岐の下余白に home indicator の safe-area を含める(issue #599)。plain は pb = 1.5rem + env(safe-area-inset-bottom)、float 系は面が下端から 12px 浮いているので pb = max(1.5rem, env(safe-area-inset-bottom))。padding={false} / safeArea={false} / キーボード表示中は足さない。デスクトップ分岐と preset 経路は変えない",
+        "モバイルの side=float / float-glass は既定で max-height: min(85dvh, 100dvh - 1.5rem - 上部safe-area)(lg 以上は min(85dvh,46rem))を持ち、超えた分は面の中でスクロールする(issue #599)。キーボード表示中は #337 の inline style が優先",
         "description / autoFocus / restoreFocusOnClose / closeOnEsc / zIndex を両分岐へ透過",
         "snap sheet はデスクトップでもシートのまま",
         "ResponsiveOverlayFooter がモバイルのみキーボード追従になる",
@@ -2331,7 +2333,8 @@
         "side / preset ごとに効く prop が判別ユニオンで分かれている: preset 経路は preset / surface / desktopPosition、float 系と preset=\"plain\" は padding。効かない組み合わせは黙って無視されずコンパイルエラーになる(型テスト test/types/responsive-overlay-frame.tsx)",
         "デスクトップ分岐のキーボード補正は max-height だけで lift(bottom)は当てない。DialogContent は top:50% + translate-y:-50% で位置決めしているため bottom を足すと両拘束になり高さが縦一杯へ伸びる。中央寄せのキャップは 100dvh - 2*kb(100dvh - kb では下端がキーボードへ潜り込む。desktopPosition=\"top\" / \"fullscreen\" は上端固定なのでキーボード 1 回分 / #487)",
         "3 つのデスクトップ分岐(preset / plain / float 系)はすべて data-frame=\"responsive-overlay-frame\" + data-side + data-position を出す。consumer が独自のキーボード補正を当てる場合もこの属性で絞る(#487)",
-        "float-glass の実スクロールは src/styles/sheet-keyboard.css の :is(sheet-content, dialog-content)[data-side=\"float-glass\"] が担う。.glass-specular の overflow:hidden が非レイヤー CSS で className を踏み潰すため、className だけでは効かない(#337 / #479)"
+        "float-glass の実スクロールは src/styles/sheet-keyboard.css の :is(sheet-content, dialog-content)[data-side=\"float-glass\"] が担う。.glass-specular の overflow:hidden が非レイヤー CSS で className を踏み潰すため、className だけでは効かない(#337 / #479)",
+        "モバイルの下余白(safe-area)や float の最大高さを consumer 側で pb-8 / max-h-[85dvh] overflow-y-auto と書き足さない(#599 で既定化)。値を変えたいときだけ className / mobileClassName の pb-* / max-h-* で上書きする(twMerge で既定と置き換わり二重にならない)。ResponsiveOverlayFooter を使う面は padding={false} にする(フッタ自身が safe-area を持つ)"
       ],
       "subcomponents": [
         "ResponsiveOverlayFooter"

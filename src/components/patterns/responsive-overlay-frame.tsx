@@ -60,6 +60,47 @@ const floatSides = new Set<ResponsiveOverlaySide>(["float", "float-glass"])
 const desktopFloatClasses = "sm:max-w-lg max-h-[min(85dvh,46rem)] flex flex-col overflow-y-auto"
 
 /**
+ * モバイル float 系の既定の高さキャップ（issue #599）。
+ *
+ * Sheet の float は「画面 − 上下マージン − 上部 safe-area」までしか縛らないため、
+ * 内容が長いとほぼ全画面の高さまで伸びる。consumer が毎回
+ * `max-h-[85dvh] lg:max-h-[min(85dvh,46rem)]` を書き足していたので既定にした。
+ * 値はデスクトップ分岐（`desktopFloatClasses`）と揃えている。
+ *
+ * `safeArea`（既定 true）の間は Sheet 側の safe-area キャップも min() で残し、
+ * ノッチ端末の背の低い画面で上端が抜けないようにする。
+ * スクロールは Sheet の float バリアントが持つ `overflow-y-auto`（float-glass は
+ * sheet-keyboard.css の非レイヤー規則）が担う。`ResponsiveOverlayFooter` は
+ * sticky なので、本文がスクロールしてもフッタは下端に残る。
+ *
+ * キーボード表示中は SheetContent の inline style（#337）がこの値を上書きする。
+ * 上書きしたいときは className / mobileClassName に `max-h-*` を渡す（twMerge で置き換わる）。
+ */
+const mobileFloatMaxHeightClasses = {
+  safeArea:
+    "max-h-[min(85dvh,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))] lg:max-h-[min(85dvh,46rem)]",
+  noSafeArea: "max-h-[85dvh] lg:max-h-[min(85dvh,46rem)]",
+} as const
+
+/**
+ * モバイル分岐の既定の下余白に home indicator の safe-area を含める（issue #599）。
+ *
+ * - plain: 画面下端（`bottom-0`）に貼り付くので、Dialog fullscreen と同じく
+ *   `1.5rem + env(safe-area-inset-bottom)` にする。
+ * - float 系: 面自体が下端から 12px（`bottom-3`）浮いているため、足し算にすると
+ *   余白が過大になる。`max(1.5rem, env(safe-area-inset-bottom))` で、safe-area の
+ *   ある端末では内容の下端が「12px + safe-area」の位置に来る（StickyActionBar 等と同じ max 方式）。
+ *
+ * 既定の `p-6` を上書きせず `pb-*` だけを足す（twMerge は p-6 と pb-* を両方残し、
+ * pb が下辺だけを置き換える）。consumer が className で下余白（pb 系）を渡した場合は
+ * twMerge でそちらが勝つため、既存の上書きと二重にはならない。
+ * `padding={false}`（自前でレイアウトを組む / ResponsiveOverlayFooter が
+ * safe-area を持つ）と `safeArea={false}`（consumer が自前で管理）では足さない。
+ */
+const mobilePlainSafeAreaBottomClass = "pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]"
+const mobileFloatSafeAreaBottomClass = "pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]"
+
+/**
  * `preset="plain"`（preset 無しの素の bottom シート）のデスクトップ recipe。
  * モバイルは Sheet の bottom バリアント（`inset-x-0 bottom-0` / `max-h-[90dvh]` /
  * `p-6`）そのままなので、それを中央へ移した寸法にする。
@@ -422,7 +463,11 @@ type ResponsiveOverlayFrameProps =
        * 既存の素の SheetContent をデスクトップ対応させたいときはこれを使う。
        */
       preset: "plain"
-      /** 内側の既定 padding（`p-6`）。既定 true。 */
+      /**
+       * 内側の既定 padding（`p-6`）。既定 true。
+       * モバイルでは下辺が `1.5rem + env(safe-area-inset-bottom)` になる（#599。
+       * `safeArea={false}` で外せる）。
+       */
       padding?: boolean
       /** 面の素材。モバイル / デスクトップの両方に効く。既定 "default"。 */
       surface?: SheetSurface
@@ -440,6 +485,12 @@ type ResponsiveOverlayFrameProps =
       /**
        * 内側の既定 padding（`p-6`）。既定 true。
        * float 系だけが持つ（side="bottom" は preset が余白を持つ）。
+       * モバイルでは下辺が `max(1.5rem, env(safe-area-inset-bottom))` になる（#599。
+       * `safeArea={false}` で外せる）。
+       *
+       * モバイルの float は既定で `max-height: min(85dvh, …)`（lg 以上は
+       * `min(85dvh, 46rem)`）を持ち、超えた分は面の中でスクロールする（#599）。
+       * 変えたいときは className / mobileClassName に `max-h-*` を渡す。
        */
       padding?: boolean
       /**
@@ -668,12 +719,28 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
     )
   }
 
+  // #599: モバイル分岐の下余白に home indicator の safe-area を含める。
+  // キーボード表示中はシートがキーボードの上へ持ち上がり、下端に home indicator が
+  // 来ないので足さない（判定はデスクトップ分岐の #487 と同じ AND ゲート）。
+  const mobileKeyboardOpen = !isDesktop && editableFocused && keyboardInset > 0
+  const mobileSafeAreaBottomClass =
+    padding && safeArea && !mobileKeyboardOpen
+      ? isFloat
+        ? mobileFloatSafeAreaBottomClass
+        : mobilePlainSafeAreaBottomClass
+      : undefined
+
   if (isPlain) {
     return (
       <SheetContent
         side="bottom"
         padding={padding}
-        className={cn(sheetSurfaceClasses[surface], className, mobileClassName)}
+        className={cn(
+          sheetSurfaceClasses[surface],
+          mobileSafeAreaBottomClass,
+          className,
+          mobileClassName
+        )}
         {...props}
         data-frame="responsive-overlay-frame"
         data-preset="plain"
@@ -690,7 +757,14 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
         data-frame="responsive-overlay-frame"
         side={side}
         padding={padding}
-        className={cn(className, mobileClassName)}
+        className={cn(
+          safeArea
+            ? mobileFloatMaxHeightClasses.safeArea
+            : mobileFloatMaxHeightClasses.noSafeArea,
+          mobileSafeAreaBottomClass,
+          className,
+          mobileClassName
+        )}
         {...props}
       >
         {/* SheetContent 自身が children を scale="dialog" で包むため、

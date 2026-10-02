@@ -276,10 +276,48 @@ export const FloatGlassSide: Story = {
 }
 
 /**
+ * `side="float"` に長い内容を入れた例（issue #599）。
+ * モバイルでも既定で `max-height: 85dvh`（lg 以上は `min(85dvh, 46rem)`）に収まり、
+ * 超えた分は面の中でスクロールする。下余白は `max(1.5rem, env(safe-area-inset-bottom))`
+ * なので、ホームインジケータのある端末でも最下部のボタンが下端に寄りすぎない。
+ * consumer 側で最大高さ・スクロール・下余白を書き足す必要は無い。
+ */
+export const FloatLongContent: Story = {
+  name: "float サイド（長い内容・既定の最大高さと safe-area）",
+  render: function Render() {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <ResponsiveDialog open={open} onOpenChange={setOpen} breakpoint="lg">
+        <ResponsiveDialogTrigger asChild>
+          <Button>長い float シートを開く</Button>
+        </ResponsiveDialogTrigger>
+        <ResponsiveOverlayFrame side="float" description="プランの内容を確認します">
+          <div className="space-y-4">
+            <ResponsiveDialogTitle>プランの内容</ResponsiveDialogTitle>
+            {Array.from({ length: 14 }, (_, i) => (
+              <p key={i} className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+                {`特典 ${i + 1}: 予定やメモを端末間で同期し、家族と共有できます。`}
+              </p>
+            ))}
+            <div className="flex gap-3 [&>*]:flex-1">
+              <Button variant="secondary" onClick={() => setOpen(false)}>
+                閉じる
+              </Button>
+              <Button onClick={() => setOpen(false)}>申し込む</Button>
+            </div>
+          </div>
+        </ResponsiveOverlayFrame>
+      </ResponsiveDialog>
+    )
+  },
+}
+
+/**
  * `preset="plain"`（issue #486）。preset を使わない素の bottom シート。
  * モバイルは全幅・下端固定・`p-6` のまま（タブレット幅でもフロートカード化
  * しない）で、デスクトップだけ中央モーダルになる。
  * 既存の素の `<SheetContent side="bottom">` をデスクトップ対応させる用。
+ * モバイルの下余白は `1.5rem + env(safe-area-inset-bottom)`（issue #599）。
  */
 export const PlainBottomPreset: Story = {
   name: "plain preset（素の bottom シート）",
