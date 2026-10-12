@@ -287,6 +287,9 @@ npm run storybook
 # ビルド
 npm run build-storybook
 
+# 初回のみ: mcp-server のテスト（npm test に含まれる）が MCP SDK を使うため依存を入れる
+npm ci --prefix mcp-server
+
 # スクラッチ検出（実装後に必ず実行）
 bash scripts/lint-scratch.sh
 
@@ -301,6 +304,9 @@ npm run lint:design
 
 # 非推奨 API 台帳の整合検査（台帳 ⇔ 実ソースの @deprecated JSDoc）
 npm run lint:deprecations
+
+# 未定義 CSS 変数の参照検査（変数名のタイプミス検出。実行時注入の変数は scripts/check-css-vars.mjs の ALLOWLIST）
+npm run lint:css-vars
 
 # `Closes #N` 誤リンク監査（gh 必須。npm run check には入っていない）
 npm run audit:issue-links -- --recent 60
