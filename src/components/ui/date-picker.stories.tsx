@@ -4,6 +4,8 @@
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
+import { expect, within } from "storybook/test"
+import { FormField } from "../patterns/form-field"
 import { DatePicker, DateRangePicker } from "./date-picker"
 import { Calendar } from "./calendar"
 import { type DateRange } from "react-day-picker"
@@ -105,5 +107,33 @@ export const CalendarRange: Story = {
       to: new Date(2026, 3, 15),
     })
     return <Calendar mode="range" selected={range} onSelect={setRange as (r: unknown) => void} />
+  },
+}
+
+// --Border-Caution の解決後の色（FormField の error で出るエラー枠の期待色）
+const cautionBorderColor = () => {
+  const probe = document.createElement("div")
+  probe.style.cssText = "border: 1px solid var(--Border-Caution); position: absolute;"
+  document.body.appendChild(probe)
+  const color = getComputedStyle(probe).borderTopColor
+  probe.remove()
+  return color
+}
+
+/** FormField の error がトリガーに届き、エラー枠（赤枠）になる。 */
+export const InvalidInFormField: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div className="w-72">
+      <FormField label="日付を" error="入力してください">
+        <DatePicker />
+      </FormField>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole("button", { name: "日付を選択" })
+    await expect(trigger).toHaveAttribute("aria-invalid", "true")
+    await expect(trigger.getAttribute("aria-describedby")).toBeTruthy()
+    await expect(getComputedStyle(trigger).borderTopColor).toBe(cautionBorderColor())
   },
 }

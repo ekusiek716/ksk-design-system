@@ -38,6 +38,12 @@ function CheckboxCardItem({
   description,
   expandedContent,
   badge,
+  checked: checkedProp,
+  defaultChecked,
+  onCheckedChange,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
+  "aria-describedby": ariaDescribedby,
   ...props
 }: React.ComponentProps<typeof CheckboxPrimitive.Root> & {
   /** ラベルテキスト */
@@ -49,9 +55,41 @@ function CheckboxCardItem({
   /** タグバッジ（例: "20%OFF"） */
   badge?: React.ReactNode
 }) {
+  const baseId = React.useId()
+  const labelId = `${baseId}-label`
+  const descriptionId = `${baseId}-description`
+  const expandedId = `${baseId}-expanded`
+
+  // 展開内容は選択中だけ見える。説明に加えるのも選択中だけにして、非表示の内容を読み上げない。
+  const [uncontrolledChecked, setUncontrolledChecked] = React.useState(defaultChecked === true)
+  const isChecked = (checkedProp !== undefined ? checkedProp : uncontrolledChecked) === true
+
+  // アクセシブル名はラベル（+ バッジ）だけにする。名前をボタンの内容に任せると
+  // 説明文・展開内容まで名前になり、「ライトプラン 月額 ¥500」のように長くなり、
+  // 展開内容は選択の前後で名前が変わってしまう。説明は aria-describedby に分ける。
+  const hasLabel = Boolean(children || badge)
+  const labelledby = ariaLabelledby ?? (ariaLabel === undefined && hasLabel ? labelId : undefined)
+  const describedby =
+    [
+      description ? descriptionId : undefined,
+      expandedContent && isChecked ? expandedId : undefined,
+      ariaDescribedby,
+    ]
+      .filter(Boolean)
+      .join(" ") || undefined
+
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox-card-item"
+      checked={checkedProp}
+      defaultChecked={defaultChecked}
+      onCheckedChange={(next) => {
+        setUncontrolledChecked(next === true)
+        onCheckedChange?.(next)
+      }}
+      aria-label={ariaLabel}
+      aria-labelledby={labelledby}
+      aria-describedby={describedby}
       className={cn(
         "group flex cursor-pointer gap-2 rounded-lg border-2 border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] p-4 text-left focus-visible:outline-hidden transition-colors",
         expandedContent ? "flex-col items-stretch" : "items-center",
@@ -87,7 +125,7 @@ function CheckboxCardItem({
         {(children || description || badge) && (
           <span className="flex min-w-0 flex-1 flex-col">
             {(children || badge) && (
-              <span className="flex items-center gap-1.5">
+              <span id={labelId} className="flex items-center gap-1.5">
                 {children && (
                   <span
                     data-slot="checkbox-card-label"
@@ -106,6 +144,7 @@ function CheckboxCardItem({
             )}
             {description && (
               <span
+                id={descriptionId}
                 data-slot="checkbox-card-description"
                 className={cn(
                   "typo-body-sm text-[var(--Text-Medium-Emphasis)]",
@@ -122,6 +161,7 @@ function CheckboxCardItem({
       {/* Expanded content (visible only when checked) */}
       {expandedContent && (
         <span
+          id={expandedId}
           data-slot="checkbox-card-expanded"
           className="hidden border-t border-[var(--Border-Medium-Emphasis)] pt-3 group-data-[state=checked]:block"
         >

@@ -267,7 +267,8 @@
       "description": "ドロップダウン選択。Radix UIベース。SelectTrigger / SelectContent / SelectItemで構成。",
       "variants": [],
       "accessibility": [
-        "Must pair with <Label>"
+        "Must pair with <Label>",
+        "aria-invalid=true（FormField の error から Select Root 経由で自動）でトリガーにエラー枠（Border-Caution）"
       ],
       "rules": [
         "Must use <Select> not <select>"
@@ -493,7 +494,7 @@
     {
       "name": "Tabs",
       "path": "src/components/ui/tabs.tsx",
-      "description": "タブナビゲーション。同一コンテキスト内のビュー切り替えに使用。",
+      "description": "タブナビゲーション。同一コンテキスト内のビュー切り替えに使用。forced-colors（Windows ハイコントラスト）では選択中を Highlight / HighlightText で反転して示す。",
       "subcomponents": [
         "TabsList",
         "TabsTrigger",
@@ -942,7 +943,8 @@
       "description": "数値スライダー。価格帯フィルタ・音量など連続値の入力。範囲スライダー（2ハンドル）も対応。",
       "accessibility": [
         "Radix Slider 準拠",
-        "キーボード操作対応（矢印キー）"
+        "キーボード操作対応（矢印キー）",
+        "範囲スライダーの Home / End はフォーカス中のつまみを動かせる範囲の端（隣のつまみ、無ければ min / max）へ動かす"
       ],
       "rules": [
         "defaultValue は配列",
@@ -973,7 +975,8 @@
       "description": "カード型チェックボックス。複数選択のカード型UI。単一選択には RadioGroup を使用。",
       "accessibility": [
         "Radix Checkbox 準拠",
-        "disabled 状態対応"
+        "disabled 状態対応",
+        "アクセシブル名はラベル（+ バッジ）だけ（aria-labelledby）。説明は aria-describedby に分け、展開内容は選択中だけ説明に加える"
       ],
       "rules": [
         "CheckboxCardGroup でグループ化",
@@ -1067,7 +1070,8 @@
       "sizes": [],
       "accessibility": [
         "aria-expanded",
-        "role=combobox"
+        "role=combobox",
+        "aria-invalid=true でトリガーにエラー枠（Border-Caution）。FormField の error から自動で届く"
       ],
       "rules": [
         "select で代替できない検索付きセレクトに使う"
@@ -1101,7 +1105,9 @@
       "variants": [],
       "sizes": [],
       "accessibility": [
-        "aria-multiselectable"
+        "aria-multiselectable",
+        "aria-invalid=true でトリガーにエラー枠（Border-Caution）。FormField の error から自動で届く",
+        "クリアボタンで選択が空になったらフォーカスをトリガーへ戻す（ボタンが消えて body に落ちない）"
       ],
       "rules": [
         "3 件以上選択する用途に。少数なら CheckboxGroup を優先"

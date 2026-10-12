@@ -16,10 +16,20 @@ type SliderProps = Omit<
   "aria-labelledby"?: string | string[]
 }
 
+function getDecimalCount(value: number) {
+  return (String(value).split(".")[1] || "").length
+}
+
 /**
  * Slider — 数値スライダー
  *
  * Radix UI Slider ラッパー。範囲スライダー（2ハンドル）にも対応。
+ *
+ * 範囲スライダーの Home / End は WAI-ARIA APG の Multi-Thumb Slider に合わせ、
+ * 「フォーカス中のつまみ」をそのつまみが動ける範囲の端（隣のつまみ ± `minStepsBetweenThumbs` × `step`、
+ * 無ければ `min` / `max`）へ動かす。Radix の既定は先頭 / 末尾のつまみを動かしてしまうため、
+ * 各つまみの keydown で横取りする（preventDefault 済みの keydown を Radix は無視する）。
+ * 値の更新は onValueChange / onValueCommit に流す。つまみが 1 つのときは Radix の既定のまま。
  *
  * ### 使用例
  * ```tsx
@@ -38,6 +48,11 @@ function Slider({
   max = 100,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
+  step = 1,
+  minStepsBetweenThumbs = 0,
+  onValueChange,
+  onValueCommit,
+  disabled,
   ...props
 }: SliderProps) {
   const _values = React.useMemo(
@@ -50,11 +65,53 @@ function Slider({
     [value, defaultValue, min, max]
   )
 
+  const isRange = _values.length > 1
+  const isControlled = Array.isArray(value)
+  // 範囲スライダーの非制御時だけ、Home / End で値を Radix へ反映するための内部 state を持つ。
+  const [innerValue, setInnerValue] = React.useState<number[]>(
+    Array.isArray(defaultValue) ? defaultValue : [min, max]
+  )
+  const currentValues = isControlled ? (value as number[]) : innerValue
+
+  const moveThumbToEdge = (index: number, edge: "start" | "end") => {
+    const gap = minStepsBetweenThumbs * step
+    const target =
+      edge === "start"
+        ? index === 0
+          ? min
+          : (currentValues[index - 1] ?? min) + gap
+        : index === currentValues.length - 1
+          ? max
+          : (currentValues[index + 1] ?? max) - gap
+    const decimals = Math.max(getDecimalCount(step), getDecimalCount(gap))
+    const nextValue = Number(target.toFixed(decimals))
+    if (nextValue === currentValues[index]) return
+    const next = currentValues.map((v, i) => (i === index ? nextValue : v))
+    if (!isControlled) setInnerValue(next)
+    onValueChange?.(next)
+    onValueCommit?.(next)
+  }
+
+  const handleThumbKeyDown = (index: number) => (event: React.KeyboardEvent<HTMLSpanElement>) => {
+    if (!isRange || disabled || (event.key !== "Home" && event.key !== "End")) return
+    event.preventDefault()
+    moveThumbToEdge(index, event.key === "Home" ? "start" : "end")
+  }
+
   return (
     <SliderPrimitive.Root
       data-slot="slider"
-      defaultValue={defaultValue}
-      value={value}
+      step={step}
+      minStepsBetweenThumbs={minStepsBetweenThumbs}
+      disabled={disabled}
+      // 範囲スライダーは常に値を Radix へ渡す（非制御なら内部 state で保持）。1 つまみは Radix に任せる。
+      defaultValue={isRange ? undefined : defaultValue}
+      value={isRange ? currentValues : value}
+      onValueChange={(next) => {
+        if (isRange && !isControlled) setInnerValue(next)
+        onValueChange?.(next)
+      }}
+      onValueCommit={onValueCommit}
       min={min}
       max={max}
       className={cn(
@@ -108,6 +165,7 @@ function Slider({
             key={index}
             aria-label={thumbLabel}
             aria-labelledby={thumbLabelledby}
+            onKeyDown={handleThumbKeyDown(index)}
             className="block size-5 shrink-0 rounded-full border-2 border-[var(--Brand-Primary)] bg-[var(--Surface-Primary)] shadow-[var(--shadow-sm)] ring-[var(--Brand-Primary)]/20 transition-[color,box-shadow,transform] hover:ring-4 hover:scale-125 focus-visible:ring-4 focus-visible:outline-hidden active:scale-110 active:ring-6 active:shadow-[var(--shadow-md)] disabled:pointer-events-none disabled:opacity-50"
           />
         )

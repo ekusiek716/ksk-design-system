@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, userEvent, within } from "storybook/test"
 import { Slider } from "./slider"
 
 const meta = {
@@ -75,4 +76,46 @@ export const Disabled: Story = {
       <Slider defaultValue={[30]} min={0} max={100} step={1} disabled />
     </div>
   ),
+}
+
+/**
+ * 範囲スライダーの Home / End は、フォーカス中のつまみをそのつまみが動ける範囲の端
+ * （隣のつまみ、無ければ min / max）へ動かす（WAI-ARIA APG の Multi-Thumb Slider）。
+ * 先頭・末尾のつまみを動かしてしまうと、キーボード操作で意図しないつまみが動く。
+ */
+export const RangeHomeEndMovesFocusedThumb: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div className="w-64">
+      <Slider defaultValue={[20, 80]} min={0} max={100} step={1} aria-label="価格" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const start = canvas.getByRole("slider", { name: "価格（開始）" })
+    const end = canvas.getByRole("slider", { name: "価格（終了）" })
+
+    // 終了つまみで Home: 開始つまみ（20）の位置まで。開始つまみは動かない
+    end.focus()
+    await userEvent.keyboard("{Home}")
+    await expect(end).toHaveAttribute("aria-valuenow", "20")
+    await expect(start).toHaveAttribute("aria-valuenow", "20")
+    await expect(end).toHaveFocus()
+
+    // 開始つまみで End: 終了つまみ（20）の位置まで
+    start.focus()
+    await userEvent.keyboard("{End}")
+    await expect(start).toHaveAttribute("aria-valuenow", "20")
+
+    // 開始つまみで Home: min まで
+    await userEvent.keyboard("{Home}")
+    await expect(start).toHaveAttribute("aria-valuenow", "0")
+    await expect(end).toHaveAttribute("aria-valuenow", "20")
+
+    // 終了つまみで End: max まで
+    end.focus()
+    await userEvent.keyboard("{End}")
+    await expect(end).toHaveAttribute("aria-valuenow", "100")
+    await expect(start).toHaveAttribute("aria-valuenow", "0")
+  },
 }

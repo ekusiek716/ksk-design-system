@@ -418,6 +418,8 @@
 @source inline("font-medium");
 @source inline("font-normal");
 @source inline("font-semibold");
+@source inline("forced-colors:data-[state=active]:bg-[Highlight]");
+@source inline("forced-colors:data-[state=active]:text-[HighlightText]");
 @source inline("from-[var(--Brand-Primary)]");
 @source inline("gap-0");
 @source inline("gap-0.5");
