@@ -279,6 +279,7 @@
 @source inline("bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]");
 @source inline("bottom-[var(--ksk-keyboard-inset)]");
 @source inline("break-words");
+@source inline("col-start-1");
 @source inline("collapse");
 @source inline("container");
 @source inline("contents");
@@ -563,6 +564,7 @@
 @source inline("inline");
 @source inline("inline-block");
 @source inline("inline-flex");
+@source inline("inline-grid");
 @source inline("inset-0");
 @source inline("inset-x-0");
 @source inline("inset-x-1");
@@ -580,6 +582,7 @@
 @source inline("justify-between");
 @source inline("justify-center");
 @source inline("justify-end");
+@source inline("justify-items-center");
 @source inline("landscape:flex-row");
 @source inline("last:border-b-0");
 @source inline("leading-[44px]");
@@ -911,6 +914,7 @@
 @source inline("rounded-t-[32px]");
 @source inline("rounded-t-[var(--Radius-Sheet)]");
 @source inline("rounded-xl");
+@source inline("row-start-1");
 @source inline("scroll-smooth");
 @source inline("scrollbar-hide");
 @source inline("scrollbar-none");
