@@ -287,6 +287,9 @@ npm run storybook
 # ビルド
 npm run build-storybook
 
+# 初回のみ: mcp-server のテスト（npm test に含まれる）が MCP SDK を使うため依存を入れる
+npm ci --prefix mcp-server
+
 # スクラッチ検出（実装後に必ず実行）
 bash scripts/lint-scratch.sh
 

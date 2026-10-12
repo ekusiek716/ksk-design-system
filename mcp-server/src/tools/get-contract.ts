@@ -228,7 +228,20 @@ export function getContract(name: string, options: GetContractOptions = {}): Get
           error: `path "${options.path}" は "${result.reached}" までしか辿れません。次に指定できるキー: ${result.available.join(", ") || "(なし)"}`,
         };
       }
-      return { ok: true, text: JSON.stringify(result.value, null, 2) };
+      const partText = JSON.stringify(result.value, null, 2)
+      if (options.full || partText.length <= FULL_TEXT_LIMIT) return { ok: true, text: partText }
+      const keys = childKeys(result.value).map((key) => {
+        const value = (result.value as Record<string, unknown>)[key]
+        const size = Array.isArray(value) ? `array(${value.length})` : isObject(value) ? `object(${Object.keys(value).length})` : typeof value
+        return `${key}: ${size}`
+      })
+      return {
+        ok: true,
+        text:
+          `path "${options.path}" の中身は ${partText.length} 文字あるため、キーの一覧のみ返します。` +
+          `より深い path を指定するか、full:true で全量を取得できます。\n\n` +
+          keys.join("\n"),
+      }
     }
     if (options.full || text.length <= FULL_TEXT_LIMIT) return { ok: true, text };
     const keys = childKeys(data).map((key) => {

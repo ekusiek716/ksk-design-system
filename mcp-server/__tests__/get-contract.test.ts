@@ -109,6 +109,13 @@ describe("getContract", () => {
     if (!bad.ok) expect(bad.error).toContain("counts")
   })
 
+  it("path で引いた結果も上限を超えれば目次になり、full:true で全量を返す", () => {
+    const outline = getContract("components", { path: "ui" })
+    expect(outline.ok && outline.text).toContain("キーの一覧のみ")
+    const full = getContract("components", { path: "ui", full: true })
+    expect(full.ok && Array.isArray(JSON.parse(full.text))).toBe(true)
+  })
+
   it("section で Markdown の節を取得でき、無い節は見出し一覧付きのエラーになる", () => {
     const headings = extractHeadings(readFileSync(resolve(projectRoot, "DESIGN.md"), "utf-8"))
     const target = headings.find((h) => h.level >= 2)

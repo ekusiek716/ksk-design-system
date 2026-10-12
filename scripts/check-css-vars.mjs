@@ -40,8 +40,15 @@ const SRC = join(ROOT, "src")
  */
 export const ALLOWLIST = [
   {
-    prefix: "--radix-",
-    reason: "Radix UI が Popper / Select / Dropdown 等のコンテンツ要素へ実行時に注入する変数（trigger-width / available-height / transform-origin 等）。DS 側に定義は無い",
+    names: [
+      "--radix-dropdown-menu-content-available-height",
+      "--radix-dropdown-menu-content-transform-origin",
+      "--radix-hover-card-content-transform-origin",
+      "--radix-popover-trigger-width",
+      "--radix-select-trigger-height",
+      "--radix-select-trigger-width",
+    ],
+    reason: "Radix UI が Popper / Select / Dropdown 等のコンテンツ要素へ実行時に注入する変数。DS 側に定義は無い。前方一致にするとタイプミスが素通りするので完全一致で列挙する",
   },
   {
     name: "--kb-h",
@@ -137,7 +144,8 @@ function collectTokensJsonVars(defined) {
 // ---------- 参照の収集 ----------
 // var(--X) / var(--X, fallback)。Tailwind v4 の括弧記法 `bg-(--X)` / `bg-(color:--X)` も拾う。
 const VAR_REF_RE = new RegExp(`var\\(\\s*(${NAME})\\s*(,)?`, "g")
-const TW_PAREN_REF_RE = new RegExp(`[\\w-]\\((?:[a-z-]+:)?(${NAME})\\)`, "g")
+// 直前が `-` のときだけ（`bg-(--X)`）。`var(--X)` の `r(--X)` や `Math.max(--n)` には当てない
+const TW_PAREN_REF_RE = new RegExp(`-\\((?:[a-z-]+:)?(${NAME})\\)`, "g")
 
 export function scan() {
   const files = walk(SRC)
@@ -163,6 +171,9 @@ export function scan() {
         const name = m[1]
         // `var(--Border-${tone})` のような動的合成は末尾が `-` で切れる。名前が確定しないので検査できない
         if (name.endsWith("-")) continue
+        // `--Typo-H${x}-Emph` のように名前の途中にテンプレート式がある場合も同様
+        const end = (m.index ?? 0) + m[0].indexOf(name) + name.length
+        if (text.startsWith("${", end)) continue
         if (defined.has(name)) continue
         const list = undefinedRefs.get(name) ?? []
         list.push({ file: relative(ROOT, file), line: lineOf(text, m.index ?? 0), hasFallback: fallbackGroup && m[2] === "," })

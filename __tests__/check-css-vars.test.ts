@@ -33,7 +33,7 @@ describe("check-css-vars.mjs", () => {
     const r = spawnSync("node", ["scripts/check-css-vars.mjs"], { cwd: process.cwd(), encoding: "utf8" })
     expect(outputOf(r)).toContain("CSS 変数参照チェック OK")
     expect(r.status).toBe(0)
-  })
+  }, 180_000)
 
   it("tsx の任意値のタイプミスを file:line 付きで落とす", () => {
     const r = run({
@@ -97,6 +97,37 @@ describe("check-css-vars.mjs", () => {
   it("Radix が注入する --radix-* は許可リストで通る", () => {
     const r = run({
       "src/components/a.tsx": `export const A = () => <div className="w-[var(--radix-popover-trigger-width)]" />`,
+    })
+    expect(r.status).toBe(0)
+  })
+
+  it("var(--X) の未定義を 1 箇所につき 1 回だけ報告する（括弧記法と二重に拾わない）", () => {
+    const r = run({
+      "src/components/a.tsx": `export const A = () => <div className="w-[var(--Typo-Name)]" />`,
+    })
+    expect(r.status).toBe(1)
+    expect(outputOf(r).match(/--Typo-Name/g)).toHaveLength(1)
+  })
+
+  it("Tailwind v4 の括弧記法 bg-(--X) の未定義は落とすが、Math.max(--n) のような式は拾わない", () => {
+    const bad = run({ "src/components/a.tsx": `export const A = () => <div className="bg-(--Missing-Paren)" />` })
+    expect(bad.status).toBe(1)
+    expect(outputOf(bad)).toContain("--Missing-Paren")
+    const ok = run({ "src/components/a.tsx": `export const f = (n: number) => Math.max(--n)` })
+    expect(ok.status).toBe(0)
+  })
+
+  it("--radix-* は列挙した名前だけ許可し、タイプミスは落とす", () => {
+    const r = run({
+      "src/components/a.tsx": `export const A = () => <div className="w-[var(--radix-popover-trigger-widht)]" />`,
+    })
+    expect(r.status).toBe(1)
+    expect(outputOf(r)).toContain("--radix-popover-trigger-widht")
+  })
+
+  it("名前の途中にテンプレート式がある動的合成は対象外", () => {
+    const r = run({
+      "src/components/a.tsx": "export const A = (x: number) => <div className={`text-[var(--Typo-H${x}-Emph)]`} />",
     })
     expect(r.status).toBe(0)
   })

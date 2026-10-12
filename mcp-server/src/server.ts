@@ -144,14 +144,18 @@ export function createServer(): Server {
     if (!definition) {
       throw new Error(`Unknown resource: ${request.params.uri}`);
     }
+    // 読み込み失敗は MCP のエラー応答（JSON-RPC error）として返す。理由をメッセージに含める
+    let text: string;
+    try {
+      text = readContractText(definition);
+    } catch (error) {
+      throw new Error(
+        `Failed to read resource ${definition.uri}: ${error instanceof Error ? error.message : String(error)}`,
+        { cause: error }
+      );
+    }
     return {
-      contents: [
-        {
-          uri: definition.uri,
-          mimeType: definition.mimeType,
-          text: readContractText(definition),
-        },
-      ],
+      contents: [{ uri: definition.uri, mimeType: definition.mimeType, text }],
     };
   });
 
@@ -226,11 +230,20 @@ export function createServer(): Server {
       }
 
       case "get_contract": {
-        const result = getContract(String(args?.name ?? ""), {
-          path: typeof args?.path === "string" ? args.path : undefined,
-          section: typeof args?.section === "string" ? args.section : undefined,
-          full: args?.full === true,
-        });
+        let result: ReturnType<typeof getContract>;
+        try {
+          result = getContract(String(args?.name ?? ""), {
+            path: typeof args?.path === "string" ? args.path : undefined,
+            section: typeof args?.section === "string" ? args.section : undefined,
+            full: args?.full === true,
+          });
+        } catch (error) {
+          // ファイル欠落・JSON 破損などで例外になっても、クライアントには isError で返す
+          result = {
+            ok: false,
+            error: `get_contract に失敗しました: ${error instanceof Error ? error.message : String(error)}`,
+          };
+        }
         return {
           content: [
             { type: "text" as const, text: result.ok ? result.text : result.error },
