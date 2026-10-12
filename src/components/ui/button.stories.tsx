@@ -3,6 +3,7 @@
  * @description Button variants and sizes.
  */
 import type { Meta, StoryObj } from "@storybook/react"
+import * as React from "react"
 import { Add } from "iconsax-reactjs"
 import { expect, fn, userEvent, within } from "storybook/test"
 import { Button } from "./button"
@@ -624,5 +625,85 @@ export const TouchTargetsDoNotOverlap: Story = {
         }
       }
     }
+  },
+}
+
+/**
+ * 処理中（`loading`）。ラベルを透明にしてスピナーを重ねるので幅が変わらない。
+ * `loadingLabel` を渡すとスピナーの横に文言を出す（i18n 用・既定なし）。
+ * スピナーの色はボタンの文字色に追従する。
+ */
+export const Loading: Story = {
+  render: () => (
+    <div className="flex flex-col items-start gap-4 p-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <Button loading>保存する</Button>
+        <Button variant="secondary" loading>保存する</Button>
+        <Button variant="tertiary" loading>保存する</Button>
+        <Button variant="destructive" loading>削除する</Button>
+        <Button variant="ghost" loading>保存する</Button>
+        <Button size="icon" aria-label="追加" loading>
+          <Add size={20} />
+        </Button>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button loading loadingLabel="保存中…">保存する</Button>
+        <Button size="sm" loading loadingLabel="送信中…">送信</Button>
+      </div>
+    </div>
+  ),
+}
+
+/**
+ * loading の回帰テスト（stract-ui #181 / baseconnect #183 #184 の逆輸入）。
+ * - 幅が変わらない（ラベルを DOM に残して透明にしている）
+ * - aria-busy / aria-disabled を持ち、disabled 属性は付けない（フォーカスを保つ）
+ * - クリックしても onClick が発火しない
+ * - アクセシブルネームは元のラベルのまま
+ */
+export const LoadingKeepsWidthAndBlocksClick: Story = {
+  tags: ["interaction", "!autodocs"],
+  args: { onClick: fn() },
+  render: (args) => {
+    const [loading, setLoading] = React.useState(false)
+    return (
+      <div className="flex flex-col items-start gap-3 p-6">
+        <Button data-testid="loading-btn" loading={loading} onClick={args.onClick}>
+          変更を保存する
+        </Button>
+        <Button data-testid="toggle" variant="secondary" onClick={() => setLoading((v) => !v)}>
+          切り替え
+        </Button>
+      </div>
+    )
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    const btn = canvas.getByTestId("loading-btn")
+    const before = btn.getBoundingClientRect()
+
+    btn.focus()
+    await userEvent.click(canvas.getByTestId("toggle"))
+    btn.focus()
+
+    await expect(btn).toHaveAttribute("aria-busy", "true")
+    await expect(btn).toHaveAttribute("aria-disabled", "true")
+    await expect(btn).not.toBeDisabled()
+    await expect(btn).toHaveFocus()
+    await expect(btn).toHaveAccessibleName("変更を保存する")
+
+    const after = btn.getBoundingClientRect()
+    await expect(Math.round(after.width)).toBe(Math.round(before.width))
+    await expect(Math.round(after.height)).toBe(Math.round(before.height))
+
+    await userEvent.click(btn)
+    await userEvent.keyboard("{Enter}")
+    await expect(args.onClick).not.toHaveBeenCalled()
+
+    // 解除後は再び押せる
+    await userEvent.click(canvas.getByTestId("toggle"))
+    await expect(btn).not.toHaveAttribute("aria-busy")
+    await userEvent.click(btn)
+    await expect(args.onClick).toHaveBeenCalledTimes(1)
   },
 }
