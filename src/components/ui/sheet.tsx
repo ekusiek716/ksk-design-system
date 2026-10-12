@@ -591,13 +591,13 @@ const sheetVariants = cva(
           "max-h-[90dvh] overflow-y-auto",
         ].join(" "),
         left: [
-          "inset-y-0 left-0 h-full w-3/4 max-w-sm border-r border-[var(--Border-Low-Emphasis)]",
+          "inset-y-0 left-0 h-full w-3/4 border-r border-[var(--Border-Low-Emphasis)]",
           "bg-[var(--Surface-Primary)]",
           "data-[state=open]:animate-slide-in-left",
           "data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left",
         ].join(" "),
         right: [
-          "inset-y-0 right-0 h-full w-3/4 max-w-sm border-l border-[var(--Border-Low-Emphasis)]",
+          "inset-y-0 right-0 h-full w-3/4 border-l border-[var(--Border-Low-Emphasis)]",
           "bg-[var(--Surface-Primary)]",
           "data-[state=open]:animate-slide-in-right",
           "data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right",
@@ -636,9 +636,26 @@ const sheetVariants = cva(
           "glass-strong",
         ].join(" "),
       },
+      /**
+       * 幅の段（`side="left"` / `"right"` のときだけ効く。top / bottom / float 系は
+       * 全幅・自前幅なので無視する）。既定 `sm` = 従来の `max-w-sm`。詳細パネルや
+       * 表を載せる場合は `md` / `lg`。実クラスは下の compoundVariants で side と
+       * 組み合わせて当てる。DialogContent の `size` と段の名前を揃えている。
+       */
+      size: {
+        sm: "",
+        md: "",
+        lg: "",
+      },
     },
+    compoundVariants: [
+      { side: ["left", "right"], size: "sm", className: "max-w-sm" },
+      { side: ["left", "right"], size: "md", className: "max-w-xl" },
+      { side: ["left", "right"], size: "lg", className: "max-w-3xl" },
+    ],
     defaultVariants: {
       side: "right",
+      size: "sm",
     },
   }
 )
@@ -650,6 +667,15 @@ interface SheetContentProps
     VariantProps<typeof sheetVariants> {
   /** オーバーレイをガラス調にする（glass系 side では自動で true） */
   glassOverlay?: boolean
+  /**
+   * 幅の段。`side="left"` / `"right"` のときだけ効く（他の side では無視）。
+   * - "sm"（既定）: `max-w-sm`（従来の幅）
+   * - "md": `max-w-xl`
+   * - "lg": `max-w-3xl`
+   * 実幅は `w-3/4` と各 max-w の小さい方（狭い画面では従来どおり 3/4）。
+   * 消費側の `className`（`max-w-*`）は常にこの size より優先される。
+   */
+  size?: "sm" | "md" | "lg"
   /**
    * Portal target element. When provided, the sheet portals into this element
    * instead of document.body. Useful for inheriting CSS transforms (e.g. forced
@@ -748,6 +774,7 @@ function SheetContent({
   className,
   children,
   side = "right",
+  size,
   glassOverlay,
   container,
   padding = true,
@@ -899,6 +926,7 @@ function SheetContent({
     return (
       <SwipeToCloseSideDrawer
         side={side as "left" | "right"}
+        size={size}
         className={className}
         glassOverlay={useGlassOverlay}
         overlayClassName={overlayClassName}
@@ -972,7 +1000,7 @@ function SheetContent({
         data-side={side}
         data-safe-area={safeArea}
         className={cn(
-          sheetVariants({ side }),
+          sheetVariants({ side, size }),
           topSafeAreaPaddingClass,
           floatSafeAreaMaxHeightClass,
           className
@@ -1430,6 +1458,8 @@ function SwipeToCloseBottomSheet({
 interface SwipeToCloseSideDrawerProps
   extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus"> {
   side: "left" | "right"
+  /** 幅の段（SheetContent の `size` をそのまま受ける）。 */
+  size?: "sm" | "md" | "lg"
   className?: string
   glassOverlay?: boolean
   /** #158: overlay 要素への追加 className（escape hatch）。 */
@@ -1452,6 +1482,7 @@ interface SwipeToCloseSideDrawerProps
 
 function SwipeToCloseSideDrawer({
   side,
+  size,
   className,
   glassOverlay,
   overlayClassName,
@@ -1661,7 +1692,7 @@ function SwipeToCloseSideDrawer({
         ref={attachTouchListeners}
         data-side={side}
         className={cn(
-          sheetVariants({ side }),
+          sheetVariants({ side, size }),
           // Block horizontal overscroll (e.g. browser back-swipe) so the
           // close-drag owns the horizontal axis; the body still scrolls
           // vertically.

@@ -148,6 +148,60 @@ export const RightSheet: Story = {
   ),
 }
 
+/**
+ * 幅の段（size）。side="left" / "right" のときだけ効く。既定 sm は従来の max-w-sm。
+ * 実幅は w-3/4 と max-w の小さい方なので viewport に依存する。play は適用された
+ * max-w クラスで固定し、bottom では size が無視されることも確認する。
+ */
+export const Sizes: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="flex flex-wrap gap-3">
+      {(["sm", "md", "lg"] as const).map((size) => (
+        <Sheet key={size}>
+          <SheetTrigger asChild>
+            <Button variant="secondary" data-testid={`open-${size}`}>{size}</Button>
+          </SheetTrigger>
+          <SheetContent side="right" size={size}>
+            <SheetHeader>
+              <SheetTitle>size=&quot;{size}&quot;</SheetTitle>
+              <SheetDescription>幅の段を切り替えるデモです。</SheetDescription>
+            </SheetHeader>
+          </SheetContent>
+        </Sheet>
+      ))}
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="secondary" data-testid="open-bottom">bottom + lg</Button>
+        </SheetTrigger>
+        <SheetContent side="bottom" size="lg">
+          <SheetHeader>
+            <SheetTitle>bottom は全幅</SheetTitle>
+            <SheetDescription>side=&quot;bottom&quot; では size を無視します。</SheetDescription>
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+    const expected = { sm: "max-w-sm", md: "max-w-xl", lg: "max-w-3xl" } as const
+    for (const size of ["sm", "md", "lg"] as const) {
+      await userEvent.click(canvas.getByTestId(`open-${size}`))
+      const dialog = await body.findByRole("dialog")
+      await expect(dialog.className).toContain(expected[size])
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
+    }
+    await userEvent.click(canvas.getByTestId("open-bottom"))
+    const bottom = await body.findByRole("dialog")
+    await expect(bottom.className).not.toMatch(/max-w-(sm|xl|3xl)/)
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
+  },
+}
+
 export const A11yOptions: Story = {
   render: () => (
     <Sheet>

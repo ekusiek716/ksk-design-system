@@ -971,7 +971,10 @@
 @source inline("sm:justify-end");
 @source inline("sm:left-auto");
 @source inline("sm:max-h-[90dvh]");
+@source inline("sm:max-w-[400px]");
 @source inline("sm:max-w-[480px]");
+@source inline("sm:max-w-[640px]");
+@source inline("sm:max-w-[800px]");
 @source inline("sm:max-w-lg");
 @source inline("sm:max-w-sm");
 @source inline("sm:max-w-xl");

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect } from "storybook/test"
 import { Home2, Home3, People, Setting2, TaskSquare } from "iconsax-reactjs"
 import { SidebarNav, type SidebarNavItem } from "./sidebar-nav"
 
@@ -65,5 +66,33 @@ export const LongLabel: Story = {
       { label: "とても長いメニュー名が入ったときは末尾を省略する", icon: <TaskSquare />, badgeCount: 2 },
       ...items.slice(1),
     ],
+  },
+}
+
+/**
+ * 項目ごとの `render` スロットでフレームワークのリンク部品（next/link 等）に差し替える。
+ * 渡された props（className・aria-current・data-*・children）をそのまま転送すれば、
+ * 通常の `<a>` と同じ見た目・現在地表示になる。ここでは `data-router` を付ける
+ * だけのスタブで代用している。
+ */
+export const RouterLinkRender: Story = {
+  tags: ["interaction"],
+  args: {
+    items: items.map((item) => ({
+      ...item,
+      href: `#${item.tabKey}`,
+      render: (p) => (
+        <a {...p} data-router="1">
+          {p.children}
+        </a>
+      ),
+    })),
+  },
+  play: async ({ canvasElement }) => {
+    const links = canvasElement.querySelectorAll<HTMLElement>("a[data-router]")
+    await expect(links).toHaveLength(4)
+    await expect(links[0].getAttribute("aria-current")).toBe("page")
+    await expect(links[0].getAttribute("data-tab-key")).toBe("home")
+    await expect(links[0].className).toContain("min-h-11")
   },
 }

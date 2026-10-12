@@ -352,6 +352,54 @@ export const OpensAndIsImmediatelyInteractive: Story = {
   },
 }
 
+/**
+ * 幅の段（size）。既定 md は従来どおり 480px。sm / lg / xl は opt-in で、
+ * 狭い画面では段に関係なく左右 24px を残す幅が優先される。
+ * 実幅は viewport に依存するため、play は適用された max-w クラスで固定する。
+ */
+export const Sizes: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="flex flex-wrap gap-3">
+      {(["sm", "md", "lg", "xl"] as const).map((size) => (
+        <Dialog key={size}>
+          <DialogTrigger asChild>
+            <Button variant="secondary" data-testid={`open-${size}`}>{size}</Button>
+          </DialogTrigger>
+          <DialogContent size={size}>
+            <DialogHeader>
+              <DialogTitle>size=&quot;{size}&quot;</DialogTitle>
+              <DialogDescription>幅の段を切り替えるデモです。</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="secondary">閉じる</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+    const expected = {
+      sm: "sm:max-w-[400px]",
+      md: "sm:max-w-[480px]",
+      lg: "sm:max-w-[640px]",
+      xl: "sm:max-w-[800px]",
+    } as const
+    for (const size of ["sm", "md", "lg", "xl"] as const) {
+      await userEvent.click(canvas.getByTestId(`open-${size}`))
+      const dialog = await body.findByRole("dialog")
+      await expect(dialog.className).toContain(expected[size])
+      await userEvent.keyboard("{Escape}")
+      await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
+    }
+  },
+}
+
 /** Esc キーで閉じる。 */
 export const ClosesOnEscape: Story = {
   tags: ["interaction", "!autodocs"],
