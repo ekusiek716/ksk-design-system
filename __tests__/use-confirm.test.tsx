@@ -137,6 +137,56 @@ describe("useConfirm", () => {
     await expect(p).resolves.toBe(false)
   })
 
+  it("閉じるアニメーション中に次の confirm を呼んでも、閉じた後は元の呼び出し元へフォーカスが戻る", async () => {
+    mount(
+      <ConfirmDialogProvider>
+        <button type="button">呼び出し元</button>
+        <Capture />
+      </ConfirmDialogProvider>,
+    )
+    const opener = buttonByText("呼び出し元")
+    opener.focus()
+
+    let first!: Promise<boolean>
+    await act(async () => {
+      first = confirmRef!({ title: "1件目", confirmLabel: "はい" })
+    })
+    // 開いている間はフォーカスがダイアログ内にある（jsdom では自動フォーカスの時機が
+    // 実ブラウザと違うので、キーボード利用者が確認ボタンへ移った状態を明示的に作る）
+    buttonByText("はい").focus()
+    expect(document.activeElement?.closest('[role="alertdialog"]')).not.toBeNull()
+
+    // 確認 → 閉じ始めた（open=false・active は残る）直後に、ダイアログ内にフォーカスが
+    // ある状態のまま次の confirm を呼ぶ
+    let second!: Promise<boolean>
+    await act(async () => {
+      buttonByText("はい").click()
+      second = confirmRef!({ title: "2件目" })
+    })
+    await expect(first).resolves.toBe(true)
+    expect(document.querySelector('[role="alertdialog"]')?.textContent).toContain("2件目")
+
+    await act(async () => {
+      buttonByText("キャンセル").click()
+      // Radix FocusScope の unmount 時フォーカス移動は setTimeout(0) 後に走る
+      await new Promise((r) => setTimeout(r, 20))
+    })
+    await expect(second).resolves.toBe(false)
+    expect(document.activeElement).toBe(opener)
+  })
+
+  it("Provider unmount 後に呼んだ confirm は即 false で resolve する", async () => {
+    mount(
+      <ConfirmDialogProvider>
+        <Capture />
+      </ConfirmDialogProvider>,
+    )
+    const stale = confirmRef!
+    act(() => root!.unmount())
+    root = null
+    await expect(stale({ title: "遷移後" })).resolves.toBe(false)
+  })
+
   it("Provider の外で使うと例外を投げる", () => {
     function Outside() {
       useConfirm()

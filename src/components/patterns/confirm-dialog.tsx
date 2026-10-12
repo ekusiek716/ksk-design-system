@@ -118,6 +118,15 @@ interface ConfirmRequest {
   returnFocus: HTMLElement | null
 }
 
+/**
+ * 閉じた後に戻す先として使えるフォーカス要素か。body / 未取得 / 確認ダイアログの中
+ * （閉じると消える）は使えない。
+ */
+function isUsefulReturnFocus(el: HTMLElement | null): el is HTMLElement {
+  if (!el || el === el.ownerDocument.body) return false
+  return !el.closest('[data-slot="alert-dialog-content"]')
+}
+
 interface ConfirmQueueState {
   /** 表示中（または閉じるアニメーション中）の要求。 */
   active: ConfirmRequest | null
@@ -154,10 +163,17 @@ function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) {
     activeRef.current = state.open ? state.active : null
   }, [state.open, state.active])
   const pendingRef = React.useRef(new Set<ConfirmRequest>())
+  // unmount 後に confirm() が呼ばれた場合（保持していた関数を遷移後に呼ぶ等）、
+  // ダイアログを出せず resolve もされない Promise が残るので、即 false で返すために持つ。
+  const mountedRef = React.useRef(false)
 
   const confirm = React.useCallback<ConfirmFn>(
     (options) =>
       new Promise<boolean>((resolve) => {
+        if (!mountedRef.current) {
+          resolve(false)
+          return
+        }
         const focused = typeof document !== "undefined" ? document.activeElement : null
         const request: ConfirmRequest = {
           id: nextConfirmId++,
@@ -167,11 +183,16 @@ function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) {
         }
         pendingRef.current.add(request)
         setState((prev) => {
-          if (!(prev.active && prev.open)) return { active: request, open: true, queue: prev.queue }
-          // 表示中のダイアログから呼ばれた場合、その時点のフォーカスはダイアログ内にあり
-          // 閉じた後には存在しない。最初の呼び出し元へ戻すため戻り先を引き継ぐ
+          // 直前の要求（表示中 / 閉じるアニメーション中）がある間に呼ばれた場合、その時点の
+          // フォーカスはダイアログ内（閉じた後には消える要素）か body にある。戻り先として
+          // 役に立たないので、直前の要求の戻り先（＝元の呼び出し元）を引き継ぐ。
+          // 閉じ中の要求は下で active を差し替えると key 変更で即 unmount し、自分の
+          // onCloseAutoFocus を走らせないため、ここで引き継がないとフォーカスが迷子になる
           // （同じ値の代入なので StrictMode の二重実行でも結果は変わらない）。
-          request.returnFocus = prev.active.returnFocus
+          if (prev.active && !isUsefulReturnFocus(request.returnFocus)) {
+            request.returnFocus = prev.active.returnFocus
+          }
+          if (!(prev.active && prev.open)) return { active: request, open: true, queue: prev.queue }
           return { ...prev, queue: [...prev.queue, request] }
         })
       }),
@@ -195,8 +216,10 @@ function ConfirmDialogProvider({ children }: ConfirmDialogProviderProps) {
   }, [])
 
   React.useEffect(() => {
+    mountedRef.current = true
     const pending = pendingRef.current
     return () => {
+      mountedRef.current = false
       for (const request of pending) request.resolve(false)
       pending.clear()
     }

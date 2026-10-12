@@ -232,7 +232,10 @@ function ButtonLoadingContent({
         <span
           data-slot="button-spinner"
           aria-hidden="true"
-          className="size-4 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent"
+          // 動きを減らす設定では回転を止める（--Motion-* の一括制御は animate-spin に
+          // 効かないため個別に指定）。止めても上辺だけ欠けた輪で処理中と分かり、
+          // 状態は aria-busy でも伝わる。
+          className="size-4 shrink-0 animate-spin motion-reduce:animate-none rounded-full border-2 border-current border-t-transparent"
         />
         {hasLabel ? <span>{loadingLabel}</span> : null}
       </span>

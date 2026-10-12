@@ -717,6 +717,7 @@
 @source inline("ml-1");
 @source inline("ml-6");
 @source inline("ml-auto");
+@source inline("motion-reduce:animate-none");
 @source inline("motion-reduce:transition-none");
 @source inline("mr-1");
 @source inline("mt-0.5");
