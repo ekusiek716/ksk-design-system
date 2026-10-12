@@ -585,6 +585,22 @@ Claude Code をこのリポで開いて:
 
 DS コンポーネントを最大限活用したモックが `src/prototypes/` に生成され、`http://localhost:5173` のプレビューに即反映されます。スクラッチで UI を組まず、既存コンポーネントを組み合わせて作るのでブレません。
 
+## 🤖 MCP サーバー（AI エージェント向け）
+
+`mcp-server/`（`ksk-ds-mcp`）は DS の正本を MCP で配信する。リポジトリを clone した環境で `npm run mcp:build` → `npm run mcp:start`（stdio）。
+
+| 種別 | 名前 | 内容 |
+|------|------|------|
+| tool | `get_component` / `get_token` / `check_rule` / `search` | コンポーネント・トークン・禁止ルールの照会と横断検索 |
+| tool | `list_contracts` | 配信している正本の名前・説明・URI の一覧 |
+| tool | `get_contract` | 正本を名前で取得。JSON は `path`（例: `meta.counts`）、Markdown は `section`（見出しの部分一致）で部分取得。大きい契約は目次のみ返し、`full: true` で全文 |
+| resource | `ksk-ds://contracts/<name>` | `contracts/*.json`・`tokens.json`（components / rules / tokens / composition / screen-patterns 等） |
+| resource | `ksk-ds://docs/<name>` | `DESIGN.md`・`COMPONENT_LOOKUP.md`（web / native） |
+
+- resources を読めないクライアントでも `get_contract` で同じ内容を取得できる。
+- 配信するのは npm パッケージ（`package.json` の `files`）に同梱されるファイルだけ。新しい `contracts/*.json` を足したら `mcp-server/src/tools/get-contract.ts` の一覧にも追加する（`mcp-server/__tests__/get-contract.test.ts` が登録漏れと同梱漏れを検出する）。
+- テストは MCP SDK のクライアントを使うため、先に `npm ci --prefix mcp-server` が要る。
+
 ## 📖 ドキュメント
 
 - **ライブ Storybook**: https://ksk-design-system.vercel.app — 全コンポーネントのバリアント・テーマ切り替えを操作可能
