@@ -17,6 +17,8 @@ import { storybookTest } from "@storybook/addon-vitest/vitest-plugin"
  * @storybook/addon-vitest が自動適用する（Storybook 10.3+）。
  *
  * 実行: `npm run test:interaction`
+ * WebKit（Safari 系）: `npm run test:interaction:webkit`（環境変数 KSK_BROWSER=webkit で切替。
+ * 初回のみ `npx playwright install webkit`）。CI では専用の webkit ジョブで並列実行する。
  */
 export default defineConfig({
   resolve: {
@@ -46,7 +48,7 @@ export default defineConfig({
       enabled: true,
       headless: true,
       provider: playwright(),
-      instances: [{ browser: "chromium" }],
+      instances: [{ browser: (process.env.KSK_BROWSER ?? "chromium") as "chromium" | "webkit" }],
     },
   },
 })
