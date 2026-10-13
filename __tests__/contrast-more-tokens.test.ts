@@ -14,7 +14,7 @@ const more = tokens.colors.semanticContrastMore as Record<
   { border: { control: string }; surface: Record<string, string> }
 >
 
-const NAMES = ["Border-Control", "Surface-Switch-Off", "Surface-Switch-Off-Hover"] as const
+const NAMES = ["Border-Control", "Surface-Switch-Off", "Surface-Switch-Off-Hover", "Surface-Slider-Track"] as const
 
 /** `selector { ... }` の最初の本体を取り出し、対象 3 変数だけを Map にする。 */
 function declarations(body: string) {
@@ -38,19 +38,20 @@ function expected(mode: "light" | "dark") {
     ["Border-Control", more[mode].border.control],
     ["Surface-Switch-Off", more[mode].surface["switch-off"]],
     ["Surface-Switch-Off-Hover", more[mode].surface["switch-off-hover"]],
+    ["Surface-Slider-Track", more[mode].surface["slider-track"]],
   ])
 }
 
 describe("既定値は据え置き（issue #636）", () => {
-  it("light / dark とも Border-Control = Border-Medium-Emphasis、Switch-Off = Quaternary", () => {
+  it(":root / .dark では新ロールを宣言しない（部品側のフォールバックが従来の変数を解決する）", () => {
+    // :root で宣言すると :root で解決済みの値を継承し、要素単位の --Border-Medium-Emphasis 等の
+    // 上書きに追従しなくなる。高コントラスト時だけ宣言するのが契約。
     const lightRoot = css.match(/:root\s*\{([\s\S]*?)\n\}\n\n\/\* ─── Dark Mode ─── \*\//)?.[1] ?? ""
     const darkRoot = css.match(/\n\.dark\s*\{([\s\S]*?)\n\}/)?.[1] ?? ""
-    for (const body of [lightRoot, darkRoot]) {
-      const d = declarations(body)
-      expect(d.get("Border-Control")).toBe("var(--Border-Medium-Emphasis)")
-      expect(d.get("Surface-Switch-Off")).toBe("var(--Surface-Quaternary)")
-      expect(d.get("Surface-Switch-Off-Hover")).toBe("var(--Object-Disable)")
-    }
+    expect(lightRoot).not.toBe("")
+    expect(darkRoot).not.toBe("")
+    expect([...declarations(lightRoot).keys()]).toEqual([])
+    expect([...declarations(darkRoot).keys()]).toEqual([])
   })
 })
 
@@ -77,6 +78,7 @@ describe("prefers-contrast: more / data-contrast=\"more\" の値", () => {
 })
 
 describe("部品の参照", () => {
+  const FALLBACK = "var(--Border-Control,var(--Border-Medium-Emphasis))"
   const controlFiles = [
     "ui/input",
     "ui/textarea",
@@ -89,6 +91,7 @@ describe("部品の参照", () => {
     "ui/time-picker",
     "ui/number-input",
     "ui/checkbox-card",
+    "ui/star-rating",
     "patterns/search-bar",
     "patterns/tag-input",
     "patterns/chip",
@@ -98,12 +101,25 @@ describe("部品の参照", () => {
     "patterns/commerce/quantity-selector",
   ]
 
-  it.each(controlFiles)("%s の操作部品の枠は --Border-Control を参照し、border に --Border-Medium-Emphasis を直接使わない", (name) => {
+  it.each(controlFiles)("%s の操作部品の枠は --Border-Control をフォールバック付きで参照する", (name) => {
     const source = readFileSync(`src/components/${name}.tsx`, "utf8")
-    expect(source).toContain("var(--Border-Control)")
+    expect(source).toContain(FALLBACK)
+    // フォールバック無し（未宣言なら無効になる）の参照は禁止
+    expect(source).not.toContain("var(--Border-Control)")
     // 区切り線（border-t）は非操作要素なので対象外
     const withoutDivider = source.replace("border-t border-[var(--Border-Medium-Emphasis)]", "")
     expect(withoutDivider).not.toMatch(/border[a-z-]*-\[var\(--Border-Medium-Emphasis\)\]/)
+  })
+
+  it("StarRating は入力用（radio）の選択前の星だけ Control、表示専用は Medium のまま", () => {
+    const source = readFileSync("src/components/ui/star-rating.tsx", "utf8")
+    expect(source).toContain(`text-[${FALLBACK}]`)
+    expect(source).toContain("text-[var(--Border-Medium-Emphasis)]")
+  })
+
+  it("ChartControls の比較トグルの丸印（オフ）も Control", () => {
+    const source = readFileSync("src/components/patterns/admin/chart-controls.tsx", "utf8")
+    expect(source).toContain(`bg-[${FALLBACK}]`)
   })
 
   it("非操作要素（CheckboxCard の展開部の区切り線）は --Border-Medium-Emphasis のまま", () => {
@@ -111,10 +127,15 @@ describe("部品の参照", () => {
     expect(source).toContain("border-t border-[var(--Border-Medium-Emphasis)]")
   })
 
-  it("switch の off 地は --Surface-Switch-Off / -Hover を参照する", () => {
+  it("switch の off 地は --Surface-Switch-Off / -Hover をフォールバック付きで参照する", () => {
     const source = readFileSync("src/components/ui/switch.tsx", "utf8")
-    expect(source).toContain("data-[state=unchecked]:bg-[var(--Surface-Switch-Off)]")
-    expect(source).toContain("hover:data-[state=unchecked]:bg-[var(--Surface-Switch-Off-Hover)]")
-    expect(source).not.toContain("var(--Surface-Quaternary)")
+    expect(source).toContain("data-[state=unchecked]:bg-[var(--Surface-Switch-Off,var(--Surface-Quaternary))]")
+    expect(source).toContain("hover:data-[state=unchecked]:bg-[var(--Surface-Switch-Off-Hover,var(--Object-Disable))]")
+    expect(source).not.toContain("var(--Surface-Switch-Off)")
+  })
+
+  it("slider の溝は --Surface-Slider-Track をフォールバック付きで参照する", () => {
+    const source = readFileSync("src/components/ui/slider.tsx", "utf8")
+    expect(source).toContain("bg-[var(--Surface-Slider-Track,var(--Surface-Tertiary))]")
   })
 })

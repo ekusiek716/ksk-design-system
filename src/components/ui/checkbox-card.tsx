@@ -92,14 +92,14 @@ function CheckboxCardItem({
       aria-labelledby={labelledby}
       aria-describedby={describedby}
       className={cn(
-        "group flex cursor-pointer gap-2 rounded-lg border-2 border-[var(--Border-Control)] bg-[var(--Surface-Primary)] p-4 text-left focus-visible:outline-hidden transition-colors",
+        "group flex cursor-pointer gap-2 rounded-lg border-2 border-[var(--Border-Control,var(--Border-Medium-Emphasis))] bg-[var(--Surface-Primary)] p-4 text-left focus-visible:outline-hidden transition-colors",
         expandedContent ? "flex-col items-stretch" : "items-center",
         "hover:border-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)]",
         "data-[state=checked]:border-[var(--Object-Accent-Primary)] data-[state=checked]:bg-[var(--Surface-Primary)]",
         "focus-visible:border-[var(--Object-Accent-Primary)] focus-visible:ring-2 focus-visible:ring-[var(--Object-Accent-Primary)]/20",
         "aria-invalid:border-[var(--Border-Caution)]",
-        "disabled:cursor-not-allowed disabled:border-[var(--Border-Control)] disabled:bg-[var(--Surface-Secondary)]",
-        "disabled:hover:border-[var(--Border-Control)] disabled:hover:bg-[var(--Surface-Secondary)]",
+        "disabled:cursor-not-allowed disabled:border-[var(--Border-Control,var(--Border-Medium-Emphasis))] disabled:bg-[var(--Surface-Secondary)]",
+        "disabled:hover:border-[var(--Border-Control,var(--Border-Medium-Emphasis))] disabled:hover:bg-[var(--Surface-Secondary)]",
         className
       )}
       {...props}
@@ -109,9 +109,9 @@ function CheckboxCardItem({
         <span
           data-slot="checkbox-card-icon"
           className={cn(
-            "flex size-5 shrink-0 items-center justify-center rounded-[5px] border-2 border-[var(--Border-Control)] bg-[var(--Surface-Primary)] transition-colors",
+            "flex size-5 shrink-0 items-center justify-center rounded-[5px] border-2 border-[var(--Border-Control,var(--Border-Medium-Emphasis))] bg-[var(--Surface-Primary)] transition-colors",
             "group-data-[state=checked]:border-transparent group-data-[state=checked]:bg-transparent",
-            "group-data-[disabled]:border-[var(--Border-Control)] group-data-[disabled]:bg-[var(--Surface-Secondary)]"
+            "group-data-[disabled]:border-[var(--Border-Control,var(--Border-Medium-Emphasis))] group-data-[disabled]:bg-[var(--Surface-Secondary)]"
           )}
         >
           <CheckboxPrimitive.Indicator className="flex items-center justify-center">

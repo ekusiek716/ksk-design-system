@@ -16,10 +16,6 @@
   --Surface-Secondary:             var(--Primitive-Gray-50);
   --Surface-Tertiary:              var(--Primitive-Gray-100);
   --Surface-Quaternary:            var(--Primitive-Gray-200);
-  /* スイッチ（オフ）の地専用（issue #636）。既定は Quaternary / Object-Disable と同じ値。
-     prefers-contrast: more / data-contrast="more" のときだけ 3:1 以上へ切り替わる（末尾の節）。 */
-  --Surface-Switch-Off:            var(--Surface-Quaternary);
-  --Surface-Switch-Off-Hover:      var(--Object-Disable);
   --Surface-Disable:               var(--Primitive-Gray-100);
   --Surface-Inverse:               var(--Primitive-Gray-900);
   --Surface-Accent-Primary:        var(--Primitive-Brand-500);
@@ -95,10 +91,6 @@
   --Border-High-Emphasis:   var(--Primitive-Gray-700);
   --Border-Medium-Emphasis: var(--Primitive-Gray-300);
   --Border-Low-Emphasis:    var(--Primitive-Gray-200);
-  /* 入力欄・チェックボックス・ラジオの枠専用（issue #636）。既定は Medium と同じ値で、
-     Medium を差し替える消費側にも追従する。カード罫線などの面の区切りは Medium のまま。
-     prefers-contrast: more / data-contrast="more" のときだけ 3:1 以上へ切り替わる（末尾の節）。 */
-  --Border-Control:         var(--Border-Medium-Emphasis);
   --Border-Accent-Primary:  var(--Primitive-Brand-500);
   --Border-Caution:         var(--Primitive-Red-500);
   --Border-Success:         var(--Primitive-Green-500);
@@ -170,8 +162,6 @@
   --Surface-Secondary:             var(--Primitive-Gray-800);
   --Surface-Tertiary:              var(--Primitive-Gray-700);
   --Surface-Quaternary:            var(--Primitive-Gray-600);
-  --Surface-Switch-Off:            var(--Surface-Quaternary);
-  --Surface-Switch-Off-Hover:      var(--Object-Disable);
   --Surface-Disable:               var(--Primitive-Gray-800);
   --Surface-Inverse:               var(--Primitive-White);
   --Surface-Accent-Primary:        var(--Primitive-Brand-500);
@@ -228,7 +218,6 @@
   --Border-High-Emphasis:   var(--Primitive-White-Alpha-500);
   --Border-Medium-Emphasis: var(--Primitive-White-Alpha-300);
   --Border-Low-Emphasis:    var(--Primitive-White-Alpha-200);
-  --Border-Control:         var(--Border-Medium-Emphasis);
   --Border-Accent-Primary:  var(--Primitive-Brand-400);
   --Border-Caution:         var(--Primitive-Red-400);
   --Border-Success:         var(--Primitive-Green-400);
@@ -280,16 +269,21 @@
 }
 
 /* ─── High Contrast（コントラストを上げる）───
-   入力欄・チェックボックス・ラジオの枠（--Border-Control）とスイッチ（オフ）の地
-   （--Surface-Switch-Off）は、既定では面の区切りと同じ淡い色で WCAG 1.4.11 の 3:1 に
-   届かない（issue #636。既定の見た目はデザイン判断で据え置き）。コントラストが必要な
-   利用者には次のどちらかで 3:1 以上の色を出す。
+   入力・選択の操作部品の枠（--Border-Control）、スイッチ（オフ）の地（--Surface-Switch-Off*）、
+   スライダーの溝（--Surface-Slider-Track）は、既定では面の区切りと同じ淡い色で WCAG 1.4.11 の
+   3:1 に届かない（issue #636。既定の見た目はデザイン判断で据え置き）。
+   これらの新ロールは :root / .dark では宣言しない。部品側が
+   var(--Border-Control, var(--Border-Medium-Emphasis)) のようにフォールバック付きで参照するため、
+   未宣言のときは従来と同じ変数をその要素で解決する。消費側が要素単位（ラッパー div 等）で
+   --Border-Medium-Emphasis / --Surface-Quaternary / --Object-Disable / --Surface-Tertiary を
+   上書きしても従来どおり追従する（:root で宣言すると :root で解決済みの値を継承してしまい追従しない）。
+   コントラストが必要な利用者には次のどちらかで宣言して 3:1 以上の色を出す。
    - OS の「コントラストを上げる」（@media (prefers-contrast: more)）
    - 消費側が root（または任意の祖先）へ付ける data-contrast="more"（常時 opt-in）
    値は Surface-Primary（light=白 / dark=Gray-900）に対する実測:
-     light 枠 / スイッチ: Gray-500 #71717A = 4.83:1
+     light 枠 / スイッチ / 溝: Gray-500 #71717A = 4.83:1
      dark  枠: White-Alpha-500 を Gray-900 へ合成した #6B6B6D = 3.33:1
-     dark  スイッチ: Gray-500 #71717A = 3.67:1
+     dark  スイッチ / 溝: Gray-500 #71717A = 3.67:1
    scripts/check-contrast.mjs が tokens.json の colors.semanticContrastMore を例外なしで検査し、
    __tests__/contrast-more-tokens.test.ts が下の値と tokens.json の一致を固定する。
    .dark ブロックより後ろに置き、同じ詳細度でも dark 側が勝つ順序にしている。 */
@@ -298,11 +292,13 @@
     --Border-Control:           var(--Primitive-Gray-500);
     --Surface-Switch-Off:       var(--Primitive-Gray-500);
     --Surface-Switch-Off-Hover: var(--Primitive-Gray-600);
+    --Surface-Slider-Track:     var(--Primitive-Gray-500);
   }
   .dark {
     --Border-Control:           var(--Primitive-White-Alpha-500);
     --Surface-Switch-Off:       var(--Primitive-Gray-500);
     --Surface-Switch-Off-Hover: var(--Primitive-Gray-400);
+    --Surface-Slider-Track:     var(--Primitive-Gray-500);
   }
 }
 
@@ -310,6 +306,7 @@
   --Border-Control:           var(--Primitive-Gray-500);
   --Surface-Switch-Off:       var(--Primitive-Gray-500);
   --Surface-Switch-Off-Hover: var(--Primitive-Gray-600);
+  --Surface-Slider-Track:     var(--Primitive-Gray-500);
 }
 
 .dark[data-contrast="more"],
@@ -318,6 +315,7 @@
   --Border-Control:           var(--Primitive-White-Alpha-500);
   --Surface-Switch-Off:       var(--Primitive-Gray-500);
   --Surface-Switch-Off-Hover: var(--Primitive-Gray-400);
+  --Surface-Slider-Track:     var(--Primitive-Gray-500);
 }
 
 /* ─── Media Legibility Utilities ─── */

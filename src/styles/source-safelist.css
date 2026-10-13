@@ -126,6 +126,7 @@
 @source inline("before:size-full");
 @source inline("before:top-1/2");
 @source inline("bg-[color-mix(in_srgb,var(--Text-on-Inverse)_30%,transparent)]");
+@source inline("bg-[var(--Border-Control,var(--Border-Medium-Emphasis))]");
 @source inline("bg-[var(--Border-Low-Emphasis)]");
 @source inline("bg-[var(--Border-Medium-Emphasis)]");
 @source inline("bg-[var(--Brand-Apple-Surface)]");
@@ -194,6 +195,7 @@
 @source inline("bg-[var(--Surface-Quaternary)]");
 @source inline("bg-[var(--Surface-Secondary)]");
 @source inline("bg-[var(--Surface-Secondary)]!");
+@source inline("bg-[var(--Surface-Slider-Track,var(--Surface-Tertiary))]");
 @source inline("bg-[var(--Surface-Success)]");
 @source inline("bg-[var(--Surface-Success-Subtle)]");
 @source inline("bg-[var(--Surface-Tertiary)]");
@@ -222,7 +224,7 @@
 @source inline("border-[rgba(255,255,255,0.25)]");
 @source inline("border-[var(--Border-Accent-Primary)]");
 @source inline("border-[var(--Border-Caution)]");
-@source inline("border-[var(--Border-Control)]");
+@source inline("border-[var(--Border-Control,var(--Border-Medium-Emphasis))]");
 @source inline("border-[var(--Border-High-Emphasis)]");
 @source inline("border-[var(--Border-Info)]");
 @source inline("border-[var(--Border-Low-Emphasis)]");
@@ -359,21 +361,21 @@
 @source inline("data-[state=open]:slide-in-from-bottom");
 @source inline("data-[state=open]:slide-in-from-top");
 @source inline("data-[state=open]:zoom-in-95");
-@source inline("data-[state=unchecked]:bg-[var(--Surface-Switch-Off)]");
+@source inline("data-[state=unchecked]:bg-[var(--Surface-Switch-Off,var(--Surface-Quaternary))]");
 @source inline("data-[state=unchecked]:invisible");
 @source inline("data-[state=unchecked]:translate-x-0");
 @source inline("data-[variant=destructive]:focus:bg-[var(--Surface-Caution)]");
 @source inline("data-[variant=destructive]:text-[var(--Text-Caution)]");
 @source inline("disabled:bg-[var(--Primitive-White-Alpha-300)]");
 @source inline("disabled:bg-[var(--Surface-Secondary)]");
-@source inline("disabled:border-[var(--Border-Control)]");
+@source inline("disabled:border-[var(--Border-Control,var(--Border-Medium-Emphasis))]");
 @source inline("disabled:border-[var(--Primitive-White-Alpha-200)]");
 @source inline("disabled:cursor-not-allowed");
 @source inline("disabled:hover:bg-[var(--Surface-Secondary)]");
 @source inline("disabled:hover:bg-transparent");
-@source inline("disabled:hover:border-[var(--Border-Control)]");
+@source inline("disabled:hover:border-[var(--Border-Control,var(--Border-Medium-Emphasis))]");
 @source inline("disabled:hover:data-[state=checked]:bg-[var(--Brand-Primary)]");
-@source inline("disabled:hover:data-[state=unchecked]:bg-[var(--Surface-Switch-Off)]");
+@source inline("disabled:hover:data-[state=unchecked]:bg-[var(--Surface-Switch-Off,var(--Surface-Quaternary))]");
 @source inline("disabled:hover:text-[var(--Object-Medium-Emphasis)]");
 @source inline("disabled:opacity-0");
 @source inline("disabled:opacity-40");
@@ -463,7 +465,7 @@
 @source inline("grid-cols-[minmax(0,1fr)_8rem]");
 @source inline("grid-cols-[repeat(auto-fit,minmax(8rem,1fr))]");
 @source inline("group-data-[disabled]:bg-[var(--Surface-Secondary)]");
-@source inline("group-data-[disabled]:border-[var(--Border-Control)]");
+@source inline("group-data-[disabled]:border-[var(--Border-Control,var(--Border-Medium-Emphasis))]");
 @source inline("group-data-[disabled]:cursor-not-allowed");
 @source inline("group-data-[disabled]:opacity-50");
 @source inline("group-data-[disabled]:text-[var(--Text-Low-Emphasis)]");
@@ -563,7 +565,7 @@
 @source inline("hover:brightness-[0.98]");
 @source inline("hover:brightness-[1.06]");
 @source inline("hover:data-[state=checked]:bg-[var(--Hover-Primary-Button)]");
-@source inline("hover:data-[state=unchecked]:bg-[var(--Surface-Switch-Off-Hover)]");
+@source inline("hover:data-[state=unchecked]:bg-[var(--Surface-Switch-Off-Hover,var(--Object-Disable))]");
 @source inline("hover:no-underline");
 @source inline("hover:opacity-70");
 @source inline("hover:opacity-80");
@@ -1026,6 +1028,7 @@
 @source inline("text-5xl");
 @source inline("text-7xl");
 @source inline("text-8xl");
+@source inline("text-[var(--Border-Control,var(--Border-Medium-Emphasis))]");
 @source inline("text-[var(--Border-Medium-Emphasis)]");
 @source inline("text-[var(--Brand-Primary)]");
 @source inline("text-[var(--Brand-on-Apple)]");

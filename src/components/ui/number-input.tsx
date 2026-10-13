@@ -66,12 +66,12 @@ function NumberInput({
   const s = SIZE[size]
 
   const btnBase = cn(
-    "flex items-center justify-center rounded-full border border-[var(--Border-Control)] shrink-0 transition-colors select-none",
+    "flex items-center justify-center rounded-full border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] shrink-0 transition-colors select-none",
     s.btn,
-    "border-[var(--Border-Control)] text-[var(--Object-Medium-Emphasis)]",
+    "border-[var(--Border-Control,var(--Border-Medium-Emphasis))] text-[var(--Object-Medium-Emphasis)]",
     "hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)] hover:bg-[var(--Brand-Ultra-Light)]",
     "active:scale-95",
-    "disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[var(--Border-Control)] disabled:hover:text-[var(--Object-Medium-Emphasis)] disabled:hover:bg-transparent"
+    "disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[var(--Border-Control,var(--Border-Medium-Emphasis))] disabled:hover:text-[var(--Object-Medium-Emphasis)] disabled:hover:bg-transparent"
   )
 
   return (

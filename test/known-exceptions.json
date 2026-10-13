@@ -71,6 +71,18 @@
       "reason": "dark のスイッチ（オフ）の地 Surface-Quaternary（Gray-600）と Gray-900 の差が 2.29:1。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（PR #645）。",
       "issue": "#636",
       "reviewBy": "2027-03-31"
+    },
+    {
+      "pair": "light:slider-track",
+      "reason": "スライダーの溝 Surface-Tertiary（Gray-100）と白の差が 1.10:1。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（PR #645）。",
+      "issue": "#636",
+      "reviewBy": "2027-03-31"
+    },
+    {
+      "pair": "dark:slider-track",
+      "reason": "dark のスライダーの溝 Surface-Tertiary（Gray-700）と Gray-900 の差が 1.70:1。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（PR #645）。",
+      "issue": "#636",
+      "reviewBy": "2027-03-31"
     }
   ],
   "visual": []

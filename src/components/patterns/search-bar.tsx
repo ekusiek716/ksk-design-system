@@ -79,7 +79,7 @@ function SearchBar({
       data-slot="input"
       enterKeyHint="search"
       className={cn(
-        "flex h-12 w-full rounded-full border border-[var(--Border-Control)] bg-[var(--Surface-Primary)] pl-10 pr-4 typo-body-md text-[var(--Text-High-Emphasis)]",
+        "flex h-12 w-full rounded-full border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] bg-[var(--Surface-Primary)] pl-10 pr-4 typo-body-md text-[var(--Text-High-Emphasis)]",
         "placeholder:text-[var(--Text-Low-Emphasis)]",
         "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:border-[var(--Border-Accent-Primary)]",
         "disabled:cursor-not-allowed disabled:opacity-50"

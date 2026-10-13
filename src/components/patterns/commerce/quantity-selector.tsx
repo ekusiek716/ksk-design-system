@@ -74,11 +74,11 @@ function QuantitySelector({ className, value, min = 1, max = 99, onChange, disab
   /* mdサイズ: 商品詳細ページで使用する丸ボタン型 */
   return (
     <div data-slot="quantity-selector" className={cn("inline-flex items-center gap-3", className)} role="group" aria-label={groupLabel} {...props}>
-      <button type="button" className={cn("flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--Border-Control)] bg-[var(--Surface-Primary)] transition-colors", (canDec || isTrash) ? "text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)]" : "text-[var(--Object-Disable)]")} onClick={handleDec} disabled={!(canDec || (isTrash && !disabled))} aria-label={isTrash ? deleteLabel : decreaseLabel}>
+      <button type="button" className={cn("flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] bg-[var(--Surface-Primary)] transition-colors", (canDec || isTrash) ? "text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)]" : "text-[var(--Object-Disable)]")} onClick={handleDec} disabled={!(canDec || (isTrash && !disabled))} aria-label={isTrash ? deleteLabel : decreaseLabel}>
         {isTrash ? <TrashIcon size={18} /> : <MinusIcon size={18} />}
       </button>
-      <span className={cn("flex h-10 w-12 shrink-0 items-center justify-center rounded-lg border border-[var(--Border-Control)] typo-label-lg select-none", disabled ? "bg-[var(--Surface-Tertiary)] text-[var(--Text-Disable)]" : "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)]")} aria-live="polite">{value}</span>
-      <button type="button" className={cn("flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--Border-Control)] bg-[var(--Surface-Primary)] transition-colors", canInc ? "text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)]" : "text-[var(--Object-Disable)]")} onClick={handleInc} disabled={!canInc} aria-label={increaseLabel}>
+      <span className={cn("flex h-10 w-12 shrink-0 items-center justify-center rounded-lg border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] typo-label-lg select-none", disabled ? "bg-[var(--Surface-Tertiary)] text-[var(--Text-Disable)]" : "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)]")} aria-live="polite">{value}</span>
+      <button type="button" className={cn("flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] bg-[var(--Surface-Primary)] transition-colors", canInc ? "text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)]" : "text-[var(--Object-Disable)]")} onClick={handleInc} disabled={!canInc} aria-label={increaseLabel}>
         <PlusIcon size={18} />
       </button>
     </div>

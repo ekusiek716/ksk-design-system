@@ -12,7 +12,7 @@ import { usePortalContainer } from "./portal-container"
  * 既定値は従来の固定クラスと同値（issue #364）。
  */
 const selectTriggerVariants = cva(
-  "flex w-full items-center justify-between rounded-[var(--Field-Radius)] border border-[var(--Border-Control)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-[var(--Border-Caution)] aria-invalid:ring-[var(--Caution-Base)]/20 [&>span]:line-clamp-1",
+  "flex w-full items-center justify-between rounded-[var(--Field-Radius)] border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-[var(--Border-Caution)] aria-invalid:ring-[var(--Caution-Base)]/20 [&>span]:line-clamp-1",
   {
     variants: {
       size: {

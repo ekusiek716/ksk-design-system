@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
+import { Slider } from "@/components/ui/slider"
+import { StarRating } from "@/components/ui/star-rating"
 import { NumberInput } from "@/components/ui/number-input"
 import { CheckboxCardItem } from "@/components/ui/checkbox-card"
 import { SearchBar } from "@/components/patterns/search-bar"
@@ -79,10 +81,14 @@ function mount() {
         <SearchBar aria-label="検索" />
         <TagInput value={["a"]} />
         <CheckboxCardItem value="x" label="カード" />
+        <Slider defaultValue={[50]} aria-label="スライダー" />
+        <StarRating value={1} onChange={() => {}} />
         {/* 比較用: 面の区切りに使う Medium は入力系の切り替えに巻き込まれない */}
         <div data-testid="divider" className="border border-[var(--Border-Medium-Emphasis)]" />
         <div data-testid="medium-probe" style={{ borderTop: "1px solid var(--Border-Medium-Emphasis)" }} />
         <div data-testid="quaternary-probe" style={{ backgroundColor: "var(--Surface-Quaternary)" }} />
+        <div data-testid="tertiary-probe" style={{ backgroundColor: "var(--Surface-Tertiary)" }} />
+        <div data-testid="medium-color-probe" style={{ color: "var(--Border-Medium-Emphasis)" }} />
       </div>,
     )
   })
@@ -100,6 +106,11 @@ function colors() {
     tagInput: border(q('[data-slot="tag-input"]')),
     checkboxCard: border(q('[data-slot="checkbox-card-item"]')),
     checkboxCardIcon: border(q('[data-slot="checkbox-card-icon"]')),
+    sliderTrack: getComputedStyle(q('[data-slot="slider-track"]')).backgroundColor,
+    tertiaryProbe: getComputedStyle(q('[data-testid="tertiary-probe"]')).backgroundColor,
+    // 入力用 StarRating の選択前の星（2 つ目以降は未選択）
+    starUnselected: getComputedStyle(q('[data-slot="star-rating"] [role="radio"]:last-of-type')).color,
+    mediumColorProbe: getComputedStyle(q('[data-testid="medium-color-probe"]')).color,
     switchOff: getComputedStyle(q('[data-slot="switch"]')).backgroundColor,
     divider: border(q('[data-testid="divider"]')),
     mediumProbe: border(q('[data-testid="medium-probe"]')),
@@ -116,6 +127,8 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
     expect(c.checkbox).toBe(c.mediumProbe)
     expect(c.radio).toBe(c.mediumProbe)
     expect(c.switchOff).toBe(c.quaternaryProbe)
+    expect(c.sliderTrack).toBe(c.tertiaryProbe)
+    expect(c.starUnselected).toBe(c.mediumColorProbe)
     for (const key of EXTRA_CONTROLS) expect(c[key]).toBe(c.mediumProbe)
     expect(c.input).not.toBe(GRAY_500)
   })
@@ -130,6 +143,8 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
     expect(after.checkbox).toBe(GRAY_500)
     expect(after.radio).toBe(GRAY_500)
     expect(after.switchOff).toBe(GRAY_500)
+    expect(after.sliderTrack).toBe(GRAY_500)
+    expect(after.starUnselected).toBe(GRAY_500)
     for (const key of EXTRA_CONTROLS) expect(after[key]).toBe(GRAY_500)
     expect(after.divider).toBe(before.divider)
     expect(after.mediumProbe).toBe(before.mediumProbe)
@@ -149,6 +164,8 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
     expect(more.checkbox).toBe(WHITE_ALPHA_500)
     expect(more.radio).toBe(WHITE_ALPHA_500)
     expect(more.switchOff).toBe(GRAY_500)
+    expect(more.sliderTrack).toBe(GRAY_500)
+    expect(more.starUnselected).toBe(WHITE_ALPHA_500)
     for (const key of EXTRA_CONTROLS) expect(more[key]).toBe(WHITE_ALPHA_500)
     expect(more.mediumProbe).toBe(base.mediumProbe)
   })
@@ -167,5 +184,43 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
     expect(dark.checkbox).toBe(WHITE_ALPHA_500)
     expect(dark.radio).toBe(WHITE_ALPHA_500)
     expect(dark.switchOff).toBe(GRAY_500)
+  })
+
+  it("設定なしでは、要素単位の --Border-Medium-Emphasis 等の上書きに従来どおり追従する（main と同じ結果）", async () => {
+    await setContrast("no-preference")
+    noTransition = document.createElement("style")
+    noTransition.textContent = "*, *::before, *::after { transition: none !important; }"
+    document.head.appendChild(noTransition)
+    container = document.createElement("div")
+    document.body.appendChild(container)
+    root = createRoot(container)
+    act(() => {
+      root!.render(
+        <div
+          data-testid="scope"
+          style={
+            {
+              "--Border-Medium-Emphasis": "rgb(1, 2, 3)",
+              "--Surface-Quaternary": "rgb(4, 5, 6)",
+              "--Object-Disable": "rgb(7, 8, 9)",
+              "--Surface-Tertiary": "rgb(10, 11, 12)",
+            } as React.CSSProperties
+          }
+        >
+          <Input aria-label="入力欄" />
+          <Switch aria-label="スイッチ" />
+          <Slider defaultValue={[50]} aria-label="スライダー" />
+        </div>,
+      )
+    })
+    const q = (selector: string) => container!.querySelector(selector) as HTMLElement
+    expect(getComputedStyle(q("input")).borderTopColor).toBe("rgb(1, 2, 3)")
+    expect(getComputedStyle(q('[data-slot="switch"]')).backgroundColor).toBe("rgb(4, 5, 6)")
+    expect(getComputedStyle(q('[data-slot="slider-track"]')).backgroundColor).toBe("rgb(10, 11, 12)")
+
+    // 高コントラスト設定ありのときは、上書きより Control の値が勝つ
+    await setContrast("more")
+    expect(getComputedStyle(q("input")).borderTopColor).toBe(GRAY_500)
+    expect(getComputedStyle(q('[data-slot="switch"]')).backgroundColor).toBe(GRAY_500)
   })
 })

@@ -47,10 +47,10 @@ function ChipGroup<T extends string>({
           onClick={() => onChange(opt.value)}
           aria-pressed={opt.value === value}
           className={cn(
-            "px-3 py-1 rounded-full typo-label-xs border border-[var(--Border-Control)] transition-colors whitespace-nowrap shrink-0",
+            "px-3 py-1 rounded-full typo-label-xs border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] transition-colors whitespace-nowrap shrink-0",
             opt.value === value
               ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] border-[var(--Brand-Primary)]"
-              : "border-[var(--Border-Control)] text-[var(--Text-Medium-Emphasis)] bg-[var(--Surface-Primary)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"
+              : "border-[var(--Border-Control,var(--Border-Medium-Emphasis))] text-[var(--Text-Medium-Emphasis)] bg-[var(--Surface-Primary)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"
           )}
         >
           {opt.label}
@@ -115,15 +115,15 @@ function ChartControls({
             onClick={() => onComparisonChange(!showComparison)}
             aria-pressed={showComparison}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[var(--Border-Control)] typo-label-xs transition-colors",
+              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] typo-label-xs transition-colors",
               showComparison
                 ? "bg-[var(--Brand-Ultra-Light)] border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]"
-                : "border-[var(--Border-Control)] text-[var(--Text-Medium-Emphasis)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"
+                : "border-[var(--Border-Control,var(--Border-Medium-Emphasis))] text-[var(--Text-Medium-Emphasis)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"
             )}
           >
             <span className={cn(
               "w-2 h-2 rounded-full",
-              showComparison ? "bg-[var(--Brand-Primary)]" : "bg-[var(--Border-Medium-Emphasis)]"
+              showComparison ? "bg-[var(--Brand-Primary)]" : "bg-[var(--Border-Control,var(--Border-Medium-Emphasis))]"
             )} />
             前期比を表示
           </button>

@@ -39,18 +39,6 @@
     ],
     "skipped": [
       {
-        "key": "surface.switch-off",
-        "mode": "semantic",
-        "value": "var(--Surface-Quaternary)",
-        "reason": "other"
-      },
-      {
-        "key": "surface.switch-off-hover",
-        "mode": "semantic",
-        "value": "var(--Object-Disable)",
-        "reason": "other"
-      },
-      {
         "key": "surface.caution-subtle",
         "mode": "semantic",
         "value": "rgba(239, 68, 68, 0.15)",
@@ -117,12 +105,6 @@
         "reason": "unresolvable-var"
       },
       {
-        "key": "border.control",
-        "mode": "semantic",
-        "value": "var(--Border-Medium-Emphasis)",
-        "reason": "other"
-      },
-      {
         "key": "overlay.dark",
         "mode": "semantic",
         "value": "var(--Primitive-Gray-Alpha-800)",
@@ -139,18 +121,6 @@
         "mode": "semantic",
         "value": "var(--Primitive-Gray-Alpha-200)",
         "reason": "unresolvable-var"
-      },
-      {
-        "key": "surface.switch-off",
-        "mode": "semanticDark",
-        "value": "var(--Surface-Quaternary)",
-        "reason": "other"
-      },
-      {
-        "key": "surface.switch-off-hover",
-        "mode": "semanticDark",
-        "value": "var(--Object-Disable)",
-        "reason": "other"
       },
       {
         "key": "surface.caution-subtle",
@@ -277,12 +247,6 @@
         "mode": "semanticDark",
         "value": "var(--Primitive-White-Alpha-200)",
         "reason": "unresolvable-var"
-      },
-      {
-        "key": "border.control",
-        "mode": "semanticDark",
-        "value": "var(--Border-Medium-Emphasis)",
-        "reason": "other"
       },
       {
         "key": "hover.tertiary-button",
