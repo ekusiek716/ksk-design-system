@@ -58,7 +58,7 @@ tonal elevation（M3 の色による高度表現）は不採用で、**影＋1px
 
 | KSK | 値 | M3 shape 相当 |
 |---|---|---|
-| `--Radius-Surface`（Card/Input/Popover） | 8px | Small/Medium |
+| `--Radius-Surface`（Card/Popover パネル） | 14px | Small/Medium |
 | `--Radius-Modal`（中央 Dialog/AlertDialog） | 24px | Extra Large |
 | `--Radius-Sheet`（bottom/float Sheet） | 32px | Extra Large+ |
 | `rounded-full`（Button/Chip/Badge/Avatar） | 9999px | Full（ピル） |

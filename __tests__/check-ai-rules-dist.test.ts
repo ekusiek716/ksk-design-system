@@ -2,7 +2,7 @@
  * consumer へ配る AI 向けルールの配布漏れ検査（scripts/check-ai-rules-dist.mjs）の回帰テスト。
  * 純関数は fixture で「配布漏れを検出できる」ことを、実リポジトリでは「今は違反が無い」ことを固定する。
  */
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 import {
@@ -125,6 +125,10 @@ describe("実リポジトリ", () => {
       templates: { "templates/CLAUDE.md": read("templates/CLAUDE.md"), "templates/AGENTS.md": read("templates/AGENTS.md") },
       rootDocs: { "CLAUDE.md": read("CLAUDE.md"), "AGENTS.md": read("AGENTS.md") },
       rules: JSON.parse(read("contracts/rules.json")),
+      skillDocs: Object.fromEntries(
+        [".claude/skills/ksk-design-system/SKILL.md", ...readdirSync(join(ROOT, ".claude/skills/ksk-design-system/references")).map((f) => `.claude/skills/ksk-design-system/references/${f}`)].map((r) => [r, read(r)]),
+      ),
+      cssSources: Object.fromEntries(readdirSync(join(ROOT, "src/styles")).filter((f) => f.endsWith(".css")).map((f) => [f, read(`src/styles/${f}`)])),
       exists: (ref: string) => ref === "dist" || ref.startsWith("dist/") || ref.includes("*") || existsSync(join(ROOT, ref)),
     })
     expect(problems).toEqual([])

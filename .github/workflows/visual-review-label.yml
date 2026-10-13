@@ -8,12 +8,9 @@ name: Visual review label
 
 on:
   pull_request:
+    # paths で絞らない: src の変更を戻した push でも毎回走らせ、「該当なしならラベルを外す」を
+    # 確実に実行するため（判定は git diff と JSON 比較だけの軽い処理）。
     types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - 'src/**'
-      - 'tokens.json'
-      - 'scripts/detect-visual-changes.mjs'
-      - '.github/workflows/visual-review-label.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
@@ -27,9 +24,9 @@ jobs:
     name: needs-visual-review
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # fork からの PR は GITHUB_TOKEN が読み取り専用でラベルもコメントも付けられない。
-    # 失敗させずにスキップする（メンテナが手で見る）。
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    # fork からの PR と Dependabot の PR は GITHUB_TOKEN が読み取り専用でラベルもコメントも
+    # 付けられない。失敗させずにスキップする（メンテナが手で見る）。
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
     permissions:
       contents: read
       pull-requests: write
@@ -59,13 +56,14 @@ jobs:
         if: steps.detect.outputs.hit != 'true'
         run: gh pr edit "$PR" --repo "$REPO" --remove-label "$LABEL" 2>/dev/null || true
 
-      # 二重投稿せず、マーカー付きの既存コメントがあれば更新する。
+      # 二重投稿せず、マーカー付きの既存コメントがあれば更新する。更新対象は github-actions[bot] が
+      # 書いたものだけ（マーカーを含む他人のコメントを書き換えない）。
       # 該当なしの PR には新規投稿しない（既存コメントがあるときだけ「解除」に更新する）。
       - name: Upsert comment
         run: |
           marker='<!-- needs-visual-review -->'
           existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
-            --jq ".[] | select(.body | contains(\"$marker\")) | .id" | head -n1)
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"$marker\"))) | .id" | head -n1)
           if [ -n "$existing" ]; then
             gh api "repos/$REPO/issues/comments/$existing" --method PATCH --field body=@"$RUNNER_TEMP/comment.md" >/dev/null
           elif [ "${{ steps.detect.outputs.hit }}" = "true" ]; then

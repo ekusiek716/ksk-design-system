@@ -19,12 +19,13 @@
 //   2. templates/*.md が参照する `node_modules/ksk-design-system/<path>` が実在し、`files` に入っている
 //   3. ルートの CLAUDE.md / AGENTS.md の「必須: セッション開始時に読み込むファイル」の各パスが
 //      実在し、`files` に入っている（DS 開発者専用の例外は DEV_ONLY_PREFIXES）
+//   6. SKILL.md / references に書いたトークンの px 値が src/styles の CSS 定義と一致する
 //   5. テンプレートの角丸の許可セットが contracts/rules.json（AI3 の fix）と一致する
 //   4. テンプレートが案内する `npx ksk-ds init --force` を init.js が実際に受け付ける
 //
 // 実行: node scripts/check-ai-rules-dist.mjs
 // =============================================================
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -43,20 +44,43 @@ const BUILD_OUTPUTS = ["dist"]
 /** パッケージのルート直下で常に配布される（npm の仕様） */
 const ALWAYS_SHIPPED = [/^package\.json$/, /^README(\..+)?$/i, /^LICENSE(\..+)?$/i, /^CHANGELOG(\..+)?$/i]
 
-/** package.json の files エントリ（ファイル・ディレクトリ・簡易 glob）がパスを含むか */
-export function isShipped(path, files) {
+/** files / .npmignore の1エントリ（ファイル・ディレクトリ・簡易 glob）がパスを含むか */
+function matchesEntry(path, entry) {
+  const e = entry.replace(/^\.\//, "").replace(/^\//, "").replace(/\/+$/, "")
+  if (/[*?]/.test(e)) {
+    const re = new RegExp(
+      "^" + e.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*\*/g, "\u0000").replace(/\*/g, "[^/]*").replace(/\u0000/g, ".*") + "(/.*)?$",
+    )
+    return re.test(path)
+  }
+  return path === e || path.startsWith(e + "/")
+}
+
+/**
+ * npm pack が配布するパスか。package.json の `files` を先頭から評価し（`!` 始まりは除外）、
+ * 加えてルートの .npmignore の行（`npmignore`）に当たるものは配布しない。
+ */
+export function isShipped(path, files, npmignore = []) {
   const p = path.replace(/^\.\//, "").replace(/\/+$/, "")
   if (ALWAYS_SHIPPED.some((re) => re.test(p))) return true
-  return files.some((entry) => {
-    const e = entry.replace(/^\.\//, "").replace(/\/+$/, "")
-    if (/[*?]/.test(e)) {
-      const re = new RegExp(
-        "^" + e.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*\*/g, "\u0000").replace(/\*/g, "[^/]*").replace(/\u0000/g, ".*") + "(/.*)?$",
-      )
-      return re.test(p)
+  let shipped = false
+  for (const entry of files) {
+    if (entry.startsWith("!")) {
+      if (matchesEntry(p, entry.slice(1))) shipped = false
+    } else if (matchesEntry(p, entry)) {
+      shipped = true
     }
-    return p === e || p.startsWith(e + "/")
-  })
+  }
+  if (shipped && npmignore.some((line) => matchesEntry(p, line))) return false
+  return shipped
+}
+
+/** .npmignore の本文から有効な行（空行・コメント・否定を除く）を取り出す */
+export function parseNpmignore(text) {
+  return text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#") && !l.startsWith("!"))
 }
 
 /** `a/{X,Y}.md` を `a/X.md` と `a/Y.md` に展開する（1段のみ） */
@@ -123,6 +147,70 @@ export function rulesRoundedAllowed(rules) {
   return ai3 ? roundedSet(ai3.fix) : null
 }
 
+/**
+ * bin/init.js が実際に `--force` を引数として処理しているか。
+ * `//` コメント行とヘルプ文（引用符で囲まれない `--force`）は数えず、引用符付きのリテラルだけを見る。
+ */
+export function acceptsForceFlag(initSource) {
+  const code = initSource.split(/\r?\n/).filter((l) => !l.trim().startsWith("//")).join("\n")
+  return /["'`]--force["'`]/.test(code)
+}
+
+/**
+ * CSS からトークンの長さ（px 換算）を集める。`--Name: 0.875rem;` / `--Name: 24px;` の単純な値だけ対象。
+ * 同名の再定義（dark・media query 内）は最初の定義を採る。
+ * @returns {Map<string, number>}
+ */
+export function parseCssLengths(cssTexts) {
+  const map = new Map()
+  for (const css of cssTexts) {
+    const noComments = css.replace(/\/\*[\s\S]*?\*\//g, "")
+    for (const m of noComments.matchAll(/(--[A-Za-z][\w-]*)\s*:\s*(-?\d*\.?\d+)(rem|px)\s*;/g)) {
+      if (map.has(m[1])) continue
+      map.set(m[1], m[3] === "rem" ? Number(m[2]) * 16 : Number(m[2]))
+    }
+  }
+  return map
+}
+
+/**
+ * 文書中の `--Token` の直後に書かれた px 値（`(14)` / `14px` / `（14/24/32px）`）を CSS の定義と照合する。
+ * 対象は CSS に長さの定義があるトークンだけ。トークンの次の `--Token` までを文脈とし、最初に現れる数値を見る。
+ * @returns {{line: number, message: string}[]}
+ */
+export function findTokenPxMismatches(text, lengths) {
+  const out = []
+  const lines = text.split(/\r?\n/)
+  lines.forEach((line, idx) => {
+    // `--Radius-Surface|Modal|Sheet)]`（14/24/32px） の束ね書き
+    for (const g of line.matchAll(/(--[A-Za-z]+-)([A-Za-z]+(?:\|[A-Za-z]+)+)[^（\n]{0,6}（([\d/]+)px）/g)) {
+      const names = g[2].split("|")
+      const nums = g[3].split("/").map(Number)
+      names.forEach((n, i) => {
+        const want = lengths.get(g[1] + n)
+        if (want !== undefined && nums[i] !== undefined && nums[i] !== want) {
+          out.push({ line: idx + 1, message: `${g[1]}${n} は ${nums[i]}px と書かれていますが CSS の定義は ${want}px です` })
+        }
+      })
+    }
+    // 単独の `--Token` ＋ 直後の (N) または N px
+    const tokens = [...line.matchAll(/`?(--[A-Za-z][\w-]*)`?/g)]
+    tokens.forEach((t, i) => {
+      const want = lengths.get(t[1])
+      if (want === undefined) return
+      const start = t.index + t[0].length
+      const end = i + 1 < tokens.length ? tokens[i + 1].index : line.length
+      const seg = line.slice(start, end).replace(/（[^）]*）/g, "")
+      const m = seg.match(/^\s*\((\d+)\)|^[^0-9]{0,12}?(\d+)\s*px/)
+      const got = m ? Number(m[1] ?? m[2]) : undefined
+      if (got !== undefined && got !== want) {
+        out.push({ line: idx + 1, message: `${t[1]} は ${got}px と書かれていますが CSS の定義は ${want}px です` })
+      }
+    })
+  })
+  return out
+}
+
 /** init.js が配るテンプレート（`src: "templates/…"`）を取り出す */
 export function extractInitTemplates(initSource) {
   return [...initSource.matchAll(/src:\s*"(templates\/[^"]+)"/g)].map((m) => m[1])
@@ -133,7 +221,8 @@ export function extractInitTemplates(initSource) {
  * @param {{files: string[], initSource: string, templates: Record<string,string>, rootDocs: Record<string,string>, exists: (ref:string)=>boolean}} input
  * @returns {{kind: string, where: string, message: string}[]}
  */
-export function checkAiRulesDist({ files, initSource, templates, rootDocs, exists, rules }) {
+export function checkAiRulesDist({ files, npmignore = [], initSource, templates, rootDocs, skillDocs = {}, cssSources = {}, exists, rules }) {
+  const shipped = (p) => isShipped(p, files, npmignore)
   const problems = []
   const add = (kind, where, message) => problems.push({ kind, where, message })
 
@@ -142,18 +231,18 @@ export function checkAiRulesDist({ files, initSource, templates, rootDocs, exist
   if (distributed.length === 0) add("INIT", "bin/init.js", "配布テンプレート（src: \"templates/…\"）を1件も検出できません")
   for (const t of distributed) {
     if (!exists(t)) add("INIT", t, "init が配るテンプレートが存在しません")
-    else if (!isShipped(t, files)) add("NOT-SHIPPED", t, "init が配るテンプレートが package.json の files に入っていません")
+    else if (!shipped(t)) add("NOT-SHIPPED", t, "init が配るテンプレートが package.json の files に入っていません")
   }
 
   // 2. テンプレート内の node_modules 参照
   for (const [name, text] of Object.entries(templates)) {
     for (const ref of extractTemplateRefs(text)) {
       if (!exists(ref)) add("MISSING", name, `参照先が存在しません: ${ref}`)
-      else if (!isShipped(ref, files)) add("NOT-SHIPPED", name, `参照先が package.json の files に入っていません: ${ref}`)
+      else if (!shipped(ref)) add("NOT-SHIPPED", name, `参照先が package.json の files に入っていません: ${ref}`)
     }
     // 4. 案内するコマンド
-    if (/ksk-ds init --force/.test(text) && !/--force/.test(initSource)) {
-      add("COMMAND", name, "`npx ksk-ds init --force` を案内していますが、bin/init.js が --force を受け付けません")
+    if (/ksk-ds init --force/.test(text) && !acceptsForceFlag(initSource)) {
+      add("COMMAND", name, "`npx ksk-ds init --force` を案内していますが、bin/init.js の引数処理に \"--force\" がありません（コメント・ヘルプ文は数えない）")
     }
   }
 
@@ -178,12 +267,28 @@ export function checkAiRulesDist({ files, initSource, templates, rootDocs, exist
     }
     for (const ref of refs) {
       if (!exists(ref)) add("MISSING", name, `必読リストの参照先が存在しません: ${ref}`)
-      else if (!isShipped(ref, files) && !DEV_ONLY_PREFIXES.some((p) => ref.startsWith(p))) {
+      else if (!shipped(ref) && !DEV_ONLY_PREFIXES.some((p) => ref.startsWith(p))) {
         add("NOT-SHIPPED", name, `必読リストの参照先が package.json の files に入っていません: ${ref}`)
       }
     }
   }
+
+  // 6. SKILL・references に書いたトークンの px 値を CSS の定義と突き合わせる
+  const lengths = parseCssLengths(Object.values(cssSources))
+  if (Object.keys(skillDocs).length > 0 && lengths.size === 0) add("TOKEN-PX", "src/styles", "CSS からトークンの長さ定義を1件も読めません")
+  for (const [name, text] of Object.entries(skillDocs)) {
+    for (const m of findTokenPxMismatches(text, lengths)) {
+      add("TOKEN-PX", `${name}:${m.line}`, m.message)
+    }
+  }
   return problems
+}
+
+/** consumer に配る判断 Skill（SKILL.md と references/*.md）を {相対パス: 本文} で返す */
+function readSkillDocs() {
+  const dir = ".claude/skills/ksk-design-system"
+  const rels = [`${dir}/SKILL.md`, ...readdirSync(join(ROOT, dir, "references")).filter((f) => f.endsWith(".md")).map((f) => `${dir}/references/${f}`)]
+  return Object.fromEntries(rels.map((r) => [r, readFileSync(join(ROOT, r), "utf8")]))
 }
 
 function main() {
@@ -200,6 +305,9 @@ function main() {
     initSource: read("bin/init.js"),
     templates: { "templates/CLAUDE.md": read("templates/CLAUDE.md"), "templates/AGENTS.md": read("templates/AGENTS.md") },
     rootDocs: { "CLAUDE.md": read("CLAUDE.md"), "AGENTS.md": read("AGENTS.md") },
+    npmignore: existsSync(join(ROOT, ".npmignore")) ? parseNpmignore(read(".npmignore")) : [],
+    skillDocs: readSkillDocs(),
+    cssSources: Object.fromEntries(readdirSync(join(ROOT, "src/styles")).filter((f) => f.endsWith(".css")).map((f) => [f, read(`src/styles/${f}`)])),
     exists: existsRef,
     rules: JSON.parse(read("contracts/rules.json")),
   })

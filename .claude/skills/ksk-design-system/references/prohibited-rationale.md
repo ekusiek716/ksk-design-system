@@ -22,11 +22,11 @@ capability として引き続き解釈される。
 
 ### なぜ platform 二値ではないのか
 
-最初は `["web"]` / `["native"]` の二値で棚卸ししたが、**consumer の多く（exam-kit 系 11 アプリ）は
+最初は `["web"]` / `["native"]` の二値で棚卸ししたが、**consumer の多く（資格系の Web アプリ群）は
 NativeWind を使っており、RN でも `className` に Tailwind クラスを書く**。
 「RN だから Tailwind 系は全部外す」と倒すと、そちらの lint がほぼ無効化される
-（ap-app の実測で 858 件 → 66 件、92% 減）。
-一方 StyleSheet 系の RN（aikoibito mobile）では Tailwind 系は誤検知しかしない
+（ある consumer アプリの実測で 858 件 → 66 件、92% 減）。
+一方 StyleSheet 系の RN consumerでは Tailwind 系は誤検知しかしない
 （P032 は 76 件全部が `borderColor: colors.border` の `.border` への誤爆だった）。
 この 2 つを両立させるには、ファイル側を `className` の有無で見分ける必要がある。
 
@@ -100,7 +100,7 @@ web 前提の fix 文言が native で実行不能なルールは `fixNative` �
 
 ## theme / token（P032）
 
-- **P032 色を併記しない `border`** → **実害あり（job board）**。Tailwind v4 で border 既定色が currentColor になったため、無色 border は消費側の濃色テキストを透過して黒ずむ。`border-[var(--Border-Low-Emphasis)]` を必ず併記。状態切替系は `border-transparent` ＋ `data-[state=active]:border-[...]` のペアで
+- **P032 色を併記しない `border`** → **実害あり（consumer の求人系 Web アプリ）**。Tailwind v4 で border 既定色が currentColor になったため、無色 border は消費側の濃色テキストを透過して黒ずむ。`border-[var(--Border-Low-Emphasis)]` を必ず併記。状態切替系は `border-transparent` ＋ `data-[state=active]:border-[...]` のペアで
 
 ## accessibility / form（P023–P027）
 
@@ -142,7 +142,7 @@ AI1–AI9 は上記 P013/P021/P019/P017/P020/P009/P015/P007 の再掲（AI が�
 **AI10（文脈非依存違反）**が固有で最重要:
 
 > テキスト・背景・border の色を明示せず親の継承や currentColor に委ねると、
-> 消費側が濃色テキスト・色付き背景を敷いた瞬間に枠線・アイコン・文字が化ける（job board で実際に発生）。
+> 消費側が濃色テキスト・色付き背景を敷いた瞬間に枠線・アイコン・文字が化ける（consumer の求人系 Web アプリで実際に発生）。
 > コンポーネントは見た目を自前で固定する: テキスト要素に `text-[var(--Text-*)]`、
 > サーフェスに `bg-[var(--Surface-*)]`＋`border-[var(--Border-*)]`。
 > 検出: Storybook ツールバーの **Hostile ctx** を loud にして、マゼンタ化・背景透けが無いか目視。

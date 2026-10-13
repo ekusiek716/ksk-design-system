@@ -52,33 +52,83 @@ const MAX_PER_CATEGORY = 5
 // Tailwind のクラス名に使える文字（任意値 [..] や分数 / を含む）
 const CLS = String.raw`[\w\[\]#%./:()-]`
 
+/** 語の終わり（bordered / shadowRoot / ringBuffer のように続く別語を拾わない） */
+const B = String.raw`(?![\w])`
+
+/** CSS 変数の「定義行」（`--Foo-Bar: ...`）。参照 `var(--Foo-` だけでは定義の値変更を拾えない */
+const def = (prefix) => String.raw`--(?:${prefix})[\w-]*\s*:`
+
 /**
  * 行のカテゴリ判定。先頭の (?<![\w-]) で別語の一部（string の "ring" 等）を拾わない。
- * radius は "border-radius" / "border-t-radius" を border と誤認しないよう border 側で除外する。
+ * 右端の語境界 B は、単語そのものを指す選択肢にだけ付ける（`p-[10px]` のような値込みの選択肢には付けない）。
+ * radius は "border-radius" / "borderRadius" を border と誤認しない（border 側は語境界で弾かれる）。
  */
+const word = (alts) => new RegExp(String.raw`(?<![\w-])(?:${alts.join("|")})`)
 const LINE_PATTERNS = {
-  border: new RegExp(
-    String.raw`(?<![\w-])(?:(?:border|divide)(?!-radius)(?:-(?!radius)${CLS}+)?|borderColor|borderWidth|border-color|border-width|var\(--Border-)`,
-  ),
-  "focus-ring": new RegExp(
-    String.raw`(?<![\w-])(?:ring(?:-${CLS}+)?|outline(?:-${CLS}+)?|outlineColor|outlineWidth|outlineOffset|var\(--Focus-)`,
-  ),
-  shadow: new RegExp(
-    String.raw`(?<![\w-])(?:shadow(?:-${CLS}+)?|boxShadow|box-shadow|drop-shadow(?:-${CLS}+)?|var\(--Shadow-)`,
-  ),
-  color: /var\(--(?:Text|Surface|Object|Brand|Primitive|Hover|Active|Overlay|Caution|Success|Warning|Info)-/,
-  radius: new RegExp(
-    String.raw`(?<![\w-])(?:rounded(?:-${CLS}+)?|borderRadius|border-radius|border-(?:t|b|l|r|s|e|tl|tr|bl|br)-radius|var\(--Radius-)`,
-  ),
-  spacing: new RegExp(
-    String.raw`(?<![\w-])-?(?:p|px|py|pt|pb|pl|pr|ps|pe|m|mx|my|mt|mb|ml|mr|ms|me|gap|gap-x|gap-y|space-x|space-y)-(?:\d|\[|px\b)|var\(--Space-`,
-  ),
+  border: word([
+    String.raw`(?:border|divide)(?!-radius)(?:-(?!radius)${CLS}+)?${B}`,
+    String.raw`border(?:Top|Bottom|Left|Right|Start|End)?(?:Color|Width)${B}`,
+    String.raw`var\(--Border-`,
+    def("Border-"),
+  ]),
+  "focus-ring": word([
+    String.raw`ring(?:-${CLS}+)?${B}`,
+    String.raw`outline(?:-${CLS}+)?${B}`,
+    String.raw`outline(?:Color|Width|Offset|Style)${B}`,
+    String.raw`var\(--Focus-`,
+    def("Focus-"),
+  ]),
+  shadow: word([
+    String.raw`(?:drop-)?shadow(?:-${CLS}+)?${B}`,
+    String.raw`boxShadow${B}|box-shadow${B}|shadow(?:Color|Offset|Opacity|Radius)${B}`,
+    String.raw`var\(--[Ss]hadow-`,
+    def("[Ss]hadow-"),
+  ]),
+  color: word([
+    String.raw`var\(--(?:Text|Surface|Object|Brand|Primitive|Hover|Active|Overlay|Caution|Success|Warning|Info|Categorical)-`,
+    def("Text-|Surface-|Object-|Brand-|Primitive-|Hover-|Active-|Overlay-|Caution-|Success-|Warning-|Info-|Categorical-"),
+  ]),
+  radius: word([
+    String.raw`rounded(?:-${CLS}+)?${B}`,
+    String.raw`borderRadius${B}|border(?:Top|Bottom)(?:Left|Right|Start|End)Radius${B}`,
+    String.raw`border-radius${B}|border-(?:t|b|l|r|s|e|tl|tr|bl|br)-radius${B}|border-(?:top|bottom)-(?:left|right)-radius${B}`,
+    String.raw`var\(--Radius-`,
+    def("Radius-"),
+  ]),
+  spacing: word([
+    // Tailwind の数値・任意値ユーティリティ（p-4 / gap-x-2 / p-[10px] / -mt-px）
+    String.raw`-?(?:p|px|py|pt|pb|pl|pr|ps|pe|m|mx|my|mt|mb|ml|mr|ms|me|gap|gap-x|gap-y|space-x|space-y)-(?:\d|\[|px${B})`,
+    // RN の StyleSheet / CSS の数値指定（paddingHorizontal: 16 / margin-top: 8px / gap: 12）
+    String.raw`(?:padding|margin)(?:Top|Bottom|Left|Right|Horizontal|Vertical|Start|End|Inline|Block)?\s*:\s*-?\d`,
+    String.raw`(?:padding|margin)-(?:top|bottom|left|right|inline|block)(?:-(?:start|end))?\s*:\s*-?\d`,
+    String.raw`(?:gap|rowGap|columnGap|row-gap|column-gap)\s*:\s*\d`,
+    String.raw`var\(--(?:Space-|Product-Card-Padding)`,
+    def("Space-|Product-Card-Padding"),
+  ]),
 }
 
-/** コメントだけの行（行コメント・ブロックコメントの各行）は判定から外す */
-function isCommentOnly(text) {
+/**
+ * コメントだけの行は判定から外す。
+ *   - 行コメント・ブロックコメントの開始行、ブロックコメント内の ` * 説明` 行、JSX の波括弧で囲んだ1行コメント。
+ *   - `*` で始まるだけの行は CSS のセレクタ（`*, ::before {`）の可能性があるのでコメント扱いにしない。
+ */
+export function isCommentOnly(text) {
   const t = text.trim()
-  return t === "" || t.startsWith("//") || t.startsWith("*") || t.startsWith("/*")
+  if (t === "" || t.startsWith("//") || t.startsWith("/*")) return true
+  if (/^\{\s*\/\*.*\*\/\s*\}$/.test(t)) return true
+  if (t === "*" || t === "*/") return true
+  return t.startsWith("*") && !/^\*\s*[,{:>+~[.]/.test(t)
+}
+
+/**
+ * TSX の variant 名（`outline: "..."` のキー、`variant="outline"` の値）はクラスではないので、
+ * 判定の前に取り除く（CSS ファイルでは `outline: 2px` は本物なので除かない）。
+ */
+export function stripNonStyleTokens(text, file) {
+  if (/\.css$/.test(file)) return text
+  return text
+    .replace(/\bvariant\w*\s*[=:]\s*["'`][\w-]+["'`]/g, " ")
+    .replace(/(?<![\w:-])[A-Za-z][\w-]*\s*:\s+(?=["'`{[])/g, " ")
 }
 
 /** 判定対象のファイルか。stories・テスト・型定義は見た目の実装ではない */
@@ -92,21 +142,28 @@ export function isScannedFile(file) {
 
 /**
  * `git diff -U0` の出力を解析し、見た目に効く追加/削除行を返す。
+ * 削除されたファイルは `--- a/` 側のパスで判定する。
  * @returns {{category: string, file: string, line: number|null, sign: "+"|"-", text: string}[]}
  */
 export function scanDiffLines(diffText) {
   const hits = []
   let file = null
+  let oldFile = null
   let scanned = false
   let newLine = null
   for (const raw of diffText.split("\n")) {
+    if (raw.startsWith("--- ")) {
+      const m = raw.match(/^--- a\/(.+)$/)
+      oldFile = m ? m[1] : null
+      continue
+    }
     if (raw.startsWith("+++ ")) {
       const m = raw.match(/^\+\+\+ b\/(.+)$/)
-      file = m ? m[1] : null
+      file = m ? m[1] : oldFile // 削除（+++ /dev/null）は旧パスを使う
       scanned = file !== null && isScannedFile(file)
       continue
     }
-    if (raw.startsWith("--- ") || raw.startsWith("diff ") || raw.startsWith("index ")) continue
+    if (raw.startsWith("diff ") || raw.startsWith("index ")) continue
     const hunk = raw.match(/^@@ -\d+(?:,\d+)? \+(\d+)/)
     if (hunk) {
       newLine = Number(hunk[1])
@@ -120,8 +177,9 @@ export function scanDiffLines(diffText) {
       if (sign === "+") newLine += 1
       continue
     }
+    const target = stripNonStyleTokens(text, file)
     for (const [category, re] of Object.entries(LINE_PATTERNS)) {
-      if (re.test(text)) {
+      if (re.test(target)) {
         hits.push({ category, file, line: sign === "+" ? newLine : null, sign, text: text.trim() })
       }
     }
@@ -254,7 +312,9 @@ function main(argv) {
   // 三点 diff: base と head の共通祖先からの差分（PR 自身の変更だけ）
   const diffText = git(["diff", "-U0", "--no-color", `${base}...${head}`, "--", "src"])
   const tokensChanged = git(["diff", "--name-only", `${base}...${head}`, "--", "tokens.json"]).trim() !== ""
-  const tokenHits = tokensChanged ? diffTokens(gitShowJson(base), gitShowJson(head)) : []
+  // 比較起点は三点 diff と同じ merge-base にそろえる（base が先に進んでいても PR 自身の変更だけを見る）
+  const mergeBase = git(["merge-base", base, head]).trim() || base
+  const tokenHits = tokensChanged ? diffTokens(gitShowJson(mergeBase), gitShowJson(head)) : []
   const report = buildReport({ tokenHits, lineHits: scanDiffLines(diffText) })
   if (opts.json) writeFileSync(opts.json, JSON.stringify(report, null, 2))
   if (opts.markdown) writeFileSync(opts.markdown, renderMarkdown(report))
