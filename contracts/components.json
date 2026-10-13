@@ -512,6 +512,13 @@
         "TabsList",
         "TabsTrigger",
         "TabsContent"
+      ],
+      "props": {
+        "orientation": "\"horizontal\" | \"vertical\" (既定 \"horizontal\") — Tabs（Root）に渡す。\"vertical\" では TabsList を縦に並べて左に置き、列の幅は Tabs の幅の半分まで（長いラベルはタブの中で折り返す）、TabsContent は右の残り幅を取る。矢印キーは上下で移動する。横向きの見た目は変わらない"
+      },
+      "rules": [
+        "orientation=\"vertical\" は設定画面・ヘルプなど、タブが 4 つ以上ある・ラベルが長い・パネルが縦に長い PC 幅の画面で使う。幅 390px 前後の画面ではタブの列とパネルが半分ずつになり窮屈なので、横向き（既定）か SectionNav / SubNav を選ぶ",
+        "縦並びは data-orientation で DS 側が組むため、消費側で TabsList に flex-col や h-auto を重ねて書かない"
       ]
     },
     {

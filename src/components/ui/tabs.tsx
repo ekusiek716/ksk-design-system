@@ -21,6 +21,12 @@ const VERTICAL_TRIGGER =
 const VERTICAL_CONTENT =
   "data-[orientation=vertical]:mt-0 data-[orientation=vertical]:min-w-0 data-[orientation=vertical]:flex-1"
 
+/**
+ * Tabs — 同一コンテキスト内のビュー切り替え。
+ *
+ * `orientation="vertical"` で縦向き: タブの列を左（幅は Tabs の半分まで）、パネルを右に置く。
+ * 設定画面など PC 幅でタブが多い・ラベルが長いときに使う。幅 390px 前後では横向き（既定）を選ぶ。
+ */
 function Tabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
   return <TabsPrimitive.Root data-slot="tabs" className={cn("flex flex-col gap-2", VERTICAL_ROOT, className)} {...props} />
 }
