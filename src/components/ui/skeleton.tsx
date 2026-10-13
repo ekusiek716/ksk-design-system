@@ -29,7 +29,9 @@ export interface SkeletonProps extends Omit<React.ComponentProps<"div">, "width"
  * - 何も指定しない場合は `h-4 w-full`（native の 16px / 100% と同等）が既定で
  *   適用されるため、`<Skeleton />` だけでも必ず見える
  * - `rounded` で角丸プリセットを切り替え（既定 `lg`）
- * - `animate-pulse` がデフォルトで適用
+ * - `animate-pulse` がデフォルトで適用。動きを減らす設定（prefers-reduced-motion）では
+ *   pulse が止まる。Skeleton 自体は aria-hidden なので、読み込み中であることは
+ *   包む側の `aria-busy` などで伝える
  *
  * 複数まとめて並べる場合は `ListSkeleton` / `GridSkeleton` (patterns) を使うと
  * 定型レイアウトが組める。
@@ -53,7 +55,8 @@ function Skeleton({ className, width, height, rounded = "lg", style, ...props }:
       data-slot="skeleton"
       aria-hidden="true"
       style={inlineStyle}
-      className={cn("h-4 w-full animate-pulse bg-[var(--Surface-Tertiary)]", ROUNDED_MAP[rounded], className)}
+      // 動きを減らす設定では明滅を止める（面は残るので読み込み中の枠は分かる）。
+      className={cn("h-4 w-full animate-pulse motion-reduce:animate-none bg-[var(--Surface-Tertiary)]", ROUNDED_MAP[rounded], className)}
       {...props}
     />
   )

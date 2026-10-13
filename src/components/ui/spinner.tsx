@@ -34,8 +34,11 @@ function Spinner({ className, size = "md", label = "読み込み中", ...props }
       data-slot="spinner"
       role="status"
       aria-label={label}
+      // 動きを減らす設定（prefers-reduced-motion）では回転を止める。--Motion-* の一括制御は
+      // animate-spin に効かないため個別に指定（Button のスピナーと同じ）。止めても上辺だけ
+      // ブランド色の欠けた輪で「処理中」と分かり、状態は role="status" とラベルで伝わる。
       className={cn(
-        "animate-spin rounded-full border-[var(--Border-Medium-Emphasis)] border-t-[var(--Brand-Primary)]",
+        "animate-spin motion-reduce:animate-none rounded-full border-[var(--Border-Medium-Emphasis)] border-t-[var(--Brand-Primary)]",
         sizeClasses[size],
         className
       )}

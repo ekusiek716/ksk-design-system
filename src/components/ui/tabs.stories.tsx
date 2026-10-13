@@ -72,6 +72,48 @@ export const WithDisabledTab: Story = {
   ),
 }
 
+/**
+ * 縦向き（`orientation="vertical"`）。タブを左に縦に並べ、パネルは右の残りを取る。
+ * タブの列は Tabs の幅の半分までで、長いラベルはタブの中で折り返す。矢印キーは上下で移動する。
+ */
+export const Vertical: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <Tabs defaultValue="account" orientation="vertical">
+      <TabsList>
+        <TabsTrigger value="account">アカウント</TabsTrigger>
+        <TabsTrigger value="notice">通知</TabsTrigger>
+        <TabsTrigger value="privacy">プライバシーとセキュリティ</TabsTrigger>
+      </TabsList>
+      <TabsContent value="account">
+        <p className="typo-body-md text-[var(--Text-High-Emphasis)]">アカウントの設定</p>
+      </TabsContent>
+      <TabsContent value="notice">
+        <p className="typo-body-md text-[var(--Text-High-Emphasis)]">通知の設定</p>
+      </TabsContent>
+      <TabsContent value="privacy">
+        <p className="typo-body-md text-[var(--Text-High-Emphasis)]">プライバシーの設定</p>
+      </TabsContent>
+    </Tabs>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const tabs = canvas.getAllByRole("tab")
+    // 縦に並ぶ（左端がそろい、下へ積み重なる）
+    const [a, b] = tabs.map((t) => t.getBoundingClientRect())
+    await expect(Math.round(b.left)).toBe(Math.round(a.left))
+    await expect(b.top).toBeGreaterThanOrEqual(a.bottom)
+    // パネルはタブの列の右
+    const list = canvas.getByRole("tablist").getBoundingClientRect()
+    await expect(canvas.getByRole("tabpanel").getBoundingClientRect().left).toBeGreaterThanOrEqual(list.right)
+    // 下矢印で次のタブへ
+    await userEvent.click(tabs[0])
+    await userEvent.keyboard("{ArrowDown}")
+    await expect(tabs[1]).toHaveAttribute("data-state", "active")
+    await expect(canvas.getByRole("tabpanel")).toHaveTextContent("通知の設定")
+  },
+}
+
 // ─────────────────────────────────────────────────────────────
 // interaction 回帰テスト（issue #256 / `npm run test:interaction`）
 // ─────────────────────────────────────────────────────────────

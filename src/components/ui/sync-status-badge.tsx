@@ -44,7 +44,9 @@ function SyncStatusBadge({
       <span data-slot="sync-status-badge" data-state={state} {...liveProps} className={cn(base, "bg-[var(--Surface-Info)] text-[var(--Text-Info)]", className)}>
         <span
           aria-hidden
-          className="size-3 rounded-full border-[1.5px] border-current border-t-transparent animate-spin"
+          // 動きを減らす設定では回転を止める（Button / Spinner と同じ）。止めても欠けた輪で同期中と分かり、
+          // 状態は role="status" の文言で伝わる。
+          className="size-3 rounded-full border-[1.5px] border-current border-t-transparent animate-spin motion-reduce:animate-none"
         />
         {syncingLabel}
       </span>

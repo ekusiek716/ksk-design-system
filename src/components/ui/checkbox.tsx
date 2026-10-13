@@ -34,9 +34,13 @@ function CheckboxRoot({ className, ...props }: CheckboxRootProps) {
       )}
       {...props}
     >
+      {/* ✓ は未選択でも常に置き、visibility で出し入れする。Radix の既定（未選択で
+          中身ごと外す）だと箱の基準線が「空の箱」と「✓ のある箱」で 2〜3px 変わり、
+          文章中に置いた Checkbox と同じ行の文字が選ぶたびに上下していた。 */}
       <CheckboxPrimitive.Indicator
+        forceMount
         data-slot="checkbox-indicator"
-        className="flex items-center justify-center text-current"
+        className="flex items-center justify-center text-current data-[state=unchecked]:invisible"
       >
         {props.checked === "indeterminate" ? (
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -107,7 +111,9 @@ function Checkbox({
     >
       <CheckboxRoot id={checkboxId} className={className} {...props} />
       <div className="flex-1 min-w-0">
-        <span className="typo-body-md text-[var(--Text-High-Emphasis)]">{label}</span>
+        {/* block にして、包む div が祖先の line-height で行の箱（strut）を作らないようにする。
+            inline のままだと親の行間（例: 2.4）を受け継いで 1 行の行が 44px → 64px に伸びた。 */}
+        <span className="block typo-body-md text-[var(--Text-High-Emphasis)]">{label}</span>
         {description && (
           <span className="block typo-body-sm text-[var(--Text-Medium-Emphasis)] mt-0.5">
             {description}

@@ -77,7 +77,7 @@ function SocialLoginButton({
     >
       <span className="flex-shrink-0 w-6 flex items-center justify-center">
         {loading ? (
-          <svg className="animate-spin" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <svg className="animate-spin motion-reduce:animate-none" width="16" height="16" viewBox="0 0 16 16" fill="none">
             <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" strokeDasharray="30" strokeDashoffset="10" />
           </svg>
         ) : (

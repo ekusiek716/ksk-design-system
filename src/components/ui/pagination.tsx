@@ -72,6 +72,10 @@ function PaginationLink({
       variant: isActive ? "default" : "ghost",
       size,
     }),
+    // ページ番号（size="icon"）は正方形の 40px が既定だが、桁が多いと文字が枠から
+    // はみ出していた（5 桁で中身 44px）。min-w-fit で中身が枠より広いときだけ横に伸ばす。
+    // 1〜2 桁は 40px のまま。4 桁はフォント次第で約 41px に広がる（CI の ubuntu で実測。以前ははみ出していた）。
+    size === "icon" && "min-w-fit",
     className
   )
 
