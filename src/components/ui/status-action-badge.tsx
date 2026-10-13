@@ -67,7 +67,8 @@ function StatusDot({
     return (
       <span
         aria-hidden
-        className="size-3 rounded-full border-[1.5px] border-current border-t-transparent animate-spin"
+        // 動きを減らす設定では回転を止める（Button / Spinner と同じ）。止めても欠けた輪で処理中と分かる。
+        className="size-3 rounded-full border-[1.5px] border-current border-t-transparent animate-spin motion-reduce:animate-none"
       />
     )
   }

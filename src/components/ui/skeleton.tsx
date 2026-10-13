@@ -53,7 +53,8 @@ function Skeleton({ className, width, height, rounded = "lg", style, ...props }:
       data-slot="skeleton"
       aria-hidden="true"
       style={inlineStyle}
-      className={cn("h-4 w-full animate-pulse bg-[var(--Surface-Tertiary)]", ROUNDED_MAP[rounded], className)}
+      // 動きを減らす設定では明滅を止める（面は残るので読み込み中の枠は分かる）。
+      className={cn("h-4 w-full animate-pulse motion-reduce:animate-none bg-[var(--Surface-Tertiary)]", ROUNDED_MAP[rounded], className)}
       {...props}
     />
   )
