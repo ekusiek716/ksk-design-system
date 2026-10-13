@@ -179,6 +179,21 @@ afterEach フックが全ストーリー（tags フィルタなし）に対し�
 （AA 未達トークンの darken と opacity 減衰の廃止により全ストーリー通過。
 トークンペアの正本チェックは `scripts/check-contrast.mjs`）。CI では常時実行される。
 
+**WebKit（Safari 系）でも実行できる:**
+
+```bash
+npx playwright install webkit   # 初回のみ
+npm run test:interaction:webkit
+npm run test:a11y:webkit
+```
+
+同じ設定（`vitest.storybook.config.ts` / `vitest.a11y.config.ts`）を環境変数
+`KSK_BROWSER=webkit` で WebKit に切り替えて回す。Chromium では見えない差
+（フォーカス・スクロール・描画差）を拾う。CI では専用ジョブ `webkit` で Chromium 側と
+並列に常時実行される。現状は全ストーリーが WebKit でも通っており、**除外している
+ストーリー・検査はない**（WebKit 固有の制限で除外が必要になったら、理由付きでここに一覧を残す）。
+ボタン・リンク・Select 等のフォーカス/キーボード操作を触ったときは WebKit 側も回すこと。
+
 **Button など、フォーカス表示の `outline-none` / `outline-hidden` 系クラスを触ったら `npm run test:forced-colors` も実行:**
 
 ```bash
