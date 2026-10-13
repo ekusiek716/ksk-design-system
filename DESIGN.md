@@ -145,6 +145,27 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 - **Dark mode**: `.dark` で Semantic 層が自動反転（コンポーネント側の変更不要）。テーマ差し替え（Brand）と
   light/dark は**直交2軸**。dark の semantic 値は `src/styles/semantic.css` の `.dark` が実装で、`tokens.json` の
   `colors.semanticDark` に機械可読ミラーを持つ（契約テストで同期を保証）。
+- **High Contrast（opt-in・issue #636）**: 入力欄・チェックボックス・ラジオの枠と、スイッチ（オフ）の地は、
+  既定では面の区切りと同じ淡い色（枠 `--Border-Medium-Emphasis` は白地に 1.48:1、dark で 1.63:1。スイッチ地
+  `--Surface-Quaternary` は 1.27:1 / 2.29:1）で、WCAG 1.4.11（非テキスト 3:1）に届かない。**既定の見た目は
+  デザイン判断で据え置き**、`test/known-exceptions.json` の contrast 区分に期限付きで登録している。
+  コントラストが必要な利用者には、次のどちらかで 3:1 以上の色を出す。
+  - OS の「コントラストを上げる」（`@media (prefers-contrast: more)`）。何も書かなくても効く
+  - root（または任意の祖先）に `data-contrast="more"` を付ける。OS 設定に関わらず常に高コントラストにしたい
+    プロダクト向けの opt-in（`<html data-contrast="more">`）
+  入力系の部品は `--Border-Medium-Emphasis` ではなく専用ロール **`--Border-Control`**、スイッチ（オフ）は
+  **`--Surface-Switch-Off`** / **`--Surface-Switch-Off-Hover`** を参照する（既定値は従来と同じ計算後の色）。
+  カードの区切り線など入力以外の `--Border-Medium-Emphasis` は切り替わらない。値は Surface-Primary に対する実測:
+
+  | | light | dark |
+  |---|---|---|
+  | 枠 `--Border-Control` | Gray-500 `#71717A`（4.83:1） | White-Alpha-500 を Gray-900 へ合成した `#6B6B6D`（3.33:1） |
+  | スイッチ（オフ）`--Surface-Switch-Off` | Gray-500（4.83:1） | Gray-500（3.67:1） |
+
+  値の正本は `src/styles/semantic.css` 末尾の High Contrast 節と `tokens.json` の `colors.semanticContrastMore`
+  （契約テストで同期）。`scripts/check-contrast.mjs` が例外なしで 3:1 を必須にする。
+  dark の枠は hover（`--Border-High-Emphasis` = White-Alpha-500）と同値になるため、高コントラスト時の
+  dark は枠の hover 変化が出ない（フォーカス時の枠・リングで状態は判別できる）。
 - **Categorical（質的）**: `var(--Categorical-{1..16})` ＋ `-Subtle`(背景) / `-Bold`(文字)。
   カテゴリの色分け専用でテーマ非依存。WCAG/色覚多様性を検証済み。文字には必ず `-Bold`。
 

@@ -95,11 +95,11 @@ function MultiSelect({
             aria-describedby={ariaDescribedBy}
             aria-invalid={ariaInvalid}
             className={cn(
-              "relative flex min-h-12 w-full flex-wrap items-center gap-1.5 rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-3 py-2 pr-10 typo-body-md transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 text-left",
+              "relative flex min-h-12 w-full flex-wrap items-center gap-1.5 rounded-lg border border-[var(--Border-Control)] bg-[var(--Surface-Primary)] px-3 py-2 pr-10 typo-body-md transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 text-left",
               showClearButton && "pr-16",
               open
                 ? "border-[var(--Border-Accent-Primary)] ring-[3px] ring-[var(--Focus-High-Emphasis)]/50"
-                : "border-[var(--Border-Medium-Emphasis)] hover:border-[var(--Border-High-Emphasis)]",
+                : "border-[var(--Border-Control)] hover:border-[var(--Border-High-Emphasis)]",
               "disabled:cursor-not-allowed disabled:opacity-50",
               "aria-invalid:border-[var(--Border-Caution)] aria-invalid:ring-[var(--Caution-Base)]/20",
               className
@@ -196,10 +196,10 @@ function MultiSelect({
                   )}
                 >
                   <span className={cn(
-                    "flex size-4 shrink-0 items-center justify-center rounded border border-[var(--Border-Medium-Emphasis)] transition-colors",
+                    "flex size-4 shrink-0 items-center justify-center rounded border border-[var(--Border-Control)] transition-colors",
                     checked
                       ? "bg-[var(--Brand-Primary)] border-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
-                      : "border-[var(--Border-Medium-Emphasis)]"
+                      : "border-[var(--Border-Control)]"
                   )}>
                     {checked && (
                       <svg width="10" height="10" viewBox="0 0 10 10" fill="none">

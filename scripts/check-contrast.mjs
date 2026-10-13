@@ -149,6 +149,25 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   }
 }
 
+// prefers-contrast: more / data-contrast="more" のときの値（issue #636）。上の既定値は
+// 見た目の据え置きのため台帳に例外登録しているが、こちらは「コントラストが必要な利用者に
+// 3:1 以上を提供する」ための値なので例外なしで必須（台帳の照合キーを渡さない）。
+// 値の正本は src/styles/semantic.css 末尾の High Contrast 節（tokens.json の
+// semanticContrastMore と __tests__/contrast-more-tokens.test.ts で一致を固定）。
+const contrastMore = tokens.colors.semanticContrastMore
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const bg = resolve(s.surface.primary)
+  const more = contrastMore[mode]
+  const moreControls = [
+    ["入力欄・チェックボックス・ラジオの枠 Border-Control", more.border.control],
+    ["スイッチ（オフ）の地 Surface-Switch-Off", more.surface["switch-off"]],
+    ["スイッチ（オフ・hover）の地 Surface-Switch-Off-Hover", more.surface["switch-off-hover"]],
+  ]
+  for (const [label, value] of moreControls) {
+    pairs.push([resolveOver(value, bg), bg, `${mode}: prefers-contrast: more の ${label} / Surface-Primary（非テキスト）`, 3])
+  }
+}
+
 const ledger = loadKnownExceptions(root)
 const ledgerErrors = validateSection("contrast", ledger.contrast)
 const exceptionByPair = new Map(ledger.contrast.map((entry) => [entry.pair, entry]))

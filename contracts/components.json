@@ -107,7 +107,8 @@
         "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）"
       },
       "accessibility": [
-        "Must pair with <Label>"
+        "Must pair with <Label>",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "Must use <Input> not <input>",
@@ -185,7 +186,8 @@
       "variants": [],
       "accessibility": [
         "Must pair with <Label>",
-        "aria-expanded on trigger button"
+        "aria-expanded on trigger button",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "Use DatePicker not <input type='date'>",
@@ -239,7 +241,8 @@
         "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）"
       },
       "accessibility": [
-        "Must pair with <Label>"
+        "Must pair with <Label>",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "Must use <Textarea> not <textarea>",
@@ -268,7 +271,8 @@
       "variants": [],
       "accessibility": [
         "Must pair with <Label>",
-        "aria-invalid=true（FormField の error から Select Root 経由で自動）でトリガーにエラー枠（Border-Caution）"
+        "aria-invalid=true（FormField の error から Select Root 経由で自動）でトリガーにエラー枠（Border-Caution）",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "Must use <Select> not <select>"
@@ -282,7 +286,8 @@
       "variants": [],
       "accessibility": [
         "Must pair with <Label>",
-        "native (src/native/components/CheckboxField.tsx, RadioGroup.tsx): accessibilityState に加え aria-checked / aria-disabled を既定で併記する（react-native-web 0.21 は accessibilityState を aria-* へ変換しないため。RN peerDependency >=0.78.0 の aria-* props を直接渡す）。行内の装飾用インナー Checkbox/丸印は aria-hidden も併記して二重の role=checkbox/radio を防ぐ"
+        "native (src/native/components/CheckboxField.tsx, RadioGroup.tsx): accessibilityState に加え aria-checked / aria-disabled を既定で併記する（react-native-web 0.21 は accessibilityState を aria-* へ変換しないため。RN peerDependency >=0.78.0 の aria-* props を直接渡す）。行内の装飾用インナー Checkbox/丸印は aria-hidden も併記して二重の role=checkbox/radio を防ぐ",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "label を渡すと <label> でラップされ行全体がクリッカブルになる",
@@ -297,7 +302,8 @@
       "variants": [],
       "accessibility": [
         "Must pair with <Label> for each item",
-        "RadioGroupItem は見た目 20px の円のまま ::before で 44x44px の当たり判定を内蔵する。消費側で [role=\"radio\"] のグローバル寸法上書きを追加しない（issue #470）"
+        "RadioGroupItem は見た目 20px の円のまま ::before で 44x44px の当たり判定を内蔵する。消費側で [role=\"radio\"] のグローバル寸法上書きを追加しない（issue #470）",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "Native は単体 Radio（ksk-design-system/native/ui）を共用。selected/onChange/size/disabled/decorative を持つ。decorative は親 radio の操作と読み上げに委ねる。単体使用では accessibilityLabel を指定し、onChange は常に true（排他制御は親）。"
@@ -310,7 +316,8 @@
       "description": "トグルスイッチ。設定のON/OFFなど即時反映するアクションに使用。",
       "variants": [],
       "accessibility": [
-        "Must pair with <Label>"
+        "Must pair with <Label>",
+        "オフの地は --Surface-Switch-Off / -Hover（既定は Surface-Quaternary / Object-Disable と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（Gray-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ]
     },
     {
@@ -1096,7 +1103,8 @@
       "accessibility": [
         "aria-expanded",
         "role=combobox",
-        "aria-invalid=true でトリガーにエラー枠（Border-Caution）。FormField の error から自動で届く"
+        "aria-invalid=true でトリガーにエラー枠（Border-Caution）。FormField の error から自動で届く",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "select で代替できない検索付きセレクトに使う"
@@ -1132,7 +1140,8 @@
       "accessibility": [
         "aria-multiselectable",
         "aria-invalid=true でトリガーにエラー枠（Border-Caution）。FormField の error から自動で届く",
-        "クリアボタンで選択が空になったらフォーカスをトリガーへ戻す（ボタンが消えて body に落ちない）"
+        "クリアボタンで選択が空になったらフォーカスをトリガーへ戻す（ボタンが消えて body に落ちない）",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "3 件以上選択する用途に。少数なら CheckboxGroup を優先"
@@ -1186,7 +1195,8 @@
       "variants": [],
       "sizes": [],
       "accessibility": [
-        "aria-label required"
+        "aria-label required",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "timezone 非対応。タイムゾーンが要件なら別実装"

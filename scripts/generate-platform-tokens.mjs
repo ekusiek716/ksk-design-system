@@ -159,6 +159,10 @@ function resolveGroups(source, brandDict, modeLabel) {
     out[group] = {};
     for (const [role, value] of Object.entries(entries)) {
       if (role === '_doc') continue;
+      // 別の semantic トークンへのエイリアス（var(--Border-Medium-Emphasis) 等）は Web 専用ロール。
+      // 例: Border-Control / Surface-Switch-Off（高コントラスト時だけ値を切り替える CSS 側の仕組み・
+      // issue #636）。ネイティブは CSS カスケードが無く参照先を解決できないので出力しない。
+      if (typeof value === 'string' && /^var\(--(?!Primitive-)/.test(value.trim())) continue;
       out[group][role] = resolveColor(value, brandDict, `${modeLabel}.${group}.${role}`);
     }
   }

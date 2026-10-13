@@ -26,49 +26,49 @@
   "contrast": [
     {
       "pair": "light:input-border",
-      "reason": "Border-Medium-Emphasis（Gray-300）と白の差が 1.48:1 で非テキスト 3:1 に未達。色を濃くすると全プロダクトの見た目が変わるため、見た目の変更は別判断（本人判断待ち）。",
+      "reason": "Border-Medium-Emphasis（Gray-300）と白の差が 1.48:1 で非テキスト 3:1 に未達。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（#636 の対応 PR）。",
       "issue": "#636",
       "reviewBy": "2027-03-31"
     },
     {
       "pair": "light:checkbox-border",
-      "reason": "チェックボックス（未選択）の枠は Border-Medium-Emphasis で 1.48:1。見た目の変更は別判断（本人判断待ち）。",
+      "reason": "チェックボックス（未選択）の枠は Border-Medium-Emphasis で 1.48:1。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（#636 の対応 PR）。",
       "issue": "#636",
       "reviewBy": "2027-03-31"
     },
     {
       "pair": "light:radio-border",
-      "reason": "ラジオ（未選択）の枠は Border-Medium-Emphasis で 1.48:1。見た目の変更は別判断（本人判断待ち）。",
+      "reason": "ラジオ（未選択）の枠は Border-Medium-Emphasis で 1.48:1。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（#636 の対応 PR）。",
       "issue": "#636",
       "reviewBy": "2027-03-31"
     },
     {
       "pair": "light:switch-off-track",
-      "reason": "スイッチ（オフ）の地 Surface-Quaternary（Gray-200）と白の差が 1.27:1。見た目の変更は別判断（本人判断待ち）。",
+      "reason": "スイッチ（オフ）の地 Surface-Quaternary（Gray-200）と白の差が 1.27:1。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（#636 の対応 PR）。",
       "issue": "#636",
       "reviewBy": "2027-03-31"
     },
     {
       "pair": "dark:input-border",
-      "reason": "dark の Border-Medium-Emphasis（White-Alpha-300）を Gray-900 に合成した色との差が 1.63:1。見た目の変更は別判断（本人判断待ち）。",
+      "reason": "dark の Border-Medium-Emphasis（White-Alpha-300）を Gray-900 に合成した色との差が 1.63:1。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（#636 の対応 PR）。",
       "issue": "#636",
       "reviewBy": "2027-03-31"
     },
     {
       "pair": "dark:checkbox-border",
-      "reason": "dark のチェックボックス（未選択）の枠は 1.63:1。見た目の変更は別判断（本人判断待ち）。",
+      "reason": "dark のチェックボックス（未選択）の枠は 1.63:1。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（#636 の対応 PR）。",
       "issue": "#636",
       "reviewBy": "2027-03-31"
     },
     {
       "pair": "dark:radio-border",
-      "reason": "dark のラジオ（未選択）の枠は 1.63:1。見た目の変更は別判断（本人判断待ち）。",
+      "reason": "dark のラジオ（未選択）の枠は 1.63:1。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（#636 の対応 PR）。",
       "issue": "#636",
       "reviewBy": "2027-03-31"
     },
     {
       "pair": "dark:switch-off-track",
-      "reason": "dark のスイッチ（オフ）の地 Surface-Quaternary（Gray-600）と Gray-900 の差が 2.29:1。見た目の変更は別判断（本人判断待ち）。",
+      "reason": "dark のスイッチ（オフ）の地 Surface-Quaternary（Gray-600）と Gray-900 の差が 2.29:1。既定の見た目はデザイン判断で据え置き。コントラストが必要な利用者には prefers-contrast: more / data-contrast=\"more\" で 3:1 以上を提供（#636 の対応 PR）。",
       "issue": "#636",
       "reviewBy": "2027-03-31"
     }

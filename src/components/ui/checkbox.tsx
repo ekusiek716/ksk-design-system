@@ -25,7 +25,7 @@ function CheckboxRoot({ className, ...props }: CheckboxRootProps) {
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        "peer size-5 shrink-0 rounded-[5px] border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)]",
+        "peer size-5 shrink-0 rounded-[5px] border border-[var(--Border-Control)] bg-[var(--Surface-Primary)]",
         "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "data-[state=checked]:bg-[var(--Brand-Primary)] data-[state=checked]:text-[var(--Text-on-Inverse)] data-[state=checked]:border-[var(--Brand-Primary)]",
