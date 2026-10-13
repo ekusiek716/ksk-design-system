@@ -19,6 +19,7 @@
 //   2. templates/*.md が参照する `node_modules/ksk-design-system/<path>` が実在し、`files` に入っている
 //   3. ルートの CLAUDE.md / AGENTS.md の「必須: セッション開始時に読み込むファイル」の各パスが
 //      実在し、`files` に入っている（DS 開発者専用の例外は DEV_ONLY_PREFIXES）
+//   5. テンプレートの角丸の許可セットが contracts/rules.json（AI3 の fix）と一致する
 //   4. テンプレートが案内する `npx ksk-ds init --force` を init.js が実際に受け付ける
 //
 // 実行: node scripts/check-ai-rules-dist.mjs
@@ -31,10 +32,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
 
 /**
  * consumer に配られていないが、ルート文書の「必読」に載っている DS 開発者向けのパス。
- * ここに入れたものは「配布漏れ」ではなく既知の未配布として扱う。
- * 配布する方針に変えたら package.json の `files` に足してここから外す。
+ * ここに入れたものは「配布漏れ」ではなく既知の未配布として扱う（現在は無し。
+ * .claude/skills/ksk-design-system は files に入れて配布する）。
  */
-export const DEV_ONLY_PREFIXES = [".claude/skills/"]
+export const DEV_ONLY_PREFIXES = []
 
 /** ビルド生成物（リポジトリには無く、publish 時に prepack が作る）。実在確認は飛ばして配布対象かだけ見る */
 const BUILD_OUTPUTS = ["dist"]
@@ -102,6 +103,26 @@ export function extractRootReadList(text) {
   return refs
 }
 
+/** `rounded-xxx` の値（xxx）の集合を取り出す */
+export function roundedSet(text) {
+  return new Set([...text.matchAll(/rounded-([a-z0-9]+(?:\/[a-z0-9]+)*)/g)].flatMap((m) => m[1].split("/")))
+}
+
+/** テンプレートの角丸の行（「カスタム角丸」の表の行）の「代わりに使うもの」側の許可セット */
+export function templateRoundedAllowed(text) {
+  const row = text.split(/\r?\n/).find((l) => l.includes("カスタム角丸"))
+  if (!row) return null
+  const cells = row.split("|")
+  const right = cells[2] ?? ""
+  return roundedSet(right)
+}
+
+/** rules.json の許可セット（AI3 の fix。`rounded-a / rounded-b …` 形式） */
+export function rulesRoundedAllowed(rules) {
+  const ai3 = (rules.aiPatterns?.patterns ?? []).find((p) => p.id === "AI3")
+  return ai3 ? roundedSet(ai3.fix) : null
+}
+
 /** init.js が配るテンプレート（`src: "templates/…"`）を取り出す */
 export function extractInitTemplates(initSource) {
   return [...initSource.matchAll(/src:\s*"(templates\/[^"]+)"/g)].map((m) => m[1])
@@ -112,7 +133,7 @@ export function extractInitTemplates(initSource) {
  * @param {{files: string[], initSource: string, templates: Record<string,string>, rootDocs: Record<string,string>, exists: (ref:string)=>boolean}} input
  * @returns {{kind: string, where: string, message: string}[]}
  */
-export function checkAiRulesDist({ files, initSource, templates, rootDocs, exists }) {
+export function checkAiRulesDist({ files, initSource, templates, rootDocs, exists, rules }) {
   const problems = []
   const add = (kind, where, message) => problems.push({ kind, where, message })
 
@@ -133,6 +154,18 @@ export function checkAiRulesDist({ files, initSource, templates, rootDocs, exist
     // 4. 案内するコマンド
     if (/ksk-ds init --force/.test(text) && !/--force/.test(initSource)) {
       add("COMMAND", name, "`npx ksk-ds init --force` を案内していますが、bin/init.js が --force を受け付けません")
+    }
+  }
+
+  // 5. 角丸の許可セットを正本（rules.json）と突き合わせる
+  const canonical = rules ? rulesRoundedAllowed(rules) : null
+  if (rules && !canonical) add("RULES", "contracts/rules.json", "aiPatterns の AI3（角丸の許可セット）を検出できません")
+  for (const [name, text] of Object.entries(templates)) {
+    if (!canonical) break
+    const got = templateRoundedAllowed(text)
+    if (!got) add("RULES", name, "「カスタム角丸」の行を検出できません")
+    else if ([...canonical].sort().join() !== [...got].sort().join()) {
+      add("RULES", name, `角丸の許可セットが rules.json と食い違います（テンプレート: ${[...got].sort().join("/")} / 正本: ${[...canonical].sort().join("/")}）`)
     }
   }
 
@@ -168,6 +201,7 @@ function main() {
     templates: { "templates/CLAUDE.md": read("templates/CLAUDE.md"), "templates/AGENTS.md": read("templates/AGENTS.md") },
     rootDocs: { "CLAUDE.md": read("CLAUDE.md"), "AGENTS.md": read("AGENTS.md") },
     exists: existsRef,
+    rules: JSON.parse(read("contracts/rules.json")),
   })
 
   for (const p of problems) console.log(`${RED}[AI-RULES-DIST:${p.kind}]${NC} ${p.where}: ${p.message}`)

@@ -93,10 +93,26 @@ describe("checkAiRulesDist（fixture）", () => {
   it("必読リストの節が無ければ STRUCTURE（見出し変更で検査が素通りしない）", () => {
     expect(kinds({ rootDocs: { "CLAUDE.md": "# 見出し無し" } })).toContain("STRUCTURE")
   })
-  it(".claude/skills/ は DS 開発者専用として許容し、他の未配布パスは検出する", () => {
+  it("必読リストの未配布パスは検出する（.claude/skills も files に無ければ漏れ）", () => {
     const root = (p: string) => ({ "CLAUDE.md": `## 必須: セッション開始時に読み込むファイル\n\n\`\`\`\n${p}\n\`\`\`\n` })
-    expect(kinds({ rootDocs: root(".claude/skills/ksk-design-system/SKILL.md") })).toEqual([])
+    expect(kinds({ rootDocs: root(".claude/skills/ksk-design-system/SKILL.md") })).toContain("NOT-SHIPPED")
+    expect(kinds({ rootDocs: root(".claude/skills/ksk-design-system/SKILL.md"), files: [...base.files, ".claude/skills/ksk-design-system"], exists: () => true })).toEqual([])
     expect(kinds({ rootDocs: root("scripts/lint-scratch.sh") })).toContain("NOT-SHIPPED")
+  })
+  describe("角丸の許可セットを rules.json と突き合わせる", () => {
+    const rules = { aiPatterns: { patterns: [{ id: "AI3", fix: "rounded-none / rounded-sm / rounded-md の3値のみ" }] } }
+    const tpl = (set: string) => ({ "templates/CLAUDE.md": `| カスタム角丸（\`rounded-3xl\` 等） | \`${set}\` のみ使用可 |\n` })
+    it("一致すれば空", () => {
+      expect(kinds({ templates: tpl("rounded-none/sm/md"), rules })).toEqual([])
+    })
+    it("欠け（md が無い）も余り（xl がある）も検出する", () => {
+      expect(kinds({ templates: tpl("rounded-none/sm"), rules })).toContain("RULES")
+      expect(kinds({ templates: tpl("rounded-none/sm/md/xl"), rules })).toContain("RULES")
+    })
+    it("行や正本が見つからなければ RULES", () => {
+      expect(kinds({ templates: { "templates/CLAUDE.md": "角丸の行なし" }, rules })).toContain("RULES")
+      expect(kinds({ templates: tpl("rounded-none/sm/md"), rules: { aiPatterns: { patterns: [] } } })).toContain("RULES")
+    })
   })
 })
 
@@ -108,6 +124,7 @@ describe("実リポジトリ", () => {
       initSource: read("bin/init.js"),
       templates: { "templates/CLAUDE.md": read("templates/CLAUDE.md"), "templates/AGENTS.md": read("templates/AGENTS.md") },
       rootDocs: { "CLAUDE.md": read("CLAUDE.md"), "AGENTS.md": read("AGENTS.md") },
+      rules: JSON.parse(read("contracts/rules.json")),
       exists: (ref: string) => ref === "dist" || ref.startsWith("dist/") || ref.includes("*") || existsSync(join(ROOT, ref)),
     })
     expect(problems).toEqual([])

@@ -38,7 +38,8 @@
     "PUBLISHING.md",
     "docs/consumer-release-notices.md",
     "RELEASE.md",
-    "UPDATING.md"
+    "UPDATING.md",
+    ".claude/skills/ksk-design-system"
   ],
   "exports": {
     ".": {
