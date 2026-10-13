@@ -10,12 +10,12 @@ name: Update visual baselines
 # 走り直さないので、空コミットの push・PR の close/reopen・「Re-run jobs」の
 # いずれかで Docs and visual regression を再実行して緑を確認すること。
 # 撮り直した PNG は、別のレビュアーが旧/新の画像と実画面を確認してから承認する
-# （docs/visual-and-docs-checks.md「基準更新のレビュー」）。
+# （docs/visual-and-docs-checks.md「基準画像の撮り直し」）。
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 基準画像を撮り直してコミットするブランチ名（main は不可）
+        description: 基準画像を撮り直してコミットするブランチ名（既定ブランチ・タグ・SHA は不可）
         required: true
         type: string
 permissions:
@@ -35,34 +35,61 @@ jobs:
       KSK_VISUAL_BASELINE_WORKFLOW: '1'
       VISUAL_BASELINE_REVIEW: '1'
       TARGET_REF: ${{ inputs.ref }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
     steps:
-      - name: Refuse the default branch
+      - name: Resolve the target branch (refuse default branch, tags and SHAs)
+        # refs/heads/ を外して正規化し、既定ブランチと比べる。GitHub に実在する
+        # ブランチだけを受け付ける（タグ・コミット SHA・存在しない名前は拒否）。
+        # 結果は以降のステップで TARGET_BRANCH として使う。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          case "$TARGET_REF" in
-            main|refs/heads/main) echo "main へ直接コミットしない。PR のブランチを指定する。" >&2; exit 1 ;;
-          esac
+          node --input-type=module -e '
+            const branch = process.env.TARGET_REF.trim().replace(/^refs\/heads\//, "")
+            const fail = message => { console.error(message); process.exit(1) }
+            if (!branch || !/^[A-Za-z0-9._\/-]+$/.test(branch) || branch.includes("..") || branch.startsWith("refs/")) fail(`ブランチ名として不正: ${process.env.TARGET_REF}`)
+            if (branch === process.env.DEFAULT_BRANCH) fail(`既定ブランチ ${branch} へは直接コミットしない。PR のブランチを指定する。`)
+            const url = `https://api.github.com/repos/${process.env.GITHUB_REPOSITORY}/branches/${branch.split("/").map(encodeURIComponent).join("/")}`
+            const response = await fetch(url, { headers: { authorization: `Bearer ${process.env.GITHUB_TOKEN}`, accept: "application/vnd.github+json" } })
+            if (!response.ok) fail(`ブランチ ${branch} が見つからない（HTTP ${response.status}）。タグや SHA は指定できない。`)
+            const body = await response.json()
+            if (body.name !== branch) fail(`ブランチ名が一致しない: ${body.name} != ${branch}`)
+            const { appendFileSync } = await import("node:fs")
+            appendFileSync(process.env.GITHUB_ENV, `TARGET_BRANCH=${branch}\n`)
+            console.log(`target branch: ${branch}`)
+          '
       - name: Install git
         # actions/checkout は git が無いと .git の無い展開になり、コミットできない。
         run: command -v git || (apt-get update && apt-get install -y --no-install-recommends git)
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.ref }}
+          ref: refs/heads/${{ env.TARGET_BRANCH }}
+          # 認証情報を .git/config に残さない。push の直前の 1 コマンドだけに渡す。
+          persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      # 書き込み権限を持つジョブなので、依存の install スクリプトは実行しない。
+      - run: npm ci --ignore-scripts
       - run: npm run build-storybook
       - name: Start static Storybook
         run: |
           node scripts/serve-storybook.mjs storybook-static 0 > /tmp/storybook.log 2>&1 &
           for i in $(seq 1 60); do grep -q '^KSK_STORYBOOK_URL=' /tmp/storybook.log && break; sleep 0.5; done
+          if ! grep -q '^KSK_STORYBOOK_URL=' /tmp/storybook.log; then
+            echo "静的 Storybook サーバーが 30 秒以内に起動しなかった:" >&2
+            cat /tmp/storybook.log >&2
+            exit 1
+          fi
           sed -n 's/^KSK_STORYBOOK_URL=//p' /tmp/storybook.log | head -n 1 | sed 's/^/STORYBOOK_URL=/' >> "$GITHUB_ENV"
       - name: Capture baselines
         run: node scripts/check-visual.mjs --update
       - name: Verify the new baselines reproduce
         run: node scripts/check-visual.mjs
       - name: Commit to the branch
+        env:
+          PUSH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name "github-actions[bot]"
@@ -70,7 +97,8 @@ jobs:
           git add -A test/visual/baselines
           if git diff --cached --quiet; then echo "基準画像に変化なし"; exit 0; fi
           git commit -m "test(visual): 基準画像を固定コンテナで撮り直す" -m "workflow: ${GITHUB_WORKFLOW} run ${GITHUB_RUN_ID}"
-          git push origin "HEAD:${TARGET_REF#refs/heads/}"
+          AUTH="$(printf 'x-access-token:%s' "$PUSH_TOKEN" | base64 -w0)"
+          git -c http.extraheader="AUTHORIZATION: basic ${AUTH}" push "https://github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/${TARGET_BRANCH}"
           echo "コミット済み。GITHUB_TOKEN の push では CI が再起動しないため、PR の CI を手動で再実行すること。" >> "$GITHUB_STEP_SUMMARY"
       - name: Upload captured images
         if: always()

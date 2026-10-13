@@ -61,6 +61,13 @@ try {
         return root?.textContent.trim().length > 0 || [...(root?.querySelectorAll('*') ?? [])].some(element => element.getBoundingClientRect().height > 0) || document.querySelector('[role="dialog"]')
       })
       await page.evaluate(() => document.fonts.ready)
+      // Components that settle after mount (Select value, Slider thumb position,
+      // Progress width) can still be transitioning. Wait until no finite
+      // animation/transition is running, then for two more frames so layout and
+      // paint from the last state change are committed. Infinite animations
+      // (spinners) are frozen by `animations: 'disabled'` at capture time.
+      await page.waitForFunction(() => document.getAnimations().every(animation => animation.playState !== 'running' || animation.effect?.getComputedTiming().iterations === Infinity), null, { timeout: 10_000 })
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
       if (errors.length) throw new Error(errors.join('\n'))
       const actual = await page.screenshot({ animations: 'disabled', caret: 'hide', fullPage: Boolean(s.fullPage) })
       if (process.argv.includes('--probe-regression') && s === scenarios[0]) {

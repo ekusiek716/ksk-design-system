@@ -8,9 +8,11 @@
 // =============================================================
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { LEDGER_PATH, checkA11yLedger } from "./lib/known-exceptions.mjs"
+import { LEDGER_PATH, checkA11yLedger, loadKnownExceptions, upcomingReviews } from "./lib/known-exceptions.mjs"
 
 export default function setup() {
-  const errors = checkA11yLedger(join(dirname(fileURLToPath(import.meta.url)), ".."))
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..")
+  for (const warning of upcomingReviews("a11y", loadKnownExceptions(root).a11y)) console.warn(`⚠ 見直し期限が近い: ${warning}`)
+  const errors = checkA11yLedger(root)
   if (errors.length) throw new Error(`${LEDGER_PATH} の a11y 区分に問題があります:\n${errors.map((e) => `  - ${e}`).join("\n")}`)
 }

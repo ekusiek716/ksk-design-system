@@ -15,7 +15,7 @@
 // =============================================================
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { LEDGER_PATH, crossCheckA11y, loadKnownExceptions, scanStoryA11yOverrides, todayIso, validateSection } from "./lib/known-exceptions.mjs"
+import { LEDGER_PATH, WARN_WITHIN_DAYS, crossCheckA11y, loadKnownExceptions, scanStoryA11yOverrides, todayIso, upcomingReviews, validateSection } from "./lib/known-exceptions.mjs"
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 const today = todayIso()
@@ -30,10 +30,14 @@ for (const entry of ledger.visual) {
   if (!Number.isInteger(entry.maxChangedPixels) || entry.maxChangedPixels < 1) errors.push(`visual: ${entry.scenario} の maxChangedPixels は 1 以上の整数で書いてください`)
 }
 
+// 期限が近い登録は失敗にせず警告だけ出す（期限日に無関係な PR が一斉に止まらないように）。
+const warnings = ["a11y", "contrast", "visual"].flatMap((s) => upcomingReviews(s, ledger[s], today))
+for (const warning of warnings) console.warn(`⚠ 見直し期限が ${WARN_WITHIN_DAYS} 日以内: ${warning}`)
+
 if (errors.length) {
   console.error(`✗ ${LEDGER_PATH} の検査で ${errors.length} 件の問題:`)
   for (const error of errors) console.error(`  - ${error}`)
   process.exit(1)
 }
 const counts = ["a11y", "contrast", "visual"].map((s) => `${s} ${ledger[s].length}`).join(" / ")
-console.log(`✓ 例外台帳 OK（${counts}・基準日 ${today}）`)
+console.log(`✓ 例外台帳 OK（${counts}・基準日 ${today} UTC・期限間近 ${warnings.length}）`)

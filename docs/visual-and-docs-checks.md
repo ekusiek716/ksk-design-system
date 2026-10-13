@@ -27,7 +27,7 @@
 
 ### 判定
 
-毎回同じPlaywright公式Linuxコンテナ、Chromium、locale、timezone、device scale、reduced motionで描画します。OSフォント差を避けるためMacで生成した画像を受け付けません。
+毎回同じPlaywright公式Linuxコンテナ、Chromium、locale、timezone、device scale、reduced motionで描画します。OSフォント差を避けるためMacで生成した画像を受け付けません。撮影前に、フォント読み込み・有限のアニメーション/トランジションの終了（`document.getAnimations()`）・さらに2フレームを待ちます。マウント後に値が入る部品（Select・Slider・Progress）の途中の状態を撮らないためです。
 
 ```sh
 npm run build-storybook
@@ -50,7 +50,7 @@ docker run --rm --init --ipc=host --platform linux/amd64 \
 gh workflow run visual-baselines-update.yml -f ref=<PRのブランチ名>
 ```
 
-通常CIと同じコンテナで全場面を撮り、もう一度比較して再現することを確かめてから、そのブランチへ `test(visual): 基準画像を固定コンテナで撮り直す` としてコミットします。main は指定できません。
+通常CIと同じコンテナで全場面を撮り、もう一度比較して再現することを確かめてから、そのブランチへ `test(visual): 基準画像を固定コンテナで撮り直す` としてコミットします。入力の `ref` は `refs/heads/` を外して正規化し、既定ブランチ（main）・タグ・コミットSHA・存在しないブランチは拒否します。checkout は認証情報を残さない設定（`persist-credentials: false`）で行い、push の1コマンドだけにトークンを渡します。依存は `npm ci --ignore-scripts` で入れます。
 
 - `workflow_dispatch` は既定ブランチ（main）にあるworkflowしか起動できません。このworkflow自体を追加・変更するPRでは、マージ前に使えません（その場合は下のdocker手順で撮る）。
 - **GITHUB_TOKENでのpushは新しいworkflowを起動しません**（GitHubの仕様・無限ループ防止）。コミット後、PRのCIは自動では走り直さないため、空コミットのpush・PRのclose/reopen・「Re-run jobs」のいずれかで `Docs and visual regression` を再実行して緑を確認します。
@@ -73,17 +73,17 @@ gh workflow run visual-baselines-update.yml -f ref=<PRのブランチ名>
 
 「意図して基準を下回る」項目は `test/known-exceptions.json` に集め、**理由（reason）・issue・見直し期限（reviewBy, YYYY-MM-DD）** を必須にします。登録があれば検査は通りますが、次は失敗します。
 
-- 見直し期限を過ぎた登録
+- 見直し期限を過ぎた登録（日付の比較は **UTC** 基準。日本時間の朝9時に日付が変わる）
 - 使われていない登録（直った・対象が消えた）
 - 台帳を通さない例外（ストーリー側で axe ルールを無効化したのに未登録）
 
 | 区分 | 対象 | 検査する場所 |
 |---|---|---|
-| `a11y` | ストーリー側の axe ルール無効化（`parameters.a11y.config.rules` の `enabled: false`、`a11y.test: "off"`）。`target` は `<ファイル>#<export名>`（meta全体は `#meta`） | `npm run check`（`scripts/check-known-exceptions.mjs`）と `npm run test:a11y` の開始時（`vitest.a11y.config.ts` の globalSetup） |
+| `a11y` | ストーリー側で axe を弱めている箇所。`parameters.a11y` の `config.rules` / `options.rules`（配列 `[{ id, enabled: false }]` でもオブジェクト `{ "id": { enabled: false } }` でも、キーの順番によらず）、`test: "off"` / `"todo"`、`disable: true`。TypeScript の構文木で `src/` と `test/visual/` の `.stories.tsx` / `.stories.ts` を走査する。変数やスプレッドで静的に読めない書き方は失敗。`target` は `<ファイル>#<変数名>`（`export default {...}` は `#default`）、`rule` はルールID か `test:off` / `test:todo` / `disable` | `npm run check`（`scripts/check-known-exceptions.mjs`）と `npm run test:a11y` の開始時（`vitest.a11y.config.ts` の globalSetup） |
 | `contrast` | `scripts/check-contrast.mjs` のトークンペアのうち基準未達のもの。`pair` は照合キー（例: `light:input-border`） | `npm run check`（`scripts/check-contrast.mjs`。基準を満たした登録・存在しない組も失敗） |
 | `visual` | 画像比較で変化ピクセルを許容する場面（`scenario` と `maxChangedPixels`）。既定は0で、登録が無い限り1ピクセルも許容しない | `npm run test:visual` / `npm run test:visual:guards` |
 
-期限が来たら、直すか、理由を見直して期限を延ばすPRを出します。延長だけを繰り返さないよう、issueで判断を残してください。
+見直し期限が **30日以内** に迫った登録は、失敗させずに `npm run check` と `npm run test:a11y` で警告を出します（期限日に無関係なPRが一斉に止まらないよう、先に見直すため）。期限が来たら、直すか、理由を見直して期限を延ばすPRを出します。延長だけを繰り返さないよう、issueで判断を残してください。
 
 ### 文字以外のコントラスト（WCAG 1.4.11）
 
