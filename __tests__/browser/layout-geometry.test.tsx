@@ -28,7 +28,7 @@ import "@/index.css"
  * - 幅 390px の画面で Select / DropdownMenu / Popover の一覧が画面外へはみ出さない
  * - 隠れている SkipLink が長いラベルでも画面の上端から覗かない
  * - 縦向き Tabs がタブを縦に並べ、パネルを右に置く（横向きの既定は従来どおり）
- * - Pagination のページ番号が 5 桁でも枠からはみ出さない（4 桁までは 40px のまま）
+ * - Pagination のページ番号が 4〜5 桁でも枠からはみ出さない（1〜2 桁は 40px のまま）
  * - 動きを減らす設定で、スピナー類と Skeleton の無限アニメーションが止まる
  *
  * 敵対的な親（Storybook の Hostile ctx 相当）は、文字色に加えて行間・字間・文字サイズも
@@ -241,24 +241,36 @@ describe("Tabs", () => {
 })
 
 describe("Pagination", () => {
-  it("ページ番号は 4 桁まで 40px の正方形のまま、5 桁でも文字が枠からはみ出さない", async () => {
+  it("ページ番号は 1〜2 桁で 40px の正方形、4〜5 桁でも文字が枠からはみ出さない", async () => {
     await mount(
       <Pagination>
         <PaginationContent>
-          {["1", "1000", "10000"].map((n) => (
+          {["1", "99", "1000", "10000"].map((n) => (
             <PaginationItem key={n}>
               <PaginationLink href="#" isActive={n === "1"} data-testid={`p${n}`}>{n}</PaginationLink>
             </PaginationItem>
           ))}
+          <PaginationItem>
+            <PaginationLink href="#" size="default" data-testid="pdefault">前のページ</PaginationLink>
+          </PaginationItem>
         </PaginationContent>
       </Pagination>,
     )
-    expect(rect("[data-testid=p1]").width).toBe(40)
-    expect(rect("[data-testid=p1000]").width).toBe(40)
-    const five = document.querySelector<HTMLElement>("[data-testid=p10000]")!
-    // 修正前: 幅 40px に対して中身が 44px あり、はみ出していた
-    expect(five.scrollWidth).toBeLessThanOrEqual(five.clientWidth)
-    expect(five.getBoundingClientRect().height).toBe(40)
+    // 1〜2 桁はどのフォントでも 40px に収まる。4 桁以上の幅はフォント次第
+    // （macOS で 40px、CI の ubuntu で約 41px）なので、はみ出さないことだけを見る
+    for (const n of ["1", "99"]) {
+      expect(rect(`[data-testid=p${n}]`).width).toBe(40)
+      expect(rect(`[data-testid=p${n}]`).height).toBe(40)
+    }
+    for (const n of ["1000", "10000"]) {
+      const el = document.querySelector<HTMLElement>(`[data-testid=p${n}]`)!
+      // 修正前: 5 桁で幅 40px に対して中身が 44px あり、はみ出していた
+      expect(el.scrollWidth).toBeLessThanOrEqual(el.clientWidth)
+      expect(el.getBoundingClientRect().height).toBe(40)
+    }
+    // min-w-fit はページ番号（size="icon"）にだけ付く
+    expect(document.querySelector("[data-testid=p1]")!.classList.contains("min-w-fit")).toBe(true)
+    expect(document.querySelector("[data-testid=pdefault]")!.classList.contains("min-w-fit")).toBe(false)
   })
 })
 

@@ -29,7 +29,9 @@ export interface SkeletonProps extends Omit<React.ComponentProps<"div">, "width"
  * - 何も指定しない場合は `h-4 w-full`（native の 16px / 100% と同等）が既定で
  *   適用されるため、`<Skeleton />` だけでも必ず見える
  * - `rounded` で角丸プリセットを切り替え（既定 `lg`）
- * - `animate-pulse` がデフォルトで適用
+ * - `animate-pulse` がデフォルトで適用。動きを減らす設定（prefers-reduced-motion）では
+ *   pulse が止まる。Skeleton 自体は aria-hidden なので、読み込み中であることは
+ *   包む側の `aria-busy` などで伝える
  *
  * 複数まとめて並べる場合は `ListSkeleton` / `GridSkeleton` (patterns) を使うと
  * 定型レイアウトが組める。
