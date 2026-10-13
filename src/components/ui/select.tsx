@@ -105,6 +105,9 @@ function SelectContent({ className, children, position = "popper", ...props }: R
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          // 画面内に使える幅まで。長い選択肢があると一覧が 1 行の長さまで伸び、
+          // 幅 390px の画面で 641px になって右へはみ出していた（収まる一覧には効かない）。
+          position === "popper" && "max-w-(--radix-select-content-available-width)",
           className
         )}
         position={position}

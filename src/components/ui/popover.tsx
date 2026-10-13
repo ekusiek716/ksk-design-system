@@ -54,7 +54,9 @@ function PopoverContent({ className, align = "center", sideOffset = 4, ...props 
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          "z-[var(--Z-Popover)] w-72 rounded-[var(--Radius-Surface)] border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] p-4 shadow-[var(--shadow-lg)] focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+          // max-w は画面内に使える幅まで。className で w-[480px] などを渡しても、
+          // 幅 390px の画面で右へはみ出さない（既定の w-72 = 288px には効かない）。
+          "z-[var(--Z-Popover)] w-72 max-w-(--radix-popover-content-available-width) rounded-[var(--Radius-Surface)] border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] p-4 shadow-[var(--shadow-lg)] focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           className

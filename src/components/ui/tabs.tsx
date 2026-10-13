@@ -8,8 +8,21 @@ type TabsVariant = "default" | "pill"
 // （PillToggle は variant="pill" の Tabs として実装される）
 const TabsVariantContext = React.createContext<TabsVariant>("default")
 
+// 縦向き（orientation="vertical"）は data-orientation で並びだけを切り替える（opt-in）。
+// これまでは矢印キーだけが上下に変わり、見た目は横並びのまま・パネルはタブの下だった。
+// 横向き（既定）の見た目は変えない。
+const VERTICAL_ROOT = "data-[orientation=vertical]:flex-row data-[orientation=vertical]:items-start"
+// タブの列は Tabs の幅の半分まで。長いラベルはタブの中で折り返し、パネルを潰さない。
+const VERTICAL_LIST =
+  "data-[orientation=vertical]:h-auto data-[orientation=vertical]:max-w-[50%] data-[orientation=vertical]:shrink-0 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch"
+const VERTICAL_TRIGGER =
+  "data-[orientation=vertical]:justify-start data-[orientation=vertical]:whitespace-normal data-[orientation=vertical]:text-left"
+// パネルは行の残りを取る（タブの下に回り込ませない）。
+const VERTICAL_CONTENT =
+  "data-[orientation=vertical]:mt-0 data-[orientation=vertical]:min-w-0 data-[orientation=vertical]:flex-1"
+
 function Tabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
-  return <TabsPrimitive.Root data-slot="tabs" className={cn("flex flex-col gap-2", className)} {...props} />
+  return <TabsPrimitive.Root data-slot="tabs" className={cn("flex flex-col gap-2", VERTICAL_ROOT, className)} {...props} />
 }
 
 function TabsList({
@@ -38,6 +51,7 @@ function TabsList({
           variant === "pill"
             ? "h-11 rounded-[var(--Control-Radius)]"
             : "h-[var(--Control-Height-Md)] rounded-[var(--Field-Radius)]",
+          VERTICAL_LIST,
           className
         )}
         {...props}
@@ -71,6 +85,7 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
         "forced-colors:data-[state=active]:bg-[Highlight] forced-colors:data-[state=active]:text-[HighlightText]",
         variant === "default" && "hover:text-[var(--Text-High-Emphasis)]",
         variant === "pill" && "data-[state=inactive]:hover:text-[var(--Text-High-Emphasis)]",
+        VERTICAL_TRIGGER,
         className
       )}
       {...props}
@@ -82,7 +97,7 @@ function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPr
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("mt-2 focus-visible:outline-hidden", className)}
+      className={cn("mt-2 focus-visible:outline-hidden", VERTICAL_CONTENT, className)}
       {...props}
     />
   )

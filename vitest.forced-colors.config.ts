@@ -15,6 +15,10 @@ import { playwright } from "@vitest/browser-playwright"
  * `Emulation.setEmulatedMedia` を叩いて forced-colors を有効化し、
  * 実際の computed style（outline）を検証する軽量な browser mode 設定として分離した。
  *
+ * 同じ `__tests__/browser/` には、部品の寸法・位置を実ブラウザで固定する
+ * `layout-geometry.test.tsx`（画面幅 390 / 960px・敵対的な親・prefers-reduced-motion）も
+ * 置いており、この設定でまとめて実行される。
+ *
  * 実行: `npm run test:forced-colors`
  */
 export default defineConfig({

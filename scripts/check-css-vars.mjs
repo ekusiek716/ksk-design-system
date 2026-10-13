@@ -42,9 +42,12 @@ export const ALLOWLIST = [
   {
     names: [
       "--radix-dropdown-menu-content-available-height",
+      "--radix-dropdown-menu-content-available-width",
       "--radix-dropdown-menu-content-transform-origin",
       "--radix-hover-card-content-transform-origin",
+      "--radix-popover-content-available-width",
       "--radix-popover-trigger-width",
+      "--radix-select-content-available-width",
       "--radix-select-trigger-height",
       "--radix-select-trigger-width",
     ],

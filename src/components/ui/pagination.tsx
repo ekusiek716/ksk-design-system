@@ -72,6 +72,9 @@ function PaginationLink({
       variant: isActive ? "default" : "ghost",
       size,
     }),
+    // ページ番号（size="icon"）は正方形の 40px が既定だが、5 桁（10000〜）で文字が枠から
+    // はみ出していた。min-w-fit で中身が枠より広いときだけ横に伸ばす（4 桁までは 40px のまま）。
+    size === "icon" && "min-w-fit",
     className
   )
 
