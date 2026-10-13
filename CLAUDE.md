@@ -159,6 +159,21 @@ afterEach フックが全ストーリー（tags フィルタなし）に対し�
 （AA 未達トークンの darken と opacity 減衰の廃止により全ストーリー通過。
 トークンペアの正本チェックは `scripts/check-contrast.mjs`）。CI では常時実行される。
 
+**WebKit（Safari 系）でも実行できる:**
+
+```bash
+npx playwright install webkit   # 初回のみ
+npm run test:interaction:webkit
+npm run test:a11y:webkit
+```
+
+同じ設定（`vitest.storybook.config.ts` / `vitest.a11y.config.ts`）を環境変数
+`KSK_BROWSER=webkit` で WebKit に切り替えて回す。Chromium では見えない差
+（フォーカス・スクロール・描画差）を拾う。CI では専用ジョブ `webkit` で Chromium 側と
+並列に常時実行される。現状は全ストーリーが WebKit でも通っており、**除外している
+ストーリー・検査はない**（WebKit 固有の制限で除外が必要になったら、理由付きでここに一覧を残す）。
+ボタン・リンク・Select 等のフォーカス/キーボード操作を触ったときは WebKit 側も回すこと。
+
 **Button など、フォーカス表示の `outline-none` / `outline-hidden` 系クラスを触ったら `npm run test:forced-colors` も実行:**
 
 ```bash
@@ -358,8 +373,10 @@ npm run test:forced-colors
   v1.48.x で連続した種類の不具合をここで落とす。
 - **play 関数のあるコンポーネント（Button / Dialog / AlertDialog / Sheet / Select /
   DropdownMenu / Combobox / Tabs / Form / Toast）を触ったら `npm run test:interaction` を回すこと。**
-- ビジュアル回帰（スクリーンショット差分）は未導入。`.claude/skills/audit-pages/SKILL.md` による
-  手動の視覚監査が現状の代替。
+- ビジュアル回帰（画像比較）は固定場面 + `tags: ["vrt"]` を付けた主要部品の代表ストーリー
+  × light/dark だけを撮る（全ストーリーは撮らない）。手順・基準画像の撮り直し・使われなく
+  なった基準画像の検出は `docs/visual-and-docs-checks.md`。横断の視覚監査は
+  `.claude/skills/audit-pages/SKILL.md`。
 
 **a11y 機械検証について（issue #261）:**
 
@@ -368,7 +385,9 @@ npm run test:forced-colors
 - color-contrast ルールも有効（全ストーリー対象）。当初はトークン債務のため無効化していたが、
   AA 未達トークンの darken（Success/Warning-Base・Text-Caution/Warning・Text-Low-Emphasis）と
   opacity 減衰の廃止で解消済み。無効状態デモ等 WCAG 1.4.3 の inactive 例外だけ、ストーリー側で
-  理由コメント付きの rule 除外を許可（`.storybook/preview.ts` 参照）。トークンペアの正本チェックは
+  理由コメント付きの rule 除外を許可（`.storybook/preview.ts` 参照）。除外は
+  `test/known-exceptions.json` に理由・issue・見直し期限（reviewBy）付きで登録し、未登録・
+  期限切れ・使われていない登録は `npm run check` と `npm run test:a11y` が落とす。トークンペアの正本チェックは
   `scripts/check-contrast.mjs`（`npm run check` 経由）。
 - rules.json の `accessibility.requirements` に `machineVerified` / `verifiedBy` を追加済み。
   axe でカバーできない項目（フォーカスリング視認・タッチターゲット実測・エラー表示の

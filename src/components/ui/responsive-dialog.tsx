@@ -223,6 +223,7 @@ function ResponsiveDialogContent({
   position,
   safeArea,
   padding,
+  size,
   ...props
 }: React.ComponentProps<typeof DialogContent> & {
   /**
@@ -240,6 +241,8 @@ function ResponsiveDialogContent({
         position={position}
         safeArea={safeArea}
         padding={padding}
+        // size は PC（Dialog）の幅の段。SP の Sheet は side="bottom"（全幅）なので渡さない。
+        size={size}
         {...props}
       >
         {children}

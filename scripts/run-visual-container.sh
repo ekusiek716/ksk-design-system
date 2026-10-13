@@ -12,8 +12,23 @@ cp package.json package-lock.json "$TASK_DIR/"
 cp -R scripts test "$TASK_DIR/"
 cd "$TASK_DIR"
 npm ci --ignore-scripts --no-audit --no-fund
-node "$ROOT/scripts/serve-storybook.mjs" "$ROOT/storybook-static" 6010 > /tmp/ksk-visual-server.log 2>&1 &
+# Port 0 = OS-assigned free port, so concurrent runs (e.g. --network host or a
+# bare Linux host) never collide on 6010. The server prints the bound URL.
+SERVER_LOG="$TASK_DIR/storybook-server.log"
+node "$ROOT/scripts/serve-storybook.mjs" "$ROOT/storybook-static" 0 > "$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
+STORYBOOK_URL=""
+for _ in $(seq 1 60); do
+  STORYBOOK_URL="$(sed -n 's/^KSK_STORYBOOK_URL=//p' "$SERVER_LOG" | head -n 1)"
+  if [[ -n "$STORYBOOK_URL" ]]; then break; fi
+  sleep 0.5
+done
+if [[ -z "$STORYBOOK_URL" ]]; then
+  echo "Static Storybook server did not start:" >&2
+  cat "$SERVER_LOG" >&2
+  exit 1
+fi
+export STORYBOOK_URL
 STATUS=0
 node scripts/check-visual.mjs "$@" || STATUS=$?
 cp -R artifacts "$ROOT/"

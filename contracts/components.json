@@ -388,7 +388,8 @@
         "子として置いた DialogDescription は自動で aria-describedby に紐付く（#485）。呼び出し側で id / aria-describedby を明示した場合はそちらが優先。Description を置かないダイアログでは aria-describedby を出さない（Radix の Missing Description 警告抑制）",
         "DialogTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は position=\"fullscreen\" 配下で page 相当、それ以外は従来の typo-heading-lg",
         "native (src/native/components/Dialog.tsx): position=\"center\"(既定) / \"top\" / \"fullscreen\" を持ち、fullscreen は四辺・top は上端の safe-area を避ける。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
-        "modal な Dialog の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）"
+        "modal な Dialog の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）",
+        "size は sm(400px) / md(480px・既定) / lg(640px) / xl(800px) の幅の段（opt-in）。未指定は従来の 480px のまま。position=\"fullscreen\" では無視。size の段は sm: 付きなので、上書きは className に sm:max-w-* を渡す（接頭辞なしの max-w-* は size に勝たない）。Sheet の size と段の名前を揃えている。ResponsiveDialogContent の size は PC 側の Dialog にだけ渡る"
       ],
       "variants": {
         "position": [
@@ -400,6 +401,12 @@
           "page",
           "section",
           "card"
+        ],
+        "size": [
+          "sm",
+          "md",
+          "lg",
+          "xl"
         ]
       }
     },
@@ -430,7 +437,8 @@
         "SheetTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は BottomSheetFrame preset=\"mobile-full\"|\"mobile-page\" 配下で page 相当、それ以外は従来の typo-heading-lg",
         "native (src/native/components/Sheet.tsx): safeArea(既定 true) で side=\"top\" の上端 inset 退避と、画面いっぱいに近い side=\"bottom\" の食い込み分の退避を行う。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
         "native (src/native/components/Sheet.tsx): surfaceColor でパネル（および snap モードの footer）の面色を上書きできる。未指定なら theme.surface.primary（従来どおり）。scrim の色は変えない（issue #448）",
-        "modal な Sheet の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）"
+        "modal な Sheet の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）",
+        "size は sm(max-w-sm・既定) / md(max-w-xl) / lg(max-w-3xl) の幅の段（opt-in）。side=\"left\" / \"right\" のときだけ効き、top / bottom / float 系では無視。未指定は従来の max-w-sm のまま。className の max-w-* は size より優先。Dialog の size と段の名前を揃えている"
       ],
       "variants": {
         "titleLevel": [
@@ -446,6 +454,11 @@
           "float",
           "float-glass",
           "bottom-glass"
+        ],
+        "size": [
+          "sm",
+          "md",
+          "lg"
         ]
       }
     },
@@ -552,7 +565,8 @@
       "path": "src/components/ui/pagination.tsx",
       "description": "ページネーション。リスト・テーブルのページ送りに使用。",
       "props": {
-        "navLabel": "string (既定 \"ページネーション\") — nav 要素の aria-label（issue #428、SimplePagination.navLabel と同名）"
+        "navLabel": "string (既定 \"ページネーション\") — nav 要素の aria-label（issue #428、SimplePagination.navLabel と同名）",
+        "PaginationLink.asChild": "boolean (既定 false) — as=\"a\" 経路で <a> の代わりに子（next/link 等）へ見た目・aria を渡す（Radix Slot）。disabled は href を外せない代わりに aria-disabled / tabIndex=-1 / pointer-events-none / クリック抑止。PaginationPrevious・PaginationNext も asChild を受け、子の children をラベルとしてアイコンと一緒に子の中へ入れ直す"
       },
       "subcomponents": [
         "PaginationContent",
@@ -574,6 +588,9 @@
         "BreadcrumbPage",
         "BreadcrumbSeparator",
         "BreadcrumbEllipsis"
+      ],
+      "rules": [
+        "BreadcrumbLink は asChild で next/link 等のルーターの Link に差し替えられる（Radix Slot。Button の asChild と同じ方式）。子は単一の要素にする。未指定は従来どおり <a>"
       ]
     },
     {
@@ -836,7 +853,8 @@
       ],
       "rules": [
         "同一コンテキスト内のビュー状態切替専用。button / role=tab / aria-selected を使う",
-        "ページ内アンカー移動には使わず SectionNav を使う"
+        "ページ内アンカー移動には使わず SectionNav を使う",
+        "リンク差し替え口（asChild / render）は持たない。role=tablist のビュー状態切替専用で、ページ遷移のナビは SidebarNav（render）・Breadcrumb / Pagination（asChild）を使う"
       ]
     },
     {
@@ -2461,7 +2479,8 @@
         "MobileAppShell の desktopSidebar / AdminShell の sidebar slot に置く。Button を行の形へ上書きして代用しない",
         "モバイルの BottomTabBar と同じ items 配列を渡す",
         "ページ内アンカーの目次は SectionNav、ビュー状態の切替は SubNav を使う",
-        "ロゴ行・フッターは部品に含めず slot 側で並べる"
+        "ロゴ行・フッターは部品に含めず slot 側で並べる",
+        "next/link 等のルーターで描画するときは項目ごとの render（Footer・AppHeader と同じレンダースロット）を使う。渡された props（className・aria-current・data-*・children・onClick）をそのまま転送すること。未指定は従来どおり <a>（href あり）/ <button>"
       ]
     },
     {

@@ -109,6 +109,21 @@ function DialogOverlay({ className, style, stackLevel, ...props }: DialogOverlay
   )
 }
 
+/**
+ * 幅の段（`position` が "center" / "top" のときの 480px キャップを置き換える）。
+ * 既定 `md` = 従来の `sm:max-w-[480px]`。狭い画面では段に関係なく
+ * `max-w-[calc(100%_-_3rem)]`（左右 24px）が効く。クラスは完全な文字列で持つ
+ * （動的合成だと safelist が静的抽出できない）。
+ */
+const dialogSizeClasses = {
+  sm: "sm:max-w-[400px]",
+  md: "sm:max-w-[480px]",
+  lg: "sm:max-w-[640px]",
+  xl: "sm:max-w-[800px]",
+} as const
+
+type DialogSize = keyof typeof dialogSizeClasses
+
 interface DialogContentProps
   extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus"> {
   /**
@@ -160,6 +175,18 @@ interface DialogContentProps
    */
   safeArea?: boolean
   /**
+   * 幅の段。`position="fullscreen"` では無視する（全画面は幅を持たない）。
+   * - "sm": 400px（確認だけの短い文面）
+   * - "md"（既定）: 480px（従来の幅）
+   * - "lg": 640px（フォーム 2 カラム・簡易な表）
+   * - "xl": 800px（表・プレビューを内蔵する広いダイアログ）
+   * 狭い画面では左右 24px を残す幅が優先される。size の段は
+   * `sm:` 付きなので、上書きするときは `className` に `sm:max-w-*` を渡す
+   * （接頭辞なしの `max-w-*` は size に勝たない。twMerge は同じ接頭辞同士で後勝ち）。SheetContent の `size`
+   * と段の名前を揃えている。
+   */
+  size?: DialogSize
+  /**
    * open 時の初期フォーカス。未指定時は Radix の既定挙動。
    * - "first-input": 最初の入力/操作可能要素
    * - "title": DialogTitle
@@ -193,6 +220,7 @@ function DialogContent({
   description,
   position = "center",
   safeArea = true,
+  size = "md",
   autoFocus,
   restoreFocusOnClose = true,
   closeOnEsc = true,
@@ -289,8 +317,11 @@ function DialogContent({
                 // 横位置: left-[50%] + translate-x-[-50%] のみ。
                 // inset-x-* と組み合わせると left/right と transform が競合して
                 // SP サイズで左に大きくズレるため使わない。
-                // 幅は w-full + max-w-[calc(100%_-_3rem)] (左右 24px) + 480px キャップ。
-                "left-[50%] w-full max-w-[calc(100%_-_3rem)] sm:max-w-[480px] translate-x-[-50%]",
+                // 幅は w-full + max-w-[calc(100%_-_3rem)] (左右 24px) + size ごとのキャップ
+                // （既定 md = 480px）。
+                "left-[50%] w-full max-w-[calc(100%_-_3rem)]",
+                dialogSizeClasses[size],
+                "translate-x-[-50%]",
                 // 縦位置
                 position === "top"
                   ? safeArea
@@ -444,4 +475,4 @@ export {
   DialogTitle,
   DialogTrigger,
 }
-export type { DialogContentProps, DialogOverlayProps, DialogTitleProps }
+export type { DialogContentProps, DialogOverlayProps, DialogTitleProps, DialogSize }

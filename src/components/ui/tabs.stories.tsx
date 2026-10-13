@@ -17,6 +17,7 @@ export default meta
 type Story = StoryObj<typeof Tabs>
 
 export const ThreeTabs: Story = {
+  tags: ["vrt"],
   render: () => (
     <Tabs defaultValue="overview">
       <TabsList>

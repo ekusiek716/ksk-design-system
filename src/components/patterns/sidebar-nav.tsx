@@ -4,6 +4,30 @@ import { cn } from "@/lib/utils"
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 /**
+ * 項目を消費側のルーターコンポーネント（next/link 等）で描画するためのレンダースロット。
+ *
+ * 渡された props を**そのまま**転送すること。className を落とすと選択中の面・
+ * 文字色・行高が失われ、`aria-current` / `data-*` を落とすと現在地の表示と
+ * E2E・計測のアンカーが外れる。Footer・AppHeader の `render` と同じ形で、
+ * DS 側は見た目、消費側は遷移方法を担う。
+ *
+ * @example
+ * render: (p) => <Link {...p} href={p.href!} />
+ */
+type SidebarNavItemRender = (props: {
+  href?: string
+  className: string
+  children: React.ReactNode
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void
+  "aria-current"?: "page"
+  "aria-label"?: string
+  title?: string
+  "data-slot": string
+  "data-active"?: true
+  "data-tab-key"?: string
+}) => React.ReactElement
+
+/**
  * SidebarNav の 1 項目。
  *
  * フィールドは `BottomTabBarItem` と同じ名前にしてあり、モバイルの BottomTabBar に
@@ -32,6 +56,12 @@ interface SidebarNavItem {
   isActive?: boolean
   /** 安定 DOM アンカー。指定時は `data-tab-key` として出力する（E2E・計測用）。 */
   tabKey?: string
+  /**
+   * next/link 等で描画したいときのレンダースロット。指定時は `<a>` / `<button>` の
+   * 代わりにこの関数の戻り値を描画する（`href` は props 経由で渡る）。
+   * @see SidebarNavItemRender
+   */
+  render?: SidebarNavItemRender
 }
 
 interface SidebarNavProps extends React.ComponentProps<"nav"> {
@@ -50,40 +80,13 @@ interface SidebarNavProps extends React.ComponentProps<"nav"> {
 // ─── Item ────────────────────────────────────────────────────────────────────
 
 function SidebarNavRow({ item, collapsed }: { item: SidebarNavItem; collapsed: boolean }) {
-  const Tag = item.href ? "a" : "button"
-  const tagProps = item.href
-    ? { href: item.href, onClick: item.onClick }
-    : { type: "button" as const, onClick: item.onClick }
   const badgeCount = item.badgeCount ?? 0
   const hasBadge = badgeCount > 0
   const badgeText = badgeCount > 99 ? "99+" : String(badgeCount)
   const icon = item.isActive && item.activeIcon ? item.activeIcon : item.icon
 
-  return (
-    <Tag
-      data-slot="sidebar-nav-item"
-      data-active={item.isActive || undefined}
-      data-tab-key={item.tabKey}
-      aria-current={item.isActive ? "page" : undefined}
-      // collapsed ではバッジがドットだけになるため、件数をアクセシブルネームへ含める
-      aria-label={
-        collapsed
-          ? `${item.ariaLabel ?? item.label}${hasBadge ? `（${badgeText}）` : ""}`
-          : item.ariaLabel
-      }
-      title={collapsed ? item.label : undefined}
-      className={cn(
-        // 行高 44px は DS のタッチターゲット方針（AdminShell の合成規範 #7 と同じ）
-        "relative flex min-h-11 items-center rounded-lg typo-label-md",
-        "transition-colors duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
-        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
-        collapsed ? "size-11 justify-center" : "w-full gap-3 px-3 text-left",
-        item.isActive
-          ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)]"
-          : "bg-[var(--Surface-Primary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]"
-      )}
-      {...tagProps}
-    >
+  const rowChildren = (
+    <>
       {icon != null && (
         <span
           data-slot="sidebar-nav-item-icon"
@@ -109,7 +112,51 @@ function SidebarNavRow({ item, collapsed }: { item: SidebarNavItem; collapsed: b
           {badgeText}
         </span>
       )}
-    </Tag>
+    </>
+  )
+
+  // <a> / <button> / render スロットで共通の属性。render へはこれをそのまま渡す。
+  const rowProps = {
+    "data-slot": "sidebar-nav-item",
+    "data-active": item.isActive ? (true as const) : undefined,
+    "data-tab-key": item.tabKey,
+    "aria-current": item.isActive ? ("page" as const) : undefined,
+    // collapsed ではバッジがドットだけになるため、件数をアクセシブルネームへ含める
+    "aria-label": collapsed
+      ? `${item.ariaLabel ?? item.label}${hasBadge ? `（${badgeText}）` : ""}`
+      : item.ariaLabel,
+    title: collapsed ? item.label : undefined,
+    className: cn(
+      // 行高 44px は DS のタッチターゲット方針（AdminShell の合成規範 #7 と同じ）
+      "relative flex min-h-11 items-center rounded-lg typo-label-md",
+      "transition-colors duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
+      "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+      collapsed ? "size-11 justify-center" : "w-full gap-3 px-3 text-left",
+      item.isActive
+        ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)]"
+        : "bg-[var(--Surface-Primary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]"
+    ),
+  }
+
+  if (item.render) {
+    return item.render({
+      ...rowProps,
+      href: item.href,
+      onClick: item.onClick,
+      children: rowChildren,
+    })
+  }
+  if (item.href) {
+    return (
+      <a {...rowProps} href={item.href} onClick={item.onClick}>
+        {rowChildren}
+      </a>
+    )
+  }
+  return (
+    <button {...rowProps} type="button" onClick={item.onClick}>
+      {rowChildren}
+    </button>
   )
 }
 
@@ -155,4 +202,4 @@ function SidebarNav({
 }
 
 export { SidebarNav }
-export type { SidebarNavItem, SidebarNavProps }
+export type { SidebarNavItem, SidebarNavItemRender, SidebarNavProps }

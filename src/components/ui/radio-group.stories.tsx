@@ -26,6 +26,7 @@ export const ThreeOptions: Story = {
 }
 
 export const WithDisabled: Story = {
+  tags: ["vrt"],
   render: () => (
     <RadioGroup defaultValue="small">
       <RadioGroupItem value="small">Small</RadioGroupItem>

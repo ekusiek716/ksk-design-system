@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
 
 interface BreadcrumbProps extends React.ComponentProps<"nav"> {
@@ -30,8 +31,19 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
   return <li data-slot="breadcrumb-item" className={cn("inline-flex items-center gap-1.5", className)} {...props} />
 }
 
-function BreadcrumbLink({ className, ...props }: React.ComponentProps<"a">) {
-  return <a data-slot="breadcrumb-link" className={cn("hover:text-[var(--Text-High-Emphasis)] transition-colors", className)} {...props} />
+type BreadcrumbLinkProps = React.ComponentProps<"a"> & {
+  /**
+   * true のとき `<a>` を描画せず、子要素へ className 等の属性を委譲する
+   * （Radix Slot。Button の `asChild` と同じ方式）。next/link 等のルーターの
+   * Link をそのまま子に渡すための口で、子は単一の要素にすること。
+   * 既定 false（従来どおり `<a>` を描画）。
+   */
+  asChild?: boolean
+}
+
+function BreadcrumbLink({ asChild = false, className, ...props }: BreadcrumbLinkProps) {
+  const Comp = asChild ? Slot : "a"
+  return <Comp data-slot="breadcrumb-link" className={cn("hover:text-[var(--Text-High-Emphasis)] transition-colors", className)} {...props} />
 }
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
@@ -57,4 +69,5 @@ function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<"span"
   )
 }
 
+export type { BreadcrumbLinkProps }
 export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis }
