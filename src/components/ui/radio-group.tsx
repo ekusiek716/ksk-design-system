@@ -39,7 +39,7 @@ function RadioGroupItem({
       id={itemId}
       data-slot="radio-group-item"
       className={cn(
-        "relative aspect-square size-5 shrink-0 rounded-full border border-[var(--Border-Medium-Emphasis)]",
+        "relative aspect-square size-5 shrink-0 rounded-full border border-[var(--Border-Control,var(--Border-Medium-Emphasis))]",
         "text-[var(--Brand-Primary)] cursor-pointer transition-colors",
         // 見た目の円は 20px のまま、当たり判定だけを透明な before 擬似要素で 44px に広げる
         // （Chip / pill TabsTrigger と同じ手法）。本体の width/height は変えないので
@@ -50,7 +50,7 @@ function RadioGroupItem({
         // アクセント枠なので変化なし。disabled は hover を打ち消す（誤反応防止）。
         "hover:border-[var(--Brand-Primary)]",
         "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
-        "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--Border-Medium-Emphasis)]",
+        "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--Border-Control,var(--Border-Medium-Emphasis))]",
         "data-[state=checked]:border-[var(--Brand-Primary)]",
         // ラベル内包時は複数行テキストとの頭揃えのため少し下げる
         (children != null || description != null) && "mt-0.5",

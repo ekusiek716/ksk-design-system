@@ -137,6 +137,7 @@ const nonTextControls = [
   ["checkbox-border", "チェックボックス（未選択）の枠", s => s.border["medium-emphasis"]],
   ["radio-border", "ラジオ（未選択）の枠", s => s.border["medium-emphasis"]],
   ["switch-off-track", "スイッチ（オフ）の地 Surface-Quaternary", s => s.surface.quaternary],
+  ["slider-track", "スライダーの溝 Surface-Tertiary", s => s.surface.tertiary],
   ["checkbox-checked-fill", "チェックボックス（選択）の地 Brand-Primary", s => s.brand.primary],
   ["switch-on-track", "スイッチ（オン）の地 Brand-Primary", s => s.brand.primary],
   ["field-focus-border", "入力欄（フォーカス）の枠 Border-Accent-Primary", s => s.border["accent-primary"]],
@@ -146,6 +147,26 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   const bg = resolve(s.surface.primary)
   for (const [id, label, pick] of nonTextControls) {
     pairs.push([resolveOver(pick(s), bg), bg, `${mode}: ${label} / Surface-Primary（非テキスト）`, 3, `${mode}:${id}`])
+  }
+}
+
+// prefers-contrast: more / data-contrast="more" のときの値（issue #636）。上の既定値は
+// 見た目の据え置きのため台帳に例外登録しているが、こちらは「コントラストが必要な利用者に
+// 3:1 以上を提供する」ための値なので例外なしで必須（台帳の照合キーを渡さない）。
+// 値の正本は src/styles/semantic.css 末尾の High Contrast 節（tokens.json の
+// semanticContrastMore と __tests__/contrast-more-tokens.test.ts で一致を固定）。
+const contrastMore = tokens.colors.semanticContrastMore
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const bg = resolve(s.surface.primary)
+  const more = contrastMore[mode]
+  const moreControls = [
+    ["入力欄・チェックボックス・ラジオの枠 Border-Control", more.border.control],
+    ["スイッチ（オフ）の地 Surface-Switch-Off", more.surface["switch-off"]],
+    ["スイッチ（オフ・hover）の地 Surface-Switch-Off-Hover", more.surface["switch-off-hover"]],
+    ["スライダーの溝 Surface-Slider-Track", more.surface["slider-track"]],
+  ]
+  for (const [label, value] of moreControls) {
+    pairs.push([resolveOver(value, bg), bg, `${mode}: prefers-contrast: more の ${label} / Surface-Primary（非テキスト）`, 3])
   }
 }
 

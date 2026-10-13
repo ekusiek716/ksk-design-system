@@ -181,7 +181,7 @@ function StarRating({
             onMouseLeave={() => setHovered(null)}
             className={cn(
               "shrink-0 text-[var(--Brand-Primary)]",
-              !filled && !half && "text-[var(--Border-Medium-Emphasis)]",
+              !filled && !half && "text-[var(--Border-Control,var(--Border-Medium-Emphasis))]",
             )}
           >
             <StarIcon

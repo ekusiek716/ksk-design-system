@@ -145,6 +145,37 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
 - **Dark mode**: `.dark` で Semantic 層が自動反転（コンポーネント側の変更不要）。テーマ差し替え（Brand）と
   light/dark は**直交2軸**。dark の semantic 値は `src/styles/semantic.css` の `.dark` が実装で、`tokens.json` の
   `colors.semanticDark` に機械可読ミラーを持つ（契約テストで同期を保証）。
+- **High Contrast（opt-in・issue #636）**: 入力欄・チェックボックス・ラジオの枠と、スイッチ（オフ）の地は、
+  既定では面の区切りと同じ淡い色（枠 `--Border-Medium-Emphasis` は白地に 1.48:1、dark で 1.63:1。スイッチ地
+  `--Surface-Quaternary` は 1.27:1 / 2.29:1。スライダーの溝 `--Surface-Tertiary` は 1.10:1 / 1.70:1）で、WCAG 1.4.11（非テキスト 3:1）に届かない。**既定の見た目は
+  デザイン判断で据え置き**、`test/known-exceptions.json` の contrast 区分に期限付きで登録している。
+  コントラストが必要な利用者には、次のどちらかで 3:1 以上の色を出す。
+  - OS の「コントラストを上げる」（`@media (prefers-contrast: more)`）。何も書かなくても効く
+  - root（または任意の祖先）に `data-contrast="more"` を付ける。OS 設定に関わらず常に高コントラストにしたい
+    プロダクト向けの opt-in（`<html data-contrast="more">`）
+  入力系の部品は枠を **`var(--Border-Control, var(--Border-Medium-Emphasis))`**、スイッチ（オフ）の地を
+  `var(--Surface-Switch-Off, var(--Surface-Quaternary))`（hover は `--Surface-Switch-Off-Hover` /
+  `--Object-Disable`）、スライダーの溝を `var(--Surface-Slider-Track, var(--Surface-Tertiary))` で参照する。
+  新ロール（`--Border-Control` / `--Surface-Switch-Off*` / `--Surface-Slider-Track`）は **`:root` / `.dark` では
+  宣言せず、高コントラスト時にだけ宣言する**。未宣言のときはフォールバックの従来の変数がその要素で解決されるので、
+  既定の計算後の色は従来と同一で、消費側がラッパー要素単位で `--Border-Medium-Emphasis` 等を上書きしても追従する
+  （`:root` で宣言すると `:root` で解決済みの値を継承してしまい、要素単位の上書きに追従しなくなる）。
+  対象は入力・選択の操作部品（Input / Textarea / Select / Checkbox / Radio / Combobox / MultiSelect /
+  DatePicker / TimePicker / NumberInput / SearchBar / TagInput / CheckboxCard / Chip（outline）/ FileUpload /
+  ImageUploader / ChartControls（比較トグルの丸印を含む）/ QuantitySelector / StarRating（入力用の選択前の星）と、
+  Switch（オフ）・Slider の溝）。カードの区切り線・Alert / Toast / Banner / Badge の枠など
+  非操作要素の `--Border-Medium-Emphasis` は切り替わらない。新しく入力・選択の操作部品を作るときは枠に
+  `--Border-Control` を使う。値は Surface-Primary に対する実測:
+
+  | | light | dark |
+  |---|---|---|
+  | 枠 `--Border-Control` | Gray-500 `#71717A`（4.83:1） | White-Alpha-500 を Gray-900 へ合成した `#6B6B6D`（3.33:1） |
+  | スイッチ（オフ）`--Surface-Switch-Off` / スライダーの溝 `--Surface-Slider-Track` | Gray-500（4.83:1） | Gray-500（3.67:1） |
+
+  値の正本は `src/styles/semantic.css` 末尾の High Contrast 節と `tokens.json` の `colors.semanticContrastMore`
+  （契約テストで同期）。`scripts/check-contrast.mjs` が例外なしで 3:1 を必須にする。
+  dark の枠は hover（`--Border-High-Emphasis` = White-Alpha-500）と同値になるため、高コントラスト時の
+  dark は枠の hover 変化が出ない（フォーカス時の枠・リングで状態は判別できる）。
 - **Categorical（質的）**: `var(--Categorical-{1..16})` ＋ `-Subtle`(背景) / `-Bold`(文字)。
   カテゴリの色分け専用でテーマ非依存。WCAG/色覚多様性を検証済み。文字には必ず `-Bold`。
 
