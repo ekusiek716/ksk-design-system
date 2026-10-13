@@ -1,0 +1,99 @@
+import { describe, expect, it } from "vitest"
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import { spawnSync } from "node:child_process"
+import {
+  checkA11yLedger,
+  crossCheckA11y,
+  scanStoryA11yOverrides,
+  validateSection,
+} from "../scripts/lib/known-exceptions.mjs"
+
+/**
+ * 期限付きの例外台帳（test/known-exceptions.json）の contract。
+ * 「載っているから通る」だけの飾りにしないため、期限切れ・形式不備・
+ * 未登録の除外・使われていない登録をすべて失敗として検出できることを確かめる。
+ */
+const valid = {
+  reason: "無効状態の見た目デモで WCAG の例外に当たるため",
+  issue: "#261",
+  reviewBy: "2027-03-31",
+}
+
+describe("validateSection", () => {
+  it("形式が揃った登録は通す", () => {
+    expect(validateSection("contrast", [{ pair: "light:input-border", ...valid }], "2026-10-13")).toEqual([])
+  })
+
+  it("見直し期限を過ぎた登録を落とす", () => {
+    const errors = validateSection("contrast", [{ pair: "light:input-border", ...valid, reviewBy: "2026-10-12" }], "2026-10-13")
+    expect(errors.join("\n")).toContain("見直し期限 2026-10-12 を過ぎています")
+  })
+
+  it("期限当日はまだ通す", () => {
+    expect(validateSection("contrast", [{ pair: "x", ...valid, reviewBy: "2026-10-13" }], "2026-10-13")).toEqual([])
+  })
+
+  it("理由・issue・日付の欠落や不正形式を落とす", () => {
+    const errors = validateSection("a11y", [{ target: "a#B", rule: "color-contrast", reason: "短い", issue: "261", reviewBy: "2027/03/31" }], "2026-10-13")
+    expect(errors).toHaveLength(3)
+  })
+
+  it("同じ対象の重複登録を落とす", () => {
+    const entry = { target: "a#B", rule: "color-contrast", ...valid }
+    expect(validateSection("a11y", [entry, entry], "2026-10-13").join("\n")).toContain("重複")
+  })
+})
+
+describe("a11y 除外の突き合わせ", () => {
+  function fixture(source: string) {
+    const root = mkdtempSync(join(tmpdir(), "ksk-known-exceptions-"))
+    mkdirSync(join(root, "src"), { recursive: true })
+    writeFileSync(join(root, "src", "demo.stories.tsx"), source)
+    return root
+  }
+  const stories = `
+const meta = { title: "Demo", parameters: { a11y: { test: "off" } } }
+export default meta
+export const Ok = {}
+export const Disabled = {
+  parameters: { a11y: { config: { rules: [{ id: "color-contrast", enabled: false }] } } },
+}
+`
+
+  it("ストーリー側の rule 無効化と a11y.test:\"off\" を列挙する", () => {
+    expect(scanStoryA11yOverrides(fixture(stories))).toEqual([
+      { target: "src/demo.stories.tsx#meta", rule: "*" },
+      { target: "src/demo.stories.tsx#Disabled", rule: "color-contrast" },
+    ])
+  })
+
+  it("未登録の無効化と、使われていない登録の両方を落とす", () => {
+    const errors = crossCheckA11y(
+      [{ target: "src/demo.stories.tsx#Gone", rule: "color-contrast", ...valid }],
+      [{ target: "src/demo.stories.tsx#Disabled", rule: "color-contrast" }],
+    )
+    expect(errors).toHaveLength(2)
+    expect(errors[0]).toContain("未登録の a11y 除外")
+    expect(errors[1]).toContain("使われていない a11y 登録")
+  })
+
+  it("実リポジトリの台帳はストーリー側と一致している", () => {
+    expect(checkA11yLedger(process.cwd())).toEqual([])
+  })
+})
+
+describe("check-contrast.mjs と例外台帳", () => {
+  it("非テキストのコントラスト未達は台帳の例外として通り、例外件数を表示する", () => {
+    const r = spawnSync("node", ["scripts/check-contrast.mjs"], { cwd: process.cwd(), encoding: "utf8" })
+    expect(r.status).toBe(0)
+    expect(r.stdout).toContain("[例外]")
+    expect(r.stdout).toMatch(/1\.48 : 3 : light: 入力欄の枠/)
+  })
+
+  it("check-known-exceptions.mjs が通る", () => {
+    const r = spawnSync("node", ["scripts/check-known-exceptions.mjs"], { cwd: process.cwd(), encoding: "utf8" })
+    expect(r.status, r.stderr).toBe(0)
+  })
+})

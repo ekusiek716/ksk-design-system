@@ -65,6 +65,7 @@ export const AutoColor: Story = {
 }
 
 export const AllStates: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">

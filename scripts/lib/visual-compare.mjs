@@ -6,7 +6,9 @@ import { PNG } from 'pngjs'
 // The per-channel tolerance still absorbs <=8/255 color noise. Any pixel above
 // that tolerance must be reviewed, regardless of how large the viewport is.
 // Alpha, shape and dimensions are included; no silently resized baselines.
-export function comparePng(expected, actual, maxRatio = 0.001) {
+// maxChangedPixels > 0 is only passed for scenarios registered in the
+// time-limited ledger (test/known-exceptions.json "visual"), never by default.
+export function comparePng(expected, actual, maxRatio = 0.001, maxChangedPixels = 0) {
   const a = PNG.sync.read(expected), b = PNG.sync.read(actual)
   if (a.width !== b.width || a.height !== b.height) return { ok: false, reason: 'dimensions', expected: [a.width, a.height], actual: [b.width, b.height] }
   let pixels = 0
@@ -20,5 +22,5 @@ export function comparePng(expected, actual, maxRatio = 0.001) {
     diff.data[i + 3] = 255
   }
   const ratio = pixels / (a.width * a.height)
-  return { ok: pixels === 0 && ratio <= maxRatio, pixels, ratio, maxChangedPixels: 0, diff: PNG.sync.write(diff) }
+  return { ok: pixels <= maxChangedPixels && ratio <= maxRatio, pixels, ratio, maxChangedPixels, diff: PNG.sync.write(diff) }
 }

@@ -1,0 +1,77 @@
+{
+  "_doc": "意図して基準を下回る項目の期限付き台帳。各登録は reason（10 文字以上）・issue（#番号 か GitHub URL）・reviewBy（YYYY-MM-DD）が必須。期限切れ・使われていない登録は検査で失敗する。読み手と検査は scripts/lib/known-exceptions.mjs と docs/visual-and-docs-checks.md を参照。",
+  "a11y": [
+    {
+      "target": "src/components/ui/label.stories.tsx#DisabledState",
+      "rule": "color-contrast",
+      "reason": "無効状態の見た目デモ。disabled な Input と関連付けたラベルは WCAG 1.4.3 の inactive UI component の例外に当たるが、axe は disabled コントロールのラベルを例外扱いしないため除外する。",
+      "issue": "#261",
+      "reviewBy": "2027-03-31"
+    },
+    {
+      "target": "src/components/patterns/tag-input.stories.tsx#Disabled",
+      "rule": "color-contrast",
+      "reason": "無効状態の見た目デモ。inactive UI component は WCAG 1.4.3 の対象外だが、axe は chip（span）の無効文脈を判定できないため除外する。",
+      "issue": "#261",
+      "reviewBy": "2027-03-31"
+    },
+    {
+      "target": "src/components/patterns/screen.stories.tsx#ScrollableWithFooter",
+      "rule": "scrollable-region-focusable",
+      "reason": "Screen の main はスキップリンク遷移先として tabIndex=-1 にする意図的な設計。デモの中身に focusable 要素が無いため axe が誤検知する。実画面ではリスト行がボタン等になり警告は出ない。",
+      "issue": "#261",
+      "reviewBy": "2027-03-31"
+    }
+  ],
+  "contrast": [
+    {
+      "pair": "light:input-border",
+      "reason": "Border-Medium-Emphasis（Gray-300）と白の差が 1.48:1 で非テキスト 3:1 に未達。色を濃くすると全プロダクトの見た目が変わるため、見た目の変更は別判断（本人判断待ち）。",
+      "issue": "#636",
+      "reviewBy": "2027-03-31"
+    },
+    {
+      "pair": "light:checkbox-border",
+      "reason": "チェックボックス（未選択）の枠は Border-Medium-Emphasis で 1.48:1。見た目の変更は別判断（本人判断待ち）。",
+      "issue": "#636",
+      "reviewBy": "2027-03-31"
+    },
+    {
+      "pair": "light:radio-border",
+      "reason": "ラジオ（未選択）の枠は Border-Medium-Emphasis で 1.48:1。見た目の変更は別判断（本人判断待ち）。",
+      "issue": "#636",
+      "reviewBy": "2027-03-31"
+    },
+    {
+      "pair": "light:switch-off-track",
+      "reason": "スイッチ（オフ）の地 Surface-Quaternary（Gray-200）と白の差が 1.27:1。見た目の変更は別判断（本人判断待ち）。",
+      "issue": "#636",
+      "reviewBy": "2027-03-31"
+    },
+    {
+      "pair": "dark:input-border",
+      "reason": "dark の Border-Medium-Emphasis（White-Alpha-300）を Gray-900 に合成した色との差が 1.63:1。見た目の変更は別判断（本人判断待ち）。",
+      "issue": "#636",
+      "reviewBy": "2027-03-31"
+    },
+    {
+      "pair": "dark:checkbox-border",
+      "reason": "dark のチェックボックス（未選択）の枠は 1.63:1。見た目の変更は別判断（本人判断待ち）。",
+      "issue": "#636",
+      "reviewBy": "2027-03-31"
+    },
+    {
+      "pair": "dark:radio-border",
+      "reason": "dark のラジオ（未選択）の枠は 1.63:1。見た目の変更は別判断（本人判断待ち）。",
+      "issue": "#636",
+      "reviewBy": "2027-03-31"
+    },
+    {
+      "pair": "dark:switch-off-track",
+      "reason": "dark のスイッチ（オフ）の地 Surface-Quaternary（Gray-600）と Gray-900 の差が 2.29:1。見た目の変更は別判断（本人判断待ち）。",
+      "issue": "#636",
+      "reviewBy": "2027-03-31"
+    }
+  ],
+  "visual": []
+}

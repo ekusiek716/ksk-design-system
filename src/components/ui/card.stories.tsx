@@ -15,6 +15,7 @@ export default meta
 type Story = StoryObj<typeof Card>
 
 export const FullCard: Story = {
+  tags: ["vrt"],
   render: () => (
     <Card>
       <CardHeader>

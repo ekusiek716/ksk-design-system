@@ -6,12 +6,19 @@
 // WCAG AA を満たすか検査する。CI で a11y 回帰（トークン変更でコントラストが
 // 落ちる）を防ぐ。categorical の Bold（文字用）と semantic テキストが対象。
 //
+// 文字以外（WCAG 1.4.11 Non-text Contrast・3:1）として、入力欄・チェック
+// ボックス・ラジオ・スイッチの「枠 / 地」と背景の組も検査する。基準未達で
+// 見た目の変更を別判断にしているものは test/known-exceptions.json の contrast
+// 区分に期限付きで登録し、ここでは [例外] として通す。登録の無い新しい未達・
+// 期限切れ・使われていない登録（直った組や消えた組）は失敗にする。
+//
 // 実行: node scripts/check-contrast.mjs
 // =============================================================
 import { readFileSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
 import { loadDefaultBrandRamp, resolveTokenColor } from "./lib/resolve-token-color.mjs"
+import { LEDGER_PATH, loadKnownExceptions, validateSection } from "./lib/known-exceptions.mjs"
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 const tokens = JSON.parse(readFileSync(join(root, "tokens.json"), "utf8"))
@@ -23,6 +30,20 @@ const brandRamp = loadDefaultBrandRamp(root)
 // `var(--Primitive-Gray-900)` / `var(--Primitive-White)` / 生 hex を hex に解決
 function resolve(val) {
   return resolveTokenColor(val, prim, brandRamp)
+}
+
+// 半透明の primitive（`var(--Primitive-White-Alpha-300)` 等）を背景 hex に合成した実色。
+// 不透明な値はそのまま resolve に回す。
+function resolveOver(val, bgHex) {
+  const solid = resolve(val)
+  if (solid) return solid
+  const m = typeof val === "string" && val.match(/^var\(--Primitive-(White|Gray)-Alpha-(\d+)\)$/)
+  const rgba = m && prim[`${m[1].toLowerCase()}-alpha`]?.[m[2]]
+  const parts = rgba && rgba.match(/rgba\(\s*(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\s*\)/)
+  if (!parts || !bgHex) return null
+  const alpha = Number(parts[4])
+  const bg = [1, 3, 5].map((i) => parseInt(bgHex.slice(i, i + 2), 16))
+  return "#" + [1, 2, 3].map((i, k) => Math.round(Number(parts[i]) * alpha + bg[k] * (1 - alpha)).toString(16).padStart(2, "0")).join("")
 }
 
 const srgb2lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4 }
@@ -107,25 +128,63 @@ for (const k of Object.keys(cat)) {
   if (c.subtle) pairs.push([c.bold, c.subtle, `Categorical-${k}-Bold / Subtle`, 4.5])
 }
 
-let fail = 0, skipped = 0
-const rows = []
-for (const [fg, bg, label, min] of pairs) {
-  if (!fg || !bg) { skipped++; continue }
-  const ratio = contrast(fg, bg)
-  const ok = ratio >= min
-  if (!ok) fail++
-  rows.push({ label, ratio: ratio.toFixed(2), min, ok })
+// 文字以外のコントラスト（WCAG 1.4.11・3:1）。操作部品の境界・状態を示す
+// 「枠 / 地」と、その部品が置かれる背景（Surface-Primary）の組。
+// dark の枠は White-Alpha（半透明）なので、背景へ合成した実色で比べる。
+// 5 番目の要素は台帳（test/known-exceptions.json の contrast）の照合キー。
+const nonTextControls = [
+  ["input-border", "入力欄の枠（Input / Textarea / SelectTrigger）", s => s.border["medium-emphasis"]],
+  ["checkbox-border", "チェックボックス（未選択）の枠", s => s.border["medium-emphasis"]],
+  ["radio-border", "ラジオ（未選択）の枠", s => s.border["medium-emphasis"]],
+  ["switch-off-track", "スイッチ（オフ）の地 Surface-Quaternary", s => s.surface.quaternary],
+  ["checkbox-checked-fill", "チェックボックス（選択）の地 Brand-Primary", s => s.brand.primary],
+  ["switch-on-track", "スイッチ（オン）の地 Brand-Primary", s => s.brand.primary],
+  ["field-focus-border", "入力欄（フォーカス）の枠 Border-Accent-Primary", s => s.border["accent-primary"]],
+  ["field-error-border", "入力欄（エラー）の枠 Border-Caution", s => s.border.caution],
+]
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const bg = resolve(s.surface.primary)
+  for (const [id, label, pick] of nonTextControls) {
+    pairs.push([resolveOver(pick(s), bg), bg, `${mode}: ${label} / Surface-Primary（非テキスト）`, 3, `${mode}:${id}`])
+  }
 }
 
-console.log("🎨 KSK — コントラスト検査 (WCAG AA)")
+const ledger = loadKnownExceptions(root)
+const ledgerErrors = validateSection("contrast", ledger.contrast)
+const exceptionByPair = new Map(ledger.contrast.map((entry) => [entry.pair, entry]))
+const usedExceptions = new Set()
+
+let fail = 0, skipped = 0, excepted = 0
+const rows = []
+for (const [fg, bg, label, min, id] of pairs) {
+  if (!fg || !bg) { skipped++; continue }
+  const ratio = contrast(fg, bg)
+  let ok = ratio >= min
+  const exception = id ? exceptionByPair.get(id) : undefined
+  if (exception) {
+    usedExceptions.add(id)
+    // 基準を満たしたのに登録が残っている＝直った。登録の削除を促すため失敗にする。
+    if (ok) ledgerErrors.push(`contrast: ${id} は ${ratio.toFixed(2)}:1 で基準を満たしています。${LEDGER_PATH} から登録を削除してください`)
+  }
+  const isException = !ok && Boolean(exception)
+  if (isException) { ok = true; excepted++ }
+  if (!ok) fail++
+  rows.push({ label, ratio: ratio.toFixed(2), min, ok, isException, exception })
+}
+for (const entry of ledger.contrast) {
+  if (!usedExceptions.has(entry.pair)) ledgerErrors.push(`contrast: ${entry.pair} は検査ペアに存在しません。${LEDGER_PATH} から登録を削除してください`)
+}
+
+console.log("🎨 KSK — コントラスト検査 (WCAG AA・文字 4.5 / 非テキスト 3)")
 console.log("=======================================")
 for (const r of rows) {
-  console.log(`${r.ok ? "\x1b[32m[OK]\x1b[0m  " : "\x1b[31m[NG]\x1b[0m  "} ${r.ratio.padStart(6)} : ${r.min} : ${r.label}`)
+  const status = r.isException ? "\x1b[33m[例外]\x1b[0m" : r.ok ? "\x1b[32m[OK]\x1b[0m  " : "\x1b[31m[NG]\x1b[0m  "
+  const note = r.isException ? `  → ${r.exception.issue}・見直し ${r.exception.reviewBy}` : ""
+  console.log(`${status} ${r.ratio.padStart(6)} : ${r.min} : ${r.label}${note}`)
 }
 if (skipped) console.log(`(解決不可で skip: ${skipped} ペア — rgba/color-mix 等)`)
 console.log("=======================================")
-if (fail) {
-  console.error(`\x1b[31m✗ ${fail} ペアが AA 未満\x1b[0m`)
-  process.exit(1)
-}
-console.log(`\x1b[32m✓ 全 ${rows.length} ペア AA 通過\x1b[0m`)
+for (const error of ledgerErrors) console.error(`\x1b[31m✗ ${error}\x1b[0m`)
+if (fail) console.error(`\x1b[31m✗ ${fail} ペアが基準未満（意図した未達なら ${LEDGER_PATH} に期限付きで登録）\x1b[0m`)
+if (fail || ledgerErrors.length) process.exit(1)
+console.log(`\x1b[32m✓ 全 ${rows.length} ペア通過（うち台帳の例外 ${excepted}）\x1b[0m`)

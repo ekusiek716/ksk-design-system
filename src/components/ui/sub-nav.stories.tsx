@@ -21,6 +21,7 @@ const categories = [
 ]
 
 export const Underline: Story = {
+  tags: ["vrt"],
   render: () => {
     const [value, setValue] = React.useState("all")
     return (

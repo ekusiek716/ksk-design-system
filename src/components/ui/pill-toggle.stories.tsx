@@ -12,6 +12,7 @@ export default meta
 type Story = StoryObj<typeof PillToggle>
 
 export const Default: Story = {
+  tags: ["vrt"],
   render: () => {
     const [v, setV] = React.useState("all")
     return (

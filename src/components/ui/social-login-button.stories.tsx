@@ -16,6 +16,7 @@ export const Apple: Story = { args: { provider: "apple" } }
 export const Amazon: Story = { args: { provider: "amazon" } }
 
 export const AllProviders: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="flex flex-col gap-3 w-72">
       <SocialLoginButton provider="line" fullWidth />

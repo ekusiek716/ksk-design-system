@@ -56,6 +56,7 @@ export const Ghost: Story = {
 }
 
 export const AllVariants: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="flex flex-wrap gap-2">
       <Badge variant="default">Default</Badge>

@@ -1,0 +1,83 @@
+name: Update visual baselines
+# 画像比較（scripts/check-visual.mjs）の基準画像を、通常の CI と同じ固定コンテナで
+# 撮り直し、指定ブランチへコミットする手動 workflow。
+#
+# 使い方: gh workflow run visual-baselines-update.yml -f ref=<PR のブランチ名>
+# （workflow_dispatch は既定ブランチ main にあるこのファイルからしか起動できない）
+#
+# 注意: GITHUB_TOKEN で push したコミットは、GitHub の仕様で新しい workflow を
+# 起動しない（CI の無限ループ防止）。基準画像のコミット後は PR の CI が自動では
+# 走り直さないので、空コミットの push・PR の close/reopen・「Re-run jobs」の
+# いずれかで Docs and visual regression を再実行して緑を確認すること。
+# 撮り直した PNG は、別のレビュアーが旧/新の画像と実画面を確認してから承認する
+# （docs/visual-and-docs-checks.md「基準更新のレビュー」）。
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 基準画像を撮り直してコミットするブランチ名（main は不可）
+        required: true
+        type: string
+permissions:
+  contents: write
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.ref }}
+  cancel-in-progress: true
+jobs:
+  update-baselines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.0-noble@sha256:baed2032d533817f3dbe6425de795788430ba345e819a1201337009ba17c9d07
+      options: --ipc=host
+    env:
+      KSK_VISUAL_ENV: playwright-1.62.0-noble
+      KSK_VISUAL_BASELINE_WORKFLOW: '1'
+      VISUAL_BASELINE_REVIEW: '1'
+      TARGET_REF: ${{ inputs.ref }}
+    steps:
+      - name: Refuse the default branch
+        run: |
+          case "$TARGET_REF" in
+            main|refs/heads/main) echo "main へ直接コミットしない。PR のブランチを指定する。" >&2; exit 1 ;;
+          esac
+      - name: Install git
+        # actions/checkout は git が無いと .git の無い展開になり、コミットできない。
+        run: command -v git || (apt-get update && apt-get install -y --no-install-recommends git)
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build-storybook
+      - name: Start static Storybook
+        run: |
+          node scripts/serve-storybook.mjs storybook-static 0 > /tmp/storybook.log 2>&1 &
+          for i in $(seq 1 60); do grep -q '^KSK_STORYBOOK_URL=' /tmp/storybook.log && break; sleep 0.5; done
+          sed -n 's/^KSK_STORYBOOK_URL=//p' /tmp/storybook.log | head -n 1 | sed 's/^/STORYBOOK_URL=/' >> "$GITHUB_ENV"
+      - name: Capture baselines
+        run: node scripts/check-visual.mjs --update
+      - name: Verify the new baselines reproduce
+        run: node scripts/check-visual.mjs
+      - name: Commit to the branch
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A test/visual/baselines
+          if git diff --cached --quiet; then echo "基準画像に変化なし"; exit 0; fi
+          git commit -m "test(visual): 基準画像を固定コンテナで撮り直す" -m "workflow: ${GITHUB_WORKFLOW} run ${GITHUB_RUN_ID}"
+          git push origin "HEAD:${TARGET_REF#refs/heads/}"
+          echo "コミット済み。GITHUB_TOKEN の push では CI が再起動しないため、PR の CI を手動で再実行すること。" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload captured images
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: visual-baselines-update
+          path: |
+            artifacts/
+            test/visual/baselines/
+          retention-days: 14

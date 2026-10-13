@@ -14,6 +14,7 @@ export default meta
 type Story = StoryObj<typeof Breadcrumb>
 
 export const ThreeLevel: Story = {
+  tags: ["vrt"],
   render: () => (
     <Breadcrumb>
       <BreadcrumbList>
