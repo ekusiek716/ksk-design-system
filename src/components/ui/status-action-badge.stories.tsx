@@ -10,6 +10,7 @@ export default meta
 type Story = StoryObj<typeof StatusActionBadge>
 
 export const AllStates: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="flex flex-wrap gap-2">
       <StatusActionBadge state="syncing" label="同期中" />

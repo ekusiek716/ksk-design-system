@@ -17,6 +17,7 @@ type Story = StoryObj<typeof Input>
 // placeholder/label 無しの素の Input には axe: label 対策で aria-label を明示する
 // （実利用では WithLabel のように <Label> 併記が前提）。
 export const Default: Story = {
+  tags: ["vrt"],
   args: { defaultValue: "テキスト入力", "aria-label": "サンプル" },
 }
 
@@ -29,6 +30,7 @@ export const Disabled: Story = {
 }
 
 export const Error: Story = {
+  tags: ["vrt"],
   args: {
     defaultValue: "invalid@",
     "aria-invalid": true,

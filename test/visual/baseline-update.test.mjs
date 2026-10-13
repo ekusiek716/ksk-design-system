@@ -43,7 +43,7 @@ test('container wrapper ignores failed partial updates and accepts --update afte
   await fs.writeFile(path.join(bin, 'npm'), '#!/bin/bash\nexit 0\n', { mode: 0o755 })
   await fs.writeFile(path.join(bin, 'node'), `#!/bin/bash
 case "$1" in
-  */serve-storybook.mjs) exit 0 ;;
+  */serve-storybook.mjs) echo "KSK_STORYBOOK_URL=http://127.0.0.1:1"; exit 0 ;;
   scripts/check-visual.mjs)
     mkdir -p artifacts test/visual/baselines
     printf 'new image' > test/visual/baselines/chip.png

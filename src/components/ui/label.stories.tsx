@@ -19,6 +19,7 @@ export const Default: Story = {
 }
 
 export const WithRequiredMarker: Story = {
+  tags: ["vrt"],
   render: () => (
     <Label>
       メールアドレス

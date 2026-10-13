@@ -21,6 +21,7 @@ export default meta
 type Story = StoryObj<typeof Pagination>
 
 export const FivePages: Story = {
+  tags: ["vrt"],
   render: () => (
     <Pagination>
       <PaginationContent>

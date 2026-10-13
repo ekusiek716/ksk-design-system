@@ -107,3 +107,49 @@ jobs:
 
       - name: mcp-server build (配布物 ksk-ds-mcp のコンパイル検証)
         run: npm run build --prefix mcp-server
+
+  # ── WebKit（Safari 系）での play / axe ──
+  # 上の check ジョブと同じ interaction / a11y テストを Playwright WebKit で回す。
+  # Chromium では見えない差を拾うのが目的。直列に足すと CI が +5 分ほど伸びるため
+  # 別ジョブにして check と並列に走らせる（storybook テストは build:lib 不要）。
+  webkit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Playwright webkit のインストール
+        run: npx playwright install --with-deps webkit
+
+      - name: Interaction tests (WebKit)
+        run: npm run test:interaction:webkit
+
+      # 前のステップが落ちても a11y の結果は取る（原因の切り分けを 1 回の実行で済ませる）
+      - name: a11y tests (WebKit)
+        if: ${{ !cancelled() }}
+        run: npm run test:a11y:webkit
+
+  # 将来 branch protection の必須 check にする集約ジョブ。上のジョブのどれかが
+  # 失敗・中止（または未実行のまま）なら落ちる。ジョブを足したら needs にも足すこと。
+  ci-result:
+    name: CI result
+    if: ${{ always() }}
+    needs: [check, webkit]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "results: $RESULTS"
+          for r in $RESULTS; do
+            if [ "$r" != "success" ]; then
+              echo "::error::必須の検査が成功していない（$r）"
+              exit 1
+            fi
+          done

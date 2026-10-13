@@ -85,6 +85,7 @@ export const InlineWarning: Story = {
 }
 
 export const AllVariants: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="flex flex-col gap-4 max-w-md">
       <Alert variant="success">

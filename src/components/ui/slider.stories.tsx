@@ -11,6 +11,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="w-64">
       <Slider defaultValue={[50]} min={0} max={100} step={1} />

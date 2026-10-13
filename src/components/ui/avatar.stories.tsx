@@ -23,6 +23,7 @@ export const WithImage: Story = {
 }
 
 export const Fallback: Story = {
+  tags: ["vrt"],
   render: () => (
     <Avatar>
       <AvatarImage src="/broken-image.jpg" alt="ユーザー画像" />

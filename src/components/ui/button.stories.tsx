@@ -73,6 +73,7 @@ export const Link: Story = {
 }
 
 export const AllVariants: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
       <Button variant="default">Default</Button>
@@ -113,6 +114,7 @@ export const StatusVariants: Story = {
 }
 
 export const AllSizes: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="flex flex-wrap items-center gap-3">
       <Button size="xs">XS</Button>
