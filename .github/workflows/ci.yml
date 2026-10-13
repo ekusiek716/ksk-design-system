@@ -41,6 +41,11 @@ jobs:
       - name: tsc / lint-scratch / deps / drift / COMPONENT_LOOKUP --check
         run: npm run check
 
+      # mcp-server のテストは MCP SDK のクライアントで resources を読むため、
+      # 単体テストより前に mcp-server の依存を入れておく
+      - name: mcp-server 依存のインストール
+        run: npm ci --prefix mcp-server
+
       - name: Unit tests (vitest)
         run: npm test
 
@@ -101,9 +106,7 @@ jobs:
         run: npm run test:jest-consumer
 
       - name: mcp-server build (配布物 ksk-ds-mcp のコンパイル検証)
-        run: |
-          npm ci --prefix mcp-server
-          npm run build --prefix mcp-server
+        run: npm run build --prefix mcp-server
 
   # ── WebKit（Safari 系）での play / axe ──
   # 上の check ジョブと同じ interaction / a11y テストを Playwright WebKit で回す。
