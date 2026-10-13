@@ -21,20 +21,20 @@
 | Button | `@/components/ui/button` | **variant**: `default`, `secondary`, `secondary-switch`, `tertiary`, `ghost`, `destructive`, `info`, `warning`, `success`, `link`, `glass`, `glass-inverse`, `glass-accent`, `accent`, `inverse`, `ghost-inverse`<br>**size**: `xs`, `sm`, `default`, `lg`, `xl`, `hero`, `icon`, `icon-sm`, `icon-lg`, `icon-xl`, `icon-fab`, `match`<br>**layout**: `horizontal`, `vertical` | Default, Secondary, SecondarySwitch, Tertiary, Ghost, Destructive, Link, AllVariants, StatusVariants, AllSizes, Hero, Inverse on Dark Background, Real UI — Hero Section CTAs, Disabled, DisabledAllVariants, IconButton, Glass — Liquid Glass (iOS 26), Glass Inverse on Dark Background, Glass Accent — FAB (Floating Action Button), Glass — ボケ感デモ（動くコンテンツ上）, Glass — カーソル追従スペキュラ, WithIcon, PressDoesNotShiftLayout, DisabledIsNotClickable, FocusRingIsVisible, TouchTargetsDoNotOverlap, Loading, LoadingKeepsWidthAndBlocksClick |
 | Calendar | `@/components/ui/calendar` | — | Single, NavigatesMonths, Range |
 | Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter | `@/components/ui/card` | **variant**: `default`, `media` | FullCard, MinimalCard, HeaderOnly, OnSameColorGround |
-| CheckboxCardGroup, CheckboxCardItem | `@/components/ui/checkbox-card` | — | Default, WithDescription, WithExpandedContent, Disabled |
+| CheckboxCardGroup, CheckboxCardItem | `@/components/ui/checkbox-card` | — | Default, WithDescription, WithExpandedContent, Disabled, AccessibleNameIsLabelOnly, DescriptionOnlyIsNotReadTwice |
 | CheckboxField | `@/components/ui/checkbox-field` | — | Default, WithDescription, WithError, LongLabelWrap, Disabled |
 | CheckboxGroup, CheckboxGroupItem | `@/components/ui/checkbox-group` | — | Default, Required, WithError, SingleColumn |
 | Checkbox | `@/components/ui/checkbox` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, MultipleOptions, Row Layout (label/description/count), Real UI — Filter Sidebar |
 | CoachMark | `@/components/ui/coach-mark` | — | Default, Brand, Placements, Onboarding, Hover |
 | Collapsible, CollapsibleTrigger, CollapsibleContent | `@/components/ui/collapsible` | — | Default, FAQ |
-| Combobox | `@/components/ui/combobox` | — | Default, FiltersAndSelects, WithDisabledOption |
+| Combobox | `@/components/ui/combobox` | — | Default, FiltersAndSelects, WithDisabledOption, InvalidInFormField |
 | CommitAutoGrowTextarea | `@/components/ui/commit-auto-grow-textarea` | — | Default, MinRows |
 | CommitInput | `@/components/ui/commit-input` | — | InputCommitTiming |
 | CommitTextarea | `@/components/ui/commit-textarea` | — | Default, Empty, Disabled |
 | Container | `@/components/ui/container` | **size**: `narrow`, `page`, `wide`, `fluid`<br>**gutter**: `none`, `tight`, `default`, `spacious` | Sizes |
 | CountdownTimer | `@/components/ui/countdown-timer` | — | Filled, Ghost, Compact, DayGranularity, Ended, AllVariants |
 | DateField | `@/components/ui/date-field` | — | Default, WithInitialValue, CustomPlaceholder, Disabled, CustomFormat, WithTriggerLabel |
-| DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, FutureValueOpensSelectedMonth, WithDefaultMonth, Disabled, RangePicker, CalendarOnly, CalendarRange |
+| DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, FutureValueOpensSelectedMonth, WithDefaultMonth, Disabled, RangePicker, CalendarOnly, CalendarRange, InvalidInFormField |
 | DateTimePicker | `@/components/ui/date-time-picker` | — | Default, Empty, Bounded |
 | Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, Fullscreen, FullscreenSafeAreaOptOut, ReportShop, StackedFooter, OpensAndIsImmediatelyInteractive, Sizes, ClosesOnEscape, TrapsFocus, StacksAboveNestedSheets, ConfirmDialogStacksAboveSheet, TitleLevelFullscreenDefault, TitleLevelExplicit, TitleLevelCenterDefault, ChildDescriptionIsLinked, NoDescriptionLeavesNoDescribedBy, DescriptionPropIsLinked, ExplicitDescribedByWins, DynamicChildDescriptionIsLinked, NestedSelectKeyboard |
 | DropdownFilter | `@/components/ui/dropdown-filter` | — | Default, ActiveFilter, WithIcons（ビュー切替・アイコン付き）, MultipleFilters |
@@ -46,7 +46,7 @@
 | ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |
 | Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, Unstyled, DisabledState |
-| MultiSelect | `@/components/ui/multi-select` | — | Default, WithTriggerLabel |
+| MultiSelect | `@/components/ui/multi-select` | — | Default, WithTriggerLabel, InvalidInFormField, FocusReturnsToTriggerAfterClear |
 | NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis, WithBuildPageItems, AsChildRouterLink |
@@ -60,13 +60,13 @@
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | SectionNav | `@/components/ui/section-nav` | — | Vertical, Horizontal, StickyGuide |
 | Section | `@/components/ui/section` | **spacing**: `sm`, `md`, `lg`, `xl`<br>**background**: `none`, `subtle`, `accent-subtle` | FullBleedBandWithContainedContent |
-| Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard |
+| Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard, InvalidInFormField, KeepsOwnDescribedByInFormField |
 | SEMANTIC_ICONS, SemanticIcon | `@/components/ui/semantic-icon` | — | — |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
 | Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass`<br>**size**: `sm`, `md`, `lg` | BottomSheet, FloatSheet, TopSheet, FloatSheetTallContent, RightSheet, Sizes, A11yOptions, TitleAutoFocusAppearance, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, Float — 仮想キーボード追従, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158), OpensAndIsImmediatelyInteractive, ChildDescriptionIsLinked, ChildDescriptionIsLinkedWithSwipeToClose, NoDescriptionLeavesNoDescribedBy, ChildDescriptionIsLinkedWithSnapPoints, ChildDescriptionIsLinkedWithSwipeSideDrawer, DescriptionPropIsLinked, ExplicitDescribedByWins |
 | Skeleton, SkeletonText | `@/components/ui/skeleton` | — | CardSkeleton, TextSkeleton, SkeletonText (5 lines) |
 | SkipLink | `@/components/ui/skip-link` | — | Default |
-| Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Range — 最小値/最大値を別々にラベル付け, Disabled |
+| Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Range — 最小値/最大値を別々にラベル付け, Disabled, RangeHomeEndMovesFocusedThumb, NoValueStaysSingleThumb |
 | SOCIAL_ICON_LABELS, SOCIAL_ICON_DATA, SOCIAL_ICON_PLATFORMS | `@/components/ui/social-icon-data` | — | — |
 | SocialIcon, SOCIAL_ICON_PLATFORMS, SOCIAL_ICON_LABELS | `@/components/ui/social-icon` | — | Default, AllPlatforms, AllMono, Tones |
 | SocialLoginButton | `@/components/ui/social-login-button` | — | Line, Google, Apple, Amazon, AllProviders, LightAndDark, Loading |
@@ -78,7 +78,7 @@
 | SyncStatusBadge | `@/components/ui/sync-status-badge` | — | Syncing, Success, Error, Offline, AllStates |
 | Tabs, TabsList, TabsTrigger, TabsContent | `@/components/ui/tabs` | — | ThreeTabs, WithDisabledTab, SwitchesByClickAndArrowKeys |
 | Textarea | `@/components/ui/textarea` | — | Default, WithPlaceholder, Disabled, Error, AutoGrow |
-| TimePicker | `@/components/ui/time-picker` | — | Default, 15分刻み |
+| TimePicker | `@/components/ui/time-picker` | — | Default, 15分刻み, InvalidInFormField |
 | Toaster | `@/components/ui/toast` | **variant**: `default`, `success`, `caution`, `warning`, `info` | Default, Success, Caution, Warning, Info, AllVariants, Fire-and-forget (no <Toaster />), viewport の下端 offset（--Toast-Viewport-Offset-Bottom）, AnnouncesViaLiveRegion |
 | Tooltip, TooltipTrigger, TooltipContent, TooltipProvider | `@/components/ui/tooltip` | — | HoverToShow, OnIconButton |
 

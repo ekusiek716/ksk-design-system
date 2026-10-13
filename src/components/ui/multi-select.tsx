@@ -29,6 +29,12 @@ export interface MultiSelectProps {
    * 未指定時は未選択なら placeholder、選択済みならチップの表示テキストがそのまま読み上げられる。
    */
   triggerLabel?: string
+  /** トリガーボタンの id。FormField の htmlFor と合わせるとラベル押下でフォーカスできる。 */
+  id?: string
+  /** true でトリガーにエラー枠（Border-Caution）を出す。FormField の error から自動で渡される。 */
+  "aria-invalid"?: React.AriaAttributes["aria-invalid"]
+  /** エラー文・説明文の id。FormField から自動で渡される。 */
+  "aria-describedby"?: string
 }
 
 function MultiSelect({
@@ -44,10 +50,14 @@ function MultiSelect({
   clearable = true,
   clearLabel = "選択をクリア",
   triggerLabel,
+  id,
+  "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const triggerRef = React.useRef<HTMLButtonElement>(null)
 
   const filtered = query.trim()
     ? options.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
@@ -74,12 +84,16 @@ function MultiSelect({
       <div className="relative w-full">
         <PopoverTrigger asChild>
           <button
+            ref={triggerRef}
+            id={id}
             type="button"
             data-slot="multi-select-trigger"
             disabled={disabled}
             aria-expanded={open}
             aria-haspopup="listbox"
             aria-label={triggerLabel ?? (value.length === 0 ? placeholder : undefined)}
+            aria-describedby={ariaDescribedBy}
+            aria-invalid={ariaInvalid}
             className={cn(
               "relative flex min-h-12 w-full flex-wrap items-center gap-1.5 rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-3 py-2 pr-10 typo-body-md transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 text-left",
               showClearButton && "pr-16",
@@ -87,6 +101,7 @@ function MultiSelect({
                 ? "border-[var(--Border-Accent-Primary)] ring-[3px] ring-[var(--Focus-High-Emphasis)]/50"
                 : "border-[var(--Border-Medium-Emphasis)] hover:border-[var(--Border-High-Emphasis)]",
               "disabled:cursor-not-allowed disabled:opacity-50",
+              "aria-invalid:border-[var(--Border-Caution)] aria-invalid:ring-[var(--Caution-Base)]/20",
               className
             )}
           >
@@ -126,7 +141,12 @@ function MultiSelect({
             type="button"
             data-slot="multi-select-clear"
             aria-label={clearLabel}
-            onClick={() => onChange?.([])}
+            onClick={() => {
+              onChange?.([])
+              // クリアボタンは選択が空になると消える（showClearButton が false になる）。
+              // フォーカスが body に落ちないよう、押した直後にトリガーへ戻す。
+              triggerRef.current?.focus()
+            }}
             className="absolute right-9 top-1/2 z-[1] flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] transition-colors hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Object-High-Emphasis)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>

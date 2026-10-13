@@ -65,6 +65,10 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
         "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
         "disabled:pointer-events-none disabled:opacity-50",
         "data-[state=active]:bg-[var(--Surface-Primary)] data-[state=active]:text-[var(--Text-High-Emphasis)] data-[state=active]:shadow-sm",
+        // forced-colors（Windows ハイコントラスト）では背景色・box-shadow が消え、選択中の
+        // 白地（Surface-Primary + shadow-sm）が描画されず、どのタブが選択中か分からなくなる。
+        // 選択中だけ OS の選択色（Highlight / HighlightText）で反転させる。通常表示には当たらない。
+        "forced-colors:data-[state=active]:bg-[Highlight] forced-colors:data-[state=active]:text-[HighlightText]",
         variant === "default" && "hover:text-[var(--Text-High-Emphasis)]",
         variant === "pill" && "data-[state=inactive]:hover:text-[var(--Text-High-Emphasis)]",
         className
