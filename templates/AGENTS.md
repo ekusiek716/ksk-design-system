@@ -30,7 +30,7 @@ Codex（および他の AI エージェント）は UI 作業を始める前に�
 |-------------------|----------------|
 | カスタムカラー（`#xxxxxx` / `rgba(...)` ハードコード） | `var(--Brand-Primary)`, `var(--Surface-*)` 等のセマンティックトークン |
 | カスタム余白（`margin: 17px` 等の非トークン値） | Tailwind の標準スペーシング（`p-4`, `gap-2` 等） |
-| カスタム角丸（`rounded-md`, `rounded-xl` 等） | `rounded-none/sm/lg/2xl/full` のみ使用可 |
+| カスタム角丸（`rounded-3xl` 等、許可セット外） | `rounded-none/sm/md/lg/xl/2xl/full` の7値のみ使用可 |
 | カスタム影（`shadow-md` 以上） | `shadow-[var(--shadow-md)]`, `shadow-[var(--shadow-dialog)]` |
 | `font-bold` / `font-semibold` 等の個別指定 | `typo-*` クラス（`typo-heading-md`, `typo-label-sm` 等） |
 | `<button>` / `<input>` / `<a href>` 生タグ | `<Button>`, `<Input>`, `<Button variant="link">` |

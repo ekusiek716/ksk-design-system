@@ -41,7 +41,7 @@ Tailwind v4 は border/ring/outline の既定が currentColor。消費側が濃�
 ### 原則4: タイポは typo-* クラスのみ
 size/weight/line-height/tracking は typo-* に内包済み（和文最適化）。個別指定は行間バラバラと日本語可読性低下を招く。色だけ別指定する。
 - 良い例: `className="typo-body-sm text-[var(--Text-Low-Emphasis)]"`
-- **絶対やるな**: `text-sm font-bold`, `text-[14px]`, `tracking-tight`。本文に typo-body-xs(10px)/caption(11px)（本文下限12px）
+- **絶対やるな**: `text-sm font-bold`, `text-[14px]`, `tracking-tight`。本文に typo-body-xs(12px)/caption(11px)（本文の下限は typo-body-sm=14px）
 
 ### 原則5: アイコンは iconsax-reactjs のみ
 DS 全体でアイコンの線幅・スタイルを統一するため。
@@ -62,7 +62,7 @@ DS 全体でアイコンの線幅・スタイルを統一するため。
   良い例: `<Button variant="destructive" size="sm">` / 絶対やるな: `<Button className="bg-red-500 h-8">`
 - **スペーシングは 4px グリッド**: Tailwind 標準クラスの**整数ステップのみ**（高頻度は gap/p 1–6）。任意値 `p-[17px]` に加え、小数ステップ `gap-1.5`/`p-2.5`（6px/10px = グリッド外）も禁止。
   良い例: `gap-2`（8px） / 絶対やるな: `gap-1.5`, `p-[10px]`
-- **角丸の使い分け**: 面/モーダル/シートは意味トークン `rounded-[var(--Radius-Surface|Modal|Sheet)]`（8/24/32px）。その他の小要素は `rounded-{none|sm|md|lg|xl|2xl|full}` の7値のみ。Button/Chip/Badge はピル（full）。
+- **角丸の使い分け**: 面/モーダル/シートは意味トークン `rounded-[var(--Radius-Surface|Modal|Sheet)]`（14/24/32px）。その他の小要素は `rounded-{none|sm|md|lg|xl|2xl|full}` の7値のみ。Button/Chip/Badge はピル（full）。
 - **影は5段のみ**: `shadow-[var(--shadow-sm|md|lg|dialog|tooltip)]`。Tailwind 標準 shadow 禁止。境界は「影＋1px罫線」で表現。
 - **motion は 150/200ms ease-out**（sheet は 280ms spring）。300ms 以上禁止。常時ループアニメはローディング限定。
 - **ベンダープレフィックスは `-webkit-` を先、標準形を後**（逆順だと消費側 minifier の dedupe で Firefox で静かに無効化）。
@@ -96,6 +96,22 @@ DS 全体でアイコンの線幅・スタイルを統一するため。
 
 ## 5. 実装後の機械検証（必須）
 
+作業場所で手順が違う。**consumer で `bash scripts/...` や `npm run check` は動かない**（DS リポジトリにしか無い）。
+
+### consumer アプリで UI を書いたとき
+
+```bash
+npx ksk-ds lint src                      # DS-first ルール違反（rules.json）を検査。毎回
+npx ksk-ds lint --changed                # 差分だけ検査（編集の都度はこちらが速い）
+npx ksk-ds check-duplicates src --strict # DS と同名のローカル実装を検査（CI 向け。検出時 exit 1）
+npx ksk-ds check-migration ./src         # 非推奨 API の残存を検査（read-only）
+```
+
+Storybook がある consumer は、ツールバーの **Hostile ctx** を loud にしてマゼンタ化・背景透け（文脈非依存違反）が無いか目視確認。
+DS に無い部品が要るときは、consumer 側に別台帳を作らず DS へ issue を出す（CLAUDE.md の「ローカル二重実装ゲート」）。
+
+### DS リポジトリの中で作業するとき
+
 ```bash
 bash scripts/lint-scratch.sh   # .tsx を編集したら毎回
 npm run check                  # コンポーネント増減時（tsc+lint+drift+lookup）
@@ -103,7 +119,7 @@ npm run check                  # コンポーネント増減時（tsc+lint+drift
 
 Storybook ツールバーの **Hostile ctx** を loud にして、マゼンタ化・背景透け（文脈非依存違反）が無いか目視確認。
 
-**コンポーネントを増減したら**、コードだけでは完了しない。次の連鎖を全部更新する:
+**コンポーネントを増減したら**（DS リポジトリ内）、コードだけでは完了しない。次の連鎖を全部更新する:
 `src/index.ts` → `contracts/components.json`（定義＋`meta.counts`）→ `.stories.tsx` →
 `npm run generate:lookup` → `bash scripts/check-drift.sh`（一括なら `npm run check`）。
 contracts と実装の drift は静かに壊れるため、レビューでは counts 差分も見る。

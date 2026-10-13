@@ -67,7 +67,7 @@ gap-3=12px, gap-4=16px, gap-6=24px, p-8=32px...）で表現し、**任意値 `p-
 
 ## Radius / Shadow / Motion / TouchTarget
 
-- 角丸: 意味トークン `--Radius-Surface`(8) / `--Radius-Modal`(24) / `--Radius-Sheet`(32) を優先。
+- 角丸: 意味トークン `--Radius-Surface`(14) / `--Radius-Modal`(24) / `--Radius-Sheet`(32) を優先。
   素の rounded-* は none/sm(4)/md(6)/lg(8)/xl(12)/2xl(16)/full の7値のみ（P019）
 - 影: `--shadow-sm/md/lg/dialog/tooltip` の5段のみ（P020）。影色は neutral でテーマ非依存
 - motion: 150ms（micro）/ 200ms（enter）/ sheet 280ms spring。300ms+ 禁止（P030）
