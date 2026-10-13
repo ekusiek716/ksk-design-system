@@ -78,21 +78,37 @@ describe("prefers-contrast: more / data-contrast=\"more\" の値", () => {
 
 describe("部品の参照", () => {
   const controlFiles = [
-    "input",
-    "textarea",
-    "select",
-    "checkbox",
-    "radio-group",
-    "combobox",
-    "multi-select",
-    "date-picker",
-    "time-picker",
+    "ui/input",
+    "ui/textarea",
+    "ui/select",
+    "ui/checkbox",
+    "ui/radio-group",
+    "ui/combobox",
+    "ui/multi-select",
+    "ui/date-picker",
+    "ui/time-picker",
+    "ui/number-input",
+    "ui/checkbox-card",
+    "patterns/search-bar",
+    "patterns/tag-input",
+    "patterns/chip",
+    "patterns/file-upload",
+    "patterns/admin/image-uploader",
+    "patterns/admin/chart-controls",
+    "patterns/commerce/quantity-selector",
   ]
 
-  it.each(controlFiles)("%s の枠は --Border-Control を参照し、--Border-Medium-Emphasis を直接使わない", (name) => {
-    const source = readFileSync(`src/components/ui/${name}.tsx`, "utf8")
+  it.each(controlFiles)("%s の操作部品の枠は --Border-Control を参照し、border に --Border-Medium-Emphasis を直接使わない", (name) => {
+    const source = readFileSync(`src/components/${name}.tsx`, "utf8")
     expect(source).toContain("var(--Border-Control)")
-    expect(source).not.toContain("var(--Border-Medium-Emphasis)")
+    // 区切り線（border-t）は非操作要素なので対象外
+    const withoutDivider = source.replace("border-t border-[var(--Border-Medium-Emphasis)]", "")
+    expect(withoutDivider).not.toMatch(/border[a-z-]*-\[var\(--Border-Medium-Emphasis\)\]/)
+  })
+
+  it("非操作要素（CheckboxCard の展開部の区切り線）は --Border-Medium-Emphasis のまま", () => {
+    const source = readFileSync("src/components/ui/checkbox-card.tsx", "utf8")
+    expect(source).toContain("border-t border-[var(--Border-Medium-Emphasis)]")
   })
 
   it("switch の off 地は --Surface-Switch-Off / -Hover を参照する", () => {

@@ -114,10 +114,10 @@ function FileUpload({
         onClick={() => !disabled && inputRef.current?.click()}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") inputRef.current?.click() }}
         className={cn(
-          "flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-[var(--Border-Medium-Emphasis)] border-dashed p-8 cursor-pointer transition-colors",
+          "flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-[var(--Border-Control)] border-dashed p-8 cursor-pointer transition-colors",
           dragging
             ? "border-[var(--Brand-Primary)] bg-[var(--Surface-Accent-Primary-Light)]"
-            : "border-[var(--Border-Medium-Emphasis)] hover:border-[var(--Brand-Primary)] hover:bg-[var(--Surface-Secondary)]",
+            : "border-[var(--Border-Control)] hover:border-[var(--Brand-Primary)] hover:bg-[var(--Surface-Secondary)]",
           disabled && "opacity-50 cursor-not-allowed pointer-events-none"
         )}
       >

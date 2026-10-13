@@ -11,7 +11,7 @@ const chipVariants = cva(
       variant: {
         filled: "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)] disabled:text-[var(--Text-Disable)] disabled:hover:bg-[var(--Surface-Secondary)]",
         accent: "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)] disabled:bg-[var(--Surface-Secondary)] disabled:text-[var(--Text-Disable)] disabled:hover:bg-[var(--Surface-Secondary)]",
-        outline: "border border-[var(--Border-Medium-Emphasis)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)] disabled:text-[var(--Text-Disable)]",
+        outline: "border border-[var(--Border-Control)] text-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)] disabled:text-[var(--Text-Disable)]",
       },
       // Chip は常にインタラクティブ（button / a）なので、44px のタッチターゲットを
       // 縦横とも満たす必要がある。縦横で手法を変えているのは意図的:
@@ -256,7 +256,7 @@ function Chip({
             // 仕切り線なし・本体と同じ面色を継ぎ目なく延長。ホバー時のみ × 側を強調。
             !selected && variant === "filled" && "bg-[var(--Surface-Secondary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Tertiary)] hover:text-[var(--Text-High-Emphasis)]",
             !selected && variant === "accent" && "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)]",
-            !selected && variant === "outline" && "border border-l-0 border-[var(--Border-Medium-Emphasis)] bg-transparent text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]",
+            !selected && variant === "outline" && "border border-l-0 border-[var(--Border-Control)] bg-transparent text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]",
             selected && "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Active-Primary-Button)] hover:text-[var(--Text-on-Inverse)]",
             removeButtonSize,
             actualSize !== "tile" && "[@media(hover:hover)_and_(pointer:fine)]:w-[max(2rem,var(--Chip-Remove-Width))] [@media(any-pointer:coarse)]:min-w-11",

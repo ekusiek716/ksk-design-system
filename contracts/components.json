@@ -719,6 +719,9 @@
       "rules": [
         "Use NumberInput not <input type='number'>",
         "Use format prop for currency display"
+      ],
+      "accessibility": [
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ]
     },
     {
@@ -1008,7 +1011,8 @@
       "accessibility": [
         "Radix Checkbox 準拠",
         "disabled 状態対応",
-        "アクセシブル名はラベル（+ バッジ）だけ（aria-labelledby）。説明は aria-describedby に分け、展開内容は選択中だけ説明に加える"
+        "アクセシブル名はラベル（+ バッジ）だけ（aria-labelledby）。説明は aria-describedby に分け、展開内容は選択中だけ説明に加える",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "CheckboxCardGroup でグループ化",
@@ -1435,6 +1439,9 @@
       "rules": [
         "asForm=false（既定）ではルート div に role=search を付けない。消費側が外側で role=search を既に持つ場合に二重ランドマークになるのを避けるため",
         "asForm=true と keydown 側の Enter 処理は二重発火防止のため排他"
+      ],
+      "accessibility": [
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ]
     },
     {
@@ -1468,6 +1475,9 @@
         "touch device では selected 切替時の color transition を走らせない",
         "Android tap highlight は DS 側で抑制するため consumer CSS で上書きしない",
         "removable の削除ボタンは横44px + 縦44px hit areaを確保する"
+      ],
+      "accessibility": [
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ]
     },
     {
@@ -1586,6 +1596,9 @@
       ],
       "rules": [
         "Use for multi-value text input (tags, emails, keywords)"
+      ],
+      "accessibility": [
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ]
     },
     {
@@ -2101,7 +2114,8 @@
       "sizes": [],
       "accessibility": [
         "aria-label",
-        "drop zone announces"
+        "drop zone announces",
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ],
       "rules": [
         "画像専用なら ImageUploader を使う"
@@ -2650,7 +2664,10 @@
         "decreaseLabel": "string (既定 \"数量を減らす\") — 減少ボタンの aria-label（issue #428）",
         "increaseLabel": "string (既定 \"数量を増やす\") — 増加ボタンの aria-label（issue #428）",
         "deleteLabel": "string (既定 \"削除\") — trash 状態時の減少ボタンの aria-label（issue #428）"
-      }
+      },
+      "accessibility": [
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+      ]
     },
     {
       "name": "OrderSummary",
@@ -2903,7 +2920,10 @@
       ],
       "props": {
         "addLabel": "string (既定 \"画像を追加\") — 追加ボタンの aria-label（issue #428）"
-      }
+      },
+      "accessibility": [
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+      ]
     },
     {
       "name": "NotificationList",
@@ -2925,6 +2945,9 @@
       ],
       "rules": [
         "Chips wrap on narrow widths (flex-wrap)"
+      ],
+      "accessibility": [
+        "枠は --Border-Control（既定は Border-Medium-Emphasis と同じ値）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
       ]
     }
   ],

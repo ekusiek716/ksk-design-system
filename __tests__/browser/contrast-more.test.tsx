@@ -6,6 +6,10 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
+import { NumberInput } from "@/components/ui/number-input"
+import { CheckboxCardItem } from "@/components/ui/checkbox-card"
+import { SearchBar } from "@/components/patterns/search-bar"
+import { TagInput } from "@/components/patterns/tag-input"
 import "@/index.css"
 
 /**
@@ -23,6 +27,9 @@ import "@/index.css"
 
 const GRAY_500 = "rgb(113, 113, 122)"
 const WHITE_ALPHA_500 = "rgba(255, 255, 255, 0.36)"
+
+// 入力・選択の操作部品（枠が操作の手がかりになるもの）。既定は Medium と同じ、設定ありで Control の値
+const EXTRA_CONTROLS = ["numberInputButton", "searchBar", "tagInput", "checkboxCard", "checkboxCardIcon"] as const
 
 let root: Root | undefined
 let container: HTMLDivElement | undefined
@@ -68,6 +75,10 @@ function mount() {
           <RadioGroupItem value="a" aria-label="ラジオ" />
         </RadioGroup>
         <Switch aria-label="スイッチ" />
+        <NumberInput value={1} />
+        <SearchBar aria-label="検索" />
+        <TagInput value={["a"]} />
+        <CheckboxCardItem value="x" label="カード" />
         {/* 比較用: 面の区切りに使う Medium は入力系の切り替えに巻き込まれない */}
         <div data-testid="divider" className="border border-[var(--Border-Medium-Emphasis)]" />
         <div data-testid="medium-probe" style={{ borderTop: "1px solid var(--Border-Medium-Emphasis)" }} />
@@ -84,6 +95,11 @@ function colors() {
     input: border(q("input")),
     checkbox: border(q('[data-slot="checkbox"]')),
     radio: border(q('[data-slot="radio-group-item"]')),
+    numberInputButton: border(q('[data-slot="number-input"] button')),
+    searchBar: border(q('[data-slot="search-bar"] input')),
+    tagInput: border(q('[data-slot="tag-input"]')),
+    checkboxCard: border(q('[data-slot="checkbox-card-item"]')),
+    checkboxCardIcon: border(q('[data-slot="checkbox-card-icon"]')),
     switchOff: getComputedStyle(q('[data-slot="switch"]')).backgroundColor,
     divider: border(q('[data-testid="divider"]')),
     mediumProbe: border(q('[data-testid="medium-probe"]')),
@@ -100,6 +116,7 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
     expect(c.checkbox).toBe(c.mediumProbe)
     expect(c.radio).toBe(c.mediumProbe)
     expect(c.switchOff).toBe(c.quaternaryProbe)
+    for (const key of EXTRA_CONTROLS) expect(c[key]).toBe(c.mediumProbe)
     expect(c.input).not.toBe(GRAY_500)
   })
 
@@ -113,6 +130,7 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
     expect(after.checkbox).toBe(GRAY_500)
     expect(after.radio).toBe(GRAY_500)
     expect(after.switchOff).toBe(GRAY_500)
+    for (const key of EXTRA_CONTROLS) expect(after[key]).toBe(GRAY_500)
     expect(after.divider).toBe(before.divider)
     expect(after.mediumProbe).toBe(before.mediumProbe)
   })
@@ -131,6 +149,7 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
     expect(more.checkbox).toBe(WHITE_ALPHA_500)
     expect(more.radio).toBe(WHITE_ALPHA_500)
     expect(more.switchOff).toBe(GRAY_500)
+    for (const key of EXTRA_CONTROLS) expect(more[key]).toBe(WHITE_ALPHA_500)
     expect(more.mediumProbe).toBe(base.mediumProbe)
   })
 

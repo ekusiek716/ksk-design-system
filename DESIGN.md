@@ -155,7 +155,11 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
     プロダクト向けの opt-in（`<html data-contrast="more">`）
   入力系の部品は `--Border-Medium-Emphasis` ではなく専用ロール **`--Border-Control`**、スイッチ（オフ）は
   **`--Surface-Switch-Off`** / **`--Surface-Switch-Off-Hover`** を参照する（既定値は従来と同じ計算後の色）。
-  カードの区切り線など入力以外の `--Border-Medium-Emphasis` は切り替わらない。値は Surface-Primary に対する実測:
+  対象は入力・選択の操作部品（Input / Textarea / Select / Checkbox / Radio / Combobox / MultiSelect /
+  DatePicker / TimePicker / NumberInput / SearchBar / TagInput / CheckboxCard / Chip（outline）/ FileUpload /
+  ImageUploader / ChartControls / QuantitySelector）。カードの区切り線・Alert / Toast / Banner / Badge の枠など
+  非操作要素の `--Border-Medium-Emphasis` は切り替わらない。新しく入力・選択の操作部品を作るときは枠に
+  `--Border-Control` を使う。値は Surface-Primary に対する実測:
 
   | | light | dark |
   |---|---|---|

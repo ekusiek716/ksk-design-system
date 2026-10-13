@@ -81,7 +81,7 @@ function TagInput({
     <div
       data-slot="tag-input"
       className={cn(
-        "flex flex-wrap gap-1.5 min-h-12 w-full rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-3 py-2 transition-colors",
+        "flex flex-wrap gap-1.5 min-h-12 w-full rounded-lg border border-[var(--Border-Control)] bg-[var(--Surface-Primary)] px-3 py-2 transition-colors",
         "focus-within:ring-[3px] focus-within:ring-[var(--Focus-High-Emphasis)]/50 focus-within:border-[var(--Border-Accent-Primary)]",
         disabled && "cursor-not-allowed opacity-50",
         className
