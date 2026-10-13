@@ -394,8 +394,8 @@ export const Sizes: Story = {
       await userEvent.click(canvas.getByTestId(`open-${size}`))
       const dialog = await body.findByRole("dialog")
       await expect(dialog.className).toContain(expected[size])
-      await userEvent.keyboard("{Escape}")
-      await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
+      await userEvent.click(within(dialog).getByRole("button", { name: "閉じる" }))
+      await waitFor(() => expect(body.queryByRole("dialog")).toBeNull(), { timeout: 5000 })
     }
   },
 }

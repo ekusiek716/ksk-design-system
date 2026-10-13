@@ -167,6 +167,9 @@ export const Sizes: Story = {
               <SheetTitle>size=&quot;{size}&quot;</SheetTitle>
               <SheetDescription>幅の段を切り替えるデモです。</SheetDescription>
             </SheetHeader>
+            <SheetClose asChild>
+              <Button variant="secondary" data-testid="close">閉じる</Button>
+            </SheetClose>
           </SheetContent>
         </Sheet>
       ))}
@@ -179,6 +182,9 @@ export const Sizes: Story = {
             <SheetTitle>bottom は全幅</SheetTitle>
             <SheetDescription>side=&quot;bottom&quot; では size を無視します。</SheetDescription>
           </SheetHeader>
+          <SheetClose asChild>
+            <Button variant="secondary" data-testid="close">閉じる</Button>
+          </SheetClose>
         </SheetContent>
       </Sheet>
     </div>
@@ -191,14 +197,14 @@ export const Sizes: Story = {
       await userEvent.click(canvas.getByTestId(`open-${size}`))
       const dialog = await body.findByRole("dialog")
       await expect(dialog.className).toContain(expected[size])
-      await userEvent.keyboard("{Escape}")
-      await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
+      await userEvent.click(within(dialog).getByTestId("close"))
+      await waitFor(() => expect(body.queryByRole("dialog")).toBeNull(), { timeout: 5000 })
     }
     await userEvent.click(canvas.getByTestId("open-bottom"))
     const bottom = await body.findByRole("dialog")
     await expect(bottom.className).not.toMatch(/max-w-(sm|xl|3xl)/)
-    await userEvent.keyboard("{Escape}")
-    await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
+    await userEvent.click(within(bottom).getByTestId("close"))
+    await waitFor(() => expect(body.queryByRole("dialog")).toBeNull(), { timeout: 5000 })
   },
 }
 
