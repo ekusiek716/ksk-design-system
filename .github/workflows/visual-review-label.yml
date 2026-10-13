@@ -1,0 +1,73 @@
+name: Visual review label
+
+# 見た目に効く変更（枠線・フォーカスリング・影・色・角丸・余白）を含む PR に
+# `needs-visual-review` ラベルと「何がどこで変わったか」のコメントを付ける。
+# VRT は 1px の枠線の色や影の微差を取りこぼすことがあるため、緑の CI をすり抜けた
+# 見た目の変更をレビュアーが目視確認できるようにする。判定ロジックは
+# scripts/detect-visual-changes.mjs（テスト: __tests__/detect-visual-changes.test.ts）。
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'src/**'
+      - 'tokens.json'
+      - 'scripts/detect-visual-changes.mjs'
+      - '.github/workflows/visual-review-label.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  label:
+    name: needs-visual-review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # fork からの PR は GITHUB_TOKEN が読み取り専用でラベルもコメントも付けられない。
+    # 失敗させずにスキップする（メンテナが手で見る）。
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      REPO: ${{ github.repository }}
+      LABEL: needs-visual-review
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - id: detect
+        name: Detect visual changes
+        run: node scripts/detect-visual-changes.mjs "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" --markdown "$RUNNER_TEMP/comment.md" --json "$RUNNER_TEMP/report.json"
+
+      - name: Add label (create if missing)
+        if: steps.detect.outputs.hit == 'true'
+        run: |
+          gh label create "$LABEL" --repo "$REPO" --color 5319E7 \
+            --description "見た目に関わる変更を含む。VRT が取りこぼす差があるため目視レビュー必須" 2>/dev/null || true
+          gh pr edit "$PR" --repo "$REPO" --add-label "$LABEL"
+
+      - name: Remove label (no longer applicable)
+        if: steps.detect.outputs.hit != 'true'
+        run: gh pr edit "$PR" --repo "$REPO" --remove-label "$LABEL" 2>/dev/null || true
+
+      # 二重投稿せず、マーカー付きの既存コメントがあれば更新する。
+      # 該当なしの PR には新規投稿しない（既存コメントがあるときだけ「解除」に更新する）。
+      - name: Upsert comment
+        run: |
+          marker='<!-- needs-visual-review -->'
+          existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq ".[] | select(.body | contains(\"$marker\")) | .id" | head -n1)
+          if [ -n "$existing" ]; then
+            gh api "repos/$REPO/issues/comments/$existing" --method PATCH --field body=@"$RUNNER_TEMP/comment.md" >/dev/null
+          elif [ "${{ steps.detect.outputs.hit }}" = "true" ]; then
+            gh pr comment "$PR" --repo "$REPO" --body-file "$RUNNER_TEMP/comment.md"
+          fi
