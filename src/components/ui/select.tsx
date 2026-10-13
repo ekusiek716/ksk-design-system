@@ -76,9 +76,12 @@ function SelectTrigger({ className, children, size, ...props }: SelectTriggerPro
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       aria-invalid={ariaFromRoot["aria-invalid"]}
-      aria-describedby={ariaFromRoot["aria-describedby"]}
       className={cn(selectTriggerVariants({ size }), className)}
       {...props}
+      // Root（FormField）由来の id と、トリガー自身の aria-describedby は両方残す
+      aria-describedby={
+        [ariaFromRoot["aria-describedby"], props["aria-describedby"]].filter(Boolean).join(" ") || undefined
+      }
     >
       {children}
       <SelectPrimitive.Icon asChild>

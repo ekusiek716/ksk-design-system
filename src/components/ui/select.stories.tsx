@@ -190,3 +190,28 @@ export const InvalidInFormField: Story = {
     await expect(getComputedStyle(trigger).borderTopColor).toBe(cautionBorderColor())
   },
 }
+
+/** トリガー自身の aria-describedby と FormField のエラー文の id が両方残る。 */
+export const KeepsOwnDescribedByInFormField: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div className="w-[260px]">
+      <FormField label="カテゴリ" error="カテゴリを選択してください">
+        <Select>
+          <SelectTrigger data-testid="trigger" aria-label="カテゴリ" aria-describedby="own-hint">
+            <SelectValue placeholder="カテゴリを選択" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="design">デザイン</SelectItem>
+          </SelectContent>
+        </Select>
+      </FormField>
+      <p id="own-hint">独自のヒント</p>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByTestId("trigger")
+    await expect(trigger).toHaveAccessibleDescription(/独自のヒント/)
+    await expect(trigger).toHaveAccessibleDescription(/カテゴリを選択してください/)
+  },
+}

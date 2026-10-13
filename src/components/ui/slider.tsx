@@ -65,7 +65,14 @@ function Slider({
     [value, defaultValue, min, max]
   )
 
-  const isRange = _values.length > 1
+  // 範囲かどうかは、実際に渡された value / defaultValue 配列の長さで判定する
+  // （どちらも無い <Slider /> は Radix の既定 [min] の単一つまみのまま）
+  const providedLength = Array.isArray(value)
+    ? value.length
+    : Array.isArray(defaultValue)
+      ? defaultValue.length
+      : 1
+  const isRange = providedLength > 1
   const isControlled = Array.isArray(value)
   // 範囲スライダーの非制御時だけ、Home / End で値を Radix へ反映するための内部 state を持つ。
   const [innerValue, setInnerValue] = React.useState<number[]>(

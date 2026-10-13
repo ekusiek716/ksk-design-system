@@ -21,7 +21,7 @@
 | Button | `@/components/ui/button` | **variant**: `default`, `secondary`, `secondary-switch`, `tertiary`, `ghost`, `destructive`, `info`, `warning`, `success`, `link`, `glass`, `glass-inverse`, `glass-accent`, `accent`, `inverse`, `ghost-inverse`<br>**size**: `xs`, `sm`, `default`, `lg`, `xl`, `hero`, `icon`, `icon-sm`, `icon-lg`, `icon-xl`, `icon-fab`, `match`<br>**layout**: `horizontal`, `vertical` | Default, Secondary, SecondarySwitch, Tertiary, Ghost, Destructive, Link, AllVariants, StatusVariants, AllSizes, Hero, Inverse on Dark Background, Real UI — Hero Section CTAs, Disabled, DisabledAllVariants, IconButton, Glass — Liquid Glass (iOS 26), Glass Inverse on Dark Background, Glass Accent — FAB (Floating Action Button), Glass — ボケ感デモ（動くコンテンツ上）, Glass — カーソル追従スペキュラ, WithIcon, PressDoesNotShiftLayout, DisabledIsNotClickable, FocusRingIsVisible, TouchTargetsDoNotOverlap, Loading, LoadingKeepsWidthAndBlocksClick |
 | Calendar | `@/components/ui/calendar` | — | Single, NavigatesMonths, Range |
 | Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter | `@/components/ui/card` | **variant**: `default`, `media` | FullCard, MinimalCard, HeaderOnly, OnSameColorGround |
-| CheckboxCardGroup, CheckboxCardItem | `@/components/ui/checkbox-card` | — | Default, WithDescription, WithExpandedContent, Disabled, AccessibleNameIsLabelOnly |
+| CheckboxCardGroup, CheckboxCardItem | `@/components/ui/checkbox-card` | — | Default, WithDescription, WithExpandedContent, Disabled, AccessibleNameIsLabelOnly, DescriptionOnlyIsNotReadTwice |
 | CheckboxField | `@/components/ui/checkbox-field` | — | Default, WithDescription, WithError, LongLabelWrap, Disabled |
 | CheckboxGroup, CheckboxGroupItem | `@/components/ui/checkbox-group` | — | Default, Required, WithError, SingleColumn |
 | Checkbox | `@/components/ui/checkbox` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, MultipleOptions, Row Layout (label/description/count), Real UI — Filter Sidebar |
@@ -60,13 +60,13 @@
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | SectionNav | `@/components/ui/section-nav` | — | Vertical, Horizontal, StickyGuide |
 | Section | `@/components/ui/section` | **spacing**: `sm`, `md`, `lg`, `xl`<br>**background**: `none`, `subtle`, `accent-subtle` | FullBleedBandWithContainedContent |
-| Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard, InvalidInFormField |
+| Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard, InvalidInFormField, KeepsOwnDescribedByInFormField |
 | SEMANTIC_ICONS, SemanticIcon | `@/components/ui/semantic-icon` | — | — |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
 | Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass` | BottomSheet, FloatSheet, TopSheet, FloatSheetTallContent, RightSheet, A11yOptions, TitleAutoFocusAppearance, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, Float — 仮想キーボード追従, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158), OpensAndIsImmediatelyInteractive, ChildDescriptionIsLinked, ChildDescriptionIsLinkedWithSwipeToClose, NoDescriptionLeavesNoDescribedBy, ChildDescriptionIsLinkedWithSnapPoints, ChildDescriptionIsLinkedWithSwipeSideDrawer, DescriptionPropIsLinked, ExplicitDescribedByWins |
 | Skeleton, SkeletonText | `@/components/ui/skeleton` | — | CardSkeleton, TextSkeleton, SkeletonText (5 lines) |
 | SkipLink | `@/components/ui/skip-link` | — | Default |
-| Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Range — 最小値/最大値を別々にラベル付け, Disabled, RangeHomeEndMovesFocusedThumb |
+| Slider | `@/components/ui/slider` | — | Default, Range, WithLabel, Range — 最小値/最大値を別々にラベル付け, Disabled, RangeHomeEndMovesFocusedThumb, NoValueStaysSingleThumb |
 | SOCIAL_ICON_LABELS, SOCIAL_ICON_DATA, SOCIAL_ICON_PLATFORMS | `@/components/ui/social-icon-data` | — | — |
 | SocialIcon, SOCIAL_ICON_PLATFORMS, SOCIAL_ICON_LABELS | `@/components/ui/social-icon` | — | Default, AllPlatforms, AllMono, Tones |
 | SocialLoginButton | `@/components/ui/social-login-button` | — | Line, Google, Apple, Amazon, AllProviders, LightAndDark, Loading |

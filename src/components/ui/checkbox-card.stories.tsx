@@ -101,3 +101,18 @@ export const AccessibleNameIsLabelOnly: Story = {
     await expect(standard).toHaveAccessibleDescription("月額 ¥1,000")
   },
 }
+
+/** ラベルが無く説明だけのカードは、名前と説明が同じ文になるので説明を重ねない。 */
+export const DescriptionOnlyIsNotReadTwice: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <CheckboxCardGroup className="max-w-sm">
+      <CheckboxCardItem description="説明だけのカード" />
+    </CheckboxCardGroup>
+  ),
+  play: async ({ canvasElement }) => {
+    const card = within(canvasElement).getByRole("checkbox")
+    await expect(card).toHaveAccessibleName("説明だけのカード")
+    await expect(card).not.toHaveAttribute("aria-describedby")
+  },
+}

@@ -71,7 +71,8 @@ function CheckboxCardItem({
   const labelledby = ariaLabelledby ?? (ariaLabel === undefined && hasLabel ? labelId : undefined)
   const describedby =
     [
-      description ? descriptionId : undefined,
+      // ラベルが無いカードは名前が内容（= 説明）になるので、説明を重ねて 2 回読ませない
+      description && hasLabel ? descriptionId : undefined,
       expandedContent && isChecked ? expandedId : undefined,
       ariaDescribedby,
     ]

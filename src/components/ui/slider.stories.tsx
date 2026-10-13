@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import * as React from "react"
 import { expect, userEvent, within } from "storybook/test"
 import { Slider } from "./slider"
 
@@ -117,5 +118,30 @@ export const RangeHomeEndMovesFocusedThumb: Story = {
     await userEvent.keyboard("{End}")
     await expect(end).toHaveAttribute("aria-valuenow", "100")
     await expect(start).toHaveAttribute("aria-valuenow", "0")
+  },
+}
+
+/** defaultValue / value が無い <Slider /> は単一つまみのまま（範囲スライダーにならない）。 */
+export const NoValueStaysSingleThumb: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => {
+    const [last, setLast] = React.useState("")
+    return (
+      <div className="w-64">
+        <Slider aria-label="音量" onValueChange={(v) => setLast(JSON.stringify(v))} />
+        <p data-testid="last">{last}</p>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const thumb = within(canvasElement).getAllByRole("slider")[0]
+    thumb.focus()
+    // 範囲スライダー用の Home/End 横取り（隣のつまみ基準）が入らず、Radix 既定の単一つまみとして min/max へ動く
+    await userEvent.keyboard("{End}")
+    await expect(thumb).toHaveAttribute("aria-valuenow", "100")
+    // 値は 1 要素の配列（2 要素になっていれば範囲スライダー化している）
+    await expect(within(canvasElement).getByTestId("last")).toHaveTextContent("[100]")
+    await userEvent.keyboard("{Home}")
+    await expect(thumb).toHaveAttribute("aria-valuenow", "0")
   },
 }
