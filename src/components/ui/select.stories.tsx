@@ -4,6 +4,7 @@
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
+import { FormField } from "../patterns/form-field"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "./select"
 
 const meta: Meta<typeof Select> = {
@@ -152,5 +153,66 @@ export const SelectsWithKeyboard: Story = {
     await waitFor(() => expect(trigger).toHaveAttribute("aria-expanded", "false"))
     await expect(trigger.textContent).not.toBe("カテゴリを選択")
     await waitFor(() => expect(body.queryByRole("listbox")).not.toBeInTheDocument())
+  },
+}
+
+// --Border-Caution の解決後の色（FormField の error で出るエラー枠の期待色）
+const cautionBorderColor = () => {
+  const probe = document.createElement("div")
+  probe.style.cssText = "border: 1px solid var(--Border-Caution); position: absolute;"
+  document.body.appendChild(probe)
+  const color = getComputedStyle(probe).borderTopColor
+  probe.remove()
+  return color
+}
+
+/** FormField の error が Select（Root）経由でトリガーに届き、エラー枠（赤枠）になる。 */
+export const InvalidInFormField: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div className="w-[260px]">
+      <FormField label="カテゴリ" error="カテゴリを選択してください">
+        <Select>
+          <SelectTrigger data-testid="trigger" aria-label="カテゴリ">
+            <SelectValue placeholder="カテゴリを選択" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="design">デザイン</SelectItem>
+            <SelectItem value="development">開発</SelectItem>
+          </SelectContent>
+        </Select>
+      </FormField>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByTestId("trigger")
+    await expect(trigger).toHaveAttribute("aria-invalid", "true")
+    await expect(trigger.getAttribute("aria-describedby")).toBeTruthy()
+    await expect(getComputedStyle(trigger).borderTopColor).toBe(cautionBorderColor())
+  },
+}
+
+/** トリガー自身の aria-describedby と FormField のエラー文の id が両方残る。 */
+export const KeepsOwnDescribedByInFormField: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <div className="w-[260px]">
+      <FormField label="カテゴリ" error="カテゴリを選択してください">
+        <Select>
+          <SelectTrigger data-testid="trigger" aria-label="カテゴリ" aria-describedby="own-hint">
+            <SelectValue placeholder="カテゴリを選択" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="design">デザイン</SelectItem>
+          </SelectContent>
+        </Select>
+      </FormField>
+      <p id="own-hint">独自のヒント</p>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByTestId("trigger")
+    await expect(trigger).toHaveAccessibleDescription(/独自のヒント/)
+    await expect(trigger).toHaveAccessibleDescription(/カテゴリを選択してください/)
   },
 }

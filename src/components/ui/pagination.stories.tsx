@@ -9,6 +9,7 @@
  */
 import { useState } from "react"
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect } from "storybook/test"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext, PaginationEllipsis } from "./pagination"
 import { buildPageItems } from "@/lib/build-page-items"
 
@@ -135,5 +136,50 @@ export const WithBuildPageItems: Story = {
         </PaginationContent>
       </Pagination>
     )
+  },
+}
+
+/**
+ * `asChild` でフレームワークのリンク部品（next/link 等）に差し替える。
+ * 前へ / 次へは子の children をラベルとして使い、アイコンと一緒に子の中へ
+ * 入れ直す。disabled は href を外せない代わりに aria-disabled・tabIndex=-1・
+ * pointer-events-none でクリックを止める。ここでは `data-router` を付ける
+ * だけのスタブで代用している。
+ */
+export const AsChildRouterLink: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious asChild disabled>
+            <a href="#p0" data-router="1" />
+          </PaginationPrevious>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink asChild isActive>
+            <a href="#p1" data-router="1">1</a>
+          </PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink asChild>
+            <a href="#p2" data-router="1">2</a>
+          </PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationNext asChild>
+            <a href="#p2" data-router="1" />
+          </PaginationNext>
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  ),
+  play: async ({ canvasElement }) => {
+    const links = canvasElement.querySelectorAll<HTMLElement>("a[data-router]")
+    await expect(links).toHaveLength(4)
+    await expect(links[0].getAttribute("aria-disabled")).toBe("true")
+    await expect(links[0].getAttribute("tabindex")).toBe("-1")
+    await expect(links[1].getAttribute("aria-current")).toBe("page")
+    await expect(links[3].textContent).toContain("次へ")
   },
 }

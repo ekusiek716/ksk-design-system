@@ -80,7 +80,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 | CollapsibleChipField | あり | あり |  |  |  | 未検証 |
 | CollapsibleContent | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | CollapsibleTrigger | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
-| Combobox | あり | あり | emptyLabel, className, triggerLabel | emptyMessage | emptyLabel/emptyMessage naming diverged independently for the same feature | 未検証 |
+| Combobox | あり | あり | emptyLabel, className, triggerLabel, id | emptyMessage | emptyLabel/emptyMessage naming diverged independently for the same feature | 未検証 |
 | CommitAutoGrowTextarea | あり | あり |  |  |  | 未検証 |
 | CommitInput | あり | あり |  |  |  | 未検証 |
 | CommitTextarea | あり | あり |  |  |  | 未検証 |
@@ -202,7 +202,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 | MobileAppShell | あり | あり | mainClassName, contentClassName, bottomNavMode, maxWidth, centeredPreview | scrollable, children, style, contentStyle | className/CSS (Web) vs RN style/StyleSheet (Native) is each platform's idiomatic styling prop, not a functional gap; Web has a richer desktop-sidebar-handoff API (bottomNavMode/maxWidth) with no RN equivalent | 未検証 |
 | MobileFloatingActionButton | あり | あり | mobileOnly, fullWidth | style | className/CSS (Web) vs RN style/StyleSheet (Native) is each platform's idiomatic styling prop, not a functional gap; mobileOnly (CSS breakpoint visibility) is a Web-only responsive concept; fullWidth relies on CSS env(safe-area-inset-*) insets and has no Native port yet | 未検証 |
 | MobileTabBar | あり | なし | 抽出不可 | 抽出不可 | web-only BottomTabBar wrapper; native uses LiquidBottomTabBar / createExpoRouterTabBar instead | 未検証 |
-| MultiSelect | あり | あり | value, emptyLabel, className, maxDisplay, clearable, clearLabel, triggerLabel | values, accessibilityLabel | value vs values naming diverged independently; Web has a richer display-truncation/clearable API not yet ported to Native. clearLabel (issue #428) labels the Web-only clear button; triggerLabel vs accessibilityLabel (issue #426) are the same trigger label in platform vocabulary | 未検証 |
+| MultiSelect | あり | あり | value, emptyLabel, className, maxDisplay, clearable, clearLabel, triggerLabel, id | values, accessibilityLabel | value vs values naming diverged independently; Web has a richer display-truncation/clearable API not yet ported to Native. clearLabel (issue #428) labels the Web-only clear button; triggerLabel vs accessibilityLabel (issue #426) are the same trigger label in platform vocabulary | 未検証 |
 | NavigationBar | あり | あり | title, leftIcon, onLeft, leftLabel, rightSlot, onShare, shareLabel, glass, transparent, className | items, value, onChange | Web and Native implementations were designed independently for this component (pre-dates this check); prop vocabulary diverges by design and is tracked here as the established baseline, not a new regression (Web: single-screen back/share header; Native: this file implements a segmented nav bar, a different pattern entirely) | 未検証 |
 | NotFoundIllustration | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | NotificationBadge | あり | あり | size | dot, children | Native adds a dot-only mode and children composition not yet ported to Web / 既定値差: [{"prop":"count","reason":"Web declares `count: number` as required (no default — callers must always pass a value); Native declares `count?: number` optional with a `0` fallback for looser call sites. required-vs-optional (or shape) differs by design between the two platforms' own Props type, so only one side needs a fallback default — a deliberate API surface difference, not a missed port"}] | 未検証 |

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, userEvent, within } from "storybook/test"
 import { CheckboxCardGroup, CheckboxCardItem } from "./checkbox-card"
 import { Badge } from "./badge"
 
@@ -61,4 +62,57 @@ export const Disabled: Story = {
       </CheckboxCardItem>
     </CheckboxCardGroup>
   ),
+}
+
+/**
+ * 読み上げ名はラベル（+ バッジ）だけにし、説明・展開内容は説明（description）に分ける。
+ * カード全体のテキストが名前になると「ライトプラン 月額 ¥500」のように長くなり、
+ * 展開内容は選択の前後で名前が変わってしまう。
+ */
+export const AccessibleNameIsLabelOnly: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <CheckboxCardGroup className="max-w-sm">
+      <CheckboxCardItem
+        description="クレジットカード、コンビニ払い"
+        expandedContent={<p>VISA / Mastercard / JCB対応</p>}
+      >
+        オンライン決済
+      </CheckboxCardItem>
+      <CheckboxCardItem description="月額 ¥1,000" badge={<span>人気</span>}>
+        スタンダードプラン
+      </CheckboxCardItem>
+    </CheckboxCardGroup>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const online = canvas.getByRole("checkbox", { name: "オンライン決済" })
+    await expect(online).toHaveAccessibleDescription("クレジットカード、コンビニ払い")
+    await userEvent.click(online)
+    // 選択して展開内容が見えても名前は変わらず、展開内容は説明に加わる
+    await expect(canvas.getByRole("checkbox", { name: "オンライン決済" })).toBeChecked()
+    await expect(online).toHaveAccessibleDescription(
+      "クレジットカード、コンビニ払い VISA / Mastercard / JCB対応"
+    )
+
+    // バッジは名前に含まれ、説明は含まれない
+    const standard = canvas.getByRole("checkbox", { name: "スタンダードプラン 人気" })
+    await expect(standard).toHaveAccessibleDescription("月額 ¥1,000")
+  },
+}
+
+/** ラベルが無く説明だけのカードは、名前と説明が同じ文になるので説明を重ねない。 */
+export const DescriptionOnlyIsNotReadTwice: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <CheckboxCardGroup className="max-w-sm">
+      <CheckboxCardItem description="説明だけのカード" />
+    </CheckboxCardGroup>
+  ),
+  play: async ({ canvasElement }) => {
+    const card = within(canvasElement).getByRole("checkbox")
+    await expect(card).toHaveAccessibleName("説明だけのカード")
+    await expect(card).not.toHaveAttribute("aria-describedby")
+  },
 }

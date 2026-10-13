@@ -12,7 +12,7 @@ import { usePortalContainer } from "./portal-container"
  * 既定値は従来の固定クラスと同値（issue #364）。
  */
 const selectTriggerVariants = cva(
-  "flex w-full items-center justify-between rounded-[var(--Field-Radius)] border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+  "flex w-full items-center justify-between rounded-[var(--Field-Radius)] border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-[var(--Border-Caution)] aria-invalid:ring-[var(--Caution-Base)]/20 [&>span]:line-clamp-1",
   {
     variants: {
       size: {
@@ -25,8 +25,33 @@ const selectTriggerVariants = cva(
   }
 )
 
-function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />
+/**
+ * Select（Root）が受けた aria-invalid / aria-describedby を SelectTrigger へ届けるための context。
+ * Radix の Root は DOM 要素を描かないため、FormField が子（Select）へ注入した aria 属性は
+ * そのままでは実際のボタン（SelectTrigger）に届かない。
+ */
+const SelectAriaContext = React.createContext<{
+  "aria-invalid"?: React.AriaAttributes["aria-invalid"]
+  "aria-describedby"?: string
+}>({})
+
+type SelectRootProps = React.ComponentProps<typeof SelectPrimitive.Root> & {
+  /** true でトリガーにエラー枠（Border-Caution）を出す。FormField の error から自動で渡される。 */
+  "aria-invalid"?: React.AriaAttributes["aria-invalid"]
+  /** エラー文・説明文の id。トリガーへ転送される。 */
+  "aria-describedby"?: string
+}
+
+function Select({ "aria-invalid": ariaInvalid, "aria-describedby": ariaDescribedBy, ...props }: SelectRootProps) {
+  const ariaValue = React.useMemo(
+    () => ({ "aria-invalid": ariaInvalid, "aria-describedby": ariaDescribedBy }),
+    [ariaInvalid, ariaDescribedBy]
+  )
+  return (
+    <SelectAriaContext.Provider value={ariaValue}>
+      <SelectPrimitive.Root data-slot="select" {...props} />
+    </SelectAriaContext.Provider>
+  )
 }
 
 function SelectGroup({ ...props }: React.ComponentProps<typeof SelectPrimitive.Group>) {
@@ -46,11 +71,17 @@ interface SelectTriggerProps
 }
 
 function SelectTrigger({ className, children, size, ...props }: SelectTriggerProps) {
+  const ariaFromRoot = React.useContext(SelectAriaContext)
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
+      aria-invalid={ariaFromRoot["aria-invalid"]}
       className={cn(selectTriggerVariants({ size }), className)}
       {...props}
+      // Root（FormField）由来の id と、トリガー自身の aria-describedby は両方残す
+      aria-describedby={
+        [ariaFromRoot["aria-describedby"], props["aria-describedby"]].filter(Boolean).join(" ") || undefined
+      }
     >
       {children}
       <SelectPrimitive.Icon asChild>
@@ -129,4 +160,4 @@ export {
   SelectLabel, SelectSeparator, SelectTrigger, SelectValue,
   selectTriggerVariants,
 }
-export type { SelectTriggerProps }
+export type { SelectRootProps, SelectTriggerProps }

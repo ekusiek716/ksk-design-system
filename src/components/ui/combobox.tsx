@@ -20,6 +20,12 @@ export interface ComboboxProps {
   className?: string
   /** トリガーボタンの aria-label */
   triggerLabel?: string
+  /** トリガーボタンの id。FormField の htmlFor と合わせるとラベル押下でフォーカスできる。 */
+  id?: string
+  /** true でトリガーにエラー枠（Border-Caution）を出す。FormField の error から自動で渡される。 */
+  "aria-invalid"?: React.AriaAttributes["aria-invalid"]
+  /** エラー文・説明文の id。FormField から自動で渡される。 */
+  "aria-describedby"?: string
 }
 
 function Combobox({
@@ -32,6 +38,9 @@ function Combobox({
   disabled = false,
   className,
   triggerLabel,
+  id,
+  "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
@@ -55,16 +64,20 @@ function Combobox({
     <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setQuery("") }}>
       <PopoverTrigger asChild>
         <button
+          id={id}
           data-slot="combobox-trigger"
           disabled={disabled}
           aria-expanded={open}
           aria-label={triggerLabel ?? placeholder}
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={ariaInvalid}
           className={cn(
             "flex h-[var(--Field-Height-Md)] w-full items-center justify-between rounded-[var(--Field-Radius)] border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-[var(--Field-Padding-X-Md)] typo-body-md transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
             open
               ? "border-[var(--Border-Accent-Primary)] ring-[3px] ring-[var(--Focus-High-Emphasis)]/50"
               : "border-[var(--Border-Medium-Emphasis)] hover:border-[var(--Border-High-Emphasis)]",
             "disabled:cursor-not-allowed disabled:opacity-50",
+            "aria-invalid:border-[var(--Border-Caution)] aria-invalid:ring-[var(--Caution-Base)]/20",
             selected ? "text-[var(--Text-High-Emphasis)]" : "text-[var(--Text-Low-Emphasis)]",
             className
           )}
