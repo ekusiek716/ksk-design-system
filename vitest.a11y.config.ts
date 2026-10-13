@@ -50,6 +50,10 @@ export default defineConfig({
   ],
   test: {
     name: "storybook-a11y",
+    // ストーリー側の axe ルール無効化は test/known-exceptions.json の a11y 区分に
+    // 理由・issue・見直し期限付きで登録する。未登録・期限切れ・使われていない
+    // 登録は、描画を始める前にここで落とす。
+    globalSetup: ["./scripts/a11y-ledger-global-setup.mjs"],
     // 全 612 テストをヘッドレス chromium で回すため、マシン負荷が高いと
     // 描画待ちでタイムアウトしてフレークする（2026-07-29 に 5 件観測 → 再実行で全緑）。
     // axe 検査は決定的なので、retry は負荷起因の偽陽性だけを吸収する。

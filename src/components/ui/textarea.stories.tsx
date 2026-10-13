@@ -27,6 +27,7 @@ export const Disabled: Story = {
 }
 
 export const Error: Story = {
+  tags: ["vrt"],
   args: {
     defaultValue: "エラーのある入力",
     "aria-invalid": true,

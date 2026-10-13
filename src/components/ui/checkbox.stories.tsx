@@ -42,6 +42,7 @@ export const WithLabel: Story = {
 
 /** 複数オプション。すべて label prop で行レイアウト統一 */
 export const MultipleOptions: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="flex flex-col w-72">
       <Checkbox label="メール通知を受け取る" defaultChecked />

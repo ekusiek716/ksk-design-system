@@ -138,6 +138,9 @@ const preview: Preview = {
     // 誤検知・意図的なもの（デコレーション目的の装飾要素等）はストーリー単位で
     // `parameters.a11y = { test: "off" }` または `config.rules` で該当ルールのみ
     // 無効化し、理由コメントを残すこと。
+    // 無効化した箇所は test/known-exceptions.json の a11y 区分に理由・issue・
+    // reviewBy（見直し期限）付きで登録する。未登録・期限切れ・使われていない
+    // 登録は npm run check と npm run test:a11y が失敗にする。
     a11y: {
       test: "error",
       // color-contrast も有効（全ストーリー対象）。#261 初回導入時はトークン

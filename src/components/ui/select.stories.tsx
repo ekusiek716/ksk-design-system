@@ -15,6 +15,7 @@ export default meta
 type Story = StoryObj<typeof Select>
 
 export const WithPlaceholder: Story = {
+  tags: ["vrt"],
   render: () => (
     <Select>
       <SelectTrigger className="w-[240px]" aria-label="カテゴリを選択">

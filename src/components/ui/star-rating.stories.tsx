@@ -95,6 +95,7 @@ export const AllowClear: Story = {
 }
 
 export const ReadOnly: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="flex flex-col gap-3 p-4">
       <StarRating value={5} />

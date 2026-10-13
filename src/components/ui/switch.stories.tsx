@@ -42,6 +42,7 @@ export const WithLabel: Story = {
 }
 
 export const SettingsList: Story = {
+  tags: ["vrt"],
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">

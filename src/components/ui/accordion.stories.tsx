@@ -22,6 +22,7 @@ export default meta
 type Story = StoryObj<typeof Accordion>
 
 export const ThreeItems: Story = {
+  tags: ["vrt"],
   render: () => (
     <Accordion type="single" collapsible>
       <AccordionItem value="item-1">
