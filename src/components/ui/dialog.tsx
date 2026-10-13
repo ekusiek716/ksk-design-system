@@ -180,8 +180,9 @@ interface DialogContentProps
    * - "md"（既定）: 480px（従来の幅）
    * - "lg": 640px（フォーム 2 カラム・簡易な表）
    * - "xl": 800px（表・プレビューを内蔵する広いダイアログ）
-   * 狭い画面では左右 24px を残す幅が優先される。`className` の `max-w-*` は
-   * 常にこの size より優先される（twMerge で後勝ち）。SheetContent の `size`
+   * 狭い画面では左右 24px を残す幅が優先される。size の段は
+   * `sm:` 付きなので、上書きするときは `className` に `sm:max-w-*` を渡す
+   * （接頭辞なしの `max-w-*` は size に勝たない。twMerge は同じ接頭辞同士で後勝ち）。SheetContent の `size`
    * と段の名前を揃えている。
    */
   size?: DialogSize

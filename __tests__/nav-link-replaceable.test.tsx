@@ -1,6 +1,9 @@
+/** @vitest-environment jsdom */
 import * as React from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import { describe, expect, it } from "vitest"
+import { act } from "react"
+import { createRoot } from "react-dom/client"
+import { describe, expect, it, vi } from "vitest"
 
 import { BreadcrumbLink } from "../src/components/ui/breadcrumb"
 import { PaginationLink, PaginationNext, PaginationPrevious } from "../src/components/ui/pagination"
@@ -83,7 +86,8 @@ describe("PaginationLink asChild", () => {
       </PaginationNext>
     )
     expect(next.match(/<a /g)).toHaveLength(1)
-    expect(next).toContain('aria-label="次へ"')
+    // 子の文字が見えるラベルなので aria-label は付けない（見える文字と読み上げ名を一致, WCAG 2.5.3）
+    expect(next).not.toContain("aria-label")
     expect(next).toContain("<span>次のページ</span>")
     expect(next).toContain("<svg")
 
@@ -165,5 +169,73 @@ describe("SidebarNav item.render", () => {
     expect(html).toContain('title="ホーム"')
     expect(html).toContain('data-icon="home"')
     expect(html).not.toContain('data-slot="sidebar-nav-item-label"')
+  })
+})
+
+describe("PaginationLink asChild の堅牢性", () => {
+  it("子が要素でないときは asChild を無視して通常の <a> を描画し、警告する", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const html = renderToStaticMarkup(
+      <PaginationLink asChild href="/p/9">9</PaginationLink>
+    )
+    expect(html).toContain('<a href="/p/9"')
+    expect(html).toContain(">9</a>")
+    expect(warn).toHaveBeenCalledTimes(1)
+    warn.mockRestore()
+  })
+
+  it("PaginationNext asChild で子が文字列だけでも通常描画に戻る（aria-label を維持）", () => {
+    const html = renderToStaticMarkup(<PaginationNext asChild href="/p/3" />)
+    expect(html).toContain('aria-label="次へ"')
+    expect(html).toContain("<span>次へ</span>")
+  })
+
+  it("disabled のとき子が自前の tabIndex を持っていても -1 が優先される", () => {
+    const html = renderToStaticMarkup(
+      <PaginationLink asChild disabled>
+        <RouterLink to="/p/0" tabIndex={0}>0</RouterLink>
+      </PaginationLink>
+    )
+    expect(html).toContain('tabindex="-1"')
+    expect(html).not.toContain('tabindex="0"')
+  })
+})
+
+describe("PaginationLink asChild + disabled のクリック抑止", () => {
+  function click(disabled: boolean) {
+    const host = document.createElement("div")
+    document.body.appendChild(host)
+    const root = createRoot(host)
+    const onChildClick = vi.fn()
+    const onOuterClick = vi.fn()
+    act(() => {
+      root.render(
+        <div onClick={onOuterClick}>
+          <PaginationLink asChild disabled={disabled}>
+            <a href="#x" data-testid="l" onClick={onChildClick}>2</a>
+          </PaginationLink>
+        </div>
+      )
+    })
+    const a = host.querySelector("a")!
+    const ev = new MouseEvent("click", { bubbles: true, cancelable: true })
+    act(() => {
+      a.dispatchEvent(ev)
+    })
+    act(() => root.unmount())
+    host.remove()
+    return { defaultPrevented: ev.defaultPrevented, onChildClick, onOuterClick }
+  }
+
+  it("disabled では defaultPrevented になり、子の onClick も外側へも伝わらない", () => {
+    const r = click(true)
+    expect(r.defaultPrevented).toBe(true)
+    expect(r.onChildClick).not.toHaveBeenCalled()
+    expect(r.onOuterClick).not.toHaveBeenCalled()
+  })
+
+  it("disabled でなければ子の onClick が呼ばれる", () => {
+    const r = click(false)
+    expect(r.onChildClick).toHaveBeenCalledTimes(1)
   })
 })

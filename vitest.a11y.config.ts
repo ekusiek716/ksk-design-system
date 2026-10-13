@@ -21,6 +21,7 @@ import { storybookTest } from "@storybook/addon-vitest/vitest-plugin"
  * axe-core を実行し、違反があればテストを fail させる。
  *
  * 実行: `npm run test:a11y`
+ * WebKit（Safari 系）: `npm run test:a11y:webkit`（環境変数 KSK_BROWSER=webkit で切替）。
  */
 export default defineConfig({
   resolve: {
@@ -58,7 +59,7 @@ export default defineConfig({
       enabled: true,
       headless: true,
       provider: playwright(),
-      instances: [{ browser: "chromium" }],
+      instances: [{ browser: (process.env.KSK_BROWSER ?? "chromium") as "chromium" | "webkit" }],
     },
   },
 })

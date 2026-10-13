@@ -262,7 +262,9 @@ export const TitleAutoFocusAppearance: Story = {
     expect(window.getComputedStyle(title).outlineStyle).toBe("none")
 
     await userEvent.keyboard("{Escape}")
-    await waitFor(() => expect(trigger).toHaveFocus())
+    // フォーカスの復帰は退場アニメーション終了後。Linux の WebKit（CI）では
+    // 閉じ切るまでに 1 秒を超えることがあり、既定の 1 秒では偽陽性になる
+    await waitFor(() => expect(trigger).toHaveFocus(), { timeout: 5000 })
     await userEvent.keyboard("{Enter}")
     await waitFor(() =>
       expect(document.activeElement?.getAttribute("data-slot")).toBe("sheet-title")

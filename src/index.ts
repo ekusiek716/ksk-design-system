@@ -165,8 +165,8 @@ export { TagInput } from "./components/patterns/tag-input"
 export type { TagInputProps } from "./components/patterns/tag-input"
 export { SwipeRow } from "./components/patterns/swipe-row"
 export type { SwipeRowProps, SwipeAction } from "./components/patterns/swipe-row"
-export { ConfirmDialog } from "./components/patterns/confirm-dialog"
-export type { ConfirmDialogProps } from "./components/patterns/confirm-dialog"
+export { ConfirmDialog, ConfirmDialogProvider, useConfirm } from "./components/patterns/confirm-dialog"
+export type { ConfirmDialogProps, ConfirmDialogProviderProps, ConfirmOptions, ConfirmFn } from "./components/patterns/confirm-dialog"
 export {
   AUTO_PROMPT_SUPPRESSION_EVENT,
   AutoPrompt,

@@ -69,17 +69,21 @@
       "props": {
         "asChild": "boolean — 子要素へ見た目と操作属性を委譲（リンクを Button として見せる）",
         "haptic": "\"light\" | \"medium\" | \"heavy\" | \"warning\" — navigator.vibrate()",
-        "unstyled": "boolean — 視覚クラスを出さず挙動と a11y だけ提供（段階移行用 / issue #420）"
+        "unstyled": "boolean — 視覚クラスを出さず挙動と a11y だけ提供（段階移行用 / issue #420）",
+        "loading": "boolean (既定 false) — 処理中表示。ラベルを透明にしてスピナーを重ね（幅は不変）、aria-busy=\"true\" + aria-disabled=\"true\" でクリックを止める。native disabled は付けずフォーカスを保つ。native Button と同名",
+        "loadingLabel": "ReactNode — loading 中にスピナーの横へ出す文言（i18n）。既定なし（スピナーのみ）で native Button と同じ。指定時はこれがアクセシブルネームになる"
       },
       "accessibility": [
         "aria-label required for icon-only buttons",
-        "Native loading state sets accessibility busy"
+        "Native loading state sets accessibility busy",
+        "Web loading state sets aria-busy and aria-disabled (not the disabled attribute) so focus stays on the button"
       ],
       "rules": [
         "Must use <Button> not <button>",
         "リンクを Button として表示する場合は <Button asChild><a href=... /></Button> を使う",
         "Icon-only buttons require aria-label",
         "Native Button supports loading/loadingLabel and leadingIcon/trailingIcon; do not wrap ActivityIndicator in Text",
+        "Web Button も loading / loadingLabel を持つ（opt-in）。非同期処理中は自前で disabled + 文言差し替えをせず loading を使う。asChild 併用時はスピナーを出さず aria-busy と disabled 相当だけを子へ渡す",
         "Native Button supports spinnerColor to override the loading ActivityIndicator color; default unchanged (falls back to variant fg color, issue #450)",
         "variant=info / warning / success は状態色で種類や意味を伝えるボタン（issue #598）。背景色を className で上書きせず variant を使う。不可逆操作には warning ではなく destructive を使う",
         "variant=glass は背景がグラデーション/写真の場合のみ使用",
@@ -384,7 +388,7 @@
         "DialogTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は position=\"fullscreen\" 配下で page 相当、それ以外は従来の typo-heading-lg",
         "native (src/native/components/Dialog.tsx): position=\"center\"(既定) / \"top\" / \"fullscreen\" を持ち、fullscreen は四辺・top は上端の safe-area を避ける。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
         "modal な Dialog の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）",
-        "size は sm(400px) / md(480px・既定) / lg(640px) / xl(800px) の幅の段（opt-in）。未指定は従来の 480px のまま。position=\"fullscreen\" では無視。className の max-w-* は size より優先。Sheet の size と段の名前を揃えている。ResponsiveDialogContent の size は PC 側の Dialog にだけ渡る"
+        "size は sm(400px) / md(480px・既定) / lg(640px) / xl(800px) の幅の段（opt-in）。未指定は従来の 480px のまま。position=\"fullscreen\" では無視。size の段は sm: 付きなので、上書きは className に sm:max-w-* を渡す（接頭辞なしの max-w-* は size に勝たない）。Sheet の size と段の名前を揃えている。ResponsiveDialogContent の size は PC 側の Dialog にだけ渡る"
       ],
       "variants": {
         "position": [
@@ -1588,9 +1592,19 @@
         "default",
         "destructive"
       ],
+      "props": {
+        "onCloseAutoFocus": "(event: Event) => void — 閉じた後のフォーカス移動を差し替える（Trigger が無いため既定では body へ落ちる）"
+      },
       "rules": [
         "Use destructive variant for delete/irreversible actions",
-        "Use ConfirmDialog not custom Dialog for confirmation flows"
+        "Use ConfirmDialog not custom Dialog for confirmation flows",
+        "window.confirm() は使わず、<ConfirmDialogProvider> をルートに 1 つ置いて const ok = await useConfirm()({ title, ... }) で置き換える（Promise<boolean>。確認で true / キャンセル・Esc で false）",
+        "useConfirm は確認ボタン押下で即 true を返して閉じる。処理完了までダイアログ内で処理中表示を出したい場合は ConfirmDialog を直接置き非同期 onConfirm を渡す",
+        "useConfirm の同時呼び出しは順番待ちで 1 件ずつ表示し、Provider unmount 時の未解決分は false で resolve する。閉じた後は呼び出し元の要素へフォーカスを戻す"
+      ],
+      "subcomponents": [
+        "ConfirmDialogProvider",
+        "useConfirm"
       ]
     },
     {

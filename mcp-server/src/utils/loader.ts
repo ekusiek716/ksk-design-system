@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // mcp-server/ -> project root
-const projectRoot = resolve(__dirname, "../../..");
+export const projectRoot = resolve(__dirname, "../../..");
 
 // --- Types (contracts/components.json) ---
 
