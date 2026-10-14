@@ -10,7 +10,13 @@ import { chromium } from "playwright"
 import { readReadmeConsumerExample } from "./readme-consumer-example.mjs"
 
 const root = dirname(fileURLToPath(new URL("../package.json", import.meta.url)))
-const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
+const lock = JSON.parse(readFileSync(join(root, "package-lock.json"), "utf8"))
+// Use the tested exact versions; independent caret ranges can resolve mismatched React renderers.
+const lockedVersion = (name) => {
+  const version = lock.packages[`node_modules/${name}`]?.version
+  assert.ok(version, `Missing locked consumer dependency: ${name}`)
+  return version
+}
 const temp = realpathSync(mkdtempSync(join(tmpdir(), "ksk-web-consumer-")))
 let browser
 let server
@@ -30,7 +36,7 @@ async function mustFail(label, action, expected) {
 try {
   const [{ filename }] = JSON.parse(run("npm", ["pack", "--ignore-scripts", "--json", "--pack-destination", temp], root).toString())
   write("package.json", JSON.stringify({ name: "ksk-empty-web-consumer", private: true, type: "module" }))
-  run("npm", ["install", "--ignore-scripts", join(temp, filename), ...["react", "react-dom", "@types/react", "@types/react-dom", "tailwindcss"].map((name) => `${name}@${pkg.devDependencies[name]}`)])
+  run("npm", ["install", "--ignore-scripts", join(temp, filename), ...["react", "react-dom", "@types/react", "@types/react-dom", "tailwindcss"].map((name) => `${name}@${lockedVersion(name)}`)])
   mkdirSync(join(temp, "src/styles"), { recursive: true })
   const readme = readFileSync(join(temp, "node_modules/ksk-design-system/README.md"), "utf8")
   const tsx = readReadmeConsumerExample(readme, "tsx")

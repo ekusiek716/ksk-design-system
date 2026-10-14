@@ -5,15 +5,22 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const root = dirname(fileURLToPath(new URL("../package.json", import.meta.url)))
-const rootPackageJson = JSON.parse(
-  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+const rootPackageLock = JSON.parse(
+  readFileSync(new URL("../package-lock.json", import.meta.url), "utf8"),
 )
+const rootPackageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
 const temp = mkdtempSync(join(tmpdir(), "ksk-native-consumer-"))
 
-const versionOf = (name) =>
-  rootPackageJson.devDependencies[name] ??
-  rootPackageJson.dependencies?.[name] ??
-  rootPackageJson.peerDependencies[name]
+// Match the exact versions tested by the source checkout, rather than fresh range resolutions.
+const versionOf = (name) => {
+  const version = rootPackageLock.packages[`node_modules/${name}`]?.version
+  if (version) return version
+  // Optional native peers (e.g. SVG) are intentionally absent from the source lock.
+  const optionalPeer = rootPackageJson.peerDependenciesMeta?.[name]?.optional
+  const range = rootPackageJson.peerDependencies?.[name]
+  if (optionalPeer && range) return range
+  throw new Error(`Missing locked consumer dependency: ${name}`)
+}
 
 const run = (command, args) => {
   execFileSync(command, args, {
