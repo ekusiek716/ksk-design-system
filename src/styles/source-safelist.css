@@ -241,7 +241,6 @@
 @source inline("border-[var(--Categorical-2)]");
 @source inline("border-[var(--Categorical-9)]");
 @source inline("border-[var(--Caution-Base)]");
-@source inline("border-[var(--Focus-High-Emphasis)]");
 @source inline("border-[var(--Info-Base)]");
 @source inline("border-[var(--Object-on-Inverse)]/10");
 @source inline("border-[var(--Primitive-White-Alpha-300)]");
@@ -523,8 +522,6 @@
 @source inline("has-[:focus-visible]:bg-[var(--Surface-Tertiary)]");
 @source inline("has-[:focus-visible]:bg-transparent");
 @source inline("hidden");
-@source inline("hover:bg-[var(--Active-Primary-Button)]");
-@source inline("hover:bg-[var(--Active-Primary-Button)]!");
 @source inline("hover:bg-[var(--Border-Medium-Emphasis)]");
 @source inline("hover:bg-[var(--Brand-Light)]");
 @source inline("hover:bg-[var(--Brand-Ultra-Light)]");
@@ -534,6 +531,7 @@
 @source inline("hover:bg-[var(--Hover-Ghost-Button)]");
 @source inline("hover:bg-[var(--Hover-Info-Button)]");
 @source inline("hover:bg-[var(--Hover-Primary-Button)]");
+@source inline("hover:bg-[var(--Hover-Primary-Button)]!");
 @source inline("hover:bg-[var(--Hover-Secondary-Button)]");
 @source inline("hover:bg-[var(--Hover-Success-Button)]");
 @source inline("hover:bg-[var(--Hover-Tertiary-Button)]");
@@ -942,6 +940,7 @@
 @source inline("scrollbar-none");
 @source inline("select-none");
 @source inline("self-end");
+@source inline("shadow");
 @source inline("shadow-[0_0_0_5px_rgba(193,104,0,0.2)]");
 @source inline("shadow-[0_0_0_5px_rgba(216,216,219,0.3)]");
 @source inline("shadow-[0_0_0_5px_rgba(236,0,0,0.15)]");

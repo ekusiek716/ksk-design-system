@@ -1,3 +1,4 @@
+import { getActiveElement } from "@/lib/active-element"
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
@@ -136,8 +137,13 @@ function AlertDialogContent({
   style,
   zIndex,
   children,
+  restoreFocusOnClose = true,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
+  /** Restore the opener when closing, including controlled dialogs without a Trigger. */
+  restoreFocusOnClose?: boolean
   size?: "default" | "sm"
   /**
    * #340: 多段モーダルの z-index escape hatch。未指定時は開いているモーダルの
@@ -148,6 +154,7 @@ function AlertDialogContent({
   // #340: Sheet / Dialog と同じグローバル open-modal スタックに参加する。
   // 基底は --Z-Alert-* のまま＝アラートは常に通常モーダルより上、という現行の
   // 設計意図を保ったうえで、アラート同士の重なりだけを開いた順に解決する。
+  const openerRef = React.useRef<HTMLElement | null>(null)
   const [stackLevel, setStackLevel] = React.useState(0)
   const resolvedContentZ = zIndex ?? alertContentZ(stackLevel)
   return (
@@ -156,7 +163,25 @@ function AlertDialogContent({
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
         data-size={size}
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={(event) => {
+          openerRef.current = getActiveElement() as HTMLElement | null
+          onOpenAutoFocus?.(event)
+          // Leave Radix's safe default (Cancel) intact unless the caller overrides it.
+        }}
+        onCloseAutoFocus={(event) => {
+          const opener = openerRef.current
+          openerRef.current = null
+          onCloseAutoFocus?.(event)
+          if (event.defaultPrevented) return
+          if (!restoreFocusOnClose) {
+            event.preventDefault()
+            return
+          }
+          if (opener?.isConnected && !opener.matches(":disabled, [inert], [inert] *")) {
+            event.preventDefault()
+            opener.focus({ preventScroll: true })
+          }
+        }}
         style={{ ...style, zIndex: resolvedContentZ }}
         // #505: AlertDialog は Radix の仕様上つねに modal（`modal` prop が無い）。
         aria-modal={true}

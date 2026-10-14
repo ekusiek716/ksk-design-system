@@ -108,7 +108,7 @@
       },
       "accessibility": [
         "Must pair with <Label>",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "Must use <Input> not <input>",
@@ -187,7 +187,7 @@
       "accessibility": [
         "Must pair with <Label>",
         "aria-expanded on trigger button",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "Use DatePicker not <input type='date'>",
@@ -242,7 +242,7 @@
       },
       "accessibility": [
         "Must pair with <Label>",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "Must use <Textarea> not <textarea>",
@@ -272,7 +272,7 @@
       "accessibility": [
         "Must pair with <Label>",
         "aria-invalid=true（FormField の error から Select Root 経由で自動）でトリガーにエラー枠（Border-Caution）",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "Must use <Select> not <select>"
@@ -287,7 +287,7 @@
       "accessibility": [
         "Must pair with <Label>",
         "native (src/native/components/CheckboxField.tsx, RadioGroup.tsx): accessibilityState に加え aria-checked / aria-disabled を既定で併記する（react-native-web 0.21 は accessibilityState を aria-* へ変換しないため。RN peerDependency >=0.78.0 の aria-* props を直接渡す）。行内の装飾用インナー Checkbox/丸印は aria-hidden も併記して二重の role=checkbox/radio を防ぐ",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "label を渡すと <label> でラップされ行全体がクリッカブルになる",
@@ -303,7 +303,7 @@
       "accessibility": [
         "Must pair with <Label> for each item",
         "RadioGroupItem は見た目 20px の円のまま ::before で 44x44px の当たり判定を内蔵する。消費側で [role=\"radio\"] のグローバル寸法上書きを追加しない（issue #470）",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "Native は単体 Radio（ksk-design-system/native/ui）を共用。selected/onChange/size/disabled/decorative を持つ。decorative は親 radio の操作と読み上げに委ねる。単体使用では accessibilityLabel を指定し、onChange は常に true（排他制御は親）。"
@@ -317,7 +317,7 @@
       "variants": [],
       "accessibility": [
         "Must pair with <Label>",
-        "オフの地は var(--Surface-Switch-Off, var(--Surface-Quaternary)) と hover の var(--Surface-Switch-Off-Hover, var(--Object-Disable))（新ロールは高コントラスト時だけ宣言）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（Gray-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "オフの地は var(--Surface-Switch-Off, var(--Surface-Quaternary))、hoverは var(--Surface-Switch-Off-Hover, var(--Object-Disable))。通常 light/dark から3:1以上。非操作面の色は変更しない（issue #636）"
       ]
     },
     {
@@ -662,6 +662,7 @@
         "viewport の下端 offset は product theme の公開変数 --Toast-Viewport-Offset-Bottom（既定 1rem = 従来の bottom-4）で調整する。下部タブバー / FAB と重なるプロダクトは :root で持ち上げる。[data-slot=\"toast-viewport\"] を消費側 CSS から直接狙わない（issue #503）"
       ],
       "props": {
+        "Toaster.container": "Element | DocumentFragment | null — 明示先 > PortalContainerProvider > document.body。Shadow DOM 内では Toaster を明示配置する（issue #651）",
         "Toaster.regionLabel": "string (既定 \"通知\") — viewport (role=\"region\") の aria-label（issue #428）",
         "Toaster.closeLabel": "string (既定 \"閉じる\") — 各トーストの閉じるボタンの aria-label（issue #428）",
         "configureToast({ regionLabel?, closeLabel? })": "fire-and-forget API（<Toaster> 不使用時）で同じラベルを設定する関数（issue #428）"
@@ -718,10 +719,11 @@
       ],
       "rules": [
         "Use NumberInput not <input type='number'>",
-        "Use format prop for currency display"
+        "Use format prop for currency display",
+        "input の id / name / aria-* / data-* / ref を転送。onFocus / onBlur / onKeyDown は内部処理と合成（issue #655）"
       ],
       "accessibility": [
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ]
     },
     {
@@ -778,7 +780,10 @@
         "rightSlot": "ReactNode",
         "onShare": "() => void (シェアボタン簡便prop)",
         "glass": "boolean — Liquid Glass variant",
-        "transparent": "boolean — 背景なし"
+        "transparent": "boolean — 背景なし",
+        "leftButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
+        "shareButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
+        "headerProps": "title を除く header の属性・ref を根へ転送（issue #649）"
       },
       "accessibility": [
         "aria-label auto-set for back/close/share",
@@ -940,11 +945,15 @@
       "name": "AlertDialog",
       "path": "src/components/ui/alert-dialog.tsx",
       "description": "「アクションを止める」割り込み確認の基盤(role=alertdialog)。破壊的アクションの二段階確認に使用。中央表示・オーバーレイ外クリックでは閉じない（明示的に選ばせる）。開く瞬間に既存Popoverを閉じ、AlertDialog内で後から開くPopoverは専用z-indexで前面に表示する。タスク面の中央モーダルは Dialog を使う。Sheet / Dialog と同じ open 順スタックに参加し、基底は --Z-Alert-* のまま段数ぶんを加算するため、アラートは常に通常モーダルより上・アラート同士は開いた順に前面へ来る（zIndex prop で上書き可能）。",
+      "props": {
+        "restoreFocusOnClose": "boolean (既定 true) — Triggerなしのcontrolled利用を含め、閉じると開く前の要素へ戻す。onCloseAutoFocusのpreventDefaultで上書き可能"
+      },
       "variants": [
         "default",
         "sm"
       ],
       "accessibility": [
+        "開いたときはCancelにフォーカス（onOpenAutoFocusで上書き可能）",
         "フォーカストラップ",
         "aria-modal",
         "ESCキーで閉じる"
@@ -983,7 +992,7 @@
         "Radix Slider 準拠",
         "キーボード操作対応（矢印キー）",
         "範囲スライダーの Home / End はフォーカス中のつまみを動かせる範囲の端（隣のつまみ、無ければ min / max）へ動かす",
-        "溝は var(--Surface-Slider-Track, var(--Surface-Tertiary))（新ロールは高コントラスト時だけ宣言）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（Gray-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "溝は var(--Surface-Slider-Track, var(--Surface-Tertiary))。通常 light/dark から3:1以上（Gray-500）。非操作面はTertiaryを維持する（issue #636）"
       ],
       "rules": [
         "defaultValue は配列",
@@ -1016,7 +1025,7 @@
         "Radix Checkbox 準拠",
         "disabled 状態対応",
         "アクセシブル名はラベル（+ バッジ）だけ（aria-labelledby）。説明は aria-describedby に分け、展開内容は選択中だけ説明に加える",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "CheckboxCardGroup でグループ化",
@@ -1112,7 +1121,7 @@
         "aria-expanded",
         "role=combobox",
         "aria-invalid=true でトリガーにエラー枠（Border-Caution）。FormField の error から自動で届く",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "select で代替できない検索付きセレクトに使う"
@@ -1149,7 +1158,7 @@
         "aria-multiselectable",
         "aria-invalid=true でトリガーにエラー枠（Border-Caution）。FormField の error から自動で届く",
         "クリアボタンで選択が空になったらフォーカスをトリガーへ戻す（ボタンが消えて body に落ちない）",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "3 件以上選択する用途に。少数なら CheckboxGroup を優先"
@@ -1204,7 +1213,7 @@
       "sizes": [],
       "accessibility": [
         "aria-label required",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "timezone 非対応。タイムゾーンが要件なら別実装"
@@ -1239,7 +1248,9 @@
         "role=alert"
       ],
       "rules": [
-        "onError は dev 時には自動 console.error。本番では明示指定時のみ"
+        "onError は dev 時には自動 console.error。本番では明示指定時のみ",
+        "resetKeys はエラー中の変更だけ再試行し、通常時の子の状態を保持（issue #648）",
+        "reload=false で全ページ再読込を非表示、関数で動作を差し替え。embedded=true で全画面高さを外す"
       ]
     },
     {
@@ -1397,7 +1408,8 @@
       "path": "src/components/patterns/stat-card.tsx",
       "description": "KPI / メトリクス表示カード。interactive prop で button 化、focus-ring / active:scale 自動付与。",
       "rules": [
-        "interactive または onClick を渡せば role=button + キーボード操作対応"
+        "interactive または onClick を渡せば role=button + キーボード操作対応",
+        "内側の label / value / unit / trend は stat-card-* data-slot を持つ（issue #650）"
       ]
     },
     {
@@ -1445,7 +1457,7 @@
         "asForm=true と keydown 側の Enter 処理は二重発火防止のため排他"
       ],
       "accessibility": [
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ]
     },
     {
@@ -1481,7 +1493,7 @@
         "removable の削除ボタンは横44px + 縦44px hit areaを確保する"
       ],
       "accessibility": [
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ]
     },
     {
@@ -1602,7 +1614,7 @@
         "Use for multi-value text input (tags, emails, keywords)"
       ],
       "accessibility": [
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ]
     },
     {
@@ -2119,7 +2131,7 @@
       "accessibility": [
         "aria-label",
         "drop zone announces",
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
         "画像専用なら ImageUploader を使う"
@@ -2670,7 +2682,7 @@
         "deleteLabel": "string (既定 \"削除\") — trash 状態時の減少ボタンの aria-label（issue #428）"
       },
       "accessibility": [
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ]
     },
     {
@@ -2865,6 +2877,7 @@
       "props": {
         "selectionColumnLabel": "string (既定 \"行選択\") — 選択列ヘッダー (th) の aria-label（issue #428）",
         "selectAllLabel": "string (既定 \"すべて選択\") — 「すべて選択」チェックボックスの aria-label（issue #428）",
+        "DataTableBulkActions.countLabel": "(selectedCount: number) => string — 件数表示と既定 aria-label。省略時は N件を選択中（issue #654）",
         "DataTableActionCell.menuLabel": "string (既定 \"行メニュー\") — 行メニュー起動ボタンの aria-label（issue #428）"
       }
     },
@@ -2889,6 +2902,7 @@
         "Show only when rows are selected"
       ],
       "props": {
+        "countLabel": "(selectedCount: number) => string — 件数表示と既定 aria-label。省略時は N件を選択中（issue #654）",
         "clearLabel": "string (既定 \"選択を解除\") — 選択解除ボタンの aria-label（issue #428）"
       }
     },
@@ -2926,7 +2940,7 @@
         "addLabel": "string (既定 \"画像を追加\") — 追加ボタンの aria-label（issue #428）"
       },
       "accessibility": [
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ]
     },
     {
@@ -2951,7 +2965,7 @@
         "Chips wrap on narrow widths (flex-wrap)"
       ],
       "accessibility": [
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))（--Border-Control は高コントラスト時だけ宣言され、未宣言なら従来どおり Medium を解決する）。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上（light=Gray-500、dark=White-Alpha-500）に切り替わり、既定の見た目は変えない（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ]
     }
   ],

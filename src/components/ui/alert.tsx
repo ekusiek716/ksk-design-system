@@ -77,7 +77,7 @@ const alertInnerVariants = cva(
   {
     variants: {
       variant: {
-        success: "border-[var(--Focus-High-Emphasis)]",
+        success: "border-[var(--Border-Success)]",
         info: "border-[var(--Border-Medium-Emphasis)]",
         error: "border-[var(--Border-Caution)]",
         warning: "border-[var(--Border-Warning)]",

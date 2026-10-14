@@ -59,6 +59,7 @@ function CompactFilePicker({
   return (
     <div data-slot="compact-file-picker" className={cn("flex items-center gap-3", className)}>
       <input
+        tabIndex={-1}
         {...inputProps}
         ref={inputRef}
         id={inputId}

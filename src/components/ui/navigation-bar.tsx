@@ -32,7 +32,15 @@ function IconShareIos({ size = 20 }: { size?: number }) {
 
 // ─── NavigationBar ────────────────────────────────────────────────────────────
 
-export interface NavigationBarProps {
+type NavigationActionButtonProps = Omit<React.ComponentProps<typeof Button>, "variant" | "size" | "onClick" | "children"> & {
+  [key: `data-${string}`]: string | number | boolean | undefined
+}
+
+export interface NavigationBarProps extends Omit<React.ComponentProps<"header">, "title"> {
+  /** 左ボタンへの属性・ref。クリックは onLeft が担当する。 */
+  leftButtonProps?: NavigationActionButtonProps
+  /** シェアボタンへの属性・ref。クリックは onShare が担当する。 */
+  shareButtonProps?: NavigationActionButtonProps
   /** 中央タイトル（絶対配置で常に視覚的中央） */
   title?: React.ReactNode
   /**
@@ -89,6 +97,9 @@ function NavigationBar({
   glass = false,
   transparent = false,
   className,
+  leftButtonProps,
+  shareButtonProps,
+  ...props
 }: NavigationBarProps) {
   const resolveLeftIcon = () => {
     if (leftIcon === "back")  return <IconBack />
@@ -101,6 +112,7 @@ function NavigationBar({
 
   return (
     <header
+      {...props}
       data-slot="navigation-bar"
       className={cn(
         "relative flex items-center h-[60px] px-3",
@@ -114,6 +126,7 @@ function NavigationBar({
           variant={btnVariant}
           size="icon-xl"
           aria-label={leftLabel ?? defaultLeftLabel}
+          {...leftButtonProps}
           onClick={onLeft}
         >
           {resolveLeftIcon()}
@@ -137,6 +150,7 @@ function NavigationBar({
               variant={btnVariant}
               size="icon-xl"
               aria-label={shareLabel}
+              {...shareButtonProps}
               onClick={onShare}
             >
               <IconShareIos />

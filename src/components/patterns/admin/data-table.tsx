@@ -948,7 +948,8 @@ function DataTableRow({
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       className={cn(
-        "border-l-2 border-l-transparent transition-colors hover:bg-[var(--Surface-Secondary)]/50",
+        "border-l-2 border-l-transparent transition-colors",
+        isInteractive && !selected && "hover:bg-[var(--Surface-Secondary)]/50",
         selected && "bg-[var(--Surface-Accent-Primary-Light)] border-l-[var(--Brand-Primary)]",
         isInteractive &&
           "cursor-pointer focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
@@ -1657,15 +1658,19 @@ function DataTableLinkCell({
 
 interface DataTableBulkActionsProps extends React.ComponentProps<"div"> {
   selectedCount: number
+  /** 選択件数の表示と既定 aria-label。省略時は日本語。 */
+  countLabel?: (selectedCount: number) => string
 }
 
 function DataTableBulkActions({
   className,
   selectedCount,
+  countLabel = (n) => `${n}件を選択中`,
   children,
   ...props
 }: DataTableBulkActionsProps) {
   if (selectedCount === 0) return null
+  const selectionLabel = countLabel(selectedCount)
   return (
     <div
       data-slot="data-table-bulk-actions"
@@ -1674,11 +1679,11 @@ function DataTableBulkActions({
         className
       )}
       role="toolbar"
-      aria-label={`${selectedCount}件を選択中`}
+      aria-label={selectionLabel}
       {...props}
     >
       <span className="typo-label-md text-[var(--Text-High-Emphasis)] shrink-0">
-        {selectedCount}件を選択中
+        {selectionLabel}
       </span>
       {children}
     </div>

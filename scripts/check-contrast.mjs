@@ -133,11 +133,12 @@ for (const k of Object.keys(cat)) {
 // dark の枠は White-Alpha（半透明）なので、背景へ合成した実色で比べる。
 // 5 番目の要素は台帳（test/known-exceptions.json の contrast）の照合キー。
 const nonTextControls = [
-  ["input-border", "入力欄の枠（Input / Textarea / SelectTrigger）", s => s.border["medium-emphasis"]],
-  ["checkbox-border", "チェックボックス（未選択）の枠", s => s.border["medium-emphasis"]],
-  ["radio-border", "ラジオ（未選択）の枠", s => s.border["medium-emphasis"]],
-  ["switch-off-track", "スイッチ（オフ）の地 Surface-Quaternary", s => s.surface.quaternary],
-  ["slider-track", "スライダーの溝 Surface-Tertiary", s => s.surface.tertiary],
+  ["input-border", "入力欄の枠（Input / Textarea / SelectTrigger）", s => s.border.control],
+  ["checkbox-border", "チェックボックス（未選択）の枠", s => s.border.control],
+  ["radio-border", "ラジオ（未選択）の枠", s => s.border.control],
+  ["switch-off-track", "スイッチ（オフ）の地 Surface-Switch-Off", s => s.surface["switch-off"]],
+  ["switch-off-hover", "スイッチ（オフ・hover）の地", s => s.surface["switch-off-hover"]],
+  ["slider-track", "スライダーの溝 Surface-Slider-Track", s => s.surface["slider-track"]],
   ["checkbox-checked-fill", "チェックボックス（選択）の地 Brand-Primary", s => s.brand.primary],
   ["switch-on-track", "スイッチ（オン）の地 Brand-Primary", s => s.brand.primary],
   ["field-focus-border", "入力欄（フォーカス）の枠 Border-Accent-Primary", s => s.border["accent-primary"]],
@@ -150,11 +151,7 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   }
 }
 
-// prefers-contrast: more / data-contrast="more" のときの値（issue #636）。上の既定値は
-// 見た目の据え置きのため台帳に例外登録しているが、こちらは「コントラストが必要な利用者に
-// 3:1 以上を提供する」ための値なので例外なしで必須（台帳の照合キーを渡さない）。
-// 値の正本は src/styles/semantic.css 末尾の High Contrast 節（tokens.json の
-// semanticContrastMore と __tests__/contrast-more-tokens.test.ts で一致を固定）。
+// 高コントラスト指定でも操作部品は3:1以上を維持する。既定値にも例外は不要。
 const contrastMore = tokens.colors.semanticContrastMore
 for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   const bg = resolve(s.surface.primary)

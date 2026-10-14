@@ -28,6 +28,8 @@ interface ErrorBoundaryLabels {
 
 export interface ErrorBoundaryProps {
   children: React.ReactNode
+  /** エラー中のみキー変更で再試行し、通常時の子の状態は保持する。 */
+  resetKeys?: readonly unknown[]
   /** fallback 内で使う文言。i18n はアプリ側で解決して string を渡す。 */
   labels?: ErrorBoundaryLabels
   /**
@@ -75,6 +77,15 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       console.error("[ksk-ds native ErrorBoundary]", error, errorInfo)
     }
     this.props.onError?.(error, errorInfo)
+  }
+
+  componentDidUpdate(prevProps: ErrorBoundaryProps, prevState: ErrorBoundaryState) {
+    const before = prevProps.resetKeys ?? []
+    const after = this.props.resetKeys ?? []
+    if (this.state.hasError && prevState.hasError &&
+      (before.length !== after.length || before.some((value, index) => !Object.is(value, after[index])))) {
+      this.handleRetry()
+    }
   }
 
   handleRetry = () => {

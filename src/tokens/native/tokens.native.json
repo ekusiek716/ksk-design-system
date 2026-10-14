@@ -153,7 +153,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#F4F4F5"
+          "disable": "#F4F4F5",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#52525B",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -194,7 +197,8 @@
           "caution": "#EF4444",
           "success": "#22C55E",
           "warning": "#F97316",
-          "info": "#3B82F6"
+          "info": "#3B82F6",
+          "control": "#71717A"
         },
         "brand": {
           "primary": "#2563EB",
@@ -270,7 +274,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#27272A"
+          "disable": "#27272A",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#A1A1AA",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -311,7 +318,8 @@
           "caution": "#F87171",
           "success": "#4ADE80",
           "warning": "#FB923C",
-          "info": "#60A5FA"
+          "info": "#60A5FA",
+          "control": "rgba(255, 255, 255, 0.36)"
         },
         "brand": {
           "primary": "#60A5FA",
@@ -385,7 +393,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#F4F4F5"
+          "disable": "#F4F4F5",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#52525B",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -426,7 +437,8 @@
           "caution": "#EF4444",
           "success": "#22C55E",
           "warning": "#F97316",
-          "info": "#3B82F6"
+          "info": "#3B82F6",
+          "control": "#71717A"
         },
         "brand": {
           "primary": "#2563EB",
@@ -502,7 +514,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#27272A"
+          "disable": "#27272A",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#A1A1AA",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -543,7 +558,8 @@
           "caution": "#F87171",
           "success": "#4ADE80",
           "warning": "#FB923C",
-          "info": "#60A5FA"
+          "info": "#60A5FA",
+          "control": "rgba(255, 255, 255, 0.36)"
         },
         "brand": {
           "primary": "#60A5FA",
@@ -617,7 +633,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#F4F4F5"
+          "disable": "#F4F4F5",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#52525B",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -658,7 +677,8 @@
           "caution": "#EF4444",
           "success": "#22C55E",
           "warning": "#F97316",
-          "info": "#3B82F6"
+          "info": "#3B82F6",
+          "control": "#71717A"
         },
         "brand": {
           "primary": "#163FF4",
@@ -734,7 +754,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#27272A"
+          "disable": "#27272A",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#A1A1AA",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -775,7 +798,8 @@
           "caution": "#F87171",
           "success": "#4ADE80",
           "warning": "#FB923C",
-          "info": "#60A5FA"
+          "info": "#60A5FA",
+          "control": "rgba(255, 255, 255, 0.36)"
         },
         "brand": {
           "primary": "#4398F8",
@@ -849,7 +873,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#F4F4F5"
+          "disable": "#F4F4F5",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#52525B",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -890,7 +917,8 @@
           "caution": "#EF4444",
           "success": "#22C55E",
           "warning": "#F97316",
-          "info": "#3B82F6"
+          "info": "#3B82F6",
+          "control": "#71717A"
         },
         "brand": {
           "primary": "#C2410C",
@@ -966,7 +994,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#27272A"
+          "disable": "#27272A",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#A1A1AA",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -1007,7 +1038,8 @@
           "caution": "#F87171",
           "success": "#4ADE80",
           "warning": "#FB923C",
-          "info": "#60A5FA"
+          "info": "#60A5FA",
+          "control": "rgba(255, 255, 255, 0.36)"
         },
         "brand": {
           "primary": "#FB923C",
@@ -1081,7 +1113,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#F4F4F5"
+          "disable": "#F4F4F5",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#52525B",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -1122,7 +1157,8 @@
           "caution": "#EF4444",
           "success": "#22C55E",
           "warning": "#F97316",
-          "info": "#3B82F6"
+          "info": "#3B82F6",
+          "control": "#71717A"
         },
         "brand": {
           "primary": "#15803D",
@@ -1198,7 +1234,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#27272A"
+          "disable": "#27272A",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#A1A1AA",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -1239,7 +1278,8 @@
           "caution": "#F87171",
           "success": "#4ADE80",
           "warning": "#FB923C",
-          "info": "#60A5FA"
+          "info": "#60A5FA",
+          "control": "rgba(255, 255, 255, 0.36)"
         },
         "brand": {
           "primary": "#4ADE80",
@@ -1313,7 +1353,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#F4F4F5"
+          "disable": "#F4F4F5",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#52525B",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -1354,7 +1397,8 @@
           "caution": "#EF4444",
           "success": "#22C55E",
           "warning": "#F97316",
-          "info": "#3B82F6"
+          "info": "#3B82F6",
+          "control": "#71717A"
         },
         "brand": {
           "primary": "#6D28D9",
@@ -1430,7 +1474,10 @@
           "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
           "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
           "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-          "disable": "#27272A"
+          "disable": "#27272A",
+          "switch-off": "#71717A",
+          "switch-off-hover": "#A1A1AA",
+          "slider-track": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -1471,7 +1518,8 @@
           "caution": "#F87171",
           "success": "#4ADE80",
           "warning": "#FB923C",
-          "info": "#60A5FA"
+          "info": "#60A5FA",
+          "control": "rgba(255, 255, 255, 0.36)"
         },
         "brand": {
           "primary": "#A78BFA",

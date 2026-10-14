@@ -28,10 +28,10 @@ UI を書く前に必ず確認すること:
 - [ ] 既存コンポーネントを `src/components/COMPONENT_LOOKUP.md` で確認したか（手書き・再定義は禁止）
 - [ ] 色は semantic token（`var(--Surface-*)` / `var(--Brand-Primary)` 等）か。Tailwind標準色・生 `#hex` は禁止
 - [ ] `border` は色を併記したか（`border-[var(--Border-Low-Emphasis)]` 等）。Tailwind v4 では無色 border は currentColor になり、消費側の濃色テキストで黒ずむ（preset.css の base layer が保険だが明示が原則）
-- [ ] **文脈非依存**か（テキスト要素に `text-[var(--Text-*)]`、サーフェス/オーバーレイに `bg-[var(--Surface-*)]` を明示）。親の継承や currentColor に頼ると消費側の色文脈で崩れる。Storybook ツールバーの **Hostile ctx** を loud にして、文字/アイコンがマゼンタ化・背景が透けないか確認する
+- [ ] **文脈非依存**か（テキスト要素に `text-[var(--Text-High-Emphasis)]`、サーフェス/オーバーレイに `bg-[var(--Surface-Primary)]` を明示）。親の継承や currentColor に頼ると消費側の色文脈で崩れる。Storybook ツールバーの **Hostile ctx** を loud にして、文字/アイコンがマゼンタ化・背景が透けないか確認する
 - [ ] typography は `typo-*` クラスか（`font-bold` 等の直書きは禁止）
-- [ ] アニメーションは `duration-[var(--Motion-Duration-*)]` / `ease-[var(--Motion-Easing-*)]` か（`duration-200` や生 `cubic-bezier` の直書きは禁止。トークン参照でないと `prefers-reduced-motion` の一括制御から漏れる）
-- [ ] 重なり順は `z-[var(--Z-*)]` か（`z-50` 一律だと Portal のマウント順で勝敗が決まる。`z-10` / `z-20` のコンポーネント内部の重なりは対象外。順序は DESIGN.md の Layering 節）
+- [ ] アニメーションは Motion トークン参照か（例: `duration-[var(--Motion-Duration-Base)]` / `ease-[var(--Motion-Easing-Standard)]`）（`duration-200` や生 `cubic-bezier` の直書きは禁止。トークン参照でないと `prefers-reduced-motion` の一括制御から漏れる）
+- [ ] 重なり順は用途に合うトークン（例: `z-[var(--Z-Modal)]` / `z-[var(--Z-Popover)]`）か（`z-50` 一律だと Portal のマウント順で勝敗が決まる。`z-10` / `z-20` のコンポーネント内部の重なりは対象外。順序は DESIGN.md の Layering 節）
 - [ ] アイコンは `iconsax-reactjs` か（`lucide-react` / `heroicons` は使わない）
 - [ ] **選んだアイコンの「絵」を実際に見たか**。iconsax は名前と絵が一致しないものがある。`Check` は小切手（checkbook）でチェックマークではない（PR #349 で出荷直前まで残った）。チェックマークは `TickSquare` / `TickCircle`。また **"i" のグリフは iconsax に存在せず**、`InfoCircle` / `Information` / `Danger` / `Warning2` はすべて感嘆符「!」の器違いなので、情報アイコンは DS 自前の `InfoCircleIcon` を使う。名前で選んだら描画結果を目視し、意味が変わると困る箇所は path で固定するテストを書く <!-- docs-drift-ignore: Check TickSquare TickCircle InfoCircle Information Danger Warning2 InfoCircleIcon -->
 - [ ] 生タグ（`<button>` / `<input>` / `<a href>`）でなく DS コンポーネントを使ったか

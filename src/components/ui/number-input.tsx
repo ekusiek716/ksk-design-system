@@ -2,7 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { isImeComposing } from "@/lib/ime"
 
-interface NumberInputProps {
+interface NumberInputProps extends Omit<React.ComponentProps<"input">, "value" | "onChange" | "type" | "size" | "min" | "max" | "step" | "defaultValue"> {
   value?: number
   onChange?: (value: number) => void
   min?: number
@@ -38,6 +38,10 @@ function NumberInput({
   className,
   decrementLabel = "減らす",
   incrementLabel = "増やす",
+  onFocus,
+  onBlur,
+  onKeyDown,
+  ...inputProps
 }: NumberInputProps) {
   const [raw, setRaw] = React.useState(String(value))
   const [focused, setFocused] = React.useState(false)
@@ -95,15 +99,18 @@ function NumberInput({
 
       {/* Value */}
       <input
+        {...inputProps}
         type="text"
         inputMode="decimal"
         value={displayValue}
         placeholder={placeholder}
         disabled={disabled}
         onChange={(e) => setRaw(e.target.value)}
-        onFocus={() => { setFocused(true); setRaw(String(value)) }}
-        onBlur={(e) => { setFocused(false); commit(e.target.value) }}
+        onFocus={(e) => { setFocused(true); setRaw(String(value)); onFocus?.(e) }}
+        onBlur={(e) => { setFocused(false); commit(e.target.value); onBlur?.(e) }}
         onKeyDown={(e) => {
+          onKeyDown?.(e)
+          if (e.defaultPrevented) return
           // IME 変換中は Enter が「確定」、ArrowUp/Down が「変換候補の選択」なので、
           // blur / 増減に横取りさせない（issue #301 と同一原因。全角数字入力時に起きる）。
           if (isImeComposing(e)) return
