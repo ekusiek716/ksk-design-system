@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest"
 
 /**
  * issue #636: 入力系の枠（--Border-Control）とスイッチ（オフ）の地（--Surface-Switch-Off*）を
- * prefers-contrast: more / data-contrast="more" のときだけ 3:1 以上へ切り替える。
- * 既定の見た目は不変であることと、CSS・tokens.json・部品の参照がずれないことを固定する。
+ * 通常 light/dark と高コントラスト指定の両方で 3:1 以上にする。
+ * 非操作区切りを変更せず、CSS・tokens.json・部品の参照がずれないことを固定する。
  */
 
 const css = readFileSync("src/styles/semantic.css", "utf8")
@@ -42,16 +42,16 @@ function expected(mode: "light" | "dark") {
   ])
 }
 
-describe("既定値は据え置き（issue #636）", () => {
-  it(":root / .dark では新ロールを宣言しない（部品側のフォールバックが従来の変数を解決する）", () => {
-    // :root で宣言すると :root で解決済みの値を継承し、要素単位の --Border-Medium-Emphasis 等の
-    // 上書きに追従しなくなる。高コントラスト時だけ宣言するのが契約。
-    const lightRoot = css.match(/:root\s*\{([\s\S]*?)\n\}\n\n\/\* ─── Dark Mode ─── \*\//)?.[1] ?? ""
-    const darkRoot = css.match(/\n\.dark\s*\{([\s\S]*?)\n\}/)?.[1] ?? ""
-    expect(lightRoot).not.toBe("")
-    expect(darkRoot).not.toBe("")
-    expect([...declarations(lightRoot).keys()]).toEqual([])
-    expect([...declarations(darkRoot).keys()]).toEqual([])
+describe("通常 light/dark の操作部品専用値（issue #636）", () => {
+  it(":root / .dark の専用ロールは正本と一致する", () => {
+    expect(blockAfter(css, /:root\s*\{([\s\S]*?)\n\}/)).toEqual(expected("light"))
+    expect(blockAfter(css, /\n\.dark\s*\{([\s\S]*?)\n\}/)).toEqual(expected("dark"))
+    for (const [mode, group] of [["light", "semantic"], ["dark", "semanticDark"]] as const) {
+      expect(tokens.colors[group].border.control).toBe(more[mode].border.control)
+      for (const role of ["switch-off", "switch-off-hover", "slider-track"]) expect(tokens.colors[group].surface[role]).toBe(more[mode].surface[role])
+    }
+    expect(tokens.colors.semantic.border["medium-emphasis"]).toBe("var(--Primitive-Gray-300)")
+    expect(tokens.colors.semanticDark.border["medium-emphasis"]).toBe("var(--Primitive-White-Alpha-300)")
   })
 })
 

@@ -1,3 +1,4 @@
+import { getActiveElement } from "@/lib/active-element"
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
@@ -51,7 +52,7 @@ function focusLayerTarget(container: HTMLElement | null, target: LayerAutoFocusT
 
 function captureRestoreFocus(ref: React.RefObject<HTMLElement | null>) {
   if (ref.current != null || typeof document === "undefined") return
-  ref.current = document.activeElement as HTMLElement | null
+  ref.current = getActiveElement() as HTMLElement | null
 }
 
 function Dialog({ modal = true, ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {

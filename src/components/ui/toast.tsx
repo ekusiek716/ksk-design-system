@@ -1,4 +1,5 @@
 import * as React from "react"
+import { usePortalContainer, type PortalContainer } from "./portal-container"
 import { createPortal } from "react-dom"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
@@ -215,7 +216,8 @@ function useToast(): ToastContextValue {
 // Viewport (shared between Toaster と auto-mounted root)
 // =============================================================
 
-function ToastViewport({ regionLabel, closeLabel }: { regionLabel?: string; closeLabel?: string } = {}) {
+function ToastViewport({ regionLabel, closeLabel, container }: { regionLabel?: string; closeLabel?: string; container?: PortalContainer } = {}) {
+  const portalContainer = usePortalContainer(container)
   const toasts = useToastStoreSnapshot()
   const hydrated = useIsHydrated()
   // 初回 render はサーバー出力（= 何も出さない）と一致させる。
@@ -271,7 +273,7 @@ function ToastViewport({ regionLabel, closeLabel }: { regionLabel?: string; clos
         </div>
       ))}
     </div>,
-    document.body
+    portalContainer ?? document.body
   )
 }
 
@@ -280,6 +282,8 @@ function ToastViewport({ regionLabel, closeLabel }: { regionLabel?: string; clos
 // =============================================================
 
 interface ToasterProps {
+  /** 描画先。未指定は Provider、null は document.body。Shadow DOM では Toaster を明示配置する。 */
+  container?: PortalContainer
   children?: React.ReactNode
   /** viewport (role="region") の aria-label。@default "通知" */
   regionLabel?: string
@@ -287,7 +291,7 @@ interface ToasterProps {
   closeLabel?: string
 }
 
-function Toaster({ children, regionLabel, closeLabel }: ToasterProps) {
+function Toaster({ children, regionLabel, closeLabel, container }: ToasterProps) {
   // 自動マウントされた viewport との二重描画を避けるため、
   // マウント中フラグを立てる。
   React.useEffect(() => {
@@ -302,7 +306,7 @@ function Toaster({ children, regionLabel, closeLabel }: ToasterProps) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <ToastViewport regionLabel={regionLabel} closeLabel={closeLabel} />
+      <ToastViewport regionLabel={regionLabel} closeLabel={closeLabel} container={container} />
     </ToastContext.Provider>
   )
 }

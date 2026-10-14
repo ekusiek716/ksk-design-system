@@ -107,7 +107,7 @@ function StatCard({
       {...props}
     >
       <div className="flex items-center justify-between">
-        <span className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
+        <span data-slot="stat-card-label" className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
           {label}
         </span>
         {icon && (
@@ -115,17 +115,18 @@ function StatCard({
         )}
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="typo-heading-2xl text-[var(--Text-High-Emphasis)]">
+        <span data-slot="stat-card-value" className="typo-heading-2xl text-[var(--Text-High-Emphasis)]">
           {value}
         </span>
         {unit && (
-          <span className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
+          <span data-slot="stat-card-unit" className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
             {unit}
           </span>
         )}
       </div>
       {trend && (
         <div
+          data-slot="stat-card-trend"
           className={cn(
             "typo-body-sm flex items-center gap-1",
             trend.value >= 0

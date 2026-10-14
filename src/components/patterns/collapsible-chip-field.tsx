@@ -1,3 +1,4 @@
+import { getActiveElement } from "@/lib/active-element"
 import * as React from "react"
 import { Chip } from "@/components/patterns/chip"
 
@@ -145,7 +146,7 @@ function CollapsibleChipField<K extends string>({
     const onEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || event.defaultPrevented) return
       const root = rowRef.current
-      if (!root || !root.contains(document.activeElement)) return
+      if (!root || !root.contains(getActiveElement(root))) return
       event.preventDefault()
       event.stopPropagation()
       collapse()
@@ -200,6 +201,13 @@ function CollapsibleChipField<K extends string>({
       {leading}
       <div
         ref={rowRef}
+        onKeyDownCapture={(event) => {
+          // Shadow hosts may isolate key events before they reach window.
+          if (event.key !== "Escape" || event.defaultPrevented || !collapsible || !forcedExpand) return
+          event.preventDefault()
+          event.stopPropagation()
+          collapse()
+        }}
         onKeyDown={handleKeyDown}
         // 全選択肢が見えている状態だけが選択グループ。折りたたみ中は
         // 「開閉トリガが 1 つあるだけ」なので radiogroup を名乗らない

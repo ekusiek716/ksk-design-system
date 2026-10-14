@@ -35,7 +35,7 @@ Claude Code は UI 作業を始める前に、以下のファイルを**必ず**
 | `font-bold` / `font-semibold` 等の個別指定 | `typo-*` クラス（`typo-heading-md`, `typo-label-sm` 等） |
 | `<button>` / `<input>` / `<a href>` 生タグ | `<Button>`, `<Input>`, `<Button variant="link">` |
 | `text-white` / `bg-white` / Tailwind標準色 | `text-[var(--Text-on-Inverse)]`, `bg-[var(--Surface-Primary)]` |
-| グラデーション（`bg-gradient-to-*`） | 単色背景 `bg-[var(--Surface-*)]` |
+| グラデーション（`bg-gradient-to-*`） | 単色背景 `bg-[var(--Surface-Primary)]` |
 | カラーバー（`border-t-4` 等の太ボーダー） | 全周ボーダー `border border-[var(--Border-Low-Emphasis)]` |
 
 DS に該当パターンが無い場合のみカスタム実装を許可。その場合は**必ずコメントで理由を記載**すること。

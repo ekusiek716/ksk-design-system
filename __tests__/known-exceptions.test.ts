@@ -132,11 +132,12 @@ export const A = { parameters: { a11y: shared } }
 })
 
 describe("check-contrast.mjs と例外台帳", () => {
-  it("非テキストのコントラスト未達は台帳の例外として通り、例外件数を表示する", () => {
+  it("通常の操作部品は非テキスト基準を満たし、例外なしで通る (#636)", () => {
     const r = spawnSync("node", ["scripts/check-contrast.mjs"], { cwd: process.cwd(), encoding: "utf8" })
     expect(r.status).toBe(0)
-    expect(r.stdout).toContain("[例外]")
-    expect(r.stdout).toMatch(/1\.48 : 3 : light: 入力欄の枠/)
+    expect(r.stdout).not.toContain("[例外]")
+    expect(r.stdout).toMatch(/全 \d+ ペア通過（うち台帳の例外 0）/)
+    expect(r.stdout).toMatch(/4\.83 : 3 : light: 入力欄の枠/)
   })
 
   it("check-known-exceptions.mjs が通る", () => {

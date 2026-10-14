@@ -2,7 +2,7 @@ import { describe, expect, it, afterEach } from "vitest"
 import { createRoot, type Root } from "react-dom/client"
 import { act } from "react"
 import { cdp } from "vitest/browser"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import "@/index.css"
 
 /**
@@ -44,6 +44,7 @@ function mountTabs(variant: "default" | "pill") {
           <TabsTrigger value="a">概要</TabsTrigger>
           <TabsTrigger value="b">詳細</TabsTrigger>
         </TabsList>
+        <TabsContent value="a">本文</TabsContent>
       </Tabs>,
     )
   })
@@ -59,6 +60,14 @@ function paint(el: HTMLElement) {
 }
 
 describe("Tabs の forced-colors 表示", () => {
+  it("tabpanel のキーボードフォーカスは通常表示でリングを持つ (#659)", () => {
+    mountTabs("default")
+    const panel = container!.querySelector<HTMLElement>('[role="tabpanel"]')!
+    panel.focus()
+    expect(panel.matches(":focus-visible")).toBe(true)
+    expect(getComputedStyle(panel).boxShadow).not.toBe("none")
+  })
+
   for (const variant of ["default", "pill"] as const) {
     it(`${variant}: forced-colors では選択中だけ背景・文字色が変わる`, async () => {
       await cdp().send("Emulation.setEmulatedMedia", {

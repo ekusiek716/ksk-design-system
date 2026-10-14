@@ -249,6 +249,12 @@
         "reason": "unresolvable-var"
       },
       {
+        "key": "border.control",
+        "mode": "semanticDark",
+        "value": "var(--Primitive-White-Alpha-500)",
+        "reason": "unresolvable-var"
+      },
+      {
         "key": "hover.tertiary-button",
         "mode": "semanticDark",
         "value": "var(--Primitive-White-Alpha-100)",
@@ -300,6 +306,9 @@
     "surface.info": "#EFF6FF",
     "surface.caution-strong": "#EF4444",
     "surface.disable": "#F4F4F5",
+    "surface.switch-off": "#71717A",
+    "surface.switch-off-hover": "#52525B",
+    "surface.slider-track": "#71717A",
     "text.high-emphasis": "#18181B",
     "text.medium-emphasis": "#3F3F46",
     "text.low-emphasis": "#52525B",
@@ -331,6 +340,7 @@
     "border.success": "#22C55E",
     "border.warning": "#F97316",
     "border.info": "#3B82F6",
+    "border.control": "#71717A",
     "brand.primary": "#2563EB",
     "brand.action": "#1D4ED8",
     "brand.light": "#DBEAFE",
@@ -429,6 +439,9 @@
     "surface.info": "#1E3A8A",
     "surface.caution-strong": "#EF4444",
     "surface.disable": "#27272A",
+    "surface.switch-off": "#71717A",
+    "surface.switch-off-hover": "#A1A1AA",
+    "surface.slider-track": "#71717A",
     "text.on-inverse": "#18181B",
     "text.on-media": "#FFFFFF",
     "text.accent-primary": "#60A5FA",

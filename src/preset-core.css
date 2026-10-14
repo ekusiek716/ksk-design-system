@@ -120,6 +120,15 @@
   --border: var(--Border-Medium-Emphasis);
   --input: var(--Border-Medium-Emphasis);
   --ring: var(--Focus-High-Emphasis);
+
+  --sidebar-background: var(--Surface-Primary);
+  --sidebar-foreground: var(--Text-High-Emphasis);
+  --sidebar-primary: var(--Brand-Primary);
+  --sidebar-primary-foreground: var(--Text-on-Inverse);
+  --sidebar-accent: var(--Surface-Accent-Primary-Light);
+  --sidebar-accent-foreground: var(--Text-Accent-Primary);
+  --sidebar-border: var(--Border-Low-Emphasis);
+  --sidebar-ring: var(--Focus-High-Emphasis);
 }
 
 /* ─── Radius Tokens ───

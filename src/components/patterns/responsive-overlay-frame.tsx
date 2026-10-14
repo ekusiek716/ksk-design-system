@@ -1,3 +1,4 @@
+import { getActiveElement } from "@/lib/active-element"
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { DialogContent } from "../ui/dialog"
@@ -325,7 +326,7 @@ function useEditableElementFocused(): boolean {
   React.useEffect(() => {
     if (typeof document === "undefined") return
     const check = () => {
-      const el = document.activeElement
+      const el = getActiveElement()
       setFocused(
         el instanceof Element &&
           // isContentEditable は継承された編集可能性まで拾うが、jsdom など

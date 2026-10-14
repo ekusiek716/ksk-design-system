@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils"
 interface BulkActionsProps extends React.ComponentProps<"div"> {
   /** 選択件数 */
   selectedCount: number
+  /** 選択件数の表示と既定 aria-label。省略時は日本語。 */
+  countLabel?: (selectedCount: number) => string
   /** 選択解除ボタンクリック時 */
   onClear?: () => void
   /** 選択解除ボタンの aria-label。@default "選択を解除" */
@@ -17,8 +19,9 @@ interface BulkActionsProps extends React.ComponentProps<"div"> {
  * 選択件数 + アクションボタン群を横並びで表示。
  * selectedCount が 0 のとき自動で非表示になる。
  */
-function BulkActions({ selectedCount, onClear, children, className, clearLabel = "選択を解除", ...props }: BulkActionsProps) {
+function BulkActions({ selectedCount, onClear, children, className, clearLabel = "選択を解除", countLabel = (n) => `${n}件を選択中`, ...props }: BulkActionsProps) {
   if (selectedCount === 0) return null
+  const selectionLabel = countLabel(selectedCount)
 
   return (
     <div
@@ -30,12 +33,12 @@ function BulkActions({ selectedCount, onClear, children, className, clearLabel =
         className
       )}
       role="toolbar"
-      aria-label={`${selectedCount}件を選択中`}
+      aria-label={selectionLabel}
       {...props}
     >
       {/* 選択件数 */}
       <span className="typo-label-md text-[var(--Text-on-Inverse)] shrink-0">
-        {selectedCount}件を選択中
+        {selectionLabel}
       </span>
 
       {/* 区切り線 */}

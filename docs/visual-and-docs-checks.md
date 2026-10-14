@@ -89,7 +89,7 @@ gh workflow run visual-baselines-update.yml -f ref=<PRのブランチ名>
 
 `scripts/check-contrast.mjs` は文字（4.5:1）に加えて、入力欄・チェックボックス・ラジオの枠、スイッチ（オン/オフ）の地、フォーカス枠・エラー枠と背景（Surface-Primary）の組を 3:1 で light / dark とも検査します。dark の半透明な枠（White-Alpha）は背景へ合成した実色で比べます。
 
-現在の未達（`--Border-Medium-Emphasis` が白地で約1.48:1、スイッチ（オフ）の地が1.27:1 など）は、色を変えると全プロダクトの見た目が変わるため、見た目の変更を別判断（本人判断待ち・issue #636）として 2027-03-31 期限で台帳に登録しています。**新しく未達の組が増えたときは、登録が無いので失敗します。**
+操作部品専用の `--Border-Control`、`--Surface-Switch-Off` / `-Hover`、`--Surface-Slider-Track` は通常 light/dark でも 3:1 以上です（issue #636）。入力・選択操作の境界だけを濃くし、非操作の区切り線 `--Border-Medium-Emphasis` は維持します。旧例外10件は解消して台帳から削除しました。consumer が専用ロールを上書きする場合は、変更後の背景との3:1を確認してください。
 
 ## negative test
 

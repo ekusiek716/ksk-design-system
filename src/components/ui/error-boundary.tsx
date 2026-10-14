@@ -19,6 +19,12 @@ interface ErrorBoundaryLabels {
 
 export interface ErrorBoundaryProps {
   children: React.ReactNode
+  /** エラー中のみ、値の変更で再試行する。通常時の子の状態は保持する。 */
+  resetKeys?: readonly unknown[]
+  /** false で全ページ再読込を非表示。関数で再読込動作を差し替える。 */
+  reload?: false | (() => void)
+  /** 埋め込み領域向け。既定 false（従来の全画面表示）。 */
+  embedded?: boolean
   /** fallback 内で使う文言。i18n はアプリ側で解決して string を渡す。 */
   labels?: ErrorBoundaryLabels
   /**
@@ -90,19 +96,30 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     this.props.onError?.(error, errorInfo)
   }
 
+  componentDidUpdate(prevProps: ErrorBoundaryProps, prevState: ErrorBoundaryState) {
+    const before = prevProps.resetKeys ?? []
+    const after = this.props.resetKeys ?? []
+    if (this.state.hasError && prevState.hasError &&
+      (before.length !== after.length || before.some((value, index) => !Object.is(value, after[index])))) {
+      this.handleReset()
+    }
+  }
+
   handleReset = () => {
     this.setState({ hasError: false, error: null })
     this.props.onReset?.()
   }
 
   handleReload = () => {
-    if (typeof window !== "undefined") window.location.reload()
+    if (this.props.reload === false) return
+    if (this.props.reload) this.props.reload()
+    else if (typeof window !== "undefined") window.location.reload()
   }
 
   render() {
     if (!this.state.hasError) return this.props.children
 
-    const { fallback, labels, onReset, className } = this.props
+    const { fallback, labels, onReset, className, reload, embedded } = this.props
     const merged = { ...DEFAULT_LABELS, ...labels }
 
     if (fallback) {
@@ -114,7 +131,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         data-slot="error-boundary-fallback"
         role="alert"
         className={cn(
-          "flex flex-col items-center justify-center min-h-screen p-8 text-center bg-[var(--Surface-Primary)]",
+          "flex flex-col items-center justify-center text-center bg-[var(--Surface-Primary)]",
+          embedded ? "p-4" : "min-h-screen p-8",
           className,
         )}
       >
@@ -130,9 +148,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 {merged.resetLabel}
               </Button>
             )}
-            <Button size="lg" onClick={this.handleReload}>
+            {reload !== false && <Button size="lg" onClick={this.handleReload}>
               {merged.reloadLabel}
-            </Button>
+            </Button>}
           </div>
         </div>
       </div>

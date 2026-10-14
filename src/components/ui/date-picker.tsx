@@ -1,3 +1,4 @@
+import { getActiveElement } from "@/lib/active-element"
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Calendar } from "./calendar"
@@ -134,9 +135,8 @@ function DatePicker({
             e.preventDefault()
             // フォーカスを閉じかけのカレンダー内に残さない（unmount 時の唐突な
             // フォーカス移動を避け、明示的に手放す）
-            if (document.activeElement instanceof HTMLElement) {
-              document.activeElement.blur()
-            }
+            const active = getActiveElement()
+            if (active instanceof HTMLElement) active.blur()
           }
         }}
       >

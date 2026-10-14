@@ -15,14 +15,9 @@ import { TagInput } from "@/components/patterns/tag-input"
 import "@/index.css"
 
 /**
- * issue #636: 入力欄・チェックボックス・ラジオの枠（--Border-Control）とスイッチ（オフ）の地
- * （--Surface-Switch-Off）は、既定では WCAG 1.4.11 の 3:1 に届かない淡い色のまま据え置き、
- * OS の「コントラストを上げる」（prefers-contrast: more）か root の data-contrast="more"
- * のときだけ 3:1 以上の色へ切り替える。計算後の色を chromium 実機で確かめる。
- *
- * - 設定なし: 部品の枠は従来の Border-Medium-Emphasis と同じ計算後の色（既定の見た目は不変）
- * - 設定あり: light は Gray-500 (#71717A)、dark は White-Alpha-500
- * - 設定なしでも data-contrast="more" を付ければ同じ値（opt-in）
+ * issue #636: 操作部品専用色を通常 light/dark から3:1以上にする。
+ * prefers-contrast / data-contrast の互換を維持し、非操作区切りは変更しない。
+ * consumer の専用トークン上書きと通常表示の計算後色をChromiumで確認する。
  */
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
@@ -118,19 +113,19 @@ function colors() {
   }
 }
 
-describe("prefers-contrast: more で入力系の枠とスイッチの地だけ濃くなる (issue #636)", () => {
-  it("設定なし（light）: 入力系の枠は従来の Border-Medium-Emphasis、スイッチ地は Surface-Quaternary のまま", async () => {
+describe("通常表示から操作部品の枠と地が3:1以上 (issue #636)", () => {
+  it("通常 light: 専用値が適用され非操作区切りと分離される", async () => {
     await setContrast("no-preference")
     mount()
     const c = colors()
-    expect(c.input).toBe(c.mediumProbe)
-    expect(c.checkbox).toBe(c.mediumProbe)
-    expect(c.radio).toBe(c.mediumProbe)
-    expect(c.switchOff).toBe(c.quaternaryProbe)
-    expect(c.sliderTrack).toBe(c.tertiaryProbe)
-    expect(c.starUnselected).toBe(c.mediumColorProbe)
-    for (const key of EXTRA_CONTROLS) expect(c[key]).toBe(c.mediumProbe)
-    expect(c.input).not.toBe(GRAY_500)
+    expect(c.input).toBe(GRAY_500)
+    expect(c.checkbox).toBe(GRAY_500)
+    expect(c.radio).toBe(GRAY_500)
+    expect(c.switchOff).toBe(GRAY_500)
+    expect(c.sliderTrack).toBe(GRAY_500)
+    expect(c.starUnselected).toBe(GRAY_500)
+    for (const key of EXTRA_CONTROLS) expect(c[key]).toBe(GRAY_500)
+    expect(c.input).not.toBe(c.mediumProbe)
   })
 
   it("設定あり（light）: 枠とスイッチ地が Gray-500 になり、面の区切り（Medium）は変わらない", async () => {
@@ -150,13 +145,13 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
     expect(after.mediumProbe).toBe(before.mediumProbe)
   })
 
-  it("設定あり（dark）: 枠は White-Alpha-500、スイッチ地は Gray-500。設定なし（dark）は従来どおり", async () => {
+  it("設定あり（dark）: 枠は White-Alpha-500、スイッチ地は Gray-500。通常 dark も同じ値", async () => {
     document.documentElement.classList.add("dark")
     await setContrast("no-preference")
     mount()
     const base = colors()
-    expect(base.input).toBe(base.mediumProbe)
-    expect(base.switchOff).toBe(base.quaternaryProbe)
+    expect(base.input).toBe(WHITE_ALPHA_500)
+    expect(base.switchOff).toBe(GRAY_500)
 
     await setContrast("more")
     const more = colors()
@@ -186,7 +181,7 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
     expect(dark.switchOff).toBe(GRAY_500)
   })
 
-  it("設定なしでは、要素単位の --Border-Medium-Emphasis 等の上書きに従来どおり追従する（main と同じ結果）", async () => {
+  it("consumer の専用ロール上書きは通常表示と祖先の高コントラスト指定の両方で優先される", async () => {
     await setContrast("no-preference")
     noTransition = document.createElement("style")
     noTransition.textContent = "*, *::before, *::after { transition: none !important; }"
@@ -200,10 +195,10 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
           data-testid="scope"
           style={
             {
-              "--Border-Medium-Emphasis": "rgb(1, 2, 3)",
-              "--Surface-Quaternary": "rgb(4, 5, 6)",
-              "--Object-Disable": "rgb(7, 8, 9)",
-              "--Surface-Tertiary": "rgb(10, 11, 12)",
+              "--Border-Control": "rgb(1, 2, 3)",
+              "--Surface-Switch-Off": "rgb(4, 5, 6)",
+              "--Surface-Switch-Off-Hover": "rgb(7, 8, 9)",
+              "--Surface-Slider-Track": "rgb(10, 11, 12)",
             } as React.CSSProperties
           }
         >
@@ -218,9 +213,9 @@ describe("prefers-contrast: more で入力系の枠とスイッチの地だけ�
     expect(getComputedStyle(q('[data-slot="switch"]')).backgroundColor).toBe("rgb(4, 5, 6)")
     expect(getComputedStyle(q('[data-slot="slider-track"]')).backgroundColor).toBe("rgb(10, 11, 12)")
 
-    // 高コントラスト設定ありのときは、上書きより Control の値が勝つ
+    // 専用ロールの明示上書きは継承元の高コントラスト指定より優先される。
     await setContrast("more")
-    expect(getComputedStyle(q("input")).borderTopColor).toBe(GRAY_500)
-    expect(getComputedStyle(q('[data-slot="switch"]')).backgroundColor).toBe(GRAY_500)
+    expect(getComputedStyle(q("input")).borderTopColor).toBe("rgb(1, 2, 3)")
+    expect(getComputedStyle(q('[data-slot="switch"]')).backgroundColor).toBe("rgb(4, 5, 6)")
   })
 })

@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:63b2c77fce13)
+// source: tokens.json v2.1.0 (sha256:d6873803ff25)
 // =============================================================
 
 export const themes = {
@@ -28,7 +28,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F4F4F5"
+        "disable": "#F4F4F5",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#52525B",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -69,7 +72,8 @@ export const themes = {
         "caution": "#EF4444",
         "success": "#22C55E",
         "warning": "#F97316",
-        "info": "#3B82F6"
+        "info": "#3B82F6",
+        "control": "#71717A"
       },
       "brand": {
         "primary": "#2563EB",
@@ -145,7 +149,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#27272A"
+        "disable": "#27272A",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#A1A1AA",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -186,7 +193,8 @@ export const themes = {
         "caution": "#F87171",
         "success": "#4ADE80",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
         "primary": "#60A5FA",
@@ -260,7 +268,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F4F4F5"
+        "disable": "#F4F4F5",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#52525B",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -301,7 +312,8 @@ export const themes = {
         "caution": "#EF4444",
         "success": "#22C55E",
         "warning": "#F97316",
-        "info": "#3B82F6"
+        "info": "#3B82F6",
+        "control": "#71717A"
       },
       "brand": {
         "primary": "#2563EB",
@@ -377,7 +389,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#27272A"
+        "disable": "#27272A",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#A1A1AA",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -418,7 +433,8 @@ export const themes = {
         "caution": "#F87171",
         "success": "#4ADE80",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
         "primary": "#60A5FA",
@@ -492,7 +508,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F4F4F5"
+        "disable": "#F4F4F5",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#52525B",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -533,7 +552,8 @@ export const themes = {
         "caution": "#EF4444",
         "success": "#22C55E",
         "warning": "#F97316",
-        "info": "#3B82F6"
+        "info": "#3B82F6",
+        "control": "#71717A"
       },
       "brand": {
         "primary": "#163FF4",
@@ -609,7 +629,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#27272A"
+        "disable": "#27272A",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#A1A1AA",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -650,7 +673,8 @@ export const themes = {
         "caution": "#F87171",
         "success": "#4ADE80",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
         "primary": "#4398F8",
@@ -724,7 +748,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F4F4F5"
+        "disable": "#F4F4F5",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#52525B",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -765,7 +792,8 @@ export const themes = {
         "caution": "#EF4444",
         "success": "#22C55E",
         "warning": "#F97316",
-        "info": "#3B82F6"
+        "info": "#3B82F6",
+        "control": "#71717A"
       },
       "brand": {
         "primary": "#C2410C",
@@ -841,7 +869,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#27272A"
+        "disable": "#27272A",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#A1A1AA",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -882,7 +913,8 @@ export const themes = {
         "caution": "#F87171",
         "success": "#4ADE80",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
         "primary": "#FB923C",
@@ -956,7 +988,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F4F4F5"
+        "disable": "#F4F4F5",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#52525B",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -997,7 +1032,8 @@ export const themes = {
         "caution": "#EF4444",
         "success": "#22C55E",
         "warning": "#F97316",
-        "info": "#3B82F6"
+        "info": "#3B82F6",
+        "control": "#71717A"
       },
       "brand": {
         "primary": "#15803D",
@@ -1073,7 +1109,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#27272A"
+        "disable": "#27272A",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#A1A1AA",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -1114,7 +1153,8 @@ export const themes = {
         "caution": "#F87171",
         "success": "#4ADE80",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
         "primary": "#4ADE80",
@@ -1188,7 +1228,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#F4F4F5"
+        "disable": "#F4F4F5",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#52525B",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -1229,7 +1272,8 @@ export const themes = {
         "caution": "#EF4444",
         "success": "#22C55E",
         "warning": "#F97316",
-        "info": "#3B82F6"
+        "info": "#3B82F6",
+        "control": "#71717A"
       },
       "brand": {
         "primary": "#6D28D9",
@@ -1305,7 +1349,10 @@ export const themes = {
         "videoOverlay-light": "rgba(0, 0, 0, 0.40)",
         "videoOverlay-medium": "rgba(0, 0, 0, 0.60)",
         "videoOverlay-strong": "rgba(0, 0, 0, 0.80)",
-        "disable": "#27272A"
+        "disable": "#27272A",
+        "switch-off": "#71717A",
+        "switch-off-hover": "#A1A1AA",
+        "slider-track": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -1346,7 +1393,8 @@ export const themes = {
         "caution": "#F87171",
         "success": "#4ADE80",
         "warning": "#FB923C",
-        "info": "#60A5FA"
+        "info": "#60A5FA",
+        "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
         "primary": "#A78BFA",

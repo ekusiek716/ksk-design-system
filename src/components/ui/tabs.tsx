@@ -103,7 +103,7 @@ function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPr
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("mt-2 focus-visible:outline-hidden", VERTICAL_CONTENT, className)}
+      className={cn("mt-2 rounded-sm focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50", VERTICAL_CONTENT, className)}
       {...props}
     />
   )
