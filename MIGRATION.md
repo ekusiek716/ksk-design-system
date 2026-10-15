@@ -39,6 +39,18 @@ npx ksk-ds check-migration ./src
 
 ---
 
+## v2.10.0
+
+APIの削除・改名はありません。次の表示・操作の既定値変更は、取り込み時に利用画面で確認してください。
+
+- Webの操作枠は `--Border-Control`、Switchオフ地は `--Surface-Switch-Off` / `--Surface-Switch-Off-Hover`、Slider溝は `--Surface-Slider-Track` を通常表示から宣言します。従来の `--Border-Medium-Emphasis` / `--Surface-Quaternary` 等の上書きでは操作部品を変更しません。独自テーマは専用ロールを上書きし、背景との3:1を再検証してください。非操作区切りは従来どおりです。Native部品本体の既存枠色を一括変更するリリースではありません。
+- AlertDialogは既定でCancelにフォーカスし、閉じると開く前の要素へ戻ります。画面独自の移動が必要なら `onOpenAutoFocus` / `onCloseAutoFocus` で `preventDefault()`、自動復帰の無効化は `restoreFocusOnClose={false}` を使ってください。
+- DataTableRowのhover背景は操作可能な行だけに付き、選択行の背景はhover中も維持します。Chipのhover背景とAlert成功枠も変更されます。
+- Shadow DOMの対応範囲とRadix由来の制約は [利用上の注意](https://github.com/ekusiek716/ksk-design-system/blob/main/docs/shadow-dom.md) を参照してください。ToastをShadow内に描画するときはProvider配下にToasterを明示してください。
+- CLIのP052/P053検査は部品の形の上書き・`@layer`外のグローバルCSSを新たに検出します。既存コードで検出された場合は正本ルールと例外の理由を確認してください。
+
+---
+
 ## v2.0.0
 
 **破壊変更は peerDependencies の要件変更 1 点のみ。** 識別子 / prop の削除・rename は
