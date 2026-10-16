@@ -46,7 +46,7 @@ export function FeatureComparisonTable({
   const { theme, scales } = useTheme()
   const cellBg = (c: FeatureComparisonColumn) => (c.highlight ? theme.surface["accent-primary-light"] : undefined)
   const spoken = (v: FeatureComparisonValue | undefined) =>
-    v === true ? availableLabel : v === false || v == null ? unavailableLabel : v
+    v === true ? availableLabel : v === false || v == null || v === "" ? unavailableLabel : v
   const cellWidth = 80
 
   return (
@@ -101,11 +101,11 @@ export function FeatureComparisonTable({
                     resolveTypo("body.sm"),
                     {
                       textAlign: "center",
-                      color: v === true ? theme.object.success : v === false || v == null ? theme.text["medium-emphasis"] : theme.text["high-emphasis"],
+                      color: v === true ? theme.object.success : v === false || v == null || v === "" ? theme.text["medium-emphasis"] : theme.text["high-emphasis"],
                     },
                   ]}
                 >
-                  {v === true ? "✓" : v === false || v == null ? "—" : v}
+                  {v === true ? "✓" : v === false || v == null || v === "" ? "—" : v}
                 </RNText>
               </View>
             )

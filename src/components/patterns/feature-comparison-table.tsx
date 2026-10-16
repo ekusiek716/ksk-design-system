@@ -11,7 +11,7 @@ interface FeatureComparisonColumn {
   highlight?: boolean
 }
 
-/** セルの値。true = 使える（✓）/ false = 使えない（—）/ 文字列・ReactNode = その値（「月 3 件」等） */
+/** セルの値。true = 使える（✓）/ false・未指定・空文字 = 使えない（—）/ 文字列・ReactNode = その値（「月 3 件」等） */
 type FeatureComparisonValue = boolean | React.ReactNode
 
 interface FeatureComparisonRow {
@@ -43,6 +43,11 @@ interface FeatureComparisonTableProps extends Omit<React.ComponentProps<"table">
  * - 列数は 2〜3 を想定（スマホ幅で 1 行に収まる数）。それ以上は横スクロールの親で包む
  * - highlight 列（推奨プラン）は Surface-Accent-Primary-Light の面と Text-Accent-Primary の見出し
  */
+/** 「利用できない」扱いの値（false・未指定・null・空文字）。空セルにしない */
+function isUnavailable(value: FeatureComparisonValue | undefined) {
+  return value === false || value == null || value === ""
+}
+
 function FeatureComparisonTable({
   columns,
   rows,
@@ -95,7 +100,7 @@ function FeatureComparisonTable({
               return (
                 <td
                   key={column.key}
-                  data-value={value === true ? "available" : value === false || value == null ? "unavailable" : "text"}
+                  data-value={value === true ? "available" : isUnavailable(value) ? "unavailable" : "text"}
                   className={cn("px-2 py-3 text-center typo-body-sm text-[var(--Text-High-Emphasis)]", cellBg(column))}
                 >
                   {value === true ? (
@@ -103,7 +108,7 @@ function FeatureComparisonTable({
                       <TickCircle size={20} variant="Bold" aria-hidden="true" className="mx-auto text-[var(--Object-Success)]" />
                       <span className="sr-only">{availableLabel}</span>
                     </>
-                  ) : value === false || value == null ? (
+                  ) : isUnavailable(value) ? (
                     <>
                       <span aria-hidden="true" className="text-[var(--Text-Medium-Emphasis)]">—</span>
                       <span className="sr-only">{unavailableLabel}</span>

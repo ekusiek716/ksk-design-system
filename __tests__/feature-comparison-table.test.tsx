@@ -45,4 +45,13 @@ describe("FeatureComparisonTable（#687）", () => {
     expect(src).toContain("accessible")
     expect(src).toContain('join("、")')
   })
+  it("空文字・未指定のセルは空にせず「利用できない」扱い", () => {
+    const h = document.createElement("div")
+    h.innerHTML = renderToStaticMarkup(
+      <FeatureComparisonTable columns={[{ key: "a", label: "A" }, { key: "b", label: "B" }]} rows={[{ label: "x", values: { a: "" } }]} />,
+    )
+    const cells = Array.from(h.querySelectorAll("tbody td"))
+    expect(cells.map((c) => c.getAttribute("data-value"))).toEqual(["unavailable", "unavailable"])
+    expect(cells[0].textContent).toContain("利用できない")
+  })
 })
