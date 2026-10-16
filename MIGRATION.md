@@ -25,6 +25,7 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 以下は次の版の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
 
 - **DetailSheetHeader の文字列 title がシート / ダイアログの名前になる（#727・既定動作の変更）**: Sheet / Dialog（ResponsiveOverlayFrame・BottomSheetFrame・SideDrawerFrame 経由を含む）の中で `DetailSheetHeader title="…"` に文字列を渡すと、その見出しを SheetTitle / DialogTitle（Radix の Title）として描き、シート / ダイアログの読み上げ名（`aria-labelledby`）にします。見た目（`typo-heading-lg`）は変わりません。`data-slot` が `sheet-title` / `dialog-title` になり、`autoFocus="title"` の対象にもなります。**同じシートに sr-only の `SheetTitle` / `DialogTitle` を別に置いている場合は消してください**（残すと id が重複します。開発ビルドで警告）。従来どおり別の Title で名前を付けたい画面は `overlayTitle={false}` を指定してください。オーバーレイの外・AlertDialog の中・`titleEditor` や ReactNode の `title` は変わりません。
+- **DetailSheetHeader の leading が空のときの題名の位置（#729）**: `leading` を渡さない（null / undefined / false）見出しは左の列を描かなくなり、題名が 12px 左へ寄ってヘッダーの左の余白（20px）にそろいます（従来は幅 0 の列と 12px の間隔が残っていました）。`[data-slot="detail-sheet-header-leading"]` もその場合は出ません。
 
 <!-- deprecations:start（自動生成・手で編集しない） -->
 

@@ -89,6 +89,7 @@ function DetailSheetHeader({
 }: DetailSheetHeaderProps) {
   const titleContent = titleEditor ?? title
   const defaultLabels = useKskLabels()
+  const hasLeading = leading != null && leading !== false
   const overlaySlot = useOverlayTitleSlot()
   const asOverlayTitle = overlayTitle && overlaySlot != null && titleEditor == null && typeof title === "string"
   const titleRef = React.useRef<HTMLHeadingElement>(null)
@@ -111,15 +112,20 @@ function DetailSheetHeader({
     <div
       data-slot="detail-sheet-header"
       className={cn(
-        "grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-5 pt-5",
+        // #729: leading が空なら列ごと描かない（空の auto 列 + gap-3 で題名が 12px 右にずれるため）
+        hasLeading
+          ? "grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-5 pt-5"
+          : "grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3 px-5 pt-5",
         "border-b border-[var(--Border-Low-Emphasis)] pb-4",
         className
       )}
       {...props}
     >
-      <div data-slot="detail-sheet-header-leading" className="flex min-h-10 items-center">
-        {leading}
-      </div>
+      {hasLeading && (
+        <div data-slot="detail-sheet-header-leading" className="flex min-h-10 items-center">
+          {leading}
+        </div>
+      )}
       <div data-slot="detail-sheet-header-title" className="min-w-0">
         {asOverlayTitle ? (
           // #727: Radix の Title（h2・id = Content の aria-labelledby）。見た目は素の h2 と同じ。

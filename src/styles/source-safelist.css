@@ -505,6 +505,7 @@
 @source inline("grid-cols-7");
 @source inline("grid-cols-[auto_minmax(0,1fr)_auto]");
 @source inline("grid-cols-[minmax(0,1fr)_8rem]");
+@source inline("grid-cols-[minmax(0,1fr)_auto]");
 @source inline("grid-cols-[repeat(auto-fit,minmax(8rem,1fr))]");
 @source inline("group-data-[disabled]:bg-[var(--Surface-Secondary)]");
 @source inline("group-data-[disabled]:border-[var(--Border-Control,var(--Border-Medium-Emphasis))]");
@@ -741,6 +742,7 @@
 @source inline("max-w-(--radix-popover-content-available-width)");
 @source inline("max-w-(--radix-select-content-available-width)");
 @source inline("max-w-24");
+@source inline("max-w-28");
 @source inline("max-w-2xl");
 @source inline("max-w-3xl");
 @source inline("max-w-5xl");
@@ -955,6 +957,7 @@
 @source inline("peer-disabled:cursor-not-allowed");
 @source inline("peer-disabled:opacity-50");
 @source inline("pl-10");
+@source inline("pl-2");
 @source inline("pl-2.5");
 @source inline("pl-3");
 @source inline("pl-4");
@@ -996,6 +999,7 @@
 @source inline("px-2.5");
 @source inline("px-3");
 @source inline("px-3.5");
+@source inline("px-32");
 @source inline("px-4");
 @source inline("px-4!");
 @source inline("px-5");

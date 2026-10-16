@@ -150,3 +150,23 @@ export const InSheetTitleIsSheetName: Story = {
     await waitFor(() => expect(within(document.body).queryByRole("dialog")).toBeNull(), { timeout: 5000 })
   },
 }
+
+/**
+ * leading を渡さない見出しは左の列を作らない（issue #729）。題名の左端がヘッダーの左の余白（20px）にそろう。
+ */
+export const WithoutLeading: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="max-w-md rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]">
+      <DetailSheetScaffold header={<DetailSheetHeader title="ゲスト詳細" onClose={() => {}} />}>
+        <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">本文の左端と題名の左端がそろう。</p>
+      </DetailSheetScaffold>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const header = canvasElement.querySelector<HTMLElement>('[data-slot="detail-sheet-header"]')!
+    await expect(header.querySelector('[data-slot="detail-sheet-header-leading"]')).toBeNull()
+    const title = header.querySelector<HTMLElement>('[data-slot="detail-sheet-header-title"]')!
+    await expect(Math.round(title.getBoundingClientRect().left - header.getBoundingClientRect().left)).toBe(20)
+  },
+}

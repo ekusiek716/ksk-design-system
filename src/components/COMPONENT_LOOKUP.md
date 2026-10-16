@@ -51,7 +51,7 @@
 | KskLabelsProvider, KSK_DEFAULT_LABELS | `@/components/ui/ksk-labels` | — | Default, English, CustomLabels |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, Unstyled, DisabledState |
 | MultiSelect | `@/components/ui/multi-select` | — | Default, WithTriggerLabel, InvalidInFormField, FocusReturnsToTriggerAfterClear |
-| NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |
+| NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone, LabeledBack |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis, WithBuildPageItems, AsChildRouterLink |
 | PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small, FullWidthThree, FullWidthTwo, FullWidthFour |
@@ -116,7 +116,7 @@
 | ContentCarousel | `@/components/patterns/content-carousel` | — | Default, AutoPlay, WithoutControls |
 | CookieConsent | `@/components/patterns/cookie-consent` | — | Default, CustomLabels, OnDecideCallback |
 | CountdownHero | `@/components/patterns/countdown-hero` | — | Upcoming, Today, Past, With Illustration Slot, ISO String targetDate, With dateLabel (目標日を数字の下に), Today with todayValue (0 の代わりに文字), Interactive |
-| DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle, WithCloseButton, InSheetTitleIsSheetName |
+| DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle, WithCloseButton, InSheetTitleIsSheetName, WithoutLeading |
 | DocumentPage | `@/components/patterns/document-page` | — | PrivacyPolicy, WithoutLastUpdated |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
 | ErrorState, NotFoundIllustration | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry, NotFound |
