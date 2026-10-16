@@ -245,7 +245,10 @@ export const FullscreenUntilMd: Story = {
     await expect(header.querySelector('[data-slot="dialog-header-trailing"] button')!.getAttribute("aria-label")).toBe("閉じる")
     // 幅に応じた形（md 以上は中央・幅 1024px 以下・高さ 画面 - 4rem、md 未満は全画面）。
     // 入場の zoom を待ってから寸法を測る
-    await waitFor(() => expect(getComputedStyle(dialog).animationName === "none" || dialog.getAnimations().length === 0).toBe(true))
+    await waitFor(
+      () => expect(getComputedStyle(dialog).animationName === "none" || dialog.getAnimations().length === 0).toBe(true),
+      { timeout: 5000 }
+    )
     const r = dialog.getBoundingClientRect()
     if (window.innerWidth >= 768) {
       await expect(Math.round(r.height)).toBe(window.innerHeight - 64)
@@ -256,7 +259,9 @@ export const FullscreenUntilMd: Story = {
       await expect(Math.round(r.height)).toBe(window.innerHeight)
     }
     await userEvent.click(within(dialog).getByRole("button", { name: "閉じる" }))
-    await waitFor(() => expect(within(document.body).queryByRole("dialog")).toBeNull())
+    // 閉じる入退場（境界以上は zoom-out、未満は下へのスライド）の animationend を Radix が待ってから外す。
+    // CI の WebKit は既定 1000ms を超えることがあるので、Sizes と同じく 5000ms 待つ
+    await waitFor(() => expect(within(document.body).queryByRole("dialog")).toBeNull(), { timeout: 5000 })
   },
 }
 
