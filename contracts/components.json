@@ -343,7 +343,10 @@
         "variant=media は gap / padding を持たないため、内側コンテンツで明示的に余白を管理できる",
         "カード全体を押せるようにするときは onClick（ボタン）/ href（リンク）を Card に渡す(issue #665)。全面を覆う不可視の button / a（stretched link）を重ね、Enter / Space・フォーカスリング・hover・押下表現を DS が持つ。名前は CardTitle・説明は CardDescription に自動で結ばれる（CardTitle が無いときは aria-label）。variant=media でも使える。disabled 対応",
         "押せる Card の中の別操作（メニュー・削除等）は CardAction に置く。CardAction は押せる面より前面に出て入れ子 button にならない。それ以外の場所の操作子は押せる面に覆われる",
-        "<Button unstyled> に border / rounded / shadow / active:scale を被せて押せるカードを自作しない（P040）。native は onPress / disabled"
+        "押せる面（button / a）は Card の DOM 先頭に置き、Tab 順はカード本体 → 内側の CardAction（視覚順）。onClick の型は MouseEventHandler<HTMLElement> で、以前の div 前提のハンドラもそのまま渡せる",
+        "押せる Card の名前は aria-label → aria-labelledby → CardTitle（自前の id でも結ばれる）の順。どれも無いと開発ビルドで 1 回 console.warn。押せない入れ子の Card の CardTitle / CardDescription は外側の押せる Card に登録されない",
+        "<Button unstyled> に border / rounded / shadow / active:scale を被せて押せるカードを自作しない（P040）。native は onPress / disabled",
+        "parity（web と差がある点）: native の押せる Card は Pressable 1 つで、CardTitle / CardAction の登録・前面化の仕組みを持たない。入れ子の Card や Card 内の別操作は RN の Pressable の入れ子規則（内側の Pressable が先に反応）に従い、読み上げ名は accessibilityLabel を明示するか子の Text の連結になる"
       ]
     },
     {
