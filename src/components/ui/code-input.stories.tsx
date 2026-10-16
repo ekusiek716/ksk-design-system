@@ -7,6 +7,7 @@ import * as React from "react"
 import { expect, userEvent } from "storybook/test"
 import { CodeInput } from "./code-input"
 import { Label } from "./label"
+import { Button } from "./button"
 
 const meta: Meta<typeof CodeInput> = {
   title: "Components/CodeInput",
@@ -35,6 +36,7 @@ export const Otp: Story = {
         <p className="typo-label-xs text-[var(--Text-Low-Emphasis)]" data-testid="done">
           {done ? `確認中: ${done}` : "コードを入力してください"}
         </p>
+        <Button variant="ghost-neutral">コードを再送する</Button>
       </div>
     )
   },
@@ -45,6 +47,12 @@ export const Otp: Story = {
     await expect(cells().map((c) => c.value).join("")).toBe("123")
     await userEvent.keyboard("{Backspace}")
     await expect(cells().map((c) => c.value).join("")).toBe("12")
+    // 入力途中でも Tab で CodeInput を抜けられる（キーボードトラップにしない）
+    await userEvent.tab()
+    await expect(document.activeElement?.textContent).toBe("コードを再送する")
+    await userEvent.tab({ shift: true })
+    await expect(document.activeElement).toBe(cells()[2])
+    await userEvent.click(cells()[0])
     await userEvent.paste("987654")
     await expect(cells().map((c) => c.value).join("")).toBe("987654")
     await expect(canvasElement.querySelector('[data-testid="done"]')!.textContent).toBe("確認中: 987654")

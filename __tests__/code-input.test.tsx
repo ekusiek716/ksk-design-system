@@ -153,10 +153,49 @@ describe("CodeInput cells（#669）", () => {
     expect(document.activeElement).toBe(cells()[0])
   })
 
-  it("先の空セルにフォーカスしたら次に入力すべきセルへ寄せる", () => {
+  it("先の空セルをクリック / タップしたときだけ、次に入力すべきセルへ寄せる", () => {
+    mount(<Controlled initial="1" />)
+    const down = new MouseEvent("mousedown", { bubbles: true, cancelable: true })
+    act(() => {
+      cells()[4].dispatchEvent(down)
+    })
+    expect(down.defaultPrevented).toBe(true)
+    expect(document.activeElement).toBe(cells()[1])
+  })
+
+  it("キーボード / 支援技術のフォーカス移動は奪わない（キーボードトラップを作らない・WCAG 2.1.2）", () => {
     mount(<Controlled initial="1" />)
     act(() => cells()[4].focus())
-    expect(document.activeElement).toBe(cells()[1])
+    expect(document.activeElement).toBe(cells()[4])
+  })
+
+  it("roving tabindex: Tab で止まるのは次に入力すべきセル 1 つだけ", () => {
+    mount(<Controlled initial="12" />)
+    expect(cells().map((c) => c.tabIndex)).toEqual([-1, -1, 0, -1, -1, -1])
+    typeInto(cells()[2], "3")
+    expect(cells().map((c) => c.tabIndex)).toEqual([-1, -1, -1, 0, -1, -1])
+  })
+
+  it("全桁入力済みなら最後のセルがタブストップ", () => {
+    mount(<Controlled initial="123456" />)
+    expect(cells().filter((c) => c.tabIndex === 0)).toEqual([cells()[5]])
+  })
+
+  it("グループ名が無いと開発ビルドで 1 回だけ警告する", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    mount(<CodeInput length={4} />)
+    mount(<CodeInput length={4} defaultValue="1" />)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("アクセシブルネーム"))
+    warn.mockRestore()
+  })
+
+  it("名前があれば警告しない。autoComplete は先頭セルの既定を上書きできる", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    mount(<Controlled autoComplete="off" />)
+    expect(warn).not.toHaveBeenCalled()
+    expect(cells()[0].getAttribute("autocomplete")).toBe("off")
+    warn.mockRestore()
   })
 
   it("alphanumeric + uppercase は英字を大文字にそろえ、inputMode は text", () => {
@@ -195,12 +234,13 @@ describe("CodeInput cells（#669）", () => {
 })
 
 describe("CodeInput single（#669）", () => {
-  it("1 つの入力で maxLength・one-time-code・等幅大きめ字間広めを持つ", () => {
+  it("1 つの入力で等幅大きめ字間広めを持ち、maxLength と one-time-code は既定で付けない", () => {
     mount(<Controlled variant="single" length={24} pattern="alphanumeric" uppercase />)
     const input = container.querySelector<HTMLInputElement>('[data-slot="code-input"]')!
     expect(input.tagName).toBe("INPUT")
-    expect(input.maxLength).toBe(24)
-    expect(input.getAttribute("autocomplete")).toBe("one-time-code")
+    // maxLength があるとハイフン入りの貼り付けがブラウザで先に切り詰められる
+    expect(input.hasAttribute("maxlength")).toBe(false)
+    expect(input.hasAttribute("autocomplete")).toBe(false)
     expect(input.getAttribute("aria-label")).toBe("認証コード")
     expect(input.className).toContain("font-mono")
     expect(input.className).toContain("tracking-wider")
@@ -208,12 +248,29 @@ describe("CodeInput single（#669）", () => {
     typeInto(input, "a1b2-c3")
     expect(input.value).toBe("A1B2C3")
   })
+
+  it("ハイフン・空白入りの 24 桁コードを貼っても桁が欠けない（sanitize 後に length で切る）", () => {
+    const spy = vi.fn()
+    mount(<Controlled variant="single" length={24} pattern="alphanumeric" uppercase spy={spy} />)
+    const input = container.querySelector<HTMLInputElement>('[data-slot="code-input"]')!
+    typeInto(input, "ABCD-EFGH-IJKL-MNOP-QRST-UVWX-YZ12")
+    expect(input.value).toBe("ABCDEFGHIJKLMNOPQRSTUVWX")
+    expect(spy).toHaveBeenLastCalledWith("ABCDEFGHIJKLMNOPQRSTUVWX")
+  })
+
+  it("autoComplete を渡せば single でも付く。single は名前なし警告を出さない（label htmlFor で結ぶ）", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    mount(<CodeInput variant="single" length={6} autoComplete="one-time-code" id="x" />)
+    expect(container.querySelector('[data-slot="code-input"]')!.getAttribute("autocomplete")).toBe("one-time-code")
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
 })
 
 describe("native CodeInput（#669）", () => {
   const source = readFileSync(join(__dirname, "..", "src/native/components/CodeInput.tsx"), "utf8")
   it("SMS 自動入力の属性と Web と同じ API 語彙を持つ", () => {
-    expect(source).toContain('textContentType: "oneTimeCode"')
+    expect(source).toContain('textContentType: "oneTimeCode" as const')
     expect(source).toContain('"sms-otp"')
     expect(source).toContain('export type CodeInputVariant = "cells" | "single"')
     expect(source).toContain("onComplete?.(next)")

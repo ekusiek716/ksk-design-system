@@ -752,11 +752,14 @@
         "variant": "\"cells\"（既定）| \"single\"",
         "invalid": "boolean — aria-invalid と Caution の枠",
         "cellLabel": "(index, length) => string — 各セルの読み上げ名（既定「n桁目（全m桁）」・i18n 用）",
-        "name / id / aria-label / aria-labelledby / aria-describedby / autoFocus / disabled / placeholder / className": "フォーム・a11y 用"
+        "autoComplete": "string — 既定は cells の先頭セルが one-time-code、single は無し",
+        "name / id / aria-label / aria-labelledby / aria-describedby / autoFocus / disabled / placeholder / className": "フォーム・a11y 用。single は maxLength を付けず、ハイフン・空白入りの貼り付けも sanitize 後に length で切る"
       },
       "accessibility": [
         "cells はグループ（role=group）に aria-label / aria-labelledby で名前を付け、各セルに「n桁目（全m桁）」の aria-label を持つ",
-        "autocomplete=\"one-time-code\"（cells は先頭セル）と inputMode（numeric なら numeric）で SMS コードの自動入力に対応",
+        "autocomplete=\"one-time-code\" は cells の先頭セルの既定（autoComplete で上書き可）。single は既定で付けない（OTP を受けるなら autoComplete を渡す）。inputMode（numeric なら numeric）で数字キーボード",
+        "cells は roving tabindex（タブストップは次に入力すべきセル 1 つ）で、Tab / Shift+Tab でそのまま抜けられる（WCAG 2.1.2）。先の空セルへ寄せるのはクリック / タップ時だけで、キーボード / 支援技術のフォーカス移動は奪わない",
+        "cells でグループ名（aria-label / aria-labelledby）が無いと開発ビルドで 1 回 console.warn",
         "invalid で各入力に aria-invalid",
         "native は 1 つの TextInput をセルに重ねる方式（textContentType=oneTimeCode / autoComplete=sms-otp）で、accessibilityLabel と accessibilityValue（n / m 桁）を読む"
       ],

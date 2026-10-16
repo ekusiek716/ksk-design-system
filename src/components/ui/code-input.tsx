@@ -51,10 +51,25 @@ interface CodeInputProps {
    * @default (index, length) => `${index + 1}桁目（全${length}桁）`
    */
   cellLabel?: (index: number, length: number) => string
+  /**
+   * 入力欄の autocomplete（issue #669 レビュー）。
+   * 既定は `cells` が先頭セルに `"one-time-code"`（SMS / メールの認証コード自動入力）、
+   * `single` は付けない（招待コード等にワンタイムコードの候補を出さないため）。
+   * single で OTP を受けるなら `autoComplete="one-time-code"` を渡す。
+   */
+  autoComplete?: React.InputHTMLAttributes<HTMLInputElement>["autoComplete"]
   /** `single` の placeholder（例: "A1B2C3…"） */
   placeholder?: string
   /** ルート（cells ではセル列の div、single では input）に付く className */
   className?: string
+}
+
+/**
+ * 開発ビルド判定（ChipSelector と同じ形）。process が無い環境では本番扱いにする。
+ */
+const isDev = () => {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+  return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
 }
 
 const defaultCellLabel = (index: number, length: number) => `${index + 1}桁目（全${length}桁）`
@@ -114,6 +129,7 @@ function CodeInput({
   "aria-labelledby": ariaLabelledby,
   "aria-describedby": ariaDescribedby,
   cellLabel = defaultCellLabel,
+  autoComplete,
   placeholder,
   className,
 }: CodeInputProps) {
@@ -123,18 +139,11 @@ function CodeInput({
   )
   const value = (isControlled ? valueProp : innerValue).slice(0, length)
   const cellsRef = React.useRef<Array<HTMLInputElement | null>>([])
-  // 入力直後に次のセルへ focus を移すとき、onFocus は再レンダー前の古い value を閉じ込めている。
-  // 確定済みの最新値をここに同期で持ち、onFocus の「未入力の桁へは寄せる」判定に使う。
-  const latestValueRef = React.useRef(value)
-  React.useLayoutEffect(() => {
-    latestValueRef.current = value
-  }, [value])
   const inputMode = pattern === "numeric" ? "numeric" : "text"
 
   const commit = (next: string) => {
     const clipped = next.slice(0, length)
     if (clipped === value) return
-    latestValueRef.current = clipped
     if (!isControlled) setInnerValue(clipped)
     onChange?.(clipped)
     if (clipped.length === length) onComplete?.(clipped)
@@ -146,6 +155,16 @@ function CodeInput({
     target?.select()
   }
 
+  // cells のグループ（role="group"）は名前が無いと「グループ」としか読まれない。
+  // ChipSelector と同じく、名前なしは開発ビルドで 1 回だけ警告する。
+  const isUnnamedGroup = variant === "cells" && !ariaLabel && !ariaLabelledby
+  React.useEffect(() => {
+    if (!isUnnamedGroup || !isDev()) return
+    console.warn(
+      '[ksk-ds] CodeInput: variant="cells"（role="group"）にはアクセシブルネームが必要です。見出しの id を aria-labelledby に渡すか、aria-label を指定してください。'
+    )
+  }, [isUnnamedGroup])
+
   if (variant === "single") {
     return (
       <input
@@ -155,9 +174,10 @@ function CodeInput({
         name={name}
         type="text"
         value={value}
+        // maxLength は付けない。付けるとハイフン・空白入りの貼り付け（"ABCD-EFGH-…"）が
+        // ブラウザで先に切り詰められて桁が欠ける。長さは sanitize 後の slice（commit）で揃える。
         onChange={(event) => commit(sanitize(event.target.value, pattern, uppercase))}
-        maxLength={length}
-        autoComplete="one-time-code"
+        autoComplete={autoComplete}
         inputMode={inputMode}
         autoCapitalize={uppercase ? "characters" : "off"}
         autoCorrect="off"
@@ -245,6 +265,11 @@ function CodeInput({
     focusCell(start + pasted.length)
   }
 
+  // roving tabindex: Tab で止まるのは「次に入力すべきセル」1 つだけ（全桁入力済みなら最後のセル）。
+  // 値は常に左詰めなので、それより後ろの空セルはタブ順から外す。セル間の移動は ← → / Home / End。
+  // こうすると Tab / Shift+Tab で CodeInput をそのまま抜けられる（WCAG 2.1.2 のキーボードトラップを作らない）。
+  const activeIndex = Math.min(value.length, length - 1)
+
   return (
     <div
       data-slot="code-input"
@@ -268,15 +293,19 @@ function CodeInput({
           onChange={(event) => handleCellChange(index, event.target.value)}
           onKeyDown={(event) => handleKeyDown(index, event)}
           onPaste={(event) => handlePaste(index, event)}
-          // 未入力の桁より後ろには入れられない（値は常に左詰め）ので、先の空セルに
-          // フォーカスしたら次に入力すべきセルへ寄せる
-          onFocus={(event) => {
-            const filled = latestValueRef.current.length
-            if (index > filled) focusCell(filled)
-            else event.currentTarget.select()
+          tabIndex={index === activeIndex ? 0 : -1}
+          // 先の空セルをタップ / クリックしたときだけ、次に入力すべきセルへ寄せる
+          // （値は左詰めなので後ろの桁には入れられない）。focus イベントで寄せると
+          // キーボードのフォーカス移動まで奪ってトラップになるため、ポインタ操作に限る。
+          onMouseDown={(event) => {
+            if (index > value.length) {
+              event.preventDefault()
+              focusCell(value.length)
+            }
           }}
+          onFocus={(event) => event.currentTarget.select()}
           // SMS 自動入力は先頭セルに全桁が届く。2 桁目以降は候補を出さない
-          autoComplete={index === 0 ? "one-time-code" : "off"}
+          autoComplete={index === 0 ? (autoComplete ?? "one-time-code") : "off"}
           inputMode={inputMode}
           autoCapitalize={uppercase ? "characters" : "off"}
           autoCorrect="off"

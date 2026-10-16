@@ -39,6 +39,11 @@ export interface CodeInputProps {
   invalid?: boolean
   /** 読み上げ名（Web の aria-label と対）。何のコードかを書く（例: "認証コード"） */
   accessibilityLabel?: string
+  /**
+   * autoComplete（Web と同じ規則）。既定は cells が SMS コード自動入力（iOS oneTimeCode /
+   * Android sms-otp）、single は付けない（招待コード等にワンタイムコードの候補を出さない）。
+   */
+  autoComplete?: TextInputProps["autoComplete"]
   /** `single` の placeholder */
   placeholder?: string
   /** 外側コンテナの style（Web の className 相当） */
@@ -84,6 +89,7 @@ export function CodeInput({
   disabled = false,
   invalid = false,
   accessibilityLabel,
+  autoComplete,
   placeholder,
   style,
   testID,
@@ -111,8 +117,11 @@ export function CodeInput({
     onChangeText: handleChangeText,
     maxLength: length,
     keyboardType: pattern === "numeric" ? "number-pad" : "default",
-    textContentType: "oneTimeCode",
-    autoComplete: Platform.OS === "android" ? "sms-otp" : "one-time-code",
+    ...(variant === "cells" || autoComplete === "one-time-code" || autoComplete === "sms-otp"
+      ? { textContentType: "oneTimeCode" as const }
+      : null),
+    autoComplete:
+      autoComplete ?? (variant === "cells" ? (Platform.OS === "android" ? "sms-otp" : "one-time-code") : undefined),
     autoCapitalize: uppercase ? "characters" : "none",
     autoCorrect: false,
     autoFocus,
