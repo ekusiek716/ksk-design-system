@@ -59,11 +59,13 @@ function KanbanColumn({
 }: KanbanColumnProps) {
   const titleId = React.useId()
   const label = countLabel ?? ((n: number) => `${n}件`)
+  // 空文字（未設定の分類色を "" で渡す等）は指定なしとして tone へフォールバックする
+  const accent = accentColor?.trim() ? accentColor : undefined
   return (
     <section
       data-slot="kanban-column"
       data-tone={tone}
-      data-accent={accentColor !== undefined || undefined}
+      data-accent={accent !== undefined || undefined}
       aria-labelledby={titleId}
       className={cn(
         "flex min-w-0 flex-col gap-3 rounded-lg bg-[var(--Surface-Secondary)] p-3",
@@ -73,13 +75,13 @@ function KanbanColumn({
       {...props}
     >
       <div data-slot="kanban-column-header" className="flex min-h-8 items-center gap-2">
-        {accentColor !== undefined ? (
+        {accent !== undefined ? (
           // 任意色は inline の変数で渡し、クラスは固定文字列にする（動的クラスは静的抽出できない）
           <span
             aria-hidden="true"
             data-slot="kanban-column-dot"
             className="size-2 shrink-0 rounded-full bg-[var(--ksk-kanban-accent)]"
-            style={{ "--ksk-kanban-accent": accentColor } as React.CSSProperties}
+            style={{ "--ksk-kanban-accent": accent } as React.CSSProperties}
           />
         ) : (
           tone && (

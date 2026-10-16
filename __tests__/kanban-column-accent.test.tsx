@@ -33,4 +33,12 @@ describe("KanbanColumn accentColor（#702）", () => {
     expect(dots[0].getAttribute("aria-hidden")).toBe("true")
     expect(host.querySelector("section")!.dataset.accent).toBe("true")
   })
+  it("accentColor が空文字なら tone へフォールバックする", () => {
+    const host = render(<KanbanColumn title="会場" tone="info" accentColor="" />)
+    const dot = host.querySelector<HTMLElement>('[data-slot="kanban-column-dot"]')!
+    expect(dot.className).toContain("bg-[var(--Object-Info)]")
+    expect(dot.hasAttribute("style")).toBe(false)
+    expect(host.querySelector("section")!.hasAttribute("data-accent")).toBe(false)
+    expect(render(<KanbanColumn title="会場" accentColor="  " />).querySelector('[data-slot="kanban-column-dot"]')).toBeNull()
+  })
 })
