@@ -2,7 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useValueLength } from "@/lib/use-value-length"
 import { UNSTYLED_FOCUS_RING } from "@/lib/server-variants/unstyled"
-import { INLINE_FIELD_BASE, INLINE_FIELD_TYPO, type FieldVariant } from "@/lib/server-variants/inline-field"
+import { INLINE_FIELD_BASE, INLINE_FIELD_TYPO, type FieldVariant } from "../../lib/server-variants/inline-field"
 
 interface InputProps extends Omit<React.ComponentProps<"input">, "prefix"> {
   /**
