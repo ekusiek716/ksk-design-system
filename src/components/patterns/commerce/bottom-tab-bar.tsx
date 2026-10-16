@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
+import { useSoftKeyboardFocus } from "@/lib/use-soft-keyboard-focus"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -71,7 +72,9 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
   /**
    * ソフトキーボード表示中の挙動。
    * - "stay" : 従来通り下部に固定
-   * - "hide" : 入力中は非表示
+   * - "hide" : 入力中は非表示。キーボード検知（visualViewport の縮み / `html[data-kb-open]`）に加え、
+   *            タッチ主体の端末（`(pointer: coarse)`）でテキスト入力欄にフォーカスがある間も隠す
+   *            （visualViewport が縮む前・縮まない端末向け。issue #700）
    * - "lift" : keyboard inset 分だけ上へ逃がす
    */
   keyboardBehavior?: BottomTabBarKeyboardBehavior
@@ -136,11 +139,14 @@ interface BottomTabBarKeyboardState {
 
 function useBottomTabBarKeyboardState(keyboardBehavior: BottomTabBarKeyboardBehavior): BottomTabBarKeyboardState {
   const { keyboardInset, isKeyboardOpen } = useVisualViewportKeyboardInset()
+  // visualViewport が縮む前・縮まない端末でも「入力中」を拾う（issue #700）。
+  // タッチ主体の端末でソフトキーボードを出す入力欄にフォーカスがある間 true
+  const isSoftKeyboardFocused = useSoftKeyboardFocus(keyboardBehavior === "hide")
 
   return {
     keyboardBehavior,
     isKeyboardOpen,
-    shouldHide: keyboardBehavior === "hide" && isKeyboardOpen,
+    shouldHide: keyboardBehavior === "hide" && (isKeyboardOpen || isSoftKeyboardFocused),
     liftInset: keyboardBehavior === "lift" ? keyboardInset : 0,
   }
 }

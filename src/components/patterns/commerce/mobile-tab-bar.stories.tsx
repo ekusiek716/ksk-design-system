@@ -3,6 +3,8 @@ import * as React from "react"
 import { Home2, Notification, Setting2, TaskSquare, User } from "iconsax-reactjs"
 import { expect } from "storybook/test"
 import { MobileTabBar } from "./mobile-tab-bar"
+import { Input } from "../../ui/input"
+import { FormField } from "../form-field"
 
 const meta: Meta<typeof MobileTabBar> = {
   title: "Components/MobileTabBar",
@@ -210,5 +212,30 @@ export const FixedItemHeight: Story = {
       const label = item.querySelector<HTMLElement>('[data-slot="bottom-nav-item-label"]')!
       await expect(getComputedStyle(label).top).toBe("-2px")
     }
+  },
+}
+
+// ─── 入力中は隠す（issue #700） ───────────────────────────────────────────────
+
+/**
+ * `keyboardBehavior="hide"`（既定）は、キーボード検知（visualViewport の縮み /
+ * `html[data-kb-open]`）に加えて、タッチ主体の端末（`(pointer: coarse)`）でテキスト入力欄に
+ * フォーカスがある間もタブバーを隠す。visualViewport が縮む前の iOS Safari や、
+ * 縮まない Android でもキーボードの上にナビが重ならない。
+ * consumer が `html:has(input:focus) [data-slot="bottom-nav-pill"]` の CSS を足す必要は無い。
+ * マウス主体の PC ではフォーカスだけでは隠さない（このストーリーはスマホ / タッチ
+ * エミュレーションで確認する）。
+ */
+export const HideWhileTyping: Story = {
+  render: function Render() {
+    const [active, setActive] = React.useState<TabKey>("home")
+    return (
+      <div className="relative w-full min-h-screen flex flex-col items-center gap-4 px-6 pt-10 bg-[var(--Surface-Secondary)]">
+        <FormField label="メモ" className="w-full max-w-sm">
+          <Input placeholder="入力するとタブバーが隠れる" />
+        </FormField>
+        <MobileTabBar tabs={TABS.slice(0, 4)} activeTab={active} onSelect={setActive} />
+      </div>
+    )
   },
 }
