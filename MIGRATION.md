@@ -39,6 +39,15 @@ npx ksk-ds check-migration ./src
 
 ---
 
+## v2.11.0
+
+追加のみで、APIの削除・改名はありません。propsを渡さなければ従来と同じ表示です。次の2点は取り込み時に確認してください。
+
+- Cardに `onClick` を渡していた場合、Card全体が押せる面（button）になります。従来のdiv向けハンドラもそのまま型が通ります。`href` / `disabled` も使えます。
+- 名前の無いChipSelector（単一選択）、押せるCard、CodeInputは、開発ビルドで1回 `console.warn` を出します。`aria-label` / `aria-labelledby` を渡すか、CardはCardTitle / CardDescriptionで名前を付けてください。
+
+---
+
 ## v2.10.0
 
 APIの削除・改名はありません。次の表示・操作の既定値変更は、取り込み時に利用画面で確認してください。
