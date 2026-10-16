@@ -295,6 +295,14 @@ describe("契約が contracts に載っている", () => {
     }
   })
 
+  it("--Nav-Selected-Backdrop が check-css-vars の ALLOWLIST と product-theme の nav 許可リストに載っている（#726）", () => {
+    const cssVars = readFileSync(join(ROOT, "scripts/check-css-vars.mjs"), "utf8")
+    expect(cssVars).toContain('"--Nav-Selected-Backdrop"')
+    expect(contract.allowedVariables.nav).toContain("--Nav-Selected-Backdrop")
+    expect(contract.wiredComponents.BottomTabBar).toContain("--Nav-Selected-*")
+    expect(contract.wiredComponents.MobileTabBar).toContain("--Nav-Selected-*")
+  })
+
   it("BottomTabBar / MobileTabBar が wiredComponents に載っている", () => {
     expect(contract.wiredComponents.BottomTabBar).toBeDefined()
     expect(contract.wiredComponents.MobileTabBar).toBeDefined()
