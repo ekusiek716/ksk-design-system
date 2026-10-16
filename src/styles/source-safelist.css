@@ -1070,9 +1070,11 @@
 @source inline("text-[var(--Object-Caution)]");
 @source inline("text-[var(--Object-Disable)]");
 @source inline("text-[var(--Object-High-Emphasis)]");
+@source inline("text-[var(--Object-Info)]");
 @source inline("text-[var(--Object-Low-Emphasis)]");
 @source inline("text-[var(--Object-Medium-Emphasis)]");
 @source inline("text-[var(--Object-Success)]");
+@source inline("text-[var(--Object-Warning)]");
 @source inline("text-[var(--Text-Accent-Primary)]");
 @source inline("text-[var(--Text-Caution)]");
 @source inline("text-[var(--Text-Disable)]");

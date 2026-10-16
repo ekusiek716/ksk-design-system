@@ -20,6 +20,7 @@ export {
   AlertDialogCancel,
 } from "./components/ui/alert-dialog"
 export { Avatar, AvatarImage, AvatarFallback } from "./components/ui/avatar"
+export type { AvatarProps, AvatarSize } from "./components/ui/avatar"
 export { Badge, badgeVariants } from "./components/ui/badge"
 export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from "./components/ui/breadcrumb"
 export type { BreadcrumbLinkProps } from "./components/ui/breadcrumb"

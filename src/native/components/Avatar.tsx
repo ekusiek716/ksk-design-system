@@ -11,7 +11,7 @@ import {
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 
-export type AvatarSize = "sm" | "md" | "lg" | "xl"
+export type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl"
 export type AvatarShape = "circle" | "rounded"
 /** 角丸の強さ（`shape="rounded"` のときだけ効く）。native Card の radius と同じ語彙。 */
 export type AvatarRadius = "lg" | "xl" | "2xl"
@@ -30,7 +30,7 @@ export interface AvatarProps {
    */
   fallback?: React.ReactNode
   /**
-   * サイズ。プリセット（sm=32 / md=40 / lg=56 / xl=80）に加えて pt の数値も渡せる。
+   * サイズ。プリセット（xs=24 / sm=32 / md=40 / lg=56 / xl=80）に加えて pt の数値も渡せる。
    * 既定は "md"。
    */
   size?: AvatarSize | number
@@ -43,6 +43,7 @@ export interface AvatarProps {
 }
 
 const sizeMap: Record<AvatarSize, number> = {
+  xs: 24,
   sm: 32,
   md: 40,
   lg: 56,

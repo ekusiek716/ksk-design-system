@@ -236,6 +236,7 @@ export {
   type IconBadgeProps,
   type IconBadgeRenderProps,
   type IconBadgeSize,
+  type IconBadgeTone,
 } from "./IconBadge"
 export {
   IconButton,

@@ -379,7 +379,11 @@
       "rules": [
         "rounded-full only",
         "Use DiceBear shapes for placeholder, not pravatar.cc",
-        "native (src/native/components/Avatar.tsx): size はプリセット(sm/md/lg/xl)に加えて pt の数値も可。shape=\"circle\"(既定)|\"rounded\"、rounded の角丸は radius(lg/xl/2xl・既定 xl)。fallback は文字列に加えて ReactNode を受け、独自のフォールバック表示（決定論グラデ+絵文字等）を差し込める。source はリモート URL 文字列も受け取り {uri} に正規化する（issue #449）"
+        "native (src/native/components/Avatar.tsx): size はプリセット(sm/md/lg/xl)に加えて pt の数値も可。shape=\"circle\"(既定)|\"rounded\"、rounded の角丸は radius(lg/xl/2xl・既定 xl)。fallback は文字列に加えて ReactNode を受け、独自のフォールバック表示（決定論グラデ+絵文字等）を差し込める。source はリモート URL 文字列も受け取り {uri} に正規化する（issue #449）",
+        "寸法は size で指定する。className の size-* / w-* h-* で上書きしない（AvatarFallback の文字サイズが追随しなくなる）。native は xs=24 も持つ（issue #688）"
+      ],
+      "variants": [
+        "size: xs(24) / sm(32) / md(40・既定) / lg(56) / xl(80)。native と同じ語彙・値（issue #688）"
       ]
     },
     {
@@ -954,7 +958,8 @@
       "description": "淡いアクセント背景の円に装飾アイコンを収めるバッジ。Card や Stack の gap と競合しないよう外側 margin を持たない。",
       "variants": [
         "size: md(44px) / ml(48px) / lg(72px)",
-        "appearance: accent / plain"
+        "appearance: accent / plain",
+        "tone: accent(既定) / info / success / warning / caution（issue #684）"
       ],
       "accessibility": [
         "装飾用途は既定で aria-hidden",
@@ -963,7 +968,8 @@
       "rules": [
         "外側 margin を追加せず、親の gap で配置間隔を管理する",
         "背景は Surface-Accent-Primary-Light、前景は Object-Accent-Primary と currentColor を使う",
-        "appearance=plain は既存パターン内部の視覚互換用途に限定する"
+        "appearance=plain は既存パターン内部の視覚互換用途に限定する",
+        "tone で情報・成功・注意・警告の色にする（面は Surface-*、アイコンは Object-*）。Surface-Info + Object-Info の円を自作しない。色だけで意味を伝えず、隣の見出し・本文で状態を言葉でも示す。native IconBadge も同名 tone（issue #684）"
       ]
     },
     {
