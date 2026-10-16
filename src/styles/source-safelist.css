@@ -543,6 +543,7 @@
 @source inline("h-[var(--Field-Height-Lg)]");
 @source inline("h-[var(--Field-Height-Md)]");
 @source inline("h-[var(--Field-Height-Sm)]");
+@source inline("h-[var(--Nav-Item-Height,100%)]");
 @source inline("h-[var(--radix-select-trigger-height)]");
 @source inline("h-auto");
 @source inline("h-full");
@@ -1154,6 +1155,7 @@
 @source inline("top-[50%]");
 @source inline("top-[max(1rem,var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)))]");
 @source inline("top-[max(var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)),2rem)]");
+@source inline("top-[var(--Nav-Item-Label-Offset-Y,0px)]");
 @source inline("touch-manipulation");
 @source inline("touch-none");
 @source inline("touch-pan-y");

@@ -177,6 +177,17 @@ function useBottomTabBarKeyboardState(keyboardBehavior: BottomTabBarKeyboardBeha
  * - `--Nav-Pill-*` … pill の最小高さ・内側 padding・アイテム間の gap
  * - `--Nav-Item-*` … タブの最小高さ（44px 未満にしても 44px より縮まない）と
  *   アイコン↔ラベルの gap
+ * - `--Nav-Item-Height` / `--Nav-Item-Label-Offset-Y`（issue #699）… prominent の
+ *   タブの高さ（未宣言なら pill の内寸いっぱい = 従来どおり）とラベルの縦位置の
+ *   微調整（未宣言なら 0。負の値で上へ）。どちらも**宣言したときだけ**効く。
+ *   アイコン領域は `shrink-0` なので、タブを低くしてもアイコンは潰れない
+ *
+ *   ```css
+ *   :root {
+ *     --Nav-Item-Height: 48px;
+ *     --Nav-Item-Label-Offset-Y: -2px;
+ *   }
+ *   ```
  * - `--Nav-Center-Action-Size` / `-Radius` … 中央アクションの寸法・角丸
  * - `--Nav-Center-Action-Surface` / `-Border` / `-Shadow` と
  *   `--Nav-Selected-Surface` / `-Shadow` は**宣言したときだけ** DS 既定
@@ -620,7 +631,13 @@ function NavItem({
         // iOS 26 のガラスは押下で沈む（ゲル感）。opacity だけでなく scale も入れる
         "transition-[transform,opacity] duration-[var(--Motion-Duration-Fast)] active:scale-95 active:opacity-80",
         "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
-        compact ? (isLabelVisible ? "h-full min-w-0 flex-1 px-2 py-1" : "h-full w-14") : "min-w-0 flex-1 pb-1 pt-1",
+        // prominent（ラベル表示）のタブの高さは公開契約 --Nav-Item-Height（issue #699）。
+        // 未宣言なら従来の h-full（100%）と同じ値。下限 44px は上の min-h が守る。
+        compact
+          ? isLabelVisible
+            ? "h-[var(--Nav-Item-Height,100%)] min-w-0 flex-1 px-2 py-1"
+            : "h-full w-14"
+          : "min-w-0 flex-1 pb-1 pt-1",
         // 影は上端のインセットハイライト 1 枚のみ。外側ドロップシャドウを足すと
         // ピル本体（.glass）の影と二重になり煩く見える
         // 面の宣言は bottom-nav.css（data-slot 経由の公開契約）が持つ
@@ -642,7 +659,9 @@ function NavItem({
         data-platter-anchor={isPlatterAnchorIcon || undefined}
         data-nav-platter={(platterOnIcon && compact) || undefined}
         className={cn(
-          "relative flex items-center justify-center rounded-full transition-colors",
+          // shrink-0: タブを --Nav-Item-Height で低くしてもアイコンが flex で潰れない（issue #699）。
+          // 既定寸法ではそもそも縮んでいないので見た目は変わらない
+          "relative flex shrink-0 items-center justify-center rounded-full transition-colors",
           compact ? (isLabelVisible ? "h-7 min-w-7" : "h-8 w-12") : "h-7 w-14",
           // compact のプラッターは bottom-nav.css（data-slot）が面を持つ。
           // default variant（M3 スタイル）は従来どおりの semantic 塗り。
@@ -664,9 +683,11 @@ function NavItem({
       {isLabelVisible && (
         // typo クラスはアクティブ状態で変えない（weight ジャンプでラベルが揺れる）。
         // 状態差は色・opacity のみで表現する（iOS 26 と同じ）
+        // 縦位置の微調整は公開契約 --Nav-Item-Label-Offset-Y（issue #699。未宣言なら 0）。
+        // transform ではなく relative + top で動かす（重なり順・containing block を変えない）
         <span
           data-slot="bottom-nav-item-label"
-          className="max-w-full truncate px-0.5 text-center typo-label-xs"
+          className="relative top-[var(--Nav-Item-Label-Offset-Y,0px)] max-w-full truncate px-0.5 text-center typo-label-xs"
         >
           {item.label}
         </span>

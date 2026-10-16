@@ -162,6 +162,9 @@
 
   --Nav-Item-Min-Height: 2.75rem;  /* 44px — min-h-11 */
   --Nav-Item-Gap: 0.125rem;        /* 2px  — gap-0.5（アイコン↔ラベル） */
+  /* --Nav-Item-Height / --Nav-Item-Label-Offset-Y（issue #699）は :root に既定を置かない。
+     未宣言なら tab は pill の内寸いっぱい（従来の h-full）・ラベルは 0 ずらし。
+     bottom-tab-bar.tsx が var(--X, 既定) で参照する */
 
   --Nav-Center-Action-Size: 3rem;  /* 48px — size-12 */
   --Nav-Center-Action-Radius: 9999px; /* rounded-full 相当 */
