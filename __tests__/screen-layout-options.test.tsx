@@ -24,7 +24,7 @@ describe("Screen 既定は従来どおり（#701 の後方互換）", () => {
     const screen = host.firstElementChild as HTMLElement
     expect(screen.dataset.slot).toBe("screen")
     expect(screen.className).toContain("h-[100dvh]")
-    expect(screen.className).not.toContain("lg:rounded-2xl")
+    expect(screen.className).not.toContain("md:rounded-2xl")
     const main = host.querySelector("main")!
     expect(main.id).toBe("main-content")
     expect(main.getAttribute("tabindex")).toBe("-1")
@@ -44,9 +44,9 @@ describe("safeAreaTop（#701）", () => {
     const host = render(<Screen safeAreaTop>本文</Screen>)
     expect((host.querySelector('[data-slot="screen"]') as HTMLElement).className).toContain(SAFE_TOP)
   })
-  it("PC の中央カードでは lg 以上で 0 に戻す", () => {
+  it("PC の中央カードでは md 以上で 0 に戻す", () => {
     const host = render(<Screen safeAreaTop desktopLayout="card" header={<p>h</p>}>本文</Screen>)
-    expect(host.querySelector('[data-slot="screen-header"]')!.className).toContain("lg:pt-0")
+    expect(host.querySelector('[data-slot="screen-header"]')!.className).toContain("md:pt-0")
   })
 })
 
@@ -63,20 +63,20 @@ describe("height（#701）", () => {
 })
 
 describe("desktopLayout=\"card\"（#701）", () => {
-  it("背景ラッパーの中に、lg 以上で枠・角丸のカードとして置く", () => {
+  it("背景ラッパーの中に、md 以上で枠・角丸のカードとして置く", () => {
     const host = render(<Screen desktopLayout="card">本文</Screen>)
     const backdrop = host.querySelector<HTMLElement>('[data-slot="screen-backdrop"]')!
-    expect(backdrop.className).toContain("lg:bg-[var(--Surface-Secondary)]")
-    expect(backdrop.className).toContain("lg:items-center")
+    expect(backdrop.className).toContain("md:bg-[var(--Surface-Secondary)]")
+    expect(backdrop.className).toContain("md:items-center")
     const screen = backdrop.querySelector<HTMLElement>('[data-slot="screen"]')!
     expect(screen.dataset.desktopLayout).toBe("card")
-    expect(screen.className).toContain("lg:max-w-[var(--ksk-screen-card-max-width,30rem)]")
-    expect(screen.className).toContain("lg:h-[min(var(--ksk-screen-card-max-height,47.5rem),calc(100dvh_-_4rem))]")
-    expect(screen.className).toContain("lg:border")
+    expect(screen.className).toContain("md:max-w-[var(--ksk-screen-card-max-width,30rem)]")
+    expect(screen.className).toContain("md:h-[min(var(--ksk-screen-card-max-height,47.5rem),calc(100dvh_-_4rem))]")
+    expect(screen.className).toContain("md:border")
     // 未指定なら inline の変数は出さない（フォールバックの既定値が効く）
     expect(screen.getAttribute("style") ?? "").not.toContain("--ksk-screen-card")
   })
-  it("height=\"fill\" はラッパーにも h-full を付け、lg 未満で親の高さを伝える", () => {
+  it("height=\"fill\" はラッパーにも h-full を付け、md 未満で親の高さを伝える", () => {
     const backdrop = render(<Screen desktopLayout="card" height="fill">本文</Screen>).querySelector<HTMLElement>(
       '[data-slot="screen-backdrop"]',
     )!
@@ -86,6 +86,27 @@ describe("desktopLayout=\"card\"（#701）", () => {
     // 既定（dvh）のラッパーは高さを持たない（中の 100dvh がそのまま効く）
     const dvh = render(<Screen desktopLayout="card">本文</Screen>).querySelector<HTMLElement>('[data-slot="screen-backdrop"]')!
     expect(dvh.className.split(" ")).not.toContain("h-full")
+  })
+
+  it("fill の card は viewport の最小高さ・固定高さを使わず親の高さを継承する", () => {
+    const host = render(<Screen desktopLayout="card" height="fill">本文</Screen>)
+    const backdrop = host.querySelector<HTMLElement>('[data-slot="screen-backdrop"]')!
+    const screen = host.querySelector<HTMLElement>('[data-slot="screen"]')!
+    expect(backdrop.className).not.toContain("100dvh")
+    expect(backdrop.className).not.toContain("md:p-8")
+    expect(screen.className).toContain("md:h-full")
+    expect(screen.className).toContain("md:max-h-[var(--ksk-screen-card-max-height,47.5rem)]")
+    expect(screen.className).not.toContain("calc(100dvh")
+  })
+
+  it("svh card は中央カードと背景も小さい viewport の高さを維持する", () => {
+    const host = render(<Screen desktopLayout="card" height="svh">本文</Screen>)
+    const backdrop = host.querySelector<HTMLElement>('[data-slot="screen-backdrop"]')!
+    const screen = host.querySelector<HTMLElement>('[data-slot="screen"]')!
+    expect(backdrop.className).toContain("md:min-h-[100svh]")
+    expect(screen.className).toContain("md:h-[min(var(--ksk-screen-card-max-height,47.5rem),calc(100svh_-_4rem))]")
+    expect(backdrop.className).not.toContain("100dvh")
+    expect(screen.className).not.toContain("100dvh")
   })
 
   it("cardMaxWidth / cardMaxHeight を inline の変数で渡す", () => {

@@ -73,7 +73,7 @@ describe("AdminShell mobileDrawer（#705）", () => {
   })
 
   it("メニューボタンで開き、リンクを押すと閉じる。トグル等のボタンでは閉じない", () => {
-    act(() => root.render(<AdminShell sidebar={sidebar} mobileDrawer mobileMenuLabel="ナビを開く">本文</AdminShell>))
+    act(() => root.render(<AdminShell sidebar={sidebar} mobileDrawer closeMobileDrawerOnNavigate mobileMenuLabel="ナビを開く">本文</AdminShell>))
     expect(drawer()).toBeNull()
     act(() => menuButton().click())
     expect(drawer()).not.toBeNull()
@@ -89,16 +89,16 @@ describe("AdminShell mobileDrawer（#705）", () => {
     expect(drawer()).toBeNull()
   })
 
-  it("SidebarNav の button 項目でも閉じる", () => {
-    act(() => root.render(<AdminShell sidebar={sidebar} mobileDrawer>本文</AdminShell>))
+  it("opt-in では SidebarNav の button 項目でも閉じる", () => {
+    act(() => root.render(<AdminShell sidebar={sidebar} mobileDrawer closeMobileDrawerOnNavigate>本文</AdminShell>))
     act(() => menuButton().click())
     const item = [...drawer()!.querySelectorAll<HTMLElement>('[data-slot="sidebar-nav-item"]')].find((el) => el.tagName === "BUTTON")!
     act(() => item.click())
     expect(drawer()).toBeNull()
   })
 
-  it("closeMobileDrawerOnNavigate=false なら押しても閉じない", () => {
-    act(() => root.render(<AdminShell sidebar={sidebar} mobileDrawer closeMobileDrawerOnNavigate={false}>本文</AdminShell>))
+  it.each([undefined, false])("closeMobileDrawerOnNavigate=%s はリンクを押しても閉じない（既定を含む）", (closeOnNavigate) => {
+    act(() => root.render(<AdminShell sidebar={sidebar} mobileDrawer closeMobileDrawerOnNavigate={closeOnNavigate}>本文</AdminShell>))
     act(() => menuButton().click())
     act(() => drawer()!.querySelector<HTMLAnchorElement>('a[href="#dash"]')!.click())
     expect(drawer()).not.toBeNull()
@@ -128,7 +128,7 @@ describe("AdminShell mobileDrawer（#705）", () => {
         <a href="#child" aria-expanded="true">親リンク</a>
       </div>
     )
-    act(() => root.render(<AdminShell sidebar={withParent} mobileDrawer>本文</AdminShell>))
+    act(() => root.render(<AdminShell sidebar={withParent} mobileDrawer closeMobileDrawerOnNavigate>本文</AdminShell>))
     act(() => menuButton().click())
     act(() => drawer()!.querySelector<HTMLButtonElement>('[data-slot="sidebar-nav-item"]')!.click())
     expect(drawer()).not.toBeNull()

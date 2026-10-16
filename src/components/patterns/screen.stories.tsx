@@ -120,7 +120,7 @@ export const FixedPhotoHero: Story = {
  *
  * - `safeAreaTop`: header の上にステータスバー / ダイナミックアイランド分の余白
  * - `height="svh"`: アドレスバーの出入りで高さが揺れない
- * - `desktopLayout="card"`: PC（lg 以上）では背景の中央に枠・角丸のカードとして置く
+ * - `desktopLayout="card"`: PC（md 以上）では背景の中央に枠・角丸のカードとして置く
  *   （既定 最大幅 30rem・高さ 47.5rem。`cardMaxWidth` / `cardMaxHeight` で変える）
  */
 export const OnboardingCard: Story = {

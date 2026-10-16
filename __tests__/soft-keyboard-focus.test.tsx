@@ -59,13 +59,13 @@ function renderUi(ui: React.ReactElement) {
   act(() => root.render(ui))
 }
 
-function Page({ behavior = "hide" as "hide" | "lift" | "stay", inputType = "text" }) {
+function Page({ behavior = "hide" as "hide" | "lift" | "stay", inputType = "text", hideOnInputFocus = true }) {
   return (
     <>
       <input aria-label="名前" type={inputType} data-testid="field" />
       <button type="button" data-testid="plain">ボタン</button>
-      <MobileTabBar tabs={TABS} activeTab="home" onSelect={() => {}} keyboardBehavior={behavior} />
-      <MobileFloatingActionButton label="追加" keyboardBehavior={behavior} />
+      <MobileTabBar tabs={TABS} activeTab="home" onSelect={() => {}} keyboardBehavior={behavior} hideOnInputFocus={hideOnInputFocus} />
+      <MobileFloatingActionButton label="追加" keyboardBehavior={behavior} hideOnInputFocus={hideOnInputFocus} />
     </>
   )
 }
@@ -75,6 +75,19 @@ const fab = () => container.querySelector<HTMLElement>('[data-slot="mobile-float
 const isHidden = (el: HTMLElement) => el.className.split(/\s+/).includes("invisible")
 
 describe("keyboardBehavior=\"hide\" の入力フォーカス判定（#700）", () => {
+  it("focus fallback を無効にしても viewport の keyboard 検知では隠す", async () => {
+    renderUi(<Page hideOnInputFocus={false} />)
+    act(() => container.querySelector<HTMLInputElement>('[data-testid="field"]')!.focus())
+    expect(isHidden(nav())).toBe(false)
+    expect(isHidden(fab())).toBe(false)
+    await act(async () => { document.documentElement.setAttribute("data-kb-open", "") })
+    expect(isHidden(nav())).toBe(true)
+    expect(isHidden(fab())).toBe(true)
+    await act(async () => { document.documentElement.removeAttribute("data-kb-open") })
+    expect(isHidden(nav())).toBe(false)
+    expect(isHidden(fab())).toBe(false)
+  })
+
   it("タッチ端末でテキスト入力欄にフォーカスすると隠れ、外すと戻る", () => {
     renderUi(<Page />)
     expect(isHidden(nav())).toBe(false)
@@ -117,7 +130,7 @@ describe("keyboardBehavior=\"hide\" の入力フォーカス判定（#700）", (
     expect(isHidden(nav())).toBe(true)
   })
 
-  it("iPad + ハードウェアキーボード等（coarse でも hover できる）ではフォーカスだけでは隠さない", () => {
+  it("coarse でも hover できるポインターではフォーカスだけでは隠さない", () => {
     hoverNone = false
     renderUi(<Page />)
     act(() => container.querySelector<HTMLInputElement>('[data-testid="field"]')!.focus())
@@ -199,6 +212,18 @@ describe("isSoftKeyboardTarget（#700）", () => {
     ]) {
       expect(isSoftKeyboardTarget(make(html)), html).toBe(true)
     }
+  })
+  it("contenteditable=false の境界を飛び越えず、内側の明示的な再有効化は尊重する", () => {
+    const host = make('<div contenteditable="true"><div contenteditable="false"><button>操作</button><span contenteditable="true">編集</span></div></div>')!
+    expect(isSoftKeyboardTarget(host.querySelector("button"))).toBe(false)
+    expect(isSoftKeyboardTarget(host.querySelector("span"))).toBe(true)
+    expect(isSoftKeyboardTarget(host)).toBe(true)
+  })
+  it("ブラウザが isContentEditable=false と判定した要素を属性で再び有効にしない", () => {
+    const host = make('<div contenteditable="true"><button contenteditable="false">操作</button></div>')!
+    const target = host.querySelector("button")!
+    Object.defineProperty(target, "isContentEditable", { value: false })
+    expect(isSoftKeyboardTarget(target)).toBe(false)
   })
   it("キーボードを出さない要素は false", () => {
     for (const html of [

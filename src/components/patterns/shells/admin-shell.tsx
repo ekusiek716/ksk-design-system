@@ -37,9 +37,9 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
   mobileDrawerTitle?: string
   /**
    * ドロワーの中のリンク（`a[href]`）や SidebarNav の項目を押したら閉じる。
-   * ページ内の状態で画面を切り替える consumer が自前で閉じなくてよいように既定 true。
+   * 既定 false。画面遷移時の開閉は consumer が制御し、自動で閉じたい場合だけ true にする。
    * サイドバー内の開閉トグル等、それ以外のボタンでは閉じない。
-   * @default true
+   * @default false
    */
   closeMobileDrawerOnNavigate?: boolean
 }
@@ -110,7 +110,7 @@ function AdminShell({
   onMobileDrawerOpenChange,
   mobileMenuLabel = "メニューを開く",
   mobileDrawerTitle = "メニュー",
-  closeMobileDrawerOnNavigate = true,
+  closeMobileDrawerOnNavigate = false,
   ...props
 }: AdminShellProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
