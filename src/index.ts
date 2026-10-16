@@ -247,6 +247,8 @@ export { MonthCalendar, buildMonthWeeks } from "./components/patterns/month-cale
 export type { MonthCalendarEvent, MonthCalendarEventTone, MonthCalendarProps } from "./components/patterns/month-calendar"
 export { KanbanColumn } from "./components/patterns/kanban-column"
 export type { KanbanColumnProps, KanbanColumnTone } from "./components/patterns/kanban-column"
+export { SelectableTile } from "./components/patterns/selectable-tile"
+export type { SelectableTileMoveDirection, SelectableTileProps, SelectableTileShape } from "./components/patterns/selectable-tile"
 export type { EmptyStateProps } from "./components/patterns/empty-state"
 export { ErrorState, NotFoundIllustration } from "./components/patterns/error-state"
 export type { ErrorStateKind, ErrorStateProps, NotFoundIllustrationProps } from "./components/patterns/error-state"

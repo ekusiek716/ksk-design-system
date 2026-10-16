@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 72,
-      "patterns": 67,
+      "patterns": 68,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 162
+      "total": 163
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -2819,6 +2819,26 @@
         "分類の識別色（カテゴリ別ボード等）は accentColor に var(--Categorical-N) を渡す（tone より優先。issue #702）。title の中に色の点を自作しない",
         "中のカードは Card elevation=\"none\"（面の中の面は影なし）",
         "ドラッグ＆ドロップは持たない。consumer のライブラリで包む",
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
+      ]
+    },
+    {
+      "name": "SelectableTile",
+      "path": "src/components/patterns/selectable-tile.tsx",
+      "description": "押すと選べて、編集中はドラッグ・矢印キーで動かせるタイル（issue #703）。配席表の卓・座席、レイアウト編集のブロック等。押せる面そのものが 1 つの button で、consumer の pointer / key ハンドラと aria-* が同じ要素に付く。",
+      "variants": {
+        "shape": ["rounded", "circle"]
+      },
+      "accessibility": [
+        "1 つの <button>。名前は中身か aria-label。selected 指定時は aria-pressed（未指定なら付けない）",
+        "movable の間は矢印キー（↑ ↓ ← →）で onMove を呼び preventDefault。consumer の onKeyDown が preventDefault したら呼ばない",
+        "moveInstructions は hidden の説明に描画して aria-describedby で結ぶ（consumer の aria-describedby と連結）。非推奨の aria-grabbed / aria-dropeffect は使わない",
+        "タップ領域は 44px 以上（min-h-11 / min-w-11）。focus-visible は 3px のリング"
+      ],
+      "rules": [
+        "選択・移動するタイルを Button unstyled / Card selected + className で自作しない（Card の押せる面は内側の button でハンドラ・aria-describedby が乗らない）",
+        "ドラッグ＆ドロップ自体（pointer capture・落とし先の判定）は consumer が onPointerDown 等で実装し、dragging で見た目だけ渡す",
+        "大きさは className で渡す（円形は size-12 等）。selected の面・枠は Card / ActionTile と同じトークン",
         "native は未提供（INTENTIONAL_NATIVE_GAPS）"
       ]
     }

@@ -277,6 +277,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 | SelectSeparator | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | SelectTrigger | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | SelectValue | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
+| SelectableTile | あり | なし | 抽出不可 | 抽出不可 | 選べて動かせるタイル（issue #703）。ドラッグ・矢印キーの移動とキーボードの説明は DOM の pointer / keyboard / aria-describedby の前提で作った。native の並べ替えはジェスチャーハンドラ（Pressable の長押し・PanResponder）と accessibilityActions で別途設計する | 未検証 |
 | SemanticIcon | あり | あり |  |  |  | 未検証 |
 | Separator | あり | あり | 抽出不可 | 抽出不可 |  | 未検証 |
 | SettingsListRow | あり | あり | interactive, onClick | children, onPress, style | DOM event naming (onClick/onOpenChange/onSearch) vs RN naming (onPress/onClose/onChange) is each platform's idiomatic convention, not a functional gap; Native composes via children instead of Web's interactive/onClick pair | 未検証 |

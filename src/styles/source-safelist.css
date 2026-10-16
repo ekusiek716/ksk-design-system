@@ -311,6 +311,7 @@
 @source inline("contents");
 @source inline("cursor-default");
 @source inline("cursor-grab");
+@source inline("cursor-grabbing");
 @source inline("cursor-not-allowed");
 @source inline("cursor-pointer");
 @source inline("data-[disabled]:opacity-50");
@@ -1176,6 +1177,7 @@
 @source inline("tracking-wider");
 @source inline("transform");
 @source inline("transition");
+@source inline("transition-[background-color,border-color,box-shadow]");
 @source inline("transition-[background-color,scale]");
 @source inline("transition-[color,box-shadow,transform]");
 @source inline("transition-[transform,opacity]");
