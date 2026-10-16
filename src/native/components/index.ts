@@ -30,6 +30,7 @@ export { Avatar, type AvatarProps, type AvatarSize } from "./Avatar"
 export { Chip, type ChipProps, type ChipVariant, type ChipSize, type ChipShape } from "./Chip"
 export { Tag, type TagProps, type TagTone, type TagVariant } from "./Tag"
 export { Spinner, type SpinnerProps, type SpinnerSize } from "./Spinner"
+export { EmojiIcon, type EmojiIconProps, type EmojiIconSize } from "./EmojiIcon"
 export { Separator, type SeparatorProps } from "./Separator"
 export { Skeleton, SkeletonText, type SkeletonProps } from "./Skeleton"
 export {

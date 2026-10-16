@@ -4,7 +4,7 @@
 
 React Native / Expo consumer は、新規 UI を作る前にこの一覧で既存コンポーネントを確認してください。すべて `ksk-design-system/native/ui` から import します。
 
-- Public native component exports: 155
+- Public native component exports: 156
 - Import: `import { Button, Screen } from "ksk-design-system/native/ui"`
 
 | Component | Source | Section |
@@ -24,6 +24,7 @@ React Native / Expo consumer は、新規 UI を作る前にこの一覧で既�
 | `Chip` | `src/native/components/Chip.tsx` | Phase 1: Display |
 | `CountdownHero` | `src/native/components/CountdownHero.tsx` | Phase 1: Display |
 | `CountdownTimer` | `src/native/components/CountdownTimer.tsx` | Phase 1: Display |
+| `EmojiIcon` | `src/native/components/EmojiIcon.tsx` | Phase 1: Display |
 | `NotificationBadge` | `src/native/components/NotificationBadge.tsx` | Phase 1: Display |
 | `Progress` | `src/native/components/Progress.tsx` | Phase 1: Display |
 | `ProgressRing` | `src/native/components/ProgressRing.tsx` | Phase 1: Display |

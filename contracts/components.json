@@ -4,12 +4,12 @@
     "version": "2.11.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 70,
+      "ui": 71,
       "patterns": 62,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 155
+      "total": 156
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -1383,6 +1383,25 @@
         "size": "number | string (Web), number (Native) — 既定24",
         "accessibilityLabel": "string — 単独の情報画像に付ける名前。Webはaria-labelを優先"
       }
+    },
+    {
+      "name": "EmojiIcon",
+      "path": "src/components/ui/emoji-icon.tsx",
+      "description": "絵文字をアイコンと同じ寸法の箱に収めて描く装飾（issue #676）。EmptyState / ErrorState / Alert / Banner の icon、ListItem の leftSlot、Toast など、アイコンを受けるスロットに絵文字を置くときに使う。",
+      "sizes": [
+        "sm(16)",
+        "md(24・既定)",
+        "lg(36)",
+        "xl(48)"
+      ],
+      "accessibility": [
+        "常に aria-hidden の装飾。意味は隣の見出し・本文で伝える",
+        "native (src/native/components/EmojiIcon.tsx): 同じ語彙・値。accessibilityElementsHidden / importantForAccessibility=no-hide-descendants"
+      ],
+      "rules": [
+        "アイコンスロットに絵文字を素の文字で渡して text-5xl 等の生サイズで拡大しない。EmojiIcon の size を使う",
+        "ActionTile は既存の emoji prop を使う"
+      ]
     }
   ],
   "patterns": [

@@ -105,6 +105,8 @@ export { ListSkeleton, GridSkeleton } from "./components/patterns/list-skeletons
 export type { ListSkeletonProps, GridSkeletonProps } from "./components/patterns/list-skeletons"
 export { Slider } from "./components/ui/slider"
 export { Spinner } from "./components/ui/spinner"
+export { EmojiIcon } from "./components/ui/emoji-icon"
+export type { EmojiIconProps, EmojiIconSize } from "./components/ui/emoji-icon"
 export { ErrorBoundary } from "./components/ui/error-boundary"
 export type { ErrorBoundaryProps } from "./components/ui/error-boundary"
 export type { SpinnerProps } from "./components/ui/spinner"
