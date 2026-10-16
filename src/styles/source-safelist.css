@@ -195,6 +195,7 @@
 @source inline("bg-[var(--Surface-Caution)]");
 @source inline("bg-[var(--Surface-Caution-Strong)]");
 @source inline("bg-[var(--Surface-Caution-Subtle)]");
+@source inline("bg-[var(--Surface-Highlight)]");
 @source inline("bg-[var(--Surface-Info)]");
 @source inline("bg-[var(--Surface-Info-Subtle)]");
 @source inline("bg-[var(--Surface-Inverse)]");
@@ -1114,6 +1115,7 @@
 @source inline("text-[var(--Text-Medium-Emphasis)]");
 @source inline("text-[var(--Text-Success)]");
 @source inline("text-[var(--Text-Warning)]");
+@source inline("text-[var(--Text-on-Highlight)]");
 @source inline("text-[var(--Text-on-Inverse)]");
 @source inline("text-[var(--Text-on-Inverse)]!");
 @source inline("text-[var(--Text-on-Inverse)]/50");

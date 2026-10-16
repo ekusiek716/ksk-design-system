@@ -4,12 +4,12 @@
     "version": "2.11.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 71,
+      "ui": 72,
       "patterns": 65,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 159
+      "total": 160
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -1401,6 +1401,22 @@
       "rules": [
         "アイコンスロットに絵文字を素の文字で渡して text-5xl 等の生サイズで拡大しない。EmojiIcon の size を使う",
         "ActionTile は既存の emoji prop を使う"
+      ]
+    },
+    {
+      "name": "Highlight",
+      "path": "src/components/ui/highlight.tsx",
+      "description": "本文中の検索一致を <mark> で強調する（issue #692）。面は --Surface-Highlight、文字は --Text-on-Highlight（light / dark で AA）。",
+      "subcomponents": [
+        "splitHighlight"
+      ],
+      "accessibility": [
+        "<mark> は読み上げで強調として扱われる（SR により読み方は異なる）。本文の意味は変えない",
+        "native (src/native/components/Highlight.tsx): Text のネストで一致部分に面と文字色を重ねる"
+      ],
+      "rules": [
+        "検索一致の面に状態色（Surface-Warning / Object-Warning）を流用しない。--Surface-Highlight / --Text-on-Highlight を使う",
+        "検索語の正規表現の特殊文字は Highlight が文字としてエスケープする。consumer で RegExp を組まない"
       ]
     }
   ],

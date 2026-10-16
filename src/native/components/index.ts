@@ -356,3 +356,4 @@ export {
   type FeatureComparisonTableProps,
   type FeatureComparisonValue,
 } from "./FeatureComparisonTable"
+export { Highlight, type HighlightProps } from "./Highlight"

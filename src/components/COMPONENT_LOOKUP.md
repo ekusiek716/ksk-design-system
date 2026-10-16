@@ -43,6 +43,7 @@
 | EmojiIcon | `@/components/ui/emoji-icon` | — | Default, Sizes, InSlots |
 | ErrorBoundary | `@/components/ui/error-boundary` | — | — |
 | Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField | `@/components/ui/form` | — | BasicForm, WithSelect, ShowsValidationErrorAndClearsOnInput |
+| Highlight | `@/components/ui/highlight` | — | Default, NoMatch, SpecialCharacters |
 | HoverCard, HoverCardTrigger, HoverCardContent | `@/components/ui/hover-card` | — | Default |
 | IconBadge | `@/components/ui/icon-badge` | **size**: `md`, `ml`, `lg`<br>**appearance**: `accent`, `plain`<br>**tone**: `accent`, `info`, `success`, `warning`, `caution` | Medium, MediumLarge, Large, Tones, InCardFlow |
 | ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |

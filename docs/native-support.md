@@ -181,6 +181,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 | GlassView | なし | あり | 抽出不可 | 抽出不可 |  | 未検証 |
 | GradientSurface | なし | あり | 抽出不可 | 抽出不可 |  | 未検証 |
 | GridSkeleton | あり | あり | loadingLabel, className |  | className/CSS (Web) vs RN style/StyleSheet (Native) is each platform's idiomatic styling prop, not a functional gap | 未検証 |
+| Highlight | あり | あり | markClassName | style | className/CSS (Web) vs RN style/StyleSheet (Native) is each platform's idiomatic styling prop, not a functional gap | 未検証 |
 | HoverCard | あり | なし | 抽出不可 | 抽出不可 | hover interaction is Web-only | 未検証 |
 | HoverCardContent | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | HoverCardTrigger | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |

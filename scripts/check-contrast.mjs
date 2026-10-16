@@ -136,6 +136,11 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   }
 }
 
+// 検索一致のハイライト（<mark>・Highlight 部品・issue #692）。light / dark で AA。
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  pairs.push([resolve(s.text["on-highlight"]), resolve(s.surface.highlight), `${mode}: Text-on-Highlight / Surface-Highlight`, 4.5])
+}
+
 // LINE の塗りボタン（ShareButtons layout="block"・issue #685）。External Brand は tokens.json に
 // 無く semantic.css の固定 hex が正本なので、そこから読む。ライト / ダーク共通。
 {
