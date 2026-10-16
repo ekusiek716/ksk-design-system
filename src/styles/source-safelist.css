@@ -864,6 +864,7 @@
 @source inline("px-[var(--Field-Padding-X-Sm)]");
 @source inline("px-[var(--Nav-Pill-Padding-X)]");
 @source inline("px-[var(--Settings-Row-Padding-X)]");
+@source inline("px-[var(--page-px)]");
 @source inline("py-0.5");
 @source inline("py-1");
 @source inline("py-1.5");

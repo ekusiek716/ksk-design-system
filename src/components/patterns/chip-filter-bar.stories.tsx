@@ -66,6 +66,36 @@ export const Sticky: Story = {
   ),
 }
 
+/**
+ * sticky + 内側余白（issue #667）。`gutter` は Container と同じ語彙（tight = 16px / default = 24px）。
+ * 背景は全幅のまま、チップと件数だけが余白の内側に収まるので、スクロールしたリストが左右の
+ * 隙間から透けない。語彙に無い余白は `contentClassName`（例: `px-[var(--page-px)]`）で渡す。
+ * 外側の `className` に `px-*` を付けると背景まで狭まるので使わない。
+ */
+export const StickyWithGutter: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="max-w-md h-64 overflow-y-auto border border-[var(--Border-Low-Emphasis)]">
+      <ChipFilterBar sticky gutter="tight" resultCount={12}>
+        {["すべて", "未着手", "進行中", "完了", "保留", "アーカイブ"].map((label) => (
+          <Chip key={label}>{label}</Chip>
+        ))}
+      </ChipFilterBar>
+      <div className="h-96 px-4 py-2 typo-body-md text-[var(--Text-High-Emphasis)] bg-[var(--Surface-Secondary)]">
+        スクロールしてもチップ行の背景は全幅で、左右の隙間から下のリストが透けない。
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const bar = canvasElement.querySelector<HTMLElement>('[data-slot="chip-filter-bar"]')!
+    const row = bar.firstElementChild as HTMLElement
+    // 背景を持つ行は外側と同じ幅（全幅）で、余白は行の内側の padding
+    await expect(row.getBoundingClientRect().width).toBe(bar.getBoundingClientRect().width)
+    await expect(getComputedStyle(row).paddingLeft).toBe("16px")
+    await expect(getComputedStyle(bar.querySelector("p")!).paddingLeft).toBe("16px")
+  },
+}
+
 export const Bare: Story = {
   render: () => (
     <div className="max-w-md flex gap-2 overflow-x-auto scrollbar-hide px-2 py-2 bg-[var(--Surface-Secondary)]">
