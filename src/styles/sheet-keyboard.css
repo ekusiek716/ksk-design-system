@@ -62,6 +62,16 @@ html[data-kb-open]
   max-height: calc(100dvh - var(--kb-h, 0px));
 }
 
+/* ── #706: 上端の safe-area も引く（safeArea={false} 以外） ──
+   可視領域はステータスバー / ダイナミックアイランドの裏まで含むため、上の値のままだと
+   背の高いシートの見出しが時計の裏に潜る。JS 検知（resolveBottomSheetKeyboardStyle）と
+   同じ値。float 系（#337）は以前から引いている。safeArea={false} は data-safe-area="false"
+   なので従来の値（上のルール）に残る。 */
+html[data-kb-open]
+  [data-slot="sheet-content"][data-side="bottom"]:not([data-snap-active]):not([data-safe-area="false"]) {
+  max-height: max(0px, calc(100dvh - var(--kb-h, 0px) - var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))));
+}
+
 /* ── #337: float 系（float / float-glass）の lift + max-height 補正 ──
    float は画面端に貼り付かず 12px（0.75rem = Tailwind の inset-x-3 / bottom-3）の
    余白を持つ配置なので、bottom 系と補正量が違う:

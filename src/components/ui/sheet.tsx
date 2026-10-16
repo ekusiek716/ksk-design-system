@@ -151,10 +151,21 @@ function computeVisualViewportInset(
 function resolveBottomSheetKeyboardStyle(
   keyboardInset: number,
   visibleHeight: number | null,
-  snapActive: boolean
-): { bottom: number; maxHeight?: number } | undefined {
+  snapActive: boolean,
+  safeArea = false
+): { bottom: number; maxHeight?: number | string } | undefined {
   if (keyboardInset <= 0) return undefined
   if (snapActive) return { bottom: keyboardInset }
+  // #706: safeArea（SheetContent の既定 true）のときは上端の safe-area を引く。
+  // 可視領域（visualViewport.height）はステータスバー / ダイナミックアイランドの
+  // 裏まで含むので、そのまま上限にすると背の高いシートの見出しが時計の裏に潜る。
+  // float 系（resolveFloatSheetKeyboardStyle）と同じく 0 で下限を切る。
+  if (safeArea && visibleHeight != null) {
+    return {
+      bottom: keyboardInset,
+      maxHeight: `max(0px, calc(${visibleHeight}px - var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))))`,
+    }
+  }
   return { bottom: keyboardInset, maxHeight: visibleHeight ?? undefined }
 }
 
@@ -761,6 +772,9 @@ interface SheetContentProps
    *   抜けないよう既定の max-height を確保（可視領域 − 上下マージン1.5rem −
    *   上部safe-area。キーボード表示時の追従 (#337) とは独立で、そちらが
    *   優先される）
+   * - `side="bottom"` / `"bottom-glass"`（swipeToClose を含む・snap は除く）:
+   *   キーボード表示中の高さ上限（可視領域）から上部 safe-area を引き、
+   *   見出しがステータスバーの裏に潜らないようにする（#706）
    * false にすると回避を無効化する（consumer が自前で safe-area を管理する
    * 場合のオプトアウト。安全側の既定を壊さないよう既定は true）。他の side
    * では効果を持たない（`data-safe-area` 属性自体は side に関わらず出る）。
@@ -907,6 +921,7 @@ function SheetContent({
         contentZIndex={resolvedContentZ}
         container={container}
         padding={padding}
+        safeArea={safeArea}
         description={description}
         autoFocus={autoFocus}
         restoreFocusOnClose={restoreFocusOnClose}
@@ -959,7 +974,7 @@ function SheetContent({
   const isFloating = side === "float" || side === "float-glass"
   const isTopSheet = side === "top"
   const keyboardStyle = isBottomAnchored
-    ? resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false)
+    ? resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false, safeArea)
     : isFloating
       ? resolveFloatSheetKeyboardStyle(keyboardInset, visibleHeight)
       : undefined
@@ -1086,6 +1101,8 @@ interface SwipeToCloseBottomSheetProps
   contentZIndex?: number
   container?: HTMLElement | null
   padding?: boolean
+  /** #706: キーボード表示中の高さ上限から上端の safe-area を引く（SheetContent の safeArea） */
+  safeArea?: boolean
   description?: React.ReactNode
   autoFocus?: LayerAutoFocusTarget
   restoreFocusOnClose?: boolean
@@ -1104,6 +1121,7 @@ function SwipeToCloseBottomSheet({
   contentZIndex,
   container,
   padding = true,
+  safeArea = true,
   description,
   autoFocus,
   restoreFocusOnClose = true,
@@ -1363,6 +1381,8 @@ function SwipeToCloseBottomSheet({
       <DialogPrimitive.Content
         ref={attachTouchListeners}
         data-side={side}
+        // #706: CSS フォールバック（sheet-keyboard.css）が safe-area の控除を opt-out できるよう出す
+        data-safe-area={safeArea}
         className={cn(
           sheetVariants({ side }),
           // swipeToClose mode: 高さに制約がないと viewport より高いシートの
@@ -1386,7 +1406,7 @@ function SwipeToCloseBottomSheet({
           // cap its height to the visible region (maxHeight). These inline
           // values override the variant's `bottom-0` / `max-h-[90dvh]`. When no
           // keyboard is present both are inert and the CSS defaults apply.
-          ...resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false),
+          ...resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false, safeArea),
           transform: `translate3d(0, ${dragY}px, 0)`,
           transition: dragging || !everDragged
             ? "none"
