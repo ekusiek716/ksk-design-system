@@ -351,7 +351,7 @@
         "<Button unstyled> に border / rounded / shadow / active:scale を被せて押せるカードを自作しない（P040）。native は onPress / disabled",
         "parity（web と差がある点）: native の押せる Card は Pressable 1 つで、CardTitle / CardAction の登録・前面化の仕組みを持たない。入れ子の Card や Card 内の別操作は RN の Pressable の入れ子規則（内側の Pressable が先に反応）に従い、読み上げ名は accessibilityLabel を明示するか子の Text の連結になる",
         "面の中に置くカード（入れ子・Section 内のグリッド）は elevation=\"none\"。`!shadow-none` / `shadow-none` の className で消さない（issue #689）",
-        "選ぶカード（配席の卓・プラン選択等）は selected。onClick の押せる面に aria-pressed が付き、Surface-Accent-Primary-Light の面 + Border-Accent-Primary の 2px 相当の枠になる。Button unstyled に選択色を被せて自作しない。座席のような円形は Card に形の className を足して組む（専用部品は持たない）。native Card も selected（accessibilityState.selected）（issue #677）"
+        "選ぶカード（配席の卓・プラン選択等）は selected。onClick の押せる面に aria-pressed（href では aria-current=\"true\"）が付き、押せない Card では見た目だけで開発ビルドで warn。Surface-Accent-Primary-Light の面 + Border-Accent-Primary の 2px 相当の枠になる。Button unstyled に選択色を被せて自作しない。座席のような円形は Card に形の className を足して組む（専用部品は持たない）。native Card も selected（accessibilityState.selected）（issue #677）"
       ],
       "variants": [
         "elevation: none / sm / md(既定) / lg（issue #689。native と同じ語彙）"

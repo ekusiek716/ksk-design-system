@@ -3,7 +3,9 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import * as React from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import { describe, expect, it } from "vitest"
+import { act } from "react"
+import { createRoot } from "react-dom/client"
+import { describe, expect, it, vi } from "vitest"
 
 import { Card, CardTitle } from "../src/components/ui/card"
 import { StatCard } from "../src/components/patterns/stat-card"
@@ -52,10 +54,24 @@ describe("Card の selected（#677）", () => {
     host.innerHTML = renderToStaticMarkup(<Card onClick={() => {}}><CardTitle>t</CardTitle></Card>)
     expect(host.querySelector('[data-slot="card-overlay"]')!.hasAttribute("aria-pressed")).toBe(false)
   })
-  it("href のリンクには aria-pressed を付けない", () => {
+  it("href のリンクは aria-pressed ではなく aria-current=true で伝える", () => {
     const host = document.createElement("div")
     host.innerHTML = renderToStaticMarkup(<Card href="/a" selected><CardTitle>t</CardTitle></Card>)
-    expect(host.querySelector('[data-slot="card-overlay"]')!.hasAttribute("aria-pressed")).toBe(false)
+    const overlay = host.querySelector('[data-slot="card-overlay"]')!
+    expect(overlay.hasAttribute("aria-pressed")).toBe(false)
+    expect(overlay.getAttribute("aria-current")).toBe("true")
+    host.innerHTML = renderToStaticMarkup(<Card href="/a"><CardTitle>t</CardTitle></Card>)
+    expect(host.querySelector('[data-slot="card-overlay"]')!.hasAttribute("aria-current")).toBe(false)
+  })
+  it("押せない Card に selected を渡すと開発ビルドで 1 回 warn する", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const host = document.createElement("div")
+    const root = createRoot(host)
+    act(() => root.render(<><Card selected>a</Card><Card selected>b</Card></>))
+    const calls = warn.mock.calls.filter((c) => String(c[0]).includes("Card: selected"))
+    expect(calls.length).toBe(1)
+    act(() => root.unmount())
+    warn.mockRestore()
   })
   it("native Card も selected と elevation=none を持つ", () => {
     const src = readFileSync(join(__dirname, "..", "src/native/components/Card.tsx"), "utf8")

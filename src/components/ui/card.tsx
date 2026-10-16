@@ -75,8 +75,9 @@ interface CardProps
    *
    * 見た目は ActionTile の selected と同じ Surface-Accent-Primary-Light の面 + Border-Accent-Primary の枠で、
    * 枠を 2px 相当に太くして色以外でも区別できるようにする。`onClick` の押せる Card では押せる面
-   * （button）に `aria-pressed` を出す（トグルボタンとして読まれる）。`href` のリンクには付けない
-   * （現在地は aria-current の領分で、選択状態の概念が無い）。
+   * （button）に `aria-pressed` を出す（トグルボタンとして読まれる）。`href` のリンクでは
+   * `aria-current="true"`（一覧の中の現在の項目）として出す。押せない Card では見た目だけ変わり、
+   * 開発ビルドで 1 回 warn する。
    */
   selected?: boolean
 }
@@ -112,6 +113,8 @@ function useRegisterCardSlot(slot: CardPressableSlot, ownId: string | undefined)
 }
 
 /** 開発ビルド判定（ChipSelector と同じ形）。process が無い環境では本番扱い。 */
+let warnedSelectedWithoutAction = false
+
 const isDev = () => {
   const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
   return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
@@ -209,6 +212,15 @@ function Card({
     )
   }, [actionable, ariaLabel, ariaLabelledby])
 
+  // 押せない Card の selected は見た目だけで、読み上げに状態が伝わらない。開発ビルドで 1 回知らせる。
+  React.useEffect(() => {
+    if (actionable || selected === undefined || !isDev() || warnedSelectedWithoutAction) return
+    warnedSelectedWithoutAction = true
+    console.warn(
+      "[ksk-ds] Card: selected は onClick（aria-pressed）/ href（aria-current）を渡した押せる Card でだけ状態として読み上げられます。押せない Card では見た目しか変わりません。"
+    )
+  }, [actionable, selected])
+
   if (!actionable) {
     return (
       <CardPressableContext.Provider value={null}>
@@ -276,6 +288,8 @@ function Card({
             data-slot="card-overlay"
             {...a11yProps}
             aria-disabled={disabled || undefined}
+            // リンクの「選ばれている」は現在の項目として aria-current="true" で伝える（aria-pressed はボタン専用）
+            aria-current={selected ? "true" : undefined}
             className={overlayClassName}
             onClick={(event) => {
               if (disabled) event.preventDefault()
