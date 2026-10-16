@@ -44,6 +44,7 @@ const INTENTIONAL_NATIVE_GAPS = new Map([
   ["KebabMenu", "admin action menu is Web-only; native uses MenuDrawer/DropdownMenu patterns"],
   ["MonthCalendar", "予定付きの月カレンダー（issue #679）。WAI-ARIA grid のキーボード操作・md ブレークポイントでのチップ / ドット切り替えという Web の前提で作った。native の予定表は画面幅と操作体系（スワイプ・FlatList）が違うため別途設計する"],
   ["SelectableTile", "選べて動かせるタイル（issue #703）。ドラッグ・矢印キーの移動とキーボードの説明は DOM の pointer / keyboard / aria-describedby の前提で作った。native の並べ替えはジェスチャーハンドラ（Pressable の長押し・PanResponder）と accessibilityActions で別途設計する"],
+  ["AgendaList", "予定がある日の一覧（issue #704）。Web の MonthCalendar（WAI-ARIA grid）と組むスマホ幅の DOM リストとして作った。native の予定表は SectionList で別途設計する（MonthCalendar と同じ判断）"],
   ["KanbanColumn", "カンバンの列（issue #679）。横スクロールのボードに並べる PC 向けの入れ物で、native のアプリ内ボードは画面ごとの FlatList / SectionList で組むため移植しない"],
   ["MobileTabBar", "web-only BottomTabBar wrapper; native uses LiquidBottomTabBar / createExpoRouterTabBar instead"],
   ["NotificationList", "admin notification list is Web-only"],
