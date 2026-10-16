@@ -31,11 +31,8 @@ export const Small: Story = { args: { size: "sm", label: "項目を追加" } }
 
 export const CustomIcon: Story = { args: { icon: <People />, label: "卓を追加" } }
 
-export const Disabled: Story = {
-  // 無効状態の見た目デモ。inactive UI component は WCAG 1.4.3 のコントラスト要件対象外
-  parameters: { a11y: { config: { rules: [{ id: "color-contrast", enabled: false }] } } },
-  args: { disabled: true },
-}
+// disabled の button は axe の color-contrast の対象外（WCAG 1.4.3 の inactive 例外）なので除外指定は不要
+export const Disabled: Story = { args: { disabled: true } }
 
 /** グリッドの空き枠に置く例 */
 export const InGrid: Story = {
