@@ -54,3 +54,29 @@ describe("AgendaList accentColor（#716）", () => {
     expect(rows[1].firstElementChild!.innerHTML).toBe("衣装")
   })
 })
+
+describe("accentColor のレビュー指摘（#716）", () => {
+  it("前後の空白を除いた値を渡す", () => {
+    const el = host(
+      <MonthCalendar month="2026-10" today="2026-10-01" events={[{ id: "x", date: "2026-10-09", label: "前撮り", accentColor: "  var(--Categorical-2) " }]} />,
+    )
+    const dot = el.querySelector<HTMLElement>('[data-slot="month-calendar-event-dot"]')!
+    expect(dot.style.getPropertyValue("--ksk-calendar-accent")).toBe("var(--Categorical-2)")
+    const mobileDot = el.querySelector<HTMLElement>("span[data-accent].size-1\\.5")!
+    expect(mobileDot.style.getPropertyValue("--ksk-calendar-accent")).toBe("var(--Categorical-2)")
+    const agenda = host(<AgendaList today="2026-10-01" events={[{ id: "x", date: "2026-10-09", label: "前撮り", accentColor: " red " }]} />)
+    expect(agenda.querySelector<HTMLElement>('[data-slot="agenda-list-event-dot"]')!.style.getPropertyValue("--ksk-calendar-accent")).toBe("red")
+  })
+
+  it("点は aria-hidden で、日のセルの読み上げ名に予定名が入っている", () => {
+    const el = host(<MonthCalendar month="2026-10" events={events} today="2026-10-01" />)
+    const cell = el.querySelector<HTMLElement>('[role="gridcell"][data-date="2026-10-03"]') ??
+      [...el.querySelectorAll<HTMLElement>('[role="gridcell"]')].find((c) => (c.getAttribute("aria-label") ?? "").includes("会場見学"))!
+    const name = cell.getAttribute("aria-label") ?? ""
+    expect(name).toContain("会場見学")
+    expect(name).toContain("衣装")
+    for (const dot of cell.querySelectorAll('[data-slot="month-calendar-event-dot"]')) {
+      expect(dot.closest('[aria-hidden="true"]')).not.toBeNull()
+    }
+  })
+})

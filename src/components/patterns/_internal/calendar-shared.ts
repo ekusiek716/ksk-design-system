@@ -53,8 +53,10 @@ export const DOT_TONE: Record<CalendarEventTone, string> = {
 /**
  * 予定の分類の識別色（issue #716）。空白だけ・空文字は未指定と同じ（KanbanColumn の accentColor と同じ扱い）
  */
-export const resolveEventAccent = (accentColor: string | undefined) =>
-  accentColor?.trim() ? accentColor : undefined
+export const resolveEventAccent = (accentColor: string | undefined) => {
+  const trimmed = accentColor?.trim()
+  return trimmed ? trimmed : undefined
+}
 
 /** 識別色の点。色は inline の変数 --ksk-calendar-accent で渡す（クラスは固定文字列のまま） */
 export const ACCENT_DOT = "shrink-0 rounded-full bg-[var(--ksk-calendar-accent)]"

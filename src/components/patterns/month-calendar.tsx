@@ -431,7 +431,7 @@ function MonthCalendar({
                                 aria-hidden="true"
                                 data-slot="month-calendar-event-dot"
                                 className={cn("size-1.5", ACCENT_DOT)}
-                                style={{ "--ksk-calendar-accent": e.accentColor } as React.CSSProperties}
+                                style={{ "--ksk-calendar-accent": resolveEventAccent(e.accentColor) } as React.CSSProperties}
                               />
                               <span className="min-w-0 flex-1 truncate">{renderEvent ? renderEvent(e) : e.label}</span>
                             </span>
