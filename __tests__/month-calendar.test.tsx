@@ -114,6 +114,9 @@ describe("MonthCalendarHeader / MonthCalendarExpandToggle（#721）", () => {
     const only = renderToStaticMarkup(<MonthCalendarHeader month="2026-10" />)
     expect(only).toContain(">2026年10月</h2>")
     expect(only).not.toContain("<button")
+    // 月の切り替えを読み上げる
+    expect(only).toContain('aria-live="polite"')
+    expect(only).toContain('aria-atomic="true"')
     const full = renderToStaticMarkup(
       <MonthCalendarHeader month="2026-10" size="lg" headingLevel="h3" onToday={() => {}} onPrev={() => {}} onNext={() => {}} />
     )
@@ -127,7 +130,7 @@ describe("MonthCalendarHeader / MonthCalendarExpandToggle（#721）", () => {
     expect(en).toContain('aria-label="Next"')
   })
 
-  it("開閉ボタンは aria-expanded と開閉ごとの読み上げ名を持つ", async () => {
+  it("開閉ボタンの読み上げ名は固定で、状態は aria-expanded だけ", async () => {
     const { MonthCalendarExpandToggle } = await import("../src/components/patterns/month-calendar")
     const { renderToStaticMarkup } = await import("react-dom/server")
     const closed = renderToStaticMarkup(<MonthCalendarExpandToggle expanded={false} onExpandedChange={() => {}} aria-controls="cal" />)
@@ -136,7 +139,8 @@ describe("MonthCalendarHeader / MonthCalendarExpandToggle（#721）", () => {
     expect(closed).toContain('aria-controls="cal"')
     const open = renderToStaticMarkup(<MonthCalendarExpandToggle expanded onExpandedChange={() => {}} />)
     expect(open).toContain('aria-expanded="true"')
-    expect(open).toContain('aria-label="週だけを表示"')
+    expect(open).toContain('aria-label="月全体を表示"')
+    expect(renderToStaticMarkup(<MonthCalendarExpandToggle expanded onExpandedChange={() => {}} label="Month" />)).toContain('aria-label="Month"')
     expect(open).toContain("rotate-180")
   })
 })

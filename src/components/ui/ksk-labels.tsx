@@ -28,10 +28,8 @@ interface KskLabels {
   calendarPrevMonth: string
   /** MonthCalendarHeader の次の月ボタンの読み上げ名 */
   calendarNextMonth: string
-  /** MonthCalendarExpandToggle の読み上げ名（週 → 月へ広げる） */
+  /** MonthCalendarExpandToggle の読み上げ名（開閉で変えない。状態は aria-expanded） */
   calendarExpand: string
-  /** MonthCalendarExpandToggle の読み上げ名（月 → 週へたたむ） */
-  calendarCollapse: string
 }
 
 const KSK_DEFAULT_LABELS: Record<KskLocale, KskLabels> = {
@@ -46,7 +44,6 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, KskLabels> = {
     calendarPrevMonth: "前の月",
     calendarNextMonth: "次の月",
     calendarExpand: "月全体を表示",
-    calendarCollapse: "週だけを表示",
   },
   en: {
     skipLink: "Skip to content",
@@ -59,7 +56,6 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, KskLabels> = {
     calendarPrevMonth: "Previous month",
     calendarNextMonth: "Next month",
     calendarExpand: "Show full month",
-    calendarCollapse: "Show one week",
   },
 }
 

@@ -510,6 +510,7 @@ interface MonthCalendarHeaderProps extends Omit<React.ComponentProps<"div">, "ti
  * MonthCalendarHeader — 予定カレンダーの見出し（issue #721）
  *
  * 左に月の見出し + 「今日へ」、右に前後の月のアイコンボタン（aria-label 付き・44px の当たり判定）。
+ * 見出しは aria-live="polite" で、月が変わると読み上げる。
  * MonthCalendar の root は role="grid" なので、見出しは grid の外（MonthCalendar の上）に置く。
  * 見出し・「今日へ」・前後ボタンを h2 + Button で自作しない。
  */
@@ -545,6 +546,9 @@ function MonthCalendarHeader({
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <Heading
+          // 前後の月・今日へで見出しが変わったことをスクリーンリーダーへ知らせる（ボタンを押した位置から動かずに分かる）
+          aria-live="polite"
+          aria-atomic="true"
           className={cn(
             "min-w-0 truncate tabular-nums text-[var(--Text-High-Emphasis)]",
             size === "lg" ? "typo-heading-lg" : "typo-heading-md"
@@ -598,24 +602,24 @@ interface MonthCalendarExpandToggleProps extends Omit<ButtonProps, "children" | 
   expanded: boolean
   /** 押したとき（次の expanded を渡す）。consumer は view を "month" ⇄ "week" に切り替える */
   onExpandedChange: (expanded: boolean) => void
-  /** 週 → 月へ広げるときの読み上げ名。既定は KskLabelsProvider の calendarExpand（無ければ「月全体を表示」） */
-  expandLabel?: string
-  /** 月 → 週へたたむときの読み上げ名。既定は KskLabelsProvider の calendarCollapse（無ければ「週だけを表示」） */
-  collapseLabel?: string
+  /**
+   * 読み上げ名。開閉で変えない（状態は aria-expanded が伝える）。
+   * 既定は KskLabelsProvider の calendarExpand（無ければ「月全体を表示」）
+   */
+  label?: string
 }
 
 /**
  * MonthCalendarExpandToggle — 週の帯 ⇄ 月全体の開閉ボタン（issue #721）
  *
- * MonthCalendar の下に置く全幅のボタン。aria-expanded を持ち、矢印は開いているとき上向きに回る
+ * MonthCalendar の下に置く全幅のボタン。読み上げ名は固定で、開閉の状態は aria-expanded だけが伝える。矢印は開いているとき上向きに回る
  * （Motion トークン）。開閉の状態は consumer が持ち、MonthCalendar の view に渡す。
  * aria-controls に MonthCalendar の id を渡すと結び付く。Button ghost icon-sm w-full で自作しない。
  */
 function MonthCalendarExpandToggle({
   expanded,
   onExpandedChange,
-  expandLabel,
-  collapseLabel,
+  label,
   className,
   ...props
 }: MonthCalendarExpandToggleProps) {
@@ -628,7 +632,7 @@ function MonthCalendarExpandToggle({
       data-slot="month-calendar-expand-toggle"
       data-expanded={expanded || undefined}
       aria-expanded={expanded}
-      aria-label={expanded ? (collapseLabel ?? labels.calendarCollapse) : (expandLabel ?? labels.calendarExpand)}
+      aria-label={label ?? labels.calendarExpand}
       onClick={() => onExpandedChange(!expanded)}
       className={cn("w-full", className)}
       {...props}

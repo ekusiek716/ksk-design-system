@@ -200,6 +200,7 @@ export const HeaderAndExpandToggle: Story = {
   play: async ({ canvasElement }) => {
     const heading = canvasElement.querySelector<HTMLElement>('[data-slot="month-calendar-header"] h2')!
     await expect(heading.textContent).toBe("2026年10月")
+    await expect(heading.getAttribute("aria-live")).toBe("polite")
     await userEvent.click(canvasElement.querySelector<HTMLElement>('[aria-label="次の月"]')!)
     await expect(heading.textContent).toBe("2026年11月")
     await userEvent.click(canvasElement.querySelector<HTMLElement>('[data-slot="month-calendar-today"]')!)
@@ -211,7 +212,8 @@ export const HeaderAndExpandToggle: Story = {
     await expect(toggle.getAttribute("aria-label")).toBe("月全体を表示")
     await userEvent.click(toggle)
     await expect(toggle.getAttribute("aria-expanded")).toBe("true")
-    await expect(toggle.getAttribute("aria-label")).toBe("週だけを表示")
+    // 読み上げ名は開閉で変えない（状態は aria-expanded）
+    await expect(toggle.getAttribute("aria-label")).toBe("月全体を表示")
     await expect(grid.getAttribute("data-view")).toBe("month")
     await expect(toggle.getBoundingClientRect().width).toBe(grid.getBoundingClientRect().width)
   },
