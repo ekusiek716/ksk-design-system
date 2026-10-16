@@ -34,7 +34,8 @@ interface MobileTabBarProps<T extends string> {
   showOnDesktop?: boolean
   /**
    * ソフトキーボード表示中の挙動（issue #681）。BottomTabBar へそのまま渡す。
-   * "hide"（既定・従来どおり）/ "lift" / "stay"。
+   * "hide"（既定・従来どおり）/ "lift" / "stay"。"hide" はタッチ端末でテキスト入力欄に
+   * フォーカスがある間も隠す（issue #700）。
    */
   keyboardBehavior?: BottomTabBarKeyboardBehavior
   /**

@@ -1,10 +1,24 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import {
+  CHIP_TONE,
+  DOT_TONE,
+  WEEKDAYS,
+  formatDayLabel,
+  pad,
+  parseKey,
+  resolveTodayKey,
+  toKey,
+  type CalendarEventTone,
+} from "./_internal/calendar-shared"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 /** 予定の色の意味。Badge / IconBadge と同じ語彙 + neutral */
-type MonthCalendarEventTone = "neutral" | "accent" | "info" | "success" | "warning" | "caution"
+type MonthCalendarEventTone = CalendarEventTone
+
+/** 表示の範囲（issue #704）。month=月全体（既定）/ week=フォーカス中の日を含む 1 週だけ */
+type MonthCalendarView = "month" | "week"
 
 interface MonthCalendarEvent {
   /** 安定キー */
@@ -51,16 +65,20 @@ interface MonthCalendarProps extends Omit<React.ComponentProps<"div">, "onSelect
   /** グリッドの読み上げ名。既定は「2026年10月」等 */
   "aria-label"?: string
   renderEvent?: (event: MonthCalendarEvent) => React.ReactNode
+  /**
+   * 表示の範囲（issue #704）。
+   * - "month"（既定）: 月全体
+   * - "week": フォーカス中の日（選択日 → 今日 → 1 日）を含む 1 週だけ。スマホの「週の帯」用。
+   *   矢印キーで週をまたぐと表示する週が移る（grid のキー操作は month と共通）。
+   *   月をまたぐ週は月外の日も描き（数字は Text-Medium-Emphasis）、月の端でも止まらず隣の週へ移る。
+   *   onMonthChange があれば月をまたいだときに呼ぶ（無ければ内部で進める）。
+   *   日ごとの予定の中身は AgendaList と組み合わせる
+   */
+  view?: MonthCalendarView
 }
 
-// ─── Date helpers（ローカル日付・"YYYY-MM-DD"） ────────────────────────────────
+// ─── Date helpers（ローカル日付・"YYYY-MM-DD"。共通部は _internal/calendar-shared） ──────────
 
-const pad = (n: number) => String(n).padStart(2, "0")
-const toKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-function parseKey(key: string): Date {
-  const [y, m, d] = key.split("-").map(Number)
-  return new Date(y, (m ?? 1) - 1, d ?? 1)
-}
 function toMonthStart(month: Date | string): Date {
   if (typeof month === "string") {
     const [y, m] = month.split("-").map(Number)
@@ -84,29 +102,6 @@ function buildMonthWeeks(month: Date | string, weekStartsOn: 0 | 1 = 0): (string
   const weeks: (string | null)[][] = []
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7))
   return weeks
-}
-
-const WEEKDAYS = {
-  ja: ["日", "月", "火", "水", "木", "金", "土"],
-  en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-}
-
-const CHIP_TONE: Record<MonthCalendarEventTone, string> = {
-  neutral: "bg-[var(--Surface-Tertiary)] text-[var(--Text-High-Emphasis)]",
-  accent: "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)]",
-  info: "bg-[var(--Surface-Info)] text-[var(--Text-Info)]",
-  success: "bg-[var(--Surface-Success)] text-[var(--Text-Success)]",
-  warning: "bg-[var(--Surface-Warning)] text-[var(--Text-Warning)]",
-  caution: "bg-[var(--Surface-Caution)] text-[var(--Text-Caution)]",
-}
-
-const DOT_TONE: Record<MonthCalendarEventTone, string> = {
-  neutral: "bg-[var(--Object-Medium-Emphasis)]",
-  accent: "bg-[var(--Object-Accent-Primary)]",
-  info: "bg-[var(--Object-Info)]",
-  success: "bg-[var(--Object-Success)]",
-  warning: "bg-[var(--Object-Warning)]",
-  caution: "bg-[var(--Object-Caution)]",
 }
 
 // ─── MonthCalendar ───────────────────────────────────────────────────────────
@@ -145,6 +140,7 @@ function MonthCalendar({
   locale = "ja",
   moreLabel,
   renderEvent,
+  view = "month",
   className,
   "aria-label": ariaLabel,
   ...props
@@ -152,7 +148,7 @@ function MonthCalendar({
   const monthStart = toMonthStart(month)
   const monthKey = `${monthStart.getFullYear()}-${pad(monthStart.getMonth() + 1)}`
   const weeks = buildMonthWeeks(monthStart, weekStartsOn)
-  const todayKey = todayProp === undefined ? toKey(new Date()) : typeof todayProp === "string" ? todayProp : toKey(todayProp)
+  const todayKey = resolveTodayKey(todayProp)
   const inMonth = (key: string | null | undefined) => Boolean(key && key.startsWith(`${monthKey}-`))
 
   const eventsByDate = React.useMemo(() => {
@@ -167,8 +163,25 @@ function MonthCalendar({
 
   const defaultFocus = inMonth(selectedDate) ? selectedDate! : inMonth(todayKey) ? todayKey : `${monthKey}-01`
   const [focusKey, setFocusKey] = React.useState(defaultFocus)
-  // 月が変わったら、その月の中のセルへ移す（月外の日を覚えたままだとタブストップが消える）
-  const activeKey = inMonth(focusKey) ? focusKey : defaultFocus
+  // 選択日が外から変わったら（「今日へ」ボタン等）タブストップと week 表示の週もそこへ移す。
+  // effect ではなく前回値との比較で render 中に揃える（React の推奨パターン・余分な描画なし）
+  const isWeek = view === "week"
+  const [prevSelectedDate, setPrevSelectedDate] = React.useState(selectedDate)
+  if (selectedDate !== prevSelectedDate) {
+    setPrevSelectedDate(selectedDate)
+    // week は月外の日も表示できるので、月をまたいだ選択日にも追従する
+    if (selectedDate && (isWeek || inMonth(selectedDate))) setFocusKey(selectedDate)
+  }
+  // week: 表示月が外から変わったら（前後の月ボタン等）、その月の中へ移す。
+  // 自分で月をまたいで onMonthChange を呼んだときはフォーカス先が新しい月の中なので動かさない
+  const [prevMonthKey, setPrevMonthKey] = React.useState(monthKey)
+  if (monthKey !== prevMonthKey) {
+    setPrevMonthKey(monthKey)
+    if (isWeek && !inMonth(focusKey)) setFocusKey(defaultFocus)
+  }
+  // month: 月が変わったら、その月の中のセルへ移す（月外の日を覚えたままだとタブストップが消える）。
+  // week: 月外の日（月をまたぐ週）にもフォーカスできる（issue #704 レビュー）
+  const activeKey = isWeek ? focusKey : inMonth(focusKey) ? focusKey : defaultFocus
   const gridRef = React.useRef<HTMLDivElement>(null)
   const shouldFocusRef = React.useRef(false)
 
@@ -181,6 +194,12 @@ function MonthCalendar({
   const moveTo = (next: Date) => {
     const key = toKey(next)
     shouldFocusRef.current = true
+    if (isWeek) {
+      // week は月境界で止めない。onMonthChange があれば表示月も合わせ、無ければ内部で進める
+      setFocusKey(key)
+      if (!inMonth(key)) onMonthChange?.(new Date(next.getFullYear(), next.getMonth(), 1))
+      return
+    }
     if (inMonth(key)) {
       setFocusKey(key)
       return
@@ -200,11 +219,7 @@ function MonthCalendar({
       : monthStart.toLocaleDateString("en", { year: "numeric", month: "long" }))
 
   const dayLabel = (key: string, dayEvents: MonthCalendarEvent[]) => {
-    const d = parseKey(key)
-    const base =
-      locale === "ja"
-        ? `${d.getMonth() + 1}月${d.getDate()}日（${WEEKDAYS.ja[d.getDay()]}）`
-        : d.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" })
+    const base = formatDayLabel(key, locale)
     const todayPart = key === todayKey ? (locale === "ja" ? "、今日" : ", today") : ""
     const eventsPart = dayEvents.length
       ? locale === "ja"
@@ -232,12 +247,12 @@ function MonthCalendar({
         break
       case "Home": {
         const start = addDays(d, -col)
-        moveTo(inMonth(toKey(start)) ? start : monthStart)
+        moveTo(isWeek || inMonth(toKey(start)) ? start : monthStart)
         break
       }
       case "End": {
         const end = addDays(d, 6 - col)
-        moveTo(inMonth(toKey(end)) ? end : new Date(monthStart.getFullYear(), monthStart.getMonth(), daysInMonth(monthStart)))
+        moveTo(isWeek || inMonth(toKey(end)) ? end : new Date(monthStart.getFullYear(), monthStart.getMonth(), daysInMonth(monthStart)))
         break
       }
       case "PageUp":
@@ -259,10 +274,20 @@ function MonthCalendar({
     event.preventDefault()
   }
 
+  // view="week" はフォーカス中の日（タブストップ）を含む 7 日を出す。月をまたぐ週は月外の日も描く
+  const visibleWeeks: { week: (string | null)[]; index: number }[] = isWeek
+    ? (() => {
+        const active = parseKey(activeKey)
+        const start = addDays(active, -((active.getDay() - weekStartsOn + 7) % 7))
+        return [{ week: Array.from({ length: 7 }, (_, i) => toKey(addDays(start, i))), index: 0 }]
+      })()
+    : weeks.map((week, index) => ({ week, index }))
+
   return (
     <div
       ref={gridRef}
       role="grid"
+      data-view={view}
       aria-label={gridLabel}
       data-slot="month-calendar"
       className={cn("w-full", className)}
@@ -289,7 +314,7 @@ function MonthCalendar({
           )
         })}
       </div>
-      {weeks.map((week, wi) => (
+      {visibleWeeks.map(({ week, index: wi }) => (
         <div role="row" key={wi} className="grid grid-cols-7 border-b border-[var(--Border-Low-Emphasis)] last:border-b-0">
           {week.map((key, di) => {
             if (!key) {
@@ -302,6 +327,8 @@ function MonthCalendar({
             const hidden = dayEvents.length - visible.length
             const isToday = key === todayKey
             const isSelected = key === selectedDate
+            // week の月をまたぐ週で、表示月の外の日（数字を控えめにする）
+            const isOutside = !inMonth(key)
             return (
               // ksk-ds-lint-ignore P024 -- WAI-ARIA grid の gridcell は roving tabindex でセル自体がフォーカスを受け、キー操作は handleKeyDown が担う
               <div
@@ -310,6 +337,7 @@ function MonthCalendar({
                 data-date={key}
                 data-today={isToday || undefined}
                 data-selected={isSelected || undefined}
+                data-outside-month={isOutside || undefined}
                 tabIndex={key === activeKey ? 0 : -1}
                 aria-selected={isSelected}
                 aria-label={dayLabel(key, dayEvents)}
@@ -334,7 +362,9 @@ function MonthCalendar({
                     "flex size-7 items-center justify-center self-center rounded-full typo-label-sm md:self-start",
                     isToday
                       ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
-                      : weekendTone && weekday === 0
+                      : isOutside
+                        ? "text-[var(--Text-Medium-Emphasis)]"
+                        : weekendTone && weekday === 0
                         ? "text-[var(--Text-Caution)]"
                         : weekendTone && weekday === 6
                           ? "text-[var(--Text-Accent-Primary)]"
@@ -401,4 +431,4 @@ function MonthCalendar({
 }
 
 export { MonthCalendar, buildMonthWeeks }
-export type { MonthCalendarEvent, MonthCalendarEventTone, MonthCalendarProps }
+export type { MonthCalendarEvent, MonthCalendarEventTone, MonthCalendarProps, MonthCalendarView }

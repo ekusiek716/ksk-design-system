@@ -177,6 +177,8 @@
       "--Nav-Pill-Specular",
       "--Nav-Item-Min-Height",
       "--Nav-Item-Gap",
+      "--Nav-Item-Height",
+      "--Nav-Item-Label-Offset-Y",
       "--Nav-Center-Action-Size",
       "--Nav-Center-Action-Radius",
       "--Nav-Center-Action-Surface",

@@ -94,6 +94,7 @@
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
 | AddTile | `@/components/patterns/add-tile` | — | Default, Small, CustomIcon, Disabled, InGrid |
+| AgendaList | `@/components/patterns/agenda-list` | — | Default, WithSelectedDate, FixedDates, Empty, ReadOnly |
 | AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky, Glass — Liquid Glass (over gradient), Transparent — scrollable reveal, NavWithRenderSlot |
 | BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
 | Banner | `@/components/patterns/banner` | **density**: `default`, `compact`<br>**layout**: `card`, `bar`<br>**variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants, Compact, Bar |
@@ -127,7 +128,7 @@
 | FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
-| KanbanColumn | `@/components/patterns/kanban-column` | — | Board |
+| KanbanColumn | `@/components/patterns/kanban-column` | — | Board, CategoryBoard |
 | KeyboardAwareSheetFooter | `@/components/patterns/keyboard-aware-sheet-footer` | — | Fixed, HideWhenKeyboardOpen, Glass |
 | ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot, AlignCenter, DensityCompact, WithFooterSlot, WithSecondaryAction, RightSlotWidth |
 | ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | Default, WithoutFilter, FewRows |
@@ -136,7 +137,7 @@
 | MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount, WithTopAlignment |
 | MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff |
 | MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline, Full width CTA, With ad banner offset (bottomOffsetExtra) |
-| MonthCalendar | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English |
+| MonthCalendar | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English, MobileWeekWithAgenda |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
 | PresenceIndicator | `@/components/patterns/presence-indicator` | — | Default, WithBadge, Offline, NameOnly, 狭幅で非表示にする例（className） |
@@ -146,9 +147,10 @@
 | ActionTile, QuickActionGrid | `@/components/patterns/quick-action-grid` | — | EmojiOnly, IconAndLabel, WithMeta, IndicatorOverride, SelectedWithoutDescription, NarrowWithLongMeta, SingleSelection, MultipleSelection, LaunchersWithoutSelectionMode, Illustration, ColorSwatch |
 | ResponsiveOverlayFrame, ResponsiveOverlayFooter | `@/components/patterns/responsive-overlay-frame` | — | Short form (mobile-form), Long keyboard-aware form (mobile-page), mobile-full preset, breakpoint=lg, breakpoint=product-theme, snapPoints は dialog に変換されない, float サイド（カード型）, float-glass サイド（ガラス素材）, float サイド（長い内容・既定の最大高さと safe-area）, plain preset（素の bottom シート） |
 | ReviewOverlay | `@/components/patterns/review-overlay` | — | Default, WithPins |
-| Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero |
+| Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero, OnboardingCard, NestedInAppMain |
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch, AsForm |
 | SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
+| SelectableTile | `@/components/patterns/selectable-tile` | — | Shapes, MovableGrid, KeyboardMove |
 | SettingsSection, SettingsListRow | `@/components/patterns/settings-section` | — | Group, Card, Danger, CompactSpacing, WithIconAndChevron |
 | ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders, With onShare tracking, BlockPrimary |
 | SideDrawerFrame | `@/components/patterns/side-drawer-frame` | — | RightDrawer, LeftDrawer, RightDrawer — swipeToClose, LeftDrawer — swipeToClose, Glass |
@@ -181,7 +183,7 @@
 | BottomTabBar | `@/components/patterns/commerce/bottom-tab-bar` | — | Default, Pill — iOS 26 Liquid Glass, Pill — on light background, Liquid Glass — center action, Liquid Glass — labels visible, Liquid Glass — 5 items, Liquid Glass — over dark photo/gradient, Liquid Glass — light fallback, Liquid Glass — sliding selection (interactive), Liquid Glass — scroll edge effect, Floating position — left + FAB, Floating position — right + FAB, Keyboard behavior — hide, Pill の面を不透明にする（--Nav-Pill-*）, デスクトップ幅でも表示する（showOnDesktop） |
 | FilterBar | `@/components/patterns/commerce/filter-bar` | — | Default, Interactive |
 | ImageCarousel | `@/components/patterns/commerce/image-carousel` | — | Banner, Square, Video, AutoPlay |
-| MobileTabBar | `@/components/patterns/commerce/mobile-tab-bar` | — | Default, With addAction (center CTA), floatingPosition=, ProductCustomization, WithBottomOffsetExtra |
+| MobileTabBar | `@/components/patterns/commerce/mobile-tab-bar` | — | Default, With addAction (center CTA), floatingPosition=, ProductCustomization, WithBottomOffsetExtra, FixedItemHeight, HideWhileTyping |
 | OrderSummary | `@/components/patterns/commerce/order-summary` | — | Default, Simple |
 | PriceDisplay | `@/components/patterns/commerce/price-display` | **size**: `sm`, `md`, `lg`, `xl` | Default, Sale, Range, AllSizes |
 | ProductCard | `@/components/patterns/commerce/product-card` | — | Vertical, VerticalWithDiscount, VerticalWithCart, VerticalWithRanking, Horizontal, Grid |
@@ -195,7 +197,7 @@
 
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
-| AdminShell | `@/components/patterns/shells/admin-shell` | — | Default, WithoutHeader |
+| AdminShell | `@/components/patterns/shells/admin-shell` | — | Default, WithoutHeader, MobileDrawer |
 | AppShell | `@/components/patterns/shells/app-shell` | — | Default |
 | MarketingShell | `@/components/patterns/shells/marketing-shell` | — | Default |
 

@@ -1,6 +1,9 @@
 import * as React from "react"
+import { HamburgerMenu } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
+import { Button } from "../../ui/button"
 import { Container } from "../../ui/container"
+import { Sheet, SheetContent, SheetTitle } from "../../ui/sheet"
 import { ScrollArea } from "../../ui/scroll-area"
 import { SkipLink } from "../../ui/skip-link"
 
@@ -17,6 +20,45 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
   mainId?: string
   skipLink?: boolean
   skipLinkLabel?: string | null
+  /**
+   * lg（1024px）未満でサイドバーを引き出し式のメニュー（モバイルドロワー）にする（issue #705）。
+   * true のとき lg 未満のヘッダー左端にメニューボタンを出し、押すと左から Sheet で `sidebar` を開く。
+   * `header` が無いときも lg 未満ではメニューボタンだけのヘッダーを出す。lg 以上の見た目は変わらない。
+   * @default false（従来どおり lg 未満ではサイドバーを出さない）
+   */
+  mobileDrawer?: boolean
+  /** モバイルドロワーの開閉（制御する場合）。onMobileDrawerOpenChange と対で渡す */
+  mobileDrawerOpen?: boolean
+  /** モバイルドロワーの開閉が変わったとき */
+  onMobileDrawerOpenChange?: (open: boolean) => void
+  /** メニューボタンのアクセシブルネーム。@default "メニューを開く" */
+  mobileMenuLabel?: string
+  /** ドロワーの見出し（読み上げ専用。画面には出さない）。@default "メニュー" */
+  mobileDrawerTitle?: string
+  /**
+   * ドロワーの中のリンク（`a[href]`）や SidebarNav の項目を押したら閉じる。
+   * ページ内の状態で画面を切り替える consumer が自前で閉じなくてよいように既定 true。
+   * サイドバー内の開閉トグル等、それ以外のボタンでは閉じない。
+   * @default true
+   */
+  closeMobileDrawerOnNavigate?: boolean
+}
+
+/** ドロワーを閉じる対象（ナビゲーションとみなす要素） */
+const NAVIGATE_SELECTOR = 'a[href], [data-slot="sidebar-nav-item"]'
+
+/** lg（1024px）以上。ここではドロワーを出さない（desktop の aside が出る） */
+const DESKTOP_QUERY = "(min-width: 1024px)"
+
+/**
+ * 押された要素がナビゲーション（= ドロワーを閉じてよい）か。
+ * 子を持つ親項目（aria-expanded を持つ開閉用）は、押しても画面が移らないので閉じない（issue #705）。
+ */
+function isNavigationTarget(target: Element | null): boolean {
+  const item = target?.closest(NAVIGATE_SELECTOR)
+  if (!item) return false
+  if (item.hasAttribute("aria-expanded")) return false
+  return true
 }
 
 /**
@@ -49,6 +91,9 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
  *    ラッパー（height:auto）配下に入るため % height が解決されず、フッターが
  *    下端に来ない。shell 側はそのラッパーを min-h-full の縦 flex に矯正して
  *    `grow` が効く状態を用意している。
+ * 9. lg 未満でナビへ辿れるようにするときは `mobileDrawer`（issue #705）。ヘッダー左端の
+ *    メニューボタン（44px・aria-expanded）から左の Sheet に同じ `sidebar` を開く。
+ *    ハンバーガーと Sheet を consumer で自作しない。
  */
 function AdminShell({
   className,
@@ -60,8 +105,56 @@ function AdminShell({
   mainId = "main-content",
   skipLink = true,
   skipLinkLabel = "コンテンツへ移動",
+  mobileDrawer = false,
+  mobileDrawerOpen,
+  onMobileDrawerOpenChange,
+  mobileMenuLabel = "メニューを開く",
+  mobileDrawerTitle = "メニュー",
+  closeMobileDrawerOnNavigate = true,
   ...props
 }: AdminShellProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
+  const drawerOpen = mobileDrawerOpen ?? uncontrolledOpen
+  const setDrawerOpen = React.useCallback(
+    (open: boolean) => {
+      if (mobileDrawerOpen === undefined) setUncontrolledOpen(open)
+      onMobileDrawerOpenChange?.(open)
+    },
+    [mobileDrawerOpen, onMobileDrawerOpenChange]
+  )
+  const handleDrawerClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!closeMobileDrawerOnNavigate || event.defaultPrevented) return
+    if (isNavigationTarget(event.target as Element | null)) setDrawerOpen(false)
+  }
+
+  // 開いたまま lg 以上へ広がったら閉じる（lg 以上はドロワーを lg:hidden で隠すため、
+  // 開いたままだと見えないモーダルがフォーカスとスクロールを奪う）。SSR では走らない
+  React.useEffect(() => {
+    if (!mobileDrawer || !drawerOpen) return
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return
+    const query = window.matchMedia(DESKTOP_QUERY)
+    const closeIfDesktop = () => {
+      if (query.matches) setDrawerOpen(false)
+    }
+    closeIfDesktop()
+    query.addEventListener?.("change", closeIfDesktop)
+    return () => query.removeEventListener?.("change", closeIfDesktop)
+  }, [mobileDrawer, drawerOpen, setDrawerOpen])
+  const menuButton = mobileDrawer ? (
+    <Button
+      variant="ghost"
+      size="icon-xl"
+      className="-ml-2 shrink-0 lg:hidden"
+      aria-label={mobileMenuLabel}
+      aria-expanded={drawerOpen}
+      aria-haspopup="dialog"
+      data-slot="admin-mobile-menu-button"
+      onClick={() => setDrawerOpen(true)}
+    >
+      <HamburgerMenu size={20} aria-hidden="true" />
+    </Button>
+  ) : null
+
   return (
     <div
       data-slot="admin-shell"
@@ -98,13 +191,41 @@ function AdminShell({
           {sidebar}
         </ScrollArea>
       </aside>
+      {mobileDrawer && (
+        <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+          <SheetContent
+            side="left"
+            swipeToClose
+            padding={false}
+            // data-slot は SheetContent が sheet-content で固定する（#339）ため、識別は別属性
+            data-admin-mobile-drawer=""
+            data-tone={sidebarTone}
+            onClick={handleDrawerClick}
+            className={cn(
+              "flex w-72 max-w-[85vw] flex-col overflow-y-auto lg:hidden",
+              sidebarTone === "inverse"
+                ? "border-r-0 bg-[var(--Surface-Inverse)] text-[var(--Text-on-Inverse)]"
+                : "bg-[var(--Surface-Primary)]"
+            )}
+          >
+            <SheetTitle className="sr-only">{mobileDrawerTitle}</SheetTitle>
+            {/* desktop の aside と同じく slot 直下を flex grow flex-col で受ける（フッターの mt-auto が効く） */}
+            <div className="flex min-h-full grow flex-col">{sidebar}</div>
+          </SheetContent>
+        </Sheet>
+      )}
       <div className="flex flex-1 flex-col min-w-0">
-        {header && (
+        {(header || mobileDrawer) && (
           <header
             data-slot="admin-header"
-            className="h-16 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]"
+            className={cn(
+              "h-16 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
+              // header を渡していないときは、メニューボタンのための lg 未満だけのヘッダー
+              !header && "lg:hidden"
+            )}
           >
             <Container size="fluid" className="flex h-full items-center gap-4">
+              {menuButton}
               {header}
             </Container>
           </header>

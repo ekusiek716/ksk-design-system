@@ -16,6 +16,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 | ActionTile | あり | あり |  | disabled, onPress, style | DOM event naming (onClick/onOpenChange/onSearch) vs RN naming (onPress/onClose/onChange) is each platform's idiomatic convention, not a functional gap; className/CSS (Web) vs RN style/StyleSheet (Native) is each platform's idiomatic styling prop, not a functional gap | 未検証 |
 | AddTile | あり | あり |  | onPress, disabled, style | DOM event naming (onClick/onOpenChange/onSearch) vs RN naming (onPress/onClose/onChange) is each platform's idiomatic convention, not a functional gap; className/CSS (Web) vs RN style/StyleSheet (Native) is each platform's idiomatic styling prop, not a functional gap; Web inherits disabled / onClick from React.ComponentProps<"button"> | 未検証 |
 | AdminShell | あり | なし | 抽出不可 | 抽出不可 | admin shell is Web dashboard layout; native apps use AppShell or MarketingShell | 未検証 |
+| AgendaList | あり | なし | 抽出不可 | 抽出不可 | 予定がある日の一覧（issue #704）。Web の MonthCalendar（WAI-ARIA grid）と組むスマホ幅の DOM リストとして作った。native の予定表は SectionList で別途設計する（MonthCalendar と同じ判断） | 未検証 |
 | Alert | あり | あり | icon, action | variant, tone, children | Web and Native implementations were designed independently for this component (pre-dates this check); prop vocabulary diverges by design and is tracked here as the established baseline, not a new regression (Web: icon/action prop API; Native: tone + children composition API). variant/size/tone are declared via `extends VariantProps<typeof ...Variants>` on Web (inherited, so invisible to this own-props-only extractor) but declared directly in Native's own Props interface — an extraction-method artifact, not a real gap; Native inline-info/inline-warning/inline-caution (issue #586) mirror Web alertVariants; Web declares variant through VariantProps<typeof alertVariants>, so this own-props-only extractor cannot see it. | 未検証 |
 | AlertDescription | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | AlertDialog | あり | あり | 抽出不可 | 抽出不可 |  | 未検証 |
@@ -260,7 +261,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 | ReviewOverlay | あり | あり | active, onPinCreate, pins, onPinClick, holdDuration, onHaptic, className, children | open, onClose, title, onSubmit | Web and Native implementations were designed independently for this component (pre-dates this check); prop vocabulary diverges by design and is tracked here as the established baseline, not a new regression (Web: long-press pin-drop annotation overlay; Native: this file implements a plain form-submit overlay, a different pattern entirely) | 未検証 |
 | ReviewSummary | あり | あり | averageRating, totalCount, className | average, total | averageRating/totalCount vs average/total naming diverged independently for the same values | 未検証 |
 | RhfFormField | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
-| Screen | あり | あり | bodyClassName, headerClassName, footerClassName, mainId, skipLink, skipLinkLabel | style, bodyStyle, headerStyle, footerStyle, contentContainerStyle | className/CSS (Web) vs RN style/StyleSheet (Native) is each platform's idiomatic styling prop, not a functional gap; mainId/skipLink are DOM landmark features with no RN equivalent | 未検証 |
+| Screen | あり | あり | bodyClassName, headerClassName, footerClassName, mainId, skipLink, skipLinkLabel, safeAreaTop, height, desktopLayout, cardMaxWidth, cardMaxHeight, landmark | style, bodyStyle, headerStyle, footerStyle, contentContainerStyle | className/CSS (Web) vs RN style/StyleSheet (Native) is each platform's idiomatic styling prop, not a functional gap; mainId/skipLink are DOM landmark features with no RN equivalent; safeAreaTop/height/desktopLayout/cardMaxWidth/cardMaxHeight/landmark (issue #701) are CSS viewport units (dvh/svh), env(safe-area-inset-top), the lg desktop card layout and the DOM <main> landmark — native screens sit inside the navigator's SafeAreaView / flex:1 and have no browser viewport or landmark | 未検証 |
 | Scrim | なし | あり | 抽出不可 | 抽出不可 |  | 未検証 |
 | ScrollArea | あり | あり | 抽出不可 | 抽出不可 |  | 未検証 |
 | ScrollBar | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
@@ -277,6 +278,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 | SelectSeparator | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | SelectTrigger | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | SelectValue | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
+| SelectableTile | あり | なし | 抽出不可 | 抽出不可 | 選べて動かせるタイル（issue #703）。ドラッグ・矢印キーの移動とキーボードの説明は DOM の pointer / keyboard / aria-describedby の前提で作った。native の並べ替えはジェスチャーハンドラ（Pressable の長押し・PanResponder）と accessibilityActions で別途設計する | 未検証 |
 | SemanticIcon | あり | あり |  |  |  | 未検証 |
 | Separator | あり | あり | 抽出不可 | 抽出不可 |  | 未検証 |
 | SettingsListRow | あり | あり | interactive, onClick | children, onPress, style | DOM event naming (onClick/onOpenChange/onSearch) vs RN naming (onPress/onClose/onChange) is each platform's idiomatic convention, not a functional gap; Native composes via children instead of Web's interactive/onClick pair | 未検証 |

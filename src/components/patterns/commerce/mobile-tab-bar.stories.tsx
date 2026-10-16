@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
 import { Home2, Notification, Setting2, TaskSquare, User } from "iconsax-reactjs"
+import { expect } from "storybook/test"
 import { MobileTabBar } from "./mobile-tab-bar"
+import { Input } from "../../ui/input"
+import { FormField } from "../form-field"
 
 const meta: Meta<typeof MobileTabBar> = {
   title: "Components/MobileTabBar",
@@ -161,6 +164,77 @@ export const WithBottomOffsetExtra: Story = {
         <div className="fixed inset-x-0 bottom-0 flex h-[50px] items-center justify-center border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Tertiary)] typo-label-sm text-[var(--Text-Medium-Emphasis)]">
           広告バナー（50px）
         </div>
+      </div>
+    )
+  },
+}
+
+// ─── タブの高さ・ラベルの縦位置（issue #699） ─────────────────────────────────
+
+/**
+ * タブを 48px に固定し、ラベルを 2px 持ち上げる。DS の内部の目印に CSS を当てず、
+ * 公開変数 `--Nav-Item-Height` / `--Nav-Item-Label-Offset-Y` だけで組む。
+ * アイコン領域は `shrink-0` なので、タブを低くしてもアイコン（28px）は潰れない。
+ *
+ * ```css
+ * :root {
+ *   --Nav-Item-Height: 48px;
+ *   --Nav-Item-Label-Offset-Y: -2px;
+ * }
+ * ```
+ */
+export const FixedItemHeight: Story = {
+  tags: ["interaction"],
+  render: function Render() {
+    const [active, setActive] = React.useState<TabKey>("home")
+    return (
+      <div className="relative w-full min-h-screen flex flex-col items-center justify-center bg-[var(--Surface-Secondary)] [--Nav-Item-Height:48px] [--Nav-Item-Label-Offset-Y:-2px] [--Nav-Item-Gap:0px] [--Nav-Pill-Min-Height:64px]">
+        <p className="text-[var(--Text-High-Emphasis)] typo-heading-xl">現在のタブ: {active}</p>
+        <MobileTabBar
+          tabs={TABS}
+          activeTab={active}
+          onSelect={setActive}
+          addAction={{ label: "作成", onClick: () => {} }}
+          // テストの実行幅（デスクトップ幅）でも寸法を測れるように出し続ける
+          showOnDesktop
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const items = canvasElement.querySelectorAll<HTMLElement>('[data-slot="bottom-nav-item"]')
+    await expect(items.length).toBeGreaterThan(0)
+    for (const item of items) {
+      await expect(Math.round(item.getBoundingClientRect().height)).toBe(48)
+      const icon = item.querySelector<HTMLElement>('[data-slot="bottom-nav-item-icon"]')!
+      // h-7 = 28px が保たれる（shrink-0）
+      await expect(Math.round(icon.getBoundingClientRect().height)).toBe(28)
+      const label = item.querySelector<HTMLElement>('[data-slot="bottom-nav-item-label"]')!
+      await expect(getComputedStyle(label).top).toBe("-2px")
+    }
+  },
+}
+
+// ─── 入力中は隠す（issue #700） ───────────────────────────────────────────────
+
+/**
+ * `keyboardBehavior="hide"`（既定）は、キーボード検知（visualViewport の縮み /
+ * `html[data-kb-open]`）に加えて、ソフトキーボードが出る端末（`(pointer: coarse) and (hover: none)`）でテキスト入力欄に
+ * フォーカスがある間もタブバーを隠す。visualViewport が縮む前の iOS Safari や、
+ * 縮まない Android でもキーボードの上にナビが重ならない。
+ * consumer が `html:has(input:focus) [data-slot="bottom-nav-pill"]` の CSS を足す必要は無い。
+ * マウス主体の PC ではフォーカスだけでは隠さない（このストーリーはスマホ / タッチ
+ * エミュレーションで確認する）。
+ */
+export const HideWhileTyping: Story = {
+  render: function Render() {
+    const [active, setActive] = React.useState<TabKey>("home")
+    return (
+      <div className="relative w-full min-h-screen flex flex-col items-center gap-4 px-6 pt-10 bg-[var(--Surface-Secondary)]">
+        <FormField label="メモ" className="w-full max-w-sm">
+          <Input placeholder="入力するとタブバーが隠れる" />
+        </FormField>
+        <MobileTabBar tabs={TABS.slice(0, 4)} activeTab={active} onSelect={setActive} />
       </div>
     )
   },

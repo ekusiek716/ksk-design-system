@@ -144,6 +144,31 @@ describe("寸法は --Nav-* 参照（固定クラスに戻っていない）", (
     expect(SOURCE).toContain("gap-[var(--Nav-Item-Gap)]")
   })
 
+  it("タブの高さ・ラベルの縦位置は宣言したときだけ効く（issue #699）", () => {
+    // 未宣言のフォールバックは従来の h-full（100%）と 0
+    expect(SOURCE).toContain("h-[var(--Nav-Item-Height,100%)]")
+    expect(SOURCE).toContain("top-[var(--Nav-Item-Label-Offset-Y,0px)]")
+    // :root に既定値を置かない（置くと var() のフォールバックが効かなくなる）
+    expect(PRODUCT_THEME_CSS).not.toMatch(/^\s*--Nav-Item-Height\s*:/m)
+    expect(PRODUCT_THEME_CSS).not.toMatch(/^\s*--Nav-Item-Label-Offset-Y\s*:/m)
+  })
+
+  it("タブを低くしてもアイコン領域が潰れない（shrink-0 / issue #699）", () => {
+    const nav = renderNav()
+    const icons = nav.querySelectorAll('[data-slot="bottom-nav-item-icon"]')
+    expect(icons.length).toBe(TABS.length)
+    for (const icon of icons) expect(icon.className).toContain("shrink-0")
+    const labels = nav.querySelectorAll('[data-slot="bottom-nav-item-label"]')
+    for (const label of labels) {
+      expect(label.className).toContain("top-[var(--Nav-Item-Label-Offset-Y,0px)]")
+      // transform 系で動かさない（重なり順・containing block を変えない）
+      expect(label.className).not.toMatch(/translate-y/)
+    }
+    for (const item of nav.querySelectorAll('[data-slot="bottom-nav-item"]')) {
+      expect(item.className).toContain("h-[var(--Nav-Item-Height,100%)]")
+    }
+  })
+
   it("中央アクションが --Nav-Center-Action-Size / -Radius を参照する", () => {
     expect(SOURCE).toContain("size-[max(2.75rem,var(--Nav-Center-Action-Size))]")
     expect(SOURCE).toContain("h-[max(2.75rem,var(--Nav-Center-Action-Size))]")
@@ -244,6 +269,8 @@ describe("契約が contracts に載っている", () => {
       "--Nav-Pill-Gap",
       "--Nav-Item-Min-Height",
       "--Nav-Item-Gap",
+      "--Nav-Item-Height",
+      "--Nav-Item-Label-Offset-Y",
       "--Nav-Center-Action-Size",
       "--Nav-Center-Action-Radius",
       "--Nav-Center-Action-Surface",

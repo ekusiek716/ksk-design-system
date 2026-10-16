@@ -114,3 +114,63 @@ export const FixedPhotoHero: Story = {
     </Screen>
   ),
 }
+
+/**
+ * オンボーディング等の 1 画面フロー（issue #701）。
+ *
+ * - `safeAreaTop`: header の上にステータスバー / ダイナミックアイランド分の余白
+ * - `height="svh"`: アドレスバーの出入りで高さが揺れない
+ * - `desktopLayout="card"`: PC（lg 以上）では背景の中央に枠・角丸のカードとして置く
+ *   （既定 最大幅 30rem・高さ 47.5rem。`cardMaxWidth` / `cardMaxHeight` で変える）
+ */
+export const OnboardingCard: Story = {
+  render: () => (
+    <Screen
+      safeAreaTop
+      height="svh"
+      desktopLayout="card"
+      header={
+        <div className="flex h-14 items-center gap-3 px-4">
+          <Button variant="ghost" size="icon" aria-label="戻る">
+            <ArrowLeft size={20} />
+          </Button>
+          <span className="typo-label-md text-[var(--Text-Medium-Emphasis)]">2 / 5</span>
+        </div>
+      }
+      footer={<Button className="w-full" size="xl">次へ</Button>}
+    >
+      <div className="flex flex-col gap-4">
+        <h1 className="typo-heading-2xl text-[var(--Text-High-Emphasis)]">挙式の予定日は？</h1>
+        <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">
+          あとから変えられます。決まっていなければ、おおよその月で大丈夫です。
+        </p>
+        {rows.slice(0, 6).map((row) => (
+          <Button key={row} variant="secondary" className="w-full justify-start">
+            {row}
+          </Button>
+        ))}
+      </div>
+    </Screen>
+  ),
+}
+
+/**
+ * アプリのシェル（`<main>` を持つ）の中に置く場合（issue #701）。
+ * `landmark="none"` で本文を div にし、main の二重化・id の重複・スキップリンクの重複を避ける。
+ * 高さは親に合わせる `height="fill"`。
+ */
+export const NestedInAppMain: Story = {
+  render: () => (
+    <main id="app-main" className="h-[100dvh] bg-[var(--Surface-Secondary)] p-4">
+      <Screen landmark="none" height="fill" className="rounded-2xl border border-[var(--Border-Low-Emphasis)]">
+        <div className="flex flex-col gap-3">
+          <h1 className="typo-heading-xl text-[var(--Text-High-Emphasis)]">シェルの中の 1 画面</h1>
+          {rows.slice(0, 10).map((row) => (
+            <p key={row} className="typo-body-md text-[var(--Text-High-Emphasis)]">{row}</p>
+          ))}
+          <Button variant="secondary">続きを読む</Button>
+        </div>
+      </Screen>
+    </main>
+  ),
+}

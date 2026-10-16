@@ -3,6 +3,7 @@ import { Add } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
 import { Button } from "../ui/button"
 import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
+import { useSoftKeyboardFocus } from "@/lib/use-soft-keyboard-focus"
 
 type MobileFloatingActionButtonPlacement = "end" | "start" | "center"
 type MobileFloatingActionButtonKeyboardBehavior = "hide" | "lift" | "stay"
@@ -15,6 +16,13 @@ interface MobileFloatingActionButtonProps extends Omit<React.ComponentProps<type
   showLabel?: boolean
   placement?: MobileFloatingActionButtonPlacement
   bottomOffset?: MobileFloatingActionButtonBottomOffset
+  /**
+   * ソフトキーボード表示中の挙動（既定 "hide"）。
+   * - "hide" : 入力中は隠す。キーボード検知に加え、タッチ主体の端末でテキスト入力欄に
+   *            フォーカスがある間も隠す（issue #700）。隠れている間はフォーカスも受けない
+   * - "lift" : keyboard inset 分だけ上へ逃がす
+   * - "stay" : 動かさない
+   */
   keyboardBehavior?: MobileFloatingActionButtonKeyboardBehavior
   mobileOnly?: boolean
   /**
@@ -66,7 +74,10 @@ function MobileFloatingActionButton({
   const showsLabel = showLabel || fullWidth
   const ariaLabel = props["aria-label"] ?? label
   const { keyboardInset, isKeyboardOpen } = useVisualViewportKeyboardInset()
-  const shouldHide = keyboardBehavior === "hide" && isKeyboardOpen
+  // visualViewport が縮む前・縮まない端末でも「入力中」を拾う（issue #700）。
+  // タッチ主体の端末でソフトキーボードを出す入力欄にフォーカスがある間 true
+  const isSoftKeyboardFocused = useSoftKeyboardFocus(keyboardBehavior === "hide")
+  const shouldHide = keyboardBehavior === "hide" && (isKeyboardOpen || isSoftKeyboardFocused)
   const liftInset = keyboardBehavior === "lift" ? keyboardInset : 0
 
   return (
@@ -95,7 +106,10 @@ function MobileFloatingActionButton({
         bottomOffset === "bottom-nav" && "[--ksk-fab-bottom-offset:5rem]",
         bottomOffset === "bottom-nav-pill" && "[--ksk-fab-bottom-offset:6rem]",
         mobileOnly && "lg:hidden",
-        shouldHide && "translate-y-2 opacity-0 pointer-events-none",
+        // invisible: 隠れている間に Tab で見えない FAB へフォーカスが移らないようにする
+        //（BottomTabBar の hide と同じ扱い。issue #700）。visibility は上の transition-all に乗り、
+        // 遷移の終わりで hidden になるのでフェードアウトは切れない
+        shouldHide && "translate-y-2 opacity-0 pointer-events-none invisible",
         className
       )}
       style={{

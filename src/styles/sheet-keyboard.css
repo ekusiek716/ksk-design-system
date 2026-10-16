@@ -52,14 +52,25 @@
    ============================================================= */
 
 /* ── #150: bottom lift（snap を含む全 bottom シート） ── */
-html[data-kb-open] [data-slot="sheet-content"][data-side="bottom"] {
+html[data-kb-open] [data-slot="sheet-content"]:is([data-side="bottom"], [data-side="bottom-glass"]) {
   bottom: var(--kb-h, 0px);
 }
 
 /* ── #150: max-height 補正（snap モードは除外） ── */
 html[data-kb-open]
-  [data-slot="sheet-content"][data-side="bottom"]:not([data-snap-active]) {
+  [data-slot="sheet-content"]:is([data-side="bottom"], [data-side="bottom-glass"]):not([data-snap-active]) {
   max-height: calc(100dvh - var(--kb-h, 0px));
+}
+
+/* ── #706: 上端の safe-area も引く（safeArea={false} 以外） ──
+   可視領域はステータスバー / ダイナミックアイランドの裏まで含むため、上の値のままだと
+   背の高いシートの見出しが時計の裏に潜る。JS 検知（resolveBottomSheetKeyboardStyle）と
+   同じ値。float 系（#337）は以前から引いている。JS と同じく bottom-glass も対象（#706 レビュー:
+   以前は CSS だけ side="bottom" 限定で、JS が補正する bottom-glass が CSS フォールバックから漏れていた）。safeArea={false} は data-safe-area="false"
+   なので従来の値（上のルール）に残る。 */
+html[data-kb-open]
+  [data-slot="sheet-content"]:is([data-side="bottom"], [data-side="bottom-glass"]):not([data-snap-active]):not([data-safe-area="false"]) {
+  max-height: max(0px, calc(100dvh - var(--kb-h, 0px) - var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))));
 }
 
 /* ── #337: float 系（float / float-glass）の lift + max-height 補正 ──

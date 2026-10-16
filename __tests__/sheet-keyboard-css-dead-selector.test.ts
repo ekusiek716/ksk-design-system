@@ -30,11 +30,12 @@ describe("sheet-keyboard.css — 死んだセレクタの除去（Issue #339）"
   })
 
   it('[data-slot="sheet-content"] だけで bottom lift / max-height 補正をスコープする', () => {
+    // #706: JS と同じく bottom-glass も対象（:is で並べる）
     expect(css).toMatch(
-      /html\[data-kb-open\] \[data-slot="sheet-content"\]\[data-side="bottom"\] \{/
+      /html\[data-kb-open\] \[data-slot="sheet-content"\]:is\(\[data-side="bottom"\], \[data-side="bottom-glass"\]\) \{/
     )
     expect(css).toMatch(
-      /\[data-slot="sheet-content"\]\[data-side="bottom"\]:not\(\[data-snap-active\]\)/
+      /\[data-slot="sheet-content"\]:is\(\[data-side="bottom"\], \[data-side="bottom-glass"\]\):not\(\[data-snap-active\]\)/
     )
   })
 

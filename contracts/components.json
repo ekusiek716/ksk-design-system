@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 72,
-      "patterns": 67,
+      "patterns": 69,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 162
+      "total": 164
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -1889,7 +1889,8 @@
         "keyboard 表示中に入力を邪魔する場合は keyboardBehavior=hide を使う",
         "variant=glass に shadow-* を重ねない（glass-accent が inset 3層 + drop shadow を内包するため二重になる）",
         "下部固定の全幅 CTA は fullWidth を使い、fixed inset-x + Button を手組みしない。fullWidth 時は placement が無視されラベルが常に表示される",
-        "広告バナー等で動的に持ち上げる必要があるときは、内部変数 --ksk-fab-bottom-offset を直接上書きせず bottomOffsetExtra を使う（issue #453）"
+        "広告バナー等で動的に持ち上げる必要があるときは、内部変数 --ksk-fab-bottom-offset を直接上書きせず bottomOffsetExtra を使う（issue #453）",
+        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、ソフトキーボードが出る端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。consumer の html:has(input:focus) で隠す CSS は不要"
       ]
     },
     {
@@ -2202,6 +2203,10 @@
         "写真ヒーローなど 1 画面固定では scroll=false と padding=none を組み合わせる",
         "mainId で本文 landmark の id を調整でき、skipLink=false で内蔵 SkipLink を無効化できる",
         "footer には主要 CTA を置き、safe-area 余白を消費側で再実装しない",
+        "上端のステータスバー / ダイナミックアイランドは safeAreaTop で避ける（header の上、header が無ければ画面上端に --Safe-Area-Inset-Top の余白。issue #701）。header 側で pt-[max(1rem,var(--Safe-Area-Inset-Top))] を自作しない",
+        "アドレスバーの出入りで高さを揺らしたくない画面は height=\"svh\"、高さの決まった親の中では height=\"fill\"（既定 dvh）",
+        "オンボーディング・ログイン等の 1 画面フローを PC で中央カードにするときは desktopLayout=\"card\"（lg 以上で Surface-Secondary の背景の中央に枠・角丸のカード。cardMaxWidth 既定 30rem / cardMaxHeight 既定 47.5rem）。lg:w-[480px] lg:rounded-2xl 等を className で自作しない",
+        "他の <main> の中に置くときは landmark=\"none\"（本文を div にし、id とスキップリンクを既定で出さない）",
         "React Native consumer は ksk-design-system/native/ui の Screen を使い、header/body/footer shell をローカル再実装しない"
       ]
     },
@@ -2799,7 +2804,24 @@
         "日のセル・予定チップを Button unstyled で自作しない",
         "あふれは maxEventsPerDay（既定 2）超を「+n件」にまとめ、onShowMore（既定 onSelectDay）でその日の詳細へ",
         "md（768px）未満はチップの代わりに色ドット（最大 3）を出す。操作は日の選択に一本化する",
+        "スマホの週の帯は view=\"week\"（フォーカス中の日を含む 1 週だけ。矢印キーで週が移る。issue #704）、日ごとの予定の中身は AgendaList を下に置く。週ストリップ・アジェンダを Button unstyled で自作しない",
         "土日の色は weekendTone（既定 true。日曜 Text-Caution / 土曜 Text-Accent-Primary・Calendar と同じ語彙）",
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
+      ]
+    },
+    {
+      "name": "AgendaList",
+      "path": "src/components/patterns/agenda-list.tsx",
+      "description": "予定がある日を時系列に並べる一覧（issue #704）。スマホのカレンダーで MonthCalendar（view=\"week\" の週の帯や月グリッド）の下に置き、日付列（日・曜日）+ その日の予定の行で中身を見せる。予定は MonthCalendarEvent と同じ形。",
+      "accessibility": [
+        "日ごとの li に読み上げ用の見出し（既定 h3。置き場所に合わせて headingLevel で変える・「10月3日（土）、今日」）。今日の行は aria-current=\"date\"。日付列の見た目は aria-hidden",
+        "onSelectEvent を渡すと予定の行が button（44px 以上・focus-visible リング）。渡さなければ読むだけの行"
+      ],
+      "rules": [
+        "予定の行の面は tone（MonthCalendar のチップと同じ色）。今日・選択日・土日（weekendTone）の見た目は DS が持つ",
+        "既定は予定がある日だけを昇順に並べる。予定の無い日も出すときは dates（emptyDayLabel 既定「予定なし」）",
+        "スクロール連動・「今日へ」のジャンプ先は dayId で id を付ける（行には常に data-date）",
+        "並べる日が無いときは empty（EmptyState 等）",
         "native は未提供（INTENTIONAL_NATIVE_GAPS）"
       ]
     },
@@ -2812,8 +2834,32 @@
       ],
       "rules": [
         "列の上辺に太い色帯を付けない。状態は tone の色ドットと見出しの言葉で示す",
+        "分類の識別色（カテゴリ別ボード等）は accentColor に var(--Categorical-N) を渡す（tone より優先。issue #702）。title の中に色の点を自作しない",
         "中のカードは Card elevation=\"none\"（面の中の面は影なし）",
         "ドラッグ＆ドロップは持たない。consumer のライブラリで包む",
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
+      ]
+    },
+    {
+      "name": "SelectableTile",
+      "path": "src/components/patterns/selectable-tile.tsx",
+      "description": "押すと選べて、編集中はドラッグ・矢印キーで動かせるタイル（issue #703）。配席表の卓・座席、レイアウト編集のブロック等。押せる面そのものが 1 つの button で、consumer の pointer / key ハンドラと aria-* が同じ要素に付く。",
+      "variants": {
+        "shape": [
+          "rounded",
+          "circle"
+        ]
+      },
+      "accessibility": [
+        "1 つの <button>。名前は中身か aria-label。selected 指定時は aria-pressed（未指定なら付けない）",
+        "movable の間は矢印キー（↑ ↓ ← →）で onMove を呼び preventDefault。consumer の onKeyDown が preventDefault したら呼ばない",
+        "moveInstructions は button の中に hidden で描画して aria-describedby で結ぶ（名前には入らない。consumer の aria-describedby と連結）。非推奨の aria-grabbed / aria-dropeffect は使わない",
+        "タップ領域は 44px 以上（min-h-11 / min-w-11）。focus-visible は 3px のリング"
+      ],
+      "rules": [
+        "選択・移動するタイルを Button unstyled / Card selected + className で自作しない（Card の押せる面は内側の button でハンドラ・aria-describedby が乗らない）",
+        "ドラッグ＆ドロップ自体（pointer capture・落とし先の判定）は consumer が onPointerDown 等で実装し、dragging で見た目だけ渡す",
+        "大きさは className で渡す（円形は size-12 等）。selected の面・枠は Card / ActionTile と同じトークンで、枠の太さは内側の outline（focus-visible の外側 ring と両立）",
         "native は未提供（INTENTIONAL_NATIVE_GAPS）"
       ]
     }
@@ -2955,7 +3001,8 @@
         "--Nav-Item-Min-Height / --Nav-Center-Action-Size は max(44px, var(...)) で参照するため、44px（HIG のタップ領域下限）より縮まない。",
         "--Nav-Center-Action-Surface / -Border / -Shadow と --Nav-Selected-Surface / -Shadow は宣言したときだけ DS 既定（.glass-accent / ガラスの選択プラッター）を置き換える。未宣言なら tone / dark の出し分けは DS 側が持つ。",
         "--Nav-Pill-* の寸法が効くのは prominent レイアウト（showLabels か centerAction がある pill）。アイコンのみの compact pill は契約外で固定。",
-        "bottomOffsetExtra（CSS の長さ）は safe-area・pill の 12px・lift の持ち上げ量に加算される。className の bottom-* で位置を上書きしない（issue #681）"
+        "bottomOffsetExtra（CSS の長さ）は safe-area・pill の 12px・lift の持ち上げ量に加算される。className の bottom-* で位置を上書きしない（issue #681）",
+        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、ソフトキーボードが出る端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。consumer の html:has(input:focus) で隠す CSS は不要"
       ],
       "props": {
         "navLabel": "string (既定 \"メインナビゲーション\") — nav 要素の aria-label（issue #428）"
@@ -2995,7 +3042,8 @@
         "寸法・面の上書きは BottomTabBar と同じ --Nav-* を使う（MobileTabBar は薄いラッパーなので変数はそのまま効く。issue #471）",
         "[data-global-nav-add-icon] は belle-todo 互換の後方互換フックで公開契約ではない。中央アクションのアイコンは data-slot=\"bottom-nav-center-action-icon\" で狙う（issue #471）",
         "keyboardBehavior（hide 既定 / lift / stay）を BottomTabBar へ素通しする。キーボード表示中にタブバーを隠す CSS を consumer に書かない（issue #681）",
-        "bottomOffsetExtra（CSS の長さ）で画面下の広告バナー等の高さぶん持ち上げる。MobileAppShell の bottomPaddingExtra・MobileFloatingActionButton の bottomOffsetExtra に同じ値を渡す（issue #681）"
+        "bottomOffsetExtra（CSS の長さ）で画面下の広告バナー等の高さぶん持ち上げる。MobileAppShell の bottomPaddingExtra・MobileFloatingActionButton の bottomOffsetExtra に同じ値を渡す（issue #681）",
+        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、ソフトキーボードが出る端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。consumer の html:has(input:focus) で隠す CSS は不要"
       ],
       "productTheme": [
         "--Nav-Pill-*",
@@ -3193,7 +3241,9 @@
         "For admin/dashboard pages",
         "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる",
         "header と main の既定 gutter は内蔵 Container が担うためページ側で外周 padding を重ねない",
-        "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）"
+        "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）",
+        "lg 未満でナビへ辿れるようにするときは mobileDrawer（issue #705）。ヘッダー左端のメニューボタン（44px・aria-expanded・aria-label 既定「メニューを開く」）から左の Sheet に同じ sidebar を開く。ハンバーガーと Sheet side=\"left\" を consumer で自作しない",
+        "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 true）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange"
       ]
     },
     {
