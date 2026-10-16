@@ -146,7 +146,7 @@
 | ActionTile, QuickActionGrid | `@/components/patterns/quick-action-grid` | — | EmojiOnly, IconAndLabel, WithMeta, IndicatorOverride, SelectedWithoutDescription, NarrowWithLongMeta, SingleSelection, MultipleSelection, LaunchersWithoutSelectionMode, Illustration, ColorSwatch |
 | ResponsiveOverlayFrame, ResponsiveOverlayFooter | `@/components/patterns/responsive-overlay-frame` | — | Short form (mobile-form), Long keyboard-aware form (mobile-page), mobile-full preset, breakpoint=lg, breakpoint=product-theme, snapPoints は dialog に変換されない, float サイド（カード型）, float-glass サイド（ガラス素材）, float サイド（長い内容・既定の最大高さと safe-area）, plain preset（素の bottom シート） |
 | ReviewOverlay | `@/components/patterns/review-overlay` | — | Default, WithPins |
-| Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero |
+| Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero, OnboardingCard, NestedInAppMain |
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch, AsForm |
 | SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
 | SettingsSection, SettingsListRow | `@/components/patterns/settings-section` | — | Group, Card, Danger, CompactSpacing, WithIconAndChevron |
@@ -181,7 +181,7 @@
 | BottomTabBar | `@/components/patterns/commerce/bottom-tab-bar` | — | Default, Pill — iOS 26 Liquid Glass, Pill — on light background, Liquid Glass — center action, Liquid Glass — labels visible, Liquid Glass — 5 items, Liquid Glass — over dark photo/gradient, Liquid Glass — light fallback, Liquid Glass — sliding selection (interactive), Liquid Glass — scroll edge effect, Floating position — left + FAB, Floating position — right + FAB, Keyboard behavior — hide, Pill の面を不透明にする（--Nav-Pill-*）, デスクトップ幅でも表示する（showOnDesktop） |
 | FilterBar | `@/components/patterns/commerce/filter-bar` | — | Default, Interactive |
 | ImageCarousel | `@/components/patterns/commerce/image-carousel` | — | Banner, Square, Video, AutoPlay |
-| MobileTabBar | `@/components/patterns/commerce/mobile-tab-bar` | — | Default, With addAction (center CTA), floatingPosition=, ProductCustomization, WithBottomOffsetExtra, FixedItemHeight |
+| MobileTabBar | `@/components/patterns/commerce/mobile-tab-bar` | — | Default, With addAction (center CTA), floatingPosition=, ProductCustomization, WithBottomOffsetExtra, FixedItemHeight, HideWhileTyping |
 | OrderSummary | `@/components/patterns/commerce/order-summary` | — | Default, Simple |
 | PriceDisplay | `@/components/patterns/commerce/price-display` | **size**: `sm`, `md`, `lg`, `xl` | Default, Sale, Range, AllSizes |
 | ProductCard | `@/components/patterns/commerce/product-card` | — | Vertical, VerticalWithDiscount, VerticalWithCart, VerticalWithRanking, Horizontal, Grid |

@@ -416,7 +416,7 @@ export type {
 export { PhotoHero } from "./components/patterns/photo-hero"
 export type { PhotoHeroAlign, PhotoHeroOverlay, PhotoHeroProps } from "./components/patterns/photo-hero"
 export { Screen } from "./components/patterns/screen"
-export type { ScreenPadding, ScreenProps } from "./components/patterns/screen"
+export type { ScreenDesktopLayout, ScreenHeight, ScreenLandmark, ScreenPadding, ScreenProps } from "./components/patterns/screen"
 export { Footer } from "./components/patterns/footer"
 export type { FooterProps, FooterLinkGroup, FooterLink, FooterSocialLink, FooterLinkRender } from "./components/patterns/footer"
 export { ShareButtons } from "./components/patterns/share-buttons"

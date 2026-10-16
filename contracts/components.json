@@ -2202,6 +2202,10 @@
         "写真ヒーローなど 1 画面固定では scroll=false と padding=none を組み合わせる",
         "mainId で本文 landmark の id を調整でき、skipLink=false で内蔵 SkipLink を無効化できる",
         "footer には主要 CTA を置き、safe-area 余白を消費側で再実装しない",
+        "上端のステータスバー / ダイナミックアイランドは safeAreaTop で避ける（header の上、header が無ければ画面上端に --Safe-Area-Inset-Top の余白。issue #701）。header 側で pt-[max(1rem,var(--Safe-Area-Inset-Top))] を自作しない",
+        "アドレスバーの出入りで高さを揺らしたくない画面は height=\"svh\"、高さの決まった親の中では height=\"fill\"（既定 dvh）",
+        "オンボーディング・ログイン等の 1 画面フローを PC で中央カードにするときは desktopLayout=\"card\"（lg 以上で Surface-Secondary の背景の中央に枠・角丸のカード。cardMaxWidth 既定 30rem / cardMaxHeight 既定 47.5rem）。lg:w-[480px] lg:rounded-2xl 等を className で自作しない",
+        "他の <main> の中に置くときは landmark=\"none\"（本文を div にし、id とスキップリンクを既定で出さない）",
         "React Native consumer は ksk-design-system/native/ui の Screen を使い、header/body/footer shell をローカル再実装しない"
       ]
     },
