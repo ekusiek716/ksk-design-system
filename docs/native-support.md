@@ -122,7 +122,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 | DateRangePicker | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | DateTimePicker | あり | あり | min, max, datePlaceholder, timePlaceholder, dateTriggerLabel, timeTriggerLabel | minDate, maxDate, style | className/CSS (Web) vs RN style/StyleSheet (Native) is each platform's idiomatic styling prop, not a functional gap; min/max vs minDate/maxDate naming diverged independently | 未検証 |
 | DetailSheetBody | あり | あり | 抽出不可 | 抽出不可 |  | 未検証 |
-| DetailSheetHeader | あり | あり | onClose, closeLabel | children, style |  | 未検証 |
+| DetailSheetHeader | あり | あり | overlayTitle, onClose, closeLabel | children, style |  | 未検証 |
 | DetailSheetScaffold | あり | あり |  | children, style | className/CSS (Web) vs RN style/StyleSheet (Native) is each platform's idiomatic styling prop, not a functional gap | 未検証 |
 | Dialog | あり | あり | 抽出不可 | 抽出不可 |  | 未検証 |
 | DialogClose | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |

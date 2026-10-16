@@ -17,6 +17,7 @@ import {
   useModality,
 } from "@/lib/modal-stack"
 import {
+  OverlayTitleSlotProvider,
   TitleSurfaceScaleProvider,
   useTitleTypoClass,
   type TitleLevel,
@@ -505,7 +506,8 @@ function DialogContent({
           しまわないようにする。
         */}
         <TitleSurfaceScaleProvider scale={position === "fullscreen" ? "page" : "dialog"}>
-          {children}
+          {/* #727: 配下の DetailSheetHeader が文字列の title を DialogTitle として描けるようにする */}
+          <OverlayTitleSlotProvider slot="dialog">{children}</OverlayTitleSlotProvider>
         </TitleSurfaceScaleProvider>
       </DialogPrimitive.Content>
     </DialogPortal>

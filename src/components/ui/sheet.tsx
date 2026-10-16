@@ -13,6 +13,7 @@ import {
   useModality,
 } from "@/lib/modal-stack"
 import {
+  OverlayTitleSlotProvider,
   TitleSurfaceScaleProvider,
   useTitleTypoClass,
   type TitleLevel,
@@ -841,7 +842,10 @@ function SheetContent({
   // preset を持つ BottomSheetFrame は、children をさらに内側で "page" 文脈に
   // 包み直すことでこれを上書きする。
   const scopedChildren = (
-    <TitleSurfaceScaleProvider scale="dialog">{children}</TitleSurfaceScaleProvider>
+    <TitleSurfaceScaleProvider scale="dialog">
+      {/* #727: 配下の DetailSheetHeader が文字列の title を SheetTitle として描けるようにする */}
+      <OverlayTitleSlotProvider slot="sheet">{children}</OverlayTitleSlotProvider>
+    </TitleSurfaceScaleProvider>
   )
   const snapCtx = React.useContext(SheetSnapContext)
   // The drag indicator is an iOS HIG "this can be dragged" affordance.

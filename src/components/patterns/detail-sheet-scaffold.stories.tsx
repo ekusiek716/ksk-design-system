@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import * as React from "react"
 import { More } from "iconsax-reactjs"
 import { Button } from "@/components/ui/button"
@@ -7,6 +7,8 @@ import { AutoGrowTextarea } from "@/components/ui/auto-grow-textarea"
 import { KebabMenu } from "@/components/patterns/admin/kebab-menu"
 import { DetailSheetBody, DetailSheetHeader, DetailSheetScaffold } from "./detail-sheet-scaffold"
 import { KeyboardAwareSheetFooter } from "./keyboard-aware-sheet-footer"
+import { BottomSheetFrame } from "./bottom-sheet-frame"
+import { Sheet, SheetTrigger } from "@/components/ui/sheet"
 
 const meta: Meta<typeof DetailSheetScaffold> = {
   title: "Components/DetailSheetScaffold",
@@ -111,5 +113,40 @@ export const WithCloseButton: Story = {
     await expect(close.parentElement?.lastElementChild).toBe(close)
     await userEvent.click(close)
     await expect(canvas.getByText("閉じた回数: 1")).toBeInTheDocument()
+  },
+}
+
+/**
+ * Sheet の中の文字列 title はシートの名前になる（issue #727）。sr-only の SheetTitle を別に置かない。
+ * 閉じるボタンは onClose（issue #722）。
+ */
+export const InSheetTitleIsSheetName: Story = {
+  tags: ["interaction"],
+  render: function Render() {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button>ゲスト詳細を開く</Button>
+        </SheetTrigger>
+        <BottomSheetFrame description="招待状・席次・メモをまとめて確認します。">
+          <DetailSheetScaffold
+            header={<DetailSheetHeader title="ゲスト詳細" onClose={() => setOpen(false)} />}
+          >
+            <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">本文</p>
+          </DetailSheetScaffold>
+        </BottomSheetFrame>
+      </Sheet>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "ゲスト詳細を開く" }))
+    const dialog = await within(document.body).findByRole("dialog", { name: "ゲスト詳細" })
+    await waitFor(() => expect(dialog.getAttribute("data-state")).toBe("open"))
+    const title = document.getElementById(dialog.getAttribute("aria-labelledby") ?? "")
+    await expect(title?.getAttribute("data-slot")).toBe("sheet-title")
+    await userEvent.click(within(dialog).getByRole("button", { name: "閉じる" }))
+    // CI の WebKit は退場アニメーションの待ちが既定 1000ms を超えることがあるので 5000ms 待つ
+    await waitFor(() => expect(within(document.body).queryByRole("dialog")).toBeNull(), { timeout: 5000 })
   },
 }

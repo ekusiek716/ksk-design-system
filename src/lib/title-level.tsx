@@ -87,11 +87,31 @@ function useTitleTypoClass(level?: TitleLevel): string {
   return scale === "page" ? TITLE_LEVEL_TYPO.page : DIALOG_TITLE_DEFAULT_TYPO
 }
 
+/**
+ * どのオーバーレイの Content の中か（issue #727）。DialogContent は "dialog"、SheetContent は "sheet"、
+ * AlertDialogContent は null（Radix の AlertDialog は別スコープの context なので、素の Dialog の
+ * Title を置けない）を流す。null（既定）はオーバーレイの外。
+ * DetailSheetHeader が文字列の title を Radix の Title（= シート / ダイアログの名前）として描くかの判定に使う。
+ */
+type OverlayTitleSlot = "dialog" | "sheet" | null
+
+const OverlayTitleSlotContext = React.createContext<OverlayTitleSlot>(null)
+
+function OverlayTitleSlotProvider({ slot, children }: { slot: OverlayTitleSlot; children?: React.ReactNode }) {
+  return <OverlayTitleSlotContext.Provider value={slot}>{children}</OverlayTitleSlotContext.Provider>
+}
+
+function useOverlayTitleSlot(): OverlayTitleSlot {
+  return React.useContext(OverlayTitleSlotContext)
+}
+
 export {
+  OverlayTitleSlotProvider,
+  useOverlayTitleSlot,
   TITLE_LEVEL_TYPO,
   TITLE_LEVEL_COMPOSITION_ROLE,
   DIALOG_TITLE_DEFAULT_TYPO,
   TitleSurfaceScaleProvider,
   useTitleTypoClass,
 }
-export type { TitleLevel, TitleSurfaceScale }
+export type { OverlayTitleSlot, TitleLevel, TitleSurfaceScale }
