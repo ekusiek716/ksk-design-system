@@ -72,3 +72,22 @@ describe("ShareButtons layout=block / labels（#685）", () => {
     expect(host.querySelector("button")!.getAttribute("aria-label")).toBe("Send via LINE")
   })
 })
+
+describe("ShareButtons layout=block のコピー結果の通知（レビュー指摘）", () => {
+  it("ボタンの外の role=status で成功を伝え、ボタン内に live region を持たない", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true })
+    const host = document.createElement("div")
+    document.body.append(host)
+    const root = createRoot(host)
+    act(() => root.render(<ShareButtons layout="block" url="https://ex.com" providers={["copy"]} />))
+    const button = host.querySelector<HTMLButtonElement>('button[data-provider="copy"]')!
+    expect(button.querySelector("[aria-live]")).toBeNull()
+    await act(async () => button.click())
+    const status = host.querySelector('[role="status"][data-slot="share-buttons-status"]')!
+    expect(button.contains(status)).toBe(false)
+    expect(status.textContent).toBe("コピーしました")
+    act(() => root.unmount())
+    host.remove()
+  })
+})

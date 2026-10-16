@@ -342,12 +342,15 @@ function ShareButtons({
                 {feedback === "error" && <CloseCircle size={20} aria-hidden="true" />}
                 {!feedback && meta.icon}
               </span>
-              <span aria-live="polite" aria-atomic="true">
-                {feedbackLabel}
-              </span>
+              <span>{feedbackLabel}</span>
             </button>
           )
         })}
+        {/* コピー結果はボタンの外の status 領域で読み上げる（ボタン名は labels の固定値のため、
+            名前の変化では結果が伝わらない） */}
+        <span role="status" data-slot="share-buttons-status" className="sr-only">
+          {copyFeedback ? (copyFeedback.result === "success" ? copiedLabel : copyErrorLabel) : ""}
+        </span>
       </div>
     )
   }
