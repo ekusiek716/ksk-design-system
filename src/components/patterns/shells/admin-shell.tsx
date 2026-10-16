@@ -43,6 +43,13 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
    * @default false
    */
   closeMobileDrawerOnNavigate?: boolean
+  /**
+   * 上端の safe-area（ステータスバー・ノッチ）を空ける（issue #724）。既定 false。
+   * `var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))` をヘッダー（高さ 64px + 安全領域）と
+   * lg 以上のサイドバーの上に足す。ヘッダーが無い画面では本文の列の上に足す。上端の帯はそれぞれの面の色になる。
+   * アプリ内で全画面に重ねて出すときは `className="h-full"` と組み、外枠に safe-area と背景を書かない
+   */
+  safeAreaTop?: boolean
 }
 
 /** ドロワーを閉じる対象（ナビゲーションとみなす要素） */
@@ -112,6 +119,7 @@ function AdminShell({
   mobileMenuLabel: mobileMenuLabelProp,
   mobileDrawerTitle: mobileDrawerTitleProp,
   closeMobileDrawerOnNavigate = false,
+  safeAreaTop = false,
   ...props
 }: AdminShellProps) {
   const defaultLabels = useKskLabels()
@@ -176,6 +184,7 @@ function AdminShell({
           sidebarTone === "inverse"
             ? "hidden lg:flex flex-col border-r border-[var(--Surface-Inverse)] bg-[var(--Surface-Inverse)] text-[var(--Text-on-Inverse)]"
             : "hidden lg:flex flex-col border-r border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
+          safeAreaTop && "pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]",
           sidebarWidth
         )}
       >
@@ -221,12 +230,21 @@ function AdminShell({
           </SheetContent>
         </Sheet>
       )}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div
+        className={cn(
+          "flex flex-1 flex-col min-w-0",
+          // header が無い画面は本文の列の上に、lg 以上だけ header が無い（mobileDrawer だけ）画面は lg 以上で足す
+          safeAreaTop && !header && !mobileDrawer && "pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]",
+          safeAreaTop && !header && mobileDrawer && "lg:pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]"
+        )}
+      >
         {(header || mobileDrawer) && (
           <header
             data-slot="admin-header"
             className={cn(
               "h-16 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
+              // box-content: 高さ 64px はそのまま、安全領域の分だけ上に伸ばす（帯もヘッダーの面の色）
+              safeAreaTop && "box-content pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]",
               // header を渡していないときは、メニューボタンのための lg 未満だけのヘッダー
               !header && "lg:hidden"
             )}

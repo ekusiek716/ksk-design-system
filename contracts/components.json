@@ -3300,7 +3300,8 @@
         "header と main の既定 gutter は内蔵 Container が担うためページ側で外周 padding を重ねない",
         "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）",
         "lg 未満でナビへ辿れるようにするときは mobileDrawer（issue #705）。ヘッダー左端のメニューボタン（44px・aria-expanded・aria-label 既定「メニューを開く」）から左の Sheet に同じ sidebar を開く。ハンバーガーと Sheet side=\"left\" を consumer で自作しない",
-        "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 false、明示 true で有効）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange"
+        "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 false、明示 true で有効）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange",
+        "上端の safe-area は safeAreaTop（ヘッダーは box-content で 64px + 安全領域、lg 以上のサイドバーも上に足す。header が無いときは本文の列）。アプリ内で全画面に重ねるときは className=\"h-full\" と組み、外枠に pt-[var(--Safe-Area-Inset-Top)] や背景を書かない（外枠は fixed と重ね順だけ。issue #724）"
       ]
     },
     {
