@@ -54,6 +54,10 @@ export const ALLOWLIST = [
     reason: "Radix UI が Popper / Select / Dropdown 等のコンテンツ要素へ実行時に注入する変数。DS 側に定義は無い。前方一致にするとタイプミスが素通りするので完全一致で列挙する",
   },
   {
+    name: "--Native-Safe-Area-Inset-Top",
+    reason: "ネイティブの殻（WKWebView 等）が実測した上端の safe area を書き込む任意フック（issue #682）。product-theme.css の --Safe-Area-Inset-Top が var(--Native-Safe-Area-Inset-Top, 0px) で未設定でも無害",
+  },
+  {
     name: "--kb-h",
     reason: "消費側アプリが visualViewport 等から書き込む「キーボードが覆っている高さ」。sheet-keyboard.css は var(--kb-h, 0px) で未設定でも無害（#487）",
   },

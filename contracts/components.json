@@ -419,7 +419,8 @@
         "DialogTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は position=\"fullscreen\" 配下で page 相当、それ以外は従来の typo-heading-lg",
         "native (src/native/components/Dialog.tsx): position=\"center\"(既定) / \"top\" / \"fullscreen\" を持ち、fullscreen は四辺・top は上端の safe-area を避ける。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
         "modal な Dialog の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）",
-        "size は sm(400px) / md(480px・既定) / lg(640px) / xl(800px) の幅の段（opt-in）。未指定は従来の 480px のまま。position=\"fullscreen\" では無視。size の段は sm: 付きなので、上書きは className に sm:max-w-* を渡す（接頭辞なしの max-w-* は size に勝たない）。Sheet の size と段の名前を揃えている。ResponsiveDialogContent の size は PC 側の Dialog にだけ渡る"
+        "size は sm(400px) / md(480px・既定) / lg(640px) / xl(800px) の幅の段（opt-in）。未指定は従来の 480px のまま。position=\"fullscreen\" では無視。size の段は sm: 付きなので、上書きは className に sm:max-w-* を渡す（接頭辞なしの max-w-* は size に勝たない）。Sheet の size と段の名前を揃えている。ResponsiveDialogContent の size は PC 側の Dialog にだけ渡る",
+        "position=\"top\" / \"fullscreen\" の上端 safe area は --Safe-Area-Inset-Top で読む（issue #682。Sheet と同じ）"
       ],
       "variants": {
         "position": [
@@ -468,7 +469,8 @@
         "native (src/native/components/Sheet.tsx): safeArea(既定 true) で side=\"top\" の上端 inset 退避と、画面いっぱいに近い side=\"bottom\" の食い込み分の退避を行う。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
         "native (src/native/components/Sheet.tsx): surfaceColor でパネル（および snap モードの footer）の面色を上書きできる。未指定なら theme.surface.primary（従来どおり）。scrim の色は変えない（issue #448）",
         "modal な Sheet の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）",
-        "size は sm(max-w-sm・既定) / md(max-w-xl) / lg(max-w-3xl) の幅の段（opt-in）。side=\"left\" / \"right\" のときだけ効き、top / bottom / float 系では無視。未指定は従来の max-w-sm のまま。className の max-w-* は size より優先。Dialog の size と段の名前を揃えている"
+        "size は sm(max-w-sm・既定) / md(max-w-xl) / lg(max-w-3xl) の幅の段（opt-in）。side=\"left\" / \"right\" のときだけ効き、top / bottom / float 系では無視。未指定は従来の max-w-sm のまま。className の max-w-* は size より優先。Dialog の size と段の名前を揃えている",
+        "上端の safe area は --Safe-Area-Inset-Top（= max(--Native-Safe-Area-Inset-Top, env(safe-area-inset-top))）で読む。WKWebView で env() が 0 に固着する場合、ネイティブの殻が --Native-Safe-Area-Inset-Top に実測値を書く。consumer で pt-[max(...native-safe-top...)] や [data-slot=sheet-content] の max-height を上書きしない（issue #682。Dialog top / fullscreen・BottomSheetFrame・ResponsiveOverlayFrame・MediaActionCluster・sheet-keyboard.css も同じ）"
       ],
       "variants": {
         "titleLevel": [

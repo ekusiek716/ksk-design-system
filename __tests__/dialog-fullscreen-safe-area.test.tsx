@@ -151,7 +151,7 @@ describe("DialogContent position=\"fullscreen\"（Issue #339）", () => {
       </Dialog>
     )
     const el = getContent()
-    expect(el.className).toContain("pt-[env(safe-area-inset-top,0px)]")
+    expect(el.className).toContain("pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]")
     expect(el.className).toContain("pb-[env(safe-area-inset-bottom,0px)]")
   })
 })
@@ -166,7 +166,7 @@ describe("DialogContent position=\"top\" — safeArea opt-out（Issue #339）", 
       </Dialog>
     )
     const el = getContent()
-    expect(el.className).toContain("top-[max(env(safe-area-inset-top),2rem)]")
+    expect(el.className).toContain("top-[max(var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)),2rem)]")
   })
 
   it("safeArea=false は固定 2rem 相当のオフセットにフォールバックする", () => {

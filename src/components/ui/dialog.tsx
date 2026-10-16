@@ -326,7 +326,7 @@ function DialogContent({
                 // 縦位置
                 position === "top"
                   ? safeArea
-                    ? "top-[max(env(safe-area-inset-top),2rem)] max-h-[calc(100dvh_-_max(env(safe-area-inset-top),2rem)_-_2rem)] overflow-y-auto"
+                    ? "top-[max(var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)),2rem)] max-h-[calc(100dvh_-_max(var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)),2rem)_-_2rem)] overflow-y-auto"
                     : "top-8 max-h-[calc(100dvh_-_4rem)] overflow-y-auto"
                   : "top-[50%] translate-y-[-50%]",
                 "rounded-[var(--Radius-Modal)] ksk-squircle",
@@ -340,12 +340,12 @@ function DialogContent({
           // 生成順に左右されるため、必ず1つの完結したクラス集合を選ぶ。
           padding &&
             (position === "fullscreen" && safeArea
-              ? "flex flex-col gap-4 pl-[max(1.5rem,env(safe-area-inset-left,0px))] pr-[max(1.5rem,env(safe-area-inset-right,0px))] pt-[calc(1.5rem_+_env(safe-area-inset-top,0px))] pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]"
+              ? "flex flex-col gap-4 pl-[max(1.5rem,env(safe-area-inset-left,0px))] pr-[max(1.5rem,env(safe-area-inset-right,0px))] pt-[calc(1.5rem_+_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)))] pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]"
               : "flex flex-col gap-4 p-6"),
           !padding &&
             position === "fullscreen" &&
             safeArea &&
-            "pl-[env(safe-area-inset-left,0px)] pr-[env(safe-area-inset-right,0px)] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]",
+            "pl-[env(safe-area-inset-left,0px)] pr-[env(safe-area-inset-right,0px)] pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))] pb-[env(safe-area-inset-bottom,0px)]",
           // 入場/退場: 全画面は iOS の全画面モーダル慣習に合わせて下からの
           // スライド。zoom-95 だと全画面サーフェスが縮んで四辺からオーバーレイが
           // 覗くため使わない。

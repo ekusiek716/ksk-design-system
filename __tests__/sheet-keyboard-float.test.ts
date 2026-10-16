@@ -24,13 +24,13 @@ describe("resolveFloatSheetKeyboardStyle — float シートのキーボード�
 
   it("高さキャップは可視領域 - 上下マージン 24px - 上部セーフエリア", () => {
     expect(resolveFloatSheetKeyboardStyle(300, 500)?.maxHeight).toBe(
-      "max(0px, calc(476px - env(safe-area-inset-top, 0px)))"
+      "max(0px, calc(476px - var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))))"
     )
   })
 
   it("可視領域がマージン以下でもキャップは負にならない（0 で下限）", () => {
     expect(resolveFloatSheetKeyboardStyle(700, 10)?.maxHeight).toBe(
-      "max(0px, calc(0px - env(safe-area-inset-top, 0px)))"
+      "max(0px, calc(0px - var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))))"
     )
   })
 

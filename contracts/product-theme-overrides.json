@@ -188,6 +188,9 @@
     "overlay": [
       "--Overlay-Desktop-Breakpoint"
     ],
+    "safeArea": [
+      "--Safe-Area-Inset-Top"
+    ],
     "toast": [
       "--Toast-Viewport-Offset-Bottom",
       "--Toast-Viewport-Offset-X",
@@ -229,7 +232,8 @@
     "--glass-",
     "--card-surface",
     "--Nav-",
-    "--Toast-"
+    "--Toast-",
+    "--Safe-Area-"
   ],
   "namespaceNote": "P049 が「DS の変数を上書きしている」と判定する接頭辞。ここに該当し、かつ DS 自身の CSS（src/preset.css / src/styles/*.css / src/themes/*.css）に実在し、allowedVariables に無い変数を消費側 CSS が宣言していたら契約違反。接頭辞は一致するが DS に実在しない名前（消費側が DS の命名に寄せて作った独自変数。例: --Surface-Inverse-Hover）は上書きではないので対象外（issue #377）。DS の CSS が読めない環境では接頭辞一致だけで判定する。shadcn 互換の小文字ブリッジ（--primary / --border 等）は消費側アプリが同名変数を持つことがあるため対象外。",
   "wiredComponents": {
@@ -290,7 +294,14 @@
       "--Overlay-Desktop-Breakpoint"
     ],
     "ResponsiveOverlayFrame": [
-      "--Overlay-Desktop-Breakpoint"
+      "--Overlay-Desktop-Breakpoint",
+      "--Safe-Area-Inset-Top"
+    ],
+    "Sheet": [
+      "--Safe-Area-Inset-Top"
+    ],
+    "Dialog": [
+      "--Safe-Area-Inset-Top"
     ],
     "Toast": [
       "--Toast-Viewport-Offset-Bottom",

@@ -192,7 +192,7 @@ function resolveFloatSheetKeyboardStyle(
   const cap = Math.max(0, visibleHeight - FLOAT_SHEET_GAP_PX * 2)
   return {
     bottom,
-    maxHeight: `max(0px, calc(${cap}px - env(safe-area-inset-top, 0px)))`,
+    maxHeight: `max(0px, calc(${cap}px - var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))))`,
   }
 }
 
@@ -975,10 +975,10 @@ function SheetContent({
   const topSafeAreaPaddingClass = isTopSheet
     ? padding
       ? safeArea
-        ? "px-6 pb-6 pt-[calc(1.5rem_+_env(safe-area-inset-top,0px))]"
+        ? "px-6 pb-6 pt-[calc(1.5rem_+_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)))]"
         : "p-6"
       : safeArea
-        ? "pt-[env(safe-area-inset-top,0px)]"
+        ? "pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]"
         : undefined
     : padding
       ? "p-6"
@@ -990,7 +990,7 @@ function SheetContent({
   // 発火した場合は inline style（keyboardStyle）が優先して上書きする。
   const floatSafeAreaMaxHeightClass =
     isFloating && safeArea
-      ? "max-h-[max(0px,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))]"
+      ? "max-h-[max(0px,calc(100dvh_-_1.5rem_-_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))))]"
       : undefined
 
   return (
