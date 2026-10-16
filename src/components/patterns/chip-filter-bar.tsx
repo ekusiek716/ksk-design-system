@@ -84,13 +84,24 @@ function ChipFilterBar({
           // 行自体を 44px 確保し、チップは中央寄せにして見た目を変えずに収める。
           // items-center を外すと flex の stretch でチップ自体が 44px に伸びるので注意。
           "flex min-h-11 items-center gap-2 overflow-x-auto scrollbar-hide",
-          sticky && "sticky z-[var(--Z-Sticky)] bg-[var(--Surface-Primary)] py-2",
-          // 余白は背景を持つこの行の内側に付ける（背景は全幅のまま・issue #667）
-          innerClassName
+          sticky && "sticky z-[var(--Z-Sticky)] bg-[var(--Surface-Primary)] py-2"
         )}
         style={sticky ? { top: stickyOffset } : undefined}
       >
-        {children}
+        {innerClassName ? (
+          // 余白は背景を持つ行（スクロールコンテナ）ではなく、その内側のラッパーに付ける（issue #667）。
+          // スクロールコンテナ自身の右 padding はスクロール末尾で効かないブラウザがあるため、
+          // 中身ぶんの幅（w-max）を持つラッパーの padding にする。min-w-full で短いときも左余白を保つ。
+          // 余白を指定しないときはラッパーを足さない（従来と同じ DOM）。
+          <div
+            data-slot="chip-filter-bar-content"
+            className={cn("flex w-max min-w-full shrink-0 items-center gap-2", innerClassName)}
+          >
+            {children}
+          </div>
+        ) : (
+          children
+        )}
       </div>
       {resultCount !== undefined && (
         <p className={cn("mt-2 typo-label-xs text-[var(--Text-Low-Emphasis)]", innerClassName)}>

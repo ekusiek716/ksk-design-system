@@ -745,6 +745,7 @@
 @source inline("min-w-[8rem]");
 @source inline("min-w-[var(--radix-select-trigger-width)]");
 @source inline("min-w-fit");
+@source inline("min-w-full");
 @source inline("min-w-max");
 @source inline("ml-0.5");
 @source inline("ml-1");
@@ -1189,6 +1190,7 @@
 @source inline("w-auto");
 @source inline("w-fit");
 @source inline("w-full");
+@source inline("w-max");
 @source inline("w-px");
 @source inline("whitespace-nowrap");
 @source inline("whitespace-pre-line");

@@ -75,7 +75,7 @@ export const Sticky: Story = {
 export const StickyWithGutter: Story = {
   tags: ["interaction"],
   render: () => (
-    <div className="max-w-md h-64 overflow-y-auto border border-[var(--Border-Low-Emphasis)]">
+    <div className="w-72 h-64 overflow-y-auto border border-[var(--Border-Low-Emphasis)]">
       <ChipFilterBar sticky gutter="tight" resultCount={12}>
         {["すべて", "未着手", "進行中", "完了", "保留", "アーカイブ"].map((label) => (
           <Chip key={label}>{label}</Chip>
@@ -89,10 +89,17 @@ export const StickyWithGutter: Story = {
   play: async ({ canvasElement }) => {
     const bar = canvasElement.querySelector<HTMLElement>('[data-slot="chip-filter-bar"]')!
     const row = bar.firstElementChild as HTMLElement
-    // 背景を持つ行は外側と同じ幅（全幅）で、余白は行の内側の padding
+    const content = row.querySelector<HTMLElement>('[data-slot="chip-filter-bar-content"]')!
+    // 背景を持つ行は外側と同じ幅（全幅）で、余白は内側ラッパーの padding
     await expect(row.getBoundingClientRect().width).toBe(bar.getBoundingClientRect().width)
-    await expect(getComputedStyle(row).paddingLeft).toBe("16px")
+    await expect(getComputedStyle(content).paddingLeft).toBe("16px")
     await expect(getComputedStyle(bar.querySelector("p")!).paddingLeft).toBe("16px")
+    // 末尾までスクロールしても最後のチップの右に余白が残る（スクロールコンテナの右 padding 問題の回避）
+    await expect(row.scrollWidth).toBeGreaterThan(row.clientWidth)
+    row.scrollLeft = row.scrollWidth
+    const chips = row.querySelectorAll<HTMLElement>('[data-slot="chip"]')
+    const last = chips[chips.length - 1].getBoundingClientRect()
+    await expect(Math.round(row.getBoundingClientRect().right - last.right)).toBeGreaterThanOrEqual(16)
   },
 }
 
