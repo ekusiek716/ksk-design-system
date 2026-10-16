@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 72,
-      "patterns": 65,
+      "patterns": 67,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 160
+      "total": 162
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -2781,6 +2781,40 @@
         "div grid + アイコンだけで比較表を自作しない（読み上げで可否が分からない）",
         "列は 2〜3 を想定。推奨プランは highlight（Surface-Accent-Primary-Light + Text-Accent-Primary の見出し）",
         "値が無いセル（undefined）は false（利用できない）として扱う"
+      ]
+    },
+    {
+      "name": "MonthCalendar",
+      "path": "src/components/patterns/month-calendar.tsx",
+      "description": "予定付きの月カレンダー（issue #679）。日ごとの予定を一覧する予定表（日付を選ぶ入力は Calendar / DatePicker）。今日・選択日・土日・月外セル・予定チップ・「+n件」の見た目を DS が持つ。",
+      "subcomponents": [
+        "buildMonthWeeks"
+      ],
+      "accessibility": [
+        "WAI-ARIA grid パターン: role=grid / row / columnheader / gridcell、タブストップは 1 つ（roving tabindex。選択日 → 今日 → 1 日）",
+        "← → ↑ ↓ で 1 日 / 1 週、Home / End で週の端、PageUp / PageDown で前後の月（onMonthChange 指定時）、Enter / Space で onSelectDay",
+        "セルの読み上げ名に日付・今日・予定件数と予定名を含める。予定チップと「+n件」はポインタ用の近道（tabIndex=-1）で、キーボードは日の選択から詳細へ辿る"
+      ],
+      "rules": [
+        "日のセル・予定チップを Button unstyled で自作しない",
+        "あふれは maxEventsPerDay（既定 2）超を「+n件」にまとめ、onShowMore（既定 onSelectDay）でその日の詳細へ",
+        "md（768px）未満はチップの代わりに色ドット（最大 3）を出す。操作は日の選択に一本化する",
+        "土日の色は weekendTone（既定 true。日曜 Text-Caution / 土曜 Text-Accent-Primary・Calendar と同じ語彙）",
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
+      ]
+    },
+    {
+      "name": "KanbanColumn",
+      "path": "src/components/patterns/kanban-column.tsx",
+      "description": "カンバンの列の入れ物（issue #679）。見出し（色ドット + title + 件数 + action）・カードを縦に積む本体・footer（AddTile 等）。",
+      "accessibility": [
+        "見出し（h3）で名前の付いた section。件数は見出しの読み上げに「（n件）」で含め、見た目の件数バッジは aria-hidden"
+      ],
+      "rules": [
+        "列の上辺に太い色帯を付けない。状態は tone の色ドットと見出しの言葉で示す",
+        "中のカードは Card elevation=\"none\"（面の中の面は影なし）",
+        "ドラッグ＆ドロップは持たない。consumer のライブラリで包む",
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
       ]
     }
   ],

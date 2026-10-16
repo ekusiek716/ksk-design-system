@@ -180,9 +180,12 @@
 @source inline("bg-[var(--Categorical-N-Subtle)]");
 @source inline("bg-[var(--Caution-Base)]");
 @source inline("bg-[var(--Info-Base)]");
+@source inline("bg-[var(--Object-Accent-Primary)]");
 @source inline("bg-[var(--Object-Caution)]");
 @source inline("bg-[var(--Object-Disable)]");
+@source inline("bg-[var(--Object-Info)]");
 @source inline("bg-[var(--Object-Low-Emphasis)]");
+@source inline("bg-[var(--Object-Medium-Emphasis)]");
 @source inline("bg-[var(--Object-Rating)]");
 @source inline("bg-[var(--Object-Success)]");
 @source inline("bg-[var(--Object-Warning)]");
@@ -485,6 +488,7 @@
 @source inline("grid-cols-2");
 @source inline("grid-cols-3");
 @source inline("grid-cols-4");
+@source inline("grid-cols-7");
 @source inline("grid-cols-[auto_minmax(0,1fr)_auto]");
 @source inline("grid-cols-[minmax(0,1fr)_8rem]");
 @source inline("grid-cols-[repeat(auto-fit,minmax(8rem,1fr))]");
@@ -634,6 +638,7 @@
 @source inline("justify-items-center");
 @source inline("landscape:flex-row");
 @source inline("last:border-b-0");
+@source inline("last:border-r-0");
 @source inline("leading-[44px]");
 @source inline("leading-none");
 @source inline("leading-relaxed");
@@ -727,6 +732,10 @@
 @source inline("mb-4");
 @source inline("mb-6");
 @source inline("mb-8");
+@source inline("md:flex");
+@source inline("md:hidden");
+@source inline("md:min-h-24");
+@source inline("md:self-start");
 @source inline("min-h-0");
 @source inline("min-h-0!");
 @source inline("min-h-10");
@@ -735,6 +744,7 @@
 @source inline("min-h-14");
 @source inline("min-h-16");
 @source inline("min-h-24");
+@source inline("min-h-8");
 @source inline("min-h-9");
 @source inline("min-h-[100dvh]");
 @source inline("min-h-[36px]");
@@ -988,6 +998,7 @@
 @source inline("scroll-smooth");
 @source inline("scrollbar-hide");
 @source inline("select-none");
+@source inline("self-center");
 @source inline("self-end");
 @source inline("shadow");
 @source inline("shadow-[0_0_0_5px_rgba(193,104,0,0.2)]");
