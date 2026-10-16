@@ -17,8 +17,9 @@ const containerVariants = cva("mx-auto w-full", {
       spacious: "px-6 lg:px-16",
       // 画面幅で伸び縮みする余白（issue #711）。既定 clamp(1rem, 4vw, 1.75rem) = 16〜28px。
       // 値は product theme の公開変数 --Container-Gutter-Fluid で上書きできる。
-      // ChipFilterBar gutter="fluid" も同じ変数を読むので左端がそろう。
-      fluid: "px-[var(--Container-Gutter-Fluid)]",
+      // ChipFilterBar gutter="fluid" も同じ変数を読むので左端がそろう。product-theme.css を読み込まない
+      // 構成でも余白が 0 にならないよう、既定値と同じ clamp をフォールバックに持つ。
+      fluid: "px-[var(--Container-Gutter-Fluid,clamp(1rem,4vw,1.75rem))]",
     },
   },
   defaultVariants: {

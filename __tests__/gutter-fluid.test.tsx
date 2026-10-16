@@ -14,7 +14,7 @@ const ROOT = join(__dirname, "..")
 describe('gutter="fluid"（#711）', () => {
   it("Container は --Container-Gutter-Fluid を左右 padding にする", () => {
     const markup = renderToStaticMarkup(<Container gutter="fluid">x</Container>)
-    expect(markup).toContain("px-[var(--Container-Gutter-Fluid)]")
+    expect(markup).toContain("px-[var(--Container-Gutter-Fluid,clamp(1rem,4vw,1.75rem))]")
     expect(markup).toContain('data-gutter="fluid"')
   })
 
@@ -25,8 +25,8 @@ describe('gutter="fluid"（#711）', () => {
     )
     const bar = host.querySelector<HTMLElement>('[data-slot="chip-filter-bar"]')!
     const content = bar.querySelector<HTMLElement>('[data-slot="chip-filter-bar-content"]')!
-    expect(content.className).toContain("px-[var(--Container-Gutter-Fluid)]")
-    expect(bar.querySelector("p")!.className).toContain("px-[var(--Container-Gutter-Fluid)]")
+    expect(content.className).toContain("px-[var(--Container-Gutter-Fluid,clamp(1rem,4vw,1.75rem))]")
+    expect(bar.querySelector("p")!.className).toContain("px-[var(--Container-Gutter-Fluid,clamp(1rem,4vw,1.75rem))]")
     expect(bar.className).not.toContain("Container-Gutter-Fluid")
   })
 

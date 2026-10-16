@@ -47,7 +47,7 @@ const GUTTER_CLASS = {
   none: "",
   tight: "px-4",
   default: "px-6",
-  fluid: "px-[var(--Container-Gutter-Fluid)]",
+  fluid: "px-[var(--Container-Gutter-Fluid,clamp(1rem,4vw,1.75rem))]",
 } as const
 
 // ロケールを明示する（SSR 環境とブラウザでロケールが異なると hydration mismatch になるため）
