@@ -86,8 +86,10 @@
 @source inline("active:bg-[var(--Active-Primary-Button)]!");
 @source inline("active:bg-[var(--Active-Success-Button)]");
 @source inline("active:bg-[var(--Active-Warning-Button)]");
+@source inline("active:bg-[var(--Brand-Line-Pressed)]");
 @source inline("active:bg-[var(--Primitive-White-Alpha-300)]");
 @source inline("active:bg-[var(--Primitive-White-Alpha-800)]");
+@source inline("active:border-[var(--Brand-Line-Pressed)]");
 @source inline("active:brightness-110");
 @source inline("active:cursor-grabbing");
 @source inline("active:opacity-70");
@@ -543,6 +545,7 @@
 @source inline("hidden");
 @source inline("hover:bg-[var(--Border-Medium-Emphasis)]");
 @source inline("hover:bg-[var(--Brand-Light)]");
+@source inline("hover:bg-[var(--Brand-Line-Hover)]");
 @source inline("hover:bg-[var(--Brand-Ultra-Light)]");
 @source inline("hover:bg-[var(--Categorical-2-Subtle)]");
 @source inline("hover:bg-[var(--Categorical-9-Subtle)]");
@@ -578,6 +581,7 @@
 @source inline("hover:border-[var(--Border-High-Emphasis)]");
 @source inline("hover:border-[var(--Border-Low-Emphasis)]");
 @source inline("hover:border-[var(--Border-Medium-Emphasis)]");
+@source inline("hover:border-[var(--Brand-Line-Hover)]");
 @source inline("hover:border-[var(--Brand-Primary)]");
 @source inline("hover:border-[var(--Primitive-White-Alpha-900)]");
 @source inline("hover:border-[var(--Text-High-Emphasis)]");
@@ -1066,6 +1070,7 @@
 @source inline("text-[var(--Border-Medium-Emphasis)]");
 @source inline("text-[var(--Brand-Primary)]");
 @source inline("text-[var(--Brand-on-Apple)]");
+@source inline("text-[var(--Brand-on-Line)]");
 @source inline("text-[var(--Categorical-1-Bold)]");
 @source inline("text-[var(--Categorical-10-Bold)]");
 @source inline("text-[var(--Categorical-11-Bold)]");

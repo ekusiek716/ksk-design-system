@@ -2100,7 +2100,10 @@
         "providers を渡すと明示順で表示",
         "region=jp は line/x/copy、region=us は whatsapp/x/copy を既定にする",
         "provider 別の計測には onShare(provider) を使う。コピー結果の計測には onCopy(result) を使う",
-        "Clipboard API が利用不可または拒否された場合も copyErrorLabel を通知する"
+        "Clipboard API が利用不可または拒否された場合も copyErrorLabel を通知する",
+        "任意の本文（招待コード入りの案内文など）は message（native と同名）。LINE は line.me/R/share?text= に「message + url」、X / Telegram は text に message、WhatsApp / メールは「message + url」を渡す。copy は url のまま（issue #685）",
+        "共有が画面の主操作のとき（招待シート等）は layout=\"block\"（全幅・Control-Height-Lg の主ボタンを縦に積む）。LINE は --Brand-Line の塗り + --Brand-on-Line（黒。白文字は約 2.2:1 で AA 未達）、hover / 押下は --Brand-Line-Hover / --Brand-Line-Pressed。LINE ボタンや --External-LINE* を consumer で自作しない（issue #685）",
+        "表示ラベル・アクセシブルネームの上書きは labels（例: { line: \"LINE で招待を送る\" }）"
       ],
       "props": {
         "groupLabel": "string (既定 \"シェア\") — role=\"group\" 全体ラッパーの aria-label（issue #428）"

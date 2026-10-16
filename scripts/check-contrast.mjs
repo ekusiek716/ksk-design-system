@@ -136,6 +136,17 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   }
 }
 
+// LINE の塗りボタン（ShareButtons layout="block"・issue #685）。External Brand は tokens.json に
+// 無く semantic.css の固定 hex が正本なので、そこから読む。ライト / ダーク共通。
+{
+  const semanticCss = readFileSync(join(root, "src/styles/semantic.css"), "utf8")
+  const brandHex = (name) => semanticCss.match(new RegExp(`--${name}:\\s*(#[0-9A-Fa-f]{6})`))?.[1]
+  const onLine = brandHex("Brand-on-Line")
+  for (const bgName of ["Brand-Line", "Brand-Line-Hover", "Brand-Line-Pressed"]) {
+    pairs.push([onLine, brandHex(bgName), `Brand-on-Line / ${bgName}（ShareButtons block の LINE）`, 4.5])
+  }
+}
+
 // Categorical: Bold は文字用 → 白背景 & 自分の Subtle 背景で AA
 const cat = sem.categorical || {}
 for (const k of Object.keys(cat)) {

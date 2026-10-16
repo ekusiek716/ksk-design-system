@@ -114,6 +114,12 @@
      連動せず、ライト/ダーク共通で固定。SocialLoginButton 等で生 #hex を
      直書きせずこのトークンを参照する。新規追加時は公式ガイドライン準拠。 */
   --Brand-Line:              #06C755;
+  /* LINE の塗りボタン（ShareButtons layout="block"・issue #685）の hover / 押下と前景。
+     hover / 押下は公式色に黒 10% / 20% を重ねた色（LINE ログインボタンの規定と同じ考え方）。
+     前景は黒: 白文字は #06C755 上で約 2.2:1 と AA 未達のため（scripts/check-contrast.mjs で検査）。 */
+  --Brand-Line-Hover:        #05B34D;
+  --Brand-Line-Pressed:      #059F44;
+  --Brand-on-Line:           #000000;
   --Brand-Google-Border:     #DADCE0; /* Google ボタンの罫線（Google 推奨グレー） */
   --Brand-Apple:             #000000;
   --Brand-Amazon:            #232F3E;
