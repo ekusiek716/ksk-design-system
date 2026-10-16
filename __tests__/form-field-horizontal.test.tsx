@@ -175,3 +175,24 @@ describe('FormField as="group" / FieldGroup variant="rows"（#720）', () => {
     expect(stack.hasAttribute("data-variant")).toBe(false)
   })
 })
+
+describe('FormField as="group" の誤用（#720）', () => {
+  it("htmlFor を渡すと開発ビルドで警告する（渡さなければ出さない）", async () => {
+    const { vi } = await import("vitest")
+    const { act } = await import("react")
+    const { createRoot } = await import("react-dom/client")
+    const { resetDevWarnings } = await import("../src/lib/dev-warn")
+    ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+    resetDevWarnings()
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const el = document.createElement("div")
+    const root = createRoot(el)
+    act(() => root.render(<FormField as="group" label="役割"><div /></FormField>))
+    expect(warn.mock.calls.some(([m]) => String(m).includes("htmlFor"))).toBe(false)
+    act(() => root.render(<FormField as="group" label="役割" htmlFor="x"><div /></FormField>))
+    expect(warn.mock.calls.some(([m]) => String(m).includes('as="group" では htmlFor'))).toBe(true)
+    act(() => root.unmount())
+    warn.mockRestore()
+    resetDevWarnings()
+  })
+})

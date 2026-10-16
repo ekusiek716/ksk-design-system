@@ -1683,7 +1683,7 @@
         "ラベル左置きの項目行は orientation=\"horizontal\"（左のラベル列の幅は labelWidth・既定 5rem、複数行の中身は labelAlign=\"start\"）。説明文・エラーは右の列の下段に出る。Label に w-20 等を付けて行を自作しない（issue #712）",
         "horizontal で枠の無い入力欄（variant=\"inline\"）を置くときは targetSize=\"comfortable\" で 44px の当たり判定を持たせる。外側に py-2 を足して稼がない（issue #712）",
         "orientation=\"horizontal\" は置き場所の幅（@container）が 15rem 未満なら縦積みに戻る。endLabel は入力欄の右に出る（issue #712）",
-        "チップ・トグル・ラジオ等の選択肢のまとまりを右（下）に置く行は as=\"group\"（ラベルは span[id]、中身の列は role=group + aria-labelledby、説明文・エラーは aria-describedby）。<span> + <div role=\"group\"> + w-20 のラベルで行を自作しない（issue #720）",
+        "チップ・トグル・ラジオ等の選択肢のまとまりを右（下）に置く行は as=\"group\"（ラベルは span[id]、中身の列は role=group + aria-labelledby、説明文・エラーは aria-describedby）。<span> + <div role=\"group\"> + w-20 のラベルで行を自作しない。htmlFor は渡さない（開発ビルドで警告）。required は読み上げに伝わらないので、必須は description か label の文言で補う（issue #720）",
         "区切り線で並べる項目行の一覧は FieldGroup variant=\"rows\"（divide-y + 直下の FormField に py-3）に入れる。FormField に className=\"py-3\" を足さない（issue #720）"
       ]
     },

@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useKskLabels } from "../ui/ksk-labels"
+import { warnOnceInDev } from "@/lib/dev-warn"
 
 /**
  * `required` の見た目をどう出すか。
@@ -55,8 +56,10 @@ interface FormFieldProps extends React.ComponentProps<"div"> {
    * 右（下）に置く中身の種類（issue #720）。
    * - "field"（既定）: 入力欄 1 つ。ラベルは `<label htmlFor>`、子の要素に aria-invalid / aria-describedby を足す（従来）
    * - "group": チップ・トグル・ラジオ等の選択肢のまとまり。ラベルを `<span id>` で描き、中身の列を
-   *   `role="group"` + `aria-labelledby`（説明文・エラーは aria-describedby）にする。htmlFor は使わない。
-   *   `<span>` + `<div role="group">` + `w-20` のラベルで行を自作しない
+   *   `role="group"` + `aria-labelledby`（説明文・エラーは aria-describedby）にする。htmlFor は使わない
+   *   （渡すと開発ビルドで警告）。`<span>` + `<div role="group">` + `w-20` のラベルで行を自作しない。
+   *   **required は読み上げに伝わらない**（role=group は aria-required を持てず、* / 必須バッジは aria-hidden）。
+   *   必須であることは description（例: 「1 つ以上選んでください」）か label の文言で補う
    */
   as?: "field" | "group"
 }
@@ -88,6 +91,14 @@ function FormField({
   const errId = `${reactId}-err`
   const labelId = `${reactId}-label`
   const isGroup = as === "group"
+  const groupWithHtmlFor = isGroup && htmlFor != null
+  React.useEffect(() => {
+    if (!groupWithHtmlFor) return
+    warnOnceInDev(
+      "form-field-group-html-for",
+      'FormField as="group" では htmlFor は使われません（ラベルは span[id] で、中身の列を aria-labelledby で結びます）。htmlFor を外してください（issue #720）。'
+    )
+  }, [groupWithHtmlFor])
   const showDesc = description != null && !error
   const describedBy =
     [error ? errId : null, showDesc ? descId : null].filter(Boolean).join(" ") || undefined
