@@ -1,4 +1,5 @@
 import * as React from "react"
+import { ArrowRight2 } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
 
 type SettingsSectionVariant = "group" | "card" | "danger"
@@ -8,6 +9,11 @@ interface SettingsSectionProps extends Omit<React.ComponentProps<"section">, "ti
   description?: React.ReactNode
   action?: React.ReactNode
   variant?: SettingsSectionVariant
+  /**
+   * 見出しの左に置くアイコン（issue #690）。装飾扱い（aria-hidden）で、20px・Object-Medium-Emphasis
+   * （danger は Object-Caution）に揃える。意味は title で伝える。
+   */
+  icon?: React.ReactNode
 }
 
 interface SettingsListRowProps
@@ -21,6 +27,12 @@ interface SettingsListRowProps
   disabled?: boolean
   destructive?: boolean
   onClick?: React.MouseEventHandler<HTMLButtonElement>
+  /**
+   * 右端に「次の画面へ進む」矢印（ArrowRight2・16px・Object-Low-Emphasis・aria-hidden）を出す（issue #690）。
+   * 遷移する行に付ける。トグル・その場で完結する操作の行には付けない。rightSlot（現在値など）の右に並ぶ。
+   * native SettingsListRow / native ListItem と同じ名前。
+   */
+  showChevron?: boolean
 }
 
 function SettingsSection({
@@ -29,6 +41,7 @@ function SettingsSection({
   description,
   action,
   variant = "group",
+  icon,
   children,
   ...props
 }: SettingsSectionProps) {
@@ -50,10 +63,23 @@ function SettingsSection({
               <h2
                 className={cn(
                   "typo-heading-sm text-[var(--Text-High-Emphasis)]",
+                  icon != null && "flex items-center gap-2",
                   variant === "danger" && "text-[var(--Text-Caution)]"
                 )}
               >
-                {title}
+                {icon != null && (
+                  <span
+                    data-slot="settings-section-icon"
+                    aria-hidden="true"
+                    className={cn(
+                      "flex size-5 shrink-0 items-center justify-center [&_svg]:size-5",
+                      variant === "danger" ? "text-[var(--Object-Caution)]" : "text-[var(--Object-Medium-Emphasis)]"
+                    )}
+                  >
+                    {icon}
+                  </span>
+                )}
+                {icon != null ? <span className="min-w-0 flex-1">{title}</span> : title}
               </h2>
             )}
             {description && (
@@ -98,6 +124,7 @@ function SettingsListRow({
   disabled = false,
   destructive = false,
   onClick,
+  showChevron = false,
   children,
   ...props
 }: SettingsListRowProps) {
@@ -137,6 +164,15 @@ function SettingsListRow({
         <div data-slot="settings-list-row-right" className="shrink-0">
           {rightSlot}
         </div>
+      )}
+      {showChevron && (
+        <ArrowRight2
+          data-slot="settings-list-row-chevron"
+          aria-hidden="true"
+          size={16}
+          color="currentColor"
+          className="shrink-0 text-[var(--Object-Low-Emphasis)]"
+        />
       )}
     </>
   )

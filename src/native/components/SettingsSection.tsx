@@ -10,6 +10,8 @@ export interface SettingsSectionProps {
   description?: React.ReactNode
   action?: React.ReactNode
   variant?: SettingsSectionVariant
+  /** 見出しの左に置くアイコン（issue #690・Web と同名）。装飾扱いで読み上げない */
+  icon?: React.ReactNode
   children: React.ReactNode
   style?: StyleProp<ViewStyle>
   contentStyle?: StyleProp<ViewStyle>
@@ -24,6 +26,8 @@ export interface SettingsListRowProps {
   onPress?: () => void
   disabled?: boolean
   destructive?: boolean
+  /** 右端に遷移を示す矢印（›）を出す（issue #690・Web / native ListItem と同名） */
+  showChevron?: boolean
   style?: StyleProp<ViewStyle>
 }
 
@@ -32,6 +36,7 @@ export function SettingsSection({
   description,
   action,
   variant = "group",
+  icon,
   children,
   style,
   contentStyle,
@@ -51,18 +56,30 @@ export function SettingsSection({
           }}
         >
           <View style={{ flex: 1, minWidth: 0 }}>
-            {typeof title === "string" ? (
-              <RNText
-                style={[
-                  resolveTypo("heading.sm"),
-                  { color: variant === "danger" ? theme.text.caution : theme.text["high-emphasis"] },
-                ]}
-              >
-                {title}
-              </RNText>
-            ) : (
-              title
-            )}
+            <View style={icon != null ? { flexDirection: "row", alignItems: "center", gap: scales.spacing.scale[2] } : undefined}>
+              {icon != null && (
+                <View
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
+                  style={{ width: 20, height: 20, alignItems: "center", justifyContent: "center" }}
+                >
+                  {icon}
+                </View>
+              )}
+              {typeof title === "string" ? (
+                <RNText
+                  style={[
+                    resolveTypo("heading.sm"),
+                    { color: variant === "danger" ? theme.text.caution : theme.text["high-emphasis"] },
+                    icon != null ? { flex: 1 } : null,
+                  ]}
+                >
+                  {title}
+                </RNText>
+              ) : (
+                title
+              )}
+            </View>
             {description &&
               (typeof description === "string" ? (
                 <RNText
@@ -112,6 +129,7 @@ export function SettingsListRow({
   onPress,
   disabled = false,
   destructive = false,
+  showChevron = false,
   style,
 }: SettingsListRowProps) {
   const { theme, scales } = useTheme()
@@ -163,6 +181,15 @@ export function SettingsListRow({
         {children}
       </View>
       {rightSlot}
+      {showChevron && (
+        <RNText
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          style={[resolveTypo("label.md"), { color: theme.object["low-emphasis"] }]}
+        >
+          ›
+        </RNText>
+      )}
     </View>
   )
 

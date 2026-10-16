@@ -2545,7 +2545,9 @@
         "設定画面で SectionHeader + Card + ListItem の wrapper を consumer 側に作らない",
         "設定一覧で ad-hoc flex row を作らず SettingsListRow を使う",
         "switch / badge / button は rightSlot に置く",
-        "danger variant は削除・ログアウトなど不可逆操作のグループに限定する"
+        "danger variant は削除・ログアウトなど不可逆操作のグループに限定する",
+        "見出しアイコンは SettingsSection の icon（見出しの左・aria-hidden・20px・Object-Medium-Emphasis）。title を span で包んでアイコンを並べない（issue #690）",
+        "次の画面へ進む行は SettingsListRow の showChevron（右端・ArrowRight2 16px・Object-Low-Emphasis・aria-hidden）。矢印を手書きしない。トグル等その場で完結する行には付けない。native も同名（issue #690）"
       ],
       "subcomponents": [
         "SettingsSection",
