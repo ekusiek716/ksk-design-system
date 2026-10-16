@@ -581,6 +581,8 @@ function DialogHeader({
                 variant="ghost"
                 size="icon-lg"
                 data-slot="dialog-header-close"
+                // icon-lg は product theme で縮められるので、当たり判定は常に 44px 以上を保つ（透明な before）
+                className="relative before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:size-full before:min-h-11 before:min-w-11 before:content-['']"
                 aria-label={closeLabel ?? defaultLabels.close}
                 onClick={onClose}
               >

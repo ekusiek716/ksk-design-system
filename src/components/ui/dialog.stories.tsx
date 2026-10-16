@@ -297,7 +297,16 @@ export const HeaderBarOnClose: Story = {
     await waitFor(() => expect(dialog.getAttribute("data-state")).toBe("open"))
     const close = dialog.querySelector<HTMLElement>('[data-slot="dialog-header-close"]')!
     await expect(close.getAttribute("aria-label")).toBe("閉じる")
-    await expect(Math.round(close.getBoundingClientRect().width)).toBeGreaterThanOrEqual(44)
+    // 見た目は icon-lg（--Control-Height-Lg。product theme で変わる）のまま、当たり判定は 44px 以上
+    const probe = document.createElement("div")
+    probe.style.width = "var(--Control-Height-Lg)"
+    close.parentElement!.appendChild(probe)
+    const lg = probe.getBoundingClientRect().width
+    probe.remove()
+    await expect(Math.round(close.getBoundingClientRect().width)).toBe(Math.round(lg))
+    const hit = getComputedStyle(close, "::before")
+    await expect(parseFloat(hit.width)).toBeGreaterThanOrEqual(44)
+    await expect(parseFloat(hit.height)).toBeGreaterThanOrEqual(44)
     await userEvent.click(within(dialog).getByRole("button", { name: "閉じる" }))
     // CI の WebKit は退場アニメーションの待ちが既定 1000ms を超えることがあるので 5000ms 待つ
     await waitFor(() => expect(within(document.body).queryByRole("dialog")).toBeNull(), { timeout: 5000 })

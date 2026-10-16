@@ -151,6 +151,8 @@ function DetailSheetHeader({
             variant="ghost"
             size="icon"
             data-slot="detail-sheet-header-close"
+            // 見た目は 40px のまま、当たり判定を 44px に広げる（Button の xs / sm / icon-sm と同じ透明な before）
+            className="relative before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:size-full before:min-h-11 before:min-w-11 before:content-['']"
             aria-label={closeLabel ?? defaultLabels.close}
             onClick={onClose}
           >

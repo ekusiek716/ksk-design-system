@@ -109,6 +109,11 @@ export const WithCloseButton: Story = {
     const canvas = within(canvasElement)
     const close = canvas.getByRole("button", { name: "閉じる" })
     await expect(close.getAttribute("data-slot")).toBe("detail-sheet-header-close")
+    // 見た目 40px・当たり判定（透明な before）44px
+    await expect(Math.round(close.getBoundingClientRect().width)).toBe(40)
+    const hit = getComputedStyle(close, "::before")
+    await expect(parseFloat(hit.width)).toBeGreaterThanOrEqual(44)
+    await expect(parseFloat(hit.height)).toBeGreaterThanOrEqual(44)
     // trailing の末尾（右端）に置く
     await expect(close.parentElement?.lastElementChild).toBe(close)
     await userEvent.click(close)

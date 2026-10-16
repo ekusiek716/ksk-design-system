@@ -24,6 +24,8 @@ describe("DetailSheetHeader onClose", () => {
     expect(html).toMatch(/<span>t<\/span><button[^>]*data-slot="detail-sheet-header-close"/)
     expect(html).toContain('aria-label="閉じる"')
     expect(html).toContain('data-size="icon"')
+    // 当たり判定は 44px（透明な before）
+    expect(html).toContain("before:min-h-11 before:min-w-11")
   })
 
   it("closeLabel > KskLabelsProvider の close", () => {
@@ -50,6 +52,7 @@ describe("DialogHeader onClose", () => {
     expect(html).toContain('data-slot="dialog-header-trailing"')
     expect(html).toContain('data-slot="dialog-header-close"')
     expect(html).toContain('data-size="icon-lg"')
+    expect(html).toContain("before:min-h-11 before:min-w-11")
     expect(html).toContain('aria-label="閉じる"')
   })
 
