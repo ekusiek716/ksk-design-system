@@ -63,23 +63,30 @@ function TagInput({
   // label（id 経由）/ aria-labelledby で名前が付くときは、明示されない限り aria-label を出さない。
   // id だけ渡して実際には <label for={id}> が無い場合に無名の入力欄にならないよう、マウント後に
   // label の有無を確かめ、無ければ既定の aria-label に戻す（開発ビルドでは 1 回 warn）。
+  // 判定は input の ref コールバックで行う（commit 時点で兄弟の label も DOM にある。id 等が変わると
+  // コールバックの identity が変わり React が再度呼ぶ）。effect 内の同期 setState を避けるため。
   const [labelMissing, setLabelMissing] = React.useState(false)
-  React.useEffect(() => {
-    if (!id || ariaLabelledby || inputLabel !== undefined) {
-      setLabelMissing(false)
-      return
-    }
-    const root = inputRef.current?.getRootNode() as Document | ShadowRoot | undefined
-    const escaped = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(id) : id
-    const found = Boolean(root?.querySelector?.(`label[for="${escaped}"]`)) || Boolean(inputRef.current?.closest("label"))
-    setLabelMissing(!found)
-    if (!found && isDev() && !warnedMissingLabel) {
-      warnedMissingLabel = true
-      console.warn(
-        `[ksk-ds] TagInput: id="${id}" に対応する <label for> が見つかりません。FormField htmlFor で結ぶか inputLabel / aria-labelledby を渡してください（既定の aria-label「タグ入力」で補っています）。`
-      )
-    }
-  }, [id, ariaLabelledby, inputLabel])
+  const attachInput = React.useCallback(
+    (node: HTMLInputElement | null) => {
+      inputRef.current = node
+      if (!node) return
+      if (!id || ariaLabelledby || inputLabel !== undefined) {
+        setLabelMissing(false)
+        return
+      }
+      const root = node.getRootNode() as Document | ShadowRoot
+      const escaped = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(id) : id
+      const found = Boolean(root.querySelector?.(`label[for="${escaped}"]`)) || Boolean(node.closest("label"))
+      setLabelMissing(!found)
+      if (!found && isDev() && !warnedMissingLabel) {
+        warnedMissingLabel = true
+        console.warn(
+          `[ksk-ds] TagInput: id="${id}" に対応する <label for> が見つかりません。FormField htmlFor で結ぶか inputLabel / aria-labelledby を渡してください（既定の aria-label「タグ入力」で補っています）。`
+        )
+      }
+    },
+    [id, ariaLabelledby, inputLabel]
+  )
   const resolvedInputLabel =
     inputLabel ?? (ariaLabelledby || (id && !labelMissing) ? undefined : "タグ入力")
   const [input, setInput] = React.useState("")
@@ -163,7 +170,7 @@ function TagInput({
         </span>
       ))}
       <input
-        ref={inputRef}
+        ref={attachInput}
         id={id}
         name={name}
         value={input}
