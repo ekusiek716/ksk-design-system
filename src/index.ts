@@ -268,6 +268,7 @@ export {
   FieldSeparator,
 } from "./components/patterns/field"
 export type {
+  FieldSetGap,
   FieldSetProps,
   FieldLegendProps,
   FieldGroupProps,

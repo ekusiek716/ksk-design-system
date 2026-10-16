@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect } from "storybook/test"
+import { Chip } from "./chip"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -111,4 +113,35 @@ export const SeparatorWithLabel: Story = {
       </FieldGroup>
     </div>
   ),
+}
+
+/**
+ * 絞り込みシートの選択肢グループ（issue #714）。`FieldSet gap="sm"` + `FieldLegend size="sm"`。
+ * gap を指定すると legend の下にも同じ間隔が付く（legend は flex の並びに入らないため gap だけでは 0px）。
+ */
+export const CompactFilterGroups: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="flex w-80 flex-col gap-4">
+      {[
+        { legend: "期限", options: ["すべて", "今日", "今週", "期限切れ"] },
+        { legend: "状態", options: ["未完了", "すべて", "完了"] },
+      ].map((group) => (
+        <FieldSet key={group.legend} gap="sm">
+          <FieldLegend size="sm">{group.legend}</FieldLegend>
+          <div className="flex flex-wrap gap-2">
+            {group.options.map((label, i) => (
+              <Chip key={label} selected={i === 0}>{label}</Chip>
+            ))}
+          </div>
+        </FieldSet>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const legend = canvasElement.querySelector<HTMLElement>('[data-slot="field-legend"]')!
+    const row = legend.nextElementSibling as HTMLElement
+    await expect(Math.round(row.getBoundingClientRect().top - legend.getBoundingClientRect().bottom)).toBe(8)
+    await expect(getComputedStyle(legend).fontSize).toBe("14px")
+  },
 }

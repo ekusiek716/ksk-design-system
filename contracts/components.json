@@ -1678,7 +1678,8 @@
         "個々の入力は既存 FormField を FieldGroup 内に並べる",
         "FieldDescription はセクション・グループの補足、FieldError はグループ単位のエラーに使う",
         "グループ横断の区切りは FieldSeparator を使い、中央ラベルは children で渡す",
-        "FormSection は title/description 一体の簡易 API、FieldSet は legend や複数 FieldGroup を明示構成する長いフォーム向け"
+        "FormSection は title/description 一体の簡易 API、FieldSet は legend や複数 FieldGroup を明示構成する長いフォーム向け",
+        "詰めた並び（絞り込みシートの選択肢グループ等）は FieldSet gap（sm=8 / md=16 / lg=24px）+ FieldLegend size=\"sm\"（typo-label-md + Text-Medium-Emphasis）。className に space-y-* や typo-* を足して上書きしない。gap 指定時は legend の下にも同じ間隔が付く（未指定の既定は legend の直下 0px のまま）（issue #714）"
       ]
     },
     {

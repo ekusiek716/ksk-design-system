@@ -39,6 +39,9 @@
 @source inline("[&>*]:flex-col");
 @source inline("[&>*]:min-w-[140px]");
 @source inline("[&>*]:shrink-0");
+@source inline("[&>[data-slot=field-legend]]:mb-2");
+@source inline("[&>[data-slot=field-legend]]:mb-4");
+@source inline("[&>[data-slot=field-legend]]:mb-6");
 @source inline("[&>button]:bg-[var(--Brand-Primary)]");
 @source inline("[&>button]:bg-transparent!");
 @source inline("[&>button]:hover:bg-[var(--Brand-Primary)]");
