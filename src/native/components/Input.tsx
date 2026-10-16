@@ -15,7 +15,15 @@ import { resolveTypo } from "../typography"
 // borderColor の上に被さる。focus 状態は外側 View の borderColor で表すので outline は消す。
 const WEB_INPUT_RESET = Platform.OS === "web" ? { outlineStyle: "none" } : null
 
+/** Web Input / Textarea の variant と同じ語彙（issue #675） */
+export type FieldVariant = "default" | "inline" | "inline-title"
+
 export interface InputProps extends Omit<TextInputProps, "style"> {
+  /**
+   * 見た目の種類（issue #675）。"inline" は枠・背景なしで本文（body.md）と同じ見た目、
+   * "inline-title" は見出し（heading.xl）。フォーカス中は下線（accent）、invalid は下線（caution）で示す。
+   */
+  variant?: FieldVariant
   invalid?: boolean
   disabled?: boolean
   leading?: React.ReactNode
@@ -36,12 +44,13 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
 }
 
 export const Input = React.forwardRef<TextInput, InputProps>(function Input(
-  { invalid, disabled, leading, trailing, style, inputStyle, ...rest },
+  { variant = "default", invalid, disabled, leading, trailing, style, inputStyle, ...rest },
   ref,
 ) {
   const { theme, scales } = useTheme()
   const [focused, setFocused] = useState(false)
-  const typography = resolveTypo("body.md")
+  const isInline = variant !== "default"
+  const typography = resolveTypo(variant === "inline-title" ? "heading.xl" : "body.md")
   // A native single-line field centers its font metrics itself. A paragraph
   // lineHeight adds leading to its baseline (especially visible with Japanese
   // text on iOS). Keep paragraph rhythm for multiline and browser inputs.
@@ -68,6 +77,17 @@ export const Input = React.forwardRef<TextInput, InputProps>(function Input(
           backgroundColor: disabled ? theme.surface.disable : theme.surface.primary,
           opacity: disabled ? 0.6 : 1,
         },
+        isInline
+          ? {
+              // inline（issue #675）: 枠・背景なし。フォーカス / invalid は下線 2pt で示す（色だけに頼らず線の有無でも分かる）
+              paddingHorizontal: 0,
+              borderRadius: 0,
+              borderWidth: 0,
+              borderBottomWidth: 2,
+              borderBottomColor: invalid || focused ? borderColor : "transparent",
+              backgroundColor: "transparent",
+            }
+          : null,
         style,
       ]}
     >

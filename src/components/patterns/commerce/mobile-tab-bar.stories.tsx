@@ -138,3 +138,30 @@ export const ProductCustomization: Story = {
     )
   },
 }
+
+// ─── 広告バナーぶん持ち上げる（issue #681） ─────────────────────────────────────
+
+/**
+ * `bottomOffsetExtra` で画面下の広告バナー（AdMob 等）の高さぶんタブバーを持ち上げる。
+ * `keyboardBehavior` は BottomTabBar へ素通し（既定 "hide"）。
+ */
+export const WithBottomOffsetExtra: Story = {
+  render: function Render() {
+    const [active, setActive] = React.useState<TabKey>("home")
+    return (
+      <div className="relative w-full min-h-screen flex flex-col items-center justify-center bg-[var(--Surface-Secondary)]">
+        <p className="text-[var(--Text-High-Emphasis)] typo-heading-xl">現在のタブ: {active}</p>
+        <MobileTabBar
+          tabs={TABS.slice(0, 4)}
+          activeTab={active}
+          onSelect={setActive}
+          keyboardBehavior="lift"
+          bottomOffsetExtra="50px"
+        />
+        <div className="fixed inset-x-0 bottom-0 flex h-[50px] items-center justify-center border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Tertiary)] typo-label-sm text-[var(--Text-Medium-Emphasis)]">
+          広告バナー（50px）
+        </div>
+      </div>
+    )
+  },
+}

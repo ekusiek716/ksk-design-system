@@ -45,7 +45,7 @@ function expectedMaxHeight(
       ? `max(0px, calc(100dvh - ${inset}))`
       : position === "top"
         ? `max(0px, calc(100dvh - ${inset} - ${
-            safeArea ? "max(env(safe-area-inset-top, 0px), 2rem)" : "2rem"
+            safeArea ? "max(var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px)), 2rem)" : "2rem"
           } - 2rem))`
         : `max(0px, calc(100dvh - ${doubled}))`
   const caps = [

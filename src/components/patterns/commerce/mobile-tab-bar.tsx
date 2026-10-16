@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Add } from "iconsax-reactjs"
 import { BottomTabBar } from "./bottom-tab-bar"
-import type { BottomTabBarFloatingPosition } from "./bottom-tab-bar"
+import type { BottomTabBarFloatingPosition, BottomTabBarKeyboardBehavior } from "./bottom-tab-bar"
 
 interface MobileTabItem<T extends string> {
   key: T
@@ -32,6 +32,17 @@ interface MobileTabBarProps<T extends string> {
    * BottomTabBar へそのままパススルーする。@default false
    */
   showOnDesktop?: boolean
+  /**
+   * ソフトキーボード表示中の挙動（issue #681）。BottomTabBar へそのまま渡す。
+   * "hide"（既定・従来どおり）/ "lift" / "stay"。
+   */
+  keyboardBehavior?: BottomTabBarKeyboardBehavior
+  /**
+   * 下端からの追加オフセット（CSS の長さ。issue #681）。画面下の広告バナーの高さぶん持ち上げる。
+   * BottomTabBar の `bottomOffsetExtra` へそのまま渡す。MobileAppShell の `bottomPaddingExtra` と
+   * 同じ値を渡すと本文の下余白も揃う。
+   */
+  bottomOffsetExtra?: string
   className?: string
 }
 
@@ -57,7 +68,8 @@ function AddTabIcon() {
  * - addAction 指定時はブランド色丸背景 + Add アイコンを centerAction として渡す
  * - onPointerUpCapture でタップ後のフォーカスリング残留を防ぐ（closest("button, a")?.blur()）
  * - 内部は BottomTabBar（variant="pill", pillPosition="fixed", showLabels,
- *   keyboardBehavior="hide"）の薄いラッパー。floatingPosition はパススルー。
+ *   keyboardBehavior="hide" 既定）の薄いラッパー。floatingPosition / keyboardBehavior /
+ *   bottomOffsetExtra はパススルー。
  */
 function MobileTabBar<T extends string>({
   tabs,
@@ -66,6 +78,8 @@ function MobileTabBar<T extends string>({
   addAction,
   floatingPosition = "center",
   showOnDesktop = false,
+  keyboardBehavior = "hide",
+  bottomOffsetExtra,
   className,
 }: MobileTabBarProps<T>) {
   const handlePointerUpCapture = React.useCallback((event: React.PointerEvent<HTMLElement>) => {
@@ -114,7 +128,8 @@ function MobileTabBar<T extends string>({
       pillPosition="fixed"
       floatingPosition={floatingPosition}
       showLabels
-      keyboardBehavior="hide"
+      keyboardBehavior={keyboardBehavior}
+      bottomOffsetExtra={bottomOffsetExtra}
       onPointerUpCapture={handlePointerUpCapture}
       items={tabItems}
       centerAction={centerAction}

@@ -75,11 +75,20 @@ interface SidebarNavProps extends React.ComponentProps<"nav"> {
   collapsed?: boolean
   /** nav 要素の aria-label。@default "サイドナビゲーション" */
   navLabel?: string
+  /**
+   * 置く面の明暗（issue #680）。
+   * - "default"（既定）: 明るい面（Surface-Primary）。選択中は Surface-Accent-Primary-Light + Text-Accent-Primary
+   * - "inverse": 暗い面（Surface-Inverse。`AdminShell sidebarTone="inverse"` 等）。文字は
+   *   Text-on-Inverse-Secondary、hover / 選択中は Object-on-Inverse の淡い面 + Text-on-Inverse
+   *
+   * 面そのもの（サイドバーの背景）は置く側が持つ。SidebarNav は行の色だけを切り替える。
+   */
+  tone?: "default" | "inverse"
 }
 
 // ─── Item ────────────────────────────────────────────────────────────────────
 
-function SidebarNavRow({ item, collapsed }: { item: SidebarNavItem; collapsed: boolean }) {
+function SidebarNavRow({ item, collapsed, tone }: { item: SidebarNavItem; collapsed: boolean; tone: "default" | "inverse" }) {
   const badgeCount = item.badgeCount ?? 0
   const hasBadge = badgeCount > 0
   const badgeText = badgeCount > 99 ? "99+" : String(badgeCount)
@@ -130,11 +139,19 @@ function SidebarNavRow({ item, collapsed }: { item: SidebarNavItem; collapsed: b
       // 行高 44px は DS のタッチターゲット方針（AdminShell の合成規範 #7 と同じ）
       "relative flex min-h-11 items-center rounded-lg typo-label-md",
       "transition-colors duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
-      "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+      "focus-visible:outline-hidden focus-visible:ring-[3px]",
+      // inverse の面では Focus-High-Emphasis/50 が 3:1 を割る（check-contrast.mjs）ため、Object-on-Inverse の不透明リング
+      tone === "inverse"
+        ? "focus-visible:ring-[var(--Object-on-Inverse)]"
+        : "focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
       collapsed ? "size-11 justify-center" : "w-full gap-3 px-3 text-left",
-      item.isActive
-        ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)]"
-        : "bg-[var(--Surface-Primary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]"
+      tone === "inverse"
+        ? item.isActive
+          ? "bg-[var(--Object-on-Inverse)]/15 text-[var(--Text-on-Inverse)]"
+          : "bg-transparent text-[var(--Text-on-Inverse-Secondary)] hover:bg-[var(--Object-on-Inverse)]/10 hover:text-[var(--Text-on-Inverse)]"
+        : item.isActive
+          ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)]"
+          : "bg-[var(--Surface-Primary)] text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Text-High-Emphasis)]"
     ),
   }
 
@@ -179,6 +196,7 @@ function SidebarNav({
   items,
   collapsed = false,
   navLabel = "サイドナビゲーション",
+  tone = "default",
   className,
   ...props
 }: SidebarNavProps) {
@@ -186,6 +204,7 @@ function SidebarNav({
     <nav
       data-slot="sidebar-nav"
       data-collapsed={collapsed || undefined}
+      data-tone={tone}
       aria-label={navLabel}
       className={cn("w-full", className)}
       {...props}
@@ -193,7 +212,7 @@ function SidebarNav({
       <ul className={cn("flex flex-col gap-1", collapsed && "items-center")}>
         {items.map((item, index) => (
           <li key={item.tabKey ?? `${item.label}-${index}`} className={cn(!collapsed && "w-full")}>
-            <SidebarNavRow item={item} collapsed={collapsed} />
+            <SidebarNavRow item={item} collapsed={collapsed} tone={tone} />
           </li>
         ))}
       </ul>

@@ -37,8 +37,8 @@ interface MediaActionClusterProps extends Omit<React.HTMLAttributes<HTMLDivEleme
 }
 
 const ANCHOR_CLASS: Record<MediaActionClusterAnchor, string> = {
-  "top-left": "top-[max(1rem,env(safe-area-inset-top))] left-[max(1rem,env(safe-area-inset-left))]",
-  "top-right": "top-[max(1rem,env(safe-area-inset-top))] right-[max(1rem,env(safe-area-inset-right))]",
+  "top-left": "top-[max(1rem,var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)))] left-[max(1rem,env(safe-area-inset-left))]",
+  "top-right": "top-[max(1rem,var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)))] right-[max(1rem,env(safe-area-inset-right))]",
   "bottom-left": "bottom-[max(1rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))]",
   "bottom-right": "bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))]",
   "center-left": "top-1/2 left-[max(1rem,env(safe-area-inset-left))] -translate-y-1/2",

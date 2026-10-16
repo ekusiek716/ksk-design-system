@@ -2,6 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useValueLength } from "@/lib/use-value-length"
 import { UNSTYLED_FOCUS_RING } from "@/lib/server-variants/unstyled"
+import { INLINE_FIELD_BASE, INLINE_FIELD_TYPO, type FieldVariant } from "../../lib/server-variants/inline-field"
 
 interface InputProps extends Omit<React.ComponentProps<"input">, "prefix"> {
   /**
@@ -40,6 +41,17 @@ interface InputProps extends Omit<React.ComponentProps<"input">, "prefix"> {
    * `w-full` を除き DS の見た目のままにする。
    */
   unstyled?: boolean
+  /**
+   * 見た目の種類（issue #675）。
+   * - "default"（既定）: 枠・背景付きの入力欄
+   * - "inline": 枠・背景を持たず本文（typo-body-md）と同じ見た目でその場で編集する。hover で淡い面、
+   *   focus-visible で Focus リング、aria-invalid で Caution のリング
+   * - "inline-title": inline の見出し版（typo-heading-xl）。DetailSheetScaffold の titleEditor 等
+   *
+   * `unstyled` + 手書きの typo・余白・フォーカス下線でインライン編集を作らない。
+   * `unstyled` と併用した場合は `unstyled` が優先される。
+   */
+  variant?: FieldVariant
 }
 
 // 高さ・横 padding・角丸は product theme の公開変数（`--Field-*`）を参照する。
@@ -60,6 +72,7 @@ function Input({
   endAdornment,
   showCount,
   unstyled = false,
+  variant = "default",
   maxLength,
   value,
   defaultValue,
@@ -91,6 +104,7 @@ function Input({
     <input
       type={type}
       data-slot="input"
+      data-variant={variant === "default" ? undefined : variant}
       ref={countRef}
       value={value}
       defaultValue={defaultValue}
@@ -105,7 +119,11 @@ function Input({
         onCompositionEnd?.(event)
       }}
       className={cn(
-        unstyled ? UNSTYLED_FOCUS_RING : inputBaseClass,
+        unstyled
+          ? UNSTYLED_FOCUS_RING
+          : variant === "default"
+            ? inputBaseClass
+            : [INLINE_FIELD_BASE, INLINE_FIELD_TYPO[variant]],
         startAdornment && "pl-9",
         endAdornment && "pr-9",
         className,

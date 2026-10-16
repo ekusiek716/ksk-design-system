@@ -14,6 +14,12 @@ interface MobileAppShellProps extends React.ComponentProps<"div"> {
   contentClassName?: string
   bottomNavMode?: MobileAppShellBottomNavMode
   bottomPadding?: MobileAppShellBottomPadding
+  /**
+   * main の下余白に足す長さ（CSS の長さ。issue #681）。画面下に常設する広告バナーの高さなど。
+   * bottomPadding の既定余白（bottom-nav=5rem / bottom-nav-fab=7rem / none=0）に加算する。
+   * MobileTabBar / MobileFloatingActionButton の `bottomOffsetExtra` と同じ値を渡す。
+   */
+  bottomPaddingExtra?: string
   maxWidth?: React.CSSProperties["maxWidth"]
   centeredPreview?: boolean
 }
@@ -29,6 +35,7 @@ function MobileAppShell({
   contentClassName,
   bottomNavMode = "fixed",
   bottomPadding = fab ? "bottom-nav-fab" : bottomNav ? "bottom-nav" : "none",
+  bottomPaddingExtra,
   maxWidth = 430,
   centeredPreview = true,
   children,
@@ -82,10 +89,21 @@ function MobileAppShell({
             data-slot="mobile-app-shell-main"
             className={cn(
               "min-h-0 flex-1",
-              bottomPadding === "bottom-nav" && "pb-20",
-              bottomPadding === "bottom-nav-fab" && "pb-28",
+              // bottomPaddingExtra（issue #681）は指定時だけ加算する（未指定のクラスは従来どおり）
+              bottomPaddingExtra === undefined
+                ? [bottomPadding === "bottom-nav" && "pb-20", bottomPadding === "bottom-nav-fab" && "pb-28"]
+                : bottomPadding === "bottom-nav"
+                  ? "pb-[calc(5rem_+_var(--ksk-shell-bottom-padding-extra))]"
+                  : bottomPadding === "bottom-nav-fab"
+                    ? "pb-[calc(7rem_+_var(--ksk-shell-bottom-padding-extra))]"
+                    : "pb-[var(--ksk-shell-bottom-padding-extra)]",
               mainClassName
             )}
+            style={
+              bottomPaddingExtra === undefined
+                ? undefined
+                : ({ "--ksk-shell-bottom-padding-extra": bottomPaddingExtra } as React.CSSProperties)
+            }
           >
             <div data-slot="mobile-app-shell-content" className={contentClassName}>
               {children}

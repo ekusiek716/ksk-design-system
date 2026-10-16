@@ -5,8 +5,11 @@ import { useTheme } from "../theme/ThemeProvider"
 export interface CardProps extends ViewProps {
   /** spacing.scale のインデックス。既定 4 = 16px */
   padding?: number
-  /** shadow トークン名。web は boxShadow、iOS は shadow*、Android は elevation を適用 */
-  elevation?: "sm" | "md" | "lg"
+  /**
+   * shadow トークン名。web は boxShadow、iOS は shadow*、Android は elevation を適用。
+   * 未指定・"none" は影なし（Web Card と同じ語彙。issue #689）。
+   */
+  elevation?: "none" | "sm" | "md" | "lg"
   /**
    * scales.borderRadius のキー。既定 "lg"（8px、web版 Card の rounded-[var(--Radius-Surface)] と同値）。
    * 既定を変えると全 consumer のカードの見た目が一斉に変わるため、既定は "lg" のまま据え置き、
@@ -21,10 +24,15 @@ export interface CardProps extends ViewProps {
   onPress?: () => void
   /** 押せるときに操作を止める */
   disabled?: boolean
+  /**
+   * 選択中（issue #677・Web Card の selected と対）。surface.accent-primary-light の面 +
+   * border.accent-primary の 2pt 枠。onPress のときは accessibilityState.selected を出す。
+   */
+  selected?: boolean
   children: React.ReactNode
 }
 
-const iosShadowMetrics: Record<NonNullable<CardProps["elevation"]>, Omit<ViewStyle, "shadowColor">> = {
+const iosShadowMetrics: Record<Exclude<NonNullable<CardProps["elevation"]>, "none">, Omit<ViewStyle, "shadowColor">> = {
   sm: {
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -42,7 +50,7 @@ const iosShadowMetrics: Record<NonNullable<CardProps["elevation"]>, Omit<ViewSty
   },
 }
 
-function getIosShadow(elevation: NonNullable<CardProps["elevation"]>, shadowColor: string): ViewStyle {
+function getIosShadow(elevation: Exclude<NonNullable<CardProps["elevation"]>, "none">, shadowColor: string): ViewStyle {
   return {
     shadowColor,
     ...iosShadowMetrics[elevation],
@@ -50,10 +58,10 @@ function getIosShadow(elevation: NonNullable<CardProps["elevation"]>, shadowColo
 }
 
 /** surface.primary 面 + border.low-emphasis の標準カード。 */
-export function Card({ padding = 4, elevation, radius = "lg", style, children, onPress, disabled = false, ...rest }: CardProps) {
+export function Card({ padding = 4, elevation, radius = "lg", style, children, onPress, disabled = false, selected, ...rest }: CardProps) {
   const { theme, scales } = useTheme()
 
-  const shadow: ViewStyle | undefined = elevation
+  const shadow: ViewStyle | undefined = elevation && elevation !== "none"
     ? (Platform.select({
         web: { boxShadow: scales.shadows[elevation].boxShadow },
         ios: getIosShadow(elevation, theme.overlay.dark),
@@ -69,18 +77,22 @@ export function Card({ padding = 4, elevation, radius = "lg", style, children, o
     padding: scales.spacing.scale[padding],
     gap: scales.spacing.scale[3],
   }
+  const selectedStyle: ViewStyle | null = selected
+    ? { backgroundColor: theme.surface["accent-primary-light"], borderColor: theme.border["accent-primary"], borderWidth: 2 }
+    : null
 
   if (onPress) {
     return (
       <Pressable
         accessibilityRole="button"
-        accessibilityState={{ disabled }}
+        accessibilityState={{ disabled, ...(selected !== undefined ? { selected } : {}) }}
         disabled={disabled}
         onPress={onPress}
         style={({ pressed }) => [
           base,
           shadow,
-          pressed && !disabled ? { backgroundColor: theme.surface.secondary, transform: [{ scale: 0.98 }] } : null,
+          selectedStyle,
+          pressed && !disabled && !selected ? { backgroundColor: theme.surface.secondary, transform: [{ scale: 0.98 }] } : null,
           disabled ? { opacity: 0.5 } : null,
           style,
         ]}
@@ -103,6 +115,7 @@ export function Card({ padding = 4, elevation, radius = "lg", style, children, o
           gap: scales.spacing.scale[3],
         },
         shadow,
+        selectedStyle,
         style,
       ]}
       {...rest}

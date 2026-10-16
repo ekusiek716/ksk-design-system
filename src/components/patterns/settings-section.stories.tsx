@@ -78,3 +78,19 @@ export const CompactSpacing: Story = {
     </div>
   ),
 }
+
+/**
+ * 見出しアイコンと遷移の矢印（issue #690）。`icon` は見出しの左（装飾）、`showChevron` は
+ * 次の画面へ進む行の右端。トグルの行には付けない。
+ */
+export const WithIconAndChevron: Story = {
+  render: () => (
+    <div className="w-full max-w-md">
+      <SettingsSection variant="card" title="アカウント" icon={<Setting2 />}>
+        <SettingsListRow title="プロフィール" description="名前・アイコン" showChevron onClick={() => {}} />
+        <SettingsListRow title="ログイン方法" rightSlot={<Badge variant="info">メール</Badge>} showChevron onClick={() => {}} />
+        <SettingsListRow title="通知" rightSlot={<Switch aria-label="通知" />} />
+      </SettingsSection>
+    </div>
+  ),
+}

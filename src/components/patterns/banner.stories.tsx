@@ -88,3 +88,23 @@ export const AllVariants: Story = {
     </div>
   ),
 }
+
+/** density="compact"（issue #683）: 狭い場所・積み重ねるお知らせ向けに余白を詰める。 */
+export const Compact: Story = {
+  render: () => (
+    <div className="flex w-full max-w-md flex-col gap-2">
+      <Banner density="compact" variant="info" title="メールアドレスを登録しましょう" description="ログインできなくなったときに復元できます" />
+      <Banner density="compact" variant="warning" description="サンプルデータを表示しています" />
+    </div>
+  ),
+}
+
+/** layout="bar"（issue #683）: 画面上端に敷く全幅の帯。角丸なし・下線のみ。 */
+export const Bar: Story = {
+  render: () => (
+    <div className="w-full max-w-md border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]">
+      <Banner layout="bar" density="compact" variant="warning" description="サンプルモードです。入力した内容は保存されません" />
+      <div className="p-4 typo-body-sm text-[var(--Text-Medium-Emphasis)]">画面の本文</div>
+    </div>
+  ),
+}

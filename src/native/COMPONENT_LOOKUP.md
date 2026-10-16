@@ -4,7 +4,7 @@
 
 React Native / Expo consumer は、新規 UI を作る前にこの一覧で既存コンポーネントを確認してください。すべて `ksk-design-system/native/ui` から import します。
 
-- Public native component exports: 155
+- Public native component exports: 160
 - Import: `import { Button, Screen } from "ksk-design-system/native/ui"`
 
 | Component | Source | Section |
@@ -24,6 +24,7 @@ React Native / Expo consumer は、新規 UI を作る前にこの一覧で既�
 | `Chip` | `src/native/components/Chip.tsx` | Phase 1: Display |
 | `CountdownHero` | `src/native/components/CountdownHero.tsx` | Phase 1: Display |
 | `CountdownTimer` | `src/native/components/CountdownTimer.tsx` | Phase 1: Display |
+| `EmojiIcon` | `src/native/components/EmojiIcon.tsx` | Phase 1: Display |
 | `NotificationBadge` | `src/native/components/NotificationBadge.tsx` | Phase 1: Display |
 | `Progress` | `src/native/components/Progress.tsx` | Phase 1: Display |
 | `ProgressRing` | `src/native/components/ProgressRing.tsx` | Phase 1: Display |
@@ -160,7 +161,11 @@ React Native / Expo consumer は、新規 UI を作る前にこの一覧で既�
 | `RatingDisplay` | `src/native/components/RatingDisplay.tsx` | Phase 7: Commerce |
 | `ReviewCard` | `src/native/components/ReviewCard.tsx` | Phase 7: Commerce |
 | `ReviewSummary` | `src/native/components/ReviewSummary.tsx` | Phase 7: Commerce |
+| `AddTile` | `src/native/components/AddTile.tsx` | Phase 8: Shells |
 | `AppShell` | `src/native/components/AppShell.tsx` | Phase 8: Shells |
+| `CodeDisplay` | `src/native/components/CodeDisplay.tsx` | Phase 8: Shells |
+| `FeatureComparisonTable` | `src/native/components/FeatureComparisonTable.tsx` | Phase 8: Shells |
+| `Highlight` | `src/native/components/Highlight.tsx` | Phase 8: Shells |
 | `MarketingShell` | `src/native/components/MarketingShell.tsx` | Phase 8: Shells |
 | `SEMANTIC_ICONS` | `src/native/components/SemanticIcon.tsx` | Phase 8: Shells |
 | `SemanticIcon` | `src/native/components/SemanticIcon.tsx` | Phase 8: Shells |

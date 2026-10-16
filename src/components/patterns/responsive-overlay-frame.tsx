@@ -79,7 +79,7 @@ const desktopFloatClasses = "sm:max-w-lg max-h-[min(85dvh,46rem)] flex flex-col 
  */
 const mobileFloatMaxHeightClasses = {
   safeArea:
-    "max-h-[min(85dvh,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))] lg:max-h-[min(85dvh,46rem)]",
+    "max-h-[min(85dvh,calc(100dvh_-_1.5rem_-_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))))] lg:max-h-[min(85dvh,46rem)]",
   noSafeArea: "max-h-[85dvh] lg:max-h-[min(85dvh,46rem)]",
 } as const
 
@@ -404,7 +404,7 @@ function resolveDesktopOverlayKeyboardStyle(
           // ここも env() を足さない（明示的な opt-out を無視して余計に縮めない
           // / #487 の Codex レビュー指摘）。
           `max(0px, calc(100dvh - ${inset} - ${
-            safeArea ? "max(env(safe-area-inset-top, 0px), 2rem)" : "2rem"
+            safeArea ? "max(var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px)), 2rem)" : "2rem"
           } - 2rem))`
         : `max(0px, calc(100dvh - ${doubled}))`
   const caps = [

@@ -13,14 +13,14 @@
 |-----------|--------|----------|---------|
 | Accordion, AccordionItem, AccordionTrigger, AccordionContent | `@/components/ui/accordion` | — | ThreeItems, MultipleOpen, Large, MixedSizeOverride |
 | AlertDialog, AlertDialogTrigger, AlertDialogPortal, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel | `@/components/ui/alert-dialog` | — | Default, Small, ConfirmActionIsImmediatelyClickable, CancelClosesWithoutAction, NestedInDialog, PopoverCoordination |
-| Alert, AlertTitle, AlertDescription | `@/components/ui/alert` | **variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning` | Info, Success, Error, Warning, InlineInfo, InlineCaution, InlineWarning, AllVariants, Prop-based API (auto icon), Prop-based + action |
+| Alert, AlertTitle, AlertDescription | `@/components/ui/alert` | **variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning` | Info, Success, Error, Warning, InlineInfo, InlineCaution, InlineWarning, AllVariants, Prop-based API (auto icon), Prop-based + action, InlinePropBased |
 | AutoGrowTextarea | `@/components/ui/auto-grow-textarea` | — | DefaultComment, CompactTitleEditor |
 | Avatar, AvatarImage, AvatarFallback | `@/components/ui/avatar` | — | WithImage, Fallback, Sizes, Group |
 | Badge | `@/components/ui/badge` | **variant**: `default`, `secondary`, `outline`, `destructive`, `success`, `warning`, `info`, `subtle`, `ghost` | Default, Secondary, Outline, Destructive, Success, Warning, Info, Subtle, Ghost, AllVariants |
 | Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis | `@/components/ui/breadcrumb` | — | ThreeLevel, WithEllipsis, AsChildRouterLink |
 | Button | `@/components/ui/button` | **variant**: `default`, `secondary`, `secondary-switch`, `tertiary`, `ghost`, `ghost-neutral`, `ghost-destructive`, `ghost-success`, `destructive`, `info`, `warning`, `success`, `link`, `glass`, `glass-inverse`, `glass-accent`, `accent`, `inverse`, `ghost-inverse`<br>**size**: `xs`, `sm`, `default`, `lg`, `xl`, `hero`, `icon`, `icon-sm`, `icon-lg`, `icon-xl`, `icon-fab`, `match`<br>**layout**: `horizontal`, `vertical` | Default, Secondary, SecondarySwitch, Tertiary, Ghost, Destructive, Link, AllVariants, StatusVariants, GhostTones, AllSizes, Hero, Inverse on Dark Background, Real UI — Hero Section CTAs, Disabled, DisabledAllVariants, IconButton, Glass — Liquid Glass (iOS 26), Glass Inverse on Dark Background, Glass Accent — FAB (Floating Action Button), Glass — ボケ感デモ（動くコンテンツ上）, Glass — カーソル追従スペキュラ, WithIcon, PressDoesNotShiftLayout, DisabledIsNotClickable, FocusRingIsVisible, TouchTargetsDoNotOverlap, Loading, LoadingKeepsWidthAndBlocksClick |
 | Calendar | `@/components/ui/calendar` | — | Single, NavigatesMonths, Range |
-| Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter | `@/components/ui/card` | **variant**: `default`, `media` | FullCard, MinimalCard, HeaderOnly, OnSameColorGround, Pressable |
+| Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter | `@/components/ui/card` | **elevation**: `none`, `sm`, `md`, `lg`<br>**variant**: `default`, `media` | FullCard, MinimalCard, HeaderOnly, OnSameColorGround, Pressable, Elevation, Selectable |
 | CheckboxCardGroup, CheckboxCardItem | `@/components/ui/checkbox-card` | — | Default, WithDescription, WithExpandedContent, Disabled, AccessibleNameIsLabelOnly, DescriptionOnlyIsNotReadTwice |
 | CheckboxField | `@/components/ui/checkbox-field` | — | Default, WithDescription, WithError, LongLabelWrap, Disabled |
 | CheckboxGroup, CheckboxGroupItem | `@/components/ui/checkbox-group` | — | Default, Required, WithError, SingleColumn |
@@ -40,12 +40,14 @@
 | Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, Fullscreen, FullscreenSafeAreaOptOut, ReportShop, StackedFooter, OpensAndIsImmediatelyInteractive, Sizes, ClosesOnEscape, TrapsFocus, StacksAboveNestedSheets, ConfirmDialogStacksAboveSheet, TitleLevelFullscreenDefault, TitleLevelExplicit, TitleLevelCenterDefault, ChildDescriptionIsLinked, NoDescriptionLeavesNoDescribedBy, DescriptionPropIsLinked, ExplicitDescribedByWins, DynamicChildDescriptionIsLinked, NestedSelectKeyboard |
 | DropdownFilter | `@/components/ui/dropdown-filter` | — | Default, ActiveFilter, WithIcons（ビュー切替・アイコン付き）, MultipleFilters |
 | DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent | `@/components/ui/dropdown-menu` | — | Default, WithCheckbox, WithRadio, WithSubmenu, OpensAndSelectsItem, NavigatesWithKeyboard |
+| EmojiIcon | `@/components/ui/emoji-icon` | — | Default, Sizes, InSlots |
 | ErrorBoundary | `@/components/ui/error-boundary` | — | — |
 | Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField | `@/components/ui/form` | — | BasicForm, WithSelect, ShowsValidationErrorAndClearsOnInput |
+| Highlight | `@/components/ui/highlight` | — | Default, NoMatch, SpecialCharacters |
 | HoverCard, HoverCardTrigger, HoverCardContent | `@/components/ui/hover-card` | — | Default |
-| IconBadge | `@/components/ui/icon-badge` | **size**: `md`, `ml`, `lg`<br>**appearance**: `accent`, `plain` | Medium, MediumLarge, Large, InCardFlow |
+| IconBadge | `@/components/ui/icon-badge` | **size**: `md`, `ml`, `lg`<br>**appearance**: `accent`, `plain`<br>**tone**: `accent`, `info`, `success`, `warning`, `caution` | Medium, MediumLarge, Large, Tones, InCardFlow |
 | ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |
-| Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput |
+| Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput, Inline |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, Unstyled, DisabledState |
 | MultiSelect | `@/components/ui/multi-select` | — | Default, WithTriggerLabel, InvalidInFormField, FocusReturnsToTriggerAfterClear |
 | NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |
@@ -80,12 +82,84 @@
 | Tabs, TabsList, TabsTrigger, TabsContent | `@/components/ui/tabs` | — | ThreeTabs, WithDisabledTab, Vertical, SwitchesByClickAndArrowKeys |
 | Textarea | `@/components/ui/textarea` | — | Default, WithPlaceholder, Disabled, Error, AutoGrow |
 | TimePicker | `@/components/ui/time-picker` | — | Default, 15分刻み, InvalidInFormField |
-| Toaster | `@/components/ui/toast` | **variant**: `default`, `success`, `caution`, `warning`, `info` | Default, Success, Caution, Warning, Info, AllVariants, Fire-and-forget (no <Toaster />), viewport の下端 offset（--Toast-Viewport-Offset-Bottom）, AnnouncesViaLiveRegion |
+| Toaster | `@/components/ui/toast` | **variant**: `default`, `success`, `caution`, `warning`, `info` | Default, Success, Caution, Warning, Info, AllVariants, Fire-and-forget (no <Toaster />), viewport の下端 offset（--Toast-Viewport-Offset-Bottom）, 中央寄せ（position=bottom-center）, AnnouncesViaLiveRegion |
 | Tooltip, TooltipTrigger, TooltipContent, TooltipProvider | `@/components/ui/tooltip` | — | HoverToShow, OnIconButton |
 
 ---
 
 ## Pattern Components（src/components/patterns/）
+
+### patterns/（汎用）
+
+| Component | Import | Variants | Stories |
+|-----------|--------|----------|---------|
+| AddTile | `@/components/patterns/add-tile` | — | Default, Small, CustomIcon, Disabled, InGrid |
+| AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky, Glass — Liquid Glass (over gradient), Transparent — scrollable reveal, NavWithRenderSlot |
+| BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
+| Banner | `@/components/patterns/banner` | **density**: `default`, `compact`<br>**layout**: `card`, `bar`<br>**variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants, Compact, Bar |
+| BottomSheetForm | `@/components/patterns/bottom-sheet-form` | — | Default, WithLoading |
+| BottomSheetFrame | `@/components/patterns/bottom-sheet-frame` | — | MobileFull, MobileForm, DesktopFloating, Glass — mobile snap, MobilePage, KeyboardHideFallback, swipeToClose + DetailSheetScaffold (#164), TitleLevelPageDefault, TitleLevelPartialDefault, TitleLevelExplicit |
+| CategoryNav | `@/components/patterns/category-nav` | — | Default, WithSelection |
+| CategoryScroll | `@/components/patterns/category-scroll` | — | Default, CircleShape, GridLayout |
+| CelebrationDialog | `@/components/patterns/celebration-dialog` | — | Basic, Bounce Emoji / Auto Dismiss, Iconsax Badge（emoji の代わり）, Custom Confetti Colors |
+| Celebration | `@/components/patterns/celebration` | — | Confetti, InlineEmoji, Actions Slot / Interactive, Custom Duration / Colors / DriftRange, Emoji Animation: Bounce, Effect: Burst（クラッカー演出）, Cardless / Tap Dismiss |
+| ChipFilterBar | `@/components/patterns/chip-filter-bar` | — | Default, CustomResultCountLabel, Sticky, StickyWithGutter, Bare, TouchTargetNotClipped |
+| ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, SelectionModeSingle, SelectionModeMultiple, SelectionModeUnspecified, LabelledByHeading, SingleSelectScalar, WithMax, WrappedRowsDoNotOverlap |
+| Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `xs`, `sm`, `md`, `lg`, `tile`<br>**shape**: `pill`, `rounded`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape, WithCount, TileAndSoldOut, AsLink, Real UI — Filters & Status, Touch selection stable, TileTouchTargetNotShrunk, ExtraSmall, RoundedShape |
+| CoachMarkOverlay | `@/components/patterns/coach-mark-overlay` | — | MultiStepTour, Localized labels (EN), BrandVariant, MissingTarget, FocusTrap |
+| CodeDisplay | `@/components/patterns/code-display` | — | Default, Large, Accent, LongCode, WithoutCopy |
+| CollapsibleChipField | `@/components/patterns/collapsible-chip-field` | — | WithLabel, WithIcon, RequiredNoClear, CollapsedDisclosure, AlwaysExpanded, EscapeInsideDialog |
+| CompactFilePicker, ImageAttachmentPicker | `@/components/patterns/compact-file-picker` | — | SingleImageReplacement, MultiImageAttachments, ListPreview, LoadingWithCustomLabel |
+| ConfirmDialog, ConfirmDialogProvider | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading, UseConfirm |
+| ContentCarousel | `@/components/patterns/content-carousel` | — | Default, AutoPlay, WithoutControls |
+| CookieConsent | `@/components/patterns/cookie-consent` | — | Default, CustomLabels, OnDecideCallback |
+| CountdownHero | `@/components/patterns/countdown-hero` | — | Upcoming, Today, Past, With Illustration Slot, ISO String targetDate, With dateLabel (目標日を数字の下に), Today with todayValue (0 の代わりに文字), Interactive |
+| DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle |
+| DocumentPage | `@/components/patterns/document-page` | — | PrivacyPolicy, WithoutLastUpdated |
+| EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
+| ErrorState, NotFoundIllustration | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry, NotFound |
+| FeatureComparisonTable | `@/components/patterns/feature-comparison-table` | — | Default, ThreeColumns |
+| FieldSet, FieldLegend, FieldGroup, FieldDescription, FieldError, FieldSeparator | `@/components/patterns/field` | — | 3セクションの長いフォーム, SeparatorWithLabel |
+| FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
+| FilterChip | `@/components/patterns/filter-chip` | — | Inactive, ActiveWithValue, Toggle, Group |
+| FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears, WithIcon |
+| Footer | `@/components/patterns/footer` | — | Default, Minimal, WithRenderSlot, WithExtra, WithPaymentIcons |
+| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm |
+| FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
+| ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
+| KanbanColumn | `@/components/patterns/kanban-column` | — | Board |
+| KeyboardAwareSheetFooter | `@/components/patterns/keyboard-aware-sheet-footer` | — | Fixed, HideWhenKeyboardOpen, Glass |
+| ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot, AlignCenter, DensityCompact, WithFooterSlot, WithSecondaryAction, RightSlotWidth |
+| ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | Default, WithoutFilter, FewRows |
+| MediaActionCluster | `@/components/patterns/media-action-cluster` | — | Vertical, Horizontal, Auto orientation, No auto-hide |
+| MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
+| MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount, WithTopAlignment |
+| MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff |
+| MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline, Full width CTA, With ad banner offset (bottomOffsetExtra) |
+| MonthCalendar | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English |
+| NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
+| PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
+| PresenceIndicator | `@/components/patterns/presence-indicator` | — | Default, WithBadge, Offline, NameOnly, 狭幅で非表示にする例（className） |
+| ProgressSteps | `@/components/patterns/progress-steps` | — | Step2Active, FirstStep, ThirdStep, AllComplete, ThreeSteps |
+| AUTO_PROMPT_SUPPRESSION_EVENT, AutoPrompt, PromptCoordinatorProvider | `@/components/patterns/prompt-coordinator` | — | Default, 予約した案内を順番に表示する |
+| Prose | `@/components/patterns/prose` | — | PrivacyPolicy, SingleSection |
+| ActionTile, QuickActionGrid | `@/components/patterns/quick-action-grid` | — | EmojiOnly, IconAndLabel, WithMeta, IndicatorOverride, SelectedWithoutDescription, NarrowWithLongMeta, SingleSelection, MultipleSelection, LaunchersWithoutSelectionMode, Illustration, ColorSwatch |
+| ResponsiveOverlayFrame, ResponsiveOverlayFooter | `@/components/patterns/responsive-overlay-frame` | — | Short form (mobile-form), Long keyboard-aware form (mobile-page), mobile-full preset, breakpoint=lg, breakpoint=product-theme, snapPoints は dialog に変換されない, float サイド（カード型）, float-glass サイド（ガラス素材）, float サイド（長い内容・既定の最大高さと safe-area）, plain preset（素の bottom シート） |
+| ReviewOverlay | `@/components/patterns/review-overlay` | — | Default, WithPins |
+| Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero |
+| SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch, AsForm |
+| SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
+| SettingsSection, SettingsListRow | `@/components/patterns/settings-section` | — | Group, Card, Danger, CompactSpacing, WithIconAndChevron |
+| ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders, With onShare tracking, BlockPrimary |
+| SideDrawerFrame | `@/components/patterns/side-drawer-frame` | — | RightDrawer, LeftDrawer, RightDrawer — swipeToClose, LeftDrawer — swipeToClose, Glass |
+| SidebarNav | `@/components/patterns/sidebar-nav` | — | Default, Collapsed, Links, LongLabel, RouterLinkRender, Inverse |
+| SimplePagination | `@/components/patterns/simple-pagination` | — | アイテム数指定 (items), ページ数指定 (pages), compact (モバイル省略表示), 境界での disabled, 0 件 |
+| StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, Variants, Interactive, MultipleCards, ElevationNone |
+| StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |
+| SwipeRow | `@/components/patterns/swipe-row` | — | Default, SingleAction, KeyboardAccessible |
+| TagInput | `@/components/patterns/tag-input` | — | Default, WithInitialTags, WithMax, Disabled, WithFormField |
+| Tag | `@/components/patterns/tag` | **variant**: `default`, `brand`, `caution`, `success`, `warning`, `info` | Default, Brand, Caution, Success, Warning, Info, AllVariants, Categorical, CategoricalWithDot, CategoricalHelpers |
+| ThumbnailCard | `@/components/patterns/thumbnail-card` | — | Vertical, Horizontal, WithSecondaryAction, Strip, WholeCardClickableWithSecondaryAction |
 
 ### patterns/admin/
 
@@ -100,73 +174,6 @@
 | SearchPanel | `@/components/patterns/admin/search-panel` | — | Default |
 | StatusTabs | `@/components/patterns/admin/status-tabs` | — | Default |
 
-### patterns/（汎用）
-
-| Component | Import | Variants | Stories |
-|-----------|--------|----------|---------|
-| AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky, Glass — Liquid Glass (over gradient), Transparent — scrollable reveal, NavWithRenderSlot |
-| BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
-| Banner | `@/components/patterns/banner` | **variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants |
-| BottomSheetForm | `@/components/patterns/bottom-sheet-form` | — | Default, WithLoading |
-| BottomSheetFrame | `@/components/patterns/bottom-sheet-frame` | — | MobileFull, MobileForm, DesktopFloating, Glass — mobile snap, MobilePage, KeyboardHideFallback, swipeToClose + DetailSheetScaffold (#164), TitleLevelPageDefault, TitleLevelPartialDefault, TitleLevelExplicit |
-| CategoryNav | `@/components/patterns/category-nav` | — | Default, WithSelection |
-| CategoryScroll | `@/components/patterns/category-scroll` | — | Default, CircleShape, GridLayout |
-| CelebrationDialog | `@/components/patterns/celebration-dialog` | — | Basic, Bounce Emoji / Auto Dismiss, Iconsax Badge（emoji の代わり）, Custom Confetti Colors |
-| Celebration | `@/components/patterns/celebration` | — | Confetti, InlineEmoji, Actions Slot / Interactive, Custom Duration / Colors / DriftRange, Emoji Animation: Bounce, Effect: Burst（クラッカー演出）, Cardless / Tap Dismiss |
-| ChipFilterBar | `@/components/patterns/chip-filter-bar` | — | Default, CustomResultCountLabel, Sticky, StickyWithGutter, Bare, TouchTargetNotClipped |
-| ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, SelectionModeSingle, SelectionModeMultiple, SelectionModeUnspecified, LabelledByHeading, SingleSelectScalar, WithMax, WrappedRowsDoNotOverlap |
-| Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `xs`, `sm`, `md`, `lg`, `tile`<br>**shape**: `pill`, `rounded`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape, WithCount, TileAndSoldOut, AsLink, Real UI — Filters & Status, Touch selection stable, TileTouchTargetNotShrunk, ExtraSmall, RoundedShape |
-| CoachMarkOverlay | `@/components/patterns/coach-mark-overlay` | — | MultiStepTour, Localized labels (EN), BrandVariant, MissingTarget, FocusTrap |
-| CollapsibleChipField | `@/components/patterns/collapsible-chip-field` | — | WithLabel, WithIcon, RequiredNoClear, CollapsedDisclosure, AlwaysExpanded, EscapeInsideDialog |
-| CompactFilePicker, ImageAttachmentPicker | `@/components/patterns/compact-file-picker` | — | SingleImageReplacement, MultiImageAttachments, ListPreview, LoadingWithCustomLabel |
-| ConfirmDialog, ConfirmDialogProvider | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading, UseConfirm |
-| ContentCarousel | `@/components/patterns/content-carousel` | — | Default, AutoPlay, WithoutControls |
-| CookieConsent | `@/components/patterns/cookie-consent` | — | Default, CustomLabels, OnDecideCallback |
-| CountdownHero | `@/components/patterns/countdown-hero` | — | Upcoming, Today, Past, With Illustration Slot, ISO String targetDate, With dateLabel (目標日を数字の下に), Today with todayValue (0 の代わりに文字), Interactive |
-| DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle |
-| DocumentPage | `@/components/patterns/document-page` | — | PrivacyPolicy, WithoutLastUpdated |
-| EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
-| ErrorState, NotFoundIllustration | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry, NotFound |
-| FieldSet, FieldLegend, FieldGroup, FieldDescription, FieldError, FieldSeparator | `@/components/patterns/field` | — | 3セクションの長いフォーム, SeparatorWithLabel |
-| FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
-| FilterChip | `@/components/patterns/filter-chip` | — | Inactive, ActiveWithValue, Toggle, Group |
-| FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears, WithIcon |
-| Footer | `@/components/patterns/footer` | — | Default, Minimal, WithRenderSlot, WithExtra, WithPaymentIcons |
-| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm |
-| FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
-| ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
-| KeyboardAwareSheetFooter | `@/components/patterns/keyboard-aware-sheet-footer` | — | Fixed, HideWhenKeyboardOpen, Glass |
-| ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot, AlignCenter, DensityCompact, WithFooterSlot, WithSecondaryAction, RightSlotWidth |
-| ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | Default, WithoutFilter, FewRows |
-| MediaActionCluster | `@/components/patterns/media-action-cluster` | — | Vertical, Horizontal, Auto orientation, No auto-hide |
-| MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
-| MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount, WithTopAlignment |
-| MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff |
-| MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline, Full width CTA, With ad banner offset (bottomOffsetExtra) |
-| NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
-| PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
-| PresenceIndicator | `@/components/patterns/presence-indicator` | — | Default, WithBadge, Offline, NameOnly, 狭幅で非表示にする例（className） |
-| ProgressSteps | `@/components/patterns/progress-steps` | — | Step2Active, FirstStep, ThirdStep, AllComplete, ThreeSteps |
-| AUTO_PROMPT_SUPPRESSION_EVENT, AutoPrompt, PromptCoordinatorProvider | `@/components/patterns/prompt-coordinator` | — | Default, 予約した案内を順番に表示する |
-| Prose | `@/components/patterns/prose` | — | PrivacyPolicy, SingleSection |
-| ActionTile, QuickActionGrid | `@/components/patterns/quick-action-grid` | — | EmojiOnly, IconAndLabel, WithMeta, IndicatorOverride, SelectedWithoutDescription, NarrowWithLongMeta, SingleSelection, MultipleSelection, LaunchersWithoutSelectionMode, Illustration, ColorSwatch |
-| ResponsiveOverlayFrame, ResponsiveOverlayFooter | `@/components/patterns/responsive-overlay-frame` | — | Short form (mobile-form), Long keyboard-aware form (mobile-page), mobile-full preset, breakpoint=lg, breakpoint=product-theme, snapPoints は dialog に変換されない, float サイド（カード型）, float-glass サイド（ガラス素材）, float サイド（長い内容・既定の最大高さと safe-area）, plain preset（素の bottom シート） |
-| ReviewOverlay | `@/components/patterns/review-overlay` | — | Default, WithPins |
-| Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero |
-| SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch, AsForm |
-| SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
-| SettingsSection, SettingsListRow | `@/components/patterns/settings-section` | — | Group, Card, Danger, CompactSpacing |
-| ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders, With onShare tracking |
-| SideDrawerFrame | `@/components/patterns/side-drawer-frame` | — | RightDrawer, LeftDrawer, RightDrawer — swipeToClose, LeftDrawer — swipeToClose, Glass |
-| SidebarNav | `@/components/patterns/sidebar-nav` | — | Default, Collapsed, Links, LongLabel, RouterLinkRender |
-| SimplePagination | `@/components/patterns/simple-pagination` | — | アイテム数指定 (items), ページ数指定 (pages), compact (モバイル省略表示), 境界での disabled, 0 件 |
-| StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, Variants, Interactive, MultipleCards |
-| StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |
-| SwipeRow | `@/components/patterns/swipe-row` | — | Default, SingleAction, KeyboardAccessible |
-| TagInput | `@/components/patterns/tag-input` | — | Default, WithInitialTags, WithMax, Disabled |
-| Tag | `@/components/patterns/tag` | **variant**: `default`, `brand`, `caution`, `success`, `warning`, `info` | Default, Brand, Caution, Success, Warning, Info, AllVariants, Categorical, CategoricalWithDot, CategoricalHelpers |
-| ThumbnailCard | `@/components/patterns/thumbnail-card` | — | Vertical, Horizontal, WithSecondaryAction, Strip, WholeCardClickableWithSecondaryAction |
-
 ### patterns/commerce/
 
 | Component | Import | Variants | Stories |
@@ -174,7 +181,7 @@
 | BottomTabBar | `@/components/patterns/commerce/bottom-tab-bar` | — | Default, Pill — iOS 26 Liquid Glass, Pill — on light background, Liquid Glass — center action, Liquid Glass — labels visible, Liquid Glass — 5 items, Liquid Glass — over dark photo/gradient, Liquid Glass — light fallback, Liquid Glass — sliding selection (interactive), Liquid Glass — scroll edge effect, Floating position — left + FAB, Floating position — right + FAB, Keyboard behavior — hide, Pill の面を不透明にする（--Nav-Pill-*）, デスクトップ幅でも表示する（showOnDesktop） |
 | FilterBar | `@/components/patterns/commerce/filter-bar` | — | Default, Interactive |
 | ImageCarousel | `@/components/patterns/commerce/image-carousel` | — | Banner, Square, Video, AutoPlay |
-| MobileTabBar | `@/components/patterns/commerce/mobile-tab-bar` | — | Default, With addAction (center CTA), floatingPosition=, ProductCustomization |
+| MobileTabBar | `@/components/patterns/commerce/mobile-tab-bar` | — | Default, With addAction (center CTA), floatingPosition=, ProductCustomization, WithBottomOffsetExtra |
 | OrderSummary | `@/components/patterns/commerce/order-summary` | — | Default, Simple |
 | PriceDisplay | `@/components/patterns/commerce/price-display` | **size**: `sm`, `md`, `lg`, `xl` | Default, Sale, Range, AllSizes |
 | ProductCard | `@/components/patterns/commerce/product-card` | — | Vertical, VerticalWithDiscount, VerticalWithCart, VerticalWithRanking, Horizontal, Grid |

@@ -75,3 +75,22 @@ export const WithShareTracking: Story = {
     )
   },
 }
+
+/**
+ * 共有そのものが画面の主操作のとき（issue #685）: `layout="block"` で全幅・大サイズの主ボタンにし、
+ * `message` で招待コード入りの本文を渡す。LINE は公式色の塗り（前景は AA を満たす --Brand-on-Line）、
+ * hover / 押下は --Brand-Line-Hover / --Brand-Line-Pressed。
+ */
+export const BlockPrimary: Story = {
+  render: () => (
+    <div className="w-80">
+      <ShareButtons
+        layout="block"
+        providers={["line", "copy"]}
+        url="https://example.com/invite"
+        message="プレハナビに招待しました。招待コード: AB12-CD34"
+        labels={{ line: "LINE で招待を送る", copy: "リンクをコピー" }}
+      />
+    </div>
+  ),
+}

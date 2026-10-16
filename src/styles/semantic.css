@@ -30,6 +30,8 @@
   --Surface-Success:               var(--Primitive-Green-50);
   --Surface-Warning:               var(--Primitive-Amber-50);
   --Surface-Info:                  var(--Primitive-Blue-50);
+  /* 検索一致のハイライト（<mark>・Highlight 部品・issue #692）。状態色（Warning）とは別の役割 */
+  --Surface-Highlight:             var(--Primitive-Amber-200);
 
   /* Subtle 階層: 半透明 fill（中強度）。
      bg-red-500/15 のような既存実装が "Surface-Caution"（Primitive-50）の
@@ -61,6 +63,7 @@
   --Text-Low-Emphasis:     var(--Primitive-Gray-600);
   --Text-Disable:          var(--Primitive-Gray-400);
   --Text-on-Inverse:       var(--Primitive-White);
+  --Text-on-Highlight:     var(--Primitive-Gray-900); /* Surface-Highlight 上の文字（issue #692） */
   --Text-on-Inverse-Secondary: var(--Primitive-White-Alpha-800);
   --Text-on-Media:         var(--Primitive-White);
   --Text-on-Media-Secondary: var(--Primitive-White-Alpha-800);
@@ -114,6 +117,12 @@
      連動せず、ライト/ダーク共通で固定。SocialLoginButton 等で生 #hex を
      直書きせずこのトークンを参照する。新規追加時は公式ガイドライン準拠。 */
   --Brand-Line:              #06C755;
+  /* LINE の塗りボタン（ShareButtons layout="block"・issue #685）の hover / 押下と前景。
+     hover / 押下は公式色に黒 10% / 20% を重ねた色（LINE ログインボタンの規定と同じ考え方）。
+     前景は黒: 白文字は #06C755 上で約 2.2:1 と AA 未達のため（scripts/check-contrast.mjs で検査）。 */
+  --Brand-Line-Hover:        #05B34D;
+  --Brand-Line-Pressed:      #059F44;
+  --Brand-on-Line:           #000000;
   --Brand-Google-Border:     #DADCE0; /* Google ボタンの罫線（Google 推奨グレー） */
   --Brand-Apple:             #000000;
   --Brand-Amazon:            #232F3E;
@@ -182,6 +191,7 @@
   --Surface-Success:               var(--Primitive-Green-900);
   --Surface-Warning:               var(--Primitive-Amber-900);
   --Surface-Info:                  var(--Primitive-Blue-900);
+  --Surface-Highlight:             var(--Primitive-Amber-700);
 
   /* Subtle 階層（Dark） — Primitive-400 系をベースに alpha 20% で
      暗背景上でも視認できる中強度 fill。 */
@@ -202,6 +212,7 @@
   --Text-Low-Emphasis:     var(--Primitive-White-Alpha-600);
   --Text-Disable:          var(--Primitive-White-Alpha-400);
   --Text-on-Inverse:       var(--Primitive-Gray-900);
+  --Text-on-Highlight:     var(--Primitive-White);
   --Text-on-Inverse-Secondary: var(--Primitive-Gray-700);
   --Text-on-Media:         var(--Primitive-White);
   --Text-on-Media-Secondary: var(--Primitive-White-Alpha-800);

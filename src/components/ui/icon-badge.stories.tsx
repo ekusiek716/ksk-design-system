@@ -32,6 +32,19 @@ export const Large: Story = {
   },
 }
 
+/** tone: 情報・成功・注意・警告の円アイコン（面とアイコン色が対で変わる）。 */
+export const Tones: Story = {
+  render: () => (
+    <div className="flex items-center gap-3">
+      <IconBadge tone="accent"><Gift /></IconBadge>
+      <IconBadge tone="info"><Heart /></IconBadge>
+      <IconBadge tone="success"><Star1 /></IconBadge>
+      <IconBadge tone="warning"><Gift /></IconBadge>
+      <IconBadge tone="caution"><Heart /></IconBadge>
+    </div>
+  ),
+}
+
 export const InCardFlow: Story = {
   render: () => (
     <div className="flex max-w-xs flex-col gap-4 rounded-xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-6">

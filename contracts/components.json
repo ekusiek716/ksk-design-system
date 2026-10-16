@@ -4,12 +4,12 @@
     "version": "2.11.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 70,
-      "patterns": 62,
+      "ui": 72,
+      "patterns": 67,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 155
+      "total": 162
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -120,7 +120,9 @@
         "showCount + maxLength で controlled / uncontrolled / IME 対応の文字数カウンタを表示",
         "showCount 未指定時は wrapper / counter DOM を追加しない",
         "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（showCount / adornment / IME 追従は維持される）",
-        "Native Input supports style (outer container View) and inputStyle (inner TextInput) as RN-idiomatic style overrides, merged after DS defaults (issue #447)"
+        "Native Input supports style (outer container View) and inputStyle (inner TextInput) as RN-idiomatic style overrides, merged after DS defaults (issue #447)",
+        "その場で編集する欄（詳細シートのタイトル・メモ等）は variant=\"inline\"（本文 typo-body-md）/ \"inline-title\"（見出し typo-heading-xl）。枠・背景なし、hover で Surface-Secondary、focus-visible で Focus リング、aria-invalid で Caution のリング。unstyled + typo・余白・フォーカス下線の手書きで作らない（issue #675）",
+        "CommitInput / CommitTextarea / AutoGrowTextarea / CommitAutoGrowTextarea にも同じ variant を渡せる。native Input / Textarea / AutoGrowTextarea も同名（フォーカス・invalid は下線）"
       ]
     },
     {
@@ -253,7 +255,8 @@
         "Must use <Textarea> not <textarea>",
         "showCount + maxLength で controlled / uncontrolled / IME 対応の文字数カウンタを表示",
         "showCount 未指定時は wrapper / counter DOM を追加しない",
-        "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（autoGrow / showCount は維持される）"
+        "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（autoGrow / showCount は維持される）",
+        "variant=\"inline\" / \"inline-title\" は枠・背景・最小高さ・resize なしでその場編集する（issue #675。Input と同じ）"
       ]
     },
     {
@@ -346,7 +349,12 @@
         "押せる面（button / a）は Card の DOM 先頭に置き、Tab 順はカード本体 → 内側の CardAction（視覚順）。onClick の型は MouseEventHandler<HTMLElement> で、以前の div 前提のハンドラもそのまま渡せる",
         "押せる Card の名前は aria-label → aria-labelledby → CardTitle（自前の id でも結ばれる）の順。どれも無いと開発ビルドで 1 回 console.warn。押せない入れ子の Card の CardTitle / CardDescription は外側の押せる Card に登録されない",
         "<Button unstyled> に border / rounded / shadow / active:scale を被せて押せるカードを自作しない（P040）。native は onPress / disabled",
-        "parity（web と差がある点）: native の押せる Card は Pressable 1 つで、CardTitle / CardAction の登録・前面化の仕組みを持たない。入れ子の Card や Card 内の別操作は RN の Pressable の入れ子規則（内側の Pressable が先に反応）に従い、読み上げ名は accessibilityLabel を明示するか子の Text の連結になる"
+        "parity（web と差がある点）: native の押せる Card は Pressable 1 つで、CardTitle / CardAction の登録・前面化の仕組みを持たない。入れ子の Card や Card 内の別操作は RN の Pressable の入れ子規則（内側の Pressable が先に反応）に従い、読み上げ名は accessibilityLabel を明示するか子の Text の連結になる",
+        "面の中に置くカード（入れ子・Section 内のグリッド）は elevation=\"none\"。`!shadow-none` / `shadow-none` の className で消さない（issue #689）",
+        "選ぶカード（配席の卓・プラン選択等）は selected。onClick の押せる面に aria-pressed（href では aria-current=\"true\"）が付き、押せない Card では見た目だけで開発ビルドで warn。Surface-Accent-Primary-Light の面 + Border-Accent-Primary の 2px 相当の枠になる。Button unstyled に選択色を被せて自作しない。座席のような円形は Card に形の className を足して組む（専用部品は持たない）。native Card も selected（accessibilityState.selected）（issue #677）"
+      ],
+      "variants": [
+        "elevation: none / sm / md(既定) / lg（issue #689。native と同じ語彙）"
       ]
     },
     {
@@ -379,7 +387,11 @@
       "rules": [
         "rounded-full only",
         "Use DiceBear shapes for placeholder, not pravatar.cc",
-        "native (src/native/components/Avatar.tsx): size はプリセット(sm/md/lg/xl)に加えて pt の数値も可。shape=\"circle\"(既定)|\"rounded\"、rounded の角丸は radius(lg/xl/2xl・既定 xl)。fallback は文字列に加えて ReactNode を受け、独自のフォールバック表示（決定論グラデ+絵文字等）を差し込める。source はリモート URL 文字列も受け取り {uri} に正規化する（issue #449）"
+        "native (src/native/components/Avatar.tsx): size はプリセット(sm/md/lg/xl)に加えて pt の数値も可。shape=\"circle\"(既定)|\"rounded\"、rounded の角丸は radius(lg/xl/2xl・既定 xl)。fallback は文字列に加えて ReactNode を受け、独自のフォールバック表示（決定論グラデ+絵文字等）を差し込める。source はリモート URL 文字列も受け取り {uri} に正規化する（issue #449）",
+        "寸法は size で指定する。className の size-* / w-* h-* で上書きしない（AvatarFallback の文字サイズが追随しなくなる）。native は xs=24 も持つ（issue #688）"
+      ],
+      "variants": [
+        "size: xs(24) / sm(32) / md(40・既定) / lg(56) / xl(80)。native と同じ語彙・値（issue #688）"
       ]
     },
     {
@@ -407,7 +419,8 @@
         "DialogTitle は level=\"page\"|\"section\"|\"card\" で見出しの役割を指定する（値は contracts/composition.json の textHierarchy と1対1）。未指定時は position=\"fullscreen\" 配下で page 相当、それ以外は従来の typo-heading-lg",
         "native (src/native/components/Dialog.tsx): position=\"center\"(既定) / \"top\" / \"fullscreen\" を持ち、fullscreen は四辺・top は上端の safe-area を避ける。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
         "modal な Dialog の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）",
-        "size は sm(400px) / md(480px・既定) / lg(640px) / xl(800px) の幅の段（opt-in）。未指定は従来の 480px のまま。position=\"fullscreen\" では無視。size の段は sm: 付きなので、上書きは className に sm:max-w-* を渡す（接頭辞なしの max-w-* は size に勝たない）。Sheet の size と段の名前を揃えている。ResponsiveDialogContent の size は PC 側の Dialog にだけ渡る"
+        "size は sm(400px) / md(480px・既定) / lg(640px) / xl(800px) の幅の段（opt-in）。未指定は従来の 480px のまま。position=\"fullscreen\" では無視。size の段は sm: 付きなので、上書きは className に sm:max-w-* を渡す（接頭辞なしの max-w-* は size に勝たない）。Sheet の size と段の名前を揃えている。ResponsiveDialogContent の size は PC 側の Dialog にだけ渡る",
+        "position=\"top\" / \"fullscreen\" の上端 safe area は --Safe-Area-Inset-Top で読む（issue #682。Sheet と同じ）"
       ],
       "variants": {
         "position": [
@@ -456,7 +469,8 @@
         "native (src/native/components/Sheet.tsx): safeArea(既定 true) で side=\"top\" の上端 inset 退避と、画面いっぱいに近い side=\"bottom\" の食い込み分の退避を行う。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
         "native (src/native/components/Sheet.tsx): surfaceColor でパネル（および snap モードの footer）の面色を上書きできる。未指定なら theme.surface.primary（従来どおり）。scrim の色は変えない（issue #448）",
         "modal な Sheet の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）",
-        "size は sm(max-w-sm・既定) / md(max-w-xl) / lg(max-w-3xl) の幅の段（opt-in）。side=\"left\" / \"right\" のときだけ効き、top / bottom / float 系では無視。未指定は従来の max-w-sm のまま。className の max-w-* は size より優先。Dialog の size と段の名前を揃えている"
+        "size は sm(max-w-sm・既定) / md(max-w-xl) / lg(max-w-3xl) の幅の段（opt-in）。side=\"left\" / \"right\" のときだけ効き、top / bottom / float 系では無視。未指定は従来の max-w-sm のまま。className の max-w-* は size より優先。Dialog の size と段の名前を揃えている",
+        "上端の safe area は --Safe-Area-Inset-Top（= max(--Native-Safe-Area-Inset-Top, env(safe-area-inset-top))）で読む。WKWebView で env() が 0 に固着する場合、ネイティブの殻が --Native-Safe-Area-Inset-Top に実測値を書く。consumer で pt-[max(...native-safe-top...)] や [data-slot=sheet-content] の max-height を上書きしない（issue #682。Dialog top / fullscreen・BottomSheetFrame・ResponsiveOverlayFrame・MediaActionCluster・sheet-keyboard.css も同じ）"
       ],
       "variants": {
         "titleLevel": [
@@ -670,7 +684,8 @@
         "新規 action prop で右側に CTA ボタン (元に戻す / 再試行 等) を表示できる",
         "保存完了・接続復旧・同期開始など一時的な操作結果は Banner ではなく toast.* helper を使う",
         "connectionRestored / saveComplete / retryStarted / retryFailed helper を提供",
-        "viewport の下端 offset は product theme の公開変数 --Toast-Viewport-Offset-Bottom（既定 1rem = 従来の bottom-4）で調整する。下部タブバー / FAB と重なるプロダクトは :root で持ち上げる。[data-slot=\"toast-viewport\"] を消費側 CSS から直接狙わない（issue #503）"
+        "viewport の下端 offset は product theme の公開変数 --Toast-Viewport-Offset-Bottom（既定 1rem = 従来の bottom-4）で調整する。下部タブバー / FAB と重なるプロダクトは :root で持ち上げる。[data-slot=\"toast-viewport\"] を消費側 CSS から直接狙わない（issue #503）",
+        "viewport の左右の余白と最大幅は product theme 変数 --Toast-Viewport-Offset-X（既定 1rem）/ --Toast-Viewport-Max-Width（既定 24rem）、中央寄せは <Toaster position=\"bottom-center\"> / configureToast({ position: \"bottom-center\" })。[data-slot=\"toast-viewport\"] の left / right / max-width を !important で上書きしない（issue #691）"
       ],
       "props": {
         "Toaster.container": "Element | DocumentFragment | null — 明示先 > PortalContainerProvider > document.body。Shadow DOM 内では Toaster を明示配置する（issue #651）",
@@ -954,7 +969,8 @@
       "description": "淡いアクセント背景の円に装飾アイコンを収めるバッジ。Card や Stack の gap と競合しないよう外側 margin を持たない。",
       "variants": [
         "size: md(44px) / ml(48px) / lg(72px)",
-        "appearance: accent / plain"
+        "appearance: accent / plain",
+        "tone: accent(既定) / info / success / warning / caution（issue #684）"
       ],
       "accessibility": [
         "装飾用途は既定で aria-hidden",
@@ -963,7 +979,8 @@
       "rules": [
         "外側 margin を追加せず、親の gap で配置間隔を管理する",
         "背景は Surface-Accent-Primary-Light、前景は Object-Accent-Primary と currentColor を使う",
-        "appearance=plain は既存パターン内部の視覚互換用途に限定する"
+        "appearance=plain は既存パターン内部の視覚互換用途に限定する",
+        "tone で情報・成功・注意・警告の色にする（面は Surface-*、アイコンは Object-*）。Surface-Info + Object-Info の円を自作しない。色だけで意味を伝えず、隣の見出し・本文で状態を言葉でも示す。native IconBadge も同名 tone（issue #684）"
       ]
     },
     {
@@ -985,7 +1002,9 @@
       "rules": [
         "bordered は白背景+カラー枠線",
         "inline は色付き背景・コンパクト",
-        "bordered variant (success/info/error/warning) は title/description prop で自動アイコン表示可"
+        "bordered variant (success/info/error/warning) は title/description prop で自動アイコン表示可",
+        "inline 系（inline-info / inline-caution / inline-warning）も title / description / icon / action の prop で書ける（issue #695。以前は children だけを描画し空の枠になった）。inline の既定アイコンは無し",
+        "children と title / description / icon / action を併用しない。併用時は children 優先で prop は描画されず、開発ビルドで警告する（issue #695）"
       ]
     },
     {
@@ -1369,6 +1388,41 @@
         "size": "number | string (Web), number (Native) — 既定24",
         "accessibilityLabel": "string — 単独の情報画像に付ける名前。Webはaria-labelを優先"
       }
+    },
+    {
+      "name": "EmojiIcon",
+      "path": "src/components/ui/emoji-icon.tsx",
+      "description": "絵文字をアイコンと同じ寸法の箱に収めて描く装飾（issue #676）。EmptyState / ErrorState / Alert / Banner の icon、ListItem の leftSlot、Toast など、アイコンを受けるスロットに絵文字を置くときに使う。",
+      "sizes": [
+        "sm(16)",
+        "md(24・既定)",
+        "lg(36)",
+        "xl(48)"
+      ],
+      "accessibility": [
+        "常に aria-hidden の装飾。意味は隣の見出し・本文で伝える",
+        "native (src/native/components/EmojiIcon.tsx): 同じ語彙・値。accessibilityElementsHidden / importantForAccessibility=no-hide-descendants"
+      ],
+      "rules": [
+        "アイコンスロットに絵文字を素の文字で渡して text-5xl 等の生サイズで拡大しない。EmojiIcon の size を使う",
+        "ActionTile は既存の emoji prop を使う"
+      ]
+    },
+    {
+      "name": "Highlight",
+      "path": "src/components/ui/highlight.tsx",
+      "description": "本文中の検索一致を <mark> で強調する（issue #692）。面は --Surface-Highlight、文字は --Text-on-Highlight（light / dark で AA）。",
+      "subcomponents": [
+        "splitHighlight"
+      ],
+      "accessibility": [
+        "<mark> は読み上げで強調として扱われる（SR により読み方は異なる）。本文の意味は変えない",
+        "native (src/native/components/Highlight.tsx): Text のネストで一致部分に面と文字色を重ねる"
+      ],
+      "rules": [
+        "検索一致の面に状態色（Surface-Warning / Object-Warning）を流用しない。--Surface-Highlight / --Text-on-Highlight を使う",
+        "検索語の正規表現の特殊文字は Highlight が文字としてエスケープする。consumer で RegExp を組まない"
+      ]
     }
   ],
   "patterns": [
@@ -1383,7 +1437,9 @@
         "caution"
       ],
       "rules": [
-        "Color + icon + text (never color alone)"
+        "Color + icon + text (never color alone)",
+        "density: default(gap-3 p-4) / compact(gap-2 px-3 py-2)。余白を詰めたいときは density=\"compact\"。`!p-2` 等の className で上書きしない（issue #683）",
+        "layout: card(既定・角丸の囲み) / bar(全幅・角丸なし・下線のみ)。画面上端の注意帯は layout=\"bar\" を使い、div で帯を自作しない（issue #683。native Banner は画像バナーで別 API のため Web のみ）"
       ]
     },
     {
@@ -1456,7 +1512,8 @@
       "description": "KPI / メトリクス表示カード。interactive prop で button 化、focus-ring / active:scale 自動付与。",
       "rules": [
         "interactive または onClick を渡せば role=button + キーボード操作対応",
-        "内側の label / value / unit / trend は stat-card-* data-slot を持つ（issue #650）"
+        "内側の label / value / unit / trend は stat-card-* data-slot を持つ（issue #650）",
+        "elevation: none / sm / md(既定)。Card・面の中に並べる StatCard は elevation=\"none\"。`!shadow-none` で消さない（issue #689。native StatCard は影を持たないため Web のみ）"
       ]
     },
     {
@@ -1659,10 +1716,12 @@
         "duplicates-control"
       ],
       "rules": [
-        "Use for multi-value text input (tags, emails, keywords)"
+        "Use for multi-value text input (tags, emails, keywords)",
+        "FormField と使うときは id を渡して htmlFor で結ぶ。inputLabel を label の代わりに使わない（lint P026 の例外が要らなくなる）"
       ],
       "accessibility": [
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）",
+        "id / name / aria-labelledby / aria-describedby / aria-invalid を内部 input へ転送する。`<FormField htmlFor={id}>` の子に置くと label が名前になり、説明・エラーが自動で結ばれる。id か aria-labelledby があり inputLabel を明示しないときは aria-label を付けない（issue #693）"
       ]
     },
     {
@@ -1779,7 +1838,8 @@
       "rules": [
         "SheetContent 内で使い、Sheet の autoFocus=false と組み合わせる",
         "KebabMenu は DetailSheetHeader trailing に置く",
-        "editable title は titleEditor slot に置く"
+        "editable title は titleEditor slot に置く",
+        "DetailSheetHeader の titleEditor には <CommitInput variant=\"inline-title\" aria-label=… /> を渡す（issue #675）"
       ]
     },
     {
@@ -2081,7 +2141,10 @@
         "providers を渡すと明示順で表示",
         "region=jp は line/x/copy、region=us は whatsapp/x/copy を既定にする",
         "provider 別の計測には onShare(provider) を使う。コピー結果の計測には onCopy(result) を使う",
-        "Clipboard API が利用不可または拒否された場合も copyErrorLabel を通知する"
+        "Clipboard API が利用不可または拒否された場合も copyErrorLabel を通知する",
+        "任意の本文（招待コード入りの案内文など）は message（native と同名）。LINE は line.me/R/share?text= に「message + url」、X / Telegram は text に message、WhatsApp / メールは「message + url」を渡す。copy は url のまま（issue #685）",
+        "共有が画面の主操作のとき（招待シート等）は layout=\"block\"（全幅・Control-Height-Lg の主ボタンを縦に積む）。LINE は --Brand-Line の塗り + --Brand-on-Line（黒。白文字は約 2.2:1 で AA 未達）、hover / 押下は --Brand-Line-Hover / --Brand-Line-Pressed。LINE ボタンや --External-LINE* を consumer で自作しない（issue #685）",
+        "表示ラベル・アクセシブルネームの上書きは labels（例: { line: \"LINE で招待を送る\" }）"
       ],
       "props": {
         "groupLabel": "string (既定 \"シェア\") — role=\"group\" 全体ラッパーの aria-label（issue #428）"
@@ -2531,7 +2594,9 @@
         "設定画面で SectionHeader + Card + ListItem の wrapper を consumer 側に作らない",
         "設定一覧で ad-hoc flex row を作らず SettingsListRow を使う",
         "switch / badge / button は rightSlot に置く",
-        "danger variant は削除・ログアウトなど不可逆操作のグループに限定する"
+        "danger variant は削除・ログアウトなど不可逆操作のグループに限定する",
+        "見出しアイコンは SettingsSection の icon（見出しの左・aria-hidden・20px・Object-Medium-Emphasis）。title を span で包んでアイコンを並べない（issue #690）",
+        "次の画面へ進む行は SettingsListRow の showChevron（右端・ArrowRight2 16px・Object-Low-Emphasis・aria-hidden）。矢印を手書きしない。トグル等その場で完結する行には付けない。native も同名（issue #690）"
       ],
       "subcomponents": [
         "SettingsSection",
@@ -2557,7 +2622,8 @@
       ],
       "rules": [
         "BottomTabBar + MobileFloatingActionButton の geometry を consumer CSS で手組みしない",
-        "既に fixed な nav を渡す場合は bottomNavMode=external を使う"
+        "既に fixed な nav を渡す場合は bottomNavMode=external を使う",
+        "bottomPaddingExtra（CSS の長さ）は bottomPadding の既定余白（bottom-nav=5rem / bottom-nav-fab=7rem / none=0）に加算する。広告バナー等の常設要素の高さを渡し、main の下余白を mainClassName で自前計算しない（issue #681）"
       ]
     },
     {
@@ -2579,7 +2645,8 @@
         "モバイルの BottomTabBar と同じ items 配列を渡す",
         "ページ内アンカーの目次は SectionNav、ビュー状態の切替は SubNav を使う",
         "ロゴ行・フッターは部品に含めず slot 側で並べる",
-        "next/link 等のルーターで描画するときは項目ごとの render（Footer・AppHeader と同じレンダースロット）を使う。渡された props（className・aria-current・data-*・children・onClick）をそのまま転送すること。未指定は従来どおり <a>（href あり）/ <button>"
+        "next/link 等のルーターで描画するときは項目ごとの render（Footer・AppHeader と同じレンダースロット）を使う。渡された props（className・aria-current・data-*・children・onClick）をそのまま転送すること。未指定は従来どおり <a>（href あり）/ <button>",
+        "暗い面（Surface-Inverse）のサイドバーでは tone=\"inverse\"。文字は Text-on-Inverse-Secondary、hover / 選択中は Object-on-Inverse の淡い面 + Text-on-Inverse。暗色ナビを Button unstyled で自作しない（issue #680）"
       ]
     },
     {
@@ -2659,6 +2726,95 @@
       "subcomponents": [
         "QuickActionGrid",
         "ActionTile"
+      ]
+    },
+    {
+      "name": "AddTile",
+      "path": "src/components/patterns/add-tile.tsx",
+      "description": "一覧の末尾・空のカラム・グリッドの空き枠に置く「＋追加」の点線タイル（issue #678）。押すと新しい項目を作る入口。",
+      "sizes": [
+        "sm(44px・一覧の末尾)",
+        "md(64px・既定・空カラム / グリッドの空き枠)"
+      ],
+      "accessibility": [
+        "type=button の実 button。label がアクセシブルネーム、アイコンは aria-hidden",
+        "高さ 44px 以上・focus-visible リング",
+        "native (src/native/components/AddTile.tsx): accessibilityRole=button / accessibilityLabel=label / accessibilityState.disabled"
+      ],
+      "rules": [
+        "Button に border-dashed や形を上書きして「追加」タイルを自作しない",
+        "画面の主操作（ヘッダーの作成・FAB）の代わりにしない。「この場所に足す」入口に限る",
+        "点線は Border-Medium-Emphasis、hover は Border-Accent-Primary + Surface-Accent-Primary-Light + Text-Accent-Primary"
+      ]
+    },
+    {
+      "name": "CodeDisplay",
+      "path": "src/components/patterns/code-display.tsx",
+      "description": "招待コード・ログインコード・クーポン等の英数字コードを等幅・広めの字間で見せ、ワンタップでコピーする（issue #686）。入力させる側は CodeInput。",
+      "sizes": [
+        "md(typo-heading-lg・既定)",
+        "lg(typo-heading-2xl)"
+      ],
+      "variants": [
+        "tone: neutral(Surface-Secondary・既定) / accent(Surface-Accent-Primary-Light)"
+      ],
+      "accessibility": [
+        "コピー結果はボタンの文言とアイコンで示し、aria-live=polite で読み上げる（色だけで伝えない）",
+        "native (src/native/components/CodeDisplay.tsx): コードは selectable。RN コアにクリップボードが無いため onCopy（expo-clipboard 等）を渡したときだけコピーボタンを出す"
+      ],
+      "rules": [
+        "font-mono / tracking-* を consumer で指定してコード表示を自作しない",
+        "長いコードは break-all で折り返す。横スクロールさせない",
+        "コピーの成否はトーストではなくボタン上で即時に示す（onCopy で計測・トーストを足すのは可）"
+      ]
+    },
+    {
+      "name": "FeatureComparisonTable",
+      "path": "src/components/patterns/feature-comparison-table.tsx",
+      "description": "プラン（Free / Plus 等）の機能比較表（issue #687）。列ごとの可否（✓ / —）や値を <table> と th scope で意味付きで出す。",
+      "accessibility": [
+        "<table> + sr-only の caption + 列見出し th[scope=col] + 行見出し th[scope=row]",
+        "✓ / — は aria-hidden の装飾で、availableLabel / unavailableLabel（既定「利用できる」「利用できない」）を sr-only で持つ",
+        "native (src/native/components/FeatureComparisonTable.tsx): 表のセマンティクスが無いため各行を 1 つの読み上げ要素（「機能名、Free 利用できない、Plus 利用できる」）にまとめる"
+      ],
+      "rules": [
+        "div grid + アイコンだけで比較表を自作しない（読み上げで可否が分からない）",
+        "列は 2〜3 を想定。推奨プランは highlight（Surface-Accent-Primary-Light + Text-Accent-Primary の見出し）",
+        "値が無いセル（undefined）は false（利用できない）として扱う"
+      ]
+    },
+    {
+      "name": "MonthCalendar",
+      "path": "src/components/patterns/month-calendar.tsx",
+      "description": "予定付きの月カレンダー（issue #679）。日ごとの予定を一覧する予定表（日付を選ぶ入力は Calendar / DatePicker）。今日・選択日・土日・月外セル・予定チップ・「+n件」の見た目を DS が持つ。",
+      "subcomponents": [
+        "buildMonthWeeks"
+      ],
+      "accessibility": [
+        "WAI-ARIA grid パターン: role=grid / row / columnheader / gridcell、タブストップは 1 つ（roving tabindex。選択日 → 今日 → 1 日）",
+        "← → ↑ ↓ で 1 日 / 1 週、Home / End で週の端、PageUp / PageDown で前後の月（onMonthChange 指定時）、Enter / Space で onSelectDay",
+        "セルの読み上げ名に日付・今日・予定件数と予定名を含める。予定チップと「+n件」はポインタ用の近道（tabIndex=-1）で、キーボードは日の選択から詳細へ辿る"
+      ],
+      "rules": [
+        "日のセル・予定チップを Button unstyled で自作しない",
+        "あふれは maxEventsPerDay（既定 2）超を「+n件」にまとめ、onShowMore（既定 onSelectDay）でその日の詳細へ",
+        "md（768px）未満はチップの代わりに色ドット（最大 3）を出す。操作は日の選択に一本化する",
+        "土日の色は weekendTone（既定 true。日曜 Text-Caution / 土曜 Text-Accent-Primary・Calendar と同じ語彙）",
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
+      ]
+    },
+    {
+      "name": "KanbanColumn",
+      "path": "src/components/patterns/kanban-column.tsx",
+      "description": "カンバンの列の入れ物（issue #679）。見出し（色ドット + title + 件数 + action）・カードを縦に積む本体・footer（AddTile 等）。",
+      "accessibility": [
+        "見出し（h3）で名前の付いた section。件数は見出しの読み上げに「（n件）」で含め、見た目の件数バッジは aria-hidden"
+      ],
+      "rules": [
+        "列の上辺に太い色帯を付けない。状態は tone の色ドットと見出しの言葉で示す",
+        "中のカードは Card elevation=\"none\"（面の中の面は影なし）",
+        "ドラッグ＆ドロップは持たない。consumer のライブラリで包む",
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
       ]
     }
   ],
@@ -2798,7 +2954,8 @@
         "消費側は DS の内部マークアップ（[data-slot=\"bottom-nav-pill\"] > :is(a, button)、span:first-child / span:last-child、[data-global-nav-add-icon]）を !important や :has() で叩かない。DOM を狙う場合も公開 data-slot だけを使う。",
         "--Nav-Item-Min-Height / --Nav-Center-Action-Size は max(44px, var(...)) で参照するため、44px（HIG のタップ領域下限）より縮まない。",
         "--Nav-Center-Action-Surface / -Border / -Shadow と --Nav-Selected-Surface / -Shadow は宣言したときだけ DS 既定（.glass-accent / ガラスの選択プラッター）を置き換える。未宣言なら tone / dark の出し分けは DS 側が持つ。",
-        "--Nav-Pill-* の寸法が効くのは prominent レイアウト（showLabels か centerAction がある pill）。アイコンのみの compact pill は契約外で固定。"
+        "--Nav-Pill-* の寸法が効くのは prominent レイアウト（showLabels か centerAction がある pill）。アイコンのみの compact pill は契約外で固定。",
+        "bottomOffsetExtra（CSS の長さ）は safe-area・pill の 12px・lift の持ち上げ量に加算される。className の bottom-* で位置を上書きしない（issue #681）"
       ],
       "props": {
         "navLabel": "string (既定 \"メインナビゲーション\") — nav 要素の aria-label（issue #428）"
@@ -2836,7 +2993,9 @@
         "addAction 指定時はブランド色丸背景 + Add アイコンが自動で centerAction になる",
         "floatingPosition='left'|'right' を使う場合は FAB を反対側に併置する",
         "寸法・面の上書きは BottomTabBar と同じ --Nav-* を使う（MobileTabBar は薄いラッパーなので変数はそのまま効く。issue #471）",
-        "[data-global-nav-add-icon] は belle-todo 互換の後方互換フックで公開契約ではない。中央アクションのアイコンは data-slot=\"bottom-nav-center-action-icon\" で狙う（issue #471）"
+        "[data-global-nav-add-icon] は belle-todo 互換の後方互換フックで公開契約ではない。中央アクションのアイコンは data-slot=\"bottom-nav-center-action-icon\" で狙う（issue #471）",
+        "keyboardBehavior（hide 既定 / lift / stay）を BottomTabBar へ素通しする。キーボード表示中にタブバーを隠す CSS を consumer に書かない（issue #681）",
+        "bottomOffsetExtra（CSS の長さ）で画面下の広告バナー等の高さぶん持ち上げる。MobileAppShell の bottomPaddingExtra・MobileFloatingActionButton の bottomOffsetExtra に同じ値を渡す（issue #681）"
       ],
       "productTheme": [
         "--Nav-Pill-*",
@@ -3033,7 +3192,8 @@
       "rules": [
         "For admin/dashboard pages",
         "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる",
-        "header と main の既定 gutter は内蔵 Container が担うためページ側で外周 padding を重ねない"
+        "header と main の既定 gutter は内蔵 Container が担うためページ側で外周 padding を重ねない",
+        "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）"
       ]
     },
     {

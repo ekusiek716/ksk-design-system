@@ -287,6 +287,21 @@ export const ViewportOffset: Story = {
   render: () => <ViewportOffsetDemo />,
 }
 
+/**
+ * 中央寄せ（issue #691）: `<Toaster position="bottom-center">`。左右の余白と最大幅は
+ * product theme 変数 `--Toast-Viewport-Offset-X` / `--Toast-Viewport-Max-Width`（既定 1rem / 24rem）。
+ * `[data-slot="toast-viewport"]` を消費側 CSS で直接上書きしない。
+ */
+export const BottomCenter: Story = {
+  name: "中央寄せ（position=bottom-center）",
+  render: () => (
+    <div className="p-6">
+      <Toaster position="bottom-center" />
+      <Button onClick={() => toast.success("保存しました")}>トーストを出す</Button>
+    </div>
+  ),
+}
+
 // ─────────────────────────────────────────────────────────────
 // interaction 回帰テスト（issue #256 / `npm run test:interaction`）
 // ─────────────────────────────────────────────────────────────

@@ -30,6 +30,7 @@ export { Avatar, type AvatarProps, type AvatarSize } from "./Avatar"
 export { Chip, type ChipProps, type ChipVariant, type ChipSize, type ChipShape } from "./Chip"
 export { Tag, type TagProps, type TagTone, type TagVariant } from "./Tag"
 export { Spinner, type SpinnerProps, type SpinnerSize } from "./Spinner"
+export { EmojiIcon, type EmojiIconProps, type EmojiIconSize } from "./EmojiIcon"
 export { Separator, type SeparatorProps } from "./Separator"
 export { Skeleton, SkeletonText, type SkeletonProps } from "./Skeleton"
 export {
@@ -61,7 +62,7 @@ export { CountdownHero, type CountdownHeroProps } from "./CountdownHero"
 
 // Phase 2: Basic Form
 export { Label, type LabelProps } from "./Label"
-export { Input, type InputProps } from "./Input"
+export { Input, type InputProps, type FieldVariant } from "./Input"
 export { Textarea, type TextareaProps } from "./Textarea"
 export { AutoGrowTextarea, type AutoGrowTextareaDensity, type AutoGrowTextareaProps } from "./AutoGrowTextarea"
 export { CommitInput, type CommitInputProps } from "./CommitInput"
@@ -236,6 +237,7 @@ export {
   type IconBadgeProps,
   type IconBadgeRenderProps,
   type IconBadgeSize,
+  type IconBadgeTone,
 } from "./IconBadge"
 export {
   IconButton,
@@ -345,3 +347,13 @@ export { AppShell, type AppShellProps } from "./AppShell"
 export { MarketingShell, type MarketingShellProps } from "./MarketingShell"
 
 export { SemanticIcon, SEMANTIC_ICONS, type SemanticIconProps, type SemanticIconName } from "./SemanticIcon"
+export { AddTile, type AddTileProps, type AddTileSize } from "./AddTile"
+export { CodeDisplay, type CodeDisplayProps, type CodeDisplaySize, type CodeDisplayTone } from "./CodeDisplay"
+export {
+  FeatureComparisonTable,
+  type FeatureComparisonColumn,
+  type FeatureComparisonRow,
+  type FeatureComparisonTableProps,
+  type FeatureComparisonValue,
+} from "./FeatureComparisonTable"
+export { Highlight, type HighlightProps } from "./Highlight"

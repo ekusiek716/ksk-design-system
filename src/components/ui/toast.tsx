@@ -112,18 +112,27 @@ const toastStore: ToastStore = {
  * `<Toaster>` 経由の描画は props（regionLabel / closeLabel）が直接
  * viewport に渡るため、この値には依存しない。既定は現行の日本語（後方互換）。
  */
-const toastLabels = {
+const toastLabels: { region: string; close: string; position: ToastViewportPosition } = {
   region: "通知",
   close: "閉じる",
+  position: "bottom-end",
 }
+
+/**
+ * viewport の水平位置（issue #691）。
+ * - "bottom-end"（既定・従来どおり）: スマホは左右 `--Toast-Viewport-Offset-X` の全幅、sm 以上は右下に最大幅で寄せる
+ * - "bottom-center": どの幅でも左右 `--Toast-Viewport-Offset-X` の内側で中央寄せ、最大幅 `--Toast-Viewport-Max-Width`
+ */
+type ToastViewportPosition = "bottom-end" | "bottom-center"
 
 /**
  * fire-and-forget API（auto-mount viewport）用のラベル設定。
  * `<Toaster>` を使う場合は props で渡せばよく、これを呼ぶ必要はない。
  */
-function configureToast(options: { regionLabel?: string; closeLabel?: string }): void {
+function configureToast(options: { regionLabel?: string; closeLabel?: string; position?: ToastViewportPosition }): void {
   if (options.regionLabel !== undefined) toastLabels.region = options.regionLabel
   if (options.closeLabel !== undefined) toastLabels.close = options.closeLabel
+  if (options.position !== undefined) toastLabels.position = options.position
 }
 
 /**
@@ -216,7 +225,8 @@ function useToast(): ToastContextValue {
 // Viewport (shared between Toaster と auto-mounted root)
 // =============================================================
 
-function ToastViewport({ regionLabel, closeLabel, container }: { regionLabel?: string; closeLabel?: string; container?: PortalContainer } = {}) {
+function ToastViewport({ regionLabel, closeLabel, container, position }: { regionLabel?: string; closeLabel?: string; container?: PortalContainer; position?: ToastViewportPosition } = {}) {
+  const resolvedPosition = position ?? toastLabels.position
   const portalContainer = usePortalContainer(container)
   const toasts = useToastStoreSnapshot()
   const hydrated = useIsHydrated()
@@ -234,7 +244,15 @@ function ToastViewport({ regionLabel, closeLabel, container }: { regionLabel?: s
       // 従来の bottom-4 と同値で、上書きしない限り 1px も変わらない。下部タブバーや
       // FAB を fixed で置くプロダクトは :root で持ち上げる（fire-and-forget の
       // auto-mount viewport にも同じく効く）。
-      className="fixed bottom-[var(--Toast-Viewport-Offset-Bottom)] right-4 left-4 sm:left-auto z-[var(--Z-Toast)] flex flex-col items-stretch gap-2 sm:w-full sm:max-w-sm"
+      // 左右の余白・最大幅も product theme の公開変数（issue #691）。既定 1rem / 24rem は従来の
+      // left-4 right-4 / sm:max-w-sm と同値。
+      data-position={resolvedPosition}
+      className={cn(
+        "fixed bottom-[var(--Toast-Viewport-Offset-Bottom)] right-[var(--Toast-Viewport-Offset-X)] left-[var(--Toast-Viewport-Offset-X)] z-[var(--Z-Toast)] flex flex-col items-stretch gap-2",
+        resolvedPosition === "bottom-center"
+          ? "mx-auto max-w-[var(--Toast-Viewport-Max-Width)]"
+          : "sm:left-auto sm:w-full sm:max-w-[var(--Toast-Viewport-Max-Width)]"
+      )}
     >
       {toasts.map((t) => (
         <div
@@ -289,9 +307,15 @@ interface ToasterProps {
   regionLabel?: string
   /** 各トーストの閉じるボタンの aria-label。@default "閉じる" */
   closeLabel?: string
+  /**
+   * viewport の水平位置（issue #691）。"bottom-end"（既定・従来どおり右下）/ "bottom-center"（中央）。
+   * 左右の余白と最大幅は product theme 変数 `--Toast-Viewport-Offset-X` / `--Toast-Viewport-Max-Width`。
+   * `<Toaster>` を置かない fire-and-forget 経路は `configureToast({ position })` で指定する。
+   */
+  position?: ToastViewportPosition
 }
 
-function Toaster({ children, regionLabel, closeLabel, container }: ToasterProps) {
+function Toaster({ children, regionLabel, closeLabel, container, position }: ToasterProps) {
   // 自動マウントされた viewport との二重描画を避けるため、
   // マウント中フラグを立てる。
   React.useEffect(() => {
@@ -306,7 +330,7 @@ function Toaster({ children, regionLabel, closeLabel, container }: ToasterProps)
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <ToastViewport regionLabel={regionLabel} closeLabel={closeLabel} container={container} />
+      <ToastViewport regionLabel={regionLabel} closeLabel={closeLabel} container={container} position={position} />
     </ToastContext.Provider>
   )
 }
@@ -414,4 +438,4 @@ toast.retryFailed = (options) =>
 toast.dismiss = (id: string) => toastStore.dismiss(id)
 
 export { Toaster, useToast, toast, toastVariants, configureToast }
-export type { Toast, ToastVariant, ToastOptions, ToastFn, ToastAction }
+export type { Toast, ToastVariant, ToastOptions, ToastFn, ToastAction, ToastViewportPosition, ToasterProps }

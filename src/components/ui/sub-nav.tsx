@@ -50,7 +50,7 @@ function SubNav({
         data-variant="chip"
         ref={scrollRef}
         className={cn(
-          "flex gap-2 overflow-x-auto scrollbar-none px-1 py-3",
+          "flex gap-2 overflow-x-auto scrollbar-hide px-1 py-3",
           sticky && "sticky top-0 z-[var(--Z-Sticky)] bg-[var(--Surface-Primary)]",
           className
         )}
@@ -112,7 +112,7 @@ function SubNav({
     >
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto scrollbar-none px-1"
+        className="flex overflow-x-auto scrollbar-hide px-1"
         role="tablist"
       >
         {items.map((item) => {

@@ -50,3 +50,17 @@ export const WithLabel: Story = {
 export const FileInput: Story = {
   args: { type: "file", "aria-label": "ファイルを選択" },
 }
+
+/**
+ * inline（issue #675）: 枠・背景なしで本文 / 見出しと同じ見た目のままその場で編集する。
+ * hover で淡い面、focus-visible で Focus リング。CommitInput / Textarea 系にも同じ variant がある。
+ */
+export const Inline: Story = {
+  render: () => (
+    <div className="flex w-80 flex-col gap-3">
+      <Input variant="inline-title" aria-label="タイトル" defaultValue="前撮りの衣装を決める" />
+      <Input variant="inline" aria-label="メモ" placeholder="メモを追加" />
+      <Input variant="inline" aria-label="会場名" aria-invalid defaultValue="未入力の必須項目" />
+    </div>
+  ),
+}

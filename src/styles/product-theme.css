@@ -190,9 +190,16 @@
        @media (min-width: 1024px) { :root { --Toast-Viewport-Offset-Bottom: 1rem; } }
 
      `<Toaster>` を置かない fire-and-forget 経路（toast.success(...) の
-     auto-mount viewport）にも同じく効く。左右（right-4 / left-4）は必要が
-     出てから開ける。 */
+     auto-mount viewport）にも同じく効く。
+
+     左右の余白と最大幅も公開する（issue #691）。--Toast-Viewport-Offset-X は
+     スマホ幅の左右（sm 以上の bottom-end では右）の余白、--Toast-Viewport-Max-Width は
+     sm 以上（bottom-center では常時）の最大幅。中央寄せは <Toaster position="bottom-center">
+     / configureToast({ position: "bottom-center" })。既定値は従来の left-4 / right-4 /
+     sm:max-w-sm と同値。 */
   --Toast-Viewport-Offset-Bottom: 1rem; /* 16px — bottom-4 */
+  --Toast-Viewport-Offset-X: 1rem;      /* 16px — left-4 / right-4 */
+  --Toast-Viewport-Max-Width: 24rem;    /* 384px — max-w-sm */
 
   /* ─── Overlay: レスポンシブ overlay の切り替え境界（issue #472） ───
      <ResponsiveDialog breakpoint="product-theme"> がこの値を読み、
@@ -204,4 +211,17 @@
      getComputedStyle でこの値を読んで matchMedia を組み立てる。長さの
      絶対単位（px / rem）で指定すること。 */
   --Overlay-Desktop-Breakpoint: 768px;
+
+  /* ─── Safe area: 上端の安全領域（issue #682） ───
+     DS の Sheet / Dialog(top・fullscreen) / BottomSheetFrame / ResponsiveOverlayFrame /
+     MediaActionCluster / sheet-keyboard.css は上端の safe area をこの変数で読む
+     （各参照は var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px)) なので、
+     このファイルを読み込まない構成でも従来どおり env() になる）。
+
+     iOS の WKWebView でネイティブのシートへ safe area を貸して戻すと
+     env(safe-area-inset-top) が 0 に固着することがある。ネイティブ側（アプリの殻）は
+     実測値を --Native-Safe-Area-Inset-Top に書くだけでよい（:root に style で入れる等）。
+     DS は env() との大きい方を使う。書かなければ従来と同じ値。
+     consumer 自身の UI も上端の余白に var(--Safe-Area-Inset-Top) を使える。 */
+  --Safe-Area-Inset-Top: max(var(--Native-Safe-Area-Inset-Top, 0px), env(safe-area-inset-top, 0px));
 }

@@ -17,10 +17,10 @@ import { ResponsiveOverlayFrame } from "../src/components/patterns/responsive-ov
 
 const PLAIN_PB = "pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]"
 const FLOAT_PB = "pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]"
-const FLOAT_MAX_H = "max-h-[min(85dvh,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))]"
+const FLOAT_MAX_H = "max-h-[min(85dvh,calc(100dvh_-_1.5rem_-_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))))]"
 const FLOAT_MAX_H_LG = "lg:max-h-[min(85dvh,46rem)]"
 /** Sheet の float バリアントが safeArea で付ける既定キャップ（frame の既定で置き換わる側）。 */
-const SHEET_FLOAT_SAFE_MAX_H = "max-h-[max(0px,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))]"
+const SHEET_FLOAT_SAFE_MAX_H = "max-h-[max(0px,calc(100dvh_-_1.5rem_-_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))))]"
 
 /** viewport 幅を px で与え、matchMedia を `(min-width: Npx)` に応答させる。 */
 function stubViewport(width: number) {

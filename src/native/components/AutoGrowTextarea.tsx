@@ -7,6 +7,8 @@ const WEB_INPUT_RESET = Platform.OS === "web" ? { outlineStyle: "none" } : null
 export type AutoGrowTextareaDensity = "default" | "compact"
 
 export interface AutoGrowTextareaProps extends Omit<TextInputProps, "style" | "multiline"> {
+  /** Web / native Input・Textarea と同じ（issue #675）。inline は枠・背景なし・下線でフォーカスを示す */
+  variant?: "default" | "inline" | "inline-title"
   invalid?: boolean
   disabled?: boolean
   minHeight?: number
@@ -16,7 +18,7 @@ export interface AutoGrowTextareaProps extends Omit<TextInputProps, "style" | "m
 
 export const AutoGrowTextarea = React.forwardRef<TextInput, AutoGrowTextareaProps>(
   function AutoGrowTextarea(
-    { invalid, disabled, minHeight = 44, maxHeight = 200, density = "default", ...rest },
+    { variant = "default", invalid, disabled, minHeight = 44, maxHeight = 200, density = "default", ...rest },
     ref,
   ) {
     const { theme, scales } = useTheme()
@@ -52,7 +54,7 @@ export const AutoGrowTextarea = React.forwardRef<TextInput, AutoGrowTextareaProp
         }}
         placeholderTextColor={theme.text["low-emphasis"]}
         style={[
-          resolveTypo("body.md"),
+          resolveTypo(variant === "inline-title" ? "heading.xl" : "body.md"),
           {
             height,
             padding: density === "compact" ? scales.spacing.scale[2] : scales.spacing.scale[3],
@@ -63,6 +65,16 @@ export const AutoGrowTextarea = React.forwardRef<TextInput, AutoGrowTextareaProp
             color: theme.text["high-emphasis"],
             opacity: disabled ? 0.6 : 1,
           },
+          variant !== "default"
+            ? {
+                paddingHorizontal: 0,
+                borderRadius: 0,
+                borderWidth: 0,
+                borderBottomWidth: 2,
+                borderBottomColor: invalid || focused ? borderColor : "transparent",
+                backgroundColor: "transparent",
+              }
+            : null,
           WEB_INPUT_RESET as TextInputProps["style"],
         ]}
         {...rest}

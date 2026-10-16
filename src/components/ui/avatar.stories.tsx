@@ -35,16 +35,19 @@ export const Fallback: Story = {
 export const Sizes: Story = {
   render: () => (
     <div className="flex items-center gap-3">
-      <Avatar className="size-8">
+      <Avatar size="xs">
+        <AvatarFallback>XS</AvatarFallback>
+      </Avatar>
+      <Avatar size="sm">
         <AvatarFallback>S</AvatarFallback>
       </Avatar>
-      <Avatar className="size-10">
+      <Avatar size="md">
         <AvatarFallback>M</AvatarFallback>
       </Avatar>
-      <Avatar className="size-12">
+      <Avatar size="lg">
         <AvatarFallback>L</AvatarFallback>
       </Avatar>
-      <Avatar className="size-16">
+      <Avatar size="xl">
         <AvatarFallback>XL</AvatarFallback>
       </Avatar>
     </div>

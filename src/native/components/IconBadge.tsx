@@ -9,6 +9,8 @@ import {
 import { useTheme } from "../theme/ThemeProvider"
 
 export type IconBadgeSize = "md" | "ml" | "lg"
+/** 色の意味。Web IconBadge の tone と同じ語彙（issue #684）。 */
+export type IconBadgeTone = "accent" | "info" | "success" | "warning" | "caution"
 
 export interface IconBadgeRenderProps {
   color: string
@@ -17,6 +19,8 @@ export interface IconBadgeRenderProps {
 
 export interface IconBadgeProps extends AccessibilityProps {
   size?: IconBadgeSize
+  /** 色の意味。既定 "accent"（従来どおり）。面は対応する淡色面、アイコンは Object-* 色。 */
+  tone?: IconBadgeTone
   children: React.ReactNode | ((props: IconBadgeRenderProps) => React.ReactNode)
   style?: StyleProp<ViewStyle>
 }
@@ -35,6 +39,7 @@ const containerSizes: Record<IconBadgeSize, number> = {
 
 export function IconBadge({
   size = "md",
+  tone = "accent",
   children,
   style,
   accessibilityLabel,
@@ -42,9 +47,17 @@ export function IconBadge({
 }: IconBadgeProps) {
   const { theme } = useTheme()
   const containerSize = containerSizes[size]
+  const palette = {
+    accent: { bg: theme.surface["accent-primary-light"], fg: theme.object["accent-primary"] },
+    info: { bg: theme.surface.info, fg: theme.object.info },
+    // success / warning の object（500）は淡い面で 3:1 を割るため text（700）を使う（Web と同じ）
+    success: { bg: theme.surface.success, fg: theme.text.success },
+    warning: { bg: theme.surface.warning, fg: theme.text.warning },
+    caution: { bg: theme.surface.caution, fg: theme.object.caution },
+  }[tone]
   const iconProps = {
     ...dimensions[size],
-    color: theme.object["accent-primary"],
+    color: palette.fg,
   }
 
   return (
@@ -60,7 +73,7 @@ export function IconBadge({
           borderRadius: containerSize / 2,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: theme.surface["accent-primary-light"],
+          backgroundColor: palette.bg,
         },
         style,
       ]}

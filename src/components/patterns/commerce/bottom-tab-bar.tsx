@@ -76,6 +76,14 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
    */
   keyboardBehavior?: BottomTabBarKeyboardBehavior
   /**
+   * 下端からの追加オフセット（CSS の長さ。issue #681）。画面下に常設する広告バナー（AdMob 等）の
+   * 高さぶんバーを持ち上げる。MobileFloatingActionButton の `bottomOffsetExtra` と同じ意味で、
+   * safe-area・pill の 12px・keyboardBehavior="lift" の持ち上げ量に**加算**される。
+   * 未指定時は従来と同じ位置。
+   * @example bottomOffsetExtra={`${adBannerHeight}px`}
+   */
+  bottomOffsetExtra?: string
+  /**
    * iOS 26 の scroll edge effect（variant="pill" 時のみ有効）。
    * バーの背後をコンテンツがスクロールする帯に progressive blur を敷き、
    * バー付近でコンテンツが徐々にぼけて溶けるようにする。
@@ -278,6 +286,7 @@ function BottomTabBarDefault({
   className,
   items,
   keyboardState,
+  bottomOffsetExtra,
   style,
   navLabel = "メインナビゲーション",
   showOnDesktop = false,
@@ -291,9 +300,14 @@ function BottomTabBarDefault({
       aria-label={navLabel}
       className={cn(
         "fixed inset-x-0 z-[var(--Z-Nav)] transition-all duration-[var(--Motion-Duration-Base)]",
+        // bottomOffsetExtra（issue #681）は指定時だけ加算する（未指定のクラスは従来どおり）
         keyboardState.keyboardBehavior === "lift"
-          ? "bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]"
-          : "bottom-0",
+          ? bottomOffsetExtra !== undefined
+            ? "bottom-[calc(var(--ksk-bottom-tab-bar-keyboard-inset)_+_var(--ksk-bottom-tab-bar-offset-extra))]"
+            : "bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]"
+          : bottomOffsetExtra !== undefined
+            ? "bottom-[var(--ksk-bottom-tab-bar-offset-extra)]"
+            : "bottom-0",
         "border-t border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
         "pb-[env(safe-area-inset-bottom)]",
         // クラス名は完全な文字列で書く（動的合成は静的抽出できない）。
@@ -305,6 +319,7 @@ function BottomTabBarDefault({
       )}
       style={{
         "--ksk-bottom-tab-bar-keyboard-inset": `${keyboardState.liftInset}px`,
+        ...(bottomOffsetExtra !== undefined && { "--ksk-bottom-tab-bar-offset-extra": bottomOffsetExtra }),
         ...style,
       } as React.CSSProperties}
       {...props}
@@ -359,6 +374,7 @@ function BottomTabBarPill({
   floatingPosition = "center",
   scrollEdge = false,
   keyboardState,
+  bottomOffsetExtra,
   style,
   navLabel = "メインナビゲーション",
   showOnDesktop = false,
@@ -430,6 +446,7 @@ function BottomTabBarPill({
   const isSideFloating = floatingPosition === "left" || floatingPosition === "right"
   const pillStyle = {
     "--ksk-bottom-tab-bar-keyboard-inset": `${keyboardState.liftInset}px`,
+    ...(bottomOffsetExtra !== undefined && { "--ksk-bottom-tab-bar-offset-extra": bottomOffsetExtra }),
     ...(hasProminentLayout && !isSideFloating ? { width: "calc(100vw - 24px)", maxWidth } : {}),
     ...(isSideFloating ? { maxWidth: "calc(100vw - 92px)" } : {}),
     ...style,
@@ -464,9 +481,14 @@ function BottomTabBarPill({
         showOnDesktop ? "lg:flex" : "lg:hidden",
         pillPosition === "fixed" ? "fixed" : "absolute",
         // 位置: 画面下部に余白を持ってフロート
+        // bottomOffsetExtra（issue #681）は指定時だけ加算する（未指定のクラスは従来どおり）
         keyboardState.keyboardBehavior === "lift"
-          ? "bottom-[calc(env(safe-area-inset-bottom)_+_12px_+_var(--ksk-bottom-tab-bar-keyboard-inset))]"
-          : "bottom-[calc(env(safe-area-inset-bottom)_+_12px)]",
+          ? bottomOffsetExtra !== undefined
+            ? "bottom-[calc(env(safe-area-inset-bottom)_+_12px_+_var(--ksk-bottom-tab-bar-keyboard-inset)_+_var(--ksk-bottom-tab-bar-offset-extra))]"
+            : "bottom-[calc(env(safe-area-inset-bottom)_+_12px_+_var(--ksk-bottom-tab-bar-keyboard-inset))]"
+          : bottomOffsetExtra !== undefined
+            ? "bottom-[calc(env(safe-area-inset-bottom)_+_12px_+_var(--ksk-bottom-tab-bar-offset-extra))]"
+            : "bottom-[calc(env(safe-area-inset-bottom)_+_12px)]",
         // 水平位置: center は従来どおり中央フロート。left/right は反対側に
         // FAB スペース（80px）を確保して片側へ寄せる。
         floatingPosition === "left" && "left-3 right-20",

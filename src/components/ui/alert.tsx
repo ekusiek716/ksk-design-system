@@ -15,7 +15,9 @@ import { cn } from "@/lib/utils"
  *
  * ### 2 つの使い方
  *
- * 1. **prop ベース**（推奨・bordered variant のみ）— アイコンは variant から自動
+ * 1. **prop ベース**（推奨）— bordered はアイコンを variant から自動選択。inline 系
+ *    （inline-info / inline-caution / inline-warning）も title / description / icon / action を
+ *    描画する（issue #695。inline の既定アイコンは無し）
  *    ```tsx
  *    <Alert variant="success" title="送信しました" description="内容を確認してください。" />
  *    ```
@@ -92,6 +94,13 @@ const alertInnerVariants = cva(
 
 type AlertVariant = VariantProps<typeof alertVariants>["variant"]
 
+/** 開発ビルド判定（Card / ChipSelector と同じ形）。process が無い環境では本番扱い。 */
+const isDev = () => {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+  return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
+}
+let warnedIgnoredProps = false
+
 const AlertVariantContext = React.createContext<AlertVariant>("info")
 
 const isBorderedVariant = (
@@ -111,8 +120,8 @@ const borderedIconMap = {
 type AlertProps = React.ComponentProps<"div"> &
   VariantProps<typeof alertVariants> & {
     /**
-     * prop-based API のタイトル。children と排他（children 優先）。
-     * bordered variant でのみ有効。
+     * prop-based API のタイトル。children と排他（children 優先。併用すると開発ビルドで警告）。
+     * bordered / inline どちらの variant でも描画する（inline は issue #695 から）。
      */
     title?: React.ReactNode
     /** prop-based API の説明テキスト */
@@ -134,7 +143,53 @@ function Alert({
   ...props
 }: AlertProps) {
   const bordered = isBorderedVariant(variant)
-  const usePropBased = bordered && !children && (title || description)
+  const hasPropContent = Boolean(title || description)
+  const usePropBased = bordered && !children && hasPropContent
+  // inline 系も prop だけで書けるようにする（issue #695）。以前は children だけを描画し、
+  // bordered と同じ書き方（title / description）をすると空の枠になっていた。
+  const useInlinePropBased = !bordered && !children && hasPropContent
+
+  // children と prop を併用すると prop は描画されない（後方互換のため children 優先のまま）。
+  // 黙って捨てると気付けないので、開発ビルドで 1 回警告する。
+  const ignoredProps = Boolean(children) && (hasPropContent || icon != null || action != null)
+  React.useEffect(() => {
+    if (!ignoredProps || !isDev() || warnedIgnoredProps) return
+    warnedIgnoredProps = true
+    console.warn(
+      "[ksk-ds] Alert: children を渡したため title / description / icon / action は描画されません。どちらか一方の書き方にしてください（prop だけで書くか、AlertTitle / AlertDescription を children に置く）。"
+    )
+  }, [ignoredProps])
+
+  if (useInlinePropBased) {
+    const titleColor = alertTitleVariants[variant ?? "info"] ?? ""
+    const descriptionColor = alertDescriptionVariants[variant ?? ""] || "text-[var(--Text-Medium-Emphasis)]"
+    return (
+      <AlertVariantContext.Provider value={variant}>
+        <div
+          data-slot="alert"
+          data-variant={variant}
+          role="alert"
+          className={cn(alertVariants({ variant }), "gap-2", className)}
+          {...props}
+        >
+          {icon != null && (
+            <span data-slot="alert-icon" aria-hidden="true" className={cn("flex shrink-0 items-center [&_svg]:size-5", titleColor)}>
+              {icon}
+            </span>
+          )}
+          <div className="min-w-0 flex-1">
+            {title && <div data-slot="alert-title" className={cn("typo-label-md", titleColor)}>{title}</div>}
+            {description && (
+              <div data-slot="alert-description" className={cn("typo-body-sm", descriptionColor, title && "mt-0.5")}>
+                {description}
+              </div>
+            )}
+          </div>
+          {action && <div className="shrink-0">{action}</div>}
+        </div>
+      </AlertVariantContext.Provider>
+    )
+  }
 
   // bordered variant かつ children なし → prop-based レンダリング
   if (usePropBased) {

@@ -185,3 +185,45 @@ export const Pressable: Story = {
     await expect(canvasElement.querySelector('[data-testid="counts"]')!.textContent).toBe("カード 2 / メニュー 1")
   },
 }
+
+/** elevation（issue #689）: 面の中に置くカードは none。`!shadow-none` で消さない。 */
+export const Elevation: Story = {
+  render: () => (
+    <div className="grid w-full max-w-xl grid-cols-2 gap-4">
+      {(["none", "sm", "md", "lg"] as const).map((e) => (
+        <Card key={e} elevation={e}>
+          <CardTitle>elevation=&quot;{e}&quot;</CardTitle>
+          <CardDescription>影の強さ</CardDescription>
+        </Card>
+      ))}
+    </div>
+  ),
+}
+
+/**
+ * selected（issue #677）: 押せる Card の選択中。押せる面に aria-pressed が付き、枠が 2px 相当に太くなる。
+ */
+export const Selectable: Story = {
+  tags: ["interaction"],
+  render: function Render() {
+    const [selected, setSelected] = React.useState("A")
+    return (
+      <div className="grid w-full max-w-md grid-cols-3 gap-3">
+        {["A", "B", "C"].map((t) => (
+          <Card key={t} elevation="none" selected={selected === t} onClick={() => setSelected(t)}>
+            <CardTitle>卓 {t}</CardTitle>
+            <CardDescription>8 席</CardDescription>
+          </Card>
+        ))}
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const buttons = canvasElement.querySelectorAll<HTMLButtonElement>('[data-slot="card-overlay"]')
+    await expect(buttons[0]).toHaveAttribute("aria-pressed", "true")
+    await expect(buttons[1]).toHaveAttribute("aria-pressed", "false")
+    await userEvent.click(buttons[1])
+    await expect(buttons[1]).toHaveAttribute("aria-pressed", "true")
+    await expect(buttons[0]).toHaveAttribute("aria-pressed", "false")
+  },
+}

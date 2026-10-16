@@ -91,7 +91,7 @@ describe('SheetContent side="top" — safe-area（Issue #339）', () => {
       </Sheet>
     )
     const el = getContent()
-    expect(el.className).toContain("pt-[env(safe-area-inset-top,0px)]")
+    expect(el.className).toContain("pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]")
     expect(el.className).not.toContain("px-6")
   })
 
@@ -138,7 +138,7 @@ describe.each(["float", "float-glass"] as const)(
       const el = getContent()
       expect(el.getAttribute("data-safe-area")).toBe("true")
       expect(el.className).toContain(
-        "max-h-[max(0px,calc(100dvh_-_1.5rem_-_env(safe-area-inset-top,0px)))]"
+        "max-h-[max(0px,calc(100dvh_-_1.5rem_-_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))))]"
       )
     })
 

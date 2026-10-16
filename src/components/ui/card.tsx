@@ -17,9 +17,20 @@ import { cn } from "@/lib/utils"
 // 「自分の背景は継承値を使い、子孫はフォールバックに戻す」を両立する
 // （同じ要素で再宣言すると自分の背景まで巻き戻ってしまう）。
 const cardVariants = cva(
-  "bg-[var(--card-surface,var(--Surface-Primary))] [&>*]:[--card-surface:initial] text-[var(--Text-High-Emphasis)] flex flex-col rounded-[var(--Radius-Surface)] ksk-squircle border border-[var(--Border-Low-Emphasis)] shadow-[var(--shadow-md)] @container",
+  "bg-[var(--card-surface,var(--Surface-Primary))] [&>*]:[--card-surface:initial] text-[var(--Text-High-Emphasis)] flex flex-col rounded-[var(--Radius-Surface)] ksk-squircle border border-[var(--Border-Low-Emphasis)] @container",
   {
     variants: {
+      /**
+       * 影の強さ（issue #689）。既定 md（従来どおり）。面の中に置くカード（Card / Section の中の
+       * 入れ子）は `none` にする（composition.json の cardHierarchy）。`!shadow-none` で消さない。
+       * native Card の elevation と同じ語彙（native は未指定 = 影なし）。
+       */
+      elevation: {
+        none: "",
+        sm: "shadow-[var(--shadow-sm)]",
+        md: "shadow-[var(--shadow-md)]",
+        lg: "shadow-[var(--shadow-lg)]",
+      },
       variant: {
         /** 既定: 内側に p-6 と gap-6 相当（情報を持つカード向け）。
          *  実値は product theme の公開変数 `--Product-Card-Padding` / `--Product-Card-Gap`
@@ -30,7 +41,7 @@ const cardVariants = cva(
         media: "gap-0 p-0 overflow-hidden",
       },
     },
-    defaultVariants: { variant: "default" },
+    defaultVariants: { variant: "default", elevation: "md" },
   }
 )
 
@@ -59,7 +70,21 @@ interface CardProps
   href?: string
   /** 押せるとき（onClick / href）に操作を止める（issue #665） */
   disabled?: boolean
+  /**
+   * 選択中（issue #677）。複数のカードから 1 つ（または複数）を選ぶ画面（配席の卓・プラン選択等）で使う。
+   *
+   * 見た目は ActionTile の selected と同じ Surface-Accent-Primary-Light の面 + Border-Accent-Primary の枠で、
+   * 枠を 2px 相当に太くして色以外でも区別できるようにする。`onClick` の押せる Card では押せる面
+   * （button）に `aria-pressed` を出す（トグルボタンとして読まれる）。`href` のリンクでは
+   * `aria-current="true"`（一覧の中の現在の項目）として出す。押せない Card では見た目だけ変わり、
+   * 開発ビルドで 1 回 warn する。
+   */
+  selected?: boolean
 }
+
+/** 選択中の面・枠（issue #677）。ActionTile の selected と同じトークン。ring-1 で枠を 2px 相当に太くする */
+const SELECTED_CLASS =
+  "border-[var(--Border-Accent-Primary)] ring-1 ring-inset ring-[var(--Border-Accent-Primary)] bg-[var(--Surface-Accent-Primary-Light)]"
 
 /**
  * 押せる Card の CardTitle / CardDescription を押せる面の名前・説明へ結ぶための id（issue #665）。
@@ -88,6 +113,8 @@ function useRegisterCardSlot(slot: CardPressableSlot, ownId: string | undefined)
 }
 
 /** 開発ビルド判定（ChipSelector と同じ形）。process が無い環境では本番扱い。 */
+let warnedSelectedWithoutAction = false
+
 const isDev = () => {
   const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
   return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
@@ -146,6 +173,8 @@ const isDev = () => {
 function Card({
   className,
   variant,
+  elevation,
+  selected,
   onClick,
   href,
   disabled = false,
@@ -183,13 +212,23 @@ function Card({
     )
   }, [actionable, ariaLabel, ariaLabelledby])
 
+  // 押せない Card の selected は見た目だけで、読み上げに状態が伝わらない。開発ビルドで 1 回知らせる。
+  React.useEffect(() => {
+    if (actionable || selected === undefined || !isDev() || warnedSelectedWithoutAction) return
+    warnedSelectedWithoutAction = true
+    console.warn(
+      "[ksk-ds] Card: selected は onClick（aria-pressed）/ href（aria-current）を渡した押せる Card でだけ状態として読み上げられます。押せない Card では見た目しか変わりません。"
+    )
+  }, [actionable, selected])
+
   if (!actionable) {
     return (
       <CardPressableContext.Provider value={null}>
         <div
           data-slot="card"
           data-variant={variant ?? "default"}
-          className={cn(cardVariants({ variant }), className)}
+          data-selected={selected || undefined}
+          className={cn(cardVariants({ variant, elevation }), selected && SELECTED_CLASS, className)}
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledby}
           {...props}
@@ -223,15 +262,19 @@ function Card({
         data-slot="card"
         data-variant={variant ?? "default"}
         data-interactive="true"
+        data-selected={selected || undefined}
         className={cn(
-          cardVariants({ variant }),
+          cardVariants({ variant, elevation }),
+          selected && SELECTED_CLASS,
           "relative",
           // CardAction は押せる面より前面に出す（別操作が overlay に吸われない・入れ子にならない）
           "[&_[data-slot=card-action]]:relative [&_[data-slot=card-action]]:z-[2]",
           // hover / 押下は押せる面（overlay）に乗ったときだけ（CardAction の操作では反応しない）。
           // ListItem と同じ Surface-Secondary の hover、StatCard と同じ 0.98 の押下。
           !disabled &&
-            "transition-[background-color,scale] duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)] has-[>[data-slot=card-overlay]:hover]:bg-[var(--Surface-Secondary)] has-[>[data-slot=card-overlay]:active]:scale-[0.98]",
+            "transition-[background-color,scale] duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)] has-[>[data-slot=card-overlay]:active]:scale-[0.98]",
+          // 選択中は面の色が選択を表すので、hover で Surface-Secondary に戻さない
+          !disabled && !selected && "has-[>[data-slot=card-overlay]:hover]:bg-[var(--Surface-Secondary)]",
           disabled && "opacity-50",
           className
         )}
@@ -245,6 +288,8 @@ function Card({
             data-slot="card-overlay"
             {...a11yProps}
             aria-disabled={disabled || undefined}
+            // リンクの「選ばれている」は現在の項目として aria-current="true" で伝える（aria-pressed はボタン専用）
+            aria-current={selected ? "true" : undefined}
             className={overlayClassName}
             onClick={(event) => {
               if (disabled) event.preventDefault()
@@ -256,6 +301,7 @@ function Card({
             data-slot="card-overlay"
             {...a11yProps}
             disabled={disabled}
+            aria-pressed={selected === undefined ? undefined : selected}
             className={overlayClassName}
             onClick={onClick}
           />

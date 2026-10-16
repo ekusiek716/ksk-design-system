@@ -71,7 +71,7 @@ html[data-kb-open]
    同値を書くため二重適用にならない。 */
 html[data-kb-open] [data-slot="sheet-content"]:is([data-side="float"], [data-side="float-glass"]) {
   bottom: calc(var(--kb-h, 0px) + 0.75rem);
-  max-height: max(0px, calc(100dvh - var(--kb-h, 0px) - 1.5rem - env(safe-area-inset-top, 0px)));
+  max-height: max(0px, calc(100dvh - var(--kb-h, 0px) - 1.5rem - var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))));
 }
 
 /* ── #487: デスクトップ（中央モーダル）分岐のキーボード補正 ──
@@ -153,7 +153,7 @@ html[data-kb-open]
     var(--Overlay-Desktop-Base-Max-Height, 100dvh),
     max(
       0px,
-      calc(100dvh - var(--kb-h, 0px) - max(env(safe-area-inset-top, 0px), 2rem) - 2rem)
+      calc(100dvh - var(--kb-h, 0px) - max(var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px)), 2rem) - 2rem)
     )
   );
 }
