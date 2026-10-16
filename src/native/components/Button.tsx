@@ -14,7 +14,21 @@ import { resolveTypo } from "../typography"
 import { resolveRaisedElevationStyle } from "../button-elevation"
 import { GlassView } from "./GlassView"
 
-export type ButtonVariant = "primary" | "secondary" | "tertiary" | "destructive" | "glass"
+/**
+ * - `ghost-neutral`: 背景も枠も無い灰色（text.medium-emphasis）の文字ボタン。スキップ・あとで・
+ *   閉じるなど、押してほしくない補助・離脱の操作（issue #664・Web の同名 variant と対）。
+ * - `ghost-destructive` / `ghost-success`: 文字だけの弱い赤 / 緑ボタン（issue #671）。確認を挟む
+ *   削除の 1 段目・取り消しは ghost-destructive、確認側の最終ボタンは destructive。
+ */
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "tertiary"
+  | "destructive"
+  | "ghost-neutral"
+  | "ghost-destructive"
+  | "ghost-success"
+  | "glass"
 
 /**
  * elevation トークン（scales.elevation）:
@@ -104,6 +118,29 @@ export function Button({
       fg: theme.text["on-inverse"],
       border: theme.caution.base,
       bottomBorder: theme.caution.action,
+    },
+    // 文字だけの弱いボタン（issue #664 / #671）。面と枠は透明で、押下中だけ淡い面を出す
+    // （Web の hover と同じトークン）。文字色は light / dark とも AA（scripts/check-contrast.mjs）。
+    "ghost-neutral": {
+      bg: "transparent",
+      bgActive: theme.hover["ghost-button"],
+      fg: theme.text["medium-emphasis"],
+      border: "transparent",
+      bottomBorder: "transparent",
+    },
+    "ghost-destructive": {
+      bg: "transparent",
+      bgActive: theme.surface.caution,
+      fg: theme.text.caution,
+      border: "transparent",
+      bottomBorder: "transparent",
+    },
+    "ghost-success": {
+      bg: "transparent",
+      bgActive: theme.surface.success,
+      fg: theme.text.success,
+      border: "transparent",
+      bottomBorder: "transparent",
     },
   }
 

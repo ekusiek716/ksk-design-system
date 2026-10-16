@@ -541,6 +541,7 @@
 @source inline("hover:bg-[var(--Primitive-White-Alpha-200)]");
 @source inline("hover:bg-[var(--Primitive-White-Alpha-900)]");
 @source inline("hover:bg-[var(--Surface-Accent-Primary-Light)]");
+@source inline("hover:bg-[var(--Surface-Caution)]");
 @source inline("hover:bg-[var(--Surface-Caution-Subtle)]");
 @source inline("hover:bg-[var(--Surface-Info-Subtle)]");
 @source inline("hover:bg-[var(--Surface-Quaternary)]");

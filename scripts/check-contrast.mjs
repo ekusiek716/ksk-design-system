@@ -118,6 +118,24 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   pairs.push([fg, resolve(s.active["destructive-button"]), `${mode}: Text-on-Inverse / Active-Destructive-Button`, 4.5])
 }
 
+// 文字だけの弱いボタン（Button variant ghost-neutral / ghost-destructive / ghost-success・
+// issue #664 / #671）。背景は無く Surface-Primary の上に乗る。hover の面（Hover-Ghost-Button /
+// Surface-Caution / Surface-Success は淡い単色）は Surface-Primary に合成した実色で、文字も dark の White-Alpha は
+// その上に合成して比べる。light / dark の両方で AA。
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const bg = resolve(s.surface.primary)
+  const ghostTones = [
+    ["ghost-neutral", s.text["medium-emphasis"], s.hover["ghost-button"]],
+    ["ghost-destructive", s.text.caution, s.surface.caution],
+    ["ghost-success", s.text.success, s.surface.success],
+  ]
+  for (const [variant, fgVal, hoverVal] of ghostTones) {
+    pairs.push([resolveOver(fgVal, bg), bg, `${mode}: Button ${variant} の文字 / Surface-Primary`, 4.5])
+    const hoverBg = resolveOver(hoverVal, bg)
+    pairs.push([resolveOver(fgVal, hoverBg), hoverBg, `${mode}: Button ${variant} の文字 / hover の面`, 4.5])
+  }
+}
+
 // Categorical: Bold は文字用 → 白背景 & 自分の Subtle 背景で AA
 const cat = sem.categorical || {}
 for (const k of Object.keys(cat)) {
