@@ -3,6 +3,7 @@
  * @description 汎用リストアイテムコンポーネント。スロット配置とインタラクティブ状態を網羅
  */
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect } from "storybook/test"
 import { ListItem } from "./list-item"
 import { Avatar, AvatarFallback } from "../ui/avatar"
 import { Badge } from "../ui/badge"
@@ -233,4 +234,54 @@ export const WithSecondaryAction: Story = {
       />
     </div>
   ),
+}
+
+/**
+ * 右スロットの幅の上限（issue #668）。`rightSlotWidth="wide"`（行幅の 1/2）/ `"narrow"`（1/3）を
+ * 指定すると、金額・件数のような長い値は上限内で折り返し、左のラベル列が 0 幅まで潰れない。
+ * 任意の上限（`max-w-[45%]` 等）は `rightSlotClassName` で渡す。
+ * `[&>div:last-child]:max-w-*` のような子孫セレクタで DS 内部の DOM に依存しない。
+ */
+export const RightSlotWidth: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="w-80 border border-[var(--Border-Low-Emphasis)] rounded-lg overflow-hidden">
+      <ListItem
+        data-testid="wide"
+        title="今月の支出合計"
+        rightSlotWidth="wide"
+        rightSlot={
+          <span className="block break-all text-right typo-heading-md text-[var(--Text-High-Emphasis)]">
+            ¥12,345,678,901,234
+          </span>
+        }
+      />
+      <ListItem
+        title="参加人数"
+        rightSlotWidth="narrow"
+        rightSlot={
+          <span className="block break-all text-right typo-heading-md text-[var(--Text-High-Emphasis)]">
+            1,234,567人
+          </span>
+        }
+      />
+      <ListItem
+        title="任意の上限（45%）"
+        rightSlotClassName="max-w-[45%] min-w-0"
+        rightSlot={
+          <span className="block break-all text-right typo-body-md text-[var(--Text-High-Emphasis)]">
+            とても長い値がここに入っても折り返す
+          </span>
+        }
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const row = canvasElement.querySelector<HTMLElement>('[data-testid="wide"]')!
+    const title = row.querySelector("p")!
+    const right = row.lastElementChild as HTMLElement
+    // ラベル列が潰れず、右スロットは行幅の半分以下
+    await expect(title.getBoundingClientRect().width).toBeGreaterThan(60)
+    await expect(right.getBoundingClientRect().width).toBeLessThanOrEqual(row.clientWidth / 2 + 1)
+  },
 }

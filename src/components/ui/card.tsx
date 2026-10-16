@@ -35,8 +35,63 @@ const cardVariants = cva(
 )
 
 interface CardProps
-  extends React.ComponentProps<"div">,
-    VariantProps<typeof cardVariants> {}
+  extends Omit<React.ComponentProps<"div">, "onClick">,
+    VariantProps<typeof cardVariants> {
+  /**
+   * 指定するとカード全体が押せるボタンになる（issue #665）。
+   *
+   * カード全面を覆う不可視の `<button>`（stretched link・ListItem の secondaryAction /
+   * ThumbnailCard と同じ構造）を重ねる。Enter / Space で発火し、フォーカスリング・hover・
+   * 押下表現を DS が持つ。名前は `aria-label`（指定時）か `CardTitle`（自動で結ぶ）、
+   * 説明は `CardDescription`。
+   *
+   * カード内に別の操作（メニュー・削除ボタン等）を置くときは `CardAction` に入れる。
+   * `CardAction` は押せる面より前面に出るので、押してもカードの onClick は発火せず、
+   * button の入れ子にもならない。**それ以外の場所に置いた操作子は押せる面に覆われる。**
+   *
+   * 後方互換の注意: 以前は onClick が素の div に付くだけだった（role / キー操作 / フォーカス
+   * 無し）。ハンドラは引き続きクリックで呼ばれる。型は `HTMLElement` の MouseEventHandler にして
+   * あるので、以前の `(e: React.MouseEvent<HTMLDivElement>) => …` のハンドラもそのまま渡せる
+   * （実際の currentTarget は押せる面の button）。
+   */
+  onClick?: React.MouseEventHandler<HTMLElement>
+  /** 指定するとカード全体が遷移リンクになる（issue #665）。`onClick` と併用しない */
+  href?: string
+  /** 押せるとき（onClick / href）に操作を止める（issue #665） */
+  disabled?: boolean
+}
+
+/**
+ * 押せる Card の CardTitle / CardDescription を押せる面の名前・説明へ結ぶための id（issue #665）。
+ * 子が実際に描画されたときだけ aria-labelledby / aria-describedby を出す（存在しない id を
+ * 参照しない）ため、子は mount 時に「実際に付けた id」（自前の id でも既定 id でも）を register する。
+ *
+ * 押せない Card は context に null を流す。これで入れ子の Card の CardTitle が外側の押せる
+ * Card に登録されない（外側の名前が内側のカードの見出しになる事故を防ぐ）。
+ */
+type CardPressableSlot = "title" | "description"
+interface CardPressableContextValue {
+  titleId: string
+  descriptionId: string
+  register: (slot: CardPressableSlot, id: string) => () => void
+}
+const CardPressableContext = React.createContext<CardPressableContextValue | null>(null)
+
+function useRegisterCardSlot(slot: CardPressableSlot, ownId: string | undefined) {
+  const pressable = React.useContext(CardPressableContext)
+  const id = ownId ?? (pressable ? (slot === "title" ? pressable.titleId : pressable.descriptionId) : undefined)
+  React.useEffect(() => {
+    if (!pressable || !id) return
+    return pressable.register(slot, id)
+  }, [pressable, slot, id])
+  return id
+}
+
+/** 開発ビルド判定（ChipSelector と同じ形）。process が無い環境では本番扱い。 */
+const isDev = () => {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+  return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
+}
 
 /**
  * Card — 情報をまとめる汎用カード。
@@ -70,16 +125,144 @@ interface CardProps
  *   `contracts/composition.json` の cardHierarchy どおり内側を一段沈めたい
  *   場合は、内側を包む要素で `[--card-surface:var(--Surface-Tertiary)]` を宣言する。
  *
+ * 押せるカード（issue #665）:
+ *   `onClick` / `href` を渡すとカード全体が 1 つのボタン / リンクになる（全面を覆う不可視の
+ *   button / a を重ねる stretched link）。名前は `CardTitle`、説明は `CardDescription` に自動で
+ *   結ばれる（`CardTitle` が無いときは `aria-label` を渡す）。別操作は `CardAction` に置く。
+ *   `<Button unstyled>` にカード風の枠・角丸・影を被せて自作しない。
+ *
+ *   ```tsx
+ *   <Card onClick={() => open(task.id)}>
+ *     <CardHeader>
+ *       <CardTitle><s>{task.title}</s></CardTitle>
+ *       <CardAction><KebabMenu … /></CardAction>
+ *     </CardHeader>
+ *     <CardDescription>期限 10/20・担当 ふたり</CardDescription>
+ *   </Card>
+ *   ```
+ *
  * Note: 商品の表示は `ProductCard`（patterns/commerce）を使う。
  */
-function Card({ className, variant, ...props }: CardProps) {
+function Card({
+  className,
+  variant,
+  onClick,
+  href,
+  disabled = false,
+  children,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
+  ...props
+}: CardProps) {
+  const baseId = React.useId()
+  const actionable = Boolean(onClick || href)
+  const [slots, setSlots] = React.useState<Record<CardPressableSlot, string[]>>({ title: [], description: [] })
+  // 名前なし警告の判定用（子の effect は親の effect より先に走るので、親の effect 時点で登録済み）
+  const titleCountRef = React.useRef(0)
+  const ids = React.useMemo<CardPressableContextValue>(
+    () => ({
+      titleId: `${baseId}-title`,
+      descriptionId: `${baseId}-description`,
+      register: (slot, id) => {
+        if (slot === "title") titleCountRef.current += 1
+        setSlots((prev) => ({ ...prev, [slot]: [...prev[slot], id] }))
+        return () => {
+          if (slot === "title") titleCountRef.current -= 1
+          setSlots((prev) => ({ ...prev, [slot]: prev[slot].filter((x) => x !== id) }))
+        }
+      },
+    }),
+    [baseId]
+  )
+
+  // 押せるのに名前（aria-label / aria-labelledby / CardTitle）が無いと、名前の無いボタンになる。
+  React.useEffect(() => {
+    if (!actionable || ariaLabel || ariaLabelledby || titleCountRef.current > 0 || !isDev()) return
+    console.warn(
+      "[ksk-ds] Card: onClick / href を渡した押せる Card にアクセシブルネームがありません。CardTitle を置くか aria-label を指定してください。"
+    )
+  }, [actionable, ariaLabel, ariaLabelledby])
+
+  if (!actionable) {
+    return (
+      <CardPressableContext.Provider value={null}>
+        <div
+          data-slot="card"
+          data-variant={variant ?? "default"}
+          className={cn(cardVariants({ variant }), className)}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledby}
+          {...props}
+        >
+          {children}
+        </div>
+      </CardPressableContext.Provider>
+    )
+  }
+
+  const overlayClassName = cn(
+    "absolute inset-0 z-[1] rounded-[inherit]",
+    // ring-inset: media variant の overflow-hidden でリングが切れないように内側に描く
+    "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+    disabled ? "cursor-not-allowed" : "cursor-pointer",
+  )
+  const a11yProps = {
+    ...(ariaLabel
+      ? { "aria-label": ariaLabel }
+      : ariaLabelledby
+        ? { "aria-labelledby": ariaLabelledby }
+        : slots.title.length > 0
+          ? { "aria-labelledby": slots.title.join(" ") }
+          : {}),
+    ...(slots.description.length > 0 ? { "aria-describedby": slots.description.join(" ") } : {}),
+  }
+
   return (
-    <div
-      data-slot="card"
-      data-variant={variant ?? "default"}
-      className={cn(cardVariants({ variant }), className)}
-      {...props}
-    />
+    <CardPressableContext.Provider value={ids}>
+      <div
+        data-slot="card"
+        data-variant={variant ?? "default"}
+        data-interactive="true"
+        className={cn(
+          cardVariants({ variant }),
+          "relative",
+          // CardAction は押せる面より前面に出す（別操作が overlay に吸われない・入れ子にならない）
+          "[&_[data-slot=card-action]]:relative [&_[data-slot=card-action]]:z-[2]",
+          // hover / 押下は押せる面（overlay）に乗ったときだけ（CardAction の操作では反応しない）。
+          // ListItem と同じ Surface-Secondary の hover、StatCard と同じ 0.98 の押下。
+          !disabled &&
+            "transition-[background-color,scale] duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)] has-[>[data-slot=card-overlay]:hover]:bg-[var(--Surface-Secondary)] has-[>[data-slot=card-overlay]:active]:scale-[0.98]",
+          disabled && "opacity-50",
+          className
+        )}
+        {...props}
+      >
+        {/* 押せる面は DOM の先頭に置く: Tab 順を視覚順（カード本体 → 内側の CardAction）にする。
+            absolute + z-[1] なので、DOM 順に関係なく通常フローの中身より前面に描かれる */}
+        {href ? (
+          <a
+            href={href}
+            data-slot="card-overlay"
+            {...a11yProps}
+            aria-disabled={disabled || undefined}
+            className={overlayClassName}
+            onClick={(event) => {
+              if (disabled) event.preventDefault()
+            }}
+          />
+        ) : (
+          <button
+            type="button"
+            data-slot="card-overlay"
+            {...a11yProps}
+            disabled={disabled}
+            className={overlayClassName}
+            onClick={onClick}
+          />
+        )}
+        {children}
+      </div>
+    </CardPressableContext.Provider>
   )
 }
 
@@ -96,20 +279,24 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+function CardTitle({ className, id, ...props }: React.ComponentProps<"div">) {
+  const resolvedId = useRegisterCardSlot("title", id)
   return (
     <div
       data-slot="card-title"
+      id={resolvedId}
       className={cn("typo-heading-lg", className)}
       {...props}
     />
   )
 }
 
-function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+function CardDescription({ className, id, ...props }: React.ComponentProps<"div">) {
+  const resolvedId = useRegisterCardSlot("description", id)
   return (
     <div
       data-slot="card-description"
+      id={resolvedId}
       className={cn("typo-body-sm text-[var(--Text-Medium-Emphasis)]", className)}
       {...props}
     />

@@ -20,6 +20,9 @@ const meta: Meta<typeof Button> = {
         "secondary-switch",
         "tertiary",
         "ghost",
+        "ghost-neutral",
+        "ghost-destructive",
+        "ghost-success",
         "destructive",
         "info",
         "warning",
@@ -81,6 +84,9 @@ export const AllVariants: Story = {
       <Button variant="secondary-switch">Sec-Switch</Button>
       <Button variant="tertiary">Tertiary</Button>
       <Button variant="ghost">Ghost</Button>
+      <Button variant="ghost-neutral">Ghost Neutral</Button>
+      <Button variant="ghost-destructive">Ghost Destructive</Button>
+      <Button variant="ghost-success">Ghost Success</Button>
       <Button variant="destructive">Destructive</Button>
       <Button variant="info">Info</Button>
       <Button variant="warning">Warning</Button>
@@ -109,6 +115,36 @@ export const StatusVariants: Story = {
           </Button>
         </div>
       ))}
+    </div>
+  ),
+}
+
+/**
+ * 文字だけの弱いボタン（issue #664 / #671）。背景も枠も無く、hover で薄い面が出る。
+ *
+ * - `ghost-neutral`: スキップ・あとで・閉じる・解約手続きなど、押してほしくない補助・離脱の操作
+ * - `ghost-destructive`: 確認を挟む削除の 1 段目・取り消し（確認側の最終ボタンは `destructive`）
+ * - `ghost-success`: 「解決」「承認」など、弱く肯定する操作
+ *
+ * className で文字色を上書きしない（`text-[var(--Text-Medium-Emphasis)]` 等の被せは不要）。
+ */
+export const GhostTones: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {(["ghost", "ghost-neutral", "ghost-destructive", "ghost-success"] as const).map((variant) => (
+        <div key={variant} className="flex flex-wrap items-center gap-3">
+          <Button variant={variant}>{variant}</Button>
+          <Button variant={variant} size="sm">{variant}</Button>
+          <Button variant={variant} disabled>disabled</Button>
+          <Button variant={variant} size="icon" aria-label={`${variant} を追加`}>
+            <Add size={20} />
+          </Button>
+        </div>
+      ))}
+      <div className="flex flex-col gap-2">
+        <Button variant="default" className="w-full">登録する</Button>
+        <Button variant="ghost-neutral" className="w-full">あとで</Button>
+      </div>
     </div>
   ),
 }
@@ -182,6 +218,9 @@ export const DisabledAllVariants: Story = {
       <Button variant="secondary" disabled>Secondary</Button>
       <Button variant="tertiary" disabled>Tertiary</Button>
       <Button variant="ghost" disabled>Ghost</Button>
+      <Button variant="ghost-neutral" disabled>Ghost Neutral</Button>
+      <Button variant="ghost-destructive" disabled>Ghost Destructive</Button>
+      <Button variant="ghost-success" disabled>Ghost Success</Button>
       <Button variant="destructive" disabled>Destructive</Button>
       <Button variant="info" disabled>Info</Button>
       <Button variant="warning" disabled>Warning</Button>

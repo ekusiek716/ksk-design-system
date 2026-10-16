@@ -1,5 +1,5 @@
 import React from "react"
-import { View, Platform, type ViewProps, type ViewStyle } from "react-native"
+import { Pressable, View, Platform, type ViewProps, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 
 export interface CardProps extends ViewProps {
@@ -13,6 +13,14 @@ export interface CardProps extends ViewProps {
    * 16px 等が欲しい呼び出し側は明示的に指定する（issue #332）。
    */
   radius?: "lg" | "xl" | "2xl"
+  /**
+   * 指定するとカード全体が押せるボタンになる（issue #665・Web の onClick / href と対）。
+   * accessibilityRole="button"、押下中は surface.secondary の面 + 0.98 の縮小を DS が持つ。
+   * 読み上げ名は accessibilityLabel（未指定なら子の Text を RN が連結して読む）。
+   */
+  onPress?: () => void
+  /** 押せるときに操作を止める */
+  disabled?: boolean
   children: React.ReactNode
 }
 
@@ -42,7 +50,7 @@ function getIosShadow(elevation: NonNullable<CardProps["elevation"]>, shadowColo
 }
 
 /** surface.primary 面 + border.low-emphasis の標準カード。 */
-export function Card({ padding = 4, elevation, radius = "lg", style, children, ...rest }: CardProps) {
+export function Card({ padding = 4, elevation, radius = "lg", style, children, onPress, disabled = false, ...rest }: CardProps) {
   const { theme, scales } = useTheme()
 
   const shadow: ViewStyle | undefined = elevation
@@ -52,6 +60,36 @@ export function Card({ padding = 4, elevation, radius = "lg", style, children, .
         default: { elevation: scales.shadows[elevation].elevation },
       }) as ViewStyle)
     : undefined
+
+  const base: ViewStyle = {
+    backgroundColor: theme.surface.primary,
+    borderColor: theme.border["low-emphasis"],
+    borderWidth: 1,
+    borderRadius: scales.borderRadius[radius],
+    padding: scales.spacing.scale[padding],
+    gap: scales.spacing.scale[3],
+  }
+
+  if (onPress) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={onPress}
+        style={({ pressed }) => [
+          base,
+          shadow,
+          pressed && !disabled ? { backgroundColor: theme.surface.secondary, transform: [{ scale: 0.98 }] } : null,
+          disabled ? { opacity: 0.5 } : null,
+          style,
+        ]}
+        {...rest}
+      >
+        {children}
+      </Pressable>
+    )
+  }
 
   return (
     <View

@@ -65,6 +65,7 @@ export { Input, type InputProps } from "./Input"
 export { Textarea, type TextareaProps } from "./Textarea"
 export { AutoGrowTextarea, type AutoGrowTextareaDensity, type AutoGrowTextareaProps } from "./AutoGrowTextarea"
 export { CommitInput, type CommitInputProps } from "./CommitInput"
+export { CodeInput, type CodeInputProps, type CodeInputPattern, type CodeInputVariant } from "./CodeInput"
 export { CommitTextarea, type CommitTextareaProps } from "./CommitTextarea"
 export { CommitAutoGrowTextarea, type CommitAutoGrowTextareaProps } from "./CommitAutoGrowTextarea"
 export { Switch, type SwitchProps } from "./Switch"
@@ -219,6 +220,7 @@ export {
   type ListItemTone,
   type ListItemDivider,
   type ListItemDensity,
+  type ListItemSlotWidth,
 } from "./ListItem"
 export {
   SettingsListRow,
@@ -277,6 +279,8 @@ export {
 export {
   ActionTile,
   QuickActionGrid,
+  type ActionTileMediaPosition,
+  type ActionTileMediaSize,
   type ActionTileProps,
   type ActionTileVariant,
   type QuickActionGridProps,

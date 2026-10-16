@@ -34,9 +34,42 @@ type ListItemAlign = "start" | "center"
  */
 type ListItemDensity = "comfortable" | "compact"
 
+/**
+ * rightSlot ラッパーの幅の上限（issue #668）。
+ * - "auto"   : 既定。上限なし（従来どおり中身の幅）。
+ * - "narrow" : 行幅の 1/3 まで。
+ * - "wide"   : 行幅の 1/2 まで。
+ * 上限を超える中身は折り返す（金額・件数のような長い値で title 列が 0 幅まで潰れるのを防ぐ）。
+ */
+type ListItemSlotWidth = "auto" | "narrow" | "wide"
+
+const RIGHT_SLOT_WIDTH_CLASS: Record<ListItemSlotWidth, string | undefined> = {
+  auto: undefined,
+  narrow: "max-w-[33%] min-w-0",
+  wide: "max-w-[50%] min-w-0",
+}
+
 interface ListItemCommonProps {
   leftSlot?: React.ReactNode
   rightSlot?: React.ReactNode
+  /**
+   * leftSlot を包むラッパー div の className（issue #668）。既定の `shrink-0` に追加される。
+   * DS 内部の DOM 構造に依存する子孫セレクタ（`[&>div:first-child]` 等）の代わりに使う。
+   */
+  leftSlotClassName?: string
+  /**
+   * rightSlot を包むラッパー div の className（issue #668）。既定の `shrink-0` に追加される。
+   * 幅の上限だけなら `rightSlotWidth` を使い、それ以外の調整（`max-w-[45%]` 等の任意値）に使う。
+   * `[&>div:last-child]:max-w-*` のような子孫セレクタで DS 内部の DOM に依存しない。
+   */
+  rightSlotClassName?: string
+  /**
+   * rightSlot ラッパーの幅の上限（issue #668）。`"narrow"`（1/3）/ `"wide"`（1/2）を指定すると、
+   * 長い値は上限内で折り返し、title 列の幅が残る。中身の文字列には `break-all` / `text-right`
+   * 等を呼び出し側で付ける。
+   * @default "auto"
+   */
+  rightSlotWidth?: ListItemSlotWidth
   /**
    * title / description と同じ列（leftSlot の右側）に置く下段スロット。
    * leftSlot がある場合はその幅ぶんインデントされる。
@@ -104,6 +137,9 @@ function ListItem({
   className,
   leftSlot,
   rightSlot,
+  leftSlotClassName,
+  rightSlotClassName,
+  rightSlotWidth = "auto",
   bottomSlot,
   footerSlot,
   secondaryAction,
@@ -151,7 +187,7 @@ function ListItem({
 
   const row = (
     <>
-      {leftSlot && <div className="shrink-0">{leftSlot}</div>}
+      {leftSlot && <div className={cn("shrink-0", leftSlotClassName)}>{leftSlot}</div>}
       <div className={isCentered ? "min-w-0" : "flex-1 min-w-0"}>
         {title && (
           <p
@@ -173,7 +209,11 @@ function ListItem({
         {children}
         {bottomSlot && <div className="mt-2">{bottomSlot}</div>}
       </div>
-      {rightSlot && <div className="shrink-0">{rightSlot}</div>}
+      {rightSlot && (
+        <div className={cn("shrink-0", RIGHT_SLOT_WIDTH_CLASS[rightSlotWidth], rightSlotClassName)}>
+          {rightSlot}
+        </div>
+      )}
       {secondaryAction && (
         // stretched link（行全体を覆う a/button）より前面に置き、
         // 副アクションのクリックが行の遷移・onClick に吸われないようにする。
@@ -305,4 +345,4 @@ function ListItem({
 }
 
 export { ListItem }
-export type { ListItemProps, ListItemVariant, ListItemAlign, ListItemDensity }
+export type { ListItemProps, ListItemVariant, ListItemAlign, ListItemDensity, ListItemSlotWidth }

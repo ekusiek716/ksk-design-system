@@ -33,6 +33,7 @@ import { Checkbox } from "../src/components/ui/checkbox"
 import { Switch } from "../src/components/ui/switch"
 import { RadioGroup, RadioGroupItem } from "../src/components/ui/radio-group"
 import { NumberInput } from "../src/components/ui/number-input"
+import { CodeInput } from "../src/components/ui/code-input"
 import { DateField } from "../src/components/ui/date-field"
 import { Slider } from "../src/components/ui/slider"
 
@@ -252,6 +253,29 @@ describe("controller 経路", () => {
     const increment = container.querySelector('button[aria-label="増やす"]')!
     click(increment)
     expect(captured.form.getValues("qty")).toBe(8)
+  })
+
+  it("CodeInput: defaultValues の初期表示 / reset() 追従 / 入力での値更新", () => {
+    const { captured, Wrapper } = makeHarness({ otp: "12" }, (form) => (
+      <Controller
+        control={form.control}
+        name="otp"
+        render={({ field }) => (
+          <CodeInput length={4} value={field.value} onChange={field.onChange} aria-label="認証コード" />
+        )}
+      />
+    ))
+    render(<Wrapper />)
+
+    const cells = () =>
+      Array.from(container.querySelectorAll<HTMLInputElement>('[data-slot="code-input-cell"]'))
+    expect(cells().map((c) => c.value).join("")).toBe("12")
+
+    act(() => captured.form.reset({ otp: "987" }))
+    expect(cells().map((c) => c.value).join("")).toBe("987")
+
+    typeInto(cells()[3], "6")
+    expect(captured.form.getValues("otp")).toBe("9876")
   })
 
   it("DateField: defaultValues の初期表示 / reset() 追従 / 日付選択での値更新", () => {

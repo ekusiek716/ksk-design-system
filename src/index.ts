@@ -128,6 +128,8 @@ export type {
 } from "./components/ui/progress-ring"
 export { NumberInput } from "./components/ui/number-input"
 export type { NumberInputProps } from "./components/ui/number-input"
+export { CodeInput } from "./components/ui/code-input"
+export type { CodeInputProps, CodeInputPattern, CodeInputVariant } from "./components/ui/code-input"
 export { PillToggle } from "./components/ui/pill-toggle"
 export type { PillToggleProps, PillToggleOption } from "./components/ui/pill-toggle"
 export { StarRating } from "./components/ui/star-rating"
@@ -259,6 +261,7 @@ export type {
   ListItemVariant,
   ListItemAlign,
   ListItemDensity,
+  ListItemSlotWidth,
 } from "./components/patterns/list-item"
 export { SettingsListRow, SettingsSection } from "./components/patterns/settings-section"
 export type { SettingsListRowProps, SettingsSectionProps, SettingsSectionVariant } from "./components/patterns/settings-section"
@@ -319,7 +322,7 @@ export type { FileUploadProps, UploadedFile } from "./components/patterns/file-u
 export { CompactFilePicker, ImageAttachmentPicker } from "./components/patterns/compact-file-picker"
 export type { CompactFilePickerProps, ImageAttachment, ImageAttachmentPickerProps } from "./components/patterns/compact-file-picker"
 export { ActionTile, QuickActionGrid } from "./components/patterns/quick-action-grid"
-export type { ActionTileProps, ActionTileVariant, QuickActionGridColumns, QuickActionGridGap, QuickActionGridProps, QuickActionGridSelectionMode } from "./components/patterns/quick-action-grid"
+export type { ActionTileMediaPosition, ActionTileMediaSize, ActionTileProps, ActionTileVariant, QuickActionGridColumns, QuickActionGridGap, QuickActionGridProps, QuickActionGridSelectionMode } from "./components/patterns/quick-action-grid"
 export { NotificationList } from "./components/patterns/admin/notification-list"
 export { ChartControls } from "./components/patterns/admin/chart-controls"
 export type { ChartControlsProps, Granularity, Period } from "./components/patterns/admin/chart-controls"

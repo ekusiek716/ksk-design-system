@@ -61,6 +61,7 @@ function SingleDemo({
       onChange={setValue}
       selectionMode={mode}
       multiple={multiple}
+      aria-label="カテゴリ"
     />
   )
 }

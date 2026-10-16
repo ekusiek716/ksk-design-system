@@ -448,7 +448,7 @@
       "excludeDsPaths": ["components/patterns/", "src/native/components/"],
       "excludeLines": ["ksk-ds-allow-custom-ui"],
       "message": "shortcut / emoji action tile のローカル再実装禁止",
-      "fix": "<QuickActionGrid><ActionTile ... /></QuickActionGrid> を使用"
+      "fix": "<QuickActionGrid><ActionTile ... /></QuickActionGrid> を使用。大きなイラスト・画像・色見本付きのタイルは ActionTile の media / mediaPosition / mediaSize（issue #670）、複数行・打ち消し線・メタ情報を持つ押せるカードは <Card onClick / href>（issue #665）を使い、<Button unstyled> に枠・角丸・影を被せて自作しない"
     },
     {
       "id": "P041",

@@ -47,6 +47,9 @@ const TOUCH_TARGET_VARIANTS = [
   "secondary-switch",
   "tertiary",
   "ghost",
+  "ghost-neutral",
+  "ghost-destructive",
+  "ghost-success",
   "destructive",
   "info",
   "warning",
@@ -67,6 +70,16 @@ const buttonVariants = cva(
         "secondary-switch": "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] border border-[var(--Border-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)] rounded-[var(--Control-Radius)]",
         tertiary: "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] border border-[var(--Border-Medium-Emphasis)] hover:bg-[var(--Hover-Tertiary-Button)] rounded-[var(--Control-Radius)]",
         ghost: "text-[var(--Text-Accent-Primary)] hover:bg-[var(--Hover-Ghost-Button)] rounded-[var(--Control-Radius)]",
+        // ghost-neutral — 背景も枠も無い灰色の文字ボタン（issue #664）。
+        // スキップ・あとで・閉じる・解約手続きなど、押してほしくない補助・離脱の操作に使う。
+        // 文字は Text-Medium-Emphasis（light / dark とも AA。scripts/check-contrast.mjs で検査）。
+        "ghost-neutral": "text-[var(--Text-Medium-Emphasis)] hover:bg-[var(--Hover-Ghost-Button)] rounded-[var(--Control-Radius)]",
+        // ghost-destructive / ghost-success — 文字だけの弱い意味色ボタン（issue #671）。
+        // 確認を挟む削除の 1 段目・取り消し（ghost-destructive）や「解決」（ghost-success）に使う。
+        // 確認する側の最終ボタンは塗りの destructive を使う。hover の面は淡い単色の Surface-Caution /
+        // Surface-Success（半透明の *-Subtle だと light の ghost-success が AA を割るため）。
+        "ghost-destructive": "text-[var(--Text-Caution)] hover:bg-[var(--Surface-Caution)] rounded-[var(--Control-Radius)]",
+        "ghost-success": "text-[var(--Text-Success)] hover:bg-[var(--Surface-Success)] rounded-[var(--Control-Radius)]",
         destructive: "bg-[var(--Caution-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Destructive-Button)] active:bg-[var(--Active-Destructive-Button)] rounded-[var(--Control-Radius)]",
         // info / warning / success — 状態色で意味を伝えるボタン（issue #598）。
         // ブランドに連動しない固定の状態色。文字は --Text-on-Inverse で、light / dark とも

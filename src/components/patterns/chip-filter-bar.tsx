@@ -26,8 +26,27 @@ interface ChipFilterBarProps {
    * 共有させたい場合に使う（二重スクロールコンテナの回避）。
    */
   bare?: boolean
+  /**
+   * 内側（チップ列と件数テキスト）の左右余白（issue #667）。`Container` の gutter と同じ語彙
+   * （`tight` = 16px / `default` = 24px）。外側（sticky の背景）は全幅のまま、チップと件数だけが
+   * 余白の内側に収まる。横スクロールの始点・終点も余白ぶん内側になる。
+   * @default "none"
+   */
+  gutter?: "none" | "tight" | "default"
+  /**
+   * 内側（チップ列 div と件数 p の両方）に付ける className（issue #667）。`gutter` の語彙に無い
+   * 余白（consumer 独自のページ余白変数 `px-[var(--page-px)]` 等）を渡すときに使う。
+   * 外側の `className` と違い、sticky の背景を狭めない。`bare` のときは無視される。
+   */
+  contentClassName?: string
   className?: string
 }
+
+const GUTTER_CLASS = {
+  none: "",
+  tight: "px-4",
+  default: "px-6",
+} as const
 
 // ロケールを明示する（SSR 環境とブラウザでロケールが異なると hydration mismatch になるため）
 const defaultResultCountLabel = (n: number) => `${n.toLocaleString("ja-JP")}件`
@@ -46,9 +65,12 @@ function ChipFilterBar({
   sticky = false,
   stickyOffset = 0,
   bare = false,
+  gutter = "none",
+  contentClassName,
   className,
 }: ChipFilterBarProps) {
   if (bare) return <>{children}</>
+  const innerClassName = cn(GUTTER_CLASS[gutter], contentClassName)
 
   return (
     <div data-slot="chip-filter-bar" className={className}>
@@ -66,10 +88,23 @@ function ChipFilterBar({
         )}
         style={sticky ? { top: stickyOffset } : undefined}
       >
-        {children}
+        {innerClassName ? (
+          // 余白は背景を持つ行（スクロールコンテナ）ではなく、その内側のラッパーに付ける（issue #667）。
+          // スクロールコンテナ自身の右 padding はスクロール末尾で効かないブラウザがあるため、
+          // 中身ぶんの幅（w-max）を持つラッパーの padding にする。min-w-full で短いときも左余白を保つ。
+          // 余白を指定しないときはラッパーを足さない（従来と同じ DOM）。
+          <div
+            data-slot="chip-filter-bar-content"
+            className={cn("flex w-max min-w-full shrink-0 items-center gap-2", innerClassName)}
+          >
+            {children}
+          </div>
+        ) : (
+          children
+        )}
       </div>
       {resultCount !== undefined && (
-        <p className="mt-2 typo-label-xs text-[var(--Text-Low-Emphasis)]">
+        <p className={cn("mt-2 typo-label-xs text-[var(--Text-Low-Emphasis)]", innerClassName)}>
           {resultCountLabel(resultCount)}
         </p>
       )}

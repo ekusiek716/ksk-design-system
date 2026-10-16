@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { expect, userEvent, within } from "storybook/test"
 import { Add, Heart, NoteText, Star1 } from "iconsax-reactjs"
 import { IconBadge } from "@/components/ui/icon-badge"
+import { cn } from "@/lib/utils"
 import { ActionTile, QuickActionGrid } from "./quick-action-grid"
 
 const meta: Meta<typeof QuickActionGrid> = {
@@ -217,4 +218,68 @@ export const LaunchersWithoutSelectionMode: Story = {
       <ActionTile icon={<NoteText size={20} />} label="メモを書く" />
     </QuickActionGrid>
   ),
+}
+
+/**
+ * 大きなイラストを載せるタイル（issue #670）。`media` に画像を渡し、`mediaPosition="top"`（既定）/
+ * `mediaSize="lg"`（128px）で機能メニューのようなイラスト付きタイルになる。media は装飾扱い
+ * （aria-hidden）なので、意味はラベルで伝える。`columns="auto"` の狭いタイルでも正方形のまま縮む。
+ * `<Button unstyled>` に色背景・枠・角丸・影を被せて自作しない（rules.json P040）。
+ */
+export const Illustration: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const illustration = (hue: string) => (
+      <div className={cn("size-full rounded-lg", hue)} />
+    )
+    return (
+      <QuickActionGrid className="max-w-md" columns="auto">
+        <ActionTile label="持ち物リスト" media={illustration("bg-[var(--Categorical-1-Subtle)]")} mediaSize="lg" />
+        <ActionTile label="予算" description="使った金額を記録" media={illustration("bg-[var(--Categorical-2-Subtle)]")} mediaSize="lg" />
+        <ActionTile label="メモ" media={illustration("bg-[var(--Categorical-3-Subtle)]")} mediaSize="lg" />
+        <ActionTile label="横長（end）" description="画像を右に置く" media={illustration("bg-[var(--Categorical-4-Subtle)]")} mediaPosition="end" mediaSize="md" />
+      </QuickActionGrid>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const media = [...canvasElement.querySelectorAll<HTMLElement>('[data-slot="action-tile-media"]')]
+    await expect(media.length).toBe(4)
+    for (const m of media) {
+      await expect(m.getAttribute("aria-hidden")).toBe("true")
+      const tile = m.closest<HTMLElement>('[data-slot="action-tile"]')!
+      // タイルからはみ出さない・正方形
+      await expect(m.getBoundingClientRect().width).toBeLessThanOrEqual(tile.getBoundingClientRect().width)
+      await expect(Math.round(m.getBoundingClientRect().width)).toBe(Math.round(m.getBoundingClientRect().height))
+    }
+  },
+}
+
+/**
+ * 色見本 + ラベルの単一選択（issue #670）。`mediaPosition="start"` / `mediaSize="sm"`（40px）で、
+ * 選択チェック（ラベル行の右端）と重ならない。カードのデザイン選択などに使う。
+ */
+export const ColorSwatch: Story = {
+  render: () => {
+    const [theme, setTheme] = React.useState("rose")
+    const themes = [
+      { value: "rose", label: "ローズ", swatch: "bg-[var(--Categorical-1-Subtle)]" },
+      { value: "sky", label: "スカイ", swatch: "bg-[var(--Categorical-2-Subtle)]" },
+      { value: "mint", label: "ミント", swatch: "bg-[var(--Categorical-3-Subtle)]" },
+    ]
+    return (
+      <QuickActionGrid className="max-w-md" columns={3} selectionMode="single" aria-label="カードのデザイン">
+        {themes.map((t) => (
+          <ActionTile
+            key={t.value}
+            label={t.label}
+            selected={theme === t.value}
+            onClick={() => setTheme(t.value)}
+            media={<div className={cn("size-full rounded-lg border border-[var(--Border-Low-Emphasis)]", t.swatch)} />}
+            mediaPosition="start"
+            mediaSize="sm"
+          />
+        ))}
+      </QuickActionGrid>
+    )
+  },
 }

@@ -42,6 +42,12 @@ function isDev() {
  * `accessibilityHint` をそのまま渡せる（issue #298①）。label + meta を
  * 合成した読み上げラベル（例: 「模試2（要解放）」）を consumer 側で付けられる。
  */
+/** ActionTile の media の置き場所（issue #670・Web と同じ語彙）。 */
+export type ActionTileMediaPosition = "top" | "start" | "end"
+/** ActionTile の media の大きさ（issue #670）。sm = 40 / md = 64 / lg = 128。 */
+export type ActionTileMediaSize = "sm" | "md" | "lg"
+const ACTION_TILE_MEDIA_SIZE: Record<ActionTileMediaSize, number> = { sm: 40, md: 64, lg: 128 }
+
 export interface ActionTileProps extends AccessibilityProps {
   icon?: React.ReactNode
   emoji?: React.ReactNode
@@ -66,6 +72,14 @@ export interface ActionTileProps extends AccessibilityProps {
   selectionMode?: QuickActionGridSelectionMode
   onPress?: () => void
   style?: StyleProp<ViewStyle>
+  /**
+   * 大きめの画像・イラスト・色見本のスロット（issue #670・Web と同じ）。装飾扱いで読み上げない。
+   */
+  media?: React.ReactNode
+  /** media の置き場所。@default "top" */
+  mediaPosition?: ActionTileMediaPosition
+  /** media の枠の大きさ（sm = 40 / md = 64 / lg = 128）。@default "md" */
+  mediaSize?: ActionTileMediaSize
 }
 
 export interface QuickActionGridProps {
@@ -130,6 +144,9 @@ export function ActionTile({
   selectionMode,
   onPress,
   style,
+  media,
+  mediaPosition = "top",
+  mediaSize = "md",
   accessibilityRole,
   accessibilityState,
   ...accessibilityProps
@@ -144,6 +161,26 @@ export function ActionTile({
   // 下段（description / meta）を描くかどうか。下の JSX の描画条件と必ず一致させる
   const hasBottomRow = Boolean(description || meta)
   const variantColors = colorsForVariant(variant, theme)
+  const hasMedia = media !== undefined && media !== null && media !== false
+  const mediaDimension = ACTION_TILE_MEDIA_SIZE[mediaSize]
+  const mediaElement = hasMedia ? (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={{
+        width: mediaDimension,
+        height: mediaDimension,
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        borderRadius: scales.borderRadius.lg,
+        flexShrink: 0,
+      }}
+    >
+      {media}
+    </View>
+  ) : null
+  const isMediaEnd = hasMedia && mediaPosition === "end"
 
   return (
     <Pressable
@@ -181,16 +218,23 @@ export function ActionTile({
           opacity: isDisabled ? 0.5 : 1,
           ...variantColors,
           backgroundColor: pressed ? theme.surface.secondary : variantColors.backgroundColor,
+          // media="end" は文字列の列と画像を横に並べる（issue #670）
+          ...(isMediaEnd ? { flexDirection: "row" as const, alignItems: "center" as const, gap: scales.spacing.scale[3] } : null),
         },
         style,
       ]}
     >
+      {hasMedia && mediaPosition === "top" && (
+        <View style={{ width: "100%", alignItems: "center" }}>{mediaElement}</View>
+      )}
+      <ActionTileBody isMediaEnd={isMediaEnd} gap={scales.spacing.scale[2]}>
       {/*
         alignItems: "center" — ラベルは常に1行なので、インジケータを上端揃えにすると
         ラベルの文字中心より数 px 高い位置に浮いて見える（web 側と同じ理由で揃える）。
       */}
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: scales.spacing.scale[2] }}>
         <View style={{ flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: scales.spacing.scale[2] }}>
+          {hasMedia && mediaPosition === "start" && mediaElement}
           {emoji && <RNText style={resolveTypo("heading.md")}>{emoji}</RNText>}
           {icon}
           {typeof label === "string" ? (
@@ -234,8 +278,16 @@ export function ActionTile({
           )}
         </View>
       )}
+      </ActionTileBody>
+      {isMediaEnd && mediaElement}
     </Pressable>
   )
+}
+
+/** media="end" のときだけラベル行と下段を 1 本の列に包む。それ以外は従来どおりラッパー無し。 */
+function ActionTileBody({ isMediaEnd, gap, children }: { isMediaEnd: boolean; gap: number; children: React.ReactNode }) {
+  if (!isMediaEnd) return <>{children}</>
+  return <View style={{ flex: 1, minWidth: 0, gap }}>{children}</View>
 }
 
 export function QuickActionGrid({

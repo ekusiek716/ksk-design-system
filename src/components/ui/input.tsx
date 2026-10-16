@@ -177,5 +177,7 @@ function Input({
   )
 }
 
-export { Input }
+// inputBaseClass は CodeInput（ui/code-input.tsx）がセルの枠・背景・フォーカス・エラー表現を Input とそろえるために使う。
+// パッケージの公開 API（src/index.ts）には出さない。
+export { Input, inputBaseClass }
 export type { InputProps }

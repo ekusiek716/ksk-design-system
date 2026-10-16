@@ -140,6 +140,9 @@
       { "variant": "secondary-switch", "role": "secondary-selected", "note": "secondary のトグル選択状態（選択中のフィルタ切替等）" },
       { "variant": "tertiary", "role": "tertiary", "note": "primary/secondary より弱い並列アクション" },
       { "variant": "ghost", "role": "low-emphasis", "note": "文字寄りの補助操作" },
+      { "variant": "ghost-neutral", "role": "low-emphasis-neutral", "note": "補助・離脱の操作（スキップ・あとで・閉じる・解約手続き 等）。押してほしくない操作を灰色の文字で示す（issue #664）" },
+      { "variant": "ghost-success", "role": "low-emphasis-success", "note": "弱く肯定する文字ボタン（解決・承認 等・issue #671）" },
+      { "variant": "ghost-destructive", "role": "low-emphasis-danger", "note": "確認を挟む削除の 1 段目・取り消し（issue #671）。確認ダイアログ側の最終ボタンは destructive" },
       { "variant": "link", "role": "inline", "note": "本文内リンク相当の操作" },
       { "variant": "destructive", "role": "danger", "note": "削除・取り消し等。alert-dialog / ConfirmDialog 内で使うことが多い" },
       { "variant": "inverse", "role": "primary-on-dark", "note": "暗背景・ヒーローセクション上の primary 相当" },
@@ -151,6 +154,8 @@
     "rules": [
       "primary（default）は1ビューポートにつき1つまで。同一ビューポートに複数の primary CTA を並べない",
       "destructive は確認なしの即時実行トリガーにしない。alert-dialog / ConfirmDialog を経由させる",
+      "確認ダイアログを開く 1 段目の削除・取り消しボタンは ghost-destructive、確認ダイアログ内の最終実行ボタンは destructive。ghost に className で文字色（Text-Caution / Object-Caution 等）を被せない",
+      "補助・離脱の操作（スキップ・あとで・閉じる）は ghost-neutral。ghost に className で灰色の文字色を被せない",
       "同一画面で glass 系と非 glass 系の CTA variant を隣接して混在させない（背景コンテキストが揃っている範囲でのみ glass 系を使う）",
       "CTA の優先度は上記 priority 配列の並び順を優先度の正本とする。同一画面に variant が複数出る場合、視覚的な強さの順序は配列順と一致させる"
     ]

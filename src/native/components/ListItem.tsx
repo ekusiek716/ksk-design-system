@@ -1,5 +1,5 @@
 import React from "react"
-import { Pressable, View, Text as RNText, type AccessibilityProps } from "react-native"
+import { Pressable, View, Text as RNText, type AccessibilityProps, type StyleProp, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 
@@ -30,6 +30,14 @@ export type ListItemAlign = "start" | "center"
  */
 export type ListItemDensity = "comfortable" | "compact"
 
+/**
+ * trailing の幅の上限（issue #668・Web の `rightSlotWidth` と同じ語彙）。
+ * - "auto"   : 既定。上限なし（trailing をラッパー無しでそのまま描画する従来の見た目）。
+ * - "narrow" : 行幅の 1/3 まで。
+ * - "wide"   : 行幅の 1/2 まで。
+ */
+export type ListItemSlotWidth = "auto" | "narrow" | "wide"
+
 export type ListItemTone = "default" | "accent" | "caution"
 export type ListItemDivider = "none" | "inset" | "full"
 
@@ -46,6 +54,17 @@ export interface ListItemProps extends AccessibilityProps {
   /** 下端の区切り線。insetは左右の行余白に追随（leadingの幅は含まない）。既定none。 */
   divider?: ListItemDivider
   trailing?: React.ReactNode
+  /**
+   * trailing の幅の上限（issue #668）。長い値（金額・件数）で title 列が潰れるのを防ぐ。
+   * 指定時は trailing を View で包み、上限内で縮む（中の Text は折り返す）。
+   * @default "auto"
+   */
+  trailingWidth?: ListItemSlotWidth
+  /**
+   * trailing を包む View の style（issue #668・Web の `rightSlotClassName` と対）。
+   * 指定時は trailing を View で包む。未指定かつ trailingWidth="auto" ならラッパーを増やさない。
+   */
+  trailingStyle?: StyleProp<ViewStyle>
   /**
    * title / description と同じ列に置く下段スロットではなく、
    * leading / 本文 / trailing の行の**外側**・全幅に置く下段スロット。
@@ -67,6 +86,8 @@ export function ListItem({
   divider = "none",
   description,
   trailing,
+  trailingWidth = "auto",
+  trailingStyle,
   footerSlot,
   showChevron,
   onPress,
@@ -123,7 +144,20 @@ export function ListItem({
           description
         )}
       </View>
-      {trailing}
+      {trailing != null && trailing !== false && (trailingWidth !== "auto" || trailingStyle) ? (
+        <View
+          style={[
+            trailingWidth === "auto"
+              ? null
+              : { maxWidth: trailingWidth === "narrow" ? "33%" : "50%", flexShrink: 1, minWidth: 0 },
+            trailingStyle,
+          ]}
+        >
+          {trailing}
+        </View>
+      ) : (
+        trailing
+      )}
       {showChevron && (
         <RNText style={[resolveTypo("label.md"), { color: theme.text["low-emphasis"] }]}>›</RNText>
       )}

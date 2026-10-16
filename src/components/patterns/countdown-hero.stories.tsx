@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import * as React from "react"
+import { expect, userEvent } from "storybook/test"
 import { CountdownHero } from "./countdown-hero"
 
 const meta: Meta<typeof CountdownHero> = {
@@ -90,4 +92,45 @@ export const TodayWithValue: Story = {
       />
     </div>
   ),
+}
+
+/**
+ * 押せるヒーロー（issue #672）。`onClick` を渡すとヒーロー全面を覆う不可視の `<button>` が重なり、
+ * Enter / Space で発火、DS 標準のフォーカスリングと押下表現（押している間だけ薄くなる）を持つ。
+ * 名前は表示中の文言（残り 42 days …）。操作の意味を足すなら `aria-label` を渡す。
+ * 遷移なら `href`。呼び出し側で `<Button unstyled>` に包んだり `active:opacity-*` を足したりしない。
+ */
+export const Interactive: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [count, setCount] = React.useState(0)
+    return (
+      <div className="max-w-sm p-4 space-y-2">
+        <CountdownHero
+          targetDate={daysFromNow(42)}
+          dateLabel="2027.01.03 (日)"
+          aria-label="挙式日を編集（残り 42 日）"
+          onClick={() => setCount((c) => c + 1)}
+          illustration={
+            <div aria-hidden="true" className="h-[120px] w-[140px] rounded-lg bg-[var(--Categorical-4-Subtle)]" />
+          }
+        />
+        <p className="typo-label-xs text-[var(--Text-Low-Emphasis)]" data-testid="count">
+          押した回数: {count}
+        </p>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const action = canvasElement.querySelector<HTMLButtonElement>('[data-slot="countdown-hero-action"]')!
+    await expect(action.tagName).toBe("BUTTON")
+    await expect(action.getAttribute("aria-label")).toBe("挙式日を編集（残り 42 日）")
+    await userEvent.click(action)
+    await userEvent.tab()
+    await userEvent.tab({ shift: true })
+    action.focus()
+    await userEvent.keyboard("{Enter}")
+    await userEvent.keyboard(" ")
+    await expect(canvasElement.querySelector('[data-testid="count"]')!.textContent).toContain("3")
+  },
 }

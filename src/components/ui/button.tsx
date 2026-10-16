@@ -72,6 +72,11 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
  * - `default`: 主たる CTA（1 画面に 1〜2 個まで）。
  * - `secondary` / `tertiary`: 並列の選択肢・キャンセル。
  * - `ghost` / `link`: 文字寄りの controls。
+ * - `ghost-neutral`: 背景も枠も無い灰色の文字ボタン（issue #664）。スキップ・あとで・閉じる・
+ *   解約手続きなど、押してほしくない補助・離脱の操作。className で文字色を上書きしない。
+ * - `ghost-destructive` / `ghost-success`: 文字だけの弱い赤 / 緑ボタン（issue #671）。
+ *   確認を挟む削除の 1 段目・取り消し（ghost-destructive）や「解決」（ghost-success）。
+ *   確認ダイアログ側の最終ボタンは塗りの `destructive` を使う。
  * - `destructive`: 削除・取り消しなど不可逆操作。
  * - `info` / `warning` / `success`: 状態色で種類や意味を伝えるボタン（issue #598）。
  *   ブランドに連動しない固定の状態色で、hover / active / disabled / focus ring まで DS が持つ。

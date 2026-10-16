@@ -29,6 +29,23 @@ interface CountdownHeroProps {
   todayValue?: string
   /** 右上に敷く装飾イラストスロット。wedding 画像等は消費側で用意する */
   illustration?: React.ReactNode
+  /**
+   * 指定するとヒーロー全体が押せるボタンになる（issue #672。例: 日付の編集画面を開く）。
+   * ヒーロー全面を覆う不可視の `<button>` を重ねる stretched link 構造で、Enter / Space で発火し、
+   * DS 標準のフォーカスリングと押下表現（押している間だけ薄くなる）を持つ。
+   * 呼び出し側で `<Button unstyled>` に包んだり `active:opacity-*` を足したりしない。
+   */
+  onClick?: React.MouseEventHandler<HTMLButtonElement>
+  /** 指定するとヒーロー全体が遷移リンクになる（issue #672）。`onClick` と併用しない */
+  href?: string
+  /**
+   * 押せるときのアクセシブルネーム（issue #672）。未指定ならヒーローに表示している文言
+   * （ラベル・日数・単位・dateLabel）がそのまま名前になる。操作の意味を足したいとき
+   * （「挙式日を編集」等）に指定する。
+   */
+  "aria-label"?: string
+  /** 押せるときに操作を止める（issue #672） */
+  disabled?: boolean
   className?: string
 }
 
@@ -78,8 +95,14 @@ function CountdownHero({
   dateLabel,
   todayValue,
   illustration,
+  onClick,
+  href,
+  "aria-label": ariaLabel,
+  disabled = false,
   className,
 }: CountdownHeroProps) {
+  const contentId = React.useId()
+  const actionable = Boolean(onClick || href)
   const target = React.useMemo(() => parseTargetDate(targetDate), [targetDate])
   const daysLeft = calcDaysLeft(target)
   const isToday = daysLeft === 0
@@ -94,7 +117,15 @@ function CountdownHero({
     <div
       data-slot="countdown-hero"
       data-state={isToday ? "today" : isPast ? "past" : "active"}
-      className={cn("relative", className)}
+      data-interactive={actionable || undefined}
+      className={cn(
+        "relative",
+        // 押下表現: ヒーロー全面を覆うボタンを押している間だけ薄くする（:active は祖先にも乗る）。
+        actionable && !disabled &&
+          "rounded-[var(--Radius-Surface)] transition-opacity duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)] active:opacity-70",
+        actionable && disabled && "opacity-50",
+        className,
+      )}
     >
       {illustration && (
         <div
@@ -108,7 +139,7 @@ function CountdownHero({
           {illustration}
         </div>
       )}
-      <div className="relative">
+      <div className="relative" id={actionable ? contentId : undefined}>
         <p className="typo-caption leading-none text-[var(--Text-Low-Emphasis)]">
           {displayLabel}
         </p>
@@ -137,7 +168,64 @@ function CountdownHero({
           </p>
         )}
       </div>
+      {actionable && <CountdownHeroAction
+        href={href}
+        onClick={onClick}
+        disabled={disabled}
+        ariaLabel={ariaLabel}
+        labelledBy={contentId}
+      />}
     </div>
+  )
+}
+
+/**
+ * ヒーロー全面を覆う不可視の a / button（stretched link・ThumbnailCard / ListItem と同じ構造）。
+ * 中身の `<p>` / `<div>` を `<button>` の子にすると不正な HTML になるため、兄弟として重ねる。
+ * 名前は aria-label（指定時）か、表示中の文言（aria-labelledby で本文を指す）。
+ */
+function CountdownHeroAction({
+  href,
+  onClick,
+  disabled,
+  ariaLabel,
+  labelledBy,
+}: {
+  href?: string
+  onClick?: React.MouseEventHandler<HTMLButtonElement>
+  disabled: boolean
+  ariaLabel?: string
+  labelledBy: string
+}) {
+  const className = cn(
+    "absolute inset-0 z-[1] rounded-[var(--Radius-Surface)]",
+    "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+    disabled ? "cursor-not-allowed" : "cursor-pointer",
+  )
+  const nameProps = ariaLabel ? { "aria-label": ariaLabel } : { "aria-labelledby": labelledBy }
+  if (href) {
+    return (
+      <a
+        href={href}
+        data-slot="countdown-hero-action"
+        {...nameProps}
+        aria-disabled={disabled || undefined}
+        className={className}
+        onClick={(event) => {
+          if (disabled) event.preventDefault()
+        }}
+      />
+    )
+  }
+  return (
+    <button
+      type="button"
+      data-slot="countdown-hero-action"
+      {...nameProps}
+      disabled={disabled}
+      className={className}
+      onClick={onClick}
+    />
   )
 }
 

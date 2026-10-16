@@ -69,6 +69,19 @@ type ChipSelectorProps<T extends string = string> =
       onChange: (value: T | null) => void
       size?: "sm" | "md" | "lg"
       className?: string
+      /**
+       * グループのアクセシブルネーム（issue #666）。`role="radiogroup"` は名前が必須
+       * （WAI-ARIA）なので、`selectionMode="single"` では `aria-label` か `aria-labelledby` の
+       * どちらかを必ず渡す（未指定は開発ビルドで警告）。画面上に見出しがあるなら、見出しに
+       * `id` を付けてここへ `aria-labelledby` で結ぶ。
+       */
+      "aria-label"?: string
+      /** グループ名にする見出し要素の id（issue #666）。見出しが見えている画面ではこちらを優先する */
+      "aria-labelledby"?: string
+      /** 補足説明の要素の id（issue #666） */
+      "aria-describedby"?: string
+      /** ルート要素の id（issue #666） */
+      id?: string
       /** 単一選択では無効（複数選択時のみ有効） */
       max?: never
       /** @deprecated `selectionMode` を使うこと。単一選択では指定できない */
@@ -90,6 +103,19 @@ type ChipSelectorProps<T extends string = string> =
       onChange: (value: T[]) => void
       size?: "sm" | "md" | "lg"
       className?: string
+      /**
+       * グループのアクセシブルネーム（issue #666）。`role="radiogroup"` は名前が必須
+       * （WAI-ARIA）なので、`selectionMode="single"` では `aria-label` か `aria-labelledby` の
+       * どちらかを必ず渡す（未指定は開発ビルドで警告）。画面上に見出しがあるなら、見出しに
+       * `id` を付けてここへ `aria-labelledby` で結ぶ。
+       */
+      "aria-label"?: string
+      /** グループ名にする見出し要素の id（issue #666）。見出しが見えている画面ではこちらを優先する */
+      "aria-labelledby"?: string
+      /** 補足説明の要素の id（issue #666） */
+      "aria-describedby"?: string
+      /** ルート要素の id（issue #666） */
+      id?: string
       max?: never
       multiple?: never
     }
@@ -120,6 +146,19 @@ type ChipSelectorProps<T extends string = string> =
       max?: number
       size?: "sm" | "md" | "lg"
       className?: string
+      /**
+       * グループのアクセシブルネーム（issue #666）。`role="radiogroup"` は名前が必須
+       * （WAI-ARIA）なので、`selectionMode="single"` では `aria-label` か `aria-labelledby` の
+       * どちらかを必ず渡す（未指定は開発ビルドで警告）。画面上に見出しがあるなら、見出しに
+       * `id` を付けてここへ `aria-labelledby` で結ぶ。
+       */
+      "aria-label"?: string
+      /** グループ名にする見出し要素の id（issue #666）。見出しが見えている画面ではこちらを優先する */
+      "aria-labelledby"?: string
+      /** 補足説明の要素の id（issue #666） */
+      "aria-describedby"?: string
+      /** ルート要素の id（issue #666） */
+      id?: string
     }
 
 /**
@@ -138,6 +177,13 @@ type ChipSelectorProps<T extends string = string> =
  * <ChipSelector selectionMode="multiple" options={TAGS} value={tags} onChange={setTags} max={3} />
  * ```
  *
+ * ### グループ名（issue #666）
+ * 単一選択は `role="radiogroup"` なので名前が必須。見出しと結ぶ:
+ * ```tsx
+ * <p id="kind-label" className="typo-label-md">種別</p>
+ * <ChipSelector aria-labelledby="kind-label" selectionMode="single" options={KINDS} value={kind} onChange={setKind} />
+ * ```
+ *
  * 「選択中の 1 つだけ表示して、タップで候補を開く」折りたたみ型が要る場合は
  * `CollapsibleChipField` を使う（issue #419）。
  */
@@ -150,6 +196,10 @@ function ChipSelector<T extends string = string>({
   max,
   size = "md",
   className,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
+  "aria-describedby": ariaDescribedby,
+  id,
 }: ChipSelectorProps<T>) {
   // selectionMode が指定されていればそれが正本。未指定なら従来の multiple から導出するので、
   // 既存の呼び出しは 1 行も変えずに同じ DOM / 同じ挙動になる（issue #352）。
@@ -216,6 +266,16 @@ function ChipSelector<T extends string = string>({
     // 移行案内は JSDoc と型定義（スカラーを先頭メンバーに）で行う。
   })
 
+  // issue #666: radiogroup は名前が必須。名前なしの単一選択は開発ビルドで 1 回だけ警告する
+  // （roving tabindex の effect は毎レンダー走るので、そこには入れない）。
+  const isUnnamedRadiogroup = isSingle && !ariaLabel && !ariaLabelledby
+  React.useEffect(() => {
+    if (!isUnnamedRadiogroup || !isDev()) return
+    console.warn(
+      '[ksk-ds] ChipSelector: selectionMode="single"（role="radiogroup"）にはアクセシブルネームが必要です。見出しの id を aria-labelledby に渡すか、aria-label を指定してください。'
+    )
+  }, [isUnnamedRadiogroup])
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (!isSingle || event.defaultPrevented) return
     const delta =
@@ -250,6 +310,10 @@ function ChipSelector<T extends string = string>({
     <div
       data-slot="chip-selector"
       ref={containerRef}
+      id={id}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledby}
+      aria-describedby={ariaDescribedby}
       // 単一選択は radiogroup。未指定 + multiple 既定なら従来どおり group（非破壊）
       role={isSingle ? "radiogroup" : "group"}
       onKeyDown={handleKeyDown}

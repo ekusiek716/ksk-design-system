@@ -4,12 +4,12 @@
     "version": "2.10.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 69,
+      "ui": 70,
       "patterns": 62,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 154
+      "total": 155
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -40,6 +40,9 @@
         "secondary-switch",
         "tertiary",
         "ghost",
+        "ghost-neutral",
+        "ghost-destructive",
+        "ghost-success",
         "link",
         "destructive",
         "info",
@@ -85,6 +88,8 @@
         "Native Button supports loading/loadingLabel and leadingIcon/trailingIcon; do not wrap ActivityIndicator in Text",
         "Web Button も loading / loadingLabel を持つ（opt-in）。非同期処理中は自前で disabled + 文言差し替えをせず loading を使う。asChild 併用時はスピナーを出さず aria-busy と disabled 相当だけを子へ渡す",
         "Native Button supports spinnerColor to override the loading ActivityIndicator color; default unchanged (falls back to variant fg color, issue #450)",
+        "variant=ghost-neutral は背景も枠も無い灰色（Text-Medium-Emphasis）の文字ボタン。スキップ・あとで・閉じる・解約手続きなどの補助・離脱の操作に使う（issue #664）。ghost に className で灰色を被せない。native Button にも同名 variant",
+        "variant=ghost-destructive / ghost-success は文字だけの弱い赤（Text-Caution）/ 緑（Text-Success）ボタン（issue #671）。確認を挟む削除の 1 段目・取り消しは ghost-destructive、確認側の最終ボタンは destructive。ghost に className で Text-Caution / Object-Caution / Text-Success を被せない。native Button にも同名 variant",
         "variant=info / warning / success は状態色で種類や意味を伝えるボタン（issue #598）。背景色を className で上書きせず variant を使う。不可逆操作には warning ではなく destructive を使う",
         "variant=glass は背景がグラデーション/写真の場合のみ使用",
         "variant=glass-inverse は暗い写真・動画・濃色面上の Liquid Glass CTA 専用",
@@ -335,7 +340,13 @@
       "rules": [
         "rounded-lg (8px)",
         "default variant は gap-6 が直下の子の縦間隔を所有する。直下の子に mt-* / mb-* / my-* / space-y-* を追加しない",
-        "variant=media は gap / padding を持たないため、内側コンテンツで明示的に余白を管理できる"
+        "variant=media は gap / padding を持たないため、内側コンテンツで明示的に余白を管理できる",
+        "カード全体を押せるようにするときは onClick（ボタン）/ href（リンク）を Card に渡す(issue #665)。全面を覆う不可視の button / a（stretched link）を重ね、Enter / Space・フォーカスリング・hover・押下表現を DS が持つ。名前は CardTitle・説明は CardDescription に自動で結ばれる（CardTitle が無いときは aria-label）。variant=media でも使える。disabled 対応",
+        "押せる Card の中の別操作（メニュー・削除等）は CardAction に置く。CardAction は押せる面より前面に出て入れ子 button にならない。それ以外の場所の操作子は押せる面に覆われる",
+        "押せる面（button / a）は Card の DOM 先頭に置き、Tab 順はカード本体 → 内側の CardAction（視覚順）。onClick の型は MouseEventHandler<HTMLElement> で、以前の div 前提のハンドラもそのまま渡せる",
+        "押せる Card の名前は aria-label → aria-labelledby → CardTitle（自前の id でも結ばれる）の順。どれも無いと開発ビルドで 1 回 console.warn。押せない入れ子の Card の CardTitle / CardDescription は外側の押せる Card に登録されない",
+        "<Button unstyled> に border / rounded / shadow / active:scale を被せて押せるカードを自作しない（P040）。native は onPress / disabled",
+        "parity（web と差がある点）: native の押せる Card は Pressable 1 つで、CardTitle / CardAction の登録・前面化の仕組みを持たない。入れ子の Card や Card 内の別操作は RN の Pressable の入れ子規則（内側の Pressable が先に反応）に従い、読み上げ名は accessibilityLabel を明示するか子の Text の連結になる"
       ]
     },
     {
@@ -724,6 +735,42 @@
       ],
       "accessibility": [
         "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
+      ]
+    },
+    {
+      "name": "CodeInput",
+      "formBinding": "controller",
+      "path": "src/components/ui/code-input.tsx",
+      "description": "認証コード（OTP）・招待コードのような固定桁のコード入力（issue #669）。variant=cells は桁ごとのセル、variant=single は等幅・大きめ・字間広めの 1 入力（24 桁のような長いコード向け）。Input と同じ --Field-* / Border-Control トークンで枠・背景・フォーカス・エラーを表す。",
+      "variants": [
+        "cells",
+        "single"
+      ],
+      "props": {
+        "length": "number — 桁数",
+        "value / defaultValue / onChange": "string — 受け付けた文字だけを左詰めにした文字列",
+        "onComplete": "(value: string) => void — 全桁がそろった瞬間に 1 回",
+        "pattern": "\"numeric\"（既定）| \"alphanumeric\" | RegExp — 1 文字ずつ判定。受け付けない文字（空白・ハイフン等）は落とす",
+        "uppercase": "boolean — 英字を大文字にそろえる",
+        "variant": "\"cells\"（既定）| \"single\"",
+        "invalid": "boolean — aria-invalid と Caution の枠",
+        "cellLabel": "(index, length) => string — 各セルの読み上げ名（既定「n桁目（全m桁）」・i18n 用）",
+        "autoComplete": "string — 既定は cells の先頭セルが one-time-code、single は無し",
+        "name / id / aria-label / aria-labelledby / aria-describedby / autoFocus / disabled / placeholder / className": "フォーム・a11y 用。single は maxLength を付けず、ハイフン・空白入りの貼り付けも sanitize 後に length で切る"
+      },
+      "accessibility": [
+        "cells はグループ（role=group）に aria-label / aria-labelledby で名前を付け、各セルに「n桁目（全m桁）」の aria-label を持つ",
+        "autocomplete=\"one-time-code\" は cells の先頭セルの既定（autoComplete で上書き可）。single は既定で付けない（OTP を受けるなら autoComplete を渡す）。inputMode（numeric なら numeric）で数字キーボード",
+        "cells は roving tabindex（タブストップは次に入力すべきセル 1 つ）で、Tab / Shift+Tab でそのまま抜けられる（WCAG 2.1.2）。先の空セルへ寄せるのはクリック / タップ時だけで、キーボード / 支援技術のフォーカス移動は奪わない",
+        "cells でグループ名（aria-label / aria-labelledby）が無いと開発ビルドで 1 回 console.warn",
+        "invalid で各入力に aria-invalid",
+        "native は 1 つの TextInput をセルに重ねる方式（textContentType=oneTimeCode / autoComplete=sms-otp）で、accessibilityLabel と accessibilityValue（n / m 桁）を読む"
+      ],
+      "rules": [
+        "認証コード・招待コードは CodeInput を使う。Input に typo-heading-2xl / tracking-wider 等を被せてコード欄を自作しない",
+        "4〜8 桁の OTP は variant=cells、24 桁のような長いコードは variant=single",
+        "貼り付けで全桁が埋まる・Backspace で前の桁へ戻る・← → / Home / End で移動する挙動を consumer で再実装しない",
+        "見出しがある画面では aria-labelledby で結ぶ。cells の id は先頭セルに付くので <Label htmlFor> でも結べる"
       ]
     },
     {
@@ -1445,6 +1492,7 @@
         "押せる行（href / onClick）の中に削除ボタン等の別操作を置く場合は secondaryAction を使う。rightSlot に button を入れると button の入れ子で不正な HTML になる",
         "secondaryAction 指定時はルートが div になり、行全体を覆う不可視の a/button（stretched link）+ 副アクションの兄弟配置に切り替わる",
         "バッジ・日時・シェブロンなど押せない表示は secondaryAction ではなく rightSlot",
+        "rightSlot に長い値（金額・件数）を置くときは rightSlotWidth（auto | narrow=1/3 | wide=1/2）で上限を付け、title 列を潰さない(issue #668)。任意の上限・調整は rightSlotClassName / leftSlotClassName。[&>div:last-child] 等の子孫セレクタで DS 内部の DOM に依存しない。native は trailingWidth / trailingStyle",
         "Native: titleTone / descriptionTone は default | accent | caution（既定 default）。文字列にのみ DS typography と semantic text 色を適用し、ReactNode は従来通り無加工。divider は none（既定）| inset | full。inset は density の左右 padding に追随し、leading 幅は含めない。footerSlot がある場合も行全体の下端。外置き Separator の full-bleed 既定は変更しない。"
       ]
     },
@@ -1825,7 +1873,8 @@
         "単一選択で選択中の値が 2 つ以上あると開発ビルドで console.warn する(issue #39 の footgun 検出)",
         "Use selectionMode=\"single\" for single-select (multiple=false は非推奨). Use max to limit selection count.",
         "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior.",
-        "PillToggle は 2〜4 択の segmented control 専用。5択以上・折り返しが要る単一選択はこの selectionMode=\"single\" を使う(issue #418)。"
+        "PillToggle は 2〜4 択の segmented control 専用。5択以上・折り返しが要る単一選択はこの selectionMode=\"single\" を使う(issue #418)。",
+        "グループ名は aria-labelledby（見出しの id）か aria-label で渡す(issue #666)。単一選択の radiogroup は名前が必須で、どちらも無いと開発ビルドで console.warn する。id / aria-describedby もルートへ渡せる。native は accessibilityLabel / accessibilityLabelledBy"
       ]
     },
     {
@@ -1864,7 +1913,8 @@
         "commerce/FilterBar（filters/sortOptions 統合型）とは別コンポーネント。children に任意の Chip 群を渡すシンプルなラッパー。",
         "sticky 時の top オフセットは stickyOffset prop で指定する（固定ヘッダー高さの相殺用）。",
         "resultCountLabel 未指定時は \"{n}件\" を表示。i18n が必要な場合は関数 props で差し替える。",
-        "bare=true 時は overflow/padding ラッパーを付けない。外側スクロールコンテナと共有する場合に使う。"
+        "bare=true 時は overflow/padding ラッパーを付けない。外側スクロールコンテナと共有する場合に使う。",
+        "チップ列と件数の左右余白は gutter（none | tight=16px | default=24px・Container と同じ語彙）か contentClassName で付ける(issue #667)。sticky の背景は全幅のまま。外側 className に px-* を付けたり [&>div]: 等の子孫セレクタで DS 内部の DOM に依存したりしない。native も gutter を持つ"
       ]
     },
     {
@@ -1902,13 +1952,15 @@
         "illustration-slot",
         "iso-string-or-date-target",
         "date-label-slot",
-        "today-value-override"
+        "today-value-override",
+        "pressable"
       ],
       "rules": [
         "既存の CountdownTimer（残日数ピル表示）とは別コンポーネント。装飾ヒーロー表示専用で置き換えない。",
         "日付編集フォームは持ち込まない。表示専用コンポーネント。",
         "illustration スロットに wedding 画像等のドメイン固有アセットを直接埋め込まない。呼び出し側が用意する。",
-        "serif フォントは --font-display-serif トークン未定義環境向けに Georgia / Noto Serif JP / serif へフォールバックする。"
+        "serif フォントは --font-display-serif トークン未定義環境向けに Georgia / Noto Serif JP / serif へフォールバックする。",
+        "押せるヒーローは onClick（ボタン）/ href（リンク）を渡す(issue #672)。全面を覆う不可視の button / a を重ねる stretched link 構造で、Enter / Space・フォーカスリング・押下表現（押している間 opacity-70）を DS が持つ。名前は既定で表示中の文言、操作の意味を足すなら aria-label。呼び出し側で <Button unstyled> に包んだり active:opacity-* を足したりしない。native は onPress / accessibilityLabel / disabled"
       ]
     },
     {
@@ -2571,7 +2623,7 @@
       "name": "QuickActionGrid / ActionTile",
       "exported": false,
       "path": "src/components/patterns/quick-action-grid.tsx",
-      "description": "ショートカット/絵文字 action の button tile と grid。icon/emoji、label、description、meta、indicator、selected/disabled/loading state、2/3/4 column または auto-fit を持つ。",
+      "description": "ショートカット/絵文字 action の button tile と grid。icon/emoji、media（大きな画像・イラスト・色見本）、label、description、meta、indicator、selected/disabled/loading state、2/3/4 column または auto-fit を持つ。",
       "variants": [
         "neutral",
         "selected",
@@ -2601,7 +2653,8 @@
         "meta はカード下段右端の補足情報専用。選択インジケータには indicator prop を使う(issue #309)",
         "indicator はラベル行右端(loading 時 Spinner の位置)に表示。省略時は選択状態でDS標準チェックが既定表示される。null/undefined/falseはいずれも「指定なし」として扱われ、選択中なら既定チェックへフォールバックする",
         "loading は indicator / 既定チェックより優先して表示される",
-        "native では indicator に文字列・数値を渡してもよい(DS 側が Text にラップする)。それ以外の ReactNode はそのまま描画されるため、consumer が Text 相当で包む"
+        "native では indicator に文字列・数値を渡してもよい(DS 側が Text にラップする)。それ以外の ReactNode はそのまま描画されるため、consumer が Text 相当で包む",
+        "大きな画像・イラスト・色見本は media に渡す(issue #670)。mediaPosition: top(既定・ラベル行の上中央) / start(ラベル行の左) / end(タイル右側)、mediaSize: sm=40px / md=64px(既定) / lg=128px。正方形のまま狭いタイル(columns=auto)に収まり、選択チェックと重ならない。media は装飾扱い(aria-hidden)で意味はラベルで伝える。icon に大きな div を渡して 24px 枠を崩したり、Button unstyled でタイルを自作したりしない。native も同名 props"
       ],
       "subcomponents": [
         "QuickActionGrid",

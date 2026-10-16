@@ -48,6 +48,13 @@ export interface ChipSelectorProps {
    * 未指定のときは後方互換のため従来どおり `multiple`（既定 `true`）から導出する。
    */
   selectionMode?: ChipSelectorSelectionMode
+  /**
+   * グループの読み上げ名（issue #666・Web の `aria-label` と対）。単一選択は
+   * `accessibilityRole="radiogroup"` なので、見出しの文言を必ず渡す（未指定は開発ビルドで警告）。
+   */
+  accessibilityLabel?: string
+  /** 見出し要素の nativeID（Android の accessibilityLabelledBy・Web の `aria-labelledby` と対） */
+  accessibilityLabelledBy?: string
 }
 
 export function ChipSelector({
@@ -56,6 +63,8 @@ export function ChipSelector({
   onChange,
   multiple = true,
   selectionMode,
+  accessibilityLabel,
+  accessibilityLabelledBy,
 }: ChipSelectorProps) {
   const { scales } = useTheme()
   // selectionMode があればそれが正本。無ければ従来の multiple から導出する（非破壊）
@@ -70,6 +79,13 @@ export function ChipSelector({
     )
   }
 
+  if (isDev() && isRadio && !accessibilityLabel && !accessibilityLabelledBy) {
+    // issue #666: radiogroup は名前が必須。何を選ぶ欄か読み上げで分からなくなる
+    console.warn(
+      '[ksk-ds] ChipSelector: selectionMode="single"（radiogroup）には accessibilityLabel（または accessibilityLabelledBy）が必要です。',
+    )
+  }
+
   const toggle = (v: string) => {
     if (isMultiple) {
       onChange?.(values.includes(v) ? values.filter((x) => x !== v) : [...values, v])
@@ -80,6 +96,8 @@ export function ChipSelector({
   return (
     <View
       accessibilityRole={isRadio ? "radiogroup" : undefined}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityLabelledBy={accessibilityLabelledBy}
       style={{
         flexDirection: "row",
         flexWrap: "wrap",
