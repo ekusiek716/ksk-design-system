@@ -96,3 +96,13 @@ export const MultipleCards: Story = {
     </div>
   ),
 }
+
+/** elevation="none"（issue #689）: Card や面の中に並べるときは影を消す。 */
+export const ElevationNone: Story = {
+  render: () => (
+    <div className="grid w-full max-w-md grid-cols-2 gap-3 rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4">
+      <StatCard elevation="none" label="完了" value={12} unit="件" />
+      <StatCard elevation="none" label="残り" value={8} unit="件" />
+    </div>
+  ),
+}

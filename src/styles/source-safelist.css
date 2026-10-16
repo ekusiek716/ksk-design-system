@@ -9,6 +9,7 @@
    preset.css から読み込まれるため、消費側は追加設定なしで恩恵を受ける。
    ============================================================= */
 
+@source inline("!shadow-none");
 @source inline("-bottom-0.5");
 @source inline("-inset-3");
 @source inline("-mb-px");
@@ -918,6 +919,7 @@
 @source inline("right-[max(1rem,env(safe-area-inset-right))]");
 @source inline("ring");
 @source inline("ring-0");
+@source inline("ring-1");
 @source inline("ring-2");
 @source inline("ring-4");
 @source inline("ring-[3px]");

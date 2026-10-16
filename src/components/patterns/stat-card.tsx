@@ -28,7 +28,18 @@ interface StatCardProps extends Omit<React.ComponentProps<"div">, "onClick"> {
    */
   interactive?: boolean
   onClick?: React.MouseEventHandler<HTMLDivElement>
+  /**
+   * 影の強さ（issue #689）。既定 md（従来どおり）。Card / 面の中に並べる StatCard は `none` にする
+   * （composition.json の cardHierarchy: 面の中の面は影なし）。`!shadow-none` で消さない。
+   */
+  elevation?: "none" | "sm" | "md"
 }
+
+const ELEVATION_CLASS = {
+  none: "",
+  sm: "shadow-[var(--shadow-sm)]",
+  md: "shadow-[var(--shadow-md)]",
+} as const
 
 const variantStyles: Record<StatCardVariant, { card: string; icon: string; hoverBg: string }> = {
   default:  {
@@ -76,6 +87,7 @@ function StatCard({
   variant = "default",
   interactive,
   onClick,
+  elevation = "md",
   ...props
 }: StatCardProps) {
   const styles = variantStyles[variant]
@@ -92,9 +104,11 @@ function StatCard({
       data-slot="stat-card"
       data-variant={variant}
       data-interactive={isInteractive || undefined}
+      data-elevation={elevation}
       onClick={isInteractive ? onClick : undefined}
       className={cn(
-        "flex flex-col gap-2 rounded-lg border border-[var(--Border-Low-Emphasis)] p-4 text-left shadow-[var(--shadow-md)]",
+        "flex flex-col gap-2 rounded-lg border border-[var(--Border-Low-Emphasis)] p-4 text-left",
+        ELEVATION_CLASS[elevation],
         styles.card,
         isInteractive && [
           "w-full appearance-none cursor-pointer transition-all",
