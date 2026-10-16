@@ -15,8 +15,12 @@ let legacy: boolean
 let host: HTMLDivElement
 let root: ReturnType<typeof createRoot>
 function Probe() {
-  state = useReduceMotionState()
-  legacy = useReduceMotion()
+  const currentState = useReduceMotionState()
+  const currentLegacy = useReduceMotion()
+  React.useLayoutEffect(() => {
+    state = currentState
+    legacy = currentLegacy
+  }, [currentState, currentLegacy])
   return null
 }
 beforeEach(() => {
