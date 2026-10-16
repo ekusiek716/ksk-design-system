@@ -347,3 +347,4 @@ export { AppShell, type AppShellProps } from "./AppShell"
 export { MarketingShell, type MarketingShellProps } from "./MarketingShell"
 
 export { SemanticIcon, SEMANTIC_ICONS, type SemanticIconProps, type SemanticIconName } from "./SemanticIcon"
+export { AddTile, type AddTileProps, type AddTileSize } from "./AddTile"

@@ -390,9 +390,11 @@
 @source inline("disabled:hover:bg-[var(--Surface-Secondary)]");
 @source inline("disabled:hover:bg-transparent");
 @source inline("disabled:hover:border-[var(--Border-Control,var(--Border-Medium-Emphasis))]");
+@source inline("disabled:hover:border-[var(--Border-Medium-Emphasis)]");
 @source inline("disabled:hover:data-[state=checked]:bg-[var(--Brand-Primary)]");
 @source inline("disabled:hover:data-[state=unchecked]:bg-[var(--Surface-Switch-Off,var(--Surface-Quaternary))]");
 @source inline("disabled:hover:text-[var(--Object-Medium-Emphasis)]");
+@source inline("disabled:hover:text-[var(--Text-Medium-Emphasis)]");
 @source inline("disabled:opacity-0");
 @source inline("disabled:opacity-40");
 @source inline("disabled:opacity-50");
@@ -599,6 +601,7 @@
 @source inline("hover:shadow");
 @source inline("hover:text-[var(--Brand-Primary)]");
 @source inline("hover:text-[var(--Object-High-Emphasis)]");
+@source inline("hover:text-[var(--Text-Accent-Primary)]");
 @source inline("hover:text-[var(--Text-High-Emphasis)]");
 @source inline("hover:text-[var(--Text-on-Inverse)]");
 @source inline("hover:underline");
@@ -725,6 +728,7 @@
 @source inline("min-h-11");
 @source inline("min-h-12");
 @source inline("min-h-14");
+@source inline("min-h-16");
 @source inline("min-h-24");
 @source inline("min-h-9");
 @source inline("min-h-[100dvh]");
@@ -757,6 +761,7 @@
 @source inline("min-w-[18px]");
 @source inline("min-w-[200px]");
 @source inline("min-w-[240px]");
+@source inline("min-w-[4rem]");
 @source inline("min-w-[60%]");
 @source inline("min-w-[78px]");
 @source inline("min-w-[8rem]");

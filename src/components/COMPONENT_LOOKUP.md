@@ -88,23 +88,11 @@
 
 ## Pattern Components（src/components/patterns/）
 
-### patterns/admin/
-
-| Component | Import | Variants | Stories |
-|-----------|--------|----------|---------|
-| BulkActions | `@/components/patterns/admin/bulk-actions` | — | Default, ManySelected |
-| ChartControls | `@/components/patterns/admin/chart-controls` | — | Default, PeriodOnly |
-| DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableDateCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState, DATA_TABLE_WIDTH_PX | `@/components/patterns/admin/data-table` | **align**: `left`, `center`, `right`<br>**width**: `auto`, `narrow`, `checkbox`, `action`, `sm`, `md`, `lg`, `xl`, `flex` | Default, Rows / Columns API, Rich Columns (CellContext API), Empty, WithSections, CellVariants, Row Click / Full Cell Hit Area, Flexible Column Width, Sticky Columns (左端固定), Drag & Drop (行の並べ替え), 固定列（オフセット自動計算）, サーバーページング |
-| ImageUploader | `@/components/patterns/admin/image-uploader` | — | Default, Empty |
-| KebabMenu | `@/components/patterns/admin/kebab-menu` | — | Default, WithMetadata |
-| NotificationList | `@/components/patterns/admin/notification-list` | — | Vertical, Horizontal, Empty |
-| SearchPanel | `@/components/patterns/admin/search-panel` | — | Default |
-| StatusTabs | `@/components/patterns/admin/status-tabs` | — | Default |
-
 ### patterns/（汎用）
 
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
+| AddTile | `@/components/patterns/add-tile` | — | Default, Small, CustomIcon, Disabled, InGrid |
 | AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky, Glass — Liquid Glass (over gradient), Transparent — scrollable reveal, NavWithRenderSlot |
 | BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
 | Banner | `@/components/patterns/banner` | **density**: `default`, `compact`<br>**layout**: `card`, `bar`<br>**variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants, Compact, Bar |
@@ -167,6 +155,19 @@
 | TagInput | `@/components/patterns/tag-input` | — | Default, WithInitialTags, WithMax, Disabled, WithFormField |
 | Tag | `@/components/patterns/tag` | **variant**: `default`, `brand`, `caution`, `success`, `warning`, `info` | Default, Brand, Caution, Success, Warning, Info, AllVariants, Categorical, CategoricalWithDot, CategoricalHelpers |
 | ThumbnailCard | `@/components/patterns/thumbnail-card` | — | Vertical, Horizontal, WithSecondaryAction, Strip, WholeCardClickableWithSecondaryAction |
+
+### patterns/admin/
+
+| Component | Import | Variants | Stories |
+|-----------|--------|----------|---------|
+| BulkActions | `@/components/patterns/admin/bulk-actions` | — | Default, ManySelected |
+| ChartControls | `@/components/patterns/admin/chart-controls` | — | Default, PeriodOnly |
+| DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableDateCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState, DATA_TABLE_WIDTH_PX | `@/components/patterns/admin/data-table` | **align**: `left`, `center`, `right`<br>**width**: `auto`, `narrow`, `checkbox`, `action`, `sm`, `md`, `lg`, `xl`, `flex` | Default, Rows / Columns API, Rich Columns (CellContext API), Empty, WithSections, CellVariants, Row Click / Full Cell Hit Area, Flexible Column Width, Sticky Columns (左端固定), Drag & Drop (行の並べ替え), 固定列（オフセット自動計算）, サーバーページング |
+| ImageUploader | `@/components/patterns/admin/image-uploader` | — | Default, Empty |
+| KebabMenu | `@/components/patterns/admin/kebab-menu` | — | Default, WithMetadata |
+| NotificationList | `@/components/patterns/admin/notification-list` | — | Vertical, Horizontal, Empty |
+| SearchPanel | `@/components/patterns/admin/search-panel` | — | Default |
+| StatusTabs | `@/components/patterns/admin/status-tabs` | — | Default |
 
 ### patterns/commerce/
 

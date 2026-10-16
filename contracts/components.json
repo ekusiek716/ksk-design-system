@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 71,
-      "patterns": 62,
+      "patterns": 63,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 156
+      "total": 157
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -2704,6 +2704,25 @@
       "subcomponents": [
         "QuickActionGrid",
         "ActionTile"
+      ]
+    },
+    {
+      "name": "AddTile",
+      "path": "src/components/patterns/add-tile.tsx",
+      "description": "一覧の末尾・空のカラム・グリッドの空き枠に置く「＋追加」の点線タイル（issue #678）。押すと新しい項目を作る入口。",
+      "sizes": [
+        "sm(44px・一覧の末尾)",
+        "md(64px・既定・空カラム / グリッドの空き枠)"
+      ],
+      "accessibility": [
+        "type=button の実 button。label がアクセシブルネーム、アイコンは aria-hidden",
+        "高さ 44px 以上・focus-visible リング",
+        "native (src/native/components/AddTile.tsx): accessibilityRole=button / accessibilityLabel=label / accessibilityState.disabled"
+      ],
+      "rules": [
+        "Button に border-dashed や形を上書きして「追加」タイルを自作しない",
+        "画面の主操作（ヘッダーの作成・FAB）の代わりにしない。「この場所に足す」入口に限る",
+        "点線は Border-Medium-Emphasis、hover は Border-Accent-Primary + Surface-Accent-Primary-Light + Text-Accent-Primary"
       ]
     }
   ],
