@@ -283,10 +283,14 @@
 @source inline("bottom-6");
 @source inline("bottom-[calc(env(safe-area-inset-bottom)_+_12px)]");
 @source inline("bottom-[calc(env(safe-area-inset-bottom)_+_12px_+_var(--ksk-bottom-tab-bar-keyboard-inset))]");
+@source inline("bottom-[calc(env(safe-area-inset-bottom)_+_12px_+_var(--ksk-bottom-tab-bar-keyboard-inset)_+_var(--ksk-bottom-tab-bar-offset-extra))]");
+@source inline("bottom-[calc(env(safe-area-inset-bottom)_+_12px_+_var(--ksk-bottom-tab-bar-offset-extra))]");
 @source inline("bottom-[calc(env(safe-area-inset-bottom)_+_var(--ksk-fab-bottom-offset)_+_var(--ksk-fab-bottom-offset-extra,_0px)_+_var(--ksk-fab-keyboard-inset))]");
+@source inline("bottom-[calc(var(--ksk-bottom-tab-bar-keyboard-inset)_+_var(--ksk-bottom-tab-bar-offset-extra))]");
 @source inline("bottom-[max(1rem,env(safe-area-inset-bottom))]");
 @source inline("bottom-[var(--Toast-Viewport-Offset-Bottom)]");
 @source inline("bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]");
+@source inline("bottom-[var(--ksk-bottom-tab-bar-offset-extra)]");
 @source inline("bottom-[var(--ksk-keyboard-inset)]");
 @source inline("break-all");
 @source inline("break-words");
@@ -817,6 +821,8 @@
 @source inline("pb-6");
 @source inline("pb-[calc(1.5rem_+_env(safe-area-inset-bottom))]");
 @source inline("pb-[calc(1.5rem_+_env(safe-area-inset-bottom,0px))]");
+@source inline("pb-[calc(5rem_+_var(--ksk-shell-bottom-padding-extra))]");
+@source inline("pb-[calc(7rem_+_var(--ksk-shell-bottom-padding-extra))]");
 @source inline("pb-[calc(env(safe-area-inset-bottom,0px)_+_1rem)]");
 @source inline("pb-[calc(env(safe-area-inset-bottom,0px)_+_3rem)]");
 @source inline("pb-[env(safe-area-inset-bottom)]");
@@ -824,6 +830,7 @@
 @source inline("pb-[max(0.75rem,env(safe-area-inset-bottom))]");
 @source inline("pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]");
 @source inline("pb-[max(1rem,env(safe-area-inset-bottom))]");
+@source inline("pb-[var(--ksk-shell-bottom-padding-extra)]");
 @source inline("peer-disabled:cursor-not-allowed");
 @source inline("peer-disabled:opacity-50");
 @source inline("pl-10");
