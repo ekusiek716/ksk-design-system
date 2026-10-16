@@ -12,6 +12,7 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 - **画面・分類・配置編集（#701–#703）**: Screenへ上端safe-area、svh/fill、768px以上の中央カード、landmark省略を追加します。fillの中央カードは親の高さを尊重します。KanbanColumnの分類色指定と、選択・ドラッグ・矢印移動用SelectableTileも追加します。これらの追加APIは任意指定です。
 - **予定のモバイル表示（#704）**: MonthCalendarへ週表示、予定一覧AgendaListを追加します。週表示は選択日を優先し、月外の初期選択日や内部の月またぎ移動でも表示週・月見出しを揃えます。既定の月表示は維持します。
 - **管理画面のモバイルナビ（#705）**: AdminShellへ任意のモバイルドロワーを追加します。リンク選択時の自動closeは `closeMobileDrawerOnNavigate={true}` の明示指定で有効にし、既定falseでは既存の挙動を維持します。
+- **CollapsibleChipField の見出し（#717）**: `label` の既定の見た目が `typo-label-sm` + `Text-Medium-Emphasis`（12px）から、フォームの項目名と同じ `typo-label-md` + `Text-High-Emphasis`（14px 太字）に変わります（同じ詳細シートの `<Label>` / `FormField` と大きさをそろえるため）。従来の見た目が要る画面は `labelSize="sm"` を指定してください。展開中の選択肢のまとまりは見える見出しと `aria-labelledby` で結ばれます（`ariaLabel` を指定した場合は従来どおり `aria-label`）。`label` も `icon` も渡さない行は、先頭の 24px の空きが無くなります。native の CollapsibleChipField は変わりません。
 
 <!-- deprecations:start（自動生成・手で編集しない） -->
 

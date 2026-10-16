@@ -1969,7 +1969,8 @@
         "label 指定時は幅 w-20 固定でフィールドリストの他行とラベル幅を揃える。",
         "折りたたみ中の1チップは開閉トリガで aria-expanded を持ち、展開中は行が role=\"radiogroup\"・各チップが role=\"radio\" + aria-checked になる。矢印キー移動と roving tabindex 付き(issue #419)。",
         "展開で選択中チップへフォーカスが移り、Escape で畳んで元のチップへ戻る(issue #419)。",
-        "label を持たない icon 先頭の行では radiogroup に名前が付かないので ariaLabel を必ず渡す(issue #419)。"
+        "label を持たない icon 先頭の行では radiogroup に名前が付かないので ariaLabel を必ず渡す(issue #419)。",
+        "見出し（label）の既定は textHierarchy のフォームラベル（typo-label-md + Text-High-Emphasis）で、同じシートの Label / FormField の項目名とそろう。従来の小さい見た目は labelSize=\"sm\"。展開中の radiogroup は見える label と aria-labelledby で結ばれる（ariaLabel 明示時は aria-label 優先）。label も icon も無い行は先頭の枠を描かない（issue #717。native は label.sm のまま）"
       ]
     },
     {

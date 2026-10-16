@@ -1,6 +1,7 @@
 import { getActiveElement } from "@/lib/active-element"
 import * as React from "react"
 import { Chip } from "@/components/patterns/chip"
+import { cn } from "@/lib/utils"
 
 interface CollapsibleChipFieldProps<K extends string> {
   /** leading アイコン。label 未指定時に w-6 の枠内で表示 */
@@ -10,6 +11,13 @@ interface CollapsibleChipFieldProps<K extends string> {
    * レイアウトを統一する用途。
    */
   label?: string
+  /**
+   * 見出し（`label`）の大きさ（issue #717）。
+   * - "md"（既定）: typo-label-md + Text-High-Emphasis。`contracts/composition.json` の textHierarchy の
+   *   「ラベル（フォーム）」と同じで、同じ詳細シートの `<Label>` / FormField の項目名とそろう
+   * - "sm": typo-label-sm + Text-Medium-Emphasis（2.12.0 までの既定の見た目）
+   */
+  labelSize?: "md" | "sm"
   options: K[]
   /** undefined / "" は未選択扱い（全 chip 展開） */
   selected: K | undefined | ""
@@ -23,7 +31,7 @@ interface CollapsibleChipFieldProps<K extends string> {
   /**
    * 展開時の選択グループ（`role="radiogroup"`）のアクセシブル名（issue #419）。
    *
-   * 未指定なら `label` を使う。`icon` だけで `label` を持たない行
+   * 未指定なら見える `label` を `aria-labelledby` で結ぶ（issue #717）。指定した場合は `aria-label` が優先される。`icon` だけで `label` を持たない行
    * （タスク詳細シートのようなアイコン先頭の行）では名前が無くなるので、
    * **その場合は必ず指定すること**（「カテゴリ」「担当者」など）。
    */
@@ -54,6 +62,7 @@ interface CollapsibleChipFieldProps<K extends string> {
 function CollapsibleChipField<K extends string>({
   icon,
   label,
+  labelSize = "md",
   options,
   selected,
   onSelect,
@@ -77,7 +86,9 @@ function CollapsibleChipField<K extends string>({
   // 開閉トリガが存在する（＝畳める）状態か。常時展開・未選択のときは畳む先が無いので
   // disclosure ではなくただの選択グループとして扱い、aria-expanded / Escape を付けない。
   const collapsible = !alwaysExpanded && selectionInOptions
-  const groupLabel = ariaLabel ?? label
+  // #717: 見える見出しがあれば aria-labelledby で結ぶ（文字列の複製にしない）。ariaLabel の明示が優先
+  const labelId = React.useId()
+  const labelledByLabel = ariaLabel === undefined && label !== undefined && label !== ""
 
   // 折りたたみ/展開で chip の折り返し行数が変わると行エリアの高さが一瞬でガクッと
   // 変わって見える。展開状態が切り替わった直後に前後の実測高さを取り、
@@ -184,17 +195,26 @@ function CollapsibleChipField<K extends string>({
   // 44px は Chip(md) の margin box の高さ。Chip は見た目 32px のピルの上下に
   // my-1.5 を持ち 44px のタッチターゲットを予約するので、行高もそれに揃える
   // （36px のままだと label が chip より 4px 上にずれる）。
+  // #717: 見出しの既定は textHierarchy のフォームラベル（typo-label-md + High）。label も icon も無いときは
+  // 先頭の枠を描かない（空の w-6 + gap-4 で 40px の空きが出ていた）
   const leading = label ? (
     <span
-      className="typo-label-sm text-[var(--Text-Medium-Emphasis)] flex-shrink-0 w-20 whitespace-nowrap leading-[44px]"
+      id={labelId}
+      data-slot="collapsible-chip-field-label"
+      className={cn(
+        labelSize === "sm"
+          ? "typo-label-sm text-[var(--Text-Medium-Emphasis)]"
+          : "typo-label-md text-[var(--Text-High-Emphasis)]",
+        "flex-shrink-0 w-20 whitespace-nowrap leading-[44px]"
+      )}
     >
       {label}
     </span>
-  ) : (
+  ) : icon != null ? (
     <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center" style={{ height: 44 }}>
       {icon}
     </div>
-  )
+  ) : null
 
   return (
     <div data-slot="collapsible-chip-field" className="flex items-start gap-4 py-3">
@@ -213,7 +233,8 @@ function CollapsibleChipField<K extends string>({
         // 「開閉トリガが 1 つあるだけ」なので radiogroup を名乗らない
         // （選択肢 1 件の radiogroup は SR に選択肢が 1 つしか無いと伝えてしまう）。
         role={expanded ? "radiogroup" : undefined}
-        aria-label={expanded ? groupLabel : undefined}
+        aria-label={expanded && !labelledByLabel ? ariaLabel : undefined}
+        aria-labelledby={expanded && labelledByLabel ? labelId : undefined}
         className="flex gap-2 flex-1 flex-wrap min-h-11 items-center"
       >
         {visible.map((key, index) => (
