@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect } from "storybook/test"
 import { Add, Home2, Setting2, TaskSquare, User } from "iconsax-reactjs"
+import { Button } from "@/components/ui/button"
 import { BottomTabBar } from "./commerce/bottom-tab-bar"
 import { MobileFloatingActionButton } from "./mobile-floating-action-button"
 import { MobileAppHeader } from "./mobile-app-header"
@@ -82,4 +84,53 @@ export const DesktopSidebarHandoff: Story = {
       </div>
     </MobileAppShell>
   ),
+}
+
+/**
+ * アプリ型の高さ固定の画面（issue #715）。`viewport="fixed"` でルートを画面の高さに固定し、main だけがスクロールする。
+ * `safeAreaTop` で header がノッチの裏まで伸び、`safeAreaBottom` で本文の末尾がタブバー + ホームインジケータに隠れない。
+ * ネイティブの殻がタブバーを描く構成は `bottomPadding="native-tab-bar"`（`--Native-Tab-Bar-Height` を読む）。
+ * 広告バナー等の常設要素は `bottomPaddingExtra` に高さの変数を渡す。page 側に padding の計算式を書かない。
+ */
+export const FixedViewportApp: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <MobileAppShell
+      viewport="fixed"
+      safeAreaTop
+      safeAreaBottom
+      centeredPreview={false}
+      header={
+        <MobileAppHeader
+          brand={<p className="typo-heading-md text-[var(--Text-High-Emphasis)]">Belle</p>}
+        />
+      }
+      bottomNavMode="fixed"
+      bottomNav={
+        <div className="relative h-20">
+          <BottomTabBar variant="pill" pillPosition="absolute" items={tabItems} showLabels />
+        </div>
+      }
+      contentClassName="space-y-3 p-4"
+    >
+      {Array.from({ length: 12 }, (_, i) => (
+        <div key={i} className="rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4">
+          <p className="typo-heading-md text-[var(--Text-High-Emphasis)]">タスク {i + 1}</p>
+          <p className="typo-body-sm mt-1 text-[var(--Text-Medium-Emphasis)]">本文だけがスクロールし、ヘッダーは常に見える。</p>
+          {/* スクロール領域の中に操作できる要素があるので、キーボードでも Tab で辿ってスクロールできる */}
+          <Button variant="secondary" size="sm" className="mt-2">開く</Button>
+        </div>
+      ))}
+    </MobileAppShell>
+  ),
+  play: async ({ canvasElement }) => {
+    const root = canvasElement.querySelector<HTMLElement>('[data-slot="mobile-app-shell"]')!
+    const main = canvasElement.querySelector<HTMLElement>('[data-slot="mobile-app-shell-main"]')!
+    await expect(Math.round(root.getBoundingClientRect().height)).toBeLessThanOrEqual(window.innerHeight)
+    // 本文の量が画面より多いと main だけがスクロールする
+    await expect(main.scrollHeight).toBeGreaterThan(main.clientHeight)
+    await expect(getComputedStyle(main).overflowY).toBe("auto")
+    // 下余白は 5rem（bottom-nav）+ 下端の safe-area（テスト環境では 0）
+    await expect(getComputedStyle(main).paddingBottom).toBe("80px")
+  },
 }
