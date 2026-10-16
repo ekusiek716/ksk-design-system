@@ -34,7 +34,7 @@ export { CheckboxField } from "./components/ui/checkbox-field"
 export type { CheckboxFieldProps } from "./components/ui/checkbox-field"
 export { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./components/ui/collapsible"
 export { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger } from "./components/ui/dialog"
-export type { DialogContentProps, DialogOverlayProps, DialogTitleProps, DialogSize } from "./components/ui/dialog"
+export type { DialogCenterFrom, DialogContentProps, DialogHeaderProps, DialogOverlayProps, DialogTitleProps, DialogSize } from "./components/ui/dialog"
 // #341: 見出しの役割（level）。値の正本は contracts/composition.json の textHierarchy。
 export type { TitleLevel } from "./lib/title-level"
 export {
@@ -66,7 +66,7 @@ export {
 } from "./components/ui/dropdown-menu"
 export { HoverCard, HoverCardTrigger, HoverCardContent } from "./components/ui/hover-card"
 export { Input } from "./components/ui/input"
-export type { FieldVariant } from "./lib/server-variants/inline-field"
+export type { FieldTargetSize, FieldVariant } from "./lib/server-variants/inline-field"
 export type { InputProps } from "./components/ui/input"
 export { CommitInput } from "./components/ui/commit-input"
 export type { CommitInputProps } from "./components/ui/commit-input"
@@ -268,6 +268,7 @@ export {
   FieldSeparator,
 } from "./components/patterns/field"
 export type {
+  FieldSetGap,
   FieldSetProps,
   FieldLegendProps,
   FieldGroupProps,

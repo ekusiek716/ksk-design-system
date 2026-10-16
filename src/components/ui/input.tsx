@@ -2,7 +2,13 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useValueLength } from "@/lib/use-value-length"
 import { UNSTYLED_FOCUS_RING } from "@/lib/server-variants/unstyled"
-import { INLINE_FIELD_BASE, INLINE_FIELD_TYPO, type FieldVariant } from "../../lib/server-variants/inline-field"
+import {
+  INLINE_FIELD_BASE,
+  INLINE_FIELD_TARGET_SIZE,
+  INLINE_FIELD_TYPO,
+  type FieldTargetSize,
+  type FieldVariant,
+} from "../../lib/server-variants/inline-field"
 
 interface InputProps extends Omit<React.ComponentProps<"input">, "prefix"> {
   /**
@@ -52,6 +58,16 @@ interface InputProps extends Omit<React.ComponentProps<"input">, "prefix"> {
    * `unstyled` と併用した場合は `unstyled` が優先される。
    */
   variant?: FieldVariant
+  /**
+   * inline 系 variant の当たり判定（issue #712）。
+   * - "compact"（既定）: 従来の高さ
+   * - "comfortable": 最小 44px（min-h-11 + py-2）。ラベル左置きの項目行（FormField orientation="horizontal"）で、
+   *   外側に py-2 を足さずに押せる範囲を 44px にする
+   *
+   * `variant="default"`（枠付き。既に 48px）と `unstyled` では効かない。HTML の `size` 属性と衝突するため
+   * `size` ではなく `targetSize` という名前にしている。
+   */
+  targetSize?: FieldTargetSize
 }
 
 // 高さ・横 padding・角丸は product theme の公開変数（`--Field-*`）を参照する。
@@ -73,6 +89,7 @@ function Input({
   showCount,
   unstyled = false,
   variant = "default",
+  targetSize = "compact",
   maxLength,
   value,
   defaultValue,
@@ -105,6 +122,7 @@ function Input({
       type={type}
       data-slot="input"
       data-variant={variant === "default" ? undefined : variant}
+      data-target-size={!unstyled && variant !== "default" && targetSize === "comfortable" ? "comfortable" : undefined}
       ref={countRef}
       value={value}
       defaultValue={defaultValue}
@@ -123,7 +141,7 @@ function Input({
           ? UNSTYLED_FOCUS_RING
           : variant === "default"
             ? inputBaseClass
-            : [INLINE_FIELD_BASE, INLINE_FIELD_TYPO[variant]],
+            : [INLINE_FIELD_BASE, INLINE_FIELD_TYPO[variant], INLINE_FIELD_TARGET_SIZE[targetSize]],
         startAdornment && "pl-9",
         endAdornment && "pr-9",
         className,

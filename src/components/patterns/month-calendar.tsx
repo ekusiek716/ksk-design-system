@@ -1,12 +1,14 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import {
+  ACCENT_DOT,
   CHIP_TONE,
   DOT_TONE,
   WEEKDAYS,
   formatDayLabel,
   pad,
   parseKey,
+  resolveEventAccent,
   resolveTodayKey,
   toKey,
   type CalendarEventTone,
@@ -29,6 +31,14 @@ interface MonthCalendarEvent {
   label: string
   /** 色の意味。既定 neutral */
   tone?: MonthCalendarEventTone
+  /**
+   * 分類の識別色（CSS の色。`var(--Categorical-N)` 想定。issue #716）。カテゴリ別の色を予定に出すとき。
+   * - md 以上: 予定のチップの先頭に 6px の点（チップの面と文字は tone のまま）
+   * - md 未満: 日付の下の点をこの色で塗る（tone より優先）
+   * - AgendaList: 予定の行の先頭に点
+   * 色だけで意味を伝えない（予定名が正）。空文字は未指定と同じ。renderEvent の中で点を自作しない
+   */
+  accentColor?: string
 }
 
 interface MonthCalendarProps extends Omit<React.ComponentProps<"div">, "onSelect"> {
@@ -381,9 +391,19 @@ function MonthCalendar({
                   <>
                     {/* md 未満: 色ドットだけ（最大 3）。読み上げはセルの aria-label が担う */}
                     <span aria-hidden="true" className="flex justify-center gap-0.5 md:hidden">
-                      {dayEvents.slice(0, 3).map((e) => (
-                        <span key={e.id} className={cn("size-1.5 rounded-full", DOT_TONE[e.tone ?? "neutral"])} />
-                      ))}
+                      {dayEvents.slice(0, 3).map((e) => {
+                        const accent = resolveEventAccent(e.accentColor)
+                        return accent !== undefined ? (
+                          <span
+                            key={e.id}
+                            data-accent=""
+                            className={cn("size-1.5", ACCENT_DOT)}
+                            style={{ "--ksk-calendar-accent": accent } as React.CSSProperties}
+                          />
+                        ) : (
+                          <span key={e.id} className={cn("size-1.5 rounded-full", DOT_TONE[e.tone ?? "neutral"])} />
+                        )
+                      })}
                     </span>
                     {/* md 以上: 予定チップ + 「+n件」（ポインタ用の近道。キーボードは日の選択から辿る） */}
                     <span aria-hidden="true" className="hidden min-w-0 flex-col gap-0.5 md:flex">
@@ -404,7 +424,22 @@ function MonthCalendar({
                             CHIP_TONE[e.tone ?? "neutral"]
                           )}
                         >
-                          {renderEvent ? renderEvent(e) : e.label}
+                          {resolveEventAccent(e.accentColor) !== undefined ? (
+                            // #716: 識別色の点 + 予定名（名前側で truncate する）
+                            <span data-accent="" className="flex min-w-0 items-center gap-1">
+                              <span
+                                aria-hidden="true"
+                                data-slot="month-calendar-event-dot"
+                                className={cn("size-1.5", ACCENT_DOT)}
+                                style={{ "--ksk-calendar-accent": resolveEventAccent(e.accentColor) } as React.CSSProperties}
+                              />
+                              <span className="min-w-0 flex-1 truncate">{renderEvent ? renderEvent(e) : e.label}</span>
+                            </span>
+                          ) : renderEvent ? (
+                            renderEvent(e)
+                          ) : (
+                            e.label
+                          )}
                         </button>
                       ))}
                       {hidden > 0 && (

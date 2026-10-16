@@ -216,3 +216,11 @@ html[data-kb-open]
     display: none;
   }
 }
+
+/* ── #715: MobileAppShell viewport="fixed" のキーボード表示中の高さ ──
+   JS（visualViewport）で検知できたときは inline style で見えている高さに縮める。
+   検知できない環境（キーボードがレイアウトを縮めず visualViewport も変わらない WebView 等）は、
+   Sheet と同じく consumer の html[data-kb-open] + --kb-h（キーボードの高さ px）でここが縮める。 */
+html[data-kb-open] [data-slot="mobile-app-shell"][data-viewport="fixed"] {
+  height: max(0px, calc(100svh - var(--kb-h, 0px)));
+}

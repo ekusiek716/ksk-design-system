@@ -2,7 +2,13 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useValueLength } from "@/lib/use-value-length"
 import { UNSTYLED_FOCUS_RING } from "@/lib/server-variants/unstyled"
-import { INLINE_FIELD_BASE, INLINE_FIELD_TYPO, type FieldVariant } from "../../lib/server-variants/inline-field"
+import {
+  INLINE_FIELD_BASE,
+  INLINE_FIELD_TARGET_SIZE,
+  INLINE_FIELD_TYPO,
+  type FieldTargetSize,
+  type FieldVariant,
+} from "../../lib/server-variants/inline-field"
 
 interface TextareaProps extends React.ComponentProps<"textarea"> {
   /** 入力内容に合わせて高さを自動伸縮する */
@@ -30,6 +36,16 @@ interface TextareaProps extends React.ComponentProps<"textarea"> {
    * AutoGrowTextarea / CommitTextarea / CommitAutoGrowTextarea にもそのまま渡せる。
    */
   variant?: FieldVariant
+  /**
+   * inline 系 variant の当たり判定（issue #712）。
+   * - "compact"（既定）: 従来の高さ
+   * - "comfortable": 最小 44px（min-h-11 + py-2）。ラベル左置きの項目行（FormField orientation="horizontal"）で、
+   *   外側に py-2 を足さずに押せる範囲を 44px にする
+   *
+   * `variant="default"`（枠付き。既に 48px）と `unstyled` では効かない。HTML の `size` 属性と衝突するため
+   * `size` ではなく `targetSize` という名前にしている。
+   */
+  targetSize?: FieldTargetSize
 }
 
 function Textarea({
@@ -38,6 +54,7 @@ function Textarea({
   showCount,
   unstyled = false,
   variant = "default",
+  targetSize = "compact",
   maxLength,
   value,
   defaultValue,
@@ -86,6 +103,7 @@ function Textarea({
       ref={countRef}
       data-slot="textarea"
       data-variant={variant === "default" ? undefined : variant}
+      data-target-size={!unstyled && variant !== "default" && targetSize === "comfortable" ? "comfortable" : undefined}
       value={value}
       defaultValue={defaultValue}
       maxLength={maxLength}
@@ -93,7 +111,7 @@ function Textarea({
         unstyled
           ? UNSTYLED_FOCUS_RING
           : variant !== "default"
-            ? [INLINE_FIELD_BASE, INLINE_FIELD_TYPO[variant], "min-h-0 resize-none"]
+            ? [INLINE_FIELD_BASE, INLINE_FIELD_TYPO[variant], "min-h-0 resize-none", INLINE_FIELD_TARGET_SIZE[targetSize]]
             : [
               // 最小高さ・padding・角丸は product theme の公開変数（`--Field-*`）を参照する。
               // 既定値は従来の min-h-[80px] / px-3 / py-2 / rounded-lg と同値（issue #364）。

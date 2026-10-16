@@ -3,6 +3,8 @@ import { expect, userEvent, waitFor } from "storybook/test"
 import * as React from "react"
 import { CollapsibleChipField } from "./collapsible-chip-field"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { FormField } from "./form-field"
+import { Input } from "@/components/ui/input"
 
 const meta: Meta<typeof CollapsibleChipField> = {
   title: "Components/CollapsibleChipField",
@@ -234,5 +236,40 @@ export const EscapeInsideDialog: Story = {
     await waitFor(async () => {
       await expect(dialog()).toBeNull()
     })
+  },
+}
+
+/**
+ * 同じ詳細シートのほかの項目行と並べる（issue #717）。見出しの既定はフォームの項目名
+ * （typo-label-md + Text-High-Emphasis）で、FormField orientation="horizontal" の項目名とそろう。
+ * 展開中の選択肢のまとまりは見える見出しと aria-labelledby で結ばれる。
+ */
+export const AlignedWithFormFieldRows: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [selected, setSelected] = React.useState<Category | "">("")
+    return (
+      <div className="w-[360px] divide-y divide-[var(--Border-Low-Emphasis)] p-4">
+        <FormField orientation="horizontal" label="かな" htmlFor="ccf-kana" className="py-3">
+          <Input id="ccf-kana" variant="inline" targetSize="comfortable" placeholder="やまだ たろう" />
+        </FormField>
+        <CollapsibleChipField<Category>
+          label="カテゴリ"
+          options={OPTIONS}
+          selected={selected}
+          onSelect={setSelected}
+          onClear={() => setSelected("")}
+          getLabel={(k) => LABELS[k]}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const fieldLabel = canvasElement.querySelector<HTMLElement>('[data-slot="form-field"] label')!
+    const chipLabel = canvasElement.querySelector<HTMLElement>('[data-slot="collapsible-chip-field-label"]')!
+    await expect(getComputedStyle(chipLabel).fontSize).toBe(getComputedStyle(fieldLabel).fontSize)
+    await expect(getComputedStyle(chipLabel).color).toBe(getComputedStyle(fieldLabel).color)
+    const group = canvasElement.querySelector<HTMLElement>('[role="radiogroup"]')!
+    await expect(group.getAttribute("aria-labelledby")).toBe(chipLabel.id)
   },
 }

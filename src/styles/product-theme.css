@@ -121,6 +121,13 @@
      委ねている）ため、対象外（issue #364 追補）。 */
   --Product-Page-Padding-Y: 1.5rem; /* 24px — py-6 */
 
+  /* Container / ChipFilterBar の gutter="fluid" の左右余白（issue #711）。
+     画面幅で 16〜28px に伸び縮みする。gutter="fluid" を指定したときだけ使われる
+     （既定の gutter は固定値のまま）ので、上書きしない限り既存の見た目は変わらない。
+     プロダクト独自のページ余白（例: clamp(16px, 4vw, 28px)）がある場合はここへ寄せると、
+     本文（Container）と絞り込みバー（ChipFilterBar）の左端がそろう。 */
+  --Container-Gutter-Fluid: clamp(1rem, 4vw, 1.75rem);
+
   /* Chip のピル角丸。Button の --Control-Radius とは独立させてある。
      プロダクトによってはボタンを角ばらせつつチップだけピルのまま、といった
      組み合わせがあり得るため（issue #364 追補）。 */

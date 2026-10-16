@@ -19,5 +19,18 @@ const INLINE_FIELD_TYPO: Record<Exclude<FieldVariant, "default">, string> = {
   "inline-title": "typo-heading-xl",
 }
 
-export { INLINE_FIELD_BASE, INLINE_FIELD_TYPO }
-export type { FieldVariant }
+/**
+ * inline 系の当たり判定の段（issue #712）。
+ * - "compact"（既定）: 従来の px-1 py-0.5（本文の行に溶け込む高さ）
+ * - "comfortable": 最小 44px（min-h-11）+ py-2。ラベル左置きの項目行など、押せる範囲を
+ *   外側の余白（py-2 等）で稼がずに 44px を確保する。typo-body-md（16px × 1.75 = 28px）+ 上下 8px で 44px
+ */
+type FieldTargetSize = "compact" | "comfortable"
+
+const INLINE_FIELD_TARGET_SIZE: Record<FieldTargetSize, string> = {
+  compact: "",
+  comfortable: "min-h-11 py-2",
+}
+
+export { INLINE_FIELD_BASE, INLINE_FIELD_TARGET_SIZE, INLINE_FIELD_TYPO }
+export type { FieldTargetSize, FieldVariant }

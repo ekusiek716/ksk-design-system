@@ -32,12 +32,12 @@
 | CommitAutoGrowTextarea | `@/components/ui/commit-auto-grow-textarea` | — | Default, MinRows |
 | CommitInput | `@/components/ui/commit-input` | — | InputCommitTiming |
 | CommitTextarea | `@/components/ui/commit-textarea` | — | Default, Empty, Disabled |
-| Container | `@/components/ui/container` | **size**: `narrow`, `page`, `wide`, `fluid`<br>**gutter**: `none`, `tight`, `default`, `spacious` | Sizes |
+| Container | `@/components/ui/container` | **size**: `narrow`, `page`, `wide`, `fluid`<br>**gutter**: `none`, `tight`, `default`, `spacious`, `fluid` | Sizes, FluidGutter |
 | CountdownTimer | `@/components/ui/countdown-timer` | — | Filled, Ghost, Compact, DayGranularity, Ended, AllVariants |
 | DateField | `@/components/ui/date-field` | — | Default, WithInitialValue, CustomPlaceholder, Disabled, CustomFormat, WithTriggerLabel |
 | DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, FutureValueOpensSelectedMonth, WithDefaultMonth, Disabled, RangePicker, CalendarOnly, CalendarRange, InvalidInFormField |
 | DateTimePicker | `@/components/ui/date-time-picker` | — | Default, Empty, Bounded |
-| Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, Fullscreen, FullscreenSafeAreaOptOut, ReportShop, StackedFooter, OpensAndIsImmediatelyInteractive, Sizes, ClosesOnEscape, TrapsFocus, StacksAboveNestedSheets, ConfirmDialogStacksAboveSheet, TitleLevelFullscreenDefault, TitleLevelExplicit, TitleLevelCenterDefault, ChildDescriptionIsLinked, NoDescriptionLeavesNoDescribedBy, DescriptionPropIsLinked, ExplicitDescribedByWins, DynamicChildDescriptionIsLinked, NestedSelectKeyboard |
+| Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, Fullscreen, FullscreenUntilMd, FullscreenSafeAreaOptOut, ReportShop, StackedFooter, OpensAndIsImmediatelyInteractive, Sizes, ClosesOnEscape, TrapsFocus, StacksAboveNestedSheets, ConfirmDialogStacksAboveSheet, TitleLevelFullscreenDefault, TitleLevelExplicit, TitleLevelCenterDefault, ChildDescriptionIsLinked, NoDescriptionLeavesNoDescribedBy, DescriptionPropIsLinked, ExplicitDescribedByWins, DynamicChildDescriptionIsLinked, NestedSelectKeyboard |
 | DropdownFilter | `@/components/ui/dropdown-filter` | — | Default, ActiveFilter, WithIcons（ビュー切替・アイコン付き）, MultipleFilters |
 | DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent | `@/components/ui/dropdown-menu` | — | Default, WithCheckbox, WithRadio, WithSubmenu, OpensAndSelectsItem, NavigatesWithKeyboard |
 | EmojiIcon | `@/components/ui/emoji-icon` | — | Default, Sizes, InSlots |
@@ -94,7 +94,7 @@
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
 | AddTile | `@/components/patterns/add-tile` | — | Default, Small, CustomIcon, Disabled, InGrid |
-| AgendaList | `@/components/patterns/agenda-list` | — | Default, WithSelectedDate, FixedDates, Empty, ReadOnly |
+| AgendaList | `@/components/patterns/agenda-list` | — | Default, WithSelectedDate, FixedDates, Empty, ReadOnly, CategoryAccent |
 | AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky, Glass — Liquid Glass (over gradient), Transparent — scrollable reveal, NavWithRenderSlot |
 | BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
 | Banner | `@/components/patterns/banner` | **density**: `default`, `compact`<br>**layout**: `card`, `bar`<br>**variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants, Compact, Bar |
@@ -104,12 +104,12 @@
 | CategoryScroll | `@/components/patterns/category-scroll` | — | Default, CircleShape, GridLayout |
 | CelebrationDialog | `@/components/patterns/celebration-dialog` | — | Basic, Bounce Emoji / Auto Dismiss, Iconsax Badge（emoji の代わり）, Custom Confetti Colors |
 | Celebration | `@/components/patterns/celebration` | — | Confetti, InlineEmoji, Actions Slot / Interactive, Custom Duration / Colors / DriftRange, Emoji Animation: Bounce, Effect: Burst（クラッカー演出）, Cardless / Tap Dismiss |
-| ChipFilterBar | `@/components/patterns/chip-filter-bar` | — | Default, CustomResultCountLabel, Sticky, StickyWithGutter, Bare, TouchTargetNotClipped |
+| ChipFilterBar | `@/components/patterns/chip-filter-bar` | — | Default, CustomResultCountLabel, Sticky, StickyWithGutter, FluidGutterAlignsWithContainer, Bare, TouchTargetNotClipped |
 | ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, SelectionModeSingle, SelectionModeMultiple, SelectionModeUnspecified, LabelledByHeading, SingleSelectScalar, WithMax, WrappedRowsDoNotOverlap |
 | Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `xs`, `sm`, `md`, `lg`, `tile`<br>**shape**: `pill`, `rounded`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape, WithCount, TileAndSoldOut, AsLink, Real UI — Filters & Status, Touch selection stable, TileTouchTargetNotShrunk, ExtraSmall, RoundedShape |
 | CoachMarkOverlay | `@/components/patterns/coach-mark-overlay` | — | MultiStepTour, Localized labels (EN), BrandVariant, MissingTarget, FocusTrap |
 | CodeDisplay | `@/components/patterns/code-display` | — | Default, Large, Accent, LongCode, WithoutCopy |
-| CollapsibleChipField | `@/components/patterns/collapsible-chip-field` | — | WithLabel, WithIcon, RequiredNoClear, CollapsedDisclosure, AlwaysExpanded, EscapeInsideDialog |
+| CollapsibleChipField | `@/components/patterns/collapsible-chip-field` | — | WithLabel, WithIcon, RequiredNoClear, CollapsedDisclosure, AlwaysExpanded, EscapeInsideDialog, AlignedWithFormFieldRows |
 | CompactFilePicker, ImageAttachmentPicker | `@/components/patterns/compact-file-picker` | — | SingleImageReplacement, MultiImageAttachments, ListPreview, LoadingWithCustomLabel |
 | ConfirmDialog, ConfirmDialogProvider | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading, UseConfirm |
 | ContentCarousel | `@/components/patterns/content-carousel` | — | Default, AutoPlay, WithoutControls |
@@ -120,12 +120,12 @@
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
 | ErrorState, NotFoundIllustration | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry, NotFound |
 | FeatureComparisonTable | `@/components/patterns/feature-comparison-table` | — | Default, ThreeColumns |
-| FieldSet, FieldLegend, FieldGroup, FieldDescription, FieldError, FieldSeparator | `@/components/patterns/field` | — | 3セクションの長いフォーム, SeparatorWithLabel |
+| FieldSet, FieldLegend, FieldGroup, FieldDescription, FieldError, FieldSeparator | `@/components/patterns/field` | — | 3セクションの長いフォーム, SeparatorWithLabel, CompactFilterGroups |
 | FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
 | FilterChip | `@/components/patterns/filter-chip` | — | Inactive, ActiveWithValue, Toggle, Group |
 | FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears, WithIcon |
 | Footer | `@/components/patterns/footer` | — | Default, Minimal, WithRenderSlot, WithExtra, WithPaymentIcons |
-| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm |
+| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm, HorizontalRows |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
 | KanbanColumn | `@/components/patterns/kanban-column` | — | Board, CategoryBoard |
@@ -135,9 +135,9 @@
 | MediaActionCluster | `@/components/patterns/media-action-cluster` | — | Vertical, Horizontal, Auto orientation, No auto-hide |
 | MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |
 | MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount, WithTopAlignment |
-| MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff |
+| MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff, FixedViewportApp |
 | MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline, Full width CTA, With ad banner offset (bottomOffsetExtra) |
-| MonthCalendar | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English, MobileWeekWithAgenda |
+| MonthCalendar | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English, MobileWeekWithAgenda, CategoryAccent |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
 | PresenceIndicator | `@/components/patterns/presence-indicator` | — | Default, WithBadge, Offline, NameOnly, 狭幅で非表示にする例（className） |

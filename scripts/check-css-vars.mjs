@@ -54,6 +54,10 @@ export const ALLOWLIST = [
     reason: "Radix UI が Popper / Select / Dropdown 等のコンテンツ要素へ実行時に注入する変数。DS 側に定義は無い。前方一致にするとタイプミスが素通りするので完全一致で列挙する",
   },
   {
+    name: "--Native-Tab-Bar-Height",
+    reason: "ネイティブの殻（Capacitor 等）がネイティブのタブバーの実測高さ（safe-area 込み）を書き込む任意フック（issue #715）。MobileAppShell の bottomPadding=\"native-tab-bar\" が var(--Native-Tab-Bar-Height, 6rem) で参照し、未設定でもフォールバックで無害",
+  },
+  {
     name: "--Native-Safe-Area-Inset-Top",
     reason: "ネイティブの殻（WKWebView 等）が実測した上端の safe area を書き込む任意フック（issue #682）。product-theme.css の --Safe-Area-Inset-Top が var(--Native-Safe-Area-Inset-Top, 0px) で未設定でも無害",
   },

@@ -109,7 +109,8 @@
         "startAdornment": "ReactNode — 左側の装飾（単位記号・アイコン等）",
         "endAdornment": "ReactNode — 右側の装飾（クリアボタン等・pointer-events 有効）",
         "showCount": "boolean — maxLength とセットで文字数カウンタ（IME 追従）",
-        "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）"
+        "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）",
+        "targetSize": "\"compact\" | \"comfortable\" — inline 系 variant の当たり判定。comfortable は min-h-11 + py-2 で 44px（issue #712）。default（枠付き）と unstyled では効かない"
       },
       "accessibility": [
         "Must pair with <Label>",
@@ -245,7 +246,8 @@
       "props": {
         "autoGrow": "boolean — 入力内容に合わせて高さを自動伸縮",
         "showCount": "boolean — maxLength とセットで文字数カウンタ（IME 追従）",
-        "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）"
+        "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）",
+        "targetSize": "\"compact\" | \"comfortable\" — inline 系 variant の当たり判定。comfortable は min-h-11 + py-2 で 44px（issue #712）。default（枠付き）と unstyled では効かない"
       },
       "accessibility": [
         "Must pair with <Label>",
@@ -420,7 +422,12 @@
         "native (src/native/components/Dialog.tsx): position=\"center\"(既定) / \"top\" / \"fullscreen\" を持ち、fullscreen は四辺・top は上端の safe-area を避ける。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
         "modal な Dialog の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）",
         "size は sm(400px) / md(480px・既定) / lg(640px) / xl(800px) の幅の段（opt-in）。未指定は従来の 480px のまま。position=\"fullscreen\" では無視。size の段は sm: 付きなので、上書きは className に sm:max-w-* を渡す（接頭辞なしの max-w-* は size に勝たない）。Sheet の size と段の名前を揃えている。ResponsiveDialogContent の size は PC 側の Dialog にだけ渡る",
-        "position=\"top\" / \"fullscreen\" の上端 safe area は --Safe-Area-Inset-Top で読む（issue #682。Sheet と同じ）"
+        "position=\"top\" / \"fullscreen\" の上端 safe area は --Safe-Area-Inset-Top で読む（issue #682。Sheet と同じ）",
+        "スマホは全画面・PC は中央のモーダルにする作業面は position=\"fullscreen\" + centerFrom（\"sm\" | \"md\" | \"lg\"）。境界以上で center と同じ位置・角丸・影・size の幅になる。className に md:!max-w-* / md:!h-* を書いて全画面を打ち消さない（issue #713）",
+        "height=\"fill\" は中央表示（center / centerFrom の境界以上）の高さを画面 - 4rem に固定する。見取り図・表など中身の量で枠が伸び縮みすると困る面向け（issue #713）",
+        "size は sm(400) / md(480・既定) / lg(640) / xl(800) / 2xl(1024px・issue #713)",
+        "全画面ダイアログ（padding={false}）の上端の帯は DialogHeader variant=\"bar\"（下線・左右 24px・上下 12px）+ trailing（閉じるボタン等）。DialogHeader に border-b / flex-row / px を自作しない（issue #713）",
+        "height=\"fill\" は position=\"top\" と centerFrom の無い fullscreen では効かない（開発ビルドで警告）。DialogHeader variant=\"bar\" の trailing（閉じるボタン）は必須（省略すると開発ビルドで警告）。centerFrom の中央表示は center と同じ ksk-squircle の角（issue #713）"
       ],
       "variants": {
         "position": [
@@ -1341,7 +1348,7 @@
       "description": "ページ内容の最大幅・中央寄せ・左右 gutter を一元管理するレイアウトプリミティブ。",
       "variants": [
         "size: narrow / page / wide / fluid",
-        "gutter: none / tight / default / spacious"
+        "gutter: none / tight / default / spacious / fluid（画面幅で 16〜28px・--Container-Gutter-Fluid で上書き可。issue #711）"
       ],
       "sizes": [],
       "rules": [
@@ -1646,7 +1653,10 @@
         "Label + Input + error message as unit",
         "required asterisk は Brand 色。Caution 色は入力エラーとの混同を避ける",
         "1 フィールド分の label / control / description / error に使う。フォーム全体のセクションには FieldSet を使う",
-        "長いフォームでは FieldGroup の中に FormField を並べる"
+        "長いフォームでは FieldGroup の中に FormField を並べる",
+        "ラベル左置きの項目行は orientation=\"horizontal\"（左のラベル列の幅は labelWidth・既定 5rem、複数行の中身は labelAlign=\"start\"）。説明文・エラーは右の列の下段に出る。Label に w-20 等を付けて行を自作しない（issue #712）",
+        "horizontal で枠の無い入力欄（variant=\"inline\"）を置くときは targetSize=\"comfortable\" で 44px の当たり判定を持たせる。外側に py-2 を足して稼がない（issue #712）",
+        "orientation=\"horizontal\" は置き場所の幅（@container）が 15rem 未満なら縦積みに戻る。endLabel は入力欄の右に出る（issue #712）"
       ]
     },
     {
@@ -1670,7 +1680,8 @@
         "個々の入力は既存 FormField を FieldGroup 内に並べる",
         "FieldDescription はセクション・グループの補足、FieldError はグループ単位のエラーに使う",
         "グループ横断の区切りは FieldSeparator を使い、中央ラベルは children で渡す",
-        "FormSection は title/description 一体の簡易 API、FieldSet は legend や複数 FieldGroup を明示構成する長いフォーム向け"
+        "FormSection は title/description 一体の簡易 API、FieldSet は legend や複数 FieldGroup を明示構成する長いフォーム向け",
+        "詰めた並び（絞り込みシートの選択肢グループ等）は FieldSet gap（sm=8 / md=16 / lg=24px）+ FieldLegend size=\"sm\"（typo-label-md + Text-Medium-Emphasis）。className に space-y-* や typo-* を足して上書きしない。gap 指定時は legend の下にも同じ間隔が付く（未指定の既定は legend の直下 0px のまま）（issue #714）"
       ]
     },
     {
@@ -1960,7 +1971,8 @@
         "label 指定時は幅 w-20 固定でフィールドリストの他行とラベル幅を揃える。",
         "折りたたみ中の1チップは開閉トリガで aria-expanded を持ち、展開中は行が role=\"radiogroup\"・各チップが role=\"radio\" + aria-checked になる。矢印キー移動と roving tabindex 付き(issue #419)。",
         "展開で選択中チップへフォーカスが移り、Escape で畳んで元のチップへ戻る(issue #419)。",
-        "label を持たない icon 先頭の行では radiogroup に名前が付かないので ariaLabel を必ず渡す(issue #419)。"
+        "label を持たない icon 先頭の行では radiogroup に名前が付かないので ariaLabel を必ず渡す(issue #419)。",
+        "見出し（label）の既定は textHierarchy のフォームラベル（typo-label-md + Text-High-Emphasis）で、同じシートの Label / FormField の項目名とそろう。従来の小さい見た目は labelSize=\"sm\"。展開中の radiogroup は見える label と aria-labelledby で結ばれる（ariaLabel 明示時は aria-label 優先）。label も icon も無い行は先頭の枠を描かない（issue #717。native は label.sm のまま）"
       ]
     },
     {
@@ -1978,7 +1990,8 @@
         "sticky 時の top オフセットは stickyOffset prop で指定する（固定ヘッダー高さの相殺用）。",
         "resultCountLabel 未指定時は \"{n}件\" を表示。i18n が必要な場合は関数 props で差し替える。",
         "bare=true 時は overflow/padding ラッパーを付けない。外側スクロールコンテナと共有する場合に使う。",
-        "チップ列と件数の左右余白は gutter（none | tight=16px | default=24px・Container と同じ語彙）か contentClassName で付ける(issue #667)。sticky の背景は全幅のまま。外側 className に px-* を付けたり [&>div]: 等の子孫セレクタで DS 内部の DOM に依存したりしない。native も gutter を持つ"
+        "チップ列と件数の左右余白は gutter（none | tight=16px | default=24px・Container と同じ語彙）か contentClassName で付ける(issue #667)。sticky の背景は全幅のまま。外側 className に px-* を付けたり [&>div]: 等の子孫セレクタで DS 内部の DOM に依存したりしない。native も gutter を持つ",
+        "gutter=\"fluid\" は Container gutter=\"fluid\" と同じ --Container-Gutter-Fluid（既定 clamp(1rem, 4vw, 1.75rem)）を読み、本文と左端がそろう。プロダクト独自のページ余白は contentClassName に渡さずこの変数へ寄せる（issue #711。native は fluid を持たない）"
       ]
     },
     {
@@ -2631,7 +2644,10 @@
       "rules": [
         "BottomTabBar + MobileFloatingActionButton の geometry を consumer CSS で手組みしない",
         "既に fixed な nav を渡す場合は bottomNavMode=external を使う",
-        "bottomPaddingExtra（CSS の長さ）は bottomPadding の既定余白（bottom-nav=5rem / bottom-nav-fab=7rem / none=0）に加算する。広告バナー等の常設要素の高さを渡し、main の下余白を mainClassName で自前計算しない（issue #681）"
+        "bottomPaddingExtra（CSS の長さ）は bottomPadding の既定余白（bottom-nav=5rem / bottom-nav-fab=7rem / none=0）に加算する。広告バナー等の常設要素の高さを渡し、main の下余白を mainClassName で自前計算しない（issue #681）",
+        "アプリ型の高さ固定の画面（本文だけスクロール・header 常時表示）は viewport=\"fixed\"（ルート 100svh・main が overflow-y-auto）。page 側で h-[100svh] overflow-hidden や main の overflow を手組みしない（issue #715）",
+        "上端の safe-area は safeAreaTop（header があれば header、無ければ枠）、fixed のタブバーの下の safe-area は safeAreaBottom。ネイティブの殻がタブバーを描く構成は bottomPadding=\"native-tab-bar\"（1rem + var(--Native-Tab-Bar-Height, 6rem)。safe-area 込みの値なので safeAreaBottom は足さない）。広告等は bottomPaddingExtra に変数を渡すだけにし、calc を page に書かない（issue #715）",
+        "全幅は centeredPreview={false}。viewport=\"fixed\" の main は Tab で止まるスクロール領域（tabIndex=0）で、ソフトキーボード表示中は見えている高さへ縮む（visualViewport。検知できない環境は html[data-kb-open] + --kb-h）。safeAreaBottom と native-tab-bar の同時指定は開発ビルドで警告（issue #715）"
       ]
     },
     {
@@ -2809,7 +2825,8 @@
         "md（768px）未満はチップの代わりに色ドット（最大 3）を出す。操作は日の選択に一本化する",
         "スマホの週の帯は view=\"week\"（フォーカス中の日を含む 1 週だけ。矢印キーで週が移る。issue #704）、日ごとの予定の中身は AgendaList を下に置く。週ストリップ・アジェンダを Button unstyled で自作しない",
         "土日の色は weekendTone（既定 true。日曜 Text-Caution / 土曜 Text-Accent-Primary・Calendar と同じ語彙）",
-        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）",
+        "分類の識別色（カテゴリ別の予定）は MonthCalendarEvent.accentColor に var(--Categorical-N) を渡す。md 以上はチップの先頭の点、md 未満は日付の下の点（tone より優先）。チップの面と文字は tone のまま。renderEvent の中で色の点を自作しない（issue #716）"
       ]
     },
     {
@@ -2825,7 +2842,8 @@
         "既定は予定がある日だけを昇順に並べる。予定の無い日も出すときは dates（emptyDayLabel 既定「予定なし」）",
         "スクロール連動・「今日へ」のジャンプ先は dayId で id を付ける（行には常に data-date）",
         "並べる日が無いときは empty（EmptyState 等）",
-        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）",
+        "予定の accentColor（issue #716）は行の先頭の点になる（行の面は tone のまま）。renderEvent で点を自作しない"
       ]
     },
     {

@@ -50,3 +50,14 @@ export const Empty: Story = {
 
 /** 押せない一覧（onSelectEvent なし）は読むだけの行になる */
 export const ReadOnly: Story = { args: { onSelectEvent: undefined } }
+
+/** 分類の識別色（issue #716）。予定の行の先頭に accentColor の点。行の面は tone のまま */
+export const CategoryAccent: Story = {
+  args: {
+    events: [
+      { id: "c1", date: "2026-10-03", label: "会場見学", accentColor: "var(--Categorical-1)" },
+      { id: "c2", date: "2026-10-03", label: "衣装合わせ", accentColor: "var(--Categorical-4)" },
+      { id: "c3", date: "2026-10-16", label: "写真の打合せ", accentColor: "var(--Categorical-7)" },
+    ],
+  },
+}

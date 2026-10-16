@@ -27,6 +27,29 @@ interface FormFieldProps extends React.ComponentProps<"div"> {
    * 「タイトル + 字数 12/200」「タイトル + 種別バッジ」のような用途。
    */
   endLabel?: React.ReactNode
+  /**
+   * ラベルと入力欄の並べ方（issue #712）。
+   * - "vertical"（既定）: ラベルを入力欄の上に置く（従来）
+   * - "horizontal": ラベルを左の列、入力欄を右の列に置く「項目行」。説明文・エラーは入力欄の下
+   *   （右の列）に出す。詳細シートの「かな / 肩書き / 住所」のような短い属性の一覧向け。
+   *   枠の無い入力欄（`variant="inline"`）と組むときは `targetSize="comfortable"` で 44px の当たり判定を持たせる。
+   *   置かれた場所の幅（@container）が 15rem（既定 labelWidth の 3 倍）未満なら縦積みに戻る。
+   *   `endLabel` はラベル列ではなく入力欄の右に置く（狭いラベル列で潰れないため）。
+   *   行の区切り線・行間は呼び出し側の並べ方（divide-y 等）に任せる
+   */
+  orientation?: "vertical" | "horizontal"
+  /**
+   * `orientation="horizontal"` の左のラベル列の幅（CSS の長さ）。既定 "5rem"（80px）。
+   * 長いラベルは列の中で折り返す（切らない）。vertical では効かない。
+   */
+  labelWidth?: string
+  /**
+   * `orientation="horizontal"` のラベルの縦位置。
+   * - "center"（既定）: 入力欄の行の中央にそろえる（1 行の入力欄）
+   * - "start": 上端にそろえる（複数行の入力欄・チップの並び等、高さが伸びる中身）
+   * 説明文・エラーは入力欄の下の行に出るので、center でもラベルは入力欄の行にそろったまま動かない。
+   */
+  labelAlign?: "center" | "start"
 }
 
 function FormField({
@@ -38,7 +61,11 @@ function FormField({
   description,
   requiredStyle = "asterisk",
   endLabel,
+  orientation = "vertical",
+  labelWidth = "5rem",
+  labelAlign = "center",
   children,
+  style,
   ...props
 }: FormFieldProps) {
   const hasLabelRow = endLabel != null
@@ -67,57 +94,59 @@ function FormField({
       })
     : children
 
-  return (
-    <div
-      data-slot="form-field"
-      className={cn("flex flex-col gap-1.5", className)}
-      {...props}
+  const labelOnly = (
+    <label
+      htmlFor={htmlFor}
+      className="typo-label-md text-[var(--Text-High-Emphasis)] inline-flex items-center gap-1.5"
     >
-      <div
-        className={cn(
-          // endLabel が無いときは <label> 単体（既存の見た目を維持）。
-          // 在るときだけ row 化して right に寄せる。
-          hasLabelRow && "flex items-center justify-between gap-2"
-        )}
-      >
-        <label
-          htmlFor={htmlFor}
-          className="typo-label-md text-[var(--Text-High-Emphasis)] inline-flex items-center gap-1.5"
+      {label}
+      {requiredStyle === "asterisk" && required && (
+        // required の * は Brand 色を使う。
+        // Caution は「誤入力アラート」と視覚的に紛らわしく
+        // フォームの「目立たせポイント」としては強すぎるため、
+        // Brand 色で「ここは記入必須」と促す方が読みやすい。
+        <span className="text-[var(--Brand-Primary)]" aria-hidden="true">
+          *
+        </span>
+      )}
+      {requiredStyle === "pill" && (
+        <span
+          className={cn(
+            "typo-label-xs px-1.5 py-0.5 rounded",
+            required
+              ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Brand-Primary)]"
+              : "bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)]"
+          )}
+          aria-hidden="true"
         >
-          {label}
-          {requiredStyle === "asterisk" && required && (
-            // required の * は Brand 色を使う。
-            // Caution は「誤入力アラート」と視覚的に紛らわしく
-            // フォームの「目立たせポイント」としては強すぎるため、
-            // Brand 色で「ここは記入必須」と促す方が読みやすい。
-            <span className="text-[var(--Brand-Primary)]" aria-hidden="true">
-              *
-            </span>
-          )}
-          {requiredStyle === "pill" && (
-            <span
-              className={cn(
-                "typo-label-xs px-1.5 py-0.5 rounded",
-                required
-                  ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Brand-Primary)]"
-                  : "bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)]"
-              )}
-              aria-hidden="true"
-            >
-              {required ? "必須" : "任意"}
-            </span>
-          )}
-        </label>
-        {endLabel && (
-          <div
-            data-slot="form-field-end-label"
-            className="typo-body-sm text-[var(--Text-Medium-Emphasis)] flex items-center"
-          >
-            {endLabel}
-          </div>
-        )}
-      </div>
-      {field}
+          {required ? "必須" : "任意"}
+        </span>
+      )}
+    </label>
+  )
+  const endLabelNode = (
+    <div
+      data-slot="form-field-end-label"
+      className="typo-body-sm text-[var(--Text-Medium-Emphasis)] flex items-center"
+    >
+      {endLabel}
+    </div>
+  )
+  const labelBlock = (
+    <div
+      className={cn(
+        // endLabel が無いときは <label> 単体（既存の見た目を維持）。
+        // 在るときだけ row 化して right に寄せる。
+        hasLabelRow && "flex items-center justify-between gap-2"
+      )}
+    >
+      {labelOnly}
+      {endLabel && endLabelNode}
+    </div>
+  )
+
+  const messages = (
+    <>
       {description && !error && (
         <p id={descId} className="typo-body-sm text-[var(--Text-Low-Emphasis)]">
           {description}
@@ -136,6 +165,57 @@ function FormField({
           {error}
         </p>
       )}
+    </>
+  )
+
+  if (orientation === "horizontal") {
+    // 狭い置き場所（コンテナ幅 15rem = 既定 labelWidth の 3 倍未満）では縦積みに戻す（@container）。
+    // 画面幅ではなく置かれた場所の幅で判定するので、シート・2 カラム等どこに置いても潰れない。
+    // 2 列のときは 1 行目 = ラベル | 入力欄、2 行目以降 = (空) | 説明文・エラー。
+    // ラベルは入力欄の行だけにそろうので、エラーが出てもラベルの位置は動かない。
+    // endLabel（字数・バッジ等）は狭いラベル列で潰れないよう、入力欄の右に置く。
+    return (
+      <div
+        data-slot="form-field"
+        data-orientation="horizontal"
+        className={cn("@container", className)}
+        style={{ ...style, "--ksk-form-field-label-width": labelWidth } as React.CSSProperties}
+        {...props}
+      >
+        <div
+          data-slot="form-field-grid"
+          className={cn(
+            "grid grid-cols-1 gap-x-4 gap-y-1.5 @[15rem]:grid-cols-[var(--ksk-form-field-label-width)_minmax(0,1fr)]",
+            labelAlign === "start" ? "items-start" : "items-center"
+          )}
+        >
+          <div data-slot="form-field-label-cell" className="min-w-0 break-words">
+            {labelOnly}
+          </div>
+          <div data-slot="form-field-control" className={cn("min-w-0", endLabel != null && "flex items-center gap-2")}>
+            {endLabel != null ? <div className="min-w-0 flex-1">{field}</div> : field}
+            {endLabel != null && endLabelNode}
+          </div>
+          {((description && !error) || error) && (
+            <div data-slot="form-field-messages" className="flex min-w-0 flex-col gap-1.5 @[15rem]:col-start-2">
+              {messages}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      data-slot="form-field"
+      className={cn("flex flex-col gap-1.5", className)}
+      style={style}
+      {...props}
+    >
+      {labelBlock}
+      {field}
+      {messages}
     </div>
   )
 }

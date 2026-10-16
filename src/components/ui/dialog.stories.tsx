@@ -14,6 +14,7 @@ import { RadioGroup, RadioGroupItem } from "./radio-group"
 import { Sheet, SheetContent, SheetTitle } from "./sheet"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
 import { ConfirmDialog } from "../patterns/confirm-dialog"
+import { SemanticIcon } from "./semantic-icon"
 
 const meta: Meta<typeof Dialog> = {
   title: "Components/Dialog",
@@ -198,6 +199,70 @@ export const Fullscreen: Story = {
       </DialogContent>
     </Dialog>
   ),
+}
+
+/**
+ * スマホは全画面、md（768px）以上は中央の大きなモーダル（issue #713）。
+ * `centerFrom="md"` + `size="2xl"`（1024px）+ `height="fill"`（画面 - 4rem に固定）。
+ * 見出しは `DialogHeader variant="bar"`（下線付きの帯・右に閉じるボタン）、本文だけをスクロールさせる。
+ * `!important` で幅・高さを上書きしない。
+ */
+export const FullscreenUntilMd: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>配席表を開く</Button>
+      </DialogTrigger>
+      <DialogContent position="fullscreen" centerFrom="md" size="2xl" height="fill" padding={false} className="flex flex-col">
+        <DialogHeader
+          variant="bar"
+          trailing={
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon-lg" aria-label="閉じる">
+                <SemanticIcon name="close" size={20} />
+              </Button>
+            </DialogClose>
+          }
+        >
+          <DialogTitle>配席表</DialogTitle>
+          <DialogDescription>卓を押すと席を割り当てられます。</DialogDescription>
+        </DialogHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto p-6">
+          <p className="typo-body-md text-[var(--Text-High-Emphasis)]">見取り図（本文だけがスクロールする）</p>
+          <Input aria-label="卓名で探す" placeholder="卓名で探す" className="mt-4" />
+        </div>
+      </DialogContent>
+    </Dialog>
+  ),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "配席表を開く" }))
+    const dialog = await within(document.body).findByRole("dialog")
+    await waitFor(() => expect(dialog.getAttribute("data-state")).toBe("open"))
+    await expect(dialog.getAttribute("data-center-from")).toBe("md")
+    const header = dialog.querySelector<HTMLElement>('[data-slot="dialog-header"]')!
+    await expect(header.getAttribute("data-variant")).toBe("bar")
+    await expect(header.querySelector('[data-slot="dialog-header-trailing"] button')!.getAttribute("aria-label")).toBe("閉じる")
+    // 幅に応じた形（md 以上は中央・幅 1024px 以下・高さ 画面 - 4rem、md 未満は全画面）。
+    // 入場の zoom を待ってから寸法を測る
+    await waitFor(
+      () => expect(getComputedStyle(dialog).animationName === "none" || dialog.getAnimations().length === 0).toBe(true),
+      { timeout: 5000 }
+    )
+    const r = dialog.getBoundingClientRect()
+    if (window.innerWidth >= 768) {
+      await expect(Math.round(r.height)).toBe(window.innerHeight - 64)
+      await expect(r.width).toBeLessThanOrEqual(1024)
+      await expect(Math.abs(r.left + r.width / 2 - window.innerWidth / 2)).toBeLessThanOrEqual(1)
+    } else {
+      await expect(Math.round(r.width)).toBe(window.innerWidth)
+      await expect(Math.round(r.height)).toBe(window.innerHeight)
+    }
+    await userEvent.click(within(dialog).getByRole("button", { name: "閉じる" }))
+    // 閉じる入退場（境界以上は zoom-out、未満は下へのスライド）の animationend を Radix が待ってから外す。
+    // CI の WebKit は既定 1000ms を超えることがあるので、Sizes と同じく 5000ms 待つ
+    await waitFor(() => expect(within(document.body).queryByRole("dialog")).toBeNull(), { timeout: 5000 })
+  },
 }
 
 /**

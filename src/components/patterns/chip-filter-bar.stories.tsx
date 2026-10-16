@@ -3,6 +3,7 @@ import { expect } from "storybook/test"
 import * as React from "react"
 import { ChipFilterBar } from "./chip-filter-bar"
 import { Chip } from "./chip"
+import { Container } from "@/components/ui/container"
 
 const meta: Meta<typeof ChipFilterBar> = {
   title: "Components/ChipFilterBar",
@@ -100,6 +101,33 @@ export const StickyWithGutter: Story = {
     const chips = row.querySelectorAll<HTMLElement>('[data-slot="chip"]')
     const last = chips[chips.length - 1].getBoundingClientRect()
     await expect(Math.round(row.getBoundingClientRect().right - last.right)).toBeGreaterThanOrEqual(16)
+  },
+}
+
+/**
+ * gutter="fluid"（issue #711）: Container gutter="fluid" と同じ --Container-Gutter-Fluid を読む。
+ * 幅 390px では 16px（clamp の下限）、本文の Container と左端がそろう。
+ */
+export const FluidGutterAlignsWithContainer: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="w-[390px] border border-[var(--Border-Low-Emphasis)]">
+      <ChipFilterBar gutter="fluid" resultCount={4}>
+        {["すべて", "未着手", "進行中", "完了"].map((label) => (
+          <Chip key={label}>{label}</Chip>
+        ))}
+      </ChipFilterBar>
+      <Container size="fluid" gutter="fluid" className="py-2">
+        <p data-testid="body" className="typo-body-md text-[var(--Text-High-Emphasis)]">本文の左端</p>
+      </Container>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const content = canvasElement.querySelector<HTMLElement>('[data-slot="chip-filter-bar-content"]')!
+    const firstChip = content.querySelector<HTMLElement>('[data-slot="chip"]')!
+    const body = canvasElement.querySelector<HTMLElement>('[data-testid="body"]')!
+    await expect(getComputedStyle(content).paddingLeft).toBe(getComputedStyle(body.parentElement!).paddingLeft)
+    await expect(Math.round(firstChip.getBoundingClientRect().left)).toBe(Math.round(body.getBoundingClientRect().left))
   },
 }
 

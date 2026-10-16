@@ -6,6 +6,8 @@ export interface VisualViewportKeyboardState {
   isKeyboardOpen: boolean
 }
 
+const CLOSED_STATE: VisualViewportKeyboardState = { keyboardInset: 0, visibleHeight: null, isKeyboardOpen: false }
+
 function computeVisualViewportKeyboardState(
   layoutHeight: number,
   visualHeight: number,
@@ -18,7 +20,11 @@ function computeVisualViewportKeyboardState(
   return { keyboardInset, visibleHeight: visualHeight, isKeyboardOpen: true }
 }
 
-function useVisualViewportKeyboardInset(): VisualViewportKeyboardState {
+/**
+ * @param enabled false の間は購読しない（常に閉じた状態を返す）。既定 true（従来どおり）。
+ *   MobileAppShell viewport="fixed" のように、条件付きでだけ追従したい部品向け（issue #715）
+ */
+function useVisualViewportKeyboardInset(enabled = true): VisualViewportKeyboardState {
   const [state, setState] = React.useState<VisualViewportKeyboardState>({
     keyboardInset: 0,
     visibleHeight: null,
@@ -27,6 +33,7 @@ function useVisualViewportKeyboardInset(): VisualViewportKeyboardState {
 
   React.useEffect(() => {
     if (typeof window === "undefined") return
+    if (!enabled) return
     const viewport = window.visualViewport
 
     const update = () => {
@@ -71,9 +78,10 @@ function useVisualViewportKeyboardInset(): VisualViewportKeyboardState {
       viewport?.removeEventListener("scroll", update)
       observer?.disconnect()
     }
-  }, [])
+  }, [enabled])
 
-  return state
+  // 無効の間は購読していないので、最後に見た値ではなく常に「閉じている」を返す
+  return enabled ? state : CLOSED_STATE
 }
 
 export { computeVisualViewportKeyboardState, useVisualViewportKeyboardInset }

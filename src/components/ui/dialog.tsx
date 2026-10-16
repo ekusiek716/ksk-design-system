@@ -2,6 +2,7 @@ import { getActiveElement } from "@/lib/active-element"
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { warnOnceInDev } from "@/lib/dev-warn"
 import { usePortalContainer } from "./portal-container"
 import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
 import { useComposedRef } from "@/lib/compose-ref"
@@ -121,9 +122,74 @@ const dialogSizeClasses = {
   md: "sm:max-w-[480px]",
   lg: "sm:max-w-[640px]",
   xl: "sm:max-w-[800px]",
+  "2xl": "sm:max-w-[1024px]",
 } as const
 
 type DialogSize = keyof typeof dialogSizeClasses
+
+/** `position="fullscreen"` を中央表示へ切り替える幅（issue #713）。Tailwind の sm / md / lg と同じ */
+type DialogCenterFrom = "sm" | "md" | "lg"
+
+/**
+ * `position="fullscreen"` + `centerFrom` の、境界以上で効く中央モーダルのクラス（issue #713）。
+ * 全画面のクラス（inset-0 / h-full / max-w-none / rounded-none）を境界以上で打ち消し、
+ * center と同じ位置・角丸・影にする。overflow-hidden（子側でスクロールする全画面の約束）は保つ。
+ * クラスは完全な文字列で持つ（safelist の静的抽出のため）。
+ */
+const fullscreenCenterFromClasses: Record<DialogCenterFrom, string> = {
+  sm: "sm:inset-auto sm:left-[50%] sm:top-[50%] sm:w-full sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-[var(--Radius-Modal)] sm:shadow-[var(--shadow-dialog)]",
+  md: "md:inset-auto md:left-[50%] md:top-[50%] md:w-full md:translate-x-[-50%] md:translate-y-[-50%] md:rounded-[var(--Radius-Modal)] md:shadow-[var(--shadow-dialog)]",
+  lg: "lg:inset-auto lg:left-[50%] lg:top-[50%] lg:w-full lg:translate-x-[-50%] lg:translate-y-[-50%] lg:rounded-[var(--Radius-Modal)] lg:shadow-[var(--shadow-dialog)]",
+}
+
+/** centerFrom の中央表示の幅。左右 24px を残す幅と size のキャップの小さい方（1 クラスに畳む: 同じ接頭辞の max-w-* は twMerge が後勝ちで消すため） */
+const fullscreenCenterFromSizeClasses: Record<DialogCenterFrom, Record<DialogSize, string>> = {
+  sm: {
+    sm: "sm:max-w-[min(400px,calc(100%_-_3rem))]",
+    md: "sm:max-w-[min(480px,calc(100%_-_3rem))]",
+    lg: "sm:max-w-[min(640px,calc(100%_-_3rem))]",
+    xl: "sm:max-w-[min(800px,calc(100%_-_3rem))]",
+    "2xl": "sm:max-w-[min(1024px,calc(100%_-_3rem))]",
+  },
+  md: {
+    sm: "md:max-w-[min(400px,calc(100%_-_3rem))]",
+    md: "md:max-w-[min(480px,calc(100%_-_3rem))]",
+    lg: "md:max-w-[min(640px,calc(100%_-_3rem))]",
+    xl: "md:max-w-[min(800px,calc(100%_-_3rem))]",
+    "2xl": "md:max-w-[min(1024px,calc(100%_-_3rem))]",
+  },
+  lg: {
+    sm: "lg:max-w-[min(400px,calc(100%_-_3rem))]",
+    md: "lg:max-w-[min(480px,calc(100%_-_3rem))]",
+    lg: "lg:max-w-[min(640px,calc(100%_-_3rem))]",
+    xl: "lg:max-w-[min(800px,calc(100%_-_3rem))]",
+    "2xl": "lg:max-w-[min(1024px,calc(100%_-_3rem))]",
+  },
+}
+
+/** centerFrom の中央表示の高さ。auto は中身なり（上限 画面 - 4rem）、fill は画面 - 4rem に固定 */
+const fullscreenCenterFromHeightClasses: Record<DialogCenterFrom, Record<"auto" | "fill", string>> = {
+  sm: { auto: "sm:h-auto sm:max-h-[calc(100dvh_-_4rem)]", fill: "sm:h-[calc(100dvh_-_4rem)]" },
+  md: { auto: "md:h-auto md:max-h-[calc(100dvh_-_4rem)]", fill: "md:h-[calc(100dvh_-_4rem)]" },
+  lg: { auto: "lg:h-auto lg:max-h-[calc(100dvh_-_4rem)]", fill: "lg:h-[calc(100dvh_-_4rem)]" },
+}
+
+/**
+ * centerFrom の中央表示の内側余白。全画面の safe-area 込みの padding を境界以上で
+ * 中央モーダルの値へ戻す（方向別に書く: ショートハンドと方向指定の混在は勝敗が生成順に依存するため）。
+ */
+const fullscreenCenterFromPaddingClasses: Record<DialogCenterFrom, Record<"padded" | "bare", string>> = {
+  sm: { padded: "sm:pl-6 sm:pr-6 sm:pt-6 sm:pb-6", bare: "sm:pl-0 sm:pr-0 sm:pt-0 sm:pb-0" },
+  md: { padded: "md:pl-6 md:pr-6 md:pt-6 md:pb-6", bare: "md:pl-0 md:pr-0 md:pt-0 md:pb-0" },
+  lg: { padded: "lg:pl-6 lg:pr-6 lg:pt-6 lg:pb-6", bare: "lg:pl-0 lg:pr-0 lg:pt-0 lg:pb-0" },
+}
+
+/** centerFrom の中央表示の入退場。下からのスライドを止め、center と同じ zoom にする */
+const fullscreenCenterFromMotionClasses: Record<DialogCenterFrom, string> = {
+  sm: "sm:data-[state=open]:slide-in-from-bottom-0 sm:data-[state=open]:zoom-in-95 sm:data-[state=closed]:slide-out-to-bottom-0 sm:data-[state=closed]:zoom-out-95",
+  md: "md:data-[state=open]:slide-in-from-bottom-0 md:data-[state=open]:zoom-in-95 md:data-[state=closed]:slide-out-to-bottom-0 md:data-[state=closed]:zoom-out-95",
+  lg: "lg:data-[state=open]:slide-in-from-bottom-0 lg:data-[state=open]:zoom-in-95 lg:data-[state=closed]:slide-out-to-bottom-0 lg:data-[state=closed]:zoom-out-95",
+}
 
 interface DialogContentProps
   extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus"> {
@@ -181,12 +247,33 @@ interface DialogContentProps
    * - "md"（既定）: 480px（従来の幅）
    * - "lg": 640px（フォーム 2 カラム・簡易な表）
    * - "xl": 800px（表・プレビューを内蔵する広いダイアログ）
+   * - "2xl": 1024px（見取り図・大きな表など、PC で画面の大半を使う作業面。issue #713）
    * 狭い画面では左右 24px を残す幅が優先される。size の段は
    * `sm:` 付きなので、上書きするときは `className` に `sm:max-w-*` を渡す
    * （接頭辞なしの `max-w-*` は size に勝たない。twMerge は同じ接頭辞同士で後勝ち）。SheetContent の `size`
    * と段の名前を揃えている。
    */
   size?: DialogSize
+  /**
+   * `position="fullscreen"` を、この幅以上で中央のモーダルへ切り替える（issue #713）。
+   * スマホは全画面、PC は中央の大きなモーダル、という作業面向け。
+   * - 未指定（既定）: どの幅でも全画面（従来）
+   * - "sm" / "md" / "lg": その幅（640 / 768 / 1024px）以上で center と同じ位置・角丸・影・`size` の幅になり、
+   *   高さは `height` に従う（既定は中身なりで上限 画面 - 4rem）。内側余白は safe-area を足さない p-6（padding=false なら 0）
+   *
+   * 中央表示でも全画面と同じく面は overflow-hidden のまま（中身のスクロールは子側に置く）。
+   * 配下の DialogTitle の既定は全画面と同じ画面タイトル相当（typo-heading-2xl）。
+   * `position` が "fullscreen" 以外のときは無視する。
+   */
+  centerFrom?: DialogCenterFrom
+  /**
+   * 中央表示の高さ（issue #713）。`position="center"` と、`position="fullscreen"` + `centerFrom` の中央表示で効く
+   * （"top" と全画面の間は効かない）。
+   * - "auto"（既定）: 中身なり（従来）
+   * - "fill": 画面の高さ - 4rem に固定する。見取り図・表など、中身の量で枠の高さが変わると困る作業面向け
+   * position="top" と、centerFrom の無い fullscreen では効かない（開発ビルドで警告）
+   */
+  height?: "auto" | "fill"
   /**
    * open 時の初期フォーカス。未指定時は Radix の既定挙動。
    * - "first-input": 最初の入力/操作可能要素
@@ -222,6 +309,8 @@ function DialogContent({
   position = "center",
   safeArea = true,
   size = "md",
+  centerFrom,
+  height = "auto",
   autoFocus,
   restoreFocusOnClose = true,
   closeOnEsc = true,
@@ -232,6 +321,24 @@ function DialogContent({
   ...props
 }: DialogContentProps) {
   const autoDescId = React.useId()
+  // #713: centerFrom は全画面のときだけ効く
+  const centeredFrom = position === "fullscreen" ? centerFrom : undefined
+  // #713 レビュー: height="fill" は中央表示（center / centerFrom の境界以上）でだけ効く。効かない組み合わせは
+  // 開発ビルドで知らせる（top は max-h で伸びる・全画面は常に画面いっぱい）
+  React.useEffect(() => {
+    if (height !== "fill") return
+    if (position === "top") {
+      warnOnceInDev(
+        "dialog-height-fill-top",
+        'DialogContent: height="fill" は position="top" では効きません（top は画面の残りを上限に中身なりで伸びます）。'
+      )
+    } else if (position === "fullscreen" && !centerFrom) {
+      warnOnceInDev(
+        "dialog-height-fill-fullscreen",
+        'DialogContent: height="fill" は position="fullscreen" では centerFrom を指定したときの中央表示でだけ効きます（全画面は常に画面いっぱいです）。'
+      )
+    }
+  }, [height, position, centerFrom])
   // #505: modal な層だけ aria-modal="true" を出し、公開判定（useHasOpenModal）
   // でも modal な層としてだけ数える。`modal={false}` の Dialog は背面が生きて
   // いるので、どちらも false 側に倒す。
@@ -301,6 +408,8 @@ function DialogContent({
         ref={mergedRef}
         data-slot="dialog-content"
         data-position={position}
+        data-center-from={centeredFrom}
+        data-height={height === "fill" ? "fill" : undefined}
         data-safe-area={safeArea}
         className={cn(
           "fixed z-[var(--Z-Modal)]",
@@ -313,7 +422,15 @@ function DialogContent({
               // 内側にヘッダー/フッターを固定するレイアウトが典型なので、
               // ルートは overflow-hidden にして子側でスクロールさせる
               // （ルートも auto にするとスクロールコンテナが二重になる）。
-              "inset-0 w-full h-full max-w-none overflow-hidden rounded-none"
+              [
+                "inset-0 w-full h-full max-w-none overflow-hidden rounded-none",
+                // centerFrom の中央表示も center と同じ連続曲率の角（角丸 0 の全画面では効かない）
+                centeredFrom && "ksk-squircle",
+                // centerFrom（#713）: 境界以上で中央のモーダルへ
+                centeredFrom && fullscreenCenterFromClasses[centeredFrom],
+                centeredFrom && fullscreenCenterFromSizeClasses[centeredFrom][size],
+                centeredFrom && fullscreenCenterFromHeightClasses[centeredFrom][height],
+              ]
             : [
                 // 横位置: left-[50%] + translate-x-[-50%] のみ。
                 // inset-x-* と組み合わせると left/right と transform が競合して
@@ -328,7 +445,9 @@ function DialogContent({
                   ? safeArea
                     ? "top-[max(var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)),2rem)] max-h-[calc(100dvh_-_max(var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)),2rem)_-_2rem)] overflow-y-auto"
                     : "top-8 max-h-[calc(100dvh_-_4rem)] overflow-y-auto"
-                  : "top-[50%] translate-y-[-50%]",
+                  : height === "fill"
+                    ? "top-[50%] translate-y-[-50%] h-[calc(100dvh_-_4rem)]"
+                    : "top-[50%] translate-y-[-50%]",
                 "rounded-[var(--Radius-Modal)] ksk-squircle",
               ].join(" "),
           "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)]",
@@ -346,11 +465,18 @@ function DialogContent({
             position === "fullscreen" &&
             safeArea &&
             "pl-[env(safe-area-inset-left,0px)] pr-[env(safe-area-inset-right,0px)] pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))] pb-[env(safe-area-inset-bottom,0px)]",
+          // centerFrom（#713）: 中央表示では safe-area を足さない（center と同じ p-6 / 0）
+          centeredFrom &&
+            safeArea &&
+            fullscreenCenterFromPaddingClasses[centeredFrom][padding ? "padded" : "bare"],
           // 入場/退場: 全画面は iOS の全画面モーダル慣習に合わせて下からの
           // スライド。zoom-95 だと全画面サーフェスが縮んで四辺からオーバーレイが
           // 覗くため使わない。
           position === "fullscreen"
-            ? "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom"
+            ? [
+                "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom",
+                centeredFrom && fullscreenCenterFromMotionClasses[centeredFrom],
+              ]
             : "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           className
         )}
@@ -383,13 +509,61 @@ function DialogContent({
   )
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+interface DialogHeaderProps extends React.ComponentProps<"div"> {
+  /**
+   * 見出しの形（issue #713）。
+   * - "stack"（既定）: タイトルと説明を縦に積む（従来）
+   * - "bar": 下線付きの帯。左にタイトル・説明（children）、右に `trailing`（閉じるボタン等）を横に並べる。
+   *   全画面ダイアログ（`padding={false}`）の上端に置き、下の本文だけをスクロールさせる作業面向け。
+   *   帯は縮まない（shrink-0）・左右 24px・上下 12px
+   */
+  variant?: "stack" | "bar"
+  /**
+   * `variant="bar"` の右端に置く要素（`<DialogClose asChild><Button size="icon-lg" aria-label="閉じる" …/></DialogClose>` 等）。
+   * **bar では必須**（全画面ダイアログで閉じる手段が見えなくなるため。省略すると開発ビルドで警告）。stack では無視する
+   */
+  trailing?: React.ReactNode
+}
+
+function DialogHeader({ className, variant = "stack", trailing, children, ...props }: DialogHeaderProps) {
+  const missingTrailing = variant === "bar" && trailing == null
+  React.useEffect(() => {
+    if (!missingTrailing) return
+    warnOnceInDev(
+      "dialog-header-bar-trailing",
+      'DialogHeader variant="bar" には trailing（閉じるボタン等）を渡してください。全画面ダイアログで閉じる手段が見えなくなります。'
+    )
+  }, [missingTrailing])
+  if (variant === "bar") {
+    return (
+      <div
+        data-slot="dialog-header"
+        data-variant="bar"
+        className={cn(
+          "flex shrink-0 flex-row items-start justify-between gap-3 border-b border-[var(--Border-Low-Emphasis)] px-6 py-3",
+          className
+        )}
+        {...props}
+      >
+        <div data-slot="dialog-header-text" className="flex min-w-0 flex-1 flex-col gap-1">
+          {children}
+        </div>
+        {trailing != null && (
+          <div data-slot="dialog-header-trailing" className="flex shrink-0 items-center gap-2">
+            {trailing}
+          </div>
+        )}
+      </div>
+    )
+  }
   return (
     <div
       data-slot="dialog-header"
       className={cn("flex flex-col gap-2", className)}
       {...props}
-    />
+    >
+      {children}
+    </div>
   )
 }
 
@@ -476,4 +650,4 @@ export {
   DialogTitle,
   DialogTrigger,
 }
-export type { DialogContentProps, DialogOverlayProps, DialogTitleProps, DialogSize }
+export type { DialogCenterFrom, DialogContentProps, DialogHeaderProps, DialogOverlayProps, DialogTitleProps, DialogSize }

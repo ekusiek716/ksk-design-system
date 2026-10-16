@@ -2,26 +2,66 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 
+/** FieldSet の間隔の段（issue #714）。8 / 16 / 24px */
+type FieldSetGap = "sm" | "md" | "lg"
+
+/**
+ * gap 指定時のクラス。`<legend>` は fieldset の枠側に描かれ flex の並びに入らないため、
+ * 子の間隔（gap）とは別に legend の下にも同じ間隔（margin-bottom）を付ける。
+ * クラスは完全な文字列で持つ（safelist の静的抽出のため）。
+ */
+const fieldSetGapClasses: Record<FieldSetGap, string> = {
+  sm: "gap-2 [&>[data-slot=field-legend]]:mb-2",
+  md: "gap-4 [&>[data-slot=field-legend]]:mb-4",
+  lg: "gap-6 [&>[data-slot=field-legend]]:mb-6",
+}
+
+interface FieldSetProps extends React.ComponentProps<"fieldset"> {
+  /**
+   * 子の間隔（issue #714）。"sm"=8px / "md"=16px / "lg"=24px。
+   * 指定すると FieldLegend の下にも同じ間隔を空ける（legend は flex の並びに入らないので gap が効かない）。
+   * 未指定は従来どおり gap-6（24px）で、legend の直下は 0px のまま（見た目を変えないため）。
+   * 絞り込みシートの選択肢グループのような詰めた並びは `gap="sm"` + `<FieldLegend size="sm">`。
+   */
+  gap?: FieldSetGap
+}
+
 /**
  * フォーム全体 / 大きな入力セクションを fieldset semantics で束ねる。
- * legend・description・FieldGroup を 24px の縦リズムで配置する。
+ * description・FieldGroup を 24px の縦リズムで配置する（legend の下の間隔は `gap` 指定時だけ付く）。
  */
-function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
+function FieldSet({ className, gap, ...props }: FieldSetProps) {
   return (
     <fieldset
       data-slot="field-set"
-      className={cn("m-0 flex min-w-0 flex-col gap-6 border-0 p-0", className)}
+      data-gap={gap}
+      className={cn("m-0 flex min-w-0 flex-col gap-6 border-0 p-0", gap && fieldSetGapClasses[gap], className)}
       {...props}
     />
   )
 }
 
+interface FieldLegendProps extends React.ComponentProps<"legend"> {
+  /**
+   * 見出しの大きさ（issue #714）。
+   * - "md"（既定）: typo-heading-md（フォームのセクション見出し・従来）
+   * - "sm": typo-label-md + Text-Medium-Emphasis（絞り込みシートの選択肢グループ等の小見出し）
+   */
+  size?: "md" | "sm"
+}
+
 /** FieldSet のアクセシブルな見出し。 */
-function FieldLegend({ className, ...props }: React.ComponentProps<"legend">) {
+function FieldLegend({ className, size = "md", ...props }: FieldLegendProps) {
   return (
     <legend
       data-slot="field-legend"
-      className={cn("typo-heading-md text-[var(--Text-High-Emphasis)]", className)}
+      data-size={size === "sm" ? "sm" : undefined}
+      className={cn(
+        size === "sm"
+          ? "typo-label-md text-[var(--Text-Medium-Emphasis)]"
+          : "typo-heading-md text-[var(--Text-High-Emphasis)]",
+        className
+      )}
       {...props}
     />
   )
@@ -105,8 +145,7 @@ export {
   FieldError,
   FieldSeparator,
 }
-export type FieldSetProps = React.ComponentProps<"fieldset">
-export type FieldLegendProps = React.ComponentProps<"legend">
+export type { FieldLegendProps, FieldSetGap, FieldSetProps }
 export type FieldGroupProps = React.ComponentProps<"div">
 export type FieldDescriptionProps = React.ComponentProps<"p">
 export type FieldErrorProps = React.ComponentProps<"p">

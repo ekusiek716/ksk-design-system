@@ -133,3 +133,26 @@ export const MobileWeekWithAgenda: Story = {
     await expect(args.onSelectEvent).toHaveBeenCalledWith(EVENTS[0])
   },
 }
+
+/**
+ * 分類の識別色（issue #716）。`accentColor` に `var(--Categorical-N)` を渡すと、md 以上はチップの先頭、
+ * md 未満は日付の下の点がその色になる。チップの面と文字は tone のまま。renderEvent で点を自作しない。
+ */
+const CATEGORY_EVENTS: MonthCalendarEvent[] = [
+  { id: "c1", date: "2026-10-03", label: "会場見学", accentColor: "var(--Categorical-1)" },
+  { id: "c2", date: "2026-10-03", label: "衣装合わせ", accentColor: "var(--Categorical-4)" },
+  { id: "c3", date: "2026-10-16", label: "写真の打合せ", accentColor: "var(--Categorical-7)" },
+  { id: "c4", date: "2026-10-24", label: "支払い期限", tone: "caution" },
+]
+
+export const CategoryAccent: Story = {
+  tags: ["interaction"],
+  args: { events: CATEGORY_EVENTS },
+  play: async ({ canvasElement }) => {
+    const dots = canvasElement.querySelectorAll<HTMLElement>('[data-slot="month-calendar-event-dot"]')
+    await expect(dots.length).toBe(3)
+    const color = getComputedStyle(dots[0]).backgroundColor
+    await expect(color).not.toBe("rgba(0, 0, 0, 0)")
+    await expect(color).not.toBe(getComputedStyle(dots[1]).backgroundColor)
+  },
+}
