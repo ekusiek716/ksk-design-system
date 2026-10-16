@@ -1665,10 +1665,12 @@
         "duplicates-control"
       ],
       "rules": [
-        "Use for multi-value text input (tags, emails, keywords)"
+        "Use for multi-value text input (tags, emails, keywords)",
+        "FormField と使うときは id を渡して htmlFor で結ぶ。inputLabel を label の代わりに使わない（lint P026 の例外が要らなくなる）"
       ],
       "accessibility": [
-        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
+        "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）",
+        "id / name / aria-labelledby / aria-describedby / aria-invalid を内部 input へ転送する。`<FormField htmlFor={id}>` の子に置くと label が名前になり、説明・エラーが自動で結ばれる。id か aria-labelledby があり inputLabel を明示しないときは aria-label を付けない（issue #693）"
       ]
     },
     {

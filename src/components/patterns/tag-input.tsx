@@ -15,9 +15,27 @@ interface TagInputProps {
   /**
    * タグ入力フィールドの aria-label。
    * i18n 対応: 英語では "Add tag" を渡す。
-   * @default "タグ入力"
+   *
+   * `id`（`<label htmlFor>` / `FormField htmlFor` で結ぶ）か `aria-labelledby` を渡したときは
+   * 既定では aria-label を付けない（付けると label より優先され、見出しが名前にならない）。
+   * @default "タグ入力"（id / aria-labelledby が無いとき）
    */
   inputLabel?: string
+  /**
+   * 内部の `<input>` の id（issue #693）。`<FormField htmlFor={id}>` / `<Label htmlFor>` と結ぶ。
+   */
+  id?: string
+  /** 内部の `<input>` の name（issue #693） */
+  name?: string
+  /** 内部の `<input>` に付ける aria-labelledby（issue #693） */
+  "aria-labelledby"?: string
+  /**
+   * 内部の `<input>` に付ける aria-describedby（issue #693）。
+   * `FormField` の子に置くと説明・エラーの id が自動で渡る。
+   */
+  "aria-describedby"?: string
+  /** 内部の `<input>` に付ける aria-invalid。`FormField error` の子に置くと自動で true になる（issue #693） */
+  "aria-invalid"?: boolean | "true" | "false"
 }
 
 function TagInput({
@@ -28,8 +46,15 @@ function TagInput({
   max,
   allowDuplicates = false,
   className,
-  inputLabel = "タグ入力",
+  inputLabel,
+  id,
+  name,
+  "aria-labelledby": ariaLabelledby,
+  "aria-describedby": ariaDescribedby,
+  "aria-invalid": ariaInvalid,
 }: TagInputProps) {
+  // label（id 経由）/ aria-labelledby で名前が付くときは、明示されない限り aria-label を出さない。
+  const resolvedInputLabel = inputLabel ?? (id || ariaLabelledby ? undefined : "タグ入力")
   const [input, setInput] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
   const skipBlurRef = React.useRef(false)
@@ -83,6 +108,8 @@ function TagInput({
       className={cn(
         "flex flex-wrap gap-1.5 min-h-12 w-full rounded-lg border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] bg-[var(--Surface-Primary)] px-3 py-2 transition-colors",
         "focus-within:ring-[3px] focus-within:ring-[var(--Focus-High-Emphasis)]/50 focus-within:border-[var(--Border-Accent-Primary)]",
+        // aria-invalid は内側の input に付くため、枠（外側）はその状態を :has で拾う（Input と同じ Caution 枠）
+        "has-[input[aria-invalid=true]]:border-[var(--Border-Caution)]",
         disabled && "cursor-not-allowed opacity-50",
         className
       )}
@@ -110,6 +137,8 @@ function TagInput({
       ))}
       <input
         ref={inputRef}
+        id={id}
+        name={name}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -120,7 +149,10 @@ function TagInput({
         disabled={disabled || (max !== undefined && value.length >= max)}
         placeholder={value.length === 0 ? placeholder : ""}
         className="flex-1 min-w-24 bg-transparent focus-visible:outline-hidden typo-body-md text-[var(--Text-High-Emphasis)] placeholder:text-[var(--Text-Low-Emphasis)] disabled:cursor-not-allowed"
-        aria-label={inputLabel}
+        aria-label={resolvedInputLabel}
+        aria-labelledby={ariaLabelledby}
+        aria-describedby={ariaDescribedby}
+        aria-invalid={ariaInvalid}
       />
     </div>
   )

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
 import { TagInput } from "./tag-input"
+import { FormField } from "./form-field"
 
 const meta: Meta<typeof TagInput> = {
   title: "Components/TagInput",
@@ -34,4 +35,21 @@ export const Disabled: Story = {
     a11y: { config: { rules: [{ id: "color-contrast", enabled: false }] } },
   },
   render: () => <Demo value={["タグA", "タグB"]} disabled />,
+}
+
+/**
+ * FormField の label と結ぶ（issue #693）。`id` を渡すと `<FormField htmlFor>` の label が
+ * 入力欄の名前になり、description / error は aria-describedby・aria-invalid として自動で渡る。
+ */
+export const WithFormField: Story = {
+  render: function Render() {
+    const [tags, setTags] = React.useState<string[]>(["前撮り"])
+    return (
+      <div className="w-80">
+        <FormField label="タグ" htmlFor="task-tags" description="Enter で追加できます">
+          <TagInput id="task-tags" value={tags} onChange={setTags} />
+        </FormField>
+      </div>
+    )
+  },
 }

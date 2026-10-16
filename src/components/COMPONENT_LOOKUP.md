@@ -163,7 +163,7 @@
 | StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, Variants, Interactive, MultipleCards |
 | StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |
 | SwipeRow | `@/components/patterns/swipe-row` | — | Default, SingleAction, KeyboardAccessible |
-| TagInput | `@/components/patterns/tag-input` | — | Default, WithInitialTags, WithMax, Disabled |
+| TagInput | `@/components/patterns/tag-input` | — | Default, WithInitialTags, WithMax, Disabled, WithFormField |
 | Tag | `@/components/patterns/tag` | **variant**: `default`, `brand`, `caution`, `success`, `warning`, `info` | Default, Brand, Caution, Success, Warning, Info, AllVariants, Categorical, CategoricalWithDot, CategoricalHelpers |
 | ThumbnailCard | `@/components/patterns/thumbnail-card` | — | Vertical, Horizontal, WithSecondaryAction, Strip, WholeCardClickableWithSecondaryAction |
 

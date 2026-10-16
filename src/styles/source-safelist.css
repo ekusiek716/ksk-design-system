@@ -530,6 +530,7 @@
 @source inline("has-[:focus-visible]:bg-transparent");
 @source inline("has-[>[data-slot=card-overlay]:active]:scale-[0.98]");
 @source inline("has-[>[data-slot=card-overlay]:hover]:bg-[var(--Surface-Secondary)]");
+@source inline("has-[input[aria-invalid=true]]:border-[var(--Border-Caution)]");
 @source inline("hidden");
 @source inline("hover:bg-[var(--Border-Medium-Emphasis)]");
 @source inline("hover:bg-[var(--Brand-Light)]");
