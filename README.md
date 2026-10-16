@@ -540,6 +540,21 @@ import { BottomTabBar } from "ksk-design-system"
 
 React Native は **0.78 以上**（React 19 を同梱する最初の RN）が必要です。
 
+### OS のモーション設定
+
+```tsx
+import { useReduceMotion } from "ksk-design-system/native/ui"
+
+const { reduceMotion, resolved } = useReduceMotion()
+const suppressMotion = !resolved || reduceMotion
+```
+
+`resolved` は OS 設定の初回取得または設定変更イベントで `true` になります。
+取得前・取得失敗時は `false` のため、`suppressMotion` の間は演出を開始せず、
+実行中の演出は停止して元の表示へ戻してください。設定変更は即時反映され、
+遅れて届いた初回取得結果では上書きしません。アンマウント時には購読を解除します。
+この hook は `native/ui` の公開 API です。トークン専用の `native` エントリには含みません。
+
 `ksk-design-system/native/ui` から直接 RN 用コンポーネント export（134 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
 
 ```tsx
