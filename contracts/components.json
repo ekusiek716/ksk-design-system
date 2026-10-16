@@ -426,8 +426,9 @@
         "スマホは全画面・PC は中央のモーダルにする作業面は position=\"fullscreen\" + centerFrom（\"sm\" | \"md\" | \"lg\"）。境界以上で center と同じ位置・角丸・影・size の幅になる。className に md:!max-w-* / md:!h-* を書いて全画面を打ち消さない（issue #713）",
         "height=\"fill\" は中央表示（center / centerFrom の境界以上）の高さを画面 - 4rem に固定する。見取り図・表など中身の量で枠が伸び縮みすると困る面向け（issue #713）",
         "size は sm(400) / md(480・既定) / lg(640) / xl(800) / 2xl(1024px・issue #713)",
+        "帯の閉じるボタンは DialogHeader variant=\"bar\" onClose={() => setOpen(false)}（右端に Button ghost icon-lg 48px + 閉じるアイコン 20px。読み上げ名は closeLabel、既定は KskLabelsProvider の close＝「閉じる」）。DialogClose + Button を trailing に自作しない（issue #722）",
         "全画面ダイアログ（padding={false}）の上端の帯は DialogHeader variant=\"bar\"（下線・左右 24px・上下 12px）+ trailing（閉じるボタン等）。DialogHeader に border-b / flex-row / px を自作しない（issue #713）",
-        "height=\"fill\" は position=\"top\" と centerFrom の無い fullscreen では効かない（開発ビルドで警告）。DialogHeader variant=\"bar\" の trailing（閉じるボタン）は必須（省略すると開発ビルドで警告）。centerFrom の中央表示は center と同じ ksk-squircle の角（issue #713）"
+        "height=\"fill\" は position=\"top\" と centerFrom の無い fullscreen では効かない（開発ビルドで警告）。DialogHeader variant=\"bar\" は onClose か trailing のどちらかが必須（どちらも無いと開発ビルドで警告）。centerFrom の中央表示は center と同じ ksk-squircle の角（issue #713）"
       ],
       "variants": {
         "position": [
@@ -1872,7 +1873,8 @@
         "SheetContent 内で使い、Sheet の autoFocus=false と組み合わせる",
         "KebabMenu は DetailSheetHeader trailing に置く",
         "editable title は titleEditor slot に置く",
-        "DetailSheetHeader の titleEditor には <CommitInput variant=\"inline-title\" aria-label=… /> を渡す（issue #675）"
+        "DetailSheetHeader の titleEditor には <CommitInput variant=\"inline-title\" aria-label=… /> を渡す（issue #675）",
+        "閉じるボタンは DetailSheetHeader onClose（trailing の右端に Button ghost icon 40px + 閉じるアイコン 20px。読み上げ名は closeLabel、既定は KskLabelsProvider の close＝「閉じる」）。trailing に閉じる Button を自作しない（issue #722）"
       ]
     },
     {

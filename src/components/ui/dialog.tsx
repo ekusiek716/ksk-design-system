@@ -6,6 +6,9 @@ import { warnOnceInDev } from "@/lib/dev-warn"
 import { usePortalContainer } from "./portal-container"
 import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
 import { useComposedRef } from "@/lib/compose-ref"
+import { Button } from "./button"
+import { SemanticIcon } from "./semantic-icon"
+import { useKskLabels } from "./ksk-labels"
 import {
   ModalStackRegistrar,
   ModalityProvider,
@@ -520,18 +523,36 @@ interface DialogHeaderProps extends React.ComponentProps<"div"> {
   variant?: "stack" | "bar"
   /**
    * `variant="bar"` の右端に置く要素（`<DialogClose asChild><Button size="icon-lg" aria-label="閉じる" …/></DialogClose>` 等）。
-   * **bar では必須**（全画面ダイアログで閉じる手段が見えなくなるため。省略すると開発ビルドで警告）。stack では無視する
+   * **bar では trailing か onClose のどちらかが必須**（全画面ダイアログで閉じる手段が見えなくなるため。
+   * どちらも無いと開発ビルドで警告）。stack では無視する
    */
   trailing?: React.ReactNode
+  /**
+   * `variant="bar"` の右端に閉じるボタンを出す（issue #722）。押したときの処理（`onOpenChange(false)` 等）を渡す。
+   * trailing の後ろに `Button variant="ghost" size="icon-lg"`（48px）+ 閉じるアイコン 20px を置く。
+   * DialogClose + Button を自作しない。stack では無視する（stack の閉じる手段は DialogFooter 等）
+   */
+  onClose?: () => void
+  /** 閉じるボタンの読み上げ名。既定は KskLabelsProvider の close（無ければ「閉じる」） */
+  closeLabel?: string
 }
 
-function DialogHeader({ className, variant = "stack", trailing, children, ...props }: DialogHeaderProps) {
-  const missingTrailing = variant === "bar" && trailing == null
+function DialogHeader({
+  className,
+  variant = "stack",
+  trailing,
+  onClose,
+  closeLabel,
+  children,
+  ...props
+}: DialogHeaderProps) {
+  const defaultLabels = useKskLabels()
+  const missingTrailing = variant === "bar" && trailing == null && onClose == null
   React.useEffect(() => {
     if (!missingTrailing) return
     warnOnceInDev(
       "dialog-header-bar-trailing",
-      'DialogHeader variant="bar" には trailing（閉じるボタン等）を渡してください。全画面ダイアログで閉じる手段が見えなくなります。'
+      'DialogHeader variant="bar" には onClose か trailing（閉じるボタン等）を渡してください。全画面ダイアログで閉じる手段が見えなくなります。'
     )
   }, [missingTrailing])
   if (variant === "bar") {
@@ -548,9 +569,21 @@ function DialogHeader({ className, variant = "stack", trailing, children, ...pro
         <div data-slot="dialog-header-text" className="flex min-w-0 flex-1 flex-col gap-1">
           {children}
         </div>
-        {trailing != null && (
+        {(trailing != null || onClose != null) && (
           <div data-slot="dialog-header-trailing" className="flex shrink-0 items-center gap-2">
             {trailing}
+            {onClose != null && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-lg"
+                data-slot="dialog-header-close"
+                aria-label={closeLabel ?? defaultLabels.close}
+                onClick={onClose}
+              >
+                <SemanticIcon name="close" size={20} />
+              </Button>
+            )}
           </div>
         )}
       </div>

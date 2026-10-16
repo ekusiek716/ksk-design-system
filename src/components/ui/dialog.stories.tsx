@@ -266,6 +266,45 @@ export const FullscreenUntilMd: Story = {
 }
 
 /**
+ * 見出しの帯の閉じるボタンを DS が出す（issue #722）。`onClose` に閉じる処理を渡すだけで、
+ * 右端に 48px の閉じるボタン（読み上げ名は closeLabel・既定「閉じる」）が出る。
+ * DialogClose + Button を trailing に自作しない。
+ */
+export const HeaderBarOnClose: Story = {
+  tags: ["interaction"],
+  render: function Render() {
+    const [open, setOpen] = useState(false)
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button>ゲスト一覧を開く</Button>
+        </DialogTrigger>
+        <DialogContent position="fullscreen" centerFrom="md" size="xl" padding={false} className="flex flex-col">
+          <DialogHeader variant="bar" onClose={() => setOpen(false)}>
+            <DialogTitle>ゲスト一覧</DialogTitle>
+            <DialogDescription>見出しの右端の閉じるボタンは DS が出します。</DialogDescription>
+          </DialogHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto p-6">
+            <p className="typo-body-md text-[var(--Text-High-Emphasis)]">本文</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole("button", { name: "ゲスト一覧を開く" }))
+    const dialog = await within(document.body).findByRole("dialog")
+    await waitFor(() => expect(dialog.getAttribute("data-state")).toBe("open"))
+    const close = dialog.querySelector<HTMLElement>('[data-slot="dialog-header-close"]')!
+    await expect(close.getAttribute("aria-label")).toBe("閉じる")
+    await expect(Math.round(close.getBoundingClientRect().width)).toBeGreaterThanOrEqual(44)
+    await userEvent.click(within(dialog).getByRole("button", { name: "閉じる" }))
+    // CI の WebKit は退場アニメーションの待ちが既定 1000ms を超えることがあるので 5000ms 待つ
+    await waitFor(() => expect(within(document.body).queryByRole("dialog")).toBeNull(), { timeout: 5000 })
+  },
+}
+
+/**
  * position="fullscreen" かつ safeArea=false（オプトアウト）。
  * consumer が自前でヘッダー/フッターの safe-area を管理したい場合に使う。
  */

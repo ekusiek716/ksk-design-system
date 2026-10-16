@@ -1,5 +1,8 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { Button } from "../ui/button"
+import { SemanticIcon } from "../ui/semantic-icon"
+import { useKskLabels } from "../ui/ksk-labels"
 
 interface DetailSheetScaffoldProps extends React.ComponentProps<"div"> {
   header?: React.ReactNode
@@ -18,6 +21,14 @@ interface DetailSheetHeaderProps extends Omit<React.ComponentProps<"div">, "titl
   description?: React.ReactNode
   leading?: React.ReactNode
   trailing?: React.ReactNode
+  /**
+   * 閉じるボタンを出す（issue #722）。押したときの処理（`onOpenChange(false)` 等）を渡す。
+   * trailing の末尾（右端）に `Button variant="ghost" size="icon"`（40px）+ 閉じるアイコン 20px を置く。
+   * 閉じるボタンを trailing に自作しない（大きさがばらつくため）。KebabMenu 等は trailing にそのまま置ける
+   */
+  onClose?: () => void
+  /** 閉じるボタンの読み上げ名。既定は KskLabelsProvider の close（無ければ「閉じる」） */
+  closeLabel?: string
 }
 
 function DetailSheetScaffold({
@@ -55,10 +66,13 @@ function DetailSheetHeader({
   description,
   leading,
   trailing,
+  onClose,
+  closeLabel,
   children,
   ...props
 }: DetailSheetHeaderProps) {
   const titleContent = titleEditor ?? title
+  const defaultLabels = useKskLabels()
 
   return (
     <div
@@ -97,6 +111,18 @@ function DetailSheetHeader({
         className="flex min-h-10 shrink-0 items-center justify-end gap-1"
       >
         {trailing}
+        {onClose && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            data-slot="detail-sheet-header-close"
+            aria-label={closeLabel ?? defaultLabels.close}
+            onClick={onClose}
+          >
+            <SemanticIcon name="close" size={20} />
+          </Button>
+        )}
       </div>
     </div>
   )

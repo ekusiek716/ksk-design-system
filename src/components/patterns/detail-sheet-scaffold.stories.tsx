@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, userEvent, within } from "storybook/test"
 import * as React from "react"
 import { More } from "iconsax-reactjs"
 import { Button } from "@/components/ui/button"
@@ -74,5 +75,41 @@ export const EditableTitle: Story = {
         </DetailSheetScaffold>
       </div>
     )
+  },
+}
+
+/**
+ * 閉じるボタンを DS が出す（issue #722）。`onClose` に閉じる処理を渡すと、trailing の右端に
+ * 40px の閉じるボタン（閉じるアイコン 20px・読み上げ名は closeLabel、既定「閉じる」）が出る。
+ * trailing の KebabMenu 等はそのまま左に並ぶ。閉じるボタンを trailing に自作しない。
+ */
+export const WithCloseButton: Story = {
+  tags: ["interaction"],
+  render: function Render() {
+    const [closed, setClosed] = React.useState(0)
+    return (
+      <div className="max-w-md rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]">
+        <DetailSheetScaffold
+          header={
+            <DetailSheetHeader
+              title="ゲスト詳細"
+              trailing={<KebabMenu items={[{ label: "編集" }, { label: "削除", destructive: true }]} />}
+              onClose={() => setClosed((n) => n + 1)}
+            />
+          }
+        >
+          <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">閉じた回数: {closed}</p>
+        </DetailSheetScaffold>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const close = canvas.getByRole("button", { name: "閉じる" })
+    await expect(close.getAttribute("data-slot")).toBe("detail-sheet-header-close")
+    // trailing の末尾（右端）に置く
+    await expect(close.parentElement?.lastElementChild).toBe(close)
+    await userEvent.click(close)
+    await expect(canvas.getByText("閉じた回数: 1")).toBeInTheDocument()
   },
 }
