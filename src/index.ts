@@ -66,6 +66,7 @@ export {
 } from "./components/ui/dropdown-menu"
 export { HoverCard, HoverCardTrigger, HoverCardContent } from "./components/ui/hover-card"
 export { Input } from "./components/ui/input"
+export type { FieldVariant } from "./lib/server-variants/inline-field"
 export type { InputProps } from "./components/ui/input"
 export { CommitInput } from "./components/ui/commit-input"
 export type { CommitInputProps } from "./components/ui/commit-input"

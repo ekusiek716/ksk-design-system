@@ -47,7 +47,7 @@
 | HoverCard, HoverCardTrigger, HoverCardContent | `@/components/ui/hover-card` | — | Default |
 | IconBadge | `@/components/ui/icon-badge` | **size**: `md`, `ml`, `lg`<br>**appearance**: `accent`, `plain`<br>**tone**: `accent`, `info`, `success`, `warning`, `caution` | Medium, MediumLarge, Large, Tones, InCardFlow |
 | ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |
-| Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput |
+| Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput, Inline |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, Unstyled, DisabledState |
 | MultiSelect | `@/components/ui/multi-select` | — | Default, WithTriggerLabel, InvalidInFormField, FocusReturnsToTriggerAfterClear |
 | NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |

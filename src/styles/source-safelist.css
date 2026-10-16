@@ -112,6 +112,8 @@
 @source inline("appearance-none");
 @source inline("aria-disabled:opacity-50");
 @source inline("aria-invalid:border-[var(--Border-Caution)]");
+@source inline("aria-invalid:ring-2");
+@source inline("aria-invalid:ring-[var(--Border-Caution)]");
 @source inline("aria-invalid:ring-[var(--Caution-Base)]/20");
 @source inline("aspect-[2/1]");
 @source inline("aspect-[3/2]");
@@ -425,6 +427,7 @@
 @source inline("flex-shrink");
 @source inline("flex-shrink-0");
 @source inline("flex-wrap");
+@source inline("focus-visible:bg-transparent");
 @source inline("focus-visible:border-[var(--Border-Accent-Primary)]");
 @source inline("focus-visible:border-[var(--Object-Accent-Primary)]");
 @source inline("focus-visible:outline-hidden");

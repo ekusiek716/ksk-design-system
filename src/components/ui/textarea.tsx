@@ -2,6 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useValueLength } from "@/lib/use-value-length"
 import { UNSTYLED_FOCUS_RING } from "@/lib/server-variants/unstyled"
+import { INLINE_FIELD_BASE, INLINE_FIELD_TYPO, type FieldVariant } from "@/lib/server-variants/inline-field"
 
 interface TextareaProps extends React.ComponentProps<"textarea"> {
   /** 入力内容に合わせて高さを自動伸縮する */
@@ -23,6 +24,12 @@ interface TextareaProps extends React.ComponentProps<"textarea"> {
    * 43px → 80px になった事例（issue #420）が想定ユースケース。
    */
   unstyled?: boolean
+  /**
+   * 見た目の種類（issue #675）。Input の variant と同じ。"inline" は枠・背景なしで本文と同じ見た目、
+   * "inline-title" は見出し（typo-heading-xl）。メモ・説明のその場編集に使う（resize なし・最小高さなし）。
+   * AutoGrowTextarea / CommitTextarea / CommitAutoGrowTextarea にもそのまま渡せる。
+   */
+  variant?: FieldVariant
 }
 
 function Textarea({
@@ -30,6 +37,7 @@ function Textarea({
   autoGrow,
   showCount,
   unstyled = false,
+  variant = "default",
   maxLength,
   value,
   defaultValue,
@@ -77,13 +85,16 @@ function Textarea({
     <textarea
       ref={countRef}
       data-slot="textarea"
+      data-variant={variant === "default" ? undefined : variant}
       value={value}
       defaultValue={defaultValue}
       maxLength={maxLength}
       className={cn(
         unstyled
           ? UNSTYLED_FOCUS_RING
-          : [
+          : variant !== "default"
+            ? [INLINE_FIELD_BASE, INLINE_FIELD_TYPO[variant], "min-h-0 resize-none"]
+            : [
               // 最小高さ・padding・角丸は product theme の公開変数（`--Field-*`）を参照する。
               // 既定値は従来の min-h-[80px] / px-3 / py-2 / rounded-lg と同値（issue #364）。
               "flex min-h-[var(--Field-Min-Height)] w-full rounded-[var(--Field-Radius)] border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] bg-[var(--Surface-Primary)] px-[var(--Field-Padding-X-Md)] py-[var(--Field-Padding-Y)] typo-body-md text-[var(--Text-High-Emphasis)] transition-colors",

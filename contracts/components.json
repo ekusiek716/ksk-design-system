@@ -120,7 +120,9 @@
         "showCount + maxLength で controlled / uncontrolled / IME 対応の文字数カウンタを表示",
         "showCount 未指定時は wrapper / counter DOM を追加しない",
         "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（showCount / adornment / IME 追従は維持される）",
-        "Native Input supports style (outer container View) and inputStyle (inner TextInput) as RN-idiomatic style overrides, merged after DS defaults (issue #447)"
+        "Native Input supports style (outer container View) and inputStyle (inner TextInput) as RN-idiomatic style overrides, merged after DS defaults (issue #447)",
+        "その場で編集する欄（詳細シートのタイトル・メモ等）は variant=\"inline\"（本文 typo-body-md）/ \"inline-title\"（見出し typo-heading-xl）。枠・背景なし、hover で Surface-Secondary、focus-visible で Focus リング、aria-invalid で Caution のリング。unstyled + typo・余白・フォーカス下線の手書きで作らない（issue #675）",
+        "CommitInput / CommitTextarea / AutoGrowTextarea / CommitAutoGrowTextarea にも同じ variant を渡せる。native Input / Textarea / AutoGrowTextarea も同名（フォーカス・invalid は下線）"
       ]
     },
     {
@@ -253,7 +255,8 @@
         "Must use <Textarea> not <textarea>",
         "showCount + maxLength で controlled / uncontrolled / IME 対応の文字数カウンタを表示",
         "showCount 未指定時は wrapper / counter DOM を追加しない",
-        "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（autoGrow / showCount は維持される）"
+        "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（autoGrow / showCount は維持される）",
+        "variant=\"inline\" / \"inline-title\" は枠・背景・最小高さ・resize なしでその場編集する（issue #675。Input と同じ）"
       ]
     },
     {
@@ -1833,7 +1836,8 @@
       "rules": [
         "SheetContent 内で使い、Sheet の autoFocus=false と組み合わせる",
         "KebabMenu は DetailSheetHeader trailing に置く",
-        "editable title は titleEditor slot に置く"
+        "editable title は titleEditor slot に置く",
+        "DetailSheetHeader の titleEditor には <CommitInput variant=\"inline-title\" aria-label=… /> を渡す（issue #675）"
       ]
     },
     {

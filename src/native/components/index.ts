@@ -62,7 +62,7 @@ export { CountdownHero, type CountdownHeroProps } from "./CountdownHero"
 
 // Phase 2: Basic Form
 export { Label, type LabelProps } from "./Label"
-export { Input, type InputProps } from "./Input"
+export { Input, type InputProps, type FieldVariant } from "./Input"
 export { Textarea, type TextareaProps } from "./Textarea"
 export { AutoGrowTextarea, type AutoGrowTextareaDensity, type AutoGrowTextareaProps } from "./AutoGrowTextarea"
 export { CommitInput, type CommitInputProps } from "./CommitInput"

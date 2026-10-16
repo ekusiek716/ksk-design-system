@@ -8,6 +8,12 @@ interface DetailSheetScaffoldProps extends React.ComponentProps<"div"> {
 
 interface DetailSheetHeaderProps extends Omit<React.ComponentProps<"div">, "title"> {
   title?: React.ReactNode
+  /**
+   * タイトルをその場で編集する入力欄。指定時は title の代わりに描画する。
+   * 見た目を合わせるには `<CommitInput variant="inline-title" aria-label="タイトル" … />`
+   * （複数行なら `<CommitAutoGrowTextarea variant="inline-title" density="compact" …/>`）を渡す
+   * （issue #675）。unstyled + typo の上書きで作らない。
+   */
   titleEditor?: React.ReactNode
   description?: React.ReactNode
   leading?: React.ReactNode
