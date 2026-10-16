@@ -138,7 +138,7 @@
 | MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount, WithTopAlignment |
 | MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff, FixedViewportApp |
 | MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline, Full width CTA, With ad banner offset (bottomOffsetExtra) |
-| MonthCalendar | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English, MobileWeekWithAgenda, CategoryAccent |
+| MonthCalendar, MonthCalendarExpandToggle, MonthCalendarHeader | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English, MobileWeekWithAgenda, CategoryAccent, HeaderAndExpandToggle |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
 | PresenceIndicator | `@/components/patterns/presence-indicator` | — | Default, WithBadge, Offline, NameOnly, 狭幅で非表示にする例（className） |

@@ -2840,7 +2840,9 @@
       "path": "src/components/patterns/month-calendar.tsx",
       "description": "予定付きの月カレンダー（issue #679）。日ごとの予定を一覧する予定表（日付を選ぶ入力は Calendar / DatePicker）。今日・選択日・土日・月外セル・予定チップ・「+n件」の見た目を DS が持つ。",
       "subcomponents": [
-        "buildMonthWeeks"
+        "buildMonthWeeks",
+        "MonthCalendarHeader",
+        "MonthCalendarExpandToggle"
       ],
       "accessibility": [
         "WAI-ARIA grid パターン: role=grid / row / columnheader / gridcell、タブストップは 1 つ（roving tabindex。選択日 → 今日 → 1 日）",
@@ -2854,7 +2856,9 @@
         "スマホの週の帯は view=\"week\"（フォーカス中の日を含む 1 週だけ。矢印キーで週が移る。issue #704）、日ごとの予定の中身は AgendaList を下に置く。週ストリップ・アジェンダを Button unstyled で自作しない",
         "土日の色は weekendTone（既定 true。日曜 Text-Caution / 土曜 Text-Accent-Primary・Calendar と同じ語彙）",
         "native は未提供（INTENTIONAL_NATIVE_GAPS）",
-        "分類の識別色（カテゴリ別の予定）は MonthCalendarEvent.accentColor に var(--Categorical-N) を渡す。md 以上はチップの先頭の点、md 未満は日付の下の点（tone より優先）。チップの面と文字は tone のまま。renderEvent の中で色の点を自作しない（issue #716）"
+        "分類の識別色（カテゴリ別の予定）は MonthCalendarEvent.accentColor に var(--Categorical-N) を渡す。md 以上はチップの先頭の点、md 未満は日付の下の点（tone より優先）。チップの面と文字は tone のまま。renderEvent の中で色の点を自作しない（issue #716）",
+        "月の見出し（月名・今日へ・前後の月）は MonthCalendarHeader（month・onToday / onPrev / onNext・size md=スマホ / lg=PC・headingLevel）を grid の上に置く。前後は icon-sm + aria-label（既定「前の月」「次の月」）。h2 + Button で自作しない（issue #721）",
+        "週の帯 ⇄ 月全体の開閉は MonthCalendarExpandToggle（expanded / onExpandedChange・aria-expanded・aria-controls に MonthCalendar の id）を grid の下に置き、expanded を view=\"month\" / \"week\" に渡す。Button ghost icon-sm w-full で自作しない（issue #721）"
       ]
     },
     {

@@ -5,7 +5,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
 import { expect, fn, userEvent } from "storybook/test"
-import { MonthCalendar, type MonthCalendarEvent } from "./month-calendar"
+import { MonthCalendar, MonthCalendarExpandToggle, MonthCalendarHeader, type MonthCalendarEvent } from "./month-calendar"
 import { AgendaList } from "./agenda-list"
 import { Button } from "../ui/button"
 
@@ -154,5 +154,65 @@ export const CategoryAccent: Story = {
     const color = getComputedStyle(dots[0]).backgroundColor
     await expect(color).not.toBe("rgba(0, 0, 0, 0)")
     await expect(color).not.toBe(getComputedStyle(dots[1]).backgroundColor)
+  },
+}
+
+/**
+ * 見出し（月名・今日へ・前後の月）と週 ⇄ 月の開閉（issue #721）。
+ * `MonthCalendarHeader` を grid の上、`MonthCalendarExpandToggle` を下に置く。開閉の状態は consumer が持ち、
+ * MonthCalendar の view に渡す。見出しと開閉ボタンを h2 + Button で自作しない。
+ */
+export const HeaderAndExpandToggle: Story = {
+  tags: ["interaction"],
+  render: function Render(args) {
+    const [month, setMonth] = React.useState(new Date(2026, 9, 1))
+    const [selected, setSelected] = React.useState<string | undefined>(undefined)
+    const [expanded, setExpanded] = React.useState(false)
+    const step = (delta: number) => setMonth((m) => new Date(m.getFullYear(), m.getMonth() + delta, 1))
+    return (
+      <div className="flex flex-col gap-2">
+        <MonthCalendarHeader
+          month={month}
+          onToday={() => {
+            setMonth(new Date(2026, 9, 1))
+            setSelected("2026-10-16")
+          }}
+          onPrev={() => step(-1)}
+          onNext={() => step(1)}
+        />
+        <MonthCalendar
+          {...args}
+          id="header-story-calendar"
+          view={expanded ? "month" : "week"}
+          month={month}
+          selectedDate={selected}
+          onSelectDay={setSelected}
+          onMonthChange={setMonth}
+        />
+        <MonthCalendarExpandToggle
+          expanded={expanded}
+          onExpandedChange={setExpanded}
+          aria-controls="header-story-calendar"
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const heading = canvasElement.querySelector<HTMLElement>('[data-slot="month-calendar-header"] h2')!
+    await expect(heading.textContent).toBe("2026年10月")
+    await userEvent.click(canvasElement.querySelector<HTMLElement>('[aria-label="次の月"]')!)
+    await expect(heading.textContent).toBe("2026年11月")
+    await userEvent.click(canvasElement.querySelector<HTMLElement>('[data-slot="month-calendar-today"]')!)
+    await expect(heading.textContent).toBe("2026年10月")
+    const grid = canvasElement.querySelector<HTMLElement>('[data-slot="month-calendar"]')!
+    await expect(grid.getAttribute("data-view")).toBe("week")
+    const toggle = canvasElement.querySelector<HTMLElement>('[data-slot="month-calendar-expand-toggle"]')!
+    await expect(toggle.getAttribute("aria-expanded")).toBe("false")
+    await expect(toggle.getAttribute("aria-label")).toBe("月全体を表示")
+    await userEvent.click(toggle)
+    await expect(toggle.getAttribute("aria-expanded")).toBe("true")
+    await expect(toggle.getAttribute("aria-label")).toBe("週だけを表示")
+    await expect(grid.getAttribute("data-view")).toBe("month")
+    await expect(toggle.getBoundingClientRect().width).toBe(grid.getBoundingClientRect().width)
   },
 }
