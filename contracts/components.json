@@ -4,12 +4,12 @@
     "version": "2.14.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 72,
+      "ui": 73,
       "patterns": 69,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 164
+      "total": 165
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -528,6 +528,28 @@
         "Provider を置かない既存コードは従来どおり document.body（後方互換）",
         "container に渡す要素とその祖先は transform / filter / backdrop-filter / contain / will-change でスタッキングコンテキストを作らないこと（fixed のオーバーレイが閉じ込められる）",
         "container に渡す ref は useState の setter などで安定させる（毎レンダー変わると開いている Portal が unmount/remount される）"
+      ]
+    },
+    {
+      "name": "KskLabelsProvider",
+      "path": "src/components/ui/ksk-labels.tsx",
+      "description": "DS 部品の既定文言（スキップリンク・管理画面のメニュー・FormField の必須/任意・閉じるボタン・カレンダー見出し）と MonthCalendar / AgendaList の locale 既定をまとめて切り替える Provider（issue #723）。アプリの一番外側に 1 回置く。",
+      "subcomponents": [
+        "useKskLabels",
+        "useKskLocale",
+        "KSK_DEFAULT_LABELS"
+      ],
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "読み上げ名（skip link・メニューボタン・閉じるボタン・カレンダーの前後ボタン等）を画面の言語にそろえる。英語の画面に日本語の読み上げが混ざらないようにする"
+      ],
+      "rules": [
+        "優先順位は「部品に渡した prop > Provider の labels > Provider の locale の既定（ja / en） > 日本語（Provider 無し）」",
+        "英語のアプリは <KskLabelsProvider locale=\"en\"> を 1 回置く。部品ごとに skipLinkLabel / mobileMenuLabel / closeLabel を渡して回らない",
+        "i18n の文言で差し替えるときは labels に t() の結果を渡す（入れ子の Provider は外側の labels に重ねる）",
+        "React context なので SSR でリクエスト間に共有されない。Toast の fire-and-forget 経路の文言は従来どおり configureToast（Toaster は props）",
+        "Provider を置かないときの文言は従来どおり日本語（後方互換）"
       ]
     },
     {

@@ -48,6 +48,7 @@ const INTENTIONAL_NATIVE_GAPS = new Map([
   ["KanbanColumn", "カンバンの列（issue #679）。横スクロールのボードに並べる PC 向けの入れ物で、native のアプリ内ボードは画面ごとの FlatList / SectionList で組むため移植しない"],
   ["MobileTabBar", "web-only BottomTabBar wrapper; native uses LiquidBottomTabBar / createExpoRouterTabBar instead"],
   ["NotificationList", "admin notification list is Web-only"],
+  ["KskLabelsProvider", "Web 部品の既定文言（skip link・AdminShell のメニュー・FormField の必須/任意・閉じる・カレンダー見出し。issue #723）を切り替える Provider。対象の部品が Web 専用（SkipLink / AdminShell / MonthCalendar 等）か native では別の props 体系のため、native 側は各部品の accessibilityLabel 等で渡す。必要になったら native 用に別途設計する"],
   ["PortalContainerProvider", "DOM Portal の描画先を差し替えるための Provider。React Native に DOM Portal は無く、RN の Modal は常にネイティブのルートへ描画されるため Web 専用"],
   ["ResponsiveOverlayFrame", "viewport 幅でボトムシート↔中央モーダルを切り替える Web 専用 frame（issue #472）。matchMedia と CSS のブレークポイントに依存し、native は画面幅に関わらずボトムシート（BottomSheetFrame）で統一するため移植しない"],
   ["SearchPanel", "admin search panel is Web-only"],

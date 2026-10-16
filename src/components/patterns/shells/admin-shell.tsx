@@ -6,6 +6,7 @@ import { Container } from "../../ui/container"
 import { Sheet, SheetContent, SheetTitle } from "../../ui/sheet"
 import { ScrollArea } from "../../ui/scroll-area"
 import { SkipLink } from "../../ui/skip-link"
+import { useKskLabels } from "../../ui/ksk-labels"
 
 interface AdminShellProps extends React.ComponentProps<"div"> {
   sidebar: React.ReactNode
@@ -31,9 +32,9 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
   mobileDrawerOpen?: boolean
   /** モバイルドロワーの開閉が変わったとき */
   onMobileDrawerOpenChange?: (open: boolean) => void
-  /** メニューボタンのアクセシブルネーム。@default "メニューを開く" */
+  /** メニューボタンのアクセシブルネーム。@default KskLabelsProvider の mobileMenu（無ければ「メニューを開く」） */
   mobileMenuLabel?: string
-  /** ドロワーの見出し（読み上げ専用。画面には出さない）。@default "メニュー" */
+  /** ドロワーの見出し（読み上げ専用。画面には出さない）。@default KskLabelsProvider の mobileDrawerTitle（無ければ「メニュー」） */
   mobileDrawerTitle?: string
   /**
    * ドロワーの中のリンク（`a[href]`）や SidebarNav の項目を押したら閉じる。
@@ -104,15 +105,18 @@ function AdminShell({
   sidebarTone = "default",
   mainId = "main-content",
   skipLink = true,
-  skipLinkLabel = "コンテンツへ移動",
+  skipLinkLabel,
   mobileDrawer = false,
   mobileDrawerOpen,
   onMobileDrawerOpenChange,
-  mobileMenuLabel = "メニューを開く",
-  mobileDrawerTitle = "メニュー",
+  mobileMenuLabel: mobileMenuLabelProp,
+  mobileDrawerTitle: mobileDrawerTitleProp,
   closeMobileDrawerOnNavigate = false,
   ...props
 }: AdminShellProps) {
+  const defaultLabels = useKskLabels()
+  const mobileMenuLabel = mobileMenuLabelProp ?? defaultLabels.mobileMenu
+  const mobileDrawerTitle = mobileDrawerTitleProp ?? defaultLabels.mobileDrawerTitle
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
   const drawerOpen = mobileDrawerOpen ?? uncontrolledOpen
   const setDrawerOpen = React.useCallback(
@@ -161,7 +165,10 @@ function AdminShell({
       className={cn("flex h-screen bg-[var(--Surface-Secondary)]", className)}
       {...props}
     >
-      {skipLink && skipLinkLabel && <SkipLink targetId={mainId} label={skipLinkLabel} />}
+      {/* skipLinkLabel 未指定は KskLabelsProvider の既定（issue #723）。null / "" は従来どおり出さない */}
+      {skipLink && skipLinkLabel !== null && skipLinkLabel !== "" && (
+        <SkipLink targetId={mainId} label={skipLinkLabel} />
+      )}
       <aside
         data-slot="admin-sidebar"
         data-tone={sidebarTone}

@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 interface SkipLinkProps extends Omit<React.ComponentProps<"a">, "href"> {
   targetId: string
@@ -8,11 +9,14 @@ interface SkipLinkProps extends Omit<React.ComponentProps<"a">, "href"> {
 
 function SkipLink({
   targetId,
-  label = "コンテンツへ移動",
+  label,
   className,
   onClick,
   ...props
 }: SkipLinkProps) {
+  // 既定文言は KskLabelsProvider（無ければ「コンテンツへ移動」。issue #723）
+  const defaultLabels = useKskLabels()
+  const resolvedLabel = label ?? defaultLabels.skipLink
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     onClick?.(event)
     if (event.defaultPrevented) return
@@ -41,7 +45,7 @@ function SkipLink({
         className,
       )}
     >
-      {label}
+      {resolvedLabel}
     </a>
   )
 }

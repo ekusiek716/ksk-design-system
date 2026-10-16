@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../ui/ksk-labels"
 
 /**
  * `required` の見た目をどう出すか。
@@ -69,6 +70,8 @@ function FormField({
   ...props
 }: FormFieldProps) {
   const hasLabelRow = endLabel != null
+  // pill の「必須」「任意」は KskLabelsProvider の既定（無ければ日本語。issue #723）
+  const defaultLabels = useKskLabels()
 
   // error / description を子フィールドへ aria で紐付ける。
   const reactId = React.useId()
@@ -119,7 +122,7 @@ function FormField({
           )}
           aria-hidden="true"
         >
-          {required ? "必須" : "任意"}
+          {required ? defaultLabels.required : defaultLabels.optional}
         </span>
       )}
     </label>

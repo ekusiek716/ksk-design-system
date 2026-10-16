@@ -48,6 +48,7 @@
 | IconBadge | `@/components/ui/icon-badge` | **size**: `md`, `ml`, `lg`<br>**appearance**: `accent`, `plain`<br>**tone**: `accent`, `info`, `success`, `warning`, `caution` | Medium, MediumLarge, Large, Tones, InCardFlow |
 | ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |
 | Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput, Inline |
+| KskLabelsProvider, KSK_DEFAULT_LABELS | `@/components/ui/ksk-labels` | — | Default, English, CustomLabels |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, Unstyled, DisabledState |
 | MultiSelect | `@/components/ui/multi-select` | — | Default, WithTriggerLabel, InvalidInFormField, FocusReturnsToTriggerAfterClear |
 | NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |

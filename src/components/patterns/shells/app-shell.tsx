@@ -17,7 +17,7 @@ function AppShell({
   bottomNav,
   mainId = "main-content",
   skipLink = true,
-  skipLinkLabel = "コンテンツへ移動",
+  skipLinkLabel,
   children,
   ...props
 }: AppShellProps) {
@@ -27,7 +27,10 @@ function AppShell({
       className={cn("flex flex-col min-h-screen bg-[var(--Surface-Primary)]", className)}
       {...props}
     >
-      {skipLink && skipLinkLabel && <SkipLink targetId={mainId} label={skipLinkLabel} />}
+      {/* skipLinkLabel 未指定は KskLabelsProvider の既定（issue #723）。null / "" は従来どおり出さない */}
+      {skipLink && skipLinkLabel !== null && skipLinkLabel !== "" && (
+        <SkipLink targetId={mainId} label={skipLinkLabel} />
+      )}
       {topBar && (
         <header
           data-slot="app-topbar"

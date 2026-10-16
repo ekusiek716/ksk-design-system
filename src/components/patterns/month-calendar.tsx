@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLocale } from "../ui/ksk-labels"
 import {
   ACCENT_DOT,
   CHIP_TONE,
@@ -68,7 +69,7 @@ interface MonthCalendarProps extends Omit<React.ComponentProps<"div">, "onSelect
   weekendTone?: boolean
   /** 「今日」の基準日（"YYYY-MM-DD" / Date）。省略時は現在日。テスト・擬似日付用 */
   today?: Date | string
-  /** 表示言語（曜日・読み上げ・「+n件」の既定）。既定 "ja" */
+  /** 表示言語（曜日・読み上げ・「+n件」の既定）。既定は KskLabelsProvider の locale（無ければ "ja"） */
   locale?: "ja" | "en"
   /** 「+n件」の文言。既定 ja: `+${n}件` / en: `+${n} more` */
   moreLabel?: (count: number) => string
@@ -147,7 +148,7 @@ function MonthCalendar({
   weekStartsOn = 0,
   weekendTone = true,
   today: todayProp,
-  locale = "ja",
+  locale: localeProp,
   moreLabel,
   renderEvent,
   view = "month",
@@ -155,6 +156,9 @@ function MonthCalendar({
   "aria-label": ariaLabel,
   ...props
 }: MonthCalendarProps) {
+  // 既定は KskLabelsProvider の locale（無ければ "ja"。issue #723）
+  const providerLocale = useKskLocale()
+  const locale = localeProp ?? providerLocale ?? "ja"
   const monthStart = toMonthStart(month)
   const monthKey = `${monthStart.getFullYear()}-${pad(monthStart.getMonth() + 1)}`
   const weeks = buildMonthWeeks(monthStart, weekStartsOn)
