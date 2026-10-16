@@ -219,7 +219,7 @@ export const FixedItemHeight: Story = {
 
 /**
  * `keyboardBehavior="hide"`（既定）は、キーボード検知（visualViewport の縮み /
- * `html[data-kb-open]`）に加えて、タッチ主体の端末（`(pointer: coarse)`）でテキスト入力欄に
+ * `html[data-kb-open]`）に加えて、ソフトキーボードが出る端末（`(pointer: coarse) and (hover: none)`）でテキスト入力欄に
  * フォーカスがある間もタブバーを隠す。visualViewport が縮む前の iOS Safari や、
  * 縮まない Android でもキーボードの上にナビが重ならない。
  * consumer が `html:has(input:focus) [data-slot="bottom-nav-pill"]` の CSS を足す必要は無い。

@@ -107,7 +107,8 @@ function MobileFloatingActionButton({
         bottomOffset === "bottom-nav-pill" && "[--ksk-fab-bottom-offset:6rem]",
         mobileOnly && "lg:hidden",
         // invisible: 隠れている間に Tab で見えない FAB へフォーカスが移らないようにする
-        //（BottomTabBar の hide と同じ扱い。issue #700）
+        //（BottomTabBar の hide と同じ扱い。issue #700）。visibility は上の transition-all に乗り、
+        // 遷移の終わりで hidden になるのでフェードアウトは切れない
         shouldHide && "translate-y-2 opacity-0 pointer-events-none invisible",
         className
       )}

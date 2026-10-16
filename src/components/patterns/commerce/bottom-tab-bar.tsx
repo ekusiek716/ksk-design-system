@@ -73,7 +73,7 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
    * ソフトキーボード表示中の挙動。
    * - "stay" : 従来通り下部に固定
    * - "hide" : 入力中は非表示。キーボード検知（visualViewport の縮み / `html[data-kb-open]`）に加え、
-   *            タッチ主体の端末（`(pointer: coarse)`）でテキスト入力欄にフォーカスがある間も隠す
+   *            ソフトキーボードが出る端末（`(pointer: coarse) and (hover: none)`）でテキスト入力欄にフォーカスがある間も隠す
    *            （visualViewport が縮む前・縮まない端末向け。issue #700）
    * - "lift" : keyboard inset 分だけ上へ逃がす
    */
@@ -522,6 +522,8 @@ function BottomTabBarPill({
         hasProminentLayout
           ? "min-h-[var(--Nav-Pill-Min-Height)] gap-[var(--Nav-Pill-Gap)] px-[var(--Nav-Pill-Padding-X)] py-[var(--Nav-Pill-Padding-Y)]"
           : "h-[58px] gap-0 px-3",
+        // invisible は transition-all に乗る（visibility は遷移の終わりで hidden になる）ので
+        // フェードアウトは切れず、隠れた後は Tab でフォーカスが入らない
         keyboardState.shouldHide && "translate-y-2 opacity-0 pointer-events-none invisible",
         className
       )}

@@ -10,12 +10,13 @@
 import * as React from "react"
 import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { renderToString } from "react-dom/server"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { Home2, User } from "iconsax-reactjs"
 
 import { MobileTabBar } from "../src/components/patterns/commerce/mobile-tab-bar"
 import { MobileFloatingActionButton } from "../src/components/patterns/mobile-floating-action-button"
-import { isSoftKeyboardTarget } from "../src/lib/use-soft-keyboard-focus"
+import { SOFT_KEYBOARD_DEVICE_QUERY, isSoftKeyboardTarget } from "../src/lib/use-soft-keyboard-focus"
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
@@ -25,14 +26,16 @@ const TABS = [
 ]
 
 let coarse = true
+let hoverNone = true
 const originalMatchMedia = window.matchMedia
 let container: HTMLDivElement
 let root: Root
 
 beforeEach(() => {
   coarse = true
+  hoverNone = true
   window.matchMedia = ((query: string) => ({
-    matches: query === "(pointer: coarse)" ? coarse : false,
+    matches: query === SOFT_KEYBOARD_DEVICE_QUERY ? coarse && hoverNone : false,
     media: query,
     onchange: null,
     addEventListener: () => {},
@@ -86,13 +89,72 @@ describe("keyboardBehavior=\"hide\" の入力フォーカス判定（#700）", (
     expect(isHidden(fab())).toBe(false)
   })
 
-  it("フォーカスがどこにも無くなっても戻る（blur）", () => {
+  it("フォーカスがどこにも無くなったら、次のフレームで実際のフォーカス先を見て戻す（blur）", async () => {
     renderUi(<Page />)
     const field = container.querySelector<HTMLInputElement>('[data-testid="field"]')!
     act(() => field.focus())
     expect(isHidden(nav())).toBe(true)
     act(() => field.blur())
+    // relatedTarget が null の時点では即断しない
+    expect(isHidden(nav())).toBe(true)
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50))
+    })
     expect(isHidden(nav())).toBe(false)
+  })
+
+  it("relatedTarget が null でも、次のフレームでまだ入力欄にフォーカスがあれば隠したまま", async () => {
+    renderUi(<Page />)
+    const field = container.querySelector<HTMLInputElement>('[data-testid="field"]')!
+    act(() => field.focus())
+    act(() => {
+      field.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: null }))
+    })
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50))
+    })
+    expect(document.activeElement).toBe(field)
+    expect(isHidden(nav())).toBe(true)
+  })
+
+  it("iPad + ハードウェアキーボード等（coarse でも hover できる）ではフォーカスだけでは隠さない", () => {
+    hoverNone = false
+    renderUi(<Page />)
+    act(() => container.querySelector<HTMLInputElement>('[data-testid="field"]')!.focus())
+    expect(isHidden(nav())).toBe(false)
+    expect(isHidden(fab())).toBe(false)
+  })
+
+  it("隠れても transition-all のままなので invisible でフェードが切れない", () => {
+    renderUi(<Page />)
+    act(() => container.querySelector<HTMLInputElement>('[data-testid="field"]')!.focus())
+    for (const el of [nav(), fab()]) {
+      const classes = el.className.split(/\s+/)
+      expect(classes).toContain("invisible")
+      expect(classes).toContain("opacity-0")
+      expect(classes).toContain("transition-all")
+    }
+  })
+
+  it("SSR（renderToString）で描画でき、隠さない状態で出る", () => {
+    const html = renderToString(<Page />)
+    expect(html).toContain('data-slot="bottom-nav-pill"')
+    expect(html).not.toMatch(/class="[^"]*\binvisible\b/)
+  })
+
+  it("アンマウントでリスナーを外す / keyboardBehavior が hide 以外なら付けない", () => {
+    const add = vi.spyOn(document, "addEventListener")
+    const remove = vi.spyOn(document, "removeEventListener")
+    renderUi(<Page behavior="stay" />)
+    expect(add.mock.calls.filter(([type]) => type === "focusin").length).toBe(0)
+    renderUi(<Page />)
+    const added = add.mock.calls.filter(([type]) => type === "focusin" || type === "focusout").length
+    expect(added).toBe(4) // タブバー + FAB × focusin / focusout
+    act(() => root.render(<></>))
+    const removed = remove.mock.calls.filter(([type]) => type === "focusin" || type === "focusout").length
+    expect(removed).toBe(added)
+    add.mockRestore()
+    remove.mockRestore()
   })
 
   it("マウス主体の端末（pointer: fine）ではフォーカスだけでは隠さない", () => {

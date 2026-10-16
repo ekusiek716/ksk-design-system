@@ -1889,7 +1889,8 @@
         "keyboard 表示中に入力を邪魔する場合は keyboardBehavior=hide を使う",
         "variant=glass に shadow-* を重ねない（glass-accent が inset 3層 + drop shadow を内包するため二重になる）",
         "下部固定の全幅 CTA は fullWidth を使い、fixed inset-x + Button を手組みしない。fullWidth 時は placement が無視されラベルが常に表示される",
-        "広告バナー等で動的に持ち上げる必要があるときは、内部変数 --ksk-fab-bottom-offset を直接上書きせず bottomOffsetExtra を使う（issue #453）"
+        "広告バナー等で動的に持ち上げる必要があるときは、内部変数 --ksk-fab-bottom-offset を直接上書きせず bottomOffsetExtra を使う（issue #453）",
+        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、ソフトキーボードが出る端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。consumer の html:has(input:focus) で隠す CSS は不要"
       ]
     },
     {
@@ -2844,7 +2845,10 @@
       "path": "src/components/patterns/selectable-tile.tsx",
       "description": "押すと選べて、編集中はドラッグ・矢印キーで動かせるタイル（issue #703）。配席表の卓・座席、レイアウト編集のブロック等。押せる面そのものが 1 つの button で、consumer の pointer / key ハンドラと aria-* が同じ要素に付く。",
       "variants": {
-        "shape": ["rounded", "circle"]
+        "shape": [
+          "rounded",
+          "circle"
+        ]
       },
       "accessibility": [
         "1 つの <button>。名前は中身か aria-label。selected 指定時は aria-pressed（未指定なら付けない）",
@@ -2997,7 +3001,8 @@
         "--Nav-Item-Min-Height / --Nav-Center-Action-Size は max(44px, var(...)) で参照するため、44px（HIG のタップ領域下限）より縮まない。",
         "--Nav-Center-Action-Surface / -Border / -Shadow と --Nav-Selected-Surface / -Shadow は宣言したときだけ DS 既定（.glass-accent / ガラスの選択プラッター）を置き換える。未宣言なら tone / dark の出し分けは DS 側が持つ。",
         "--Nav-Pill-* の寸法が効くのは prominent レイアウト（showLabels か centerAction がある pill）。アイコンのみの compact pill は契約外で固定。",
-        "bottomOffsetExtra（CSS の長さ）は safe-area・pill の 12px・lift の持ち上げ量に加算される。className の bottom-* で位置を上書きしない（issue #681）"
+        "bottomOffsetExtra（CSS の長さ）は safe-area・pill の 12px・lift の持ち上げ量に加算される。className の bottom-* で位置を上書きしない（issue #681）",
+        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、ソフトキーボードが出る端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。consumer の html:has(input:focus) で隠す CSS は不要"
       ],
       "props": {
         "navLabel": "string (既定 \"メインナビゲーション\") — nav 要素の aria-label（issue #428）"
@@ -3037,7 +3042,8 @@
         "寸法・面の上書きは BottomTabBar と同じ --Nav-* を使う（MobileTabBar は薄いラッパーなので変数はそのまま効く。issue #471）",
         "[data-global-nav-add-icon] は belle-todo 互換の後方互換フックで公開契約ではない。中央アクションのアイコンは data-slot=\"bottom-nav-center-action-icon\" で狙う（issue #471）",
         "keyboardBehavior（hide 既定 / lift / stay）を BottomTabBar へ素通しする。キーボード表示中にタブバーを隠す CSS を consumer に書かない（issue #681）",
-        "bottomOffsetExtra（CSS の長さ）で画面下の広告バナー等の高さぶん持ち上げる。MobileAppShell の bottomPaddingExtra・MobileFloatingActionButton の bottomOffsetExtra に同じ値を渡す（issue #681）"
+        "bottomOffsetExtra（CSS の長さ）で画面下の広告バナー等の高さぶん持ち上げる。MobileAppShell の bottomPaddingExtra・MobileFloatingActionButton の bottomOffsetExtra に同じ値を渡す（issue #681）",
+        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、ソフトキーボードが出る端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。consumer の html:has(input:focus) で隠す CSS は不要"
       ],
       "productTheme": [
         "--Nav-Pill-*",
