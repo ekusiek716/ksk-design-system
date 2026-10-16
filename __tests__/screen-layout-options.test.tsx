@@ -76,6 +76,18 @@ describe("desktopLayout=\"card\"（#701）", () => {
     // 未指定なら inline の変数は出さない（フォールバックの既定値が効く）
     expect(screen.getAttribute("style") ?? "").not.toContain("--ksk-screen-card")
   })
+  it("height=\"fill\" はラッパーにも h-full を付け、lg 未満で親の高さを伝える", () => {
+    const backdrop = render(<Screen desktopLayout="card" height="fill">本文</Screen>).querySelector<HTMLElement>(
+      '[data-slot="screen-backdrop"]',
+    )!
+    expect(backdrop.className.split(" ")).toContain("h-full")
+    const screen = backdrop.querySelector<HTMLElement>('[data-slot="screen"]')!
+    expect(screen.className.split(" ")).toContain("h-full")
+    // 既定（dvh）のラッパーは高さを持たない（中の 100dvh がそのまま効く）
+    const dvh = render(<Screen desktopLayout="card">本文</Screen>).querySelector<HTMLElement>('[data-slot="screen-backdrop"]')!
+    expect(dvh.className.split(" ")).not.toContain("h-full")
+  })
+
   it("cardMaxWidth / cardMaxHeight を inline の変数で渡す", () => {
     const screen = render(
       <Screen desktopLayout="card" cardMaxWidth="32rem" cardMaxHeight="44rem">本文</Screen>,

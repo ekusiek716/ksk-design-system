@@ -185,7 +185,12 @@ function Screen({
   return (
     <div
       data-slot="screen-backdrop"
-      className="lg:flex lg:min-h-[100dvh] lg:items-center lg:justify-center lg:bg-[var(--Surface-Secondary)] lg:p-8"
+      className={cn(
+        "lg:flex lg:min-h-[100dvh] lg:items-center lg:justify-center lg:bg-[var(--Surface-Secondary)] lg:p-8",
+        // height="fill" は親の高さを受ける。lg 未満の素通しラッパーが高さを持たないと
+        // 中の h-full が解決されず本文がスクロールしなくなるので、ラッパーにも伝える
+        height === "fill" && "h-full"
+      )}
     >
       {screen}
     </div>
