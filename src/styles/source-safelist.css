@@ -438,6 +438,7 @@
 @source inline("focus-visible:ring-[var(--Focus-High-Emphasis)]");
 @source inline("focus-visible:ring-[var(--Focus-High-Emphasis)]/50");
 @source inline("focus-visible:ring-[var(--Object-Accent-Primary)]/20");
+@source inline("focus-visible:ring-[var(--Object-on-Inverse)]");
 @source inline("focus-visible:ring-inset");
 @source inline("focus-visible:ring-offset-2");
 @source inline("focus-visible:ring-offset-transparent");
@@ -1107,7 +1108,6 @@
 @source inline("text-[var(--Object-Low-Emphasis)]");
 @source inline("text-[var(--Object-Medium-Emphasis)]");
 @source inline("text-[var(--Object-Success)]");
-@source inline("text-[var(--Object-Warning)]");
 @source inline("text-[var(--Text-Accent-Primary)]");
 @source inline("text-[var(--Text-Caution)]");
 @source inline("text-[var(--Text-Disable)]");

@@ -139,7 +139,11 @@ function SidebarNavRow({ item, collapsed, tone }: { item: SidebarNavItem; collap
       // 行高 44px は DS のタッチターゲット方針（AdminShell の合成規範 #7 と同じ）
       "relative flex min-h-11 items-center rounded-lg typo-label-md",
       "transition-colors duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
-      "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+      "focus-visible:outline-hidden focus-visible:ring-[3px]",
+      // inverse の面では Focus-High-Emphasis/50 が 3:1 を割る（check-contrast.mjs）ため、Object-on-Inverse の不透明リング
+      tone === "inverse"
+        ? "focus-visible:ring-[var(--Object-on-Inverse)]"
+        : "focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
       collapsed ? "size-11 justify-center" : "w-full gap-3 px-3 text-left",
       tone === "inverse"
         ? item.isActive

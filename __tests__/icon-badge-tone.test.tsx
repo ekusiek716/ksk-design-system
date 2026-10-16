@@ -23,13 +23,13 @@ describe("IconBadge の tone（#684）", () => {
   })
 
   it.each([
-    ["info", "Info"],
-    ["success", "Success"],
-    ["warning", "Warning"],
-    ["caution", "Caution"],
-  ] as const)("tone=%s は Object-%s のアイコンと Surface-%s の面", (tone, name) => {
+    ["info", "Info", "Object"],
+    ["success", "Success", "Text"],
+    ["warning", "Warning", "Text"],
+    ["caution", "Caution", "Object"],
+  ] as const)("tone=%s は %s の面と、3:1 を満たすアイコン色", (tone, name, fgGroup) => {
     const cls = parse(<IconBadge tone={tone}><svg /></IconBadge>).className.split(" ")
-    expect(cls).toContain(`text-[var(--Object-${name})]`)
+    expect(cls).toContain(`text-[var(--${fgGroup}-${name})]`)
     expect(cls).toContain(`bg-[var(--Surface-${name})]`)
     expect(cls).not.toContain("bg-[var(--Surface-Accent-Primary-Light)]")
   })

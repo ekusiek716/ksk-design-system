@@ -18,13 +18,14 @@ const iconBadgeVariants = cva(
       },
       /**
        * 色の意味（issue #684）。accent（既定・従来どおり）/ info / success / warning / caution。
-       * アイコン色は Object-*、`appearance="accent"` の面は対応する Surface-* の淡色面。
+       * アイコン色は Object-*（success / warning は 3:1 のため Text-*）、`appearance="accent"` の面は対応する Surface-* の淡色面。
        */
       tone: {
         accent: "text-[var(--Object-Accent-Primary)]",
         info: "text-[var(--Object-Info)]",
-        success: "text-[var(--Object-Success)]",
-        warning: "text-[var(--Object-Warning)]",
+        // success / warning の Object-*（Green-500 / Orange-500）は淡い面で非テキスト 3:1 を割るため Text-* を使う
+        success: "text-[var(--Text-Success)]",
+        warning: "text-[var(--Text-Warning)]",
         caution: "text-[var(--Object-Caution)]",
       },
     },

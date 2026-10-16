@@ -136,6 +136,47 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   }
 }
 
+// 暗色サイドバー（SidebarNav tone="inverse"・issue #680）。面は Surface-Inverse、hover / 選択中は
+// Object-on-Inverse を 10% / 15% 重ねた色（Tailwind の /10・/15 = color-mix と同じ線形合成）。
+// 文字: 通常 Text-on-Inverse-Secondary、hover / 選択中 Text-on-Inverse。light / dark で AA。
+const mixHex = (fgHex, bgHex, alpha) => {
+  const f = [1, 3, 5].map((i) => parseInt(fgHex.slice(i, i + 2), 16))
+  const b = [1, 3, 5].map((i) => parseInt(bgHex.slice(i, i + 2), 16))
+  return "#" + f.map((c, k) => Math.round(c * alpha + b[k] * (1 - alpha)).toString(16).padStart(2, "0")).join("")
+}
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const surfaceInverse = resolve(s.surface.inverse)
+  const objectOnInverse = resolve(s.object["on-inverse"])
+  const hoverBg = mixHex(objectOnInverse, surfaceInverse, 0.1)
+  const selectedBg = mixHex(objectOnInverse, surfaceInverse, 0.15)
+  const secondaryOn = (bg) => resolveOver(s.text["on-inverse-secondary"], bg)
+  pairs.push([secondaryOn(surfaceInverse), surfaceInverse, `${mode}: SidebarNav inverse の文字 / Surface-Inverse`, 4.5])
+  pairs.push([resolve(s.text["on-inverse"]), hoverBg, `${mode}: SidebarNav inverse の hover 文字 / hover の面`, 4.5])
+  pairs.push([resolve(s.text["on-inverse"]), selectedBg, `${mode}: SidebarNav inverse の選択中の文字 / 選択の面`, 4.5])
+}
+
+// IconBadge の tone（issue #684）: アイコン色と淡い面の非テキストコントラスト 3:1（WCAG 1.4.11）。light / dark。
+// success / warning は Object-*（Green-500 / Orange-500）だと淡い面で 3:1 を割るため Text-* を使う（icon-badge.tsx と同じ対応）。
+const iconBadgeTones = [
+  ["accent", "object", "accent-primary", "accent-primary-light"],
+  ["info", "object", "info", "info"],
+  ["success", "text", "success", "success"],
+  ["warning", "text", "warning", "warning"],
+  ["caution", "object", "caution", "caution"],
+]
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  for (const [tone, group, fg, surf] of iconBadgeTones) {
+    pairs.push([resolve(s[group][fg]), resolve(s.surface[surf]), `${mode}: IconBadge tone=${tone} のアイコン / 面（非テキスト）`, 3])
+  }
+}
+
+// 暗色サイドバー（SidebarNav tone="inverse"）のフォーカスリング。既定の Focus-High-Emphasis/50 は
+// Surface-Inverse 上で 3:1 を割る（light 2.7 / dark 1.6）ため、inverse では Object-on-Inverse の不透明リングを使う。
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const surfaceInverse = resolve(s.surface.inverse)
+  pairs.push([resolve(s.object["on-inverse"]), surfaceInverse, `${mode}: SidebarNav inverse のフォーカスリング / Surface-Inverse（非テキスト）`, 3])
+}
+
 // 検索一致のハイライト（<mark>・Highlight 部品・issue #692）。light / dark で AA。
 for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   pairs.push([resolve(s.text["on-highlight"]), resolve(s.surface.highlight), `${mode}: Text-on-Highlight / Surface-Highlight`, 4.5])

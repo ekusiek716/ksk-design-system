@@ -50,8 +50,9 @@ export function IconBadge({
   const palette = {
     accent: { bg: theme.surface["accent-primary-light"], fg: theme.object["accent-primary"] },
     info: { bg: theme.surface.info, fg: theme.object.info },
-    success: { bg: theme.surface.success, fg: theme.object.success },
-    warning: { bg: theme.surface.warning, fg: theme.object.warning },
+    // success / warning の object（500）は淡い面で 3:1 を割るため text（700）を使う（Web と同じ）
+    success: { bg: theme.surface.success, fg: theme.text.success },
+    warning: { bg: theme.surface.warning, fg: theme.text.warning },
     caution: { bg: theme.surface.caution, fg: theme.object.caution },
   }[tone]
   const iconProps = {

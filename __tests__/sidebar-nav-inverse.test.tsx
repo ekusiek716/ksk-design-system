@@ -32,6 +32,9 @@ describe("SidebarNav tone（#680）", () => {
     expect(active.className).not.toContain("Surface-Accent-Primary-Light")
     expect(rest.className).toContain("text-[var(--Text-on-Inverse-Secondary)]")
     expect(rest.className).not.toContain("bg-[var(--Surface-Primary)]")
+    // 暗い面では 3:1 を満たす Object-on-Inverse のフォーカスリング
+    expect(rest.className).toContain("focus-visible:ring-[var(--Object-on-Inverse)]")
+    expect(rest.className).not.toContain("focus-visible:ring-[var(--Focus-High-Emphasis)]/50")
   })
 })
 
