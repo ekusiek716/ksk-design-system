@@ -278,6 +278,10 @@ describe("契約のドリフト検査", () => {
       "--Nav-Pill-Border",
       "--Nav-Pill-Shadow",
       "--Nav-Pill-Specular",
+      // タブの高さ・ラベルの縦位置（issue #699）。未宣言なら h-full（100%）/ 0 で従来どおりに
+      // するため :root に置かず、bottom-tab-bar.tsx が var(--X, 既定) で受ける
+      "--Nav-Item-Height",
+      "--Nav-Item-Label-Offset-Y",
     ])
     const missing = [...contract.allowed].filter((name) => !declared.has(name) && !seams.has(name))
     expect(missing).toEqual([])
