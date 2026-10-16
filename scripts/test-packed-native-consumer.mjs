@@ -79,7 +79,7 @@ try {
   writeFileSync(
     join(temp, "consumer.tsx"),
     [
-      'import { Button, ListItem, Radio, ThemeProvider, type ListItemDivider, type ListItemTone, type RadioProps } from "ksk-design-system/native/ui"',
+      'import { Button, ListItem, Radio, ThemeProvider, useReduceMotion, type ReduceMotionState, type ListItemDivider, type ListItemTone, type RadioProps } from "ksk-design-system/native/ui"',
       'import { getTheme, themes } from "ksk-design-system/native"',
       "",
       'const defaultTheme = getTheme("default", "light")',
@@ -91,6 +91,9 @@ try {
       'const radioProps: RadioProps = { selected: true, onChange: (selected: boolean) => { void selected }, accessibilityLabel: "選択肢" }',
       "",
       "export function Consumer() {",
+      "  const motion: ReduceMotionState = useReduceMotion()",
+      "  const suppressMotion: boolean = !motion.resolved || motion.reduceMotion",
+      "  void suppressMotion",
       '  return <ThemeProvider initialName="default">',
       '    <Button>確認する</Button>',
       '    <Radio {...radioProps} />',

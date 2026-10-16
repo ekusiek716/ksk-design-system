@@ -17,6 +17,21 @@ RN 側の公開 export 一覧は `src/native/COMPONENT_LOOKUP.md` で確認で�
 import { Button, Screen, PhotoHero } from "ksk-design-system/native/ui"
 ```
 
+## OS のモーション設定
+
+```tsx
+import { useReduceMotion } from "ksk-design-system/native/ui"
+
+const { reduceMotion, resolved } = useReduceMotion()
+const suppressMotion = !resolved || reduceMotion
+```
+
+`resolved` は OS 設定の初回取得または設定変更イベントで `true` になります。
+取得前・取得失敗時は `false` のため、`suppressMotion` の間は演出を開始せず、
+実行中の演出は停止して元の表示へ戻してください。設定変更は即時反映され、
+遅れて届いた初回取得結果では上書きしません。アンマウント時には購読を解除します。
+この hook は `native/ui` の公開 API です。トークン専用の `native` エントリには含みません。
+
 ## Expo Router / React Navigation bottom tabs
 
 Expo Router の `<Tabs>` では `createExpoRouterTabBar` を渡します。アイコンは各 screen の `tabBarIcon` をそのまま使えるため、consumer 側で floating tab bar を組み直す必要はありません。
