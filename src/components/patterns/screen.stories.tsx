@@ -124,9 +124,6 @@ export const FixedPhotoHero: Story = {
  *   （既定 最大幅 30rem・高さ 47.5rem。`cardMaxWidth` / `cardMaxHeight` で変える）
  */
 export const OnboardingCard: Story = {
-  parameters: {
-    a11y: { config: { rules: [{ id: "scrollable-region-focusable", enabled: false }] } },
-  },
   render: () => (
     <Screen
       safeAreaTop
@@ -148,12 +145,9 @@ export const OnboardingCard: Story = {
           あとから変えられます。決まっていなければ、おおよその月で大丈夫です。
         </p>
         {rows.slice(0, 6).map((row) => (
-          <div
-            key={row}
-            className="rounded-xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4 typo-body-md text-[var(--Text-High-Emphasis)]"
-          >
+          <Button key={row} variant="secondary" className="w-full justify-start">
             {row}
-          </div>
+          </Button>
         ))}
       </div>
     </Screen>
@@ -166,9 +160,6 @@ export const OnboardingCard: Story = {
  * 高さは親に合わせる `height="fill"`。
  */
 export const NestedInAppMain: Story = {
-  parameters: {
-    a11y: { config: { rules: [{ id: "scrollable-region-focusable", enabled: false }] } },
-  },
   render: () => (
     <main id="app-main" className="h-[100dvh] bg-[var(--Surface-Secondary)] p-4">
       <Screen landmark="none" height="fill" className="rounded-2xl border border-[var(--Border-Low-Emphasis)]">
@@ -177,6 +168,7 @@ export const NestedInAppMain: Story = {
           {rows.slice(0, 10).map((row) => (
             <p key={row} className="typo-body-md text-[var(--Text-High-Emphasis)]">{row}</p>
           ))}
+          <Button variant="secondary">続きを読む</Button>
         </div>
       </Screen>
     </main>
