@@ -2,6 +2,18 @@
 
 `ksk-design-system` のリリーススケジュール・運用ルール。
 
+## v2.11.0（2026-10-16）
+
+2.10.0以降に、consumer側の見た目の上書きをなくすためのAPIを9件追加したminorリリース。追加のみで、propsを渡さなければ従来と同じ表示です。
+
+- Buttonに `ghost-neutral` / `ghost-destructive` / `ghost-success` を追加しました（#664・#671）。hover面はAAを満たす色です。
+- Cardに `onClick` / `href` / `disabled` を追加し、全面の押せる面にできるようにしました（#665）。
+- ChipSelectorに `aria-label` / `aria-labelledby` / `aria-describedby` / `id`、ChipFilterBarに `gutter` / `contentClassName` を追加しました（#666・#667）。
+- ListItemにスロット用の `leftSlotClassName` / `rightSlotClassName` / `rightSlotWidth`、ActionTileに `media` / `mediaPosition` / `mediaSize`、CountdownHeroに `onClick` / `href` / `aria-label` / `disabled` を追加しました（#668・#670・#672）。
+- コード / OTP入力の新部品 `CodeInput` を追加しました（#669）。貼り付けで全桁入力、`one-time-code`、桁ごとの読み上げ名に対応します。
+
+導入時は [2.11.0の注意](./MIGRATION.md#v2110) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。consumerへの取り込みとアプリ配布は別工程で、今回のDS公開準備には含めません。
+
 ## v2.10.0（2026-10-16）
 
 2.9.0以降の未公開13コミットをまとめたminorリリース。既存APIの削除はなく、操作部品の見た目とフォーカスの既定動作を改善しています。
