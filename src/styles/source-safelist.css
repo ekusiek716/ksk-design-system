@@ -57,6 +57,8 @@
 @source inline("[&_[data-radix-scroll-area-viewport]>div]:flex!");
 @source inline("[&_[data-radix-scroll-area-viewport]>div]:flex-col");
 @source inline("[&_[data-radix-scroll-area-viewport]>div]:min-h-full");
+@source inline("[&_[data-slot=card-action]]:relative");
+@source inline("[&_[data-slot=card-action]]:z-[2]");
 @source inline("[&_svg:not([class*='size-'])]:size-4");
 @source inline("[&_svg]:pointer-events-none");
 @source inline("[&_svg]:shrink-0");
@@ -523,6 +525,8 @@
 @source inline("h-screen");
 @source inline("has-[:focus-visible]:bg-[var(--Surface-Tertiary)]");
 @source inline("has-[:focus-visible]:bg-transparent");
+@source inline("has-[>[data-slot=card-overlay]:active]:scale-[0.98]");
+@source inline("has-[>[data-slot=card-overlay]:hover]:bg-[var(--Surface-Secondary)]");
 @source inline("hidden");
 @source inline("hover:bg-[var(--Border-Medium-Emphasis)]");
 @source inline("hover:bg-[var(--Brand-Light)]");
@@ -915,6 +919,7 @@
 @source inline("ring-[var(--Brand-Primary)]/20");
 @source inline("ring-[var(--Focus-High-Emphasis)]/50");
 @source inline("ring-[var(--Object-Caution)]/30");
+@source inline("ring-inset");
 @source inline("rotate-180");
 @source inline("rotate-45");
 @source inline("rotate-90");
@@ -1102,6 +1107,7 @@
 @source inline("tracking-wider");
 @source inline("transform");
 @source inline("transition");
+@source inline("transition-[background-color,scale]");
 @source inline("transition-[color,box-shadow,transform]");
 @source inline("transition-[transform,opacity]");
 @source inline("transition-[transform,width,height]");

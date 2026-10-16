@@ -340,7 +340,10 @@
       "rules": [
         "rounded-lg (8px)",
         "default variant は gap-6 が直下の子の縦間隔を所有する。直下の子に mt-* / mb-* / my-* / space-y-* を追加しない",
-        "variant=media は gap / padding を持たないため、内側コンテンツで明示的に余白を管理できる"
+        "variant=media は gap / padding を持たないため、内側コンテンツで明示的に余白を管理できる",
+        "カード全体を押せるようにするときは onClick（ボタン）/ href（リンク）を Card に渡す(issue #665)。全面を覆う不可視の button / a（stretched link）を重ね、Enter / Space・フォーカスリング・hover・押下表現を DS が持つ。名前は CardTitle・説明は CardDescription に自動で結ばれる（CardTitle が無いときは aria-label）。variant=media でも使える。disabled 対応",
+        "押せる Card の中の別操作（メニュー・削除等）は CardAction に置く。CardAction は押せる面より前面に出て入れ子 button にならない。それ以外の場所の操作子は押せる面に覆われる",
+        "<Button unstyled> に border / rounded / shadow / active:scale を被せて押せるカードを自作しない（P040）。native は onPress / disabled"
       ]
     },
     {

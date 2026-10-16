@@ -3,6 +3,9 @@
  * @description コンテンツカードコンポーネント。Header / Title / Description / Action / Content / Footer のサブコンポーネントを組み合わせて使用
  */
 import type { Meta, StoryObj } from "@storybook/react"
+import * as React from "react"
+import { expect, userEvent } from "storybook/test"
+import { More } from "iconsax-reactjs"
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from "./card"
 import { Button } from "./button"
 
@@ -130,4 +133,55 @@ export const OnSameColorGround: Story = {
       </div>
     </div>
   ),
+}
+
+/**
+ * 押せるカード（issue #665）。`onClick`（ボタン）/ `href`（リンク）を渡すとカード全体が 1 つの
+ * 操作になる。全面を覆う不可視の button / a を重ねる stretched link 構造で、Enter / Space・
+ * フォーカスリング・hover（Surface-Secondary）・押下（0.98）を DS が持つ。名前は CardTitle、
+ * 説明は CardDescription に自動で結ばれる。別操作は CardAction に置く（押してもカードは反応せず、
+ * button の入れ子にもならない）。`<Button unstyled>` に枠・角丸・影を被せて自作しない。
+ */
+export const Pressable: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [opened, setOpened] = React.useState(0)
+    const [menu, setMenu] = React.useState(0)
+    return (
+      <div className="flex max-w-sm flex-col gap-3">
+        <Card onClick={() => setOpened((n) => n + 1)} data-testid="task-card">
+          <CardHeader>
+            <CardTitle className="typo-heading-md">
+              <s>式場の見学を予約する</s>
+            </CardTitle>
+            <CardAction>
+              <Button variant="ghost-neutral" size="icon-sm" aria-label="メニュー" onClick={() => setMenu((n) => n + 1)}>
+                <More size={16} />
+              </Button>
+            </CardAction>
+          </CardHeader>
+          <CardDescription>期限 10/20・担当 ふたり</CardDescription>
+        </Card>
+        <Card href="#notes" variant="media" aria-label="メモ一覧を開く">
+          <div className="p-4 typo-body-md text-[var(--Text-High-Emphasis)]">リンクのカード（variant=media）</div>
+        </Card>
+        <p className="typo-label-xs text-[var(--Text-Low-Emphasis)]" data-testid="counts">
+          カード {opened} / メニュー {menu}
+        </p>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const card = canvasElement.querySelector<HTMLElement>('[data-testid="task-card"]')!
+    const overlay = card.querySelector<HTMLButtonElement>('[data-slot="card-overlay"]')!
+    await expect(overlay.tagName).toBe("BUTTON")
+    const title = canvasElement.querySelector('[data-slot="card-title"]')!
+    await expect(overlay.getAttribute("aria-labelledby")).toBe(title.id)
+    await userEvent.click(overlay)
+    overlay.focus()
+    await userEvent.keyboard("{Enter}")
+    // CardAction のボタンは押せる面より前面にあり、押してもカードは反応しない
+    await userEvent.click(canvasElement.querySelector<HTMLButtonElement>('[aria-label="メニュー"]')!)
+    await expect(canvasElement.querySelector('[data-testid="counts"]')!.textContent).toBe("カード 2 / メニュー 1")
+  },
 }
