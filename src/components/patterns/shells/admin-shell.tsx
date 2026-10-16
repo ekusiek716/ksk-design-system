@@ -8,6 +8,12 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
   sidebar: React.ReactNode
   header?: React.ReactNode
   sidebarWidth?: string
+  /**
+   * サイドバーの面（issue #680）。"default"（既定）は Surface-Primary、"inverse" は Surface-Inverse の
+   * 暗い面。inverse では中のナビを `<SidebarNav tone="inverse">` にし、ロゴ・フッターの文字も
+   * Text-on-Inverse 系にする。
+   */
+  sidebarTone?: "default" | "inverse"
   mainId?: string
   skipLink?: boolean
   skipLinkLabel?: string | null
@@ -50,6 +56,7 @@ function AdminShell({
   header,
   children,
   sidebarWidth = "w-64",
+  sidebarTone = "default",
   mainId = "main-content",
   skipLink = true,
   skipLinkLabel = "コンテンツへ移動",
@@ -64,8 +71,11 @@ function AdminShell({
       {skipLink && skipLinkLabel && <SkipLink targetId={mainId} label={skipLinkLabel} />}
       <aside
         data-slot="admin-sidebar"
+        data-tone={sidebarTone}
         className={cn(
-          "hidden lg:flex flex-col border-r border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
+          sidebarTone === "inverse"
+            ? "hidden lg:flex flex-col border-r border-[var(--Surface-Inverse)] bg-[var(--Surface-Inverse)] text-[var(--Text-on-Inverse)]"
+            : "hidden lg:flex flex-col border-r border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
           sidebarWidth
         )}
       >

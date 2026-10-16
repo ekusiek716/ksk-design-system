@@ -158,7 +158,7 @@
 | SettingsSection, SettingsListRow | `@/components/patterns/settings-section` | — | Group, Card, Danger, CompactSpacing, WithIconAndChevron |
 | ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders, With onShare tracking |
 | SideDrawerFrame | `@/components/patterns/side-drawer-frame` | — | RightDrawer, LeftDrawer, RightDrawer — swipeToClose, LeftDrawer — swipeToClose, Glass |
-| SidebarNav | `@/components/patterns/sidebar-nav` | — | Default, Collapsed, Links, LongLabel, RouterLinkRender |
+| SidebarNav | `@/components/patterns/sidebar-nav` | — | Default, Collapsed, Links, LongLabel, RouterLinkRender, Inverse |
 | SimplePagination | `@/components/patterns/simple-pagination` | — | アイテム数指定 (items), ページ数指定 (pages), compact (モバイル省略表示), 境界での disabled, 0 件 |
 | StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, Variants, Interactive, MultipleCards, ElevationNone |
 | StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |

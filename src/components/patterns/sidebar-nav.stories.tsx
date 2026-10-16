@@ -96,3 +96,23 @@ export const RouterLinkRender: Story = {
     await expect(links[0].className).toContain("min-h-11")
   },
 }
+
+/**
+ * tone="inverse"（issue #680）: 暗い面（Surface-Inverse）のサイドバーに置く。
+ * 面は置く側（AdminShell sidebarTone="inverse" 等）が持ち、SidebarNav は行の色だけを切り替える。
+ */
+export const Inverse: Story = {
+  args: { items, tone: "inverse" },
+  decorators: [
+    (Story) => (
+      <div className="w-64 bg-[var(--Surface-Inverse)] p-3">
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const current = canvasElement.querySelector('[aria-current="page"]')
+    await expect(current).not.toBeNull()
+    await expect(current?.textContent).toContain("ホーム")
+  },
+}

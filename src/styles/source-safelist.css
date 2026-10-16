@@ -183,6 +183,7 @@
 @source inline("bg-[var(--Object-Success)]");
 @source inline("bg-[var(--Object-Warning)]");
 @source inline("bg-[var(--Object-on-Inverse)]/10");
+@source inline("bg-[var(--Object-on-Inverse)]/15");
 @source inline("bg-[var(--Overlay-Dark)]");
 @source inline("bg-[var(--Overlay-Light)]");
 @source inline("bg-[var(--Overlay-Medium)]");
@@ -252,6 +253,7 @@
 @source inline("border-[var(--Primitive-White-Alpha-300)]");
 @source inline("border-[var(--Success-Base)]");
 @source inline("border-[var(--Surface-Accent-Primary-Subtle)]");
+@source inline("border-[var(--Surface-Inverse)]");
 @source inline("border-[var(--Surface-Primary)]");
 @source inline("border-[var(--Text-Disable)]");
 @source inline("border-b");
@@ -553,6 +555,7 @@
 @source inline("hover:bg-[var(--Hover-Success-Button)]");
 @source inline("hover:bg-[var(--Hover-Tertiary-Button)]");
 @source inline("hover:bg-[var(--Hover-Warning-Button)]");
+@source inline("hover:bg-[var(--Object-on-Inverse)]/10");
 @source inline("hover:bg-[var(--Object-on-Inverse)]/20");
 @source inline("hover:bg-[var(--Overlay-Medium)]");
 @source inline("hover:bg-[var(--Primitive-White-Alpha-200)]");
@@ -1105,6 +1108,7 @@
 @source inline("text-[var(--Text-on-Inverse)]/50");
 @source inline("text-[var(--Text-on-Inverse)]/60");
 @source inline("text-[var(--Text-on-Inverse)]/70");
+@source inline("text-[var(--Text-on-Inverse-Secondary)]");
 @source inline("text-[var(--Text-on-Media)]");
 @source inline("text-[var(--Text-on-Media-Secondary)]");
 @source inline("text-[var(--glass-button-text)]");

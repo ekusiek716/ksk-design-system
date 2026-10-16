@@ -2599,7 +2599,8 @@
         "モバイルの BottomTabBar と同じ items 配列を渡す",
         "ページ内アンカーの目次は SectionNav、ビュー状態の切替は SubNav を使う",
         "ロゴ行・フッターは部品に含めず slot 側で並べる",
-        "next/link 等のルーターで描画するときは項目ごとの render（Footer・AppHeader と同じレンダースロット）を使う。渡された props（className・aria-current・data-*・children・onClick）をそのまま転送すること。未指定は従来どおり <a>（href あり）/ <button>"
+        "next/link 等のルーターで描画するときは項目ごとの render（Footer・AppHeader と同じレンダースロット）を使う。渡された props（className・aria-current・data-*・children・onClick）をそのまま転送すること。未指定は従来どおり <a>（href あり）/ <button>",
+        "暗い面（Surface-Inverse）のサイドバーでは tone=\"inverse\"。文字は Text-on-Inverse-Secondary、hover / 選択中は Object-on-Inverse の淡い面 + Text-on-Inverse。暗色ナビを Button unstyled で自作しない（issue #680）"
       ]
     },
     {
@@ -3056,7 +3057,8 @@
       "rules": [
         "For admin/dashboard pages",
         "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる",
-        "header と main の既定 gutter は内蔵 Container が担うためページ側で外周 padding を重ねない"
+        "header と main の既定 gutter は内蔵 Container が担うためページ側で外周 padding を重ねない",
+        "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）"
       ]
     },
     {
