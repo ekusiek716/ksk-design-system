@@ -422,7 +422,11 @@
         "native (src/native/components/Dialog.tsx): position=\"center\"(既定) / \"top\" / \"fullscreen\" を持ち、fullscreen は四辺・top は上端の safe-area を避ける。実測 inset は SafeAreaInsetsProvider から供給し、未供給なら回避量 0（従来どおり）",
         "modal な Dialog の content は aria-modal=\"true\" を出力する（modal={false} では出さない）。開いているモーダルの横断判定は useHasOpenModal() / useOpenModalCount() を使い、consumer 側で data-state 等の内部属性を直接読まない（#505）",
         "size は sm(400px) / md(480px・既定) / lg(640px) / xl(800px) の幅の段（opt-in）。未指定は従来の 480px のまま。position=\"fullscreen\" では無視。size の段は sm: 付きなので、上書きは className に sm:max-w-* を渡す（接頭辞なしの max-w-* は size に勝たない）。Sheet の size と段の名前を揃えている。ResponsiveDialogContent の size は PC 側の Dialog にだけ渡る",
-        "position=\"top\" / \"fullscreen\" の上端 safe area は --Safe-Area-Inset-Top で読む（issue #682。Sheet と同じ）"
+        "position=\"top\" / \"fullscreen\" の上端 safe area は --Safe-Area-Inset-Top で読む（issue #682。Sheet と同じ）",
+        "スマホは全画面・PC は中央のモーダルにする作業面は position=\"fullscreen\" + centerFrom（\"sm\" | \"md\" | \"lg\"）。境界以上で center と同じ位置・角丸・影・size の幅になる。className に md:!max-w-* / md:!h-* を書いて全画面を打ち消さない（issue #713）",
+        "height=\"fill\" は中央表示（center / centerFrom の境界以上）の高さを画面 - 4rem に固定する。見取り図・表など中身の量で枠が伸び縮みすると困る面向け（issue #713）",
+        "size は sm(400) / md(480・既定) / lg(640) / xl(800) / 2xl(1024px・issue #713)",
+        "全画面ダイアログ（padding={false}）の上端の帯は DialogHeader variant=\"bar\"（下線・左右 24px・上下 12px）+ trailing（閉じるボタン等）。DialogHeader に border-b / flex-row / px を自作しない（issue #713）"
       ],
       "variants": {
         "position": [

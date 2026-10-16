@@ -34,7 +34,7 @@ export { CheckboxField } from "./components/ui/checkbox-field"
 export type { CheckboxFieldProps } from "./components/ui/checkbox-field"
 export { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./components/ui/collapsible"
 export { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger } from "./components/ui/dialog"
-export type { DialogContentProps, DialogOverlayProps, DialogTitleProps, DialogSize } from "./components/ui/dialog"
+export type { DialogCenterFrom, DialogContentProps, DialogHeaderProps, DialogOverlayProps, DialogTitleProps, DialogSize } from "./components/ui/dialog"
 // #341: 見出しの役割（level）。値の正本は contracts/composition.json の textHierarchy。
 export type { TitleLevel } from "./lib/title-level"
 export {
