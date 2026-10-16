@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "./button"
+import { useKskLabels } from "./ksk-labels"
 
 // ─── Inline icons (pure SVG, no external dep) ────────────────────────────────
 
@@ -66,7 +67,7 @@ export interface NavigationBarProps extends Omit<React.ComponentProps<"header">,
   rightSlot?: React.ReactNode
   /** シェアボタンを右に表示してそのハンドラを登録する簡便 prop */
   onShare?: () => void
-  /** シェアボタンのアクセシビリティラベル */
+  /** シェアボタンのアクセシビリティラベル。既定は KskLabelsProvider の share（無ければ「シェア」） */
   shareLabel?: string
   /**
    * true : Liquid Glass ボタン（グラデーション・写真背景の上に重ねるとき）
@@ -100,7 +101,7 @@ function NavigationBar({
   leftLabelVisible = false,
   rightSlot,
   onShare,
-  shareLabel = "シェア",
+  shareLabel: shareLabelProp,
   glass = false,
   transparent = false,
   className,
@@ -114,7 +115,10 @@ function NavigationBar({
     return leftIcon
   }
 
-  const defaultLeftLabel = leftIcon === "close" ? "閉じる" : "戻る"
+  // 既定文言は KskLabelsProvider（無ければ「戻る」「閉じる」「シェア」。issue #723）
+  const defaultLabels = useKskLabels()
+  const defaultLeftLabel = leftIcon === "close" ? defaultLabels.close : defaultLabels.back
+  const shareLabel = shareLabelProp ?? defaultLabels.share
   const btnVariant = glass ? "glass" : "secondary"
 
   return (
@@ -151,7 +155,10 @@ function NavigationBar({
           onClick={onLeft}
         >
           {resolveLeftIcon()}
-          <span className="min-w-0 truncate">{leftLabel ?? defaultLeftLabel}</span>
+          {/* 省略されても全文が分かるよう title を付ける */}
+          <span className="min-w-0 truncate" title={leftLabel ?? defaultLeftLabel}>
+            {leftLabel ?? defaultLeftLabel}
+          </span>
         </Button>
       )}
 

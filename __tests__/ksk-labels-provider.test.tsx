@@ -1,8 +1,12 @@
 /**
+ * @vitest-environment jsdom
+ *
  * KskLabelsProvider（issue #723）。DS 部品の既定文言をまとめて切り替える。
  * Provider を置かないときの文言・DOM は従来どおり日本語。
  */
 import * as React from "react"
+import { act } from "react"
+import { createRoot } from "react-dom/client"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 
@@ -15,6 +19,10 @@ import { MarketingShell } from "../src/components/patterns/shells/marketing-shel
 import { AdminShell } from "../src/components/patterns/shells/admin-shell"
 import { MonthCalendar } from "../src/components/patterns/month-calendar"
 import { AgendaList } from "../src/components/patterns/agenda-list"
+import { NavigationBar } from "../src/components/ui/navigation-bar"
+import { KSK_DEFAULT_LABELS } from "../src/components/ui/ksk-labels"
+
+;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
 const pill = (required: boolean) => (
   <FormField label="名前" requiredStyle="pill" required={required}>
@@ -100,5 +108,59 @@ describe("KskLabelsProvider", () => {
     )
     expect(explicit).toContain('aria-label="2026年10月"')
     expect(renderToStaticMarkup(<MonthCalendar month="2026-10" today="2026-10-01" />)).toContain('aria-label="2026年10月"')
+  })
+
+  it("Provider 無しの既定文言は 2.14 までの日本語と 1 文字も違わない", () => {
+    expect(KSK_DEFAULT_LABELS.ja).toEqual({
+      skipLink: "コンテンツへ移動",
+      mobileMenu: "メニューを開く",
+      mobileDrawerTitle: "メニュー",
+      required: "必須",
+      optional: "任意",
+      close: "閉じる",
+      back: "戻る",
+      share: "シェア",
+      calendarToday: "今日へ",
+      calendarPrevMonth: "前の月",
+      calendarNextMonth: "次の月",
+      calendarExpand: "月全体を表示",
+    })
+    const nav = renderToStaticMarkup(<NavigationBar onLeft={() => {}} onShare={() => {}} />)
+    expect(nav).toContain('aria-label="戻る"')
+    expect(nav).toContain('aria-label="シェア"')
+    expect(renderToStaticMarkup(<NavigationBar leftIcon="close" onLeft={() => {}} />)).toContain('aria-label="閉じる"')
+  })
+
+  it("NavigationBar の戻る / 閉じる / シェアも Provider に従う（明示 prop が勝つ）", () => {
+    const en = (node: React.ReactNode) => renderToStaticMarkup(<KskLabelsProvider locale="en">{node}</KskLabelsProvider>)
+    const nav = en(<NavigationBar onLeft={() => {}} onShare={() => {}} />)
+    expect(nav).toContain('aria-label="Back"')
+    expect(nav).toContain('aria-label="Share"')
+    expect(en(<NavigationBar leftIcon="close" onLeft={() => {}} />)).toContain('aria-label="Close"')
+    expect(en(<NavigationBar onLeft={() => {}} onShare={() => {}} shareLabel="送る" />)).toContain('aria-label="送る"')
+  })
+
+  it("labels をインラインで渡しても、キーと値が同じなら context 値を変えない（配下を再レンダーしない）", () => {
+    const seen: ReturnType<typeof useKskLabels>[] = []
+    const Probe = React.memo(function Probe() {
+      seen.push(useKskLabels())
+      return null
+    })
+    const el = document.createElement("div")
+    const root = createRoot(el)
+    const ui = (close: string) => (
+      <KskLabelsProvider locale="en" labels={{ close }}>
+        <Probe />
+      </KskLabelsProvider>
+    )
+    act(() => root.render(ui("Dismiss")))
+    act(() => root.render(ui("Dismiss")))
+    act(() => root.render(ui("Dismiss")))
+    // memo の Probe は context が変わったときだけ描き直す
+    expect(seen.length).toBe(1)
+    act(() => root.render(ui("Hide")))
+    expect(seen.length).toBe(2)
+    expect(seen[1].close).toBe("Hide")
+    act(() => root.unmount())
   })
 })

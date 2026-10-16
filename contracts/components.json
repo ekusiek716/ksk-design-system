@@ -534,7 +534,7 @@
     {
       "name": "KskLabelsProvider",
       "path": "src/components/ui/ksk-labels.tsx",
-      "description": "DS 部品の既定文言（スキップリンク・管理画面のメニュー・FormField の必須/任意・閉じるボタン・カレンダー見出し）と MonthCalendar / AgendaList の locale 既定をまとめて切り替える Provider（issue #723）。アプリの一番外側に 1 回置く。",
+      "description": "DS 部品の既定文言（スキップリンク・管理画面のメニュー・FormField の必須/任意・閉じるボタン・NavigationBar の戻る/閉じる/シェア・カレンダー見出し）と MonthCalendar / AgendaList の locale 既定をまとめて切り替える Provider（issue #723）。アプリの一番外側に 1 回置く。",
       "subcomponents": [
         "useKskLabels",
         "useKskLocale",
@@ -876,7 +876,7 @@
         "leftButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
         "shareButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
         "headerProps": "title を除く header の属性・ref を根へ転送（issue #649）",
-        "leftLabelVisible": "boolean — 左ボタンに leftLabel の文字も表示（高さ 44px・文字は max-w-28 で省略・タイトルの左右を px-32 に広げる。既定 false。issue #729）"
+        "leftLabelVisible": "boolean — 左ボタンに leftLabel の文字も表示（高さ 44px・文字は max-w-28 で省略し title 属性で全文・タイトルの左右を px-32 に広げる。既定 false。issue #729）"
       },
       "accessibility": [
         "aria-label auto-set for back/close/share",

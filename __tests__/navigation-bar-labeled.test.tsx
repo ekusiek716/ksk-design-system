@@ -22,7 +22,8 @@ describe("NavigationBar leftLabelVisible (#729)", () => {
       <NavigationBar title="設定" onLeft={() => {}} leftLabel="メニューに戻る" leftLabelVisible />
     )
     expect(html).toContain("data-label-visible")
-    expect(html).toContain('<span class="min-w-0 truncate">メニューに戻る</span>')
+    // 省略されても全文が分かるよう title を付ける
+    expect(html).toContain('<span class="min-w-0 truncate" title="メニューに戻る">メニューに戻る</span>')
     expect(html).not.toContain('aria-label="メニューに戻る"')
     expect(html).toContain("h-11")
     expect(html).toContain("px-32")
