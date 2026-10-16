@@ -161,11 +161,11 @@ function MonthCalendar({
     return map
   }, [events])
 
-  const defaultFocus = inMonth(selectedDate) ? selectedDate! : inMonth(todayKey) ? todayKey : `${monthKey}-01`
+  const isWeek = view === "week"
+  const defaultFocus = selectedDate && (isWeek || inMonth(selectedDate)) ? selectedDate : inMonth(todayKey) ? todayKey : `${monthKey}-01`
   const [focusKey, setFocusKey] = React.useState(defaultFocus)
   // 選択日が外から変わったら（「今日へ」ボタン等）タブストップと week 表示の週もそこへ移す。
   // effect ではなく前回値との比較で render 中に揃える（React の推奨パターン・余分な描画なし）
-  const isWeek = view === "week"
   const [prevSelectedDate, setPrevSelectedDate] = React.useState(selectedDate)
   if (selectedDate !== prevSelectedDate) {
     setPrevSelectedDate(selectedDate)
@@ -182,6 +182,10 @@ function MonthCalendar({
   // month: 月が変わったら、その月の中のセルへ移す（月外の日を覚えたままだとタブストップが消える）。
   // week: 月外の日（月をまたぐ週）にもフォーカスできる（issue #704 レビュー）
   const activeKey = isWeek ? focusKey : inMonth(focusKey) ? focusKey : defaultFocus
+  // 週を内部で移動する構成では、見出しと月外表示もフォーカス先の月へ揃える。
+  // onMonthChange ありでは従来どおり consumer の month を表示月の正本にする。
+  const displayedMonthStart = isWeek && !onMonthChange ? toMonthStart(parseKey(activeKey)) : monthStart
+  const displayedMonthKey = `${displayedMonthStart.getFullYear()}-${pad(displayedMonthStart.getMonth() + 1)}`
   const gridRef = React.useRef<HTMLDivElement>(null)
   const shouldFocusRef = React.useRef(false)
 
@@ -215,8 +219,8 @@ function MonthCalendar({
   const gridLabel =
     ariaLabel ??
     (locale === "ja"
-      ? `${monthStart.getFullYear()}年${monthStart.getMonth() + 1}月`
-      : monthStart.toLocaleDateString("en", { year: "numeric", month: "long" }))
+      ? `${displayedMonthStart.getFullYear()}年${displayedMonthStart.getMonth() + 1}月`
+      : displayedMonthStart.toLocaleDateString("en", { year: "numeric", month: "long" }))
 
   const dayLabel = (key: string, dayEvents: MonthCalendarEvent[]) => {
     const base = formatDayLabel(key, locale)
@@ -328,7 +332,7 @@ function MonthCalendar({
             const isToday = key === todayKey
             const isSelected = key === selectedDate
             // week の月をまたぐ週で、表示月の外の日（数字を控えめにする）
-            const isOutside = !inMonth(key)
+            const isOutside = !key.startsWith(`${displayedMonthKey}-`)
             return (
               // ksk-ds-lint-ignore P024 -- WAI-ARIA grid の gridcell は roving tabindex でセル自体がフォーカスを受け、キー操作は handleKeyDown が担う
               <div

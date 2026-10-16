@@ -121,6 +121,18 @@ describe("MonthCalendar view=\"week\"（#704）", () => {
     expect(selected.querySelector('[data-date="2026-10-16"]')).toBeNull()
   })
 
+  it("week の初回 mount も月外の選択日を優先する", () => {
+    const host = html(<MonthCalendar month="2026-10" selectedDate="2026-11-03" today="2026-10-17" view="week" />)
+    expect(host.querySelector('[role="gridcell"][tabindex="0"]')!.getAttribute("data-date")).toBe("2026-11-03")
+    expect([...host.querySelectorAll<HTMLElement>('[role="gridcell"]')].map(cell => cell.dataset.date)).toEqual([
+      "2026-11-01", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07",
+    ])
+    expect(host.querySelector('[role="grid"]')!.getAttribute("aria-label")).toBe("2026年11月")
+    expect(host.querySelector('[data-date="2026-11-03"]')!.hasAttribute("data-outside-month")).toBe(false)
+    const month = html(<MonthCalendar month="2026-10" selectedDate="2026-11-03" today="2026-10-17" />)
+    expect(month.querySelector('[role="gridcell"][tabindex="0"]')!.getAttribute("data-date")).toBe("2026-10-17")
+  })
+
   it("選択日が外から変わると、表示する週とタブストップがそこへ移る", () => {
     const container = document.createElement("div")
     document.body.appendChild(container)
@@ -157,6 +169,8 @@ describe("MonthCalendar view=\"week\"（#704）", () => {
     expect(cell("2026-09-24")).not.toBeNull()
     expect(document.activeElement).toBe(cell("2026-09-24"))
     expect(cell("2026-10-01")).toBeNull()
+    expect(container.querySelector('[role="grid"]')!.getAttribute("aria-label")).toBe("2026年9月")
+    expect(cell("2026-09-24")!.hasAttribute("data-outside-month")).toBe(false)
     act(() => root.unmount())
     container.remove()
   })

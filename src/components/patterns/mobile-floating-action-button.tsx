@@ -24,6 +24,10 @@ interface MobileFloatingActionButtonProps extends Omit<React.ComponentProps<type
    * - "stay" : 動かさない
    */
   keyboardBehavior?: MobileFloatingActionButtonKeyboardBehavior
+  /** 入力フォーカスによる非表示を有効にする。keyboardBehavior="hide" 時のみ。
+   * 物理キーボード等で不要な場合は false にすると viewport 検知だけを使う。@default true
+   */
+  hideOnInputFocus?: boolean
   mobileOnly?: boolean
   /**
    * 見た目。既定は `default`（Brand 塗りのソリッド FAB）。
@@ -63,6 +67,7 @@ function MobileFloatingActionButton({
   placement = "end",
   bottomOffset = "bottom-nav",
   keyboardBehavior = "hide",
+  hideOnInputFocus = true,
   mobileOnly = true,
   variant = "default",
   fullWidth = false,
@@ -76,7 +81,7 @@ function MobileFloatingActionButton({
   const { keyboardInset, isKeyboardOpen } = useVisualViewportKeyboardInset()
   // visualViewport が縮む前・縮まない端末でも「入力中」を拾う（issue #700）。
   // タッチ主体の端末でソフトキーボードを出す入力欄にフォーカスがある間 true
-  const isSoftKeyboardFocused = useSoftKeyboardFocus(keyboardBehavior === "hide")
+  const isSoftKeyboardFocused = useSoftKeyboardFocus(keyboardBehavior === "hide" && hideOnInputFocus)
   const shouldHide = keyboardBehavior === "hide" && (isKeyboardOpen || isSoftKeyboardFocused)
   const liftInset = keyboardBehavior === "lift" ? keyboardInset : 0
 

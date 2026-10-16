@@ -78,6 +78,10 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
    * - "lift" : keyboard inset 分だけ上へ逃がす
    */
   keyboardBehavior?: BottomTabBarKeyboardBehavior
+  /** 入力フォーカスによる非表示を有効にする。keyboardBehavior="hide" 時のみ。
+   * 物理キーボード等で不要な場合は false にすると viewport 検知だけを使う。@default true
+   */
+  hideOnInputFocus?: boolean
   /**
    * 下端からの追加オフセット（CSS の長さ。issue #681）。画面下に常設する広告バナー（AdMob 等）の
    * 高さぶんバーを持ち上げる。MobileFloatingActionButton の `bottomOffsetExtra` と同じ意味で、
@@ -137,11 +141,11 @@ interface BottomTabBarKeyboardState {
   liftInset: number
 }
 
-function useBottomTabBarKeyboardState(keyboardBehavior: BottomTabBarKeyboardBehavior): BottomTabBarKeyboardState {
+function useBottomTabBarKeyboardState(keyboardBehavior: BottomTabBarKeyboardBehavior, hideOnInputFocus: boolean): BottomTabBarKeyboardState {
   const { keyboardInset, isKeyboardOpen } = useVisualViewportKeyboardInset()
   // visualViewport が縮む前・縮まない端末でも「入力中」を拾う（issue #700）。
   // タッチ主体の端末でソフトキーボードを出す入力欄にフォーカスがある間 true
-  const isSoftKeyboardFocused = useSoftKeyboardFocus(keyboardBehavior === "hide")
+  const isSoftKeyboardFocused = useSoftKeyboardFocus(keyboardBehavior === "hide" && hideOnInputFocus)
 
   return {
     keyboardBehavior,
@@ -259,12 +263,13 @@ function BottomTabBar({
   pillPosition = "fixed",
   floatingPosition = "center",
   keyboardBehavior = "stay",
+  hideOnInputFocus = true,
   scrollEdge = false,
   navLabel = "メインナビゲーション",
   showOnDesktop = false,
   ...props
 }: BottomTabBarProps) {
-  const keyboardState = useBottomTabBarKeyboardState(keyboardBehavior)
+  const keyboardState = useBottomTabBarKeyboardState(keyboardBehavior, hideOnInputFocus)
 
   if (variant === "pill") {
     return (

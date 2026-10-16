@@ -3,6 +3,16 @@
 メジャーバージョン間の移行ガイド。
 patch / minor は原則破壊変更なし、自動アップグレード可（例外: **v1.34.0 で npm パッケージ名を変更**。import の置換が必要。下記参照）。
 
+## 次回公開予定（未公開）
+
+以下はmainへ取り込む変更の導入注意です。版更新・npm公開・consumer同期・アプリ配布はまだ行いません。
+
+- **下部ナビ・FABの入力中表示（#700）**: `MobileTabBar` / `MobileFloatingActionButton` は既定の `keyboardBehavior="hide"` での非表示条件が増えます。`BottomTabBar` の既定stayは維持し、hideを明示した場合だけ同じ検知を使います。viewportの縮小に加え、タッチ主体の端末でテキスト入力にフォーカスした時点でも非表示になります。pointer/hover能力では物理キーボード接続を判別できないため、この先行非表示が不要なら `hideOnInputFocus={false}` でviewport検知だけにできます。従来どおり表示位置を変えたくない画面は `keyboardBehavior="stay"` を明示してください。
+- **下側Sheetの入力時高さ（#706）**: `safeArea={true}`（既定）の通常bottom Sheetは、キーボード表示時に上端のsafe-areaも差し引き、ステータスバー・ノッチへの侵入を避けます。独自の全画面配置でこの補正が不要なら `safeArea={false}` を指定してください。snap Sheetは今回の高さ変更の対象外です。
+- **画面・分類・配置編集（#701–#703）**: Screenへ上端safe-area、svh/fill、768px以上の中央カード、landmark省略を追加します。fillの中央カードは親の高さを尊重します。KanbanColumnの分類色指定と、選択・ドラッグ・矢印移動用SelectableTileも追加します。これらの追加APIは任意指定です。
+- **予定のモバイル表示（#704）**: MonthCalendarへ週表示、予定一覧AgendaListを追加します。週表示は選択日を優先し、月外の初期選択日や内部の月またぎ移動でも表示週・月見出しを揃えます。既定の月表示は維持します。
+- **管理画面のモバイルナビ（#705）**: AdminShellへ任意のモバイルドロワーを追加します。リンク選択時の自動closeは `closeMobileDrawerOnNavigate={true}` の明示指定で有効にし、既定falseでは既存の挙動を維持します。
+
 <!-- deprecations:start（自動生成・手で編集しない） -->
 
 ## 非推奨 API 一覧

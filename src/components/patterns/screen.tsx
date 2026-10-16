@@ -5,7 +5,7 @@ import { SkipLink } from "../ui/skip-link"
 type ScreenPadding = "none" | "page"
 /** 画面の高さの測り方（issue #701） */
 type ScreenHeight = "dvh" | "svh" | "fill"
-/** PC 幅（lg = 1024px 以上）での置き方（issue #701） */
+/** PC 幅（md = 768px 以上）での置き方（issue #701） */
 type ScreenDesktopLayout = "full" | "card"
 /** 本文のランドマーク（issue #701） */
 type ScreenLandmark = "main" | "none"
@@ -36,7 +36,7 @@ interface ScreenProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "childr
    * 上端の safe-area（ステータスバー・ダイナミックアイランド）を避ける余白を付ける（issue #701）。
    * header があれば header の上に、無ければ画面の上端に
    * `var(--Safe-Area-Inset-Top, env(safe-area-inset-top))` の余白を足す。
-   * PC の中央カード（desktopLayout="card"）では lg 以上で 0 に戻す（カードは画面端に接しない）。
+   * PC の中央カード（desktopLayout="card"）では md 以上で 0 に戻す（カードは画面端に接しない）。
    * @default false（従来どおり）
    */
   safeAreaTop?: boolean
@@ -48,16 +48,16 @@ interface ScreenProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "childr
    */
   height?: ScreenHeight
   /**
-   * PC 幅（lg = 1024px 以上）での置き方（issue #701）。
+   * PC 幅（md = 768px 以上）での置き方（issue #701）。
    * - "full"（既定）: 画面いっぱい（従来どおり）
    * - "card": Surface-Secondary の背景の中央に、枠・角丸付きのカードとして置く
-   *   （オンボーディング・ログイン等の 1 画面フロー向け）。lg 未満は "full" と同じ
+   *   （オンボーディング・ログイン等の 1 画面フロー向け）。md 未満は "full" と同じ
    */
   desktopLayout?: ScreenDesktopLayout
   /** desktopLayout="card" のカードの最大幅（CSS の長さ）。@default "30rem"（480px） */
   cardMaxWidth?: string
   /**
-   * desktopLayout="card" のカードの高さ（CSS の長さ）。画面が低いときは `100dvh - 4rem` まで縮む。
+   * desktopLayout="card" のカードの最大高さ（CSS の長さ）。画面が低いときは選択した viewport 高さ（dvh / svh）から 4rem を引いた値、height="fill" では親の高さまで縮む。
    * 本文のスクロールはカードの中で起きる。@default "47.5rem"（760px）
    */
   cardMaxHeight?: string
@@ -86,9 +86,9 @@ const SAFE_AREA_TOP_CLASS = "pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-t
 /**
  * Screen — 1 画面ぶんの骨組み（header / スクロールする本文 / 下部固定 footer）。
  *
- * PC の中央カード（desktopLayout="card"）は、lg 以上で背景（Surface-Secondary）の
+ * PC の中央カード（desktopLayout="card"）は、md 以上で背景（Surface-Secondary）の
  * 中央に枠・角丸付きのカードとして置く。カードの寸法は cardMaxWidth / cardMaxHeight。
- * 外側の背景は `data-slot="screen-backdrop"`（lg 未満は素通しのブロック）。
+ * 外側の背景は `data-slot="screen-backdrop"`（md 未満は素通しのブロック）。
  */
 function Screen({
   children,
@@ -119,7 +119,7 @@ function Screen({
   const Body = isMain ? "main" : "div"
   // カードの PC では画面端に接しないので safe-area の余白を戻す
   const safeAreaTopClass = safeAreaTop
-    ? cn(SAFE_AREA_TOP_CLASS, isCard && "lg:pt-0")
+    ? cn(SAFE_AREA_TOP_CLASS, isCard && "md:pt-0")
     : undefined
 
   const screen = (
@@ -132,9 +132,14 @@ function Screen({
       className={cn(
         "flex min-h-0 flex-col overflow-hidden bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)]",
         HEIGHT_CLASS[height],
-        // lg 以上のカード: 寸法は inline の変数（未指定はフォールバックの既定値）
+        // md 以上のカード: 寸法は inline の変数（未指定はフォールバックの既定値）
         isCard &&
-          "lg:h-[min(var(--ksk-screen-card-max-height,47.5rem),calc(100dvh_-_4rem))] lg:w-full lg:max-w-[var(--ksk-screen-card-max-width,30rem)] lg:rounded-2xl lg:border lg:border-[var(--Border-Low-Emphasis)]",
+          "md:w-full md:max-w-[var(--ksk-screen-card-max-width,30rem)] md:rounded-2xl md:border md:border-[var(--Border-Low-Emphasis)]",
+        isCard && (height === "fill"
+          ? "md:h-full md:max-h-[var(--ksk-screen-card-max-height,47.5rem)]"
+          : height === "svh"
+            ? "md:h-[min(var(--ksk-screen-card-max-height,47.5rem),calc(100svh_-_4rem))]"
+            : "md:h-[min(var(--ksk-screen-card-max-height,47.5rem),calc(100dvh_-_4rem))]"),
         !header && safeAreaTopClass,
         className,
       )}
@@ -186,10 +191,12 @@ function Screen({
     <div
       data-slot="screen-backdrop"
       className={cn(
-        "lg:flex lg:min-h-[100dvh] lg:items-center lg:justify-center lg:bg-[var(--Surface-Secondary)] lg:p-8",
-        // height="fill" は親の高さを受ける。lg 未満の素通しラッパーが高さを持たないと
+        "md:flex md:items-center md:justify-center md:bg-[var(--Surface-Secondary)]",
+        // height="fill" は親の高さを受ける。md 未満の素通しラッパーが高さを持たないと
         // 中の h-full が解決されず本文がスクロールしなくなるので、ラッパーにも伝える
-        height === "fill" && "h-full"
+        height === "fill"
+          ? "h-full min-h-0"
+          : height === "svh" ? "md:min-h-[100svh] md:p-8" : "md:min-h-[100dvh] md:p-8"
       )}
     >
       {screen}

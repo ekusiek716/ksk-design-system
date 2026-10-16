@@ -38,6 +38,10 @@ interface MobileTabBarProps<T extends string> {
    * フォーカスがある間も隠す（issue #700）。
    */
   keyboardBehavior?: BottomTabBarKeyboardBehavior
+  /** 入力フォーカスによる非表示を有効にする。keyboardBehavior="hide" 時のみ。
+   * 物理キーボード等で不要な場合は false にすると viewport 検知だけを使う。@default true
+   */
+  hideOnInputFocus?: boolean
   /**
    * 下端からの追加オフセット（CSS の長さ。issue #681）。画面下の広告バナーの高さぶん持ち上げる。
    * BottomTabBar の `bottomOffsetExtra` へそのまま渡す。MobileAppShell の `bottomPaddingExtra` と
@@ -80,6 +84,7 @@ function MobileTabBar<T extends string>({
   floatingPosition = "center",
   showOnDesktop = false,
   keyboardBehavior = "hide",
+  hideOnInputFocus = true,
   bottomOffsetExtra,
   className,
 }: MobileTabBarProps<T>) {
@@ -130,6 +135,7 @@ function MobileTabBar<T extends string>({
       floatingPosition={floatingPosition}
       showLabels
       keyboardBehavior={keyboardBehavior}
+      hideOnInputFocus={hideOnInputFocus}
       bottomOffsetExtra={bottomOffsetExtra}
       onPointerUpCapture={handlePointerUpCapture}
       items={tabItems}

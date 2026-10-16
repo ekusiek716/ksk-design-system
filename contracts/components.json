@@ -1890,8 +1890,11 @@
         "variant=glass に shadow-* を重ねない（glass-accent が inset 3層 + drop shadow を内包するため二重になる）",
         "下部固定の全幅 CTA は fullWidth を使い、fixed inset-x + Button を手組みしない。fullWidth 時は placement が無視されラベルが常に表示される",
         "広告バナー等で動的に持ち上げる必要があるときは、内部変数 --ksk-fab-bottom-offset を直接上書きせず bottomOffsetExtra を使う（issue #453）",
-        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、ソフトキーボードが出る端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。consumer の html:has(input:focus) で隠す CSS は不要"
-      ]
+        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、タッチ主体の端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。物理キーボード接続はpointer/hover能力から判別できないため、フォーカスによる先行非表示だけを止めるときは hideOnInputFocus=false（viewport検知は維持）。consumer の html:has(input:focus) で隠す CSS は不要"
+      ],
+      "props": {
+        "hideOnInputFocus": "boolean（既定 true）— keyboardBehavior=\"hide\" のとき、タッチ主体端末の入力フォーカスでも隠す。false なら viewport のキーボード検知だけを使う。pointer/hover能力から物理キーボード接続は判別できない"
+      }
     },
     {
       "name": "MobileAppHeader",
@@ -2205,7 +2208,7 @@
         "footer には主要 CTA を置き、safe-area 余白を消費側で再実装しない",
         "上端のステータスバー / ダイナミックアイランドは safeAreaTop で避ける（header の上、header が無ければ画面上端に --Safe-Area-Inset-Top の余白。issue #701）。header 側で pt-[max(1rem,var(--Safe-Area-Inset-Top))] を自作しない",
         "アドレスバーの出入りで高さを揺らしたくない画面は height=\"svh\"、高さの決まった親の中では height=\"fill\"（既定 dvh）",
-        "オンボーディング・ログイン等の 1 画面フローを PC で中央カードにするときは desktopLayout=\"card\"（lg 以上で Surface-Secondary の背景の中央に枠・角丸のカード。cardMaxWidth 既定 30rem / cardMaxHeight 既定 47.5rem）。lg:w-[480px] lg:rounded-2xl 等を className で自作しない",
+        "オンボーディング・ログイン等の 1 画面フローを PC で中央カードにするときは desktopLayout=\"card\"（md = 768px 以上で Surface-Secondary の背景の中央に枠・角丸のカード。cardMaxWidth 既定 30rem / cardMaxHeight 既定 47.5rem）。md:w-[480px] md:rounded-2xl 等を className で自作しない",
         "他の <main> の中に置くときは landmark=\"none\"（本文を div にし、id とスキップリンクを既定で出さない）",
         "React Native consumer は ksk-design-system/native/ui の Screen を使い、header/body/footer shell をローカル再実装しない"
       ]
@@ -3002,10 +3005,11 @@
         "--Nav-Center-Action-Surface / -Border / -Shadow と --Nav-Selected-Surface / -Shadow は宣言したときだけ DS 既定（.glass-accent / ガラスの選択プラッター）を置き換える。未宣言なら tone / dark の出し分けは DS 側が持つ。",
         "--Nav-Pill-* の寸法が効くのは prominent レイアウト（showLabels か centerAction がある pill）。アイコンのみの compact pill は契約外で固定。",
         "bottomOffsetExtra（CSS の長さ）は safe-area・pill の 12px・lift の持ち上げ量に加算される。className の bottom-* で位置を上書きしない（issue #681）",
-        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、ソフトキーボードが出る端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。consumer の html:has(input:focus) で隠す CSS は不要"
+        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\" を明示したとき（既定はstay）は、キーボード検知に加え、タッチ主体の端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。物理キーボード接続はpointer/hover能力から判別できないため、フォーカスによる先行非表示だけを止めるときは hideOnInputFocus=false（viewport検知は維持）。consumer の html:has(input:focus) で隠す CSS は不要"
       ],
       "props": {
-        "navLabel": "string (既定 \"メインナビゲーション\") — nav 要素の aria-label（issue #428）"
+        "navLabel": "string (既定 \"メインナビゲーション\") — nav 要素の aria-label（issue #428）",
+        "hideOnInputFocus": "boolean（既定 true）— keyboardBehavior=\"hide\" のとき、タッチ主体端末の入力フォーカスでも隠す。false なら viewport のキーボード検知だけを使う。pointer/hover能力から物理キーボード接続は判別できない"
       },
       "slots": [
         "bottom-nav-pill",
@@ -3043,14 +3047,17 @@
         "[data-global-nav-add-icon] は belle-todo 互換の後方互換フックで公開契約ではない。中央アクションのアイコンは data-slot=\"bottom-nav-center-action-icon\" で狙う（issue #471）",
         "keyboardBehavior（hide 既定 / lift / stay）を BottomTabBar へ素通しする。キーボード表示中にタブバーを隠す CSS を consumer に書かない（issue #681）",
         "bottomOffsetExtra（CSS の長さ）で画面下の広告バナー等の高さぶん持ち上げる。MobileAppShell の bottomPaddingExtra・MobileFloatingActionButton の bottomOffsetExtra に同じ値を渡す（issue #681）",
-        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、ソフトキーボードが出る端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。consumer の html:has(input:focus) で隠す CSS は不要"
+        "既定挙動の変更（issue #700・次のリリースで告知）: keyboardBehavior=\"hide\"（既定）は、キーボード検知に加え、タッチ主体の端末（(pointer: coarse) and (hover: none)）でテキスト入力欄にフォーカスがある間も隠れる。隠れている間は invisible でフォーカスも受けない。従来どおり常に出したいときは keyboardBehavior=\"stay\" でオプトアウトする。物理キーボード接続はpointer/hover能力から判別できないため、フォーカスによる先行非表示だけを止めるときは hideOnInputFocus=false（viewport検知は維持）。consumer の html:has(input:focus) で隠す CSS は不要"
       ],
       "productTheme": [
         "--Nav-Pill-*",
         "--Nav-Item-*",
         "--Nav-Center-Action-*",
         "--Nav-Selected-*"
-      ]
+      ],
+      "props": {
+        "hideOnInputFocus": "boolean（既定 true）— keyboardBehavior=\"hide\" のとき、タッチ主体端末の入力フォーカスでも隠す。false なら viewport のキーボード検知だけを使う。pointer/hover能力から物理キーボード接続は判別できない"
+      }
     },
     {
       "name": "FilterBar",
@@ -3243,7 +3250,7 @@
         "header と main の既定 gutter は内蔵 Container が担うためページ側で外周 padding を重ねない",
         "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）",
         "lg 未満でナビへ辿れるようにするときは mobileDrawer（issue #705）。ヘッダー左端のメニューボタン（44px・aria-expanded・aria-label 既定「メニューを開く」）から左の Sheet に同じ sidebar を開く。ハンバーガーと Sheet side=\"left\" を consumer で自作しない",
-        "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 true）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange"
+        "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 false、明示 true で有効）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange"
       ]
     },
     {

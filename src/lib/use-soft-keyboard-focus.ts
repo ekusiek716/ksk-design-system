@@ -12,7 +12,7 @@ const SOFT_KEYBOARD_INPUT_TYPES = new Set(["", "text", "search", "email", "tel",
  * その要素へのフォーカスでソフトキーボードが出るか。
  *
  * - テキスト系 input / textarea（読み取り専用・無効は除く）
- * - contenteditable（"false" 以外。値なし・"plaintext-only" も編集可能）
+ * - contenteditable（true / 値なし / plaintext-only と、その編集可能性を継承する子要素）
  * - `inputmode="none"` はキーボードを出さない合図なので除く
  */
 function isSoftKeyboardTarget(element: Element | null | undefined): boolean {
@@ -23,15 +23,22 @@ function isSoftKeyboardTarget(element: Element | null | undefined): boolean {
     if (element.readOnly || element.disabled) return false
     return SOFT_KEYBOARD_INPUT_TYPES.has((element.getAttribute("type") ?? "").trim().toLowerCase())
   }
-  // jsdom は isContentEditable を実装しないため属性でも判定する
-  if (element.isContentEditable) return true
-  return element.closest('[contenteditable]:not([contenteditable="false"])') !== null
+  // ブラウザの判定は false も尊重する。jsdom の未実装時だけ属性継承を辿る。
+  if (typeof element.isContentEditable === "boolean") return element.isContentEditable
+  let editable = element.closest("[contenteditable]")
+  while (editable) {
+    const value = editable.getAttribute("contenteditable")?.toLowerCase()
+    if (value === "false") return false
+    if (value === "" || value === "true" || value === "plaintext-only") return true
+    // 未知の値は HTML の継承状態。false の境界を飛び越えない。
+    editable = editable.parentElement?.closest("[contenteditable]") ?? null
+  }
+  return false
 }
 
 /**
  * ソフトキーボードが出る端末の目安: 主ポインタが指（coarse）で、hover できない。
- * iPad + ハードウェアキーボード / トラックパッドは hover: hover になるので外れる
- * （ソフトキーボードが出ないのにナビが消えるのを防ぐ）。
+ * pointer / hover は入力機器の能力であり、物理キーボード接続やソフトキーボードの有無は判別できない。
  */
 const SOFT_KEYBOARD_DEVICE_QUERY = "(pointer: coarse) and (hover: none)"
 
@@ -43,9 +50,8 @@ const SOFT_KEYBOARD_DEVICE_QUERY = "(pointer: coarse) and (hover: none)"
  * ビューポートを縮めない端末（Android の一部）では検知できない。ソフトキーボードは
  * 編集可能な要素にフォーカスが無ければ出ないので、フォーカスを「出ている」の代わりに見る。
  *
- * `(pointer: coarse) and (hover: none)` に一致しない端末（マウス主体の PC、ハードウェア
- * キーボード・トラックパッド付きの iPad 等）では常に false。ソフトキーボードが出ないのに
- * フォーカスだけでナビを隠すと、入力のたびに画面下の要素が消えて見えるため。
+ * `(pointer: coarse) and (hover: none)` に一致しない端末では常に false。
+ * 一致する端末でも物理キーボードのみを使う場合があるため、呼び出し側で enabled=false にできる。
  *
  * `enabled=false` の間はリスナーを付けず false を返す。SSR では false。
  */
