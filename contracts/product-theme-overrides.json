@@ -189,7 +189,9 @@
       "--Overlay-Desktop-Breakpoint"
     ],
     "toast": [
-      "--Toast-Viewport-Offset-Bottom"
+      "--Toast-Viewport-Offset-Bottom",
+      "--Toast-Viewport-Offset-X",
+      "--Toast-Viewport-Max-Width"
     ],
     "settingsRow": [
       "--Settings-Row-Min-Height",
@@ -291,7 +293,9 @@
       "--Overlay-Desktop-Breakpoint"
     ],
     "Toast": [
-      "--Toast-Viewport-Offset-Bottom"
+      "--Toast-Viewport-Offset-Bottom",
+      "--Toast-Viewport-Offset-X",
+      "--Toast-Viewport-Max-Width"
     ],
     "DatePicker": [
       "--Field-Height-Md",

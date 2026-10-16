@@ -169,6 +169,9 @@ const EQUIVALENTS: Array<[baseline: string, tokenized: string, property: string]
   ["gap-0.5", "gap-[var(--Nav-Item-Gap)]", "gap"],
   // ─── Toast viewport（issue #503）───
   ["bottom-4", "bottom-[var(--Toast-Viewport-Offset-Bottom)]", "bottom"],
+  // ─── Toast viewport 左右・最大幅（issue #691）───
+  ["left-4", "left-[var(--Toast-Viewport-Offset-X)]", "left"],
+  ["right-4", "right-[var(--Toast-Viewport-Offset-X)]", "right"],
 ]
 
 describe("product theme の既定値は origin/main の固定クラスと同一実寸 (issue #364)", () => {
@@ -240,6 +243,13 @@ describe("公開変数の配線", () => {
   it("AdminShell の本文 padding が --Product-Page-Padding-Y を参照する", async () => {
     const source = readFileSync(join(ROOT, "src/components/patterns/shells/admin-shell.tsx"), "utf8")
     expect(source).toContain("py-[var(--Product-Page-Padding-Y)]")
+  })
+
+  it("Toast viewport の最大幅の既定は従来の sm:max-w-sm（--container-sm = 24rem）と同値（issue #691）", () => {
+    // max-w-sm は preset-core の @theme（--container-sm: 24rem）で解決されるため toPx の対象外。値を直接見る。
+    expect(toPx(defaults.get("--Toast-Viewport-Max-Width")!)).toBe(384)
+    const core = readFileSync(join(ROOT, "src/preset-core.css"), "utf8")
+    expect(core).toMatch(/--container-sm:\s*24rem/)
   })
 
   it("Toast の viewport が --Toast-Viewport-Offset-Bottom を参照する（issue #503）", () => {

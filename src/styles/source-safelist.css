@@ -635,6 +635,7 @@
 @source inline("left-[50%]");
 @source inline("left-[calc(env(safe-area-inset-left)_+_1rem)]");
 @source inline("left-[max(1rem,env(safe-area-inset-left))]");
+@source inline("left-[var(--Toast-Viewport-Offset-X)]");
 @source inline("lg:block");
 @source inline("lg:flex");
 @source inline("lg:focus-visible:opacity-100");
@@ -695,6 +696,7 @@
 @source inline("max-w-[calc(100%_-_32px)]");
 @source inline("max-w-[calc(100%_-_3rem)]");
 @source inline("max-w-[var(--Field-Height-Md)]");
+@source inline("max-w-[var(--Toast-Viewport-Max-Width)]");
 @source inline("max-w-full");
 @source inline("max-w-lg");
 @source inline("max-w-md");
@@ -926,6 +928,7 @@
 @source inline("right-9");
 @source inline("right-[calc(env(safe-area-inset-right)_+_1rem)]");
 @source inline("right-[max(1rem,env(safe-area-inset-right))]");
+@source inline("right-[var(--Toast-Viewport-Offset-X)]");
 @source inline("ring");
 @source inline("ring-0");
 @source inline("ring-1");
@@ -1028,6 +1031,7 @@
 @source inline("sm:max-w-[480px]");
 @source inline("sm:max-w-[640px]");
 @source inline("sm:max-w-[800px]");
+@source inline("sm:max-w-[var(--Toast-Viewport-Max-Width)]");
 @source inline("sm:max-w-lg");
 @source inline("sm:max-w-sm");
 @source inline("sm:max-w-xl");
