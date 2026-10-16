@@ -137,7 +137,7 @@ function ImageGallery({
 
       {/* Thumbnails */}
       {indicatorType === "thumbnail" && images.length > 1 && (
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
           {images.map((img, i) => (
             <button
               key={i}
