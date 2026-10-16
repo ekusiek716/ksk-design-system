@@ -1394,7 +1394,9 @@
         "caution"
       ],
       "rules": [
-        "Color + icon + text (never color alone)"
+        "Color + icon + text (never color alone)",
+        "density: default(gap-3 p-4) / compact(gap-2 px-3 py-2)。余白を詰めたいときは density=\"compact\"。`!p-2` 等の className で上書きしない（issue #683）",
+        "layout: card(既定・角丸の囲み) / bar(全幅・角丸なし・下線のみ)。画面上端の注意帯は layout=\"bar\" を使い、div で帯を自作しない（issue #683。native Banner は画像バナーで別 API のため Web のみ）"
       ]
     },
     {

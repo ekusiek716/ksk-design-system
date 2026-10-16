@@ -3,9 +3,22 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const bannerVariants = cva(
-  "flex items-start gap-3 rounded-lg border border-[var(--Border-Info)] p-4",
+  "flex items-start border border-[var(--Border-Info)]",
   {
     variants: {
+      /** 余白の詰め具合（issue #683）。compact は狭い場所・積み重ねるお知らせ向け */
+      density: {
+        default: "gap-3 p-4",
+        compact: "gap-2 px-3 py-2",
+      },
+      /**
+       * 形（issue #683）。card は角丸の囲み（既定・従来どおり）。bar は画面上端などに敷く全幅の帯で、
+       * 角丸なし・上と左右の枠なし・下線のみ。
+       */
+      layout: {
+        card: "rounded-lg",
+        bar: "w-full rounded-none border-x-0 border-t-0",
+      },
       variant: {
         info: "border-[var(--Border-Info)] bg-[var(--Surface-Info)] text-[var(--Text-Info)]",
         success: "border-[var(--Border-Success)] bg-[var(--Surface-Success)] text-[var(--Text-Success)]",
@@ -15,6 +28,8 @@ const bannerVariants = cva(
     },
     defaultVariants: {
       variant: "info",
+      density: "default",
+      layout: "card",
     },
   }
 )
@@ -31,6 +46,8 @@ interface BannerProps
 function Banner({
   className,
   variant,
+  density,
+  layout,
   icon,
   title,
   description,
@@ -42,7 +59,9 @@ function Banner({
     <div
       data-slot="banner"
       role="alert"
-      className={cn(bannerVariants({ variant }), className)}
+      data-density={density ?? "default"}
+      data-layout={layout ?? "card"}
+      className={cn(bannerVariants({ variant, density, layout }), className)}
       {...props}
     >
       {icon && <div className="shrink-0 mt-0.5">{icon}</div>}
@@ -51,7 +70,7 @@ function Banner({
           <p className="typo-label-md text-[var(--Text-High-Emphasis)]">{title}</p>
         )}
         {description && (
-          <p className="typo-body-sm mt-1">{description}</p>
+          <p className={cn("typo-body-sm", density === "compact" ? title && "mt-0.5" : "mt-1")}>{description}</p>
         )}
         {children}
       </div>

@@ -269,9 +269,11 @@
 @source inline("border-r");
 @source inline("border-r-0");
 @source inline("border-t");
+@source inline("border-t-0");
 @source inline("border-t-[var(--Brand-Primary)]");
 @source inline("border-t-transparent");
 @source inline("border-transparent");
+@source inline("border-x-0");
 @source inline("border-y");
 @source inline("bottom-0");
 @source inline("bottom-1");
