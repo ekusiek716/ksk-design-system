@@ -39,9 +39,14 @@ const MOVE_KEYS: Record<string, SelectableTileMoveDirection> = {
   ArrowRight: "right",
 }
 
-/** 選択中の面・枠。Card / ActionTile の selected と同じトークン（ring-1 で枠を 2px 相当に） */
+/**
+ * 選択中の面・枠。色は Card / ActionTile の selected と同じトークン。
+ * 枠の 2px 相当は ring（box-shadow）ではなく内側の outline で出す。ring にすると
+ * focus-visible のリングと同じ box-shadow を取り合い、選択中にフォーカスすると
+ * どちらかが消える（#703 レビュー）。focus は外側の ring、選択は border + outline で両立する
+ */
 const SELECTED_CLASS =
-  "border-[var(--Border-Accent-Primary)] ring-1 ring-inset ring-[var(--Border-Accent-Primary)] bg-[var(--Surface-Accent-Primary-Light)]"
+  "border-[var(--Border-Accent-Primary)] outline-1 -outline-offset-2 outline-[var(--Border-Accent-Primary)] bg-[var(--Surface-Accent-Primary-Light)]"
 
 /**
  * SelectableTile — 押すと選べて、編集中はドラッグ・矢印キーで動かせるタイル（issue #703）
@@ -75,6 +80,7 @@ function SelectableTile({
   onKeyDown,
   "aria-describedby": ariaDescribedBy,
   disabled,
+  children,
   ...props
 }: SelectableTileProps) {
   const instructionsId = React.useId()
@@ -92,40 +98,44 @@ function SelectableTile({
   }
 
   return (
-    <>
-      <button
-        type={type}
-        data-slot="selectable-tile"
-        data-shape={shape}
-        data-selected={selected || undefined}
-        data-movable={movable || undefined}
-        data-dragging={dragging || undefined}
-        aria-pressed={selected === undefined ? undefined : selected}
-        aria-describedby={describedBy}
-        disabled={disabled}
-        onKeyDown={handleKeyDown}
-        className={cn(
-          "relative inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border border-[var(--Border-Low-Emphasis)] text-[var(--Text-High-Emphasis)]",
-          "cursor-pointer transition-[background-color,border-color,box-shadow] duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
-          "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-          shape === "circle" ? "aspect-square rounded-full p-1" : "rounded-lg p-3",
-          selected
-            ? SELECTED_CLASS
-            : "bg-[var(--Surface-Primary)] hover:bg-[var(--Surface-Secondary)]",
-          movable && "cursor-grab touch-none select-none active:cursor-grabbing",
-          dragging && "cursor-grabbing shadow-[var(--shadow-md)]",
-          className
-        )}
-        {...props}
-      />
+    <button
+      type={type}
+      data-slot="selectable-tile"
+      data-shape={shape}
+      data-selected={selected || undefined}
+      data-movable={movable || undefined}
+      data-dragging={dragging || undefined}
+      aria-pressed={selected === undefined ? undefined : selected}
+      aria-describedby={describedBy}
+      disabled={disabled}
+      onKeyDown={handleKeyDown}
+      className={cn(
+        "relative inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border border-[var(--Border-Low-Emphasis)] text-[var(--Text-High-Emphasis)]",
+        "cursor-pointer transition-[background-color,border-color,box-shadow] duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
+        "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        // 既定の outline は ring に置き換える。選択中は選択の outline を残す（上のコメント）
+        !selected && "focus-visible:outline-hidden",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        shape === "circle" ? "aspect-square rounded-full p-1" : "rounded-lg p-3",
+        selected
+          ? SELECTED_CLASS
+          : "bg-[var(--Surface-Primary)] hover:bg-[var(--Surface-Secondary)]",
+        movable && "cursor-grab touch-none select-none active:cursor-grabbing",
+        dragging && "cursor-grabbing shadow-[var(--shadow-md)]",
+        className
+      )}
+      {...props}
+    >
+      {children}
       {hasInstructions && (
-        // aria-describedby は hidden の要素も参照できる（説明は読み上げ、画面とブラウズモードには出ない）
+        // button の中に hidden で置き、aria-describedby で参照する。hidden の要素は
+        // アクセシブルネーム（中身から作る名前）には入らず、説明としてだけ読まれる。
+        // 兄弟に置くとグリッド等のレイアウトに余計な子が混ざるので中に置く（#703 レビュー）
         <span id={instructionsId} hidden data-slot="selectable-tile-instructions">
           {moveInstructions}
         </span>
       )}
-    </>
+    </button>
   )
 }
 

@@ -17,6 +17,7 @@
 @source inline("-mt-6");
 @source inline("-mx-1");
 @source inline("-mx-6");
+@source inline("-outline-offset-2");
 @source inline("-right-0.5");
 @source inline("-right-1");
 @source inline("-rotate-90");
@@ -837,6 +838,8 @@
 @source inline("origin-(--radix-hover-card-content-transform-origin)");
 @source inline("origin-center");
 @source inline("outline");
+@source inline("outline-1");
+@source inline("outline-[var(--Border-Accent-Primary)]");
 @source inline("outline-hidden");
 @source inline("overflow-auto");
 @source inline("overflow-clip");

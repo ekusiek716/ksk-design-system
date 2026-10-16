@@ -2853,13 +2853,13 @@
       "accessibility": [
         "1 つの <button>。名前は中身か aria-label。selected 指定時は aria-pressed（未指定なら付けない）",
         "movable の間は矢印キー（↑ ↓ ← →）で onMove を呼び preventDefault。consumer の onKeyDown が preventDefault したら呼ばない",
-        "moveInstructions は hidden の説明に描画して aria-describedby で結ぶ（consumer の aria-describedby と連結）。非推奨の aria-grabbed / aria-dropeffect は使わない",
+        "moveInstructions は button の中に hidden で描画して aria-describedby で結ぶ（名前には入らない。consumer の aria-describedby と連結）。非推奨の aria-grabbed / aria-dropeffect は使わない",
         "タップ領域は 44px 以上（min-h-11 / min-w-11）。focus-visible は 3px のリング"
       ],
       "rules": [
         "選択・移動するタイルを Button unstyled / Card selected + className で自作しない（Card の押せる面は内側の button でハンドラ・aria-describedby が乗らない）",
         "ドラッグ＆ドロップ自体（pointer capture・落とし先の判定）は consumer が onPointerDown 等で実装し、dragging で見た目だけ渡す",
-        "大きさは className で渡す（円形は size-12 等）。selected の面・枠は Card / ActionTile と同じトークン",
+        "大きさは className で渡す（円形は size-12 等）。selected の面・枠は Card / ActionTile と同じトークンで、枠の太さは内側の outline（focus-visible の外側 ring と両立）",
         "native は未提供（INTENTIONAL_NATIVE_GAPS）"
       ]
     }

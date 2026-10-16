@@ -108,8 +108,22 @@ describe("SelectableTile（#703）", () => {
     const instructions = document.getElementById(ids[1])!
     expect(instructions.textContent).toBe("矢印キーで移動")
     expect(instructions.hidden).toBe(true)
-    // 説明は button の外（名前に混ざらない）
-    expect(tile().contains(instructions)).toBe(false)
+    // 説明は button の中に hidden で置く（兄弟要素を増やさない。hidden は名前に入らない）
+    expect(tile().contains(instructions)).toBe(true)
+    expect(container.children.length).toBe(1)
+  })
+
+  it("選択中は border + outline、フォーカスは外側の ring で両立する（box-shadow を取り合わない）", () => {
+    renderUi(<SelectableTile selected>卓</SelectableTile>)
+    const cls = tile().className.split(/\s+/)
+    expect(cls).toContain("outline-[var(--Border-Accent-Primary)]")
+    expect(cls).toContain("focus-visible:ring-[3px]")
+    expect(cls).not.toContain("ring-inset")
+    expect(cls).not.toContain("ring-1")
+    // 選択中は focus でも選択の outline を消さない
+    expect(cls).not.toContain("focus-visible:outline-hidden")
+    renderUi(<SelectableTile selected={false}>卓</SelectableTile>)
+    expect(tile().className.split(/\s+/)).toContain("focus-visible:outline-hidden")
   })
 
   it("movable でなければ説明を出さず、consumer の aria-describedby だけ残す", () => {
