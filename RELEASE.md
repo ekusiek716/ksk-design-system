@@ -2,6 +2,38 @@
 
 `ksk-design-system` のリリーススケジュール・運用ルール。
 
+## v2.14.0（2026-10-17）
+
+2.13.0以降に、consumer側の上書きをなくすためのAPIを7件追加したminorリリース。追加のみのAPIが中心です。
+
+- Container / ChipFilterBarに `gutter="fluid"`（`--Container-Gutter-Fluid`）を追加しました（#711）。
+- FormFieldに `orientation="horizontal"` / `labelWidth` / `labelAlign`、Input / Textareaに `targetSize="comfortable"`（44px）を追加しました（#712）。
+- Dialogに `centerFrom` / `height="fill"` / `size="2xl"` と `DialogHeader variant="bar"` を追加しました（#713）。
+- FieldLegendに `size="sm"`、FieldSetに `gap` を追加しました（#714）。
+- MobileAppShellに `viewport="fixed"` / `safeAreaTop` / `safeAreaBottom` / `bottomPadding="native-tab-bar"` を追加しました（#715）。
+- MonthCalendarの予定に `accentColor` を追加しました（#716）。
+- CollapsibleChipFieldの見出しを、フォームの項目名と同じ14px太字・Highにそろえました。従来の見た目は `labelSize="sm"` で指定できます。label も icon も無い行は先頭の空きが無くなります（#717）。
+
+導入時は [2.14.0の注意](./MIGRATION.md#v2140-の導入注意) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。consumerへの取り込みとアプリ配布は別工程で、今回のDS公開準備には含めません。
+
+## v2.13.0（2026-10-17）
+
+2.12.0以降に、consumer側の上書きをなくすためのAPI・部品を追加し、追加APIの不具合を直したminorリリース。次の2点は既定の挙動が変わります。
+
+- 下部ナビ・FABの `keyboardBehavior="hide"` が、タッチ専用端末で入力欄にフォーカスした時点でも隠れるようになりました。従来どおりにするには `keyboardBehavior="stay"` を指定します（#700）。
+- キーボード表示中の下側Sheetの高さ上限から、上端のsafe-areaを引くようにしました。従来どおりにするには `safeArea={false}` を指定します（#706）。
+
+主な追加は次のとおりです。
+- 下部ナビのタブ高さとラベル位置を、consumer側のCSS変数で調整できるようにしました（#699）。
+- Screenに `safeAreaTop` / `height` / `desktopLayout="card"` / `landmark="none"`（#701）。
+- KanbanColumnに `accentColor`、新部品 `SelectableTile`（#702・#703）。
+- MonthCalendarに `view="week"`、新部品 `AgendaList`（#704）。
+- AdminShellに `mobileDrawer`（#705）。
+- Nativeに、OSの視差効果を減らす設定と取得状態を返す `useReduceMotion`（#698・#708）。
+- 追加APIの高さ・日付・入力フォーカス処理の修正と、`hideOnInputFocus` の追加（#709）。
+
+導入時は [2.13.0の注意](./MIGRATION.md#v2130-の導入注意) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。consumerへの取り込みとアプリ配布は別工程で、今回のDS公開準備には含めません。
+
 ## v2.12.0（2026-10-17）
 
 2.11.0以降に、consumer側の見た目の上書きをなくすためのAPI・部品を22件追加したminorリリース。追加のみで、propsを渡さなければ従来と同じ表示です。
