@@ -119,8 +119,8 @@ describe("DetailSheetHeader overlay title", () => {
     expect(document.querySelectorAll('[data-slot="sheet-title"]').length).toBe(1)
   })
 
-  it("別の SheetTitle と併用すると開発ビルドで警告する", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+  it("別の SheetTitle と併用すると開発ビルドで console.error（Title の登録数で検出）", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
     mount(
       <Sheet open>
         <SheetContent side="bottom" description="説明">
@@ -129,6 +129,35 @@ describe("DetailSheetHeader overlay title", () => {
         </SheetContent>
       </Sheet>
     )
-    expect(warn.mock.calls.some(([m]) => String(m).includes("overlayTitle={false}"))).toBe(true)
+    expect(error.mock.calls.some(([m]) => String(m).includes("overlayTitle={false}"))).toBe(true)
+  })
+
+  it("後から SheetTitle が現れても検出する（mount 時 1 回の DOM 走査に頼らない）", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const ui = (extra: boolean) => (
+      <Sheet open>
+        <SheetContent side="bottom" description="説明">
+          <DetailSheetHeader title="ゲスト詳細" />
+          {extra && <SheetTitle className="sr-only">ゲスト詳細</SheetTitle>}
+        </SheetContent>
+      </Sheet>
+    )
+    mount(ui(false))
+    expect(error.mock.calls.some(([m]) => String(m).includes("issue #727"))).toBe(false)
+    act(() => root!.render(ui(true)))
+    expect(error.mock.calls.some(([m]) => String(m).includes("issue #727"))).toBe(true)
+  })
+
+  it("Title が 1 つ（overlayTitle={false} + SheetTitle）なら出さない", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    mount(
+      <Sheet open>
+        <SheetContent side="bottom" description="説明">
+          <SheetTitle className="sr-only">名前</SheetTitle>
+          <DetailSheetHeader title="見出し" overlayTitle={false} />
+        </SheetContent>
+      </Sheet>
+    )
+    expect(error.mock.calls.some(([m]) => String(m).includes("issue #727"))).toBe(false)
   })
 })

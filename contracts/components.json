@@ -1882,7 +1882,7 @@
         "DetailSheetHeader の titleEditor には <CommitInput variant=\"inline-title\" aria-label=… /> を渡す（issue #675）",
         "閉じるボタンは DetailSheetHeader onClose（trailing の右端に Button ghost icon 40px + 閉じるアイコン 20px。読み上げ名は closeLabel、既定は KskLabelsProvider の close＝「閉じる」）。trailing に閉じる Button を自作しない（issue #722）",
         "leading を渡さないときは左の列を描かない（題名の左端がヘッダーの左の余白にそろう）。空の leading を埋めるために <span /> 等を渡さない（issue #729）",
-        "Sheet / Dialog の中の文字列 title はシート / ダイアログの名前（SheetTitle / DialogTitle）として描かれる。sr-only の SheetTitle / DialogTitle を併用しない（id が重複する。開発ビルドで警告）。別の Title で名前を付けるときだけ overlayTitle={false}（issue #727）"
+        "Sheet / Dialog の中の文字列 title はシート / ダイアログの名前（SheetTitle / DialogTitle）として描かれる。sr-only の SheetTitle / DialogTitle を併用しない（id が重複する。同じ Content の Title の登録数で検出し、開発ビルドで console.error）。別の Title で名前を付けるときだけ overlayTitle={false}（issue #727）"
       ]
     },
     {

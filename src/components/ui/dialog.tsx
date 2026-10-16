@@ -18,6 +18,7 @@ import {
 } from "@/lib/modal-stack"
 import {
   OverlayTitleSlotProvider,
+  useRegisterOverlayTitle,
   TitleSurfaceScaleProvider,
   useTitleTypoClass,
   type TitleLevel,
@@ -653,6 +654,7 @@ interface DialogTitleProps
 
 function DialogTitle({ className, level, ...props }: DialogTitleProps) {
   const typoClass = useTitleTypoClass(level)
+  useRegisterOverlayTitle()
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"

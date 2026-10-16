@@ -1,8 +1,7 @@
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
-import { warnOnceInDev } from "@/lib/dev-warn"
-import { useOverlayTitleSlot } from "../../lib/title-level"
+import { useOverlayTitleSlot, useRegisterOverlayTitle } from "../../lib/title-level"
 import { Button } from "../ui/button"
 import { SemanticIcon } from "../ui/semantic-icon"
 import { useKskLabels } from "../ui/ksk-labels"
@@ -17,7 +16,7 @@ interface DetailSheetHeaderProps extends Omit<React.ComponentProps<"div">, "titl
    * 見出し。文字列を渡すと typo-heading-lg の h2 で描く。
    * Sheet / Dialog（ResponsiveOverlayFrame・BottomSheetFrame 経由を含む）の中では、その h2 を
    * SheetTitle / DialogTitle として描き、シート / ダイアログの名前（aria-labelledby）にする（issue #727）。
-   * そのとき sr-only の SheetTitle / DialogTitle を別に置かない（id が重複する。開発ビルドで警告）。
+   * そのとき sr-only の SheetTitle / DialogTitle を別に置かない（id が重複する。開発ビルドで console.error）。
    */
   title?: React.ReactNode
   /**
@@ -92,21 +91,8 @@ function DetailSheetHeader({
   const hasLeading = leading != null && leading !== false
   const overlaySlot = useOverlayTitleSlot()
   const asOverlayTitle = overlayTitle && overlaySlot != null && titleEditor == null && typeof title === "string"
-  const titleRef = React.useRef<HTMLHeadingElement>(null)
-
-  // #727: 同じシートに別の SheetTitle / DialogTitle が残っていると Radix の titleId が重複する
-  React.useEffect(() => {
-    if (!asOverlayTitle) return
-    const el = titleRef.current
-    if (!el?.id || typeof document === "undefined") return
-    const escaped = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(el.id) : el.id
-    if (document.querySelectorAll(`[id="${escaped}"]`).length > 1) {
-      warnOnceInDev(
-        "detail-sheet-header-duplicate-title",
-        "DetailSheetHeader の文字列 title はシート / ダイアログの名前（SheetTitle / DialogTitle）として描かれます。同じシートの sr-only の SheetTitle / DialogTitle を消すか、DetailSheetHeader に overlayTitle={false} を渡してください（issue #727）。"
-      )
-    }
-  }, [asOverlayTitle])
+  // #727: 同じ Content の Title の数で重複を検出する（SheetTitle / DialogTitle も同じ登録を行う）
+  useRegisterOverlayTitle(asOverlayTitle)
 
   return (
     <div
@@ -131,7 +117,6 @@ function DetailSheetHeader({
           // #727: Radix の Title（h2・id = Content の aria-labelledby）。見た目は素の h2 と同じ。
           // data-slot は SheetTitle / DialogTitle と同じにし、autoFocus="title" の対象にする
           <DialogPrimitive.Title
-            ref={titleRef}
             data-slot={overlaySlot === "sheet" ? "sheet-title" : "dialog-title"}
             className="typo-heading-lg text-[var(--Text-High-Emphasis)] break-words focus:outline-hidden focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
           >
