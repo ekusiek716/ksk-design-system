@@ -117,7 +117,6 @@ export const FixedViewportApp: Story = {
         <div key={i} className="rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4">
           <p className="typo-heading-md text-[var(--Text-High-Emphasis)]">タスク {i + 1}</p>
           <p className="typo-body-sm mt-1 text-[var(--Text-Medium-Emphasis)]">本文だけがスクロールし、ヘッダーは常に見える。</p>
-          {/* スクロール領域の中に操作できる要素があるので、キーボードでも Tab で辿ってスクロールできる */}
           <Button variant="secondary" size="sm" className="mt-2">開く</Button>
         </div>
       ))}
@@ -130,6 +129,8 @@ export const FixedViewportApp: Story = {
     // 本文の量が画面より多いと main だけがスクロールする
     await expect(main.scrollHeight).toBeGreaterThan(main.clientHeight)
     await expect(getComputedStyle(main).overflowY).toBe("auto")
+    // スクロール領域は Tab で止まる（中に操作できる要素が無くてもキーボードでスクロールできる）
+    await expect(main.tabIndex).toBe(0)
     // 下余白は 5rem（bottom-nav）+ 下端の safe-area（テスト環境では 0）
     await expect(getComputedStyle(main).paddingBottom).toBe("80px")
   },

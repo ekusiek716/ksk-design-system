@@ -1,6 +1,8 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { MobileAppHeader } from "./mobile-app-header"
+import { warnOnceInDev } from "@/lib/dev-warn"
+import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
 
 type MobileAppShellBottomNavMode = "fixed" | "external" | "inline"
 type MobileAppShellBottomPadding = "none" | "bottom-nav" | "bottom-nav-fab" | "native-tab-bar"
@@ -33,7 +35,10 @@ interface MobileAppShellProps extends React.ComponentProps<"div"> {
    * - "flow"（既定・従来）: 画面の高さ以上に伸び、文書全体がスクロールする
    * - "fixed": ルートを画面の高さ（100svh）に固定し、main だけを縦スクロールさせる。header は main の外にあるので
    *   常に見える。アプリ型の画面（ネイティブの殻に載せる PWA 等）向け。文書がスクロールしないので
-   *   アドレスバーの出入りで高さが揺れない svh を使う。desktopSidebar も同じ高さの中で個別にスクロールする
+   *   アドレスバーの出入りで高さが揺れない svh を使う。desktopSidebar も同じ高さの中で個別にスクロールする。
+   *   ソフトキーボードが出ている間は見えている高さ（visualViewport）まで縮む。visualViewport で検知できない環境は
+   *   consumer が `html[data-kb-open]` + `--kb-h`（キーボードの高さ）を書けば CSS で縮む（Sheet と同じ合図）。
+   *   main はスクロール領域として Tab で止まる（tabIndex=0・landmark main）
    */
   viewport?: MobileAppShellViewport
   /**
@@ -45,7 +50,7 @@ interface MobileAppShellProps extends React.ComponentProps<"div"> {
   /**
    * main の下余白に下端の safe-area（ホームインジケータ）を足す（issue #715。既定 false）。
    * fixed の BottomTabBar は safe-area の上に浮くので、本文の末尾が隠れないよう同じ量を足す。
-   * `bottomPadding="native-tab-bar"` では足さない（ネイティブのタブバーの高さが safe-area 込みのため）
+   * `bottomPadding="native-tab-bar"` では足さない（ネイティブのタブバーの高さが safe-area 込みのため。同時に指定すると開発ビルドで警告）
    */
   safeAreaBottom?: boolean
   maxWidth?: React.CSSProperties["maxWidth"]
@@ -73,6 +78,22 @@ function MobileAppShell({
   ...props
 }: MobileAppShellProps) {
   const fixed = viewport === "fixed"
+  // #715 レビュー: fixed はソフトキーボードが出たら見えている高さまで縮める（main の末尾・入力欄がキーボードの
+  // 下に隠れない）。DS 既存の visualViewport 検知（BottomTabBar / Sheet と同じ）を使い、検知できない環境は
+  // consumer の html[data-kb-open] + --kb-h で sheet-keyboard.css のフォールバックが効く
+  const keyboard = useVisualViewportKeyboardInset(fixed)
+  const keyboardHeightStyle =
+    fixed && keyboard.isKeyboardOpen && keyboard.visibleHeight != null
+      ? { height: `${keyboard.visibleHeight}px` }
+      : undefined
+  React.useEffect(() => {
+    if (safeAreaBottom && bottomPadding === "native-tab-bar") {
+      warnOnceInDev(
+        "mobile-app-shell-native-tab-bar-safe-area",
+        'MobileAppShell: bottomPadding="native-tab-bar" では safeAreaBottom は足されません（--Native-Tab-Bar-Height は safe-area 込みの値です）。safeAreaBottom を外してください。'
+      )
+    }
+  }, [safeAreaBottom, bottomPadding])
   // #715: 新しい下余白の指定（safeAreaBottom / native-tab-bar）があるときだけ、長さを 1 つの calc に畳んで
   // 変数で渡す。どちらも無いときは従来のクラス（pb-20 / pb-28 / #681 の extra）のまま。
   const usesComposedPadding = safeAreaBottom || bottomPadding === "native-tab-bar"
@@ -101,7 +122,7 @@ function MobileAppShell({
         "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)]",
         className
       )}
-      style={style}
+      style={keyboardHeightStyle ? { ...style, ...keyboardHeightStyle } : style}
       {...props}
     >
       <div className={cn("mx-auto flex w-full", fixed ? "h-full" : "min-h-dvh")} style={centeredPreview ? { maxWidth } : undefined}>
@@ -150,9 +171,13 @@ function MobileAppShell({
           )}
           <main
             data-slot="mobile-app-shell-main"
+            tabIndex={fixed ? 0 : undefined}
             className={cn(
               "min-h-0 flex-1",
-              fixed && "overflow-y-auto",
+              // fixed の main はスクロール領域。中に操作できる要素が無くてもキーボードでスクロールできるよう
+              // Tab で止まる（tabIndex=0）。フォーカスは他の部品と同じ Focus リング
+              fixed &&
+                "overflow-y-auto focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
               usesComposedPadding
                 ? "pb-[var(--ksk-shell-main-padding-bottom)]"
                 : // bottomPaddingExtra（issue #681）は指定時だけ加算する（未指定のクラスは従来どおり）

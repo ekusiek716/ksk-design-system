@@ -2647,7 +2647,7 @@
         "bottomPaddingExtra（CSS の長さ）は bottomPadding の既定余白（bottom-nav=5rem / bottom-nav-fab=7rem / none=0）に加算する。広告バナー等の常設要素の高さを渡し、main の下余白を mainClassName で自前計算しない（issue #681）",
         "アプリ型の高さ固定の画面（本文だけスクロール・header 常時表示）は viewport=\"fixed\"（ルート 100svh・main が overflow-y-auto）。page 側で h-[100svh] overflow-hidden や main の overflow を手組みしない（issue #715）",
         "上端の safe-area は safeAreaTop（header があれば header、無ければ枠）、fixed のタブバーの下の safe-area は safeAreaBottom。ネイティブの殻がタブバーを描く構成は bottomPadding=\"native-tab-bar\"（1rem + var(--Native-Tab-Bar-Height, 6rem)。safe-area 込みの値なので safeAreaBottom は足さない）。広告等は bottomPaddingExtra に変数を渡すだけにし、calc を page に書かない（issue #715）",
-        "全幅は centeredPreview={false}。スクロールする main の中には操作できる要素を置く（キーボードで辿れないと axe scrollable-region-focusable）"
+        "全幅は centeredPreview={false}。viewport=\"fixed\" の main は Tab で止まるスクロール領域（tabIndex=0）で、ソフトキーボード表示中は見えている高さへ縮む（visualViewport。検知できない環境は html[data-kb-open] + --kb-h）。safeAreaBottom と native-tab-bar の同時指定は開発ビルドで警告（issue #715）"
       ]
     },
     {
