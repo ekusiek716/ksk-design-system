@@ -4,7 +4,7 @@
 
 React Native / Expo consumer は、新規 UI を作る前にこの一覧で既存コンポーネントを確認してください。すべて `ksk-design-system/native/ui` から import します。
 
-- Public native component exports: 158
+- Public native component exports: 159
 - Import: `import { Button, Screen } from "ksk-design-system/native/ui"`
 
 | Component | Source | Section |
@@ -164,6 +164,7 @@ React Native / Expo consumer は、新規 UI を作る前にこの一覧で既�
 | `AddTile` | `src/native/components/AddTile.tsx` | Phase 8: Shells |
 | `AppShell` | `src/native/components/AppShell.tsx` | Phase 8: Shells |
 | `CodeDisplay` | `src/native/components/CodeDisplay.tsx` | Phase 8: Shells |
+| `FeatureComparisonTable` | `src/native/components/FeatureComparisonTable.tsx` | Phase 8: Shells |
 | `MarketingShell` | `src/native/components/MarketingShell.tsx` | Phase 8: Shells |
 | `SEMANTIC_ICONS` | `src/native/components/SemanticIcon.tsx` | Phase 8: Shells |
 | `SemanticIcon` | `src/native/components/SemanticIcon.tsx` | Phase 8: Shells |

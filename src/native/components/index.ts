@@ -349,3 +349,10 @@ export { MarketingShell, type MarketingShellProps } from "./MarketingShell"
 export { SemanticIcon, SEMANTIC_ICONS, type SemanticIconProps, type SemanticIconName } from "./SemanticIcon"
 export { AddTile, type AddTileProps, type AddTileSize } from "./AddTile"
 export { CodeDisplay, type CodeDisplayProps, type CodeDisplaySize, type CodeDisplayTone } from "./CodeDisplay"
+export {
+  FeatureComparisonTable,
+  type FeatureComparisonColumn,
+  type FeatureComparisonRow,
+  type FeatureComparisonTableProps,
+  type FeatureComparisonValue,
+} from "./FeatureComparisonTable"

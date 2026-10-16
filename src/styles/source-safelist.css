@@ -977,6 +977,7 @@
 @source inline("rounded-sm");
 @source inline("rounded-t-[32px]");
 @source inline("rounded-t-[var(--Radius-Sheet)]");
+@source inline("rounded-t-lg");
 @source inline("rounded-xl");
 @source inline("row-start-1");
 @source inline("scroll-smooth");

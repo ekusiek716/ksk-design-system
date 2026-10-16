@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 71,
-      "patterns": 64,
+      "patterns": 65,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 158
+      "total": 159
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -2744,6 +2744,21 @@
         "font-mono / tracking-* を consumer で指定してコード表示を自作しない",
         "長いコードは break-all で折り返す。横スクロールさせない",
         "コピーの成否はトーストではなくボタン上で即時に示す（onCopy で計測・トーストを足すのは可）"
+      ]
+    },
+    {
+      "name": "FeatureComparisonTable",
+      "path": "src/components/patterns/feature-comparison-table.tsx",
+      "description": "プラン（Free / Plus 等）の機能比較表（issue #687）。列ごとの可否（✓ / —）や値を <table> と th scope で意味付きで出す。",
+      "accessibility": [
+        "<table> + sr-only の caption + 列見出し th[scope=col] + 行見出し th[scope=row]",
+        "✓ / — は aria-hidden の装飾で、availableLabel / unavailableLabel（既定「利用できる」「利用できない」）を sr-only で持つ",
+        "native (src/native/components/FeatureComparisonTable.tsx): 表のセマンティクスが無いため各行を 1 つの読み上げ要素（「機能名、Free 利用できない、Plus 利用できる」）にまとめる"
+      ],
+      "rules": [
+        "div grid + アイコンだけで比較表を自作しない（読み上げで可否が分からない）",
+        "列は 2〜3 を想定。推奨プランは highlight（Surface-Accent-Primary-Light + Text-Accent-Primary の見出し）",
+        "値が無いセル（undefined）は false（利用できない）として扱う"
       ]
     }
   ],
