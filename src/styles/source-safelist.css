@@ -46,6 +46,8 @@
 @source inline("[&>button]:text-[var(--Text-High-Emphasis)]!");
 @source inline("[&>button]:text-[var(--Text-on-Inverse)]");
 @source inline("[&>button]:w-full");
+@source inline("[&>img]:object-contain");
+@source inline("[&>img]:size-full");
 @source inline("[&>span]:line-clamp-1");
 @source inline("[&>svg]:size-3.5");
 @source inline("[&>svg]:size-full");
@@ -1148,6 +1150,7 @@
 @source inline("w-11");
 @source inline("w-12");
 @source inline("w-14");
+@source inline("w-16");
 @source inline("w-2");
 @source inline("w-2.5");
 @source inline("w-20");

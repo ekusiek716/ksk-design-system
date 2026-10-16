@@ -278,6 +278,8 @@ export {
 export {
   ActionTile,
   QuickActionGrid,
+  type ActionTileMediaPosition,
+  type ActionTileMediaSize,
   type ActionTileProps,
   type ActionTileVariant,
   type QuickActionGridProps,

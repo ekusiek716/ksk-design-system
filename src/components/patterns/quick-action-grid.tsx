@@ -33,6 +33,19 @@ const isDev = () => {
   return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
 }
 
+/** ActionTile の media の置き場所（issue #670）。 */
+type ActionTileMediaPosition = "top" | "start" | "end"
+/** ActionTile の media の大きさ（issue #670）。sm = 40px / md = 64px / lg = 128px。 */
+type ActionTileMediaSize = "sm" | "md" | "lg"
+
+// 幅 + aspect-square + max-w-full: QuickActionGrid columns="auto"（最小 8rem）の狭いタイルでも
+// はみ出さず、正方形のまま縮む（size-* だと高さが固定のまま幅だけ縮んで潰れる）。
+const ACTION_TILE_MEDIA_SIZE: Record<ActionTileMediaSize, string> = {
+  sm: "w-10 aspect-square max-w-full",
+  md: "w-16 aspect-square max-w-full",
+  lg: "w-32 aspect-square max-w-full",
+}
+
 interface ActionTileProps extends Omit<React.ComponentProps<"button">, "children"> {
   icon?: React.ReactNode
   emoji?: React.ReactNode
@@ -55,6 +68,22 @@ interface ActionTileProps extends Omit<React.ComponentProps<"button">, "children
    * 1 つの grid に意味の違うタイルが混ざる場合の逃げ道）。
    */
   selectionMode?: QuickActionGridSelectionMode
+  /**
+   * 大きめの画像・イラスト・色見本を置くスロット（issue #670）。`icon`（24px 固定）や `emoji` では
+   * 足りないときに使う。**装飾扱い**（aria-hidden）なので、意味はラベル / description で伝える。
+   * 画像（img 要素・alt="" で可）は枠いっぱい（object-contain）に収まる。色見本は `<div className="size-full rounded-lg bg-…" />`。
+   */
+  media?: React.ReactNode
+  /**
+   * media の置き場所（issue #670）。
+   * - `"top"`（既定）: ラベル行の上・中央。機能メニューのイラスト付きタイル向け。
+   * - `"start"`: ラベル行の左（icon / emoji と同じ行）。色見本 + ラベルのテーマ選択向け。
+   * - `"end"`: タイルの右側。文字列を左、画像を右に並べる横長タイル向け。
+   * いずれも選択インジケータ（ラベル行の右端）と重ならない。
+   */
+  mediaPosition?: ActionTileMediaPosition
+  /** media の枠の大きさ（issue #670）。sm = 40px / md = 64px / lg = 128px。@default "md" */
+  mediaSize?: ActionTileMediaSize
 }
 
 interface QuickActionGridProps extends React.ComponentProps<"div"> {
@@ -98,6 +127,9 @@ function ActionTile({
   disabled,
   type,
   selectionMode,
+  media,
+  mediaPosition = "top",
+  mediaSize = "md",
   ...props
 }: ActionTileProps) {
   const contextSelectionMode = React.useContext(QuickActionGridSelectionContext)
@@ -109,10 +141,25 @@ function ActionTile({
   const hasIndicator = indicator !== undefined && indicator !== null && indicator !== false
   // 下段（description / meta）を描くかどうか。下の JSX の描画条件と必ず一致させる
   const hasBottomRow = Boolean(description || meta)
+  const hasMedia = media !== undefined && media !== null && media !== false
+  const mediaElement = hasMedia ? (
+    <span
+      data-slot="action-tile-media"
+      aria-hidden
+      className={cn(
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-lg [&>img]:size-full [&>img]:object-contain",
+        ACTION_TILE_MEDIA_SIZE[mediaSize]
+      )}
+    >
+      {media}
+    </span>
+  ) : null
+  const isMediaEnd = hasMedia && mediaPosition === "end"
   return (
     <button
       data-slot="action-tile"
       data-variant={variant}
+      data-media-position={hasMedia ? mediaPosition : undefined}
       // single では排他選択（radio）、それ以外は従来どおりトグルボタン（aria-pressed）。
       // radio に aria-pressed を併記すると意味論が二重になるので排他にする。
       role={isRadio ? "radio" : undefined}
@@ -131,11 +178,17 @@ function ActionTile({
         "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 focus-visible:outline-hidden",
         "hover:bg-[var(--Surface-Secondary)]",
         actionTileVariants[variant],
+        // media="end" は文字列の列と画像を横に並べる
+        isMediaEnd && "flex-row items-center gap-3",
         isDisabled && "cursor-not-allowed opacity-50",
         className
       )}
       {...props}
     >
+      {hasMedia && mediaPosition === "top" && (
+        <span className="flex w-full justify-center">{mediaElement}</span>
+      )}
+      <ActionTileBody isMediaEnd={isMediaEnd}>
       {/*
         items-center: ラベルは常に1行（truncate）なので、インジケータ/Spinner を
         上端揃えにするとラベルの文字中心より数 px 高い位置に浮いて見える。
@@ -143,6 +196,7 @@ function ActionTile({
       */}
       <span className="flex w-full items-center justify-between gap-3">
         <span className="flex min-w-0 flex-1 items-center gap-2">
+          {hasMedia && mediaPosition === "start" && mediaElement}
           {emoji && (
             <span className="typo-heading-md shrink-0" aria-hidden>
               {emoji}
@@ -194,8 +248,19 @@ function ActionTile({
           )}
         </span>
       )}
+      </ActionTileBody>
+      {isMediaEnd && mediaElement}
     </button>
   )
+}
+
+/**
+ * media="end" のときだけラベル行と下段を 1 本の列に包む（issue #670）。
+ * それ以外はラッパーを増やさず、従来と同じ DOM のまま子を返す。
+ */
+function ActionTileBody({ isMediaEnd, children }: { isMediaEnd: boolean; children: React.ReactNode }) {
+  if (!isMediaEnd) return <>{children}</>
+  return <span className="flex min-w-0 flex-1 flex-col items-start gap-2">{children}</span>
 }
 
 /**
@@ -311,6 +376,8 @@ function QuickActionGrid({
 
 export { ActionTile, QuickActionGrid }
 export type {
+  ActionTileMediaPosition,
+  ActionTileMediaSize,
   ActionTileProps,
   ActionTileVariant,
   QuickActionGridColumns,
