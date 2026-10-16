@@ -5,13 +5,18 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 
 ## v2.13.0 の導入注意
 
-以下はv2.13.0でnpm公開する変更の導入注意です。consumerへの展開・アプリ配布は今回の対象に含まず、次回のまとめ展開で反映します。
+以下はv2.13.0の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
 
 - **下部ナビ・FABの入力中表示（#700）**: `MobileTabBar` / `MobileFloatingActionButton` は既定の `keyboardBehavior="hide"` での非表示条件が増えます。`BottomTabBar` の既定stayは維持し、hideを明示した場合だけ同じ検知を使います。viewportの縮小に加え、タッチ主体の端末でテキスト入力にフォーカスした時点でも非表示になります。pointer/hover能力では物理キーボード接続を判別できないため、この先行非表示が不要なら `hideOnInputFocus={false}` でviewport検知だけにできます。従来どおり表示位置を変えたくない画面は `keyboardBehavior="stay"` を明示してください。
 - **下側Sheetの入力時高さ（#706）**: `safeArea={true}`（既定）の通常bottom Sheetは、キーボード表示時に上端のsafe-areaも差し引き、ステータスバー・ノッチへの侵入を避けます。独自の全画面配置でこの補正が不要なら `safeArea={false}` を指定してください。snap Sheetは今回の高さ変更の対象外です。
 - **画面・分類・配置編集（#701–#703）**: Screenへ上端safe-area、svh/fill、768px以上の中央カード、landmark省略を追加します。fillの中央カードは親の高さを尊重します。KanbanColumnの分類色指定と、選択・ドラッグ・矢印移動用SelectableTileも追加します。これらの追加APIは任意指定です。
 - **予定のモバイル表示（#704）**: MonthCalendarへ週表示、予定一覧AgendaListを追加します。週表示は選択日を優先し、月外の初期選択日や内部の月またぎ移動でも表示週・月見出しを揃えます。既定の月表示は維持します。
 - **管理画面のモバイルナビ（#705）**: AdminShellへ任意のモバイルドロワーを追加します。リンク選択時の自動closeは `closeMobileDrawerOnNavigate={true}` の明示指定で有効にし、既定falseでは既存の挙動を維持します。
+
+## v2.14.0 の導入注意
+
+以下はv2.14.0の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
+
 - **余白・項目行・ダイアログ・アプリ枠・予定の色（#711–#716）**: Container / ChipFilterBar の `gutter="fluid"`（`--Container-Gutter-Fluid`）、FormField の `orientation="horizontal"`・Input / Textarea の `targetSize="comfortable"`、Dialog の `centerFrom`・`height="fill"`・`size="2xl"`・`DialogHeader variant="bar"`、FieldSet の `gap`・FieldLegend の `size="sm"`、MobileAppShell の `viewport="fixed"`・`safeAreaTop`・`safeAreaBottom`・`bottomPadding="native-tab-bar"`（`--Native-Tab-Bar-Height`。ネイティブ側が書く任意フック <!-- docs-drift-ignore: --Native-Tab-Bar-Height -->）、MonthCalendar / AgendaList の予定の `accentColor` を追加します。すべて任意指定で、既定の見た目は変わりません。
 - **CollapsibleChipField の見出し（#717）**: `label` の既定の見た目が `typo-label-sm` + `Text-Medium-Emphasis`（12px）から、フォームの項目名と同じ `typo-label-md` + `Text-High-Emphasis`（14px 太字）に変わります（同じ詳細シートの `<Label>` / `FormField` と大きさをそろえるため）。従来の見た目が要る画面は `labelSize="sm"` を指定してください。展開中の選択肢のまとまりは見える見出しと `aria-labelledby` で結ばれます（`ariaLabel` を指定した場合は従来どおり `aria-label`）。`label` も `icon` も渡さない行は、先頭の 24px の空きが無くなります。native の CollapsibleChipField は変わりません。
 
