@@ -197,7 +197,7 @@
 
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
-| AdminShell | `@/components/patterns/shells/admin-shell` | — | Default, WithoutHeader |
+| AdminShell | `@/components/patterns/shells/admin-shell` | — | Default, WithoutHeader, MobileDrawer |
 | AppShell | `@/components/patterns/shells/app-shell` | — | Default |
 | MarketingShell | `@/components/patterns/shells/marketing-shell` | — | Default |
 

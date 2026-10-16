@@ -175,3 +175,21 @@ export const WithoutHeader: Story = {
     />
   ),
 }
+
+/**
+ * lg（1024px）未満のモバイルドロワー（issue #705）。`mobileDrawer` でヘッダー左端にメニューボタンを出し、
+ * 左からの Sheet に同じ `sidebar` を開く。ナビ項目（リンク / SidebarNav の項目）を押すと閉じる
+ * （`closeMobileDrawerOnNavigate` 既定 true）。lg 以上の見た目は Default と同じ。
+ * 狭い幅（Storybook の viewport をスマホ）で確認する。
+ */
+export const MobileDrawer: Story = {
+  render: () => (
+    <AdminShell
+      mobileDrawer
+      sidebar={<SidebarContent collapsed={false} onToggle={() => {}} />}
+      header={<HeaderContent />}
+    >
+      <SectionHeader title="注文一覧" description="狭い幅ではヘッダーのメニューボタンからナビを開く。" />
+    </AdminShell>
+  ),
+}

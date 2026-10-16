@@ -3235,7 +3235,9 @@
         "For admin/dashboard pages",
         "mainId は同一ページ内で一意にする。skipLink=false で内蔵 SkipLink を無効化できる",
         "header と main の既定 gutter は内蔵 Container が担うためページ側で外周 padding を重ねない",
-        "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）"
+        "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）",
+        "lg 未満でナビへ辿れるようにするときは mobileDrawer（issue #705）。ヘッダー左端のメニューボタン（44px・aria-expanded・aria-label 既定「メニューを開く」）から左の Sheet に同じ sidebar を開く。ハンバーガーと Sheet side=\"left\" を consumer で自作しない",
+        "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 true）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange"
       ]
     },
     {
