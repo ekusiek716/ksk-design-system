@@ -38,6 +38,13 @@ interface TagInputProps {
   "aria-invalid"?: boolean | "true" | "false"
 }
 
+/** 開発ビルド判定（Card / ChipSelector と同じ形）。process が無い環境では本番扱い。 */
+const isDev = () => {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+  return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
+}
+let warnedMissingLabel = false
+
 function TagInput({
   value = [],
   onChange,
@@ -54,7 +61,27 @@ function TagInput({
   "aria-invalid": ariaInvalid,
 }: TagInputProps) {
   // label（id 経由）/ aria-labelledby で名前が付くときは、明示されない限り aria-label を出さない。
-  const resolvedInputLabel = inputLabel ?? (id || ariaLabelledby ? undefined : "タグ入力")
+  // id だけ渡して実際には <label for={id}> が無い場合に無名の入力欄にならないよう、マウント後に
+  // label の有無を確かめ、無ければ既定の aria-label に戻す（開発ビルドでは 1 回 warn）。
+  const [labelMissing, setLabelMissing] = React.useState(false)
+  React.useEffect(() => {
+    if (!id || ariaLabelledby || inputLabel !== undefined) {
+      setLabelMissing(false)
+      return
+    }
+    const root = inputRef.current?.getRootNode() as Document | ShadowRoot | undefined
+    const escaped = typeof CSS !== "undefined" && CSS.escape ? CSS.escape(id) : id
+    const found = Boolean(root?.querySelector?.(`label[for="${escaped}"]`)) || Boolean(inputRef.current?.closest("label"))
+    setLabelMissing(!found)
+    if (!found && isDev() && !warnedMissingLabel) {
+      warnedMissingLabel = true
+      console.warn(
+        `[ksk-ds] TagInput: id="${id}" に対応する <label for> が見つかりません。FormField htmlFor で結ぶか inputLabel / aria-labelledby を渡してください（既定の aria-label「タグ入力」で補っています）。`
+      )
+    }
+  }, [id, ariaLabelledby, inputLabel])
+  const resolvedInputLabel =
+    inputLabel ?? (ariaLabelledby || (id && !labelMissing) ? undefined : "タグ入力")
   const [input, setInput] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
   const skipBlurRef = React.useRef(false)
