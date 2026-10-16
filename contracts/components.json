@@ -109,7 +109,8 @@
         "startAdornment": "ReactNode — 左側の装飾（単位記号・アイコン等）",
         "endAdornment": "ReactNode — 右側の装飾（クリアボタン等・pointer-events 有効）",
         "showCount": "boolean — maxLength とセットで文字数カウンタ（IME 追従）",
-        "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）"
+        "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）",
+        "targetSize": "\"compact\" | \"comfortable\" — inline 系 variant の当たり判定。comfortable は min-h-11 + py-2 で 44px（issue #712）。default（枠付き）と unstyled では効かない"
       },
       "accessibility": [
         "Must pair with <Label>",
@@ -245,7 +246,8 @@
       "props": {
         "autoGrow": "boolean — 入力内容に合わせて高さを自動伸縮",
         "showCount": "boolean — maxLength とセットで文字数カウンタ（IME 追従）",
-        "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）"
+        "unstyled": "boolean — 寸法・枠・背景・タイポを出さず挙動と a11y だけ提供（段階移行用 / issue #420）",
+        "targetSize": "\"compact\" | \"comfortable\" — inline 系 variant の当たり判定。comfortable は min-h-11 + py-2 で 44px（issue #712）。default（枠付き）と unstyled では効かない"
       },
       "accessibility": [
         "Must pair with <Label>",
@@ -1646,7 +1648,9 @@
         "Label + Input + error message as unit",
         "required asterisk は Brand 色。Caution 色は入力エラーとの混同を避ける",
         "1 フィールド分の label / control / description / error に使う。フォーム全体のセクションには FieldSet を使う",
-        "長いフォームでは FieldGroup の中に FormField を並べる"
+        "長いフォームでは FieldGroup の中に FormField を並べる",
+        "ラベル左置きの項目行は orientation=\"horizontal\"（左のラベル列の幅は labelWidth・既定 5rem、複数行の中身は labelAlign=\"start\"）。説明文・エラーは右の列の下段に出る。Label に w-20 等を付けて行を自作しない（issue #712）",
+        "horizontal で枠の無い入力欄（variant=\"inline\"）を置くときは targetSize=\"comfortable\" で 44px の当たり判定を持たせる。外側に py-2 を足して稼がない（issue #712）"
       ]
     },
     {

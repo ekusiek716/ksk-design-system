@@ -308,6 +308,7 @@
 @source inline("break-all");
 @source inline("break-words");
 @source inline("col-start-1");
+@source inline("col-start-2");
 @source inline("collapse");
 @source inline("container");
 @source inline("contents");
@@ -487,6 +488,7 @@
 @source inline("gap-x-4");
 @source inline("gap-y-0");
 @source inline("gap-y-1");
+@source inline("gap-y-1.5");
 @source inline("grid");
 @source inline("grid-cols-1");
 @source inline("grid-cols-2");
@@ -496,6 +498,7 @@
 @source inline("grid-cols-[auto_minmax(0,1fr)_auto]");
 @source inline("grid-cols-[minmax(0,1fr)_8rem]");
 @source inline("grid-cols-[repeat(auto-fit,minmax(8rem,1fr))]");
+@source inline("grid-cols-[var(--ksk-form-field-label-width)_minmax(0,1fr)]");
 @source inline("group-data-[disabled]:bg-[var(--Surface-Secondary)]");
 @source inline("group-data-[disabled]:border-[var(--Border-Control,var(--Border-Medium-Emphasis))]");
 @source inline("group-data-[disabled]:cursor-not-allowed");
