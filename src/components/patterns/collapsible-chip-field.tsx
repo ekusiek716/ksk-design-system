@@ -205,7 +205,10 @@ function CollapsibleChipField<K extends string>({
         labelSize === "sm"
           ? "typo-label-sm text-[var(--Text-Medium-Emphasis)]"
           : "typo-label-md text-[var(--Text-High-Emphasis)]",
-        "flex-shrink-0 w-20 whitespace-nowrap leading-[44px]"
+        // 長い label（14px 太字で 6 文字以上等）は折り返す（nowrap だと w-20 からはみ出して隣のチップに
+        // 食い込んでいた）。1 行なら min-h-11 + items-center で 1 行目のチップ（44px）と縦中央がそろい、
+        // 折り返したら上から伸びる。幅は w-20 で固定し縮ませない
+        "flex-shrink-0 w-20 min-w-20 min-h-11 flex items-center break-words"
       )}
     >
       {label}

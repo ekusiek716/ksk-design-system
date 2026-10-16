@@ -653,7 +653,6 @@
 @source inline("landscape:flex-row");
 @source inline("last:border-b-0");
 @source inline("last:border-r-0");
-@source inline("leading-[44px]");
 @source inline("leading-none");
 @source inline("leading-relaxed");
 @source inline("leading-snug");
@@ -845,6 +844,7 @@
 @source inline("min-h-screen");
 @source inline("min-w-0");
 @source inline("min-w-11");
+@source inline("min-w-20");
 @source inline("min-w-24");
 @source inline("min-w-4");
 @source inline("min-w-40");

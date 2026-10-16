@@ -63,3 +63,16 @@ describe("CollapsibleChipField の見出し（#717）", () => {
     expect(root.firstElementChild!.className).toContain("w-6")
   })
 })
+
+describe("CollapsibleChipField の長い見出し（#717 レビュー）", () => {
+  it("label は折り返し可（nowrap にしない）・幅は w-20 固定で縮まない", () => {
+    const label = host(<CollapsibleChipField<K> {...base} label="招待客との関係性" />).querySelector<HTMLElement>(
+      '[data-slot="collapsible-chip-field-label"]',
+    )!
+    expect(label.className).not.toContain("whitespace-nowrap")
+    expect(label.className).toContain("w-20")
+    expect(label.className).toContain("min-w-20")
+    expect(label.className).toContain("flex-shrink-0")
+    expect(label.className).toContain("break-words")
+  })
+})
