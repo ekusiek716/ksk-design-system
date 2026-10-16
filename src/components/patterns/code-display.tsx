@@ -42,7 +42,7 @@ const CODE_TYPO: Record<CodeDisplaySize, string> = {
  * `font-mono` を consumer で指定してコード表示を自作しない。
  *
  * - コピーは `navigator.clipboard.writeText`。結果はボタンの文言とアイコンで示し、
- *   `aria-live="polite"` で読み上げる（色だけで伝えない）
+ *   ボタンの外の `role="status"` 領域で読み上げる（色だけで伝えない）
  * - 入力させる側は CodeInput を使う（こちらは表示とコピー専用）
  */
 function CodeDisplay({
@@ -128,10 +128,15 @@ function CodeDisplay({
           ) : (
             <Copy size={16} aria-hidden="true" />
           )}
-          <span aria-live="polite" aria-atomic="true">
-            {buttonText}
-          </span>
+          <span>{buttonText}</span>
         </Button>
+      )}
+      {/* コピー結果の通知はボタンの外の status 領域で行う（ボタン内の live region は、押した直後の
+          フォーカス中の名前変化として読まれたり読まれなかったりする SR 差があるため） */}
+      {copyable && (
+        <span role="status" data-slot="code-display-status" className="sr-only">
+          {result === "success" ? copiedLabel : result === "error" ? copyErrorLabel : ""}
+        </span>
       )}
     </div>
   )

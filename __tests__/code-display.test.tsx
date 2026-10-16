@@ -38,7 +38,11 @@ describe("CodeDisplay（#686）", () => {
     expect(writeText).toHaveBeenCalledWith("AB12")
     expect(onCopy).toHaveBeenCalledWith("success")
     expect(button.textContent).toBe("コピーしました")
-    expect(button.querySelector('[aria-live="polite"]')).not.toBeNull()
+    // 結果はボタンの外の status 領域で伝える
+    expect(button.querySelector("[aria-live]")).toBeNull()
+    const status = host.querySelector('[role="status"][data-slot="code-display-status"]')!
+    expect(button.contains(status)).toBe(false)
+    expect(status.textContent).toBe("コピーしました")
     unmount()
   })
 
@@ -50,6 +54,7 @@ describe("CodeDisplay（#686）", () => {
     await act(async () => button.click())
     expect(onCopy).toHaveBeenCalledWith("error")
     expect(button.textContent).toBe("コピーできませんでした")
+    expect(host.querySelector('[role="status"]')!.textContent).toBe("コピーできませんでした")
     unmount()
   })
 
