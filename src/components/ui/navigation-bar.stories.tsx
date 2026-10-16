@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, within } from "storybook/test"
 import { NavigationBar } from "./navigation-bar"
 
 const meta: Meta<typeof NavigationBar> = {
@@ -114,4 +115,24 @@ export const GlassOverPhoto: Story = {
       </div>
     </div>
   ),
+}
+
+/**
+ * 文字付きの戻るボタン（issue #729）。`leftLabelVisible` で leftLabel を画面にも出す。
+ * 高さ 44px・文字は 112px で省略。中央タイトルは左右を同じだけ空けて中央のまま。Button で自作しない。
+ */
+export const LabeledBack: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="bg-[var(--Surface-Primary)]">
+      <NavigationBar title="設定" leftIcon="back" leftLabel="メニューに戻る" leftLabelVisible onLeft={() => {}} onShare={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const back = within(canvasElement).getByRole("button", { name: "メニューに戻る" })
+    await expect(back.hasAttribute("aria-label")).toBe(false)
+    await expect(Math.round(back.getBoundingClientRect().height)).toBe(44)
+    const title = within(canvasElement).getByText("設定").getBoundingClientRect()
+    await expect(title.left).toBeGreaterThanOrEqual(back.getBoundingClientRect().right)
+  },
 }

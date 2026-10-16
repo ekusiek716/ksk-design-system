@@ -86,13 +86,14 @@ export const ALLOWLIST = [
       "--Nav-Pill-Specular",
       "--Nav-Selected-Surface",
       "--Nav-Selected-Shadow",
+      "--Nav-Selected-Backdrop",
       "--Nav-Center-Action-Surface",
       "--Nav-Center-Action-Border",
       "--Nav-Center-Action-Shadow",
       "--Nav-Item-Height",
       "--Nav-Item-Label-Offset-Y",
     ],
-    reason: "BottomTabBar の面の公開カスタマイズ契約（issue #471）。タブの高さ・ラベルの縦位置（issue #699）も同じく宣言したときだけ効く。bottom-nav.css は var(--Nav-*, <DS 既定>) の形で、消費側が宣言したときだけ上書きされるよう既定値を :root に置かない。寸法の --Nav-* は product-theme.css で定義済み",
+    reason: "BottomTabBar の面の公開カスタマイズ契約（issue #471）。タブの高さ・ラベルの縦位置（issue #699）・選択プラッターのぼかし（issue #726）も同じく宣言したときだけ効く。bottom-nav.css は var(--Nav-*, <DS 既定>) の形で、消費側が宣言したときだけ上書きされるよう既定値を :root に置かない。寸法の --Nav-* は product-theme.css で定義済み",
   },
 ]
 

@@ -1,5 +1,6 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect } from "storybook/test"
 import { ArrowLeft2, ArrowRight2, Box, Category, People, Setting2, ShoppingCart } from "iconsax-reactjs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -193,4 +194,34 @@ export const MobileDrawer: Story = {
       <SectionHeader title="注文一覧" description="狭い幅ではヘッダーのメニューボタンからナビを開く。" />
     </AdminShell>
   ),
+}
+
+/**
+ * アプリ内で全画面に重ねて出す管理画面（issue #724）。`safeAreaTop` でヘッダー（と lg 以上のサイドバー）の上に
+ * 上端の safe-area を空け、帯はそれぞれの面の色になる。高さは `className="h-full"`。外枠は fixed と重ね順だけにし、
+ * safe-area と背景を書かない。ここでは --Safe-Area-Inset-Top を 24px に固定して確認する。
+ */
+export const SafeAreaTopOverlay: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="h-[480px]" style={{ "--Safe-Area-Inset-Top": "24px" } as React.CSSProperties}>
+      <AdminShell
+        className="h-full"
+        safeAreaTop
+        mobileDrawer
+        sidebar={<SidebarContent collapsed={false} onToggle={() => {}} />}
+        header={<HeaderContent />}
+      >
+        <SectionHeader title="注文一覧" description="上端の帯はヘッダーの面の色になる。" />
+      </AdminShell>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const header = canvasElement.querySelector<HTMLElement>('[data-slot="admin-header"]')!
+    await expect(getComputedStyle(header).paddingTop).toBe("24px")
+    // 下線込みで従来の 64px + 安全領域
+    await expect(Math.round(header.getBoundingClientRect().height)).toBe(64 + 24)
+    const shell = canvasElement.querySelector<HTMLElement>('[data-slot="admin-shell"]')!
+    await expect(Math.round(shell.getBoundingClientRect().height)).toBe(480)
+  },
 }

@@ -10,6 +10,7 @@ import {
   alertOverlayZ,
 } from "@/lib/modal-stack"
 import { buttonVariants } from "./button"
+import { OverlayTitleSlotProvider } from "../../lib/title-level"
 import type { ButtonProps } from "./button"
 
 const useIsomorphicLayoutEffect =
@@ -199,7 +200,8 @@ function AlertDialogContent({
         {...props}
       >
         <ModalStackRegistrar onLevelChange={setStackLevel} />
-        {children}
+        {/* #727: AlertDialog は Radix の別スコープなので、外側の Sheet / Dialog の Title 文脈を切る */}
+        <OverlayTitleSlotProvider slot={null}>{children}</OverlayTitleSlotProvider>
       </AlertDialogPrimitive.Content>
     </AlertDialogPortal>
   )

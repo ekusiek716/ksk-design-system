@@ -236,6 +236,17 @@ describe("面の上書きは var(--Nav-*, DS既定) で、未宣言なら見た�
     expect(NAV_CSS).toContain('[data-tone="inverse"] [data-nav-platter]')
   })
 
+  it("選択プラッターのぼかしは --Nav-Selected-Backdrop（既定 none）を詳細度 0 の :where() で当てる（#726）", () => {
+    const rule = NAV_CSS.slice(NAV_CSS.indexOf(":where([data-nav-platter]) {"))
+    expect(rule).toContain("-webkit-backdrop-filter: var(--Nav-Selected-Backdrop, none);")
+    expect(rule).toContain("backdrop-filter: var(--Nav-Selected-Backdrop, none);")
+    // -webkit- を先に書く（check-prefix-order と同じ規約）
+    expect(rule.indexOf("-webkit-backdrop-filter")).toBeLessThan(rule.indexOf("\n  backdrop-filter"))
+    // 詳細度を持つ [data-nav-platter] 側にはぼかしを書かない（consumer の既存の上書きを読み込み順で潰さないため）
+    const platter = NAV_CSS.slice(NAV_CSS.indexOf("[data-nav-platter] {"), NAV_CSS.indexOf('[data-tone="inverse"] [data-nav-platter]'))
+    expect(platter).not.toContain("backdrop-filter")
+  })
+
   it("面の白リテラルが className に戻っていない（bottom-nav.css が唯一の宣言箇所）", () => {
     expect(SOURCE).not.toContain("bg-[rgba(255,255,255,0.20)]")
     expect(SOURCE).not.toContain("[background:color-mix(in_srgb,var(--Surface-Primary)_70%,transparent)]")
@@ -278,9 +289,18 @@ describe("契約が contracts に載っている", () => {
       "--Nav-Center-Action-Shadow",
       "--Nav-Selected-Surface",
       "--Nav-Selected-Shadow",
+      "--Nav-Selected-Backdrop",
     ]) {
       expect(nav).toContain(name)
     }
+  })
+
+  it("--Nav-Selected-Backdrop が check-css-vars の ALLOWLIST と product-theme の nav 許可リストに載っている（#726）", () => {
+    const cssVars = readFileSync(join(ROOT, "scripts/check-css-vars.mjs"), "utf8")
+    expect(cssVars).toContain('"--Nav-Selected-Backdrop"')
+    expect(contract.allowedVariables.nav).toContain("--Nav-Selected-Backdrop")
+    expect(contract.wiredComponents.BottomTabBar).toContain("--Nav-Selected-*")
+    expect(contract.wiredComponents.MobileTabBar).toContain("--Nav-Selected-*")
   })
 
   it("BottomTabBar / MobileTabBar が wiredComponents に載っている", () => {

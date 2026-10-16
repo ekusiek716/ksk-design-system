@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLocale } from "../ui/ksk-labels"
 import type { MonthCalendarEvent } from "./month-calendar"
 import { ACCENT_DOT, CHIP_TONE, WEEKDAYS, formatDayLabel, parseKey, resolveEventAccent, resolveTodayKey } from "./_internal/calendar-shared"
 
@@ -15,7 +16,7 @@ interface AgendaListProps extends Omit<React.ComponentProps<"div">, "onSelect"> 
   selectedDate?: string
   /** 「今日」の基準日。省略時は現在日 */
   today?: Date | string
-  /** 表示言語（日付の読み上げ・曜日）。既定 "ja" */
+  /** 表示言語（日付の読み上げ・曜日）。既定は KskLabelsProvider の locale（無ければ "ja"） */
   locale?: "ja" | "en"
   /** 日曜を Text-Caution、土曜を Text-Accent-Primary にする（MonthCalendar と同じ）。既定 true */
   weekendTone?: boolean
@@ -55,7 +56,7 @@ function AgendaList({
   dates,
   selectedDate,
   today,
-  locale = "ja",
+  locale: localeProp,
   weekendTone = true,
   onSelectEvent,
   renderEvent,
@@ -66,6 +67,9 @@ function AgendaList({
   className,
   ...props
 }: AgendaListProps) {
+  // 既定は KskLabelsProvider の locale（無ければ "ja"。issue #723）
+  const providerLocale = useKskLocale()
+  const locale = localeProp ?? providerLocale ?? "ja"
   const Heading = `h${headingLevel}` as "h2" | "h3" | "h4" | "h5" | "h6"
   const todayKey = resolveTodayKey(today)
   const eventsByDate = React.useMemo(() => {

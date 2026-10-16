@@ -44,13 +44,16 @@
       "implementation": "src/components/patterns/shells/admin-shell.tsx",
       "structure": [
         "AdminShell (flex h-screen, bg-[var(--Surface-Secondary)])",
-        "  sidebar slot: aside hidden lg:flex, border-r, bg-[var(--Surface-Primary)], ScrollArea でラップ済み（sidebarWidth prop で幅調整、既定 w-64）",
-        "  header slot: 任意。border-b, h-16。内蔵 Container(size=fluid) が px-6 を担当",
+        "  sidebar slot: aside hidden lg:flex, border-r, ScrollArea でラップ済み（sidebarWidth prop で幅調整、既定 w-64）。面は sidebarTone で決まる: \"default\"（既定）= bg-[var(--Surface-Primary)] + Border-Low-Emphasis、\"inverse\" = bg-[var(--Surface-Inverse)] + Text-on-Inverse（issue #680）",
+        "  mobileDrawer（任意・既定 false）: lg 未満のヘッダー左端にメニューボタン（icon-xl 44px・aria-expanded）を出し、左の Sheet（w-72 max-w-[85vw]・swipeToClose）に同じ sidebar slot を開く。header が無いときは lg 未満だけメニューボタンのヘッダーを出す（issue #705）",
+        "  header slot: 任意。border-b, h-16。内蔵 Container(size=fluid) が px-6 を担当。safeAreaTop で上端の safe-area を header（下線込み 64px + 安全領域）・lg 以上の aside・mobileDrawer のドロワーの上に足す（issue #724）",
         "  main: flex-1 overflow-auto。内蔵 Container(size=fluid, className=py-6) が p-6 相当の外周余白を担当"
       ],
       "rules": [
         "main の p-6（24px）がページ外周の既定余白。ページ側で二重に外周 padding を足さない",
-        "sidebar は lg 未満で hidden になる（モバイル用の代替ナビは呼び出し側の責務。AdminShell 自体はモバイル用ドロワーを持たない）",
+        "sidebar は lg 未満で hidden になる。lg 未満でナビへ辿れるようにするときは mobileDrawer（開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange、ナビ項目で閉じるのは closeMobileDrawerOnNavigate）。ハンバーガーと Sheet side=\"left\" を呼び出し側で自作しない（issue #705）",
+        "暗色サイドバーは sidebarTone=\"inverse\"。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする。aside に bg を className で上書きしない（issue #680）",
+        "アプリ内で全画面に重ねて出す管理画面は safeAreaTop + className=\"h-full\"。外枠は fixed と重ね順だけにし、safe-area の余白と背景を外枠に書かない（issue #724）",
         "sidebarWidth を変える場合、hidden lg:flex は維持し幅クラスのみ差し替える",
         "sidebar 内のロゴ行に border-b、フッター行に border-t を入れない。罫線は sidebar 右端の縦線と header 下の横線の 2 本だけに絞る（#253/#254）",
         "sidebar slot の直下は flex grow flex-col にし、フッターは mt-auto で下端へ置く。h-full は使わない（slot は Radix ScrollArea の viewport ラッパー配下＝height:auto で % height が解決されない。shell 側がそのラッパーを min-h-full の縦 flex に矯正しているので grow が効く）",

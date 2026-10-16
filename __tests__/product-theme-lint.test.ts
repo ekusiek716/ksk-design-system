@@ -273,6 +273,8 @@ describe("契約のドリフト検査", () => {
       "--Nav-Center-Action-Shadow",
       "--Nav-Selected-Surface",
       "--Nav-Selected-Shadow",
+      // 選択プラッターのぼかし（issue #726）。既定 none を bottom-nav.css の :where() が var() で受ける
+      "--Nav-Selected-Backdrop",
       "--Nav-Pill-Surface",
       "--Nav-Pill-Backdrop",
       "--Nav-Pill-Border",

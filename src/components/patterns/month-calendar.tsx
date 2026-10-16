@@ -1,5 +1,8 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { ArrowDown2, ArrowLeft2, ArrowRight2 } from "iconsax-reactjs"
+import { useKskLabels, useKskLocale } from "../ui/ksk-labels"
+import { Button, type ButtonProps } from "../ui/button"
 import {
   ACCENT_DOT,
   CHIP_TONE,
@@ -68,7 +71,7 @@ interface MonthCalendarProps extends Omit<React.ComponentProps<"div">, "onSelect
   weekendTone?: boolean
   /** 「今日」の基準日（"YYYY-MM-DD" / Date）。省略時は現在日。テスト・擬似日付用 */
   today?: Date | string
-  /** 表示言語（曜日・読み上げ・「+n件」の既定）。既定 "ja" */
+  /** 表示言語（曜日・読み上げ・「+n件」の既定）。既定は KskLabelsProvider の locale（無ければ "ja"） */
   locale?: "ja" | "en"
   /** 「+n件」の文言。既定 ja: `+${n}件` / en: `+${n} more` */
   moreLabel?: (count: number) => string
@@ -147,7 +150,7 @@ function MonthCalendar({
   weekStartsOn = 0,
   weekendTone = true,
   today: todayProp,
-  locale = "ja",
+  locale: localeProp,
   moreLabel,
   renderEvent,
   view = "month",
@@ -155,6 +158,9 @@ function MonthCalendar({
   "aria-label": ariaLabel,
   ...props
 }: MonthCalendarProps) {
+  // 既定は KskLabelsProvider の locale（無ければ "ja"。issue #723）
+  const providerLocale = useKskLocale()
+  const locale = localeProp ?? providerLocale ?? "ja"
   const monthStart = toMonthStart(month)
   const monthKey = `${monthStart.getFullYear()}-${pad(monthStart.getMonth() + 1)}`
   const weeks = buildMonthWeeks(monthStart, weekStartsOn)
@@ -469,5 +475,186 @@ function MonthCalendar({
   )
 }
 
-export { MonthCalendar, buildMonthWeeks }
-export type { MonthCalendarEvent, MonthCalendarEventTone, MonthCalendarProps, MonthCalendarView }
+// ─── MonthCalendarHeader（issue #721） ─────────────────────────────────────────
+
+interface MonthCalendarHeaderProps extends Omit<React.ComponentProps<"div">, "title"> {
+  /** 表示中の月（MonthCalendar の month と同じ値）。title の既定「2026年10月」/「October 2026」に使う */
+  month: Date | string
+  /** 見出しの文言。既定は month から作る */
+  title?: React.ReactNode
+  /** 「今日へ」を押したとき。渡さなければボタンを出さない */
+  onToday?: () => void
+  /** 前の月へ。渡さなければボタンを出さない */
+  onPrev?: () => void
+  /** 次の月へ。渡さなければボタンを出さない */
+  onNext?: () => void
+  /**
+   * 見出しの大きさ。
+   * - "md"（既定）: typo-heading-md（スマホの週の帯の上）
+   * - "lg": typo-heading-lg（PC の月グリッドの上）
+   */
+  size?: "md" | "lg"
+  /** 見出しの要素。既定 "h2"。置き場所の見出し階層に合わせる */
+  headingLevel?: "h2" | "h3"
+  /** 表示言語（title の既定）。既定は KskLabelsProvider の locale（無ければ "ja"） */
+  locale?: "ja" | "en"
+  /** 「今日へ」の文言。既定は KskLabelsProvider の calendarToday（無ければ「今日へ」） */
+  todayLabel?: string
+  /** 前の月ボタンの読み上げ名。既定は KskLabelsProvider の calendarPrevMonth（無ければ「前の月」） */
+  prevLabel?: string
+  /** 次の月ボタンの読み上げ名。既定は KskLabelsProvider の calendarNextMonth（無ければ「次の月」） */
+  nextLabel?: string
+}
+
+/**
+ * MonthCalendarHeader — 予定カレンダーの見出し（issue #721）
+ *
+ * 左に月の見出し + 「今日へ」、右に前後の月のアイコンボタン（aria-label 付き・44px の当たり判定）。
+ * 見出しは aria-live="polite" で、月が変わると読み上げる。
+ * MonthCalendar の root は role="grid" なので、見出しは grid の外（MonthCalendar の上）に置く。
+ * 見出し・「今日へ」・前後ボタンを h2 + Button で自作しない。
+ */
+function MonthCalendarHeader({
+  month,
+  title,
+  onToday,
+  onPrev,
+  onNext,
+  size = "md",
+  headingLevel: Heading = "h2",
+  locale: localeProp,
+  todayLabel,
+  prevLabel,
+  nextLabel,
+  className,
+  ...props
+}: MonthCalendarHeaderProps) {
+  const labels = useKskLabels()
+  const providerLocale = useKskLocale()
+  const locale = localeProp ?? providerLocale ?? "ja"
+  const start = toMonthStart(month)
+  const defaultTitle =
+    locale === "ja"
+      ? `${start.getFullYear()}年${start.getMonth() + 1}月`
+      : start.toLocaleDateString("en", { year: "numeric", month: "long" })
+  return (
+    <div
+      data-slot="month-calendar-header"
+      data-size={size}
+      className={cn("flex min-w-0 items-center justify-between gap-3", className)}
+      {...props}
+    >
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <Heading
+          // 前後の月・今日へで見出しが変わったことをスクリーンリーダーへ知らせる（ボタンを押した位置から動かずに分かる）
+          aria-live="polite"
+          aria-atomic="true"
+          className={cn(
+            "min-w-0 truncate tabular-nums text-[var(--Text-High-Emphasis)]",
+            size === "lg" ? "typo-heading-lg" : "typo-heading-md"
+          )}
+        >
+          {title ?? defaultTitle}
+        </Heading>
+        {onToday && (
+          <Button type="button" variant="ghost" size="sm" data-slot="month-calendar-today" onClick={onToday}>
+            {todayLabel ?? labels.calendarToday}
+          </Button>
+        )}
+      </div>
+      {(onPrev || onNext) && (
+        // icon-sm（見た目 32px・当たり判定 44px）を並べるので、見た目の端同士は 12px（gap-3）空ける
+        <div className="flex shrink-0 items-center gap-3">
+          {onPrev && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon-sm"
+              data-slot="month-calendar-prev"
+              aria-label={prevLabel ?? labels.calendarPrevMonth}
+              onClick={onPrev}
+            >
+              <ArrowLeft2 size={16} aria-hidden="true" />
+            </Button>
+          )}
+          {onNext && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon-sm"
+              data-slot="month-calendar-next"
+              aria-label={nextLabel ?? labels.calendarNextMonth}
+              onClick={onNext}
+            >
+              <ArrowRight2 size={16} aria-hidden="true" />
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── MonthCalendarExpandToggle（issue #721） ───────────────────────────────────
+
+interface MonthCalendarExpandToggleProps extends Omit<ButtonProps, "children" | "onClick" | "variant" | "size"> {
+  /** 月全体を表示中か（MonthCalendar の view="month" のとき true） */
+  expanded: boolean
+  /** 押したとき（次の expanded を渡す）。consumer は view を "month" ⇄ "week" に切り替える */
+  onExpandedChange: (expanded: boolean) => void
+  /**
+   * 読み上げ名。開閉で変えない（状態は aria-expanded が伝える）。
+   * 既定は KskLabelsProvider の calendarExpand（無ければ「月全体を表示」）
+   */
+  label?: string
+}
+
+/**
+ * MonthCalendarExpandToggle — 週の帯 ⇄ 月全体の開閉ボタン（issue #721）
+ *
+ * MonthCalendar の下に置く全幅のボタン。読み上げ名は固定で、開閉の状態は aria-expanded だけが伝える。矢印は開いているとき上向きに回る
+ * （Motion トークン）。開閉の状態は consumer が持ち、MonthCalendar の view に渡す。
+ * aria-controls に MonthCalendar の id を渡すと結び付く。Button ghost icon-sm w-full で自作しない。
+ */
+function MonthCalendarExpandToggle({
+  expanded,
+  onExpandedChange,
+  label,
+  className,
+  ...props
+}: MonthCalendarExpandToggleProps) {
+  const labels = useKskLabels()
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      data-slot="month-calendar-expand-toggle"
+      data-expanded={expanded || undefined}
+      aria-expanded={expanded}
+      aria-label={label ?? labels.calendarExpand}
+      onClick={() => onExpandedChange(!expanded)}
+      className={cn("w-full", className)}
+      {...props}
+    >
+      <ArrowDown2
+        size={24}
+        aria-hidden="true"
+        className={cn(
+          "transition-transform duration-[var(--Motion-Duration-Base)] ease-[var(--Motion-Easing-Standard)]",
+          expanded && "rotate-180"
+        )}
+      />
+    </Button>
+  )
+}
+
+export { MonthCalendar, MonthCalendarExpandToggle, MonthCalendarHeader, buildMonthWeeks }
+export type {
+  MonthCalendarEvent,
+  MonthCalendarEventTone,
+  MonthCalendarExpandToggleProps,
+  MonthCalendarHeaderProps,
+  MonthCalendarProps,
+  MonthCalendarView,
+}

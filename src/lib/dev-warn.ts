@@ -16,6 +16,13 @@ export function warnOnceInDev(key: string, message: string): void {
   console.warn(`[ksk-design-system] ${message}`)
 }
 
+/** 開発ビルドだけで 1 回だけ出すエラー（a11y が壊れる誤用など、警告より強く知らせたいもの） */
+export function errorOnceInDev(key: string, message: string): void {
+  if (!isDevBuild() || warned.has(key)) return
+  warned.add(key)
+  console.error(`[ksk-design-system] ${message}`)
+}
+
 /** テスト用: 出した警告の記録を消す */
 export function resetDevWarnings(): void {
   warned.clear()

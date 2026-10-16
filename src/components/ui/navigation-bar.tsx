@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "./button"
+import { useKskLabels } from "./ksk-labels"
 
 // ─── Inline icons (pure SVG, no external dep) ────────────────────────────────
 
@@ -52,15 +53,21 @@ export interface NavigationBarProps extends Omit<React.ComponentProps<"header">,
   leftIcon?: "back" | "close" | React.ReactNode
   /** 左ボタンクリックハンドラ */
   onLeft?: () => void
-  /** 左ボタンのアクセシビリティラベル（自動補完: "戻る" / "閉じる"） */
+  /** 左ボタンのアクセシビリティラベル（自動補完: "戻る" / "閉じる"）。leftLabelVisible のときは画面にも出す */
   leftLabel?: string
+  /**
+   * 左ボタンに leftLabel の文字も表示する（「＜ メニューに戻る」・issue #729）。既定 false（アイコンだけ）。
+   * 高さ 44px・アイコン + 文字のボタンになり、文字は 112px（max-w-28）で省略する。中央タイトルの左右の
+   * 余白も同じ幅に広げ、重ならず中央のまま。文字付きの戻るボタンを Button で自作しない
+   */
+  leftLabelVisible?: boolean
   /**
    * 右スロット。rightSlot が優先、未指定かつ onShare があればシェアボタンを表示。
    */
   rightSlot?: React.ReactNode
   /** シェアボタンを右に表示してそのハンドラを登録する簡便 prop */
   onShare?: () => void
-  /** シェアボタンのアクセシビリティラベル */
+  /** シェアボタンのアクセシビリティラベル。既定は KskLabelsProvider の share（無ければ「シェア」） */
   shareLabel?: string
   /**
    * true : Liquid Glass ボタン（グラデーション・写真背景の上に重ねるとき）
@@ -91,9 +98,10 @@ function NavigationBar({
   leftIcon = "back",
   onLeft,
   leftLabel,
+  leftLabelVisible = false,
   rightSlot,
   onShare,
-  shareLabel = "シェア",
+  shareLabel: shareLabelProp,
   glass = false,
   transparent = false,
   className,
@@ -107,7 +115,10 @@ function NavigationBar({
     return leftIcon
   }
 
-  const defaultLeftLabel = leftIcon === "close" ? "閉じる" : "戻る"
+  // 既定文言は KskLabelsProvider（無ければ「戻る」「閉じる」「シェア」。issue #723）
+  const defaultLabels = useKskLabels()
+  const defaultLeftLabel = leftIcon === "close" ? defaultLabels.close : defaultLabels.back
+  const shareLabel = shareLabelProp ?? defaultLabels.share
   const btnVariant = glass ? "glass" : "secondary"
 
   return (
@@ -121,7 +132,7 @@ function NavigationBar({
       )}
     >
       {/* Left button — Button コンポーネントを利用 */}
-      {onLeft && (
+      {onLeft && !leftLabelVisible && (
         <Button
           variant={btnVariant}
           size="icon-xl"
@@ -132,10 +143,34 @@ function NavigationBar({
           {resolveLeftIcon()}
         </Button>
       )}
+      {onLeft && leftLabelVisible && (
+        // #729: 文字付き。高さは icon-xl と同じ 44px（size="default" の 40px から上げる）。
+        // 名前は見える文字から取る（aria-label を付けない）
+        <Button
+          variant={btnVariant}
+          size="default"
+          data-label-visible=""
+          className="h-11 max-w-28 gap-1 pl-2 pr-3"
+          {...leftButtonProps}
+          onClick={onLeft}
+        >
+          {resolveLeftIcon()}
+          {/* 省略されても全文が分かるよう title を付ける */}
+          <span className="min-w-0 truncate" title={leftLabel ?? defaultLeftLabel}>
+            {leftLabel ?? defaultLeftLabel}
+          </span>
+        </Button>
+      )}
 
       {/* Center title — absolute, always visually centered */}
       {title && (
-        <div className="absolute inset-0 flex justify-center items-center px-16 pointer-events-none">
+        <div
+          className={cn(
+            "absolute inset-0 flex justify-center items-center pointer-events-none",
+            // 文字付きの左ボタン（max-w-28 + 左の px-3）と重ならないよう、左右とも同じだけ空けて中央を保つ
+            onLeft && leftLabelVisible ? "px-32" : "px-16"
+          )}
+        >
           <span className="typo-heading-sm text-[var(--Text-High-Emphasis)] min-w-0 truncate">
             {title}
           </span>

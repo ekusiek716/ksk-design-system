@@ -37,7 +37,7 @@
 | DateField | `@/components/ui/date-field` | — | Default, WithInitialValue, CustomPlaceholder, Disabled, CustomFormat, WithTriggerLabel |
 | DatePicker, DateRangePicker | `@/components/ui/date-picker` | — | Default, WithInitialValue, FutureValueOpensSelectedMonth, WithDefaultMonth, Disabled, RangePicker, CalendarOnly, CalendarRange, InvalidInFormField |
 | DateTimePicker | `@/components/ui/date-time-picker` | — | Default, Empty, Bounded |
-| Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, Fullscreen, FullscreenUntilMd, FullscreenSafeAreaOptOut, ReportShop, StackedFooter, OpensAndIsImmediatelyInteractive, Sizes, ClosesOnEscape, TrapsFocus, StacksAboveNestedSheets, ConfirmDialogStacksAboveSheet, TitleLevelFullscreenDefault, TitleLevelExplicit, TitleLevelCenterDefault, ChildDescriptionIsLinked, NoDescriptionLeavesNoDescribedBy, DescriptionPropIsLinked, ExplicitDescribedByWins, DynamicChildDescriptionIsLinked, NestedSelectKeyboard |
+| Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger | `@/components/ui/dialog` | — | WithTrigger, WithForm, FocusOptions, TopPositionLongList, Fullscreen, FullscreenUntilMd, HeaderBarOnClose, FullscreenSafeAreaOptOut, ReportShop, StackedFooter, OpensAndIsImmediatelyInteractive, Sizes, ClosesOnEscape, TrapsFocus, StacksAboveNestedSheets, ConfirmDialogStacksAboveSheet, TitleLevelFullscreenDefault, TitleLevelExplicit, TitleLevelCenterDefault, ChildDescriptionIsLinked, NoDescriptionLeavesNoDescribedBy, DescriptionPropIsLinked, ExplicitDescribedByWins, DynamicChildDescriptionIsLinked, NestedSelectKeyboard |
 | DropdownFilter | `@/components/ui/dropdown-filter` | — | Default, ActiveFilter, WithIcons（ビュー切替・アイコン付き）, MultipleFilters |
 | DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent | `@/components/ui/dropdown-menu` | — | Default, WithCheckbox, WithRadio, WithSubmenu, OpensAndSelectsItem, NavigatesWithKeyboard |
 | EmojiIcon | `@/components/ui/emoji-icon` | — | Default, Sizes, InSlots |
@@ -48,9 +48,10 @@
 | IconBadge | `@/components/ui/icon-badge` | **size**: `md`, `ml`, `lg`<br>**appearance**: `accent`, `plain`<br>**tone**: `accent`, `info`, `success`, `warning`, `caution` | Medium, MediumLarge, Large, Tones, InCardFlow |
 | ImageGallery | `@/components/ui/image-gallery` | — | Thumbnail, Dot, Square, Single |
 | Input | `@/components/ui/input` | — | Default, WithPlaceholder, Disabled, Error, WithLabel, FileInput, Inline |
+| KskLabelsProvider, KSK_DEFAULT_LABELS | `@/components/ui/ksk-labels` | — | Default, English, CustomLabels |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, Unstyled, DisabledState |
 | MultiSelect | `@/components/ui/multi-select` | — | Default, WithTriggerLabel, InvalidInFormField, FocusReturnsToTriggerAfterClear |
-| NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone |
+| NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone, LabeledBack |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis, WithBuildPageItems, AsChildRouterLink |
 | PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small, FullWidthThree, FullWidthTwo, FullWidthFour |
@@ -115,7 +116,7 @@
 | ContentCarousel | `@/components/patterns/content-carousel` | — | Default, AutoPlay, WithoutControls |
 | CookieConsent | `@/components/patterns/cookie-consent` | — | Default, CustomLabels, OnDecideCallback |
 | CountdownHero | `@/components/patterns/countdown-hero` | — | Upcoming, Today, Past, With Illustration Slot, ISO String targetDate, With dateLabel (目標日を数字の下に), Today with todayValue (0 の代わりに文字), Interactive |
-| DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle |
+| DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle, WithCloseButton, InSheetTitleIsSheetName, WithoutLeading |
 | DocumentPage | `@/components/patterns/document-page` | — | PrivacyPolicy, WithoutLastUpdated |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
 | ErrorState, NotFoundIllustration | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry, NotFound |
@@ -125,7 +126,7 @@
 | FilterChip | `@/components/patterns/filter-chip` | — | Inactive, ActiveWithValue, Toggle, Group |
 | FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears, WithIcon |
 | Footer | `@/components/patterns/footer` | — | Default, Minimal, WithRenderSlot, WithExtra, WithPaymentIcons |
-| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm, HorizontalRows |
+| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm, HorizontalRows, GroupRows |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
 | KanbanColumn | `@/components/patterns/kanban-column` | — | Board, CategoryBoard |
@@ -137,7 +138,7 @@
 | MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount, WithTopAlignment |
 | MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff, FixedViewportApp |
 | MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline, Full width CTA, With ad banner offset (bottomOffsetExtra) |
-| MonthCalendar | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English, MobileWeekWithAgenda, CategoryAccent |
+| MonthCalendar, MonthCalendarExpandToggle, MonthCalendarHeader | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English, MobileWeekWithAgenda, CategoryAccent, HeaderAndExpandToggle |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
 | PresenceIndicator | `@/components/patterns/presence-indicator` | — | Default, WithBadge, Offline, NameOnly, 狭幅で非表示にする例（className） |
@@ -197,7 +198,7 @@
 
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
-| AdminShell | `@/components/patterns/shells/admin-shell` | — | Default, WithoutHeader, MobileDrawer |
+| AdminShell | `@/components/patterns/shells/admin-shell` | — | Default, WithoutHeader, MobileDrawer, SafeAreaTopOverlay |
 | AppShell | `@/components/patterns/shells/app-shell` | — | Default |
 | MarketingShell | `@/components/patterns/shells/marketing-shell` | — | Default |
 

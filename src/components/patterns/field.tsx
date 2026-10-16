@@ -67,14 +67,31 @@ function FieldLegend({ className, size = "md", ...props }: FieldLegendProps) {
   )
 }
 
-/** 関連する FormField 群を 16px の縦リズムで束ねる。 */
-function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
+interface FieldGroupProps extends React.ComponentProps<"div"> {
+  /**
+   * 並べ方（issue #720）。
+   * - "stack"（既定）: 16px の縦リズム（従来）
+   * - "rows": 区切り線の一覧。子の間に Border-Low-Emphasis の線（divide-y）を引き、直下の FormField に
+   *   上下 12px（py-3）を付ける。詳細シートの「ラベル左置きの項目行」（FormField orientation="horizontal"）向け。
+   *   CollapsibleChipField は自前で py-3 を持つのでそのまま並べられる。FormField に className="py-3" を足さない
+   */
+  variant?: "stack" | "rows"
+}
+
+/** 関連する FormField 群を 16px の縦リズム（または区切り線の一覧）で束ねる。 */
+function FieldGroup({ className, variant = "stack", ...props }: FieldGroupProps) {
   return (
     <div
       {...props}
       data-slot="field-group"
+      data-variant={variant === "rows" ? "rows" : undefined}
       role="group"
-      className={cn("flex min-w-0 flex-col gap-4", className)}
+      className={cn(
+        variant === "rows"
+          ? "flex min-w-0 flex-col divide-y divide-[var(--Border-Low-Emphasis)] [&>[data-slot=form-field]]:py-3"
+          : "flex min-w-0 flex-col gap-4",
+        className
+      )}
     />
   )
 }
@@ -145,8 +162,7 @@ export {
   FieldError,
   FieldSeparator,
 }
-export type { FieldLegendProps, FieldSetGap, FieldSetProps }
-export type FieldGroupProps = React.ComponentProps<"div">
+export type { FieldGroupProps, FieldLegendProps, FieldSetGap, FieldSetProps }
 export type FieldDescriptionProps = React.ComponentProps<"p">
 export type FieldErrorProps = React.ComponentProps<"p">
 export type FieldSeparatorProps = React.ComponentProps<"div">

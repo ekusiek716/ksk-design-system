@@ -6,6 +6,7 @@ import { Container } from "../../ui/container"
 import { Sheet, SheetContent, SheetTitle } from "../../ui/sheet"
 import { ScrollArea } from "../../ui/scroll-area"
 import { SkipLink } from "../../ui/skip-link"
+import { useKskLabels } from "../../ui/ksk-labels"
 
 interface AdminShellProps extends React.ComponentProps<"div"> {
   sidebar: React.ReactNode
@@ -31,9 +32,9 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
   mobileDrawerOpen?: boolean
   /** モバイルドロワーの開閉が変わったとき */
   onMobileDrawerOpenChange?: (open: boolean) => void
-  /** メニューボタンのアクセシブルネーム。@default "メニューを開く" */
+  /** メニューボタンのアクセシブルネーム。@default KskLabelsProvider の mobileMenu（無ければ「メニューを開く」） */
   mobileMenuLabel?: string
-  /** ドロワーの見出し（読み上げ専用。画面には出さない）。@default "メニュー" */
+  /** ドロワーの見出し（読み上げ専用。画面には出さない）。@default KskLabelsProvider の mobileDrawerTitle（無ければ「メニュー」） */
   mobileDrawerTitle?: string
   /**
    * ドロワーの中のリンク（`a[href]`）や SidebarNav の項目を押したら閉じる。
@@ -42,6 +43,13 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
    * @default false
    */
   closeMobileDrawerOnNavigate?: boolean
+  /**
+   * 上端の safe-area（ステータスバー・ノッチ）を空ける（issue #724）。既定 false。
+   * `var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))` をヘッダー（下線込み 64px + 安全領域）・
+   * lg 以上のサイドバー・mobileDrawer のドロワーの上に足す。ヘッダーが無い画面では本文の列の上に足す。上端の帯はそれぞれの面の色になる。
+   * アプリ内で全画面に重ねて出すときは `className="h-full"` と組み、外枠に safe-area と背景を書かない
+   */
+  safeAreaTop?: boolean
 }
 
 /** ドロワーを閉じる対象（ナビゲーションとみなす要素） */
@@ -104,15 +112,19 @@ function AdminShell({
   sidebarTone = "default",
   mainId = "main-content",
   skipLink = true,
-  skipLinkLabel = "コンテンツへ移動",
+  skipLinkLabel,
   mobileDrawer = false,
   mobileDrawerOpen,
   onMobileDrawerOpenChange,
-  mobileMenuLabel = "メニューを開く",
-  mobileDrawerTitle = "メニュー",
+  mobileMenuLabel: mobileMenuLabelProp,
+  mobileDrawerTitle: mobileDrawerTitleProp,
   closeMobileDrawerOnNavigate = false,
+  safeAreaTop = false,
   ...props
 }: AdminShellProps) {
+  const defaultLabels = useKskLabels()
+  const mobileMenuLabel = mobileMenuLabelProp ?? defaultLabels.mobileMenu
+  const mobileDrawerTitle = mobileDrawerTitleProp ?? defaultLabels.mobileDrawerTitle
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
   const drawerOpen = mobileDrawerOpen ?? uncontrolledOpen
   const setDrawerOpen = React.useCallback(
@@ -161,7 +173,10 @@ function AdminShell({
       className={cn("flex h-screen bg-[var(--Surface-Secondary)]", className)}
       {...props}
     >
-      {skipLink && skipLinkLabel && <SkipLink targetId={mainId} label={skipLinkLabel} />}
+      {/* skipLinkLabel 未指定は KskLabelsProvider の既定（issue #723）。null / "" は従来どおり出さない */}
+      {skipLink && skipLinkLabel !== null && skipLinkLabel !== "" && (
+        <SkipLink targetId={mainId} label={skipLinkLabel} />
+      )}
       <aside
         data-slot="admin-sidebar"
         data-tone={sidebarTone}
@@ -169,6 +184,7 @@ function AdminShell({
           sidebarTone === "inverse"
             ? "hidden lg:flex flex-col border-r border-[var(--Surface-Inverse)] bg-[var(--Surface-Inverse)] text-[var(--Text-on-Inverse)]"
             : "hidden lg:flex flex-col border-r border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
+          safeAreaTop && "pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]",
           sidebarWidth
         )}
       >
@@ -203,6 +219,8 @@ function AdminShell({
             onClick={handleDrawerClick}
             className={cn(
               "flex w-72 max-w-[85vw] flex-col overflow-y-auto lg:hidden",
+              // ドロワーも画面の上端から出るので、同じだけ安全領域を空ける
+              safeAreaTop && "pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]",
               sidebarTone === "inverse"
                 ? "border-r-0 bg-[var(--Surface-Inverse)] text-[var(--Text-on-Inverse)]"
                 : "bg-[var(--Surface-Primary)]"
@@ -214,12 +232,22 @@ function AdminShell({
           </SheetContent>
         </Sheet>
       )}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div
+        className={cn(
+          "flex flex-1 flex-col min-w-0",
+          // header が無い画面は本文の列の上に、lg 以上だけ header が無い（mobileDrawer だけ）画面は lg 以上で足す
+          safeAreaTop && !header && !mobileDrawer && "pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]",
+          safeAreaTop && !header && mobileDrawer && "lg:pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]"
+        )}
+      >
         {(header || mobileDrawer) && (
           <header
             data-slot="admin-header"
             className={cn(
               "h-16 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
+              // 高さは従来の 64px（下線込み）+ 安全領域。安全領域は padding で空ける（帯もヘッダーの面の色）
+              safeAreaTop &&
+                "h-[calc(4rem_+_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)))] pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]",
               // header を渡していないときは、メニューボタンのための lg 未満だけのヘッダー
               !header && "lg:hidden"
             )}

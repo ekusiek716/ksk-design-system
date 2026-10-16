@@ -181,7 +181,7 @@
      src/styles/bottom-nav.css が var() のフォールバックとして DS 既定を持つ:
 
        --Nav-Center-Action-Surface / -Border / -Shadow
-       --Nav-Selected-Surface / --Nav-Selected-Shadow
+       --Nav-Selected-Surface / --Nav-Selected-Shadow / --Nav-Selected-Backdrop（#726・既定 none）
 
      宣言した時だけ上書きされる（宣言しなければ tone="inverse" / dark の
      出し分けを DS 側が従来どおり面倒を見る）。 */

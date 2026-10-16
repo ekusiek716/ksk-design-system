@@ -4,12 +4,12 @@
     "version": "2.14.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 72,
+      "ui": 73,
       "patterns": 69,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 164
+      "total": 165
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -426,8 +426,9 @@
         "スマホは全画面・PC は中央のモーダルにする作業面は position=\"fullscreen\" + centerFrom（\"sm\" | \"md\" | \"lg\"）。境界以上で center と同じ位置・角丸・影・size の幅になる。className に md:!max-w-* / md:!h-* を書いて全画面を打ち消さない（issue #713）",
         "height=\"fill\" は中央表示（center / centerFrom の境界以上）の高さを画面 - 4rem に固定する。見取り図・表など中身の量で枠が伸び縮みすると困る面向け（issue #713）",
         "size は sm(400) / md(480・既定) / lg(640) / xl(800) / 2xl(1024px・issue #713)",
+        "帯の閉じるボタンは DialogHeader variant=\"bar\" onClose={() => setOpen(false)}（右端に Button ghost icon-lg 48px + 閉じるアイコン 20px。読み上げ名は closeLabel、既定は KskLabelsProvider の close＝「閉じる」）。DialogClose + Button を trailing に自作しない（issue #722）",
         "全画面ダイアログ（padding={false}）の上端の帯は DialogHeader variant=\"bar\"（下線・左右 24px・上下 12px）+ trailing（閉じるボタン等）。DialogHeader に border-b / flex-row / px を自作しない（issue #713）",
-        "height=\"fill\" は position=\"top\" と centerFrom の無い fullscreen では効かない（開発ビルドで警告）。DialogHeader variant=\"bar\" の trailing（閉じるボタン）は必須（省略すると開発ビルドで警告）。centerFrom の中央表示は center と同じ ksk-squircle の角（issue #713）"
+        "height=\"fill\" は position=\"top\" と centerFrom の無い fullscreen では効かない（開発ビルドで警告）。DialogHeader variant=\"bar\" は onClose か trailing のどちらかが必須（どちらも無いと開発ビルドで警告）。centerFrom の中央表示は center と同じ ksk-squircle の角（issue #713）"
       ],
       "variants": {
         "position": [
@@ -528,6 +529,28 @@
         "Provider を置かない既存コードは従来どおり document.body（後方互換）",
         "container に渡す要素とその祖先は transform / filter / backdrop-filter / contain / will-change でスタッキングコンテキストを作らないこと（fixed のオーバーレイが閉じ込められる）",
         "container に渡す ref は useState の setter などで安定させる（毎レンダー変わると開いている Portal が unmount/remount される）"
+      ]
+    },
+    {
+      "name": "KskLabelsProvider",
+      "path": "src/components/ui/ksk-labels.tsx",
+      "description": "DS 部品の既定文言（スキップリンク・管理画面のメニュー・FormField の必須/任意・閉じるボタン・NavigationBar の戻る/閉じる/シェア・カレンダー見出し）と MonthCalendar / AgendaList の locale 既定をまとめて切り替える Provider（issue #723）。アプリの一番外側に 1 回置く。",
+      "subcomponents": [
+        "useKskLabels",
+        "useKskLocale",
+        "KSK_DEFAULT_LABELS"
+      ],
+      "variants": [],
+      "sizes": [],
+      "accessibility": [
+        "読み上げ名（skip link・メニューボタン・閉じるボタン・カレンダーの前後ボタン等）を画面の言語にそろえる。英語の画面に日本語の読み上げが混ざらないようにする"
+      ],
+      "rules": [
+        "優先順位は「部品に渡した prop > Provider の labels > Provider の locale の既定（ja / en） > 日本語（Provider 無し）」",
+        "英語のアプリは <KskLabelsProvider locale=\"en\"> を 1 回置く。部品ごとに skipLinkLabel / mobileMenuLabel / closeLabel を渡して回らない",
+        "i18n の文言で差し替えるときは labels に t() の結果を渡す（入れ子の Provider は外側の labels に重ねる）",
+        "React context なので SSR でリクエスト間に共有されない。Toast の fire-and-forget 経路の文言は従来どおり configureToast（Toaster は props）",
+        "Provider を置かないときの文言は従来どおり日本語（後方互換）"
       ]
     },
     {
@@ -852,7 +875,8 @@
         "transparent": "boolean — 背景なし",
         "leftButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
         "shareButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
-        "headerProps": "title を除く header の属性・ref を根へ転送（issue #649）"
+        "headerProps": "title を除く header の属性・ref を根へ転送（issue #649）",
+        "leftLabelVisible": "boolean — 左ボタンに leftLabel の文字も表示（高さ 44px・文字は max-w-28 で省略し title 属性で全文・タイトルの左右を px-32 に広げる。既定 false。issue #729）"
       },
       "accessibility": [
         "aria-label auto-set for back/close/share",
@@ -861,7 +885,8 @@
       "rules": [
         "タイトルは absolute 中央配置",
         "glass=true は写真・グラデーション背景上でのみ使用",
-        "Button size=\"icon-xl\" (44px Apple HIG minimum)"
+        "Button size=\"icon-xl\" (44px Apple HIG minimum)",
+        "文字付きの戻るボタン（「＜ メニューに戻る」）は leftLabelVisible + leftLabel。NavigationBar をやめて Button を並べて自作しない（issue #729）"
       ]
     },
     {
@@ -1594,6 +1619,7 @@
         "square"
       ],
       "rules": [
+        "選択の切り替えのちらつき（Android Chrome）は DS が抑える: 色のアニメーションは hover:hover かつ pointer:fine の端末だけ、本体・× ボタン・中の要素のタップのハイライトは透明。consumer の CSS で [data-slot=chip] の transition / -webkit-tap-highlight-color を打ち消さない（issue #725）",
         "Tag (表示専用) との違いは interactive 性",
         "soldOut は斜線オーバーレイ + disabled",
         "href を渡すと <a> でレンダリング",
@@ -1656,7 +1682,9 @@
         "長いフォームでは FieldGroup の中に FormField を並べる",
         "ラベル左置きの項目行は orientation=\"horizontal\"（左のラベル列の幅は labelWidth・既定 5rem、複数行の中身は labelAlign=\"start\"）。説明文・エラーは右の列の下段に出る。Label に w-20 等を付けて行を自作しない（issue #712）",
         "horizontal で枠の無い入力欄（variant=\"inline\"）を置くときは targetSize=\"comfortable\" で 44px の当たり判定を持たせる。外側に py-2 を足して稼がない（issue #712）",
-        "orientation=\"horizontal\" は置き場所の幅（@container）が 15rem 未満なら縦積みに戻る。endLabel は入力欄の右に出る（issue #712）"
+        "orientation=\"horizontal\" は置き場所の幅（@container）が 15rem 未満なら縦積みに戻る。endLabel は入力欄の右に出る（issue #712）",
+        "チップ・トグル・ラジオ等の選択肢のまとまりを右（下）に置く行は as=\"group\"（ラベルは span[id]、中身の列は role=group + aria-labelledby、説明文・エラーは aria-describedby）。<span> + <div role=\"group\"> + w-20 のラベルで行を自作しない。htmlFor は渡さない（開発ビルドで警告）。required は読み上げに伝わらないので、必須は description か label の文言で補う（issue #720）",
+        "区切り線で並べる項目行の一覧は FieldGroup variant=\"rows\"（divide-y + 直下の FormField に py-3）に入れる。FormField に className=\"py-3\" を足さない（issue #720）"
       ]
     },
     {
@@ -1677,6 +1705,7 @@
       ],
       "rules": [
         "FieldSet は gap-6（24px）、FieldGroup は gap-4（16px）の縦リズムを正本とする",
+        "詳細シートの区切り線の一覧は FieldGroup variant=\"rows\"（子の間に Border-Low-Emphasis の線・直下の FormField に上下 12px）。CollapsibleChipField は自前の py-3 を持つのでそのまま並べる。divide-y と py-3 を自作しない（issue #720）",
         "個々の入力は既存 FormField を FieldGroup 内に並べる",
         "FieldDescription はセクション・グループの補足、FieldError はグループ単位のエラーに使う",
         "グループ横断の区切りは FieldSeparator を使い、中央ラベルは children で渡す",
@@ -1850,7 +1879,10 @@
         "SheetContent 内で使い、Sheet の autoFocus=false と組み合わせる",
         "KebabMenu は DetailSheetHeader trailing に置く",
         "editable title は titleEditor slot に置く",
-        "DetailSheetHeader の titleEditor には <CommitInput variant=\"inline-title\" aria-label=… /> を渡す（issue #675）"
+        "DetailSheetHeader の titleEditor には <CommitInput variant=\"inline-title\" aria-label=… /> を渡す（issue #675）",
+        "閉じるボタンは DetailSheetHeader onClose（trailing の右端に Button ghost icon 40px + 閉じるアイコン 20px。読み上げ名は closeLabel、既定は KskLabelsProvider の close＝「閉じる」）。trailing に閉じる Button を自作しない（issue #722）",
+        "leading を渡さないときは左の列を描かない（題名の左端がヘッダーの左の余白にそろう）。空の leading を埋めるために <span /> 等を渡さない（issue #729）",
+        "Sheet / Dialog の中の文字列 title はシート / ダイアログの名前（SheetTitle / DialogTitle）として描かれる。sr-only の SheetTitle / DialogTitle を併用しない（id が重複する。同じ Content の Title の登録数で検出し、開発ビルドで console.error）。別の Title で名前を付けるときだけ overlayTitle={false}（issue #727）"
       ]
     },
     {
@@ -2812,7 +2844,9 @@
       "path": "src/components/patterns/month-calendar.tsx",
       "description": "予定付きの月カレンダー（issue #679）。日ごとの予定を一覧する予定表（日付を選ぶ入力は Calendar / DatePicker）。今日・選択日・土日・月外セル・予定チップ・「+n件」の見た目を DS が持つ。",
       "subcomponents": [
-        "buildMonthWeeks"
+        "buildMonthWeeks",
+        "MonthCalendarHeader",
+        "MonthCalendarExpandToggle"
       ],
       "accessibility": [
         "WAI-ARIA grid パターン: role=grid / row / columnheader / gridcell、タブストップは 1 つ（roving tabindex。選択日 → 今日 → 1 日）",
@@ -2826,7 +2860,9 @@
         "スマホの週の帯は view=\"week\"（フォーカス中の日を含む 1 週だけ。矢印キーで週が移る。issue #704）、日ごとの予定の中身は AgendaList を下に置く。週ストリップ・アジェンダを Button unstyled で自作しない",
         "土日の色は weekendTone（既定 true。日曜 Text-Caution / 土曜 Text-Accent-Primary・Calendar と同じ語彙）",
         "native は未提供（INTENTIONAL_NATIVE_GAPS）",
-        "分類の識別色（カテゴリ別の予定）は MonthCalendarEvent.accentColor に var(--Categorical-N) を渡す。md 以上はチップの先頭の点、md 未満は日付の下の点（tone より優先）。チップの面と文字は tone のまま。renderEvent の中で色の点を自作しない（issue #716）"
+        "分類の識別色（カテゴリ別の予定）は MonthCalendarEvent.accentColor に var(--Categorical-N) を渡す。md 以上はチップの先頭の点、md 未満は日付の下の点（tone より優先）。チップの面と文字は tone のまま。renderEvent の中で色の点を自作しない（issue #716）",
+        "月の見出し（月名・今日へ・前後の月）は MonthCalendarHeader（month・onToday / onPrev / onNext・size md=スマホ / lg=PC・headingLevel）を grid の上に置く。前後は icon-sm + aria-label（既定「前の月」「次の月」）。見出しは aria-live=\"polite\" で月の切り替えを読み上げる。h2 + Button で自作しない（issue #721）",
+        "週の帯 ⇄ 月全体の開閉は MonthCalendarExpandToggle（expanded / onExpandedChange・読み上げ名は固定で状態は aria-expanded・aria-controls に MonthCalendar の id）を grid の下に置き、expanded を view=\"month\" / \"week\" に渡す。Button ghost icon-sm w-full で自作しない（issue #721）"
       ]
     },
     {
@@ -3018,6 +3054,7 @@
         "Use floatingPosition='left'|'right' (variant='pill' only) when a FAB is placed on the opposite side; default 'center' keeps the existing centered float.",
         "Native Expo Router / React Navigation consumers should use createExpoRouterTabBar instead of local floating tab bars.",
         "寸法・面のプロダクト差分は公開 CSS 変数 --Nav-*（--Nav-Pill-* / --Nav-Item-* / --Nav-Center-Action-* / --Nav-Selected-*）で表現する。contracts/product-theme-overrides.json の nav グループが正本（issue #471）。",
+        "選択面（選択中のタブの下に敷くプラッター）のぼかしは --Nav-Selected-Backdrop（既定 none・例: var(--glass-blur-sm)）。[data-slot=\"bottom-nav-selected-surface\"] に backdrop-filter を直書きしない（issue #726）",
         "消費側は DS の内部マークアップ（[data-slot=\"bottom-nav-pill\"] > :is(a, button)、span:first-child / span:last-child、[data-global-nav-add-icon]）を !important や :has() で叩かない。DOM を狙う場合も公開 data-slot だけを使う。",
         "--Nav-Item-Min-Height / --Nav-Center-Action-Size は max(44px, var(...)) で参照するため、44px（HIG のタップ領域下限）より縮まない。",
         "--Nav-Center-Action-Surface / -Border / -Shadow と --Nav-Selected-Surface / -Shadow は宣言したときだけ DS 既定（.glass-accent / ガラスの選択プラッター）を置き換える。未宣言なら tone / dark の出し分けは DS 側が持つ。",
@@ -3268,7 +3305,8 @@
         "header と main の既定 gutter は内蔵 Container が担うためページ側で外周 padding を重ねない",
         "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）",
         "lg 未満でナビへ辿れるようにするときは mobileDrawer（issue #705）。ヘッダー左端のメニューボタン（44px・aria-expanded・aria-label 既定「メニューを開く」）から左の Sheet に同じ sidebar を開く。ハンバーガーと Sheet side=\"left\" を consumer で自作しない",
-        "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 false、明示 true で有効）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange"
+        "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 false、明示 true で有効）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange",
+        "上端の safe-area は safeAreaTop（ヘッダーは下線込み 64px + 安全領域、lg 以上のサイドバーと mobileDrawer のドロワーも上に足す。header が無いときは本文の列）。アプリ内で全画面に重ねるときは className=\"h-full\" と組み、外枠に pt-[var(--Safe-Area-Inset-Top)] や背景を書かない（外枠は fixed と重ね順だけ。issue #724）"
       ]
     },
     {

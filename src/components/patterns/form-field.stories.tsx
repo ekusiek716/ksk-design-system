@@ -3,8 +3,12 @@
  * @description フォームフィールドコンポーネント。Input との組み合わせ、必須表示、エラー状態、説明テキストを網羅
  */
 import type { Meta, StoryObj } from "@storybook/react"
-import { expect } from "storybook/test"
+import { useState } from "react"
+import { expect, userEvent } from "storybook/test"
 import { FormField } from "./form-field"
+import { FieldGroup } from "./field"
+import { Chip } from "./chip"
+import { CollapsibleChipField } from "./collapsible-chip-field"
 import { Input } from "../ui/input"
 import { Textarea } from "../ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
@@ -159,5 +163,59 @@ export const HorizontalRows: Story = {
     const input = rows[1].querySelector("input")!.getBoundingClientRect()
     await expect(Math.abs(label.top + label.height / 2 - (input.top + input.height / 2))).toBeLessThanOrEqual(1)
     await expect(rows[1].querySelector("input")!.getAttribute("aria-describedby")).toBe(err.id)
+  },
+}
+
+/**
+ * 選択肢のまとまりを置く項目行（`as="group"`）と区切り線の一覧（`FieldGroup variant="rows"`）（issue #720）。
+ * ラベルは `<span id>`、右の列は `role="group"` + `aria-labelledby`。行の上下 12px と区切り線は FieldGroup が持つので、
+ * FormField に `className="py-3"` を足さない。CollapsibleChipField の行と左端・上下がそろう。
+ */
+export const GroupRows: Story = {
+  tags: ["interaction"],
+  render: function Render() {
+    const [roles, setRoles] = useState<string[]>(["受付"])
+    const [attendance, setAttendance] = useState<"attending" | "declined" | undefined>("attending")
+    const toggle = (r: string) => setRoles((prev) => (prev.includes(r) ? prev.filter((x) => x !== r) : [...prev, r]))
+    return (
+      <FieldGroup variant="rows" aria-label="ゲストの情報" className="w-[360px]">
+        <CollapsibleChipField<"attending" | "declined">
+          label="出欠"
+          options={["attending", "declined"]}
+          selected={attendance}
+          onSelect={setAttendance}
+          getLabel={(k) => (k === "attending" ? "出席" : "欠席")}
+        />
+        <FormField orientation="horizontal" label="肩書き" htmlFor="ffg-title">
+          <Input id="ffg-title" variant="inline" targetSize="comfortable" placeholder="新郎の友人" />
+        </FormField>
+        <FormField orientation="horizontal" labelAlign="start" as="group" label="役割" description="複数選べます">
+          <div className="flex flex-wrap gap-2">
+            {["受付", "余興", "スピーチ"].map((r) => (
+              <Chip key={r} selected={roles.includes(r)} onClick={() => toggle(r)}>
+                {r}
+              </Chip>
+            ))}
+          </div>
+        </FormField>
+      </FieldGroup>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const group = canvasElement.querySelector<HTMLElement>('[data-slot="form-field-control"][role="group"]')!
+    const labelEl = canvasElement.querySelector<HTMLElement>(`#${CSS.escape(group.getAttribute("aria-labelledby")!)}`)!
+    await expect(labelEl.tagName).toBe("SPAN")
+    await expect(labelEl.textContent).toBe("役割")
+    await expect(group.getAttribute("aria-describedby")).toBeTruthy()
+    // 行の上下 12px は FieldGroup が持つ
+    const rows = canvasElement.querySelectorAll<HTMLElement>('[data-slot="field-group"] > *')
+    await expect(getComputedStyle(rows[1]).paddingTop).toBe("12px")
+    await expect(getComputedStyle(rows[0]).paddingTop).toBe("12px")
+    // CollapsibleChipField の選択肢の列と、FormField の右の列の左端がそろう
+    const chipLeft = rows[0].querySelector<HTMLElement>('[data-slot="chip"]')!.getBoundingClientRect().left
+    const controlLeft = group.getBoundingClientRect().left
+    await expect(Math.abs(chipLeft - controlLeft)).toBeLessThanOrEqual(1)
+    await userEvent.click(group.querySelectorAll("button")[1])
+    await expect(group.querySelectorAll("button")[1].getAttribute("aria-pressed")).toBe("true")
   },
 }

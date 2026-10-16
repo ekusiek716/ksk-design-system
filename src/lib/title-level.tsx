@@ -1,4 +1,5 @@
 import * as React from "react"
+import { errorOnceInDev } from "./dev-warn"
 
 /**
  * 見出しの「役割」（#341）。
@@ -87,11 +88,73 @@ function useTitleTypoClass(level?: TitleLevel): string {
   return scale === "page" ? TITLE_LEVEL_TYPO.page : DIALOG_TITLE_DEFAULT_TYPO
 }
 
+/**
+ * どのオーバーレイの Content の中か（issue #727）。DialogContent は "dialog"、SheetContent は "sheet"、
+ * AlertDialogContent は null（Radix の AlertDialog は別スコープの context なので、素の Dialog の
+ * Title を置けない）を流す。null（既定）はオーバーレイの外。
+ * DetailSheetHeader が文字列の title を Radix の Title（= シート / ダイアログの名前）として描くかの判定に使う。
+ */
+type OverlayTitleSlot = "dialog" | "sheet" | null
+
+interface OverlayTitleSlotValue {
+  slot: OverlayTitleSlot
+  /**
+   * Content の Title（SheetTitle / DialogTitle / DetailSheetHeader の文字列 title）を登録する。
+   * 戻り値で登録を外す。同じ Content に 2 つ以上登録されると Radix の titleId が重複するため、
+   * 開発ビルドで console.error を出す（issue #727）。
+   */
+  register: () => () => void
+}
+
+const NOOP_REGISTER = () => () => {}
+const OverlayTitleSlotContext = React.createContext<OverlayTitleSlotValue>({ slot: null, register: NOOP_REGISTER })
+
+function OverlayTitleSlotProvider({ slot, children }: { slot: OverlayTitleSlot; children?: React.ReactNode }) {
+  const countRef = React.useRef(0)
+  const value = React.useMemo<OverlayTitleSlotValue>(
+    () => ({
+      slot,
+      register:
+        slot == null
+          ? NOOP_REGISTER
+          : () => {
+              countRef.current += 1
+              if (countRef.current > 1) {
+                errorOnceInDev(
+                  "overlay-duplicate-title",
+                  "同じ Sheet / Dialog に Title が 2 つ以上あります（SheetTitle / DialogTitle / DetailSheetHeader の文字列 title）。" +
+                    "読み上げ名の id が重複するため 1 つにしてください。DetailSheetHeader の文字列 title はそのままシート / ダイアログの名前になるので、" +
+                    "sr-only の SheetTitle / DialogTitle を消すか、DetailSheetHeader に overlayTitle={false} を渡してください（issue #727）。"
+                )
+              }
+              return () => {
+                countRef.current -= 1
+              }
+            },
+    }),
+    [slot]
+  )
+  return <OverlayTitleSlotContext.Provider value={value}>{children}</OverlayTitleSlotContext.Provider>
+}
+
+function useOverlayTitleSlot(): OverlayTitleSlot {
+  return React.useContext(OverlayTitleSlotContext).slot
+}
+
+/** Title が配下の Content に自分を登録する（重複検出用・issue #727）。enabled=false の間は登録しない */
+function useRegisterOverlayTitle(enabled = true): void {
+  const { register } = React.useContext(OverlayTitleSlotContext)
+  React.useEffect(() => (enabled ? register() : undefined), [register, enabled])
+}
+
 export {
+  OverlayTitleSlotProvider,
+  useOverlayTitleSlot,
+  useRegisterOverlayTitle,
   TITLE_LEVEL_TYPO,
   TITLE_LEVEL_COMPOSITION_ROLE,
   DIALOG_TITLE_DEFAULT_TYPO,
   TitleSurfaceScaleProvider,
   useTitleTypoClass,
 }
-export type { TitleLevel, TitleSurfaceScale }
+export type { OverlayTitleSlot, TitleLevel, TitleSurfaceScale }

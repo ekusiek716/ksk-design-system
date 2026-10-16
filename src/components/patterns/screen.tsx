@@ -102,7 +102,7 @@ function Screen({
   footerClassName,
   mainId,
   skipLink,
-  skipLinkLabel = "コンテンツへ移動",
+  skipLinkLabel,
   safeAreaTop = false,
   height = "dvh",
   desktopLayout = "full",
@@ -115,7 +115,9 @@ function Screen({
   const isCard = desktopLayout === "card"
   const isMain = landmark === "main"
   const resolvedMainId = mainId ?? (isMain ? "main-content" : undefined)
-  const showSkipLink = (skipLink ?? isMain) && Boolean(skipLinkLabel) && resolvedMainId !== undefined
+  // skipLinkLabel 未指定は KskLabelsProvider の既定（issue #723）。null / "" は従来どおり出さない
+  const showSkipLink =
+    (skipLink ?? isMain) && skipLinkLabel !== null && skipLinkLabel !== "" && resolvedMainId !== undefined
   const Body = isMain ? "main" : "div"
   // カードの PC では画面端に接しないので safe-area の余白を戻す
   const safeAreaTopClass = safeAreaTop
@@ -150,7 +152,7 @@ function Screen({
       } as React.CSSProperties}
       {...props}
     >
-      {showSkipLink && <SkipLink targetId={resolvedMainId!} label={skipLinkLabel!} />}
+      {showSkipLink && <SkipLink targetId={resolvedMainId!} label={skipLinkLabel ?? undefined} />}
       {header && (
         <div
           data-slot="screen-header"
