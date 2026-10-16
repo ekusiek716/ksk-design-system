@@ -86,6 +86,22 @@ describe("Dialog centerFrom（#713）", () => {
     expect(style.paddingTop).toBe("24px")
   })
 
+  it("safeArea={false} + centerFrom: 全画面側・中央側とも p-6（padding=false なら 0）", async () => {
+    await mount(content({ padding: true, safeArea: false }), 390)
+    const el = () => getComputedStyle(document.querySelector('[data-slot="dialog-content"]')!)
+    expect(el().paddingLeft).toBe("24px")
+    expect(el().paddingTop).toBe("24px")
+    act(() => root!.unmount())
+    container!.remove()
+    await mount(content({ padding: true, safeArea: false }), 1280)
+    expect(el().paddingLeft).toBe("24px")
+    expect(dialogRect().width).toBe(1024)
+    act(() => root!.unmount())
+    container!.remove()
+    await mount(content({ padding: false, safeArea: false }), 1280)
+    expect(el().paddingLeft).toBe("0px")
+  })
+
   it('DialogHeader variant="bar" は下線付きで横並び', async () => {
     await mount(content(), 1280)
     const header = document.querySelector<HTMLElement>('[data-slot="dialog-header"]')!

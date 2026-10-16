@@ -3,9 +3,10 @@ import * as React from "react"
 import { act } from "react"
 import { createRoot } from "react-dom/client"
 import { renderToStaticMarkup } from "react-dom/server"
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../src/components/ui/dialog"
+import { resetDevWarnings } from "../src/lib/dev-warn"
 
 // issue #713: centerFrom / height / size="2xl" / DialogHeader variant="bar"
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
@@ -91,5 +92,50 @@ describe('DialogHeader variant="bar"（#713）', () => {
     expect(renderToStaticMarkup(<DialogHeader trailing="x">a</DialogHeader>)).toBe(
       '<div data-slot="dialog-header" class="flex flex-col gap-2">a</div>',
     )
+  })
+})
+
+describe("Dialog レビュー指摘（#713）", () => {
+  it("centerFrom の中央表示にも center と同じ ksk-squircle を付ける（既定の全画面には付けない）", () => {
+    expect(open({ position: "fullscreen", centerFrom: "md" }).className).toContain("ksk-squircle")
+    cleanup?.()
+    expect(open({ position: "fullscreen" }).className).not.toContain("ksk-squircle")
+  })
+
+  it("safeArea={false} + centerFrom は全画面側も中央側も p-6 で、safe-area の padding を出さない", () => {
+    const el = open({ position: "fullscreen", centerFrom: "md", safeArea: false })
+    expect(el.className).toContain("p-6")
+    expect(el.className).not.toContain("safe-area-inset")
+    expect(el.className).not.toContain("md:pl-6")
+    expect(el.className).toContain("md:inset-auto")
+  })
+
+  it('height="fill" が効かない組み合わせ（top / centerFrom の無い fullscreen）は開発ビルドで 1 回警告する', () => {
+    resetDevWarnings()
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    open({ position: "top", height: "fill" })
+    cleanup?.()
+    open({ position: "fullscreen", height: "fill" })
+    cleanup?.()
+    open({ position: "fullscreen", centerFrom: "md", height: "fill" })
+    cleanup?.()
+    open({ position: "center", height: "fill" })
+    expect(warn).toHaveBeenCalledTimes(2)
+    expect(String(warn.mock.calls[0][0])).toContain('position="top"')
+    expect(String(warn.mock.calls[1][0])).toContain("centerFrom")
+    warn.mockRestore()
+  })
+
+  it('DialogHeader variant="bar" で trailing が無いと開発ビルドで警告する', () => {
+    resetDevWarnings()
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const host = document.createElement("div")
+    const root = createRoot(host)
+    act(() => root.render(<DialogHeader variant="bar">見出し</DialogHeader>))
+    act(() => root.render(<DialogHeader variant="bar" trailing={<span>x</span>}>見出し</DialogHeader>))
+    act(() => root.unmount())
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(String(warn.mock.calls[0][0])).toContain("trailing")
+    warn.mockRestore()
   })
 })

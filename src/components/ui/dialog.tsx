@@ -2,6 +2,7 @@ import { getActiveElement } from "@/lib/active-element"
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { warnOnceInDev } from "@/lib/dev-warn"
 import { usePortalContainer } from "./portal-container"
 import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
 import { useComposedRef } from "@/lib/compose-ref"
@@ -270,6 +271,7 @@ interface DialogContentProps
    * （"top" と全画面の間は効かない）。
    * - "auto"（既定）: 中身なり（従来）
    * - "fill": 画面の高さ - 4rem に固定する。見取り図・表など、中身の量で枠の高さが変わると困る作業面向け
+   * position="top" と、centerFrom の無い fullscreen では効かない（開発ビルドで警告）
    */
   height?: "auto" | "fill"
   /**
@@ -321,6 +323,22 @@ function DialogContent({
   const autoDescId = React.useId()
   // #713: centerFrom は全画面のときだけ効く
   const centeredFrom = position === "fullscreen" ? centerFrom : undefined
+  // #713 レビュー: height="fill" は中央表示（center / centerFrom の境界以上）でだけ効く。効かない組み合わせは
+  // 開発ビルドで知らせる（top は max-h で伸びる・全画面は常に画面いっぱい）
+  React.useEffect(() => {
+    if (height !== "fill") return
+    if (position === "top") {
+      warnOnceInDev(
+        "dialog-height-fill-top",
+        'DialogContent: height="fill" は position="top" では効きません（top は画面の残りを上限に中身なりで伸びます）。'
+      )
+    } else if (position === "fullscreen" && !centerFrom) {
+      warnOnceInDev(
+        "dialog-height-fill-fullscreen",
+        'DialogContent: height="fill" は position="fullscreen" では centerFrom を指定したときの中央表示でだけ効きます（全画面は常に画面いっぱいです）。'
+      )
+    }
+  }, [height, position, centerFrom])
   // #505: modal な層だけ aria-modal="true" を出し、公開判定（useHasOpenModal）
   // でも modal な層としてだけ数える。`modal={false}` の Dialog は背面が生きて
   // いるので、どちらも false 側に倒す。
@@ -406,6 +424,8 @@ function DialogContent({
               // （ルートも auto にするとスクロールコンテナが二重になる）。
               [
                 "inset-0 w-full h-full max-w-none overflow-hidden rounded-none",
+                // centerFrom の中央表示も center と同じ連続曲率の角（角丸 0 の全画面では効かない）
+                centeredFrom && "ksk-squircle",
                 // centerFrom（#713）: 境界以上で中央のモーダルへ
                 centeredFrom && fullscreenCenterFromClasses[centeredFrom],
                 centeredFrom && fullscreenCenterFromSizeClasses[centeredFrom][size],
@@ -498,11 +518,22 @@ interface DialogHeaderProps extends React.ComponentProps<"div"> {
    *   帯は縮まない（shrink-0）・左右 24px・上下 12px
    */
   variant?: "stack" | "bar"
-  /** `variant="bar"` の右端に置く要素（`<DialogClose asChild><Button size="icon-lg" …/></DialogClose>` 等）。stack では無視する */
+  /**
+   * `variant="bar"` の右端に置く要素（`<DialogClose asChild><Button size="icon-lg" aria-label="閉じる" …/></DialogClose>` 等）。
+   * **bar では必須**（全画面ダイアログで閉じる手段が見えなくなるため。省略すると開発ビルドで警告）。stack では無視する
+   */
   trailing?: React.ReactNode
 }
 
 function DialogHeader({ className, variant = "stack", trailing, children, ...props }: DialogHeaderProps) {
+  const missingTrailing = variant === "bar" && trailing == null
+  React.useEffect(() => {
+    if (!missingTrailing) return
+    warnOnceInDev(
+      "dialog-header-bar-trailing",
+      'DialogHeader variant="bar" には trailing（閉じるボタン等）を渡してください。全画面ダイアログで閉じる手段が見えなくなります。'
+    )
+  }, [missingTrailing])
   if (variant === "bar") {
     return (
       <div
