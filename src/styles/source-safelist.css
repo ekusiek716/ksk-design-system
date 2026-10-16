@@ -65,6 +65,7 @@
 @source inline("[&>tr]:border-[var(--Border-Low-Emphasis)]");
 @source inline("[&>tr]:border-b");
 @source inline("[&[data-state=open]>svg]:rotate-180");
+@source inline("[&_*]:[-webkit-tap-highlight-color:transparent]");
 @source inline("[&_[data-radix-scroll-area-viewport]>div]:flex!");
 @source inline("[&_[data-radix-scroll-area-viewport]>div]:flex-col");
 @source inline("[&_[data-radix-scroll-area-viewport]>div]:min-h-full");
@@ -84,7 +85,7 @@
 @source inline("[--ksk-fab-bottom-offset:6rem]");
 @source inline("[-webkit-tap-highlight-color:transparent]");
 @source inline("[@media(any-pointer:coarse)]:min-w-11");
-@source inline("[@media(hover:hover)]:transition-colors");
+@source inline("[@media(hover:hover)_and_(pointer:fine)]:transition-colors");
 @source inline("[@media(hover:hover)_and_(pointer:fine)]:w-[max(2rem,var(--Chip-Remove-Width))]");
 @source inline("[scrollbar-width:none]");
 @source inline("absolute");

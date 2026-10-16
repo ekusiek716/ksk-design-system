@@ -1617,6 +1617,7 @@
         "square"
       ],
       "rules": [
+        "選択の切り替えのちらつき（Android Chrome）は DS が抑える: 色のアニメーションは hover:hover かつ pointer:fine の端末だけ、本体・× ボタン・中の要素のタップのハイライトは透明。consumer の CSS で [data-slot=chip] の transition / -webkit-tap-highlight-color を打ち消さない（issue #725）",
         "Tag (表示専用) との違いは interactive 性",
         "soldOut は斜線オーバーレイ + disabled",
         "href を渡すと <a> でレンダリング",
