@@ -1,5 +1,5 @@
 import React, { useMemo } from "react"
-import { Text as RNText, View, type ViewStyle } from "react-native"
+import { Pressable, Text as RNText, View, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 
 export interface CountdownHeroProps {
@@ -11,6 +11,15 @@ export interface CountdownHeroProps {
   illustration?: React.ReactNode
   style?: ViewStyle
   testID?: string
+  /**
+   * 指定するとヒーロー全体が押せるボタンになる（issue #672・Web の onClick と対）。
+   * accessibilityRole="button"、押している間だけ薄くなる押下表現を DS が持つ。
+   */
+  onPress?: () => void
+  /** 押せるときの読み上げ名。未指定なら表示中の文言（ラベル・日数・単位） */
+  accessibilityLabel?: string
+  /** 押せるときに操作を止める */
+  disabled?: boolean
 }
 
 /**
@@ -54,6 +63,9 @@ export function CountdownHero({
   illustration,
   style,
   testID,
+  onPress,
+  accessibilityLabel,
+  disabled = false,
 }: CountdownHeroProps) {
   const { theme, scales } = useTheme()
   const target = useMemo(() => parseTargetDate(targetDate), [targetDate])
@@ -64,8 +76,8 @@ export function CountdownHero({
   const displayLabel = isToday ? todayLabel : isPast ? pastLabel : label
   const valueText = isToday ? "0" : String(daysAbs)
 
-  return (
-    <View testID={testID} style={[{ position: "relative" }, style]}>
+  const body = (
+    <>
       {illustration && (
         <View pointerEvents="none" style={{ position: "absolute", top: 0, right: 0 }}>
           {illustration}
@@ -102,6 +114,31 @@ export function CountdownHero({
           )}
         </View>
       </View>
+    </>
+  )
+
+  if (onPress) {
+    return (
+      <Pressable
+        testID={testID}
+        onPress={onPress}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel ?? (isToday ? `${displayLabel} ${valueText}` : `${displayLabel} ${valueText} ${unit}`)}
+        accessibilityState={{ disabled }}
+        style={({ pressed }) => [
+          { position: "relative", opacity: disabled ? 0.5 : pressed ? 0.7 : 1 },
+          style,
+        ]}
+      >
+        {body}
+      </Pressable>
+    )
+  }
+
+  return (
+    <View testID={testID} style={[{ position: "relative" }, style]}>
+      {body}
     </View>
   )
 }

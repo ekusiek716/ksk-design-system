@@ -85,6 +85,7 @@
 @source inline("active:bg-[var(--Primitive-White-Alpha-800)]");
 @source inline("active:brightness-110");
 @source inline("active:cursor-grabbing");
+@source inline("active:opacity-70");
 @source inline("active:opacity-80");
 @source inline("active:ring-6");
 @source inline("active:scale-110");

@@ -1910,13 +1910,15 @@
         "illustration-slot",
         "iso-string-or-date-target",
         "date-label-slot",
-        "today-value-override"
+        "today-value-override",
+        "pressable"
       ],
       "rules": [
         "既存の CountdownTimer（残日数ピル表示）とは別コンポーネント。装飾ヒーロー表示専用で置き換えない。",
         "日付編集フォームは持ち込まない。表示専用コンポーネント。",
         "illustration スロットに wedding 画像等のドメイン固有アセットを直接埋め込まない。呼び出し側が用意する。",
-        "serif フォントは --font-display-serif トークン未定義環境向けに Georgia / Noto Serif JP / serif へフォールバックする。"
+        "serif フォントは --font-display-serif トークン未定義環境向けに Georgia / Noto Serif JP / serif へフォールバックする。",
+        "押せるヒーローは onClick（ボタン）/ href（リンク）を渡す(issue #672)。全面を覆う不可視の button / a を重ねる stretched link 構造で、Enter / Space・フォーカスリング・押下表現（押している間 opacity-70）を DS が持つ。名前は既定で表示中の文言、操作の意味を足すなら aria-label。呼び出し側で <Button unstyled> に包んだり active:opacity-* を足したりしない。native は onPress / accessibilityLabel / disabled"
       ]
     },
     {

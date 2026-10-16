@@ -121,7 +121,7 @@
 | ConfirmDialog, ConfirmDialogProvider | `@/components/patterns/confirm-dialog` | — | Default, Destructive, WithLoading, UseConfirm |
 | ContentCarousel | `@/components/patterns/content-carousel` | — | Default, AutoPlay, WithoutControls |
 | CookieConsent | `@/components/patterns/cookie-consent` | — | Default, CustomLabels, OnDecideCallback |
-| CountdownHero | `@/components/patterns/countdown-hero` | — | Upcoming, Today, Past, With Illustration Slot, ISO String targetDate, With dateLabel (目標日を数字の下に), Today with todayValue (0 の代わりに文字) |
+| CountdownHero | `@/components/patterns/countdown-hero` | — | Upcoming, Today, Past, With Illustration Slot, ISO String targetDate, With dateLabel (目標日を数字の下に), Today with todayValue (0 の代わりに文字), Interactive |
 | DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle |
 | DocumentPage | `@/components/patterns/document-page` | — | PrivacyPolicy, WithoutLastUpdated |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
