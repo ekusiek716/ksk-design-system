@@ -12,7 +12,7 @@ import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
 import { Sheet, SheetContent, SheetTitle, resolveBottomSheetKeyboardStyle } from "../src/components/ui/sheet"
 
@@ -42,11 +42,15 @@ describe("sheet-keyboard.css の CSS フォールバック（#706）", () => {
   const css = readFileSync(join(__dirname, "..", "src/styles/sheet-keyboard.css"), "utf8")
   it("safeArea={false} 以外の bottom シートは --kb-h と上端 safe-area の両方を引く", () => {
     expect(css).toContain(
-      '[data-slot="sheet-content"][data-side="bottom"]:not([data-snap-active]):not([data-safe-area="false"])',
+      '[data-slot="sheet-content"]:is([data-side="bottom"], [data-side="bottom-glass"]):not([data-snap-active]):not([data-safe-area="false"])',
     )
     expect(css).toContain(
       `max-height: max(0px, calc(100dvh - var(--kb-h, 0px) - ${SAFE_TOP}));`,
     )
+  })
+  it("lift と従来の max-height も JS と同じく bottom / bottom-glass の両方に当てる", () => {
+    expect(css).toContain('html[data-kb-open] [data-slot="sheet-content"]:is([data-side="bottom"], [data-side="bottom-glass"]) {')
+    expect(css).toContain('[data-slot="sheet-content"]:is([data-side="bottom"], [data-side="bottom-glass"]):not([data-snap-active]) {')
   })
   it("safeArea={false} 用の従来の値（safe-area を引かない）も残す", () => {
     expect(css).toMatch(/max-height:\s*calc\(100dvh - var\(--kb-h, 0px\)\);/)
@@ -82,5 +86,67 @@ describe("swipeToClose 版も data-safe-area を出す（#706）", () => {
     )
     expect(content.dataset.side).toBe("bottom")
     expect(content.dataset.safeArea).toBe(expected)
+  })
+})
+
+describe("キーボード表示中の inline の高さ上限（#706）", () => {
+  const originalVV = Object.getOwnPropertyDescriptor(window, "visualViewport")
+  const originalInner = window.innerHeight
+  let container: HTMLDivElement | null = null
+  let root: Root | null = null
+  beforeEach(() => {
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 })
+    Object.defineProperty(window, "visualViewport", {
+      configurable: true,
+      value: { height: 500, offsetTop: 0, addEventListener: () => {}, removeEventListener: () => {} },
+    })
+  })
+  afterEach(() => {
+    act(() => root?.unmount())
+    container?.remove()
+    document.body.innerHTML = ""
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: originalInner })
+    if (originalVV) Object.defineProperty(window, "visualViewport", originalVV)
+    else delete (window as { visualViewport?: unknown }).visualViewport
+  })
+  const contentStyle = (ui: React.ReactElement) => {
+    container = document.createElement("div")
+    document.body.appendChild(container)
+    root = createRoot(container)
+    act(() => root!.render(ui))
+    return document.querySelector<HTMLElement>('[data-slot="sheet-content"]')!.getAttribute("style") ?? ""
+  }
+
+  it.each(["bottom", "bottom-glass"] as const)("%s / safeArea={false} は従来どおり可視高さ（500px）", (side) => {
+    for (const swipeToClose of [false, true]) {
+      const style = contentStyle(
+        <Sheet open>
+          <SheetContent side={side} swipeToClose={swipeToClose} safeArea={false}>
+            <SheetTitle>t</SheetTitle>
+          </SheetContent>
+        </Sheet>,
+      )
+      expect(style).toContain("bottom: 300px")
+      expect(style).toContain("max-height: 500px")
+      act(() => root!.unmount())
+      root = null
+    }
+  })
+
+  it.each(["bottom", "bottom-glass"] as const)("%s / 既定（safeArea）は上端 safe-area を引く（500px のままにしない）", (side) => {
+    for (const swipeToClose of [false, true]) {
+      const style = contentStyle(
+        <Sheet open>
+          <SheetContent side={side} swipeToClose={swipeToClose}>
+            <SheetTitle>t</SheetTitle>
+          </SheetContent>
+        </Sheet>,
+      )
+      expect(style).toContain("bottom: 300px")
+      expect(style).not.toContain("max-height: 500px")
+      expect(style).toContain("calc(500px - var(--Safe-Area-Inset-Top")
+      act(() => root!.unmount())
+      root = null
+    }
   })
 })
