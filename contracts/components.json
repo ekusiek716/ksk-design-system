@@ -997,7 +997,9 @@
       "rules": [
         "bordered は白背景+カラー枠線",
         "inline は色付き背景・コンパクト",
-        "bordered variant (success/info/error/warning) は title/description prop で自動アイコン表示可"
+        "bordered variant (success/info/error/warning) は title/description prop で自動アイコン表示可",
+        "inline 系（inline-info / inline-caution / inline-warning）も title / description / icon / action の prop で書ける（issue #695。以前は children だけを描画し空の枠になった）。inline の既定アイコンは無し",
+        "children と title / description / icon / action を併用しない。併用時は children 優先で prop は描画されず、開発ビルドで警告する（issue #695）"
       ]
     },
     {

@@ -153,3 +153,17 @@ export const WithAction: Story = {
     </div>
   ),
 }
+
+/**
+ * inline 系の prop ベース（issue #695）: title / description / icon / action を prop で渡しても描画する。
+ * children と併用した場合は children 優先（開発ビルドで警告）。
+ */
+export const InlinePropBased: Story = {
+  render: () => (
+    <div className="flex w-full max-w-md flex-col gap-3">
+      <Alert variant="inline-info" description="送料無料の条件：3,000円以上のご注文" />
+      <Alert variant="inline-caution" title="在庫わずか" description="在庫が残りわずかです。お早めにお求めください。" />
+      <Alert variant="inline-warning" description="クーポンは本日23:59まで有効です。" />
+    </div>
+  ),
+}

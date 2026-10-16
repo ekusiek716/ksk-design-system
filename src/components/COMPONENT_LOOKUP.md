@@ -13,7 +13,7 @@
 |-----------|--------|----------|---------|
 | Accordion, AccordionItem, AccordionTrigger, AccordionContent | `@/components/ui/accordion` | — | ThreeItems, MultipleOpen, Large, MixedSizeOverride |
 | AlertDialog, AlertDialogTrigger, AlertDialogPortal, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel | `@/components/ui/alert-dialog` | — | Default, Small, ConfirmActionIsImmediatelyClickable, CancelClosesWithoutAction, NestedInDialog, PopoverCoordination |
-| Alert, AlertTitle, AlertDescription | `@/components/ui/alert` | **variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning` | Info, Success, Error, Warning, InlineInfo, InlineCaution, InlineWarning, AllVariants, Prop-based API (auto icon), Prop-based + action |
+| Alert, AlertTitle, AlertDescription | `@/components/ui/alert` | **variant**: `success`, `info`, `error`, `warning`, `inline-info`, `inline-caution`, `inline-warning` | Info, Success, Error, Warning, InlineInfo, InlineCaution, InlineWarning, AllVariants, Prop-based API (auto icon), Prop-based + action, InlinePropBased |
 | AutoGrowTextarea | `@/components/ui/auto-grow-textarea` | — | DefaultComment, CompactTitleEditor |
 | Avatar, AvatarImage, AvatarFallback | `@/components/ui/avatar` | — | WithImage, Fallback, Sizes, Group |
 | Badge | `@/components/ui/badge` | **variant**: `default`, `secondary`, `outline`, `destructive`, `success`, `warning`, `info`, `subtle`, `ghost` | Default, Secondary, Outline, Destructive, Success, Warning, Info, Subtle, Ghost, AllVariants |
