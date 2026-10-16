@@ -69,6 +69,21 @@ describe("AgendaList（#704）", () => {
     expect(host.querySelectorAll('[data-slot="agenda-list-day"]').length).toBe(2)
   })
 
+  it("headingLevel で見出しのレベルを変えられる（既定 h3）", () => {
+    expect(html(<AgendaList events={events} today="2026-10-01" />).querySelectorAll("h3").length).toBe(2)
+    const host = html(<AgendaList events={events} today="2026-10-01" headingLevel={2} />)
+    expect(host.querySelectorAll("h3").length).toBe(0)
+    expect(host.querySelectorAll("h2").length).toBe(2)
+  })
+
+  it("dates の重複は 1 行にまとめる", () => {
+    const host = html(<AgendaList events={events} today="2026-10-01" dates={["2026-10-03", "2026-10-03", "2026-10-24"]} />)
+    expect([...host.querySelectorAll<HTMLElement>('[data-slot="agenda-list-day"]')].map((d) => d.dataset.date)).toEqual([
+      "2026-10-03",
+      "2026-10-24",
+    ])
+  })
+
   it("並べる日が無ければ empty を出す", () => {
     const host = html(<AgendaList events={[]} empty={<p>予定はまだありません</p>} />)
     expect(host.querySelector("ul")).toBeNull()

@@ -32,6 +32,11 @@ interface AgendaListProps extends Omit<React.ComponentProps<"div">, "onSelect"> 
    * 省略時は id を付けない（行には常に `data-date` が付く）
    */
   dayId?: (date: string) => string
+  /**
+   * 日ごとの見出し（読み上げ用）のレベル。置き場所の見出し構造に合わせる
+   * （画面の h1 → セクションの h2 の下なら 3）。@default 3
+   */
+  headingLevel?: 2 | 3 | 4 | 5 | 6
 }
 
 /**
@@ -41,7 +46,7 @@ interface AgendaListProps extends Omit<React.ComponentProps<"div">, "onSelect"> 
  * 日ごとの予定の中身を見せる。日付列（日・曜日）+ その日の予定の行。
  *
  * - 構造: 日ごとの `<li>`（`data-date` / 今日は `aria-current="date"`）に、読み上げ用の見出し
- *   （`h3`・「10月3日（土）、今日」）と予定の `<ul>`
+ *   （既定 `h3`・`headingLevel` で変更・「10月3日（土）、今日」）と予定の `<ul>`
  * - 予定の行の面は tone（MonthCalendar のチップと同じ色）。onSelectEvent を渡すと button
  * - 今日・選択日・土日の見た目は DS が持つ。過去の日の強調などプロダクト固有の表現は renderEvent で
  */
@@ -57,9 +62,11 @@ function AgendaList({
   empty,
   emptyDayLabel,
   dayId,
+  headingLevel = 3,
   className,
   ...props
 }: AgendaListProps) {
+  const Heading = `h${headingLevel}` as "h2" | "h3" | "h4" | "h5" | "h6"
   const todayKey = resolveTodayKey(today)
   const eventsByDate = React.useMemo(() => {
     const map = new Map<string, MonthCalendarEvent[]>()
@@ -70,7 +77,8 @@ function AgendaList({
     }
     return map
   }, [events])
-  const days = dates ?? [...eventsByDate.keys()].sort()
+  // dates の重複は 1 行にまとめる（同じ日の行・key・id が二重にならないように）
+  const days = dates ? [...new Set(dates)] : [...eventsByDate.keys()].sort()
   const noEventsLabel = emptyDayLabel ?? (locale === "ja" ? "予定なし" : "No events")
 
   if (days.length === 0) {
@@ -129,7 +137,7 @@ function AgendaList({
                 </span>
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                <h3 className="sr-only">{headingLabel}</h3>
+                <Heading className="sr-only">{headingLabel}</Heading>
                 {dayEvents.length === 0 ? (
                   <p className="py-2.5 typo-body-sm text-[var(--Text-Low-Emphasis)]">{noEventsLabel}</p>
                 ) : (

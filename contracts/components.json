@@ -2814,7 +2814,7 @@
       "path": "src/components/patterns/agenda-list.tsx",
       "description": "予定がある日を時系列に並べる一覧（issue #704）。スマホのカレンダーで MonthCalendar（view=\"week\" の週の帯や月グリッド）の下に置き、日付列（日・曜日）+ その日の予定の行で中身を見せる。予定は MonthCalendarEvent と同じ形。",
       "accessibility": [
-        "日ごとの li に読み上げ用の見出し（h3・「10月3日（土）、今日」）。今日の行は aria-current=\"date\"。日付列の見た目は aria-hidden",
+        "日ごとの li に読み上げ用の見出し（既定 h3。置き場所に合わせて headingLevel で変える・「10月3日（土）、今日」）。今日の行は aria-current=\"date\"。日付列の見た目は aria-hidden",
         "onSelectEvent を渡すと予定の行が button（44px 以上・focus-visible リング）。渡さなければ読むだけの行"
       ],
       "rules": [
