@@ -45,8 +45,8 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
   closeMobileDrawerOnNavigate?: boolean
   /**
    * 上端の safe-area（ステータスバー・ノッチ）を空ける（issue #724）。既定 false。
-   * `var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))` をヘッダー（高さ 64px + 安全領域）と
-   * lg 以上のサイドバーの上に足す。ヘッダーが無い画面では本文の列の上に足す。上端の帯はそれぞれの面の色になる。
+   * `var(--Safe-Area-Inset-Top, env(safe-area-inset-top, 0px))` をヘッダー（下線込み 64px + 安全領域）・
+   * lg 以上のサイドバー・mobileDrawer のドロワーの上に足す。ヘッダーが無い画面では本文の列の上に足す。上端の帯はそれぞれの面の色になる。
    * アプリ内で全画面に重ねて出すときは `className="h-full"` と組み、外枠に safe-area と背景を書かない
    */
   safeAreaTop?: boolean
@@ -219,6 +219,8 @@ function AdminShell({
             onClick={handleDrawerClick}
             className={cn(
               "flex w-72 max-w-[85vw] flex-col overflow-y-auto lg:hidden",
+              // ドロワーも画面の上端から出るので、同じだけ安全領域を空ける
+              safeAreaTop && "pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]",
               sidebarTone === "inverse"
                 ? "border-r-0 bg-[var(--Surface-Inverse)] text-[var(--Text-on-Inverse)]"
                 : "bg-[var(--Surface-Primary)]"
@@ -243,8 +245,9 @@ function AdminShell({
             data-slot="admin-header"
             className={cn(
               "h-16 shrink-0 border-b border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]",
-              // box-content: 高さ 64px はそのまま、安全領域の分だけ上に伸ばす（帯もヘッダーの面の色）
-              safeAreaTop && "box-content pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]",
+              // 高さは従来の 64px（下線込み）+ 安全領域。安全領域は padding で空ける（帯もヘッダーの面の色）
+              safeAreaTop &&
+                "h-[calc(4rem_+_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)))] pt-[var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))]",
               // header を渡していないときは、メニューボタンのための lg 未満だけのヘッダー
               !header && "lg:hidden"
             )}

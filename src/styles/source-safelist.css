@@ -313,7 +313,6 @@
 @source inline("bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]");
 @source inline("bottom-[var(--ksk-bottom-tab-bar-offset-extra)]");
 @source inline("bottom-[var(--ksk-keyboard-inset)]");
-@source inline("box-content");
 @source inline("break-all");
 @source inline("break-words");
 @source inline("col-start-1");
@@ -551,6 +550,7 @@
 @source inline("h-[5px]");
 @source inline("h-[60px]");
 @source inline("h-[calc(100dvh_-_4rem)]");
+@source inline("h-[calc(4rem_+_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)))]");
 @source inline("h-[max(2.75rem,var(--Nav-Center-Action-Size))]");
 @source inline("h-[var(--Control-Height-Lg)]");
 @source inline("h-[var(--Control-Height-Md)]");

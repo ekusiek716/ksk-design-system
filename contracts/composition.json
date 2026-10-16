@@ -46,7 +46,7 @@
         "AdminShell (flex h-screen, bg-[var(--Surface-Secondary)])",
         "  sidebar slot: aside hidden lg:flex, border-r, ScrollArea でラップ済み（sidebarWidth prop で幅調整、既定 w-64）。面は sidebarTone で決まる: \"default\"（既定）= bg-[var(--Surface-Primary)] + Border-Low-Emphasis、\"inverse\" = bg-[var(--Surface-Inverse)] + Text-on-Inverse（issue #680）",
         "  mobileDrawer（任意・既定 false）: lg 未満のヘッダー左端にメニューボタン（icon-xl 44px・aria-expanded）を出し、左の Sheet（w-72 max-w-[85vw]・swipeToClose）に同じ sidebar slot を開く。header が無いときは lg 未満だけメニューボタンのヘッダーを出す（issue #705）",
-        "  header slot: 任意。border-b, h-16。内蔵 Container(size=fluid) が px-6 を担当。safeAreaTop で上端の safe-area を header（box-content）と lg 以上の aside の上に足す（issue #724）",
+        "  header slot: 任意。border-b, h-16。内蔵 Container(size=fluid) が px-6 を担当。safeAreaTop で上端の safe-area を header（下線込み 64px + 安全領域）・lg 以上の aside・mobileDrawer のドロワーの上に足す（issue #724）",
         "  main: flex-1 overflow-auto。内蔵 Container(size=fluid, className=py-6) が p-6 相当の外周余白を担当"
       ],
       "rules": [

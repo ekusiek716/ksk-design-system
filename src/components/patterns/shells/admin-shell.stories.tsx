@@ -219,7 +219,8 @@ export const SafeAreaTopOverlay: Story = {
   play: async ({ canvasElement }) => {
     const header = canvasElement.querySelector<HTMLElement>('[data-slot="admin-header"]')!
     await expect(getComputedStyle(header).paddingTop).toBe("24px")
-    await expect(Math.round(header.getBoundingClientRect().height)).toBe(64 + 24 + 1)
+    // 下線込みで従来の 64px + 安全領域
+    await expect(Math.round(header.getBoundingClientRect().height)).toBe(64 + 24)
     const shell = canvasElement.querySelector<HTMLElement>('[data-slot="admin-shell"]')!
     await expect(Math.round(shell.getBoundingClientRect().height)).toBe(480)
   },
