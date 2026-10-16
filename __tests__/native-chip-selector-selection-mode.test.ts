@@ -57,3 +57,14 @@ describe("native ChipSelector の selectionMode（#352）", () => {
     expect(source).toMatch(/Boolean\(proc\) && proc!\.env\?\.NODE_ENV !== "production"/)
   })
 })
+
+describe("native ChipSelector のグループ名（#666）", () => {
+  it("accessibilityLabel / accessibilityLabelledBy をグループの View に渡す", () => {
+    expect(source).toContain("accessibilityLabel={accessibilityLabel}")
+    expect(source).toContain("accessibilityLabelledBy={accessibilityLabelledBy}")
+  })
+
+  it("名前なしの単一選択は開発ビルドで警告する", () => {
+    expect(source).toMatch(/isDev\(\) && isRadio && !accessibilityLabel && !accessibilityLabelledBy/)
+  })
+})

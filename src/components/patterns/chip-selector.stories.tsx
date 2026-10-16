@@ -50,7 +50,7 @@ export const SingleSelect: Story = {
     const [v, setV] = React.useState<string[]>([])
     return (
       <div className="p-4 space-y-3">
-        <ChipSelector options={CATEGORIES} value={v} onChange={setV} multiple={false} />
+        <ChipSelector options={CATEGORIES} value={v} onChange={setV} multiple={false} aria-label="カテゴリ" />
         <p className="typo-label-xs text-[var(--Text-Low-Emphasis)]">選択: {v[0] ?? "なし"}</p>
       </div>
     )
@@ -69,7 +69,7 @@ export const SelectionModeSingle: Story = {
     const [v, setV] = React.useState<string[]>(["work"])
     return (
       <div className="p-4 space-y-3">
-        <ChipSelector options={CATEGORIES} value={v} onChange={setV} selectionMode="single" />
+        <ChipSelector options={CATEGORIES} value={v} onChange={setV} selectionMode="single" aria-label="カテゴリ" />
         <p className="typo-label-xs text-[var(--Text-Low-Emphasis)]">選択: {v[0] ?? "なし"}</p>
       </div>
     )
@@ -130,6 +130,40 @@ export const SelectionModeUnspecified: Story = {
 }
 
 /**
+ * **グループ名を見出しと結ぶ**（issue #666）。単一選択は `role="radiogroup"` で名前が必須なので、
+ * 見出しに `id` を付けて `aria-labelledby` で結ぶ（見出しが無い場合は `aria-label`）。
+ * スクリーンリーダーは「種別、ラジオグループ」と読む。未指定の単一選択は開発ビルドで警告が出る。
+ */
+export const LabelledByHeading: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [kind, setKind] = React.useState<string | null>("memo")
+    return (
+      <div className="p-4 space-y-2">
+        <p id="chip-selector-kind-label" className="typo-label-md text-[var(--Text-High-Emphasis)]">種別</p>
+        <ChipSelector
+          aria-labelledby="chip-selector-kind-label"
+          selectionMode="single"
+          options={[
+            { label: "メモ", value: "memo" },
+            { label: "打ち合わせ", value: "meeting" },
+            { label: "見積もり", value: "estimate" },
+          ]}
+          value={kind}
+          onChange={setKind}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const group = canvasElement.querySelector('[data-slot="chip-selector"]')!
+    await expect(group.getAttribute("role")).toBe("radiogroup")
+    await expect(group.getAttribute("aria-labelledby")).toBe("chip-selector-kind-label")
+    await expect(canvasElement.querySelector("#chip-selector-kind-label")?.textContent).toBe("種別")
+  },
+}
+
+/**
  * **単一選択のスカラー API**（issue #418）。`value` は `T | null`、`onChange` も
  * スカラーを受け取る。`useState<T[]>` を挟まずそのまま state に繋げられる。
  *
@@ -144,6 +178,7 @@ export const SingleSelectScalar: Story = {
       <div className="p-4 space-y-3" style={{ maxWidth: 360 }}>
         <ChipSelector
           selectionMode="single"
+          aria-label="支出カテゴリ"
           options={EXPENSE_CATEGORIES}
           value={v}
           onChange={setV}

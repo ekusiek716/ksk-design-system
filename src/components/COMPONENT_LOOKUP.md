@@ -113,7 +113,7 @@
 | CelebrationDialog | `@/components/patterns/celebration-dialog` | — | Basic, Bounce Emoji / Auto Dismiss, Iconsax Badge（emoji の代わり）, Custom Confetti Colors |
 | Celebration | `@/components/patterns/celebration` | — | Confetti, InlineEmoji, Actions Slot / Interactive, Custom Duration / Colors / DriftRange, Emoji Animation: Bounce, Effect: Burst（クラッカー演出）, Cardless / Tap Dismiss |
 | ChipFilterBar | `@/components/patterns/chip-filter-bar` | — | Default, CustomResultCountLabel, Sticky, Bare, TouchTargetNotClipped |
-| ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, SelectionModeSingle, SelectionModeMultiple, SelectionModeUnspecified, SingleSelectScalar, WithMax, WrappedRowsDoNotOverlap |
+| ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, SelectionModeSingle, SelectionModeMultiple, SelectionModeUnspecified, LabelledByHeading, SingleSelectScalar, WithMax, WrappedRowsDoNotOverlap |
 | Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `xs`, `sm`, `md`, `lg`, `tile`<br>**shape**: `pill`, `rounded`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape, WithCount, TileAndSoldOut, AsLink, Real UI — Filters & Status, Touch selection stable, TileTouchTargetNotShrunk, ExtraSmall, RoundedShape |
 | CoachMarkOverlay | `@/components/patterns/coach-mark-overlay` | — | MultiStepTour, Localized labels (EN), BrandVariant, MissingTarget, FocusTrap |
 | CollapsibleChipField | `@/components/patterns/collapsible-chip-field` | — | WithLabel, WithIcon, RequiredNoClear, CollapsedDisclosure, AlwaysExpanded, EscapeInsideDialog |

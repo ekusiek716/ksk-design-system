@@ -1830,7 +1830,8 @@
         "単一選択で選択中の値が 2 つ以上あると開発ビルドで console.warn する(issue #39 の footgun 検出)",
         "Use selectionMode=\"single\" for single-select (multiple=false は非推奨). Use max to limit selection count.",
         "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior.",
-        "PillToggle は 2〜4 択の segmented control 専用。5択以上・折り返しが要る単一選択はこの selectionMode=\"single\" を使う(issue #418)。"
+        "PillToggle は 2〜4 択の segmented control 専用。5択以上・折り返しが要る単一選択はこの selectionMode=\"single\" を使う(issue #418)。",
+        "グループ名は aria-labelledby（見出しの id）か aria-label で渡す(issue #666)。単一選択の radiogroup は名前が必須で、どちらも無いと開発ビルドで console.warn する。id / aria-describedby もルートへ渡せる。native は accessibilityLabel / accessibilityLabelledBy"
       ]
     },
     {
