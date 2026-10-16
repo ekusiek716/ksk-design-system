@@ -3,9 +3,9 @@
 メジャーバージョン間の移行ガイド。
 patch / minor は原則破壊変更なし、自動アップグレード可（例外: **v1.34.0 で npm パッケージ名を変更**。import の置換が必要。下記参照）。
 
-## 次回公開予定（未公開）
+## v2.13.0 の導入注意
 
-以下はmainへ取り込む変更の導入注意です。版更新・npm公開・consumer同期・アプリ配布はまだ行いません。
+以下はv2.13.0でnpm公開する変更の導入注意です。consumerへの展開・アプリ配布は今回の対象に含まず、次回のまとめ展開で反映します。
 
 - **下部ナビ・FABの入力中表示（#700）**: `MobileTabBar` / `MobileFloatingActionButton` は既定の `keyboardBehavior="hide"` での非表示条件が増えます。`BottomTabBar` の既定stayは維持し、hideを明示した場合だけ同じ検知を使います。viewportの縮小に加え、タッチ主体の端末でテキスト入力にフォーカスした時点でも非表示になります。pointer/hover能力では物理キーボード接続を判別できないため、この先行非表示が不要なら `hideOnInputFocus={false}` でviewport検知だけにできます。従来どおり表示位置を変えたくない画面は `keyboardBehavior="stay"` を明示してください。
 - **下側Sheetの入力時高さ（#706）**: `safeArea={true}`（既定）の通常bottom Sheetは、キーボード表示時に上端のsafe-areaも差し引き、ステータスバー・ノッチへの侵入を避けます。独自の全画面配置でこの補正が不要なら `safeArea={false}` を指定してください。snap Sheetは今回の高さ変更の対象外です。
