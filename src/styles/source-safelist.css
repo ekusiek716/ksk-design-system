@@ -25,6 +25,8 @@
 @source inline("-translate-x-1/2");
 @source inline("-translate-y-1/2");
 @source inline("-translate-y-[calc(100%_+_4rem)]");
+@source inline("@[15rem]:col-start-2");
+@source inline("@[15rem]:grid-cols-[var(--ksk-form-field-label-width)_minmax(0,1fr)]");
 @source inline("@[768px]:flex");
 @source inline("@container");
 @source inline("@sm:flex-row");
@@ -312,7 +314,6 @@
 @source inline("break-all");
 @source inline("break-words");
 @source inline("col-start-1");
-@source inline("col-start-2");
 @source inline("collapse");
 @source inline("container");
 @source inline("contents");
@@ -502,7 +503,6 @@
 @source inline("grid-cols-[auto_minmax(0,1fr)_auto]");
 @source inline("grid-cols-[minmax(0,1fr)_8rem]");
 @source inline("grid-cols-[repeat(auto-fit,minmax(8rem,1fr))]");
-@source inline("grid-cols-[var(--ksk-form-field-label-width)_minmax(0,1fr)]");
 @source inline("group-data-[disabled]:bg-[var(--Surface-Secondary)]");
 @source inline("group-data-[disabled]:border-[var(--Border-Control,var(--Border-Medium-Emphasis))]");
 @source inline("group-data-[disabled]:cursor-not-allowed");

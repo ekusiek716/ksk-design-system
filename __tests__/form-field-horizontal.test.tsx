@@ -24,8 +24,12 @@ describe('FormField orientation="horizontal"（#712）', () => {
     )
     const root = el.querySelector<HTMLElement>('[data-slot="form-field"]')!
     expect(root.dataset.orientation).toBe("horizontal")
-    expect(root.className).toContain("grid-cols-[var(--ksk-form-field-label-width)_minmax(0,1fr)]")
-    expect(root.className).toContain("items-center")
+    expect(root.className).toContain("@container")
+    const grid = root.querySelector<HTMLElement>('[data-slot="form-field-grid"]')!
+    // 狭い置き場所（15rem 未満）では 1 列（縦積み）、以上で 2 列
+    expect(grid.className).toContain("grid-cols-1")
+    expect(grid.className).toContain("@[15rem]:grid-cols-[var(--ksk-form-field-label-width)_minmax(0,1fr)]")
+    expect(grid.className).toContain("items-center")
     expect(root.style.getPropertyValue("--ksk-form-field-label-width")).toBe("5rem")
     expect(root.querySelector('[data-slot="form-field-label-cell"] label')!.getAttribute("for")).toBe("k")
     expect(root.querySelector('[data-slot="form-field-control"] input')).not.toBeNull()
@@ -42,7 +46,7 @@ describe('FormField orientation="horizontal"（#712）', () => {
     const root = el.querySelector<HTMLElement>('[data-slot="form-field"]')!
     expect(root.style.getPropertyValue("--ksk-form-field-label-width")).toBe("6rem")
     expect(root.style.marginTop).toBe("4px")
-    expect(root.className).toContain("items-start")
+    expect(root.querySelector('[data-slot="form-field-grid"]')!.className).toContain("items-start")
   })
 
   it("エラーは右の列の下段に出て、入力欄の aria-describedby に結ばれる", () => {
@@ -52,13 +56,25 @@ describe('FormField orientation="horizontal"（#712）', () => {
       </FormField>,
     )
     const messages = el.querySelector<HTMLElement>('[data-slot="form-field-messages"]')!
-    expect(messages.className).toContain("col-start-2")
+    expect(messages.className).toContain("@[15rem]:col-start-2")
     const alert = messages.querySelector('[role="alert"]')!
     expect(alert.textContent).toContain("長すぎます")
     // エラー中は説明文を出さない（vertical と同じ）
     expect(messages.textContent).not.toContain("補足")
     expect(el.querySelector("input")!.getAttribute("aria-describedby")).toBe(alert.id)
     expect(el.querySelector("input")!.getAttribute("aria-invalid")).toBe("true")
+  })
+
+  it("endLabel はラベル列ではなく入力欄の右に置く（狭いラベル列で潰れない）", () => {
+    const el = host(
+      <FormField orientation="horizontal" label="メモ" htmlFor="m" endLabel="12/200">
+        <Input id="m" />
+      </FormField>,
+    )
+    expect(el.querySelector('[data-slot="form-field-label-cell"] [data-slot="form-field-end-label"]')).toBeNull()
+    const control = el.querySelector<HTMLElement>('[data-slot="form-field-control"]')!
+    expect(control.lastElementChild!.getAttribute("data-slot")).toBe("form-field-end-label")
+    expect(control.querySelector("input")).not.toBeNull()
   })
 
   it("既定（vertical）の DOM は従来どおり", () => {
