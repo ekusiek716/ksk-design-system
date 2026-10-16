@@ -117,4 +117,53 @@ describe("MonthCalendar view=\"week\"（#704）", () => {
     act(() => root.unmount())
     container.remove()
   })
+
+  it("月をまたぐ週は月外の日も描く（空きセルにしない）", () => {
+    const host = html(<MonthCalendar month="2026-10" today="2026-10-01" view="week" />)
+    const cells = [...host.querySelectorAll<HTMLElement>('[role="gridcell"]')]
+    expect(cells.map((c) => c.dataset.date)).toEqual([
+      "2026-09-27", "2026-09-28", "2026-09-29", "2026-09-30", "2026-10-01", "2026-10-02", "2026-10-03",
+    ])
+    expect(cells[0].dataset.outsideMonth).toBe("true")
+    expect(cells[4].hasAttribute("data-outside-month")).toBe(false)
+  })
+
+  it("onMonthChange が無くても矢印で月の端を越えて隣の週へ移る", () => {
+    const container = document.createElement("div")
+    document.body.appendChild(container)
+    const root = createRoot(container)
+    act(() => root.render(<MonthCalendar month="2026-10" today="2026-10-01" view="week" />))
+    const cell = (d: string) => container.querySelector<HTMLElement>(`[data-date="${d}"]`)
+    act(() => cell("2026-10-01")!.focus())
+    act(() => {
+      cell("2026-10-01")!.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }))
+    })
+    // 9/24 の週（9/20〜9/26）へ
+    expect(cell("2026-09-24")).not.toBeNull()
+    expect(document.activeElement).toBe(cell("2026-09-24"))
+    expect(cell("2026-10-01")).toBeNull()
+    act(() => root.unmount())
+    container.remove()
+  })
+
+  it("onMonthChange があれば月をまたいだときに呼び、表示月が変わってもフォーカス先を保つ", () => {
+    const container = document.createElement("div")
+    document.body.appendChild(container)
+    const root = createRoot(container)
+    const onMonthChange = vi.fn()
+    act(() => root.render(<MonthCalendar month="2026-10" today="2026-10-01" view="week" onMonthChange={onMonthChange} />))
+    const cell = (d: string) => container.querySelector<HTMLElement>(`[data-date="${d}"]`)
+    act(() => {
+      cell("2026-10-01")!.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }))
+    })
+    expect(onMonthChange).toHaveBeenCalledTimes(1)
+    expect(onMonthChange.mock.calls[0][0].getMonth()).toBe(8)
+    act(() => root.render(<MonthCalendar month="2026-09" today="2026-10-01" view="week" onMonthChange={onMonthChange} />))
+    expect(container.querySelector('[role="gridcell"][tabindex="0"]')!.getAttribute("data-date")).toBe("2026-09-30")
+    // 外から別の月へ切り替えたら、その月の中へ移る
+    act(() => root.render(<MonthCalendar month="2026-12" today="2026-10-01" view="week" onMonthChange={onMonthChange} />))
+    expect(container.querySelector('[role="gridcell"][tabindex="0"]')!.getAttribute("data-date")).toBe("2026-12-01")
+    act(() => root.unmount())
+    container.remove()
+  })
 })

@@ -70,7 +70,9 @@ interface MonthCalendarProps extends Omit<React.ComponentProps<"div">, "onSelect
    * - "month"（既定）: 月全体
    * - "week": フォーカス中の日（選択日 → 今日 → 1 日）を含む 1 週だけ。スマホの「週の帯」用。
    *   矢印キーで週をまたぐと表示する週が移る（grid のキー操作は month と共通）。
-   *   月をまたぐ週は月外の日が空きセルになる。日ごとの予定の中身は AgendaList と組み合わせる
+   *   月をまたぐ週は月外の日も描き（数字は Text-Medium-Emphasis）、月の端でも止まらず隣の週へ移る。
+   *   onMonthChange があれば月をまたいだときに呼ぶ（無ければ内部で進める）。
+   *   日ごとの予定の中身は AgendaList と組み合わせる
    */
   view?: MonthCalendarView
 }
@@ -163,13 +165,23 @@ function MonthCalendar({
   const [focusKey, setFocusKey] = React.useState(defaultFocus)
   // 選択日が外から変わったら（「今日へ」ボタン等）タブストップと week 表示の週もそこへ移す。
   // effect ではなく前回値との比較で render 中に揃える（React の推奨パターン・余分な描画なし）
+  const isWeek = view === "week"
   const [prevSelectedDate, setPrevSelectedDate] = React.useState(selectedDate)
   if (selectedDate !== prevSelectedDate) {
     setPrevSelectedDate(selectedDate)
-    if (inMonth(selectedDate)) setFocusKey(selectedDate!)
+    // week は月外の日も表示できるので、月をまたいだ選択日にも追従する
+    if (selectedDate && (isWeek || inMonth(selectedDate))) setFocusKey(selectedDate)
   }
-  // 月が変わったら、その月の中のセルへ移す（月外の日を覚えたままだとタブストップが消える）
-  const activeKey = inMonth(focusKey) ? focusKey : defaultFocus
+  // week: 表示月が外から変わったら（前後の月ボタン等）、その月の中へ移す。
+  // 自分で月をまたいで onMonthChange を呼んだときはフォーカス先が新しい月の中なので動かさない
+  const [prevMonthKey, setPrevMonthKey] = React.useState(monthKey)
+  if (monthKey !== prevMonthKey) {
+    setPrevMonthKey(monthKey)
+    if (isWeek && !inMonth(focusKey)) setFocusKey(defaultFocus)
+  }
+  // month: 月が変わったら、その月の中のセルへ移す（月外の日を覚えたままだとタブストップが消える）。
+  // week: 月外の日（月をまたぐ週）にもフォーカスできる（issue #704 レビュー）
+  const activeKey = isWeek ? focusKey : inMonth(focusKey) ? focusKey : defaultFocus
   const gridRef = React.useRef<HTMLDivElement>(null)
   const shouldFocusRef = React.useRef(false)
 
@@ -182,6 +194,12 @@ function MonthCalendar({
   const moveTo = (next: Date) => {
     const key = toKey(next)
     shouldFocusRef.current = true
+    if (isWeek) {
+      // week は月境界で止めない。onMonthChange があれば表示月も合わせ、無ければ内部で進める
+      setFocusKey(key)
+      if (!inMonth(key)) onMonthChange?.(new Date(next.getFullYear(), next.getMonth(), 1))
+      return
+    }
     if (inMonth(key)) {
       setFocusKey(key)
       return
@@ -229,12 +247,12 @@ function MonthCalendar({
         break
       case "Home": {
         const start = addDays(d, -col)
-        moveTo(inMonth(toKey(start)) ? start : monthStart)
+        moveTo(isWeek || inMonth(toKey(start)) ? start : monthStart)
         break
       }
       case "End": {
         const end = addDays(d, 6 - col)
-        moveTo(inMonth(toKey(end)) ? end : new Date(monthStart.getFullYear(), monthStart.getMonth(), daysInMonth(monthStart)))
+        moveTo(isWeek || inMonth(toKey(end)) ? end : new Date(monthStart.getFullYear(), monthStart.getMonth(), daysInMonth(monthStart)))
         break
       }
       case "PageUp":
@@ -256,9 +274,14 @@ function MonthCalendar({
     event.preventDefault()
   }
 
-  // view="week" はフォーカス中の日（タブストップ）を含む週だけを出す
-  const indexedWeeks = weeks.map((week, index) => ({ week, index }))
-  const visibleWeeks = view === "week" ? indexedWeeks.filter(({ week }) => week.includes(activeKey)) : indexedWeeks
+  // view="week" はフォーカス中の日（タブストップ）を含む 7 日を出す。月をまたぐ週は月外の日も描く
+  const visibleWeeks: { week: (string | null)[]; index: number }[] = isWeek
+    ? (() => {
+        const active = parseKey(activeKey)
+        const start = addDays(active, -((active.getDay() - weekStartsOn + 7) % 7))
+        return [{ week: Array.from({ length: 7 }, (_, i) => toKey(addDays(start, i))), index: 0 }]
+      })()
+    : weeks.map((week, index) => ({ week, index }))
 
   return (
     <div
@@ -304,6 +327,8 @@ function MonthCalendar({
             const hidden = dayEvents.length - visible.length
             const isToday = key === todayKey
             const isSelected = key === selectedDate
+            // week の月をまたぐ週で、表示月の外の日（数字を控えめにする）
+            const isOutside = !inMonth(key)
             return (
               // ksk-ds-lint-ignore P024 -- WAI-ARIA grid の gridcell は roving tabindex でセル自体がフォーカスを受け、キー操作は handleKeyDown が担う
               <div
@@ -312,6 +337,7 @@ function MonthCalendar({
                 data-date={key}
                 data-today={isToday || undefined}
                 data-selected={isSelected || undefined}
+                data-outside-month={isOutside || undefined}
                 tabIndex={key === activeKey ? 0 : -1}
                 aria-selected={isSelected}
                 aria-label={dayLabel(key, dayEvents)}
@@ -336,7 +362,9 @@ function MonthCalendar({
                     "flex size-7 items-center justify-center self-center rounded-full typo-label-sm md:self-start",
                     isToday
                       ? "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)]"
-                      : weekendTone && weekday === 0
+                      : isOutside
+                        ? "text-[var(--Text-Medium-Emphasis)]"
+                        : weekendTone && weekday === 0
                         ? "text-[var(--Text-Caution)]"
                         : weekendTone && weekday === 6
                           ? "text-[var(--Text-Accent-Primary)]"
