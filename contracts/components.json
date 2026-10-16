@@ -5,11 +5,11 @@
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 71,
-      "patterns": 63,
+      "patterns": 64,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 157
+      "total": 158
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -2723,6 +2723,27 @@
         "Button に border-dashed や形を上書きして「追加」タイルを自作しない",
         "画面の主操作（ヘッダーの作成・FAB）の代わりにしない。「この場所に足す」入口に限る",
         "点線は Border-Medium-Emphasis、hover は Border-Accent-Primary + Surface-Accent-Primary-Light + Text-Accent-Primary"
+      ]
+    },
+    {
+      "name": "CodeDisplay",
+      "path": "src/components/patterns/code-display.tsx",
+      "description": "招待コード・ログインコード・クーポン等の英数字コードを等幅・広めの字間で見せ、ワンタップでコピーする（issue #686）。入力させる側は CodeInput。",
+      "sizes": [
+        "md(typo-heading-lg・既定)",
+        "lg(typo-heading-2xl)"
+      ],
+      "variants": [
+        "tone: neutral(Surface-Secondary・既定) / accent(Surface-Accent-Primary-Light)"
+      ],
+      "accessibility": [
+        "コピー結果はボタンの文言とアイコンで示し、aria-live=polite で読み上げる（色だけで伝えない）",
+        "native (src/native/components/CodeDisplay.tsx): コードは selectable。RN コアにクリップボードが無いため onCopy（expo-clipboard 等）を渡したときだけコピーボタンを出す"
+      ],
+      "rules": [
+        "font-mono / tracking-* を consumer で指定してコード表示を自作しない",
+        "長いコードは break-all で折り返す。横スクロールさせない",
+        "コピーの成否はトーストではなくボタン上で即時に示す（onCopy で計測・トーストを足すのは可）"
       ]
     }
   ],
