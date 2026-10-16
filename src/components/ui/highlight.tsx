@@ -23,11 +23,13 @@ function escapeRegExp(value: string) {
 function splitHighlight(text: string, query: string, caseSensitive = false): { text: string; match: boolean }[] {
   const q = query.trim()
   if (!q) return [{ text, match: false }]
+  // 一致判定は正規表現（i フラグ）に任せる。split の捕獲グループは奇数番目が一致部分になる
+  // （toLowerCase 同士の比較は、大小変換で長さが変わる文字やロケール差で一致判定がずれるため使わない）。
   const re = new RegExp(`(${escapeRegExp(q)})`, caseSensitive ? "g" : "gi")
   return text
     .split(re)
-    .filter((part) => part !== "")
-    .map((part) => ({ text: part, match: caseSensitive ? part === q : part.toLowerCase() === q.toLowerCase() }))
+    .map((part, i) => ({ text: part, match: i % 2 === 1 }))
+    .filter((part) => part.text !== "")
 }
 
 /**

@@ -25,4 +25,10 @@ describe("Highlight（#692）", () => {
     expect(splitHighlight("abc", "  ")).toEqual([{ text: "abc", match: false }])
     expect(splitHighlight("a.c abc", ".").filter((p) => p.match).map((p) => p.text)).toEqual(["."])
   })
+  it("一致判定は正規表現の i フラグ（toLowerCase 比較に頼らない）", () => {
+    // "İ"（U+0130）は toLowerCase で 2 文字になり、比較方式だと判定がずれる
+    const parts = splitHighlight("İstanbul istanbul", "istanbul")
+    expect(parts.filter((p) => p.match).map((p) => p.text)).toEqual(["istanbul"])
+    expect(parts.map((p) => p.text).join("")).toBe("İstanbul istanbul")
+  })
 })

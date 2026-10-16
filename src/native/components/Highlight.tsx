@@ -23,11 +23,13 @@ export function Highlight({ text, query, caseSensitive = false, style }: Highlig
   const q = query.trim()
   if (!q) return <RNText style={style}>{text}</RNText>
   const re = new RegExp(`(${escapeRegExp(q)})`, caseSensitive ? "g" : "gi")
-  const parts = text.split(re).filter((p) => p !== "")
+  // split の捕獲グループは奇数番目が一致部分（Web と同じく一致判定は正規表現に任せる）
+  const parts = text.split(re)
   return (
     <RNText style={style}>
       {parts.map((part, i) => {
-        const match = caseSensitive ? part === q : part.toLowerCase() === q.toLowerCase()
+        if (part === "") return null
+        const match = i % 2 === 1
         return match ? (
           <RNText key={i} style={{ backgroundColor: theme.surface.highlight, color: theme.text["on-highlight"] }}>
             {part}
