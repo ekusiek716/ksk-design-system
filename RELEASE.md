@@ -2,6 +2,23 @@
 
 `ksk-design-system` のリリーススケジュール・運用ルール。
 
+## v2.12.0（2026-10-17）
+
+2.11.0以降に、consumer側の見た目の上書きをなくすためのAPI・部品を22件追加したminorリリース。追加のみで、propsを渡さなければ従来と同じ表示です。
+
+- 新部品を7つ追加しました。`EmojiIcon`（#676）、`AddTile`（#678）、`MonthCalendar` / `KanbanColumn`（#679）、`CodeDisplay`（#686）、`FeatureComparisonTable`（#687）、`Highlight`（#692）です。
+- Input / Textareaに枠なしでその場編集できる `variant="inline"` / `"inline-title"` を追加しました（#675）。
+- Cardに `selected` / `elevation`、StatCardに `elevation`、Avatarに `size` を追加しました（#677・#688・#689）。
+- SidebarNavに `tone="inverse"`、AdminShellに `sidebarTone` を追加し、暗色サイドバーにできるようにしました（#680）。
+- MobileTabBarに `keyboardBehavior` / `bottomOffsetExtra`、MobileAppShellに `bottomPaddingExtra`、nativeの上端safe-area用の `--Safe-Area-Inset-Top` を追加しました（#681・#682）。
+- Bannerに `density="compact"` / `layout="bar"`、IconBadgeに `tone`、SettingsSectionに `icon`、SettingsListRowに `showChevron` を追加しました（#683・#684・#690）。
+- ShareButtonsに `message` / `layout="block"` / `labels` とLINEのhover・押下・前景トークンを追加しました（#685）。
+- Toastの位置変数と `<Toaster position>`、`--Surface-Highlight` / `--Text-on-Highlight` トークン、TagInputのid / name / aria-*の内部input転送を追加しました（#691・#692・#693）。
+- DS部品のスクロールバー非表示を既存の `scrollbar-hide` に統一しました（#694）。
+- inline系Alertが `title` / `description` / `icon` propを描画するようにしました（#695）。
+
+導入時は [2.12.0の注意](./MIGRATION.md#v2120) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。consumerへの取り込みとアプリ配布は別工程で、今回のDS公開準備には含めません。
+
 ## v2.11.0（2026-10-16）
 
 2.10.0以降に、consumer側の見た目の上書きをなくすためのAPIを9件追加したminorリリース。追加のみで、propsを渡さなければ従来と同じ表示です。
