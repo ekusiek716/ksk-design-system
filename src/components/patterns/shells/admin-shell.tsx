@@ -47,6 +47,20 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
 /** ドロワーを閉じる対象（ナビゲーションとみなす要素） */
 const NAVIGATE_SELECTOR = 'a[href], [data-slot="sidebar-nav-item"]'
 
+/** lg（1024px）以上。ここではドロワーを出さない（desktop の aside が出る） */
+const DESKTOP_QUERY = "(min-width: 1024px)"
+
+/**
+ * 押された要素がナビゲーション（= ドロワーを閉じてよい）か。
+ * 子を持つ親項目（aria-expanded を持つ開閉用）は、押しても画面が移らないので閉じない（issue #705）。
+ */
+function isNavigationTarget(target: Element | null): boolean {
+  const item = target?.closest(NAVIGATE_SELECTOR)
+  if (!item) return false
+  if (item.hasAttribute("aria-expanded")) return false
+  return true
+}
+
 /**
  * AdminShell — 管理画面のレイアウトシェル
  *
@@ -101,15 +115,31 @@ function AdminShell({
 }: AdminShellProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
   const drawerOpen = mobileDrawerOpen ?? uncontrolledOpen
-  const setDrawerOpen = (open: boolean) => {
-    if (mobileDrawerOpen === undefined) setUncontrolledOpen(open)
-    onMobileDrawerOpenChange?.(open)
-  }
+  const setDrawerOpen = React.useCallback(
+    (open: boolean) => {
+      if (mobileDrawerOpen === undefined) setUncontrolledOpen(open)
+      onMobileDrawerOpenChange?.(open)
+    },
+    [mobileDrawerOpen, onMobileDrawerOpenChange]
+  )
   const handleDrawerClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!closeMobileDrawerOnNavigate || event.defaultPrevented) return
-    const target = event.target as Element | null
-    if (target?.closest(NAVIGATE_SELECTOR)) setDrawerOpen(false)
+    if (isNavigationTarget(event.target as Element | null)) setDrawerOpen(false)
   }
+
+  // 開いたまま lg 以上へ広がったら閉じる（lg 以上はドロワーを lg:hidden で隠すため、
+  // 開いたままだと見えないモーダルがフォーカスとスクロールを奪う）。SSR では走らない
+  React.useEffect(() => {
+    if (!mobileDrawer || !drawerOpen) return
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return
+    const query = window.matchMedia(DESKTOP_QUERY)
+    const closeIfDesktop = () => {
+      if (query.matches) setDrawerOpen(false)
+    }
+    closeIfDesktop()
+    query.addEventListener?.("change", closeIfDesktop)
+    return () => query.removeEventListener?.("change", closeIfDesktop)
+  }, [mobileDrawer, drawerOpen, setDrawerOpen])
   const menuButton = mobileDrawer ? (
     <Button
       variant="ghost"

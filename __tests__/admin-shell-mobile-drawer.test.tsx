@@ -120,4 +120,71 @@ describe("AdminShell mobileDrawer（#705）", () => {
     expect(drawer()!.dataset.tone).toBe("inverse")
     expect(drawer()!.className).toContain("bg-[var(--Surface-Inverse)]")
   })
+
+  it("子を持つ親項目（aria-expanded を持つ開閉用）を押しても閉じない", () => {
+    const withParent = (
+      <div>
+        <button type="button" data-slot="sidebar-nav-item" aria-expanded="false">設定</button>
+        <a href="#child" aria-expanded="true">親リンク</a>
+      </div>
+    )
+    act(() => root.render(<AdminShell sidebar={withParent} mobileDrawer>本文</AdminShell>))
+    act(() => menuButton().click())
+    act(() => drawer()!.querySelector<HTMLButtonElement>('[data-slot="sidebar-nav-item"]')!.click())
+    expect(drawer()).not.toBeNull()
+    act(() => drawer()!.querySelector<HTMLAnchorElement>('a[href="#child"]')!.click())
+    expect(drawer()).not.toBeNull()
+  })
+
+  describe("開いたまま lg 以上になったら閉じる", () => {
+    const original = window.matchMedia
+    let matches = false
+    const listeners = new Set<() => void>()
+    beforeEach(() => {
+      matches = false
+      listeners.clear()
+      window.matchMedia = ((query: string) => ({
+        get matches() {
+          return query === "(min-width: 1024px)" ? matches : false
+        },
+        media: query,
+        onchange: null,
+        addEventListener: (_: string, cb: () => void) => listeners.add(cb),
+        removeEventListener: (_: string, cb: () => void) => listeners.delete(cb),
+        addListener: () => {},
+        removeListener: () => {},
+        dispatchEvent: () => false,
+      })) as unknown as typeof window.matchMedia
+    })
+    afterEach(() => {
+      window.matchMedia = original
+    })
+
+    it("幅が lg に広がると閉じ、リスナーを外す", () => {
+      act(() => root.render(<AdminShell sidebar={sidebar} mobileDrawer>本文</AdminShell>))
+      act(() => menuButton().click())
+      expect(drawer()).not.toBeNull()
+      expect(listeners.size).toBe(1)
+      matches = true
+      act(() => listeners.forEach((cb) => cb()))
+      expect(drawer()).toBeNull()
+      // 閉じたら監視も外す
+      expect(listeners.size).toBe(0)
+    })
+
+    it("制御モードでは onMobileDrawerOpenChange(false) を呼ぶ", () => {
+      const onChange = vi.fn()
+      matches = true
+      act(() => root.render(<AdminShell sidebar={sidebar} mobileDrawer mobileDrawerOpen onMobileDrawerOpenChange={onChange}>本文</AdminShell>))
+      expect(onChange).toHaveBeenCalledWith(false)
+    })
+
+    it("SSR（renderToString）では matchMedia に触れない", () => {
+      matches = true
+      const spy = vi.fn(window.matchMedia)
+      window.matchMedia = spy as unknown as typeof window.matchMedia
+      renderToStaticMarkup(<AdminShell sidebar={sidebar} mobileDrawer mobileDrawerOpen>本文</AdminShell>)
+      expect(spy).not.toHaveBeenCalled()
+    })
+  })
 })
