@@ -4,7 +4,7 @@
 
 React Native / Expo consumer は、新規 UI を作る前にこの一覧で既存コンポーネントを確認してください。すべて `ksk-design-system/native/ui` から import します。
 
-- Public native component exports: 154
+- Public native component exports: 155
 - Import: `import { Button, Screen } from "ksk-design-system/native/ui"`
 
 | Component | Source | Section |
@@ -40,6 +40,7 @@ React Native / Expo consumer は、新規 UI を作る前にこの一覧で既�
 | `CheckboxCard` | `src/native/components/CheckboxCard.tsx` | Phase 2: Basic Form |
 | `CheckboxField` | `src/native/components/CheckboxField.tsx` | Phase 2: Basic Form |
 | `CheckboxGroup` | `src/native/components/CheckboxGroup.tsx` | Phase 2: Basic Form |
+| `CodeInput` | `src/native/components/CodeInput.tsx` | Phase 2: Basic Form |
 | `CommitAutoGrowTextarea` | `src/native/components/CommitAutoGrowTextarea.tsx` | Phase 2: Basic Form |
 | `CommitInput` | `src/native/components/CommitInput.tsx` | Phase 2: Basic Form |
 | `CommitTextarea` | `src/native/components/CommitTextarea.tsx` | Phase 2: Basic Form |

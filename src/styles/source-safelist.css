@@ -437,6 +437,7 @@
 @source inline("font-black");
 @source inline("font-bold");
 @source inline("font-medium");
+@source inline("font-mono");
 @source inline("font-normal");
 @source inline("font-semibold");
 @source inline("forced-colors:data-[state=active]:bg-[Highlight]");
@@ -685,6 +686,7 @@
 @source inline("max-w-[calc(100%_-_2rem)]");
 @source inline("max-w-[calc(100%_-_32px)]");
 @source inline("max-w-[calc(100%_-_3rem)]");
+@source inline("max-w-[var(--Field-Height-Md)]");
 @source inline("max-w-full");
 @source inline("max-w-lg");
 @source inline("max-w-md");

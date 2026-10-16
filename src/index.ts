@@ -128,6 +128,8 @@ export type {
 } from "./components/ui/progress-ring"
 export { NumberInput } from "./components/ui/number-input"
 export type { NumberInputProps } from "./components/ui/number-input"
+export { CodeInput } from "./components/ui/code-input"
+export type { CodeInputProps, CodeInputPattern, CodeInputVariant } from "./components/ui/code-input"
 export { PillToggle } from "./components/ui/pill-toggle"
 export type { PillToggleProps, PillToggleOption } from "./components/ui/pill-toggle"
 export { StarRating } from "./components/ui/star-rating"

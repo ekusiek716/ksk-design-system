@@ -4,12 +4,12 @@
     "version": "2.10.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
-      "ui": 69,
+      "ui": 70,
       "patterns": 62,
       "commerce": 12,
       "admin": 8,
       "shells": 3,
-      "total": 154
+      "total": 155
     },
     "exportNaming": {
       "_doc": "contracts の name が `import { name } from \"ksk-design-system\"` で解決できるかを示す。__tests__/contracts-export-integrity.test.ts が src/index.ts の実 export と突き合わせて固定する。",
@@ -732,6 +732,39 @@
       ],
       "accessibility": [
         "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
+      ]
+    },
+    {
+      "name": "CodeInput",
+      "formBinding": "controller",
+      "path": "src/components/ui/code-input.tsx",
+      "description": "認証コード（OTP）・招待コードのような固定桁のコード入力（issue #669）。variant=cells は桁ごとのセル、variant=single は等幅・大きめ・字間広めの 1 入力（24 桁のような長いコード向け）。Input と同じ --Field-* / Border-Control トークンで枠・背景・フォーカス・エラーを表す。",
+      "variants": [
+        "cells",
+        "single"
+      ],
+      "props": {
+        "length": "number — 桁数",
+        "value / defaultValue / onChange": "string — 受け付けた文字だけを左詰めにした文字列",
+        "onComplete": "(value: string) => void — 全桁がそろった瞬間に 1 回",
+        "pattern": "\"numeric\"（既定）| \"alphanumeric\" | RegExp — 1 文字ずつ判定。受け付けない文字（空白・ハイフン等）は落とす",
+        "uppercase": "boolean — 英字を大文字にそろえる",
+        "variant": "\"cells\"（既定）| \"single\"",
+        "invalid": "boolean — aria-invalid と Caution の枠",
+        "cellLabel": "(index, length) => string — 各セルの読み上げ名（既定「n桁目（全m桁）」・i18n 用）",
+        "name / id / aria-label / aria-labelledby / aria-describedby / autoFocus / disabled / placeholder / className": "フォーム・a11y 用"
+      },
+      "accessibility": [
+        "cells はグループ（role=group）に aria-label / aria-labelledby で名前を付け、各セルに「n桁目（全m桁）」の aria-label を持つ",
+        "autocomplete=\"one-time-code\"（cells は先頭セル）と inputMode（numeric なら numeric）で SMS コードの自動入力に対応",
+        "invalid で各入力に aria-invalid",
+        "native は 1 つの TextInput をセルに重ねる方式（textContentType=oneTimeCode / autoComplete=sms-otp）で、accessibilityLabel と accessibilityValue（n / m 桁）を読む"
+      ],
+      "rules": [
+        "認証コード・招待コードは CodeInput を使う。Input に typo-heading-2xl / tracking-wider 等を被せてコード欄を自作しない",
+        "4〜8 桁の OTP は variant=cells、24 桁のような長いコードは variant=single",
+        "貼り付けで全桁が埋まる・Backspace で前の桁へ戻る・← → / Home / End で移動する挙動を consumer で再実装しない",
+        "見出しがある画面では aria-labelledby で結ぶ。cells の id は先頭セルに付くので <Label htmlFor> でも結べる"
       ]
     },
     {

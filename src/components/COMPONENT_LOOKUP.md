@@ -26,6 +26,7 @@
 | CheckboxGroup, CheckboxGroupItem | `@/components/ui/checkbox-group` | — | Default, Required, WithError, SingleColumn |
 | Checkbox | `@/components/ui/checkbox` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, MultipleOptions, Row Layout (label/description/count), Real UI — Filter Sidebar |
 | CoachMark | `@/components/ui/coach-mark` | — | Default, Brand, Placements, Onboarding, Hover |
+| CodeInput | `@/components/ui/code-input` | — | Otp, Invalid, LongInviteCode, Disabled |
 | Collapsible, CollapsibleTrigger, CollapsibleContent | `@/components/ui/collapsible` | — | Default, FAQ |
 | Combobox | `@/components/ui/combobox` | — | Default, FiltersAndSelects, WithDisabledOption, InvalidInFormField |
 | CommitAutoGrowTextarea | `@/components/ui/commit-auto-grow-textarea` | — | Default, MinRows |
