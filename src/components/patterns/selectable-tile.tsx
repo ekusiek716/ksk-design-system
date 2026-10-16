@@ -105,14 +105,14 @@ function SelectableTile({
         disabled={disabled}
         onKeyDown={handleKeyDown}
         className={cn(
-          "relative inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border text-[var(--Text-High-Emphasis)]",
+          "relative inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border border-[var(--Border-Low-Emphasis)] text-[var(--Text-High-Emphasis)]",
           "cursor-pointer transition-[background-color,border-color,box-shadow] duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
           "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
           "disabled:cursor-not-allowed disabled:opacity-50",
           shape === "circle" ? "aspect-square rounded-full p-1" : "rounded-lg p-3",
           selected
             ? SELECTED_CLASS
-            : "border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] hover:bg-[var(--Surface-Secondary)]",
+            : "bg-[var(--Surface-Primary)] hover:bg-[var(--Surface-Secondary)]",
           movable && "cursor-grab touch-none select-none active:cursor-grabbing",
           dragging && "cursor-grabbing shadow-[var(--shadow-md)]",
           className
