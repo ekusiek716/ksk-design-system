@@ -24,3 +24,22 @@ export const Sizes: Story = {
     </div>
   ),
 }
+
+/**
+ * gutter="fluid"（issue #711）: 画面幅で 16〜28px に伸び縮みする左右余白。
+ * `--Container-Gutter-Fluid`（既定 clamp(1rem, 4vw, 1.75rem)）で上書きできる。
+ * ChipFilterBar gutter="fluid" と同じ変数を読むので、絞り込みバーと本文の左端がそろう。
+ */
+export const FluidGutter: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4 py-8">
+      {(["tight", "fluid", "default"] as const).map((gutter) => (
+        <Container key={gutter} size="fluid" gutter={gutter}>
+          <div className="rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] p-4">
+            <p className="typo-label-md text-[var(--Text-High-Emphasis)]">gutter=&quot;{gutter}&quot;</p>
+          </div>
+        </Container>
+      ))}
+    </div>
+  ),
+}

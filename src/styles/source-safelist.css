@@ -933,6 +933,7 @@
 @source inline("px-4!");
 @source inline("px-5");
 @source inline("px-6");
+@source inline("px-[var(--Container-Gutter-Fluid)]");
 @source inline("px-[var(--Control-Padding-X-Lg)]");
 @source inline("px-[var(--Control-Padding-X-Md)]");
 @source inline("px-[var(--Control-Padding-X-Sm)]");

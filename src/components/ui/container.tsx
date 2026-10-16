@@ -15,6 +15,10 @@ const containerVariants = cva("mx-auto w-full", {
       tight: "px-4",
       default: "px-6",
       spacious: "px-6 lg:px-16",
+      // 画面幅で伸び縮みする余白（issue #711）。既定 clamp(1rem, 4vw, 1.75rem) = 16〜28px。
+      // 値は product theme の公開変数 --Container-Gutter-Fluid で上書きできる。
+      // ChipFilterBar gutter="fluid" も同じ変数を読むので左端がそろう。
+      fluid: "px-[var(--Container-Gutter-Fluid)]",
     },
   },
   defaultVariants: {
@@ -30,6 +34,9 @@ interface ContainerProps
 /**
  * ページ内容の最大幅・中央寄せ・左右 gutter を一元管理する。
  * 縦方向の余白や背景帯は Section に委ねる。
+ *
+ * gutter: none / tight(16px) / default(24px) / spacious(24px、lg 以上 64px) /
+ * fluid（画面幅で 16〜28px。`--Container-Gutter-Fluid` で上書き可。issue #711）。
  */
 function Container({ className, size, gutter, ...props }: ContainerProps) {
   return (

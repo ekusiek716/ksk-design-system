@@ -28,11 +28,12 @@ interface ChipFilterBarProps {
   bare?: boolean
   /**
    * 内側（チップ列と件数テキスト）の左右余白（issue #667）。`Container` の gutter と同じ語彙
-   * （`tight` = 16px / `default` = 24px）。外側（sticky の背景）は全幅のまま、チップと件数だけが
-   * 余白の内側に収まる。横スクロールの始点・終点も余白ぶん内側になる。
+   * （`tight` = 16px / `default` = 24px / `fluid` = 画面幅で 16〜28px。`fluid` は `Container gutter="fluid"`
+   * と同じ `--Container-Gutter-Fluid` を読むので本文と左端がそろう。issue #711）。外側（sticky の背景）は
+   * 全幅のまま、チップと件数だけが余白の内側に収まる。横スクロールの始点・終点も余白ぶん内側になる。
    * @default "none"
    */
-  gutter?: "none" | "tight" | "default"
+  gutter?: "none" | "tight" | "default" | "fluid"
   /**
    * 内側（チップ列 div と件数 p の両方）に付ける className（issue #667）。`gutter` の語彙に無い
    * 余白（consumer 独自のページ余白変数 `px-[var(--page-px)]` 等）を渡すときに使う。
@@ -46,6 +47,7 @@ const GUTTER_CLASS = {
   none: "",
   tight: "px-4",
   default: "px-6",
+  fluid: "px-[var(--Container-Gutter-Fluid)]",
 } as const
 
 // ロケールを明示する（SSR 環境とブラウザでロケールが異なると hydration mismatch になるため）

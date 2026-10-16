@@ -1341,7 +1341,7 @@
       "description": "ページ内容の最大幅・中央寄せ・左右 gutter を一元管理するレイアウトプリミティブ。",
       "variants": [
         "size: narrow / page / wide / fluid",
-        "gutter: none / tight / default / spacious"
+        "gutter: none / tight / default / spacious / fluid（画面幅で 16〜28px・--Container-Gutter-Fluid で上書き可。issue #711）"
       ],
       "sizes": [],
       "rules": [
@@ -1978,7 +1978,8 @@
         "sticky 時の top オフセットは stickyOffset prop で指定する（固定ヘッダー高さの相殺用）。",
         "resultCountLabel 未指定時は \"{n}件\" を表示。i18n が必要な場合は関数 props で差し替える。",
         "bare=true 時は overflow/padding ラッパーを付けない。外側スクロールコンテナと共有する場合に使う。",
-        "チップ列と件数の左右余白は gutter（none | tight=16px | default=24px・Container と同じ語彙）か contentClassName で付ける(issue #667)。sticky の背景は全幅のまま。外側 className に px-* を付けたり [&>div]: 等の子孫セレクタで DS 内部の DOM に依存したりしない。native も gutter を持つ"
+        "チップ列と件数の左右余白は gutter（none | tight=16px | default=24px・Container と同じ語彙）か contentClassName で付ける(issue #667)。sticky の背景は全幅のまま。外側 className に px-* を付けたり [&>div]: 等の子孫セレクタで DS 内部の DOM に依存したりしない。native も gutter を持つ",
+        "gutter=\"fluid\" は Container gutter=\"fluid\" と同じ --Container-Gutter-Fluid（既定 clamp(1rem, 4vw, 1.75rem)）を読み、本文と左端がそろう。プロダクト独自のページ余白は contentClassName に渡さずこの変数へ寄せる（issue #711。native は fluid を持たない）"
       ]
     },
     {
