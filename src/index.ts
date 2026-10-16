@@ -259,6 +259,7 @@ export type {
   ListItemVariant,
   ListItemAlign,
   ListItemDensity,
+  ListItemSlotWidth,
 } from "./components/patterns/list-item"
 export { SettingsListRow, SettingsSection } from "./components/patterns/settings-section"
 export type { SettingsListRowProps, SettingsSectionProps, SettingsSectionVariant } from "./components/patterns/settings-section"

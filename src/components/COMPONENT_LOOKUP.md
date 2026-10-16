@@ -135,7 +135,7 @@
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
 | KeyboardAwareSheetFooter | `@/components/patterns/keyboard-aware-sheet-footer` | — | Fixed, HideWhenKeyboardOpen, Glass |
-| ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot, AlignCenter, DensityCompact, WithFooterSlot, WithSecondaryAction |
+| ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot, AlignCenter, DensityCompact, WithFooterSlot, WithSecondaryAction, RightSlotWidth |
 | ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | Default, WithoutFilter, FewRows |
 | MediaActionCluster | `@/components/patterns/media-action-cluster` | — | Vertical, Horizontal, Auto orientation, No auto-hide |
 | MenuDrawer | `@/components/patterns/menu-drawer` | — | Default, NoBanner |

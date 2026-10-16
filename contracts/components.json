@@ -1450,6 +1450,7 @@
         "押せる行（href / onClick）の中に削除ボタン等の別操作を置く場合は secondaryAction を使う。rightSlot に button を入れると button の入れ子で不正な HTML になる",
         "secondaryAction 指定時はルートが div になり、行全体を覆う不可視の a/button（stretched link）+ 副アクションの兄弟配置に切り替わる",
         "バッジ・日時・シェブロンなど押せない表示は secondaryAction ではなく rightSlot",
+        "rightSlot に長い値（金額・件数）を置くときは rightSlotWidth（auto | narrow=1/3 | wide=1/2）で上限を付け、title 列を潰さない(issue #668)。任意の上限・調整は rightSlotClassName / leftSlotClassName。[&>div:last-child] 等の子孫セレクタで DS 内部の DOM に依存しない。native は trailingWidth / trailingStyle",
         "Native: titleTone / descriptionTone は default | accent | caution（既定 default）。文字列にのみ DS typography と semantic text 色を適用し、ReactNode は従来通り無加工。divider は none（既定）| inset | full。inset は density の左右 padding に追随し、leading 幅は含めない。footerSlot がある場合も行全体の下端。外置き Separator の full-bleed 既定は変更しない。"
       ]
     },

@@ -280,6 +280,7 @@
 @source inline("bottom-[var(--Toast-Viewport-Offset-Bottom)]");
 @source inline("bottom-[var(--ksk-bottom-tab-bar-keyboard-inset)]");
 @source inline("bottom-[var(--ksk-keyboard-inset)]");
+@source inline("break-all");
 @source inline("break-words");
 @source inline("col-start-1");
 @source inline("collapse");
@@ -667,6 +668,9 @@
 @source inline("max-w-[120px]");
 @source inline("max-w-[200px]");
 @source inline("max-w-[240px]");
+@source inline("max-w-[33%]");
+@source inline("max-w-[45%]");
+@source inline("max-w-[50%]");
 @source inline("max-w-[58%]");
 @source inline("max-w-[5rem]");
 @source inline("max-w-[60px]");

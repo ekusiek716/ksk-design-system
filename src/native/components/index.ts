@@ -219,6 +219,7 @@ export {
   type ListItemTone,
   type ListItemDivider,
   type ListItemDensity,
+  type ListItemSlotWidth,
 } from "./ListItem"
 export {
   SettingsListRow,
