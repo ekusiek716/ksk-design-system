@@ -20,6 +20,8 @@ describe("AddTile（#678）", () => {
     expect(b.tagName).toBe("BUTTON")
     expect(b.getAttribute("type")).toBe("button")
     expect(b.textContent).toBe("タスクを追加")
+    // truncate されたラベルの全文は title で確認できる
+    expect(b.querySelector("span[title]")?.getAttribute("title")).toBe("タスクを追加")
     expect(b.querySelector('[aria-hidden="true"] svg')).not.toBeNull()
   })
   it("点線の枠・44px 以上・全幅が既定、focus-visible リングを持つ", () => {

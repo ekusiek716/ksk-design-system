@@ -55,7 +55,8 @@ function AddTile({
       <span aria-hidden="true" className="flex size-5 shrink-0 items-center justify-center [&_svg]:size-5">
         {icon ?? <Add size={20} color="currentColor" />}
       </span>
-      <span className="min-w-[4rem] truncate">{label}</span>
+      {/* 省略記号で畳まれても全文を確認できるよう title を付ける（名前はボタンの中身で付く） */}
+      <span className="min-w-[4rem] truncate" title={label}>{label}</span>
     </button>
   )
 }
