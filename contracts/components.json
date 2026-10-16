@@ -2822,7 +2822,8 @@
         "md（768px）未満はチップの代わりに色ドット（最大 3）を出す。操作は日の選択に一本化する",
         "スマホの週の帯は view=\"week\"（フォーカス中の日を含む 1 週だけ。矢印キーで週が移る。issue #704）、日ごとの予定の中身は AgendaList を下に置く。週ストリップ・アジェンダを Button unstyled で自作しない",
         "土日の色は weekendTone（既定 true。日曜 Text-Caution / 土曜 Text-Accent-Primary・Calendar と同じ語彙）",
-        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）",
+        "分類の識別色（カテゴリ別の予定）は MonthCalendarEvent.accentColor に var(--Categorical-N) を渡す。md 以上はチップの先頭の点、md 未満は日付の下の点（tone より優先）。チップの面と文字は tone のまま。renderEvent の中で色の点を自作しない（issue #716）"
       ]
     },
     {
@@ -2838,7 +2839,8 @@
         "既定は予定がある日だけを昇順に並べる。予定の無い日も出すときは dates（emptyDayLabel 既定「予定なし」）",
         "スクロール連動・「今日へ」のジャンプ先は dayId で id を付ける（行には常に data-date）",
         "並べる日が無いときは empty（EmptyState 等）",
-        "native は未提供（INTENTIONAL_NATIVE_GAPS）"
+        "native は未提供（INTENTIONAL_NATIVE_GAPS）",
+        "予定の accentColor（issue #716）は行の先頭の点になる（行の面は tone のまま）。renderEvent で点を自作しない"
       ]
     },
     {

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import type { MonthCalendarEvent } from "./month-calendar"
-import { CHIP_TONE, WEEKDAYS, formatDayLabel, parseKey, resolveTodayKey } from "./_internal/calendar-shared"
+import { ACCENT_DOT, CHIP_TONE, WEEKDAYS, formatDayLabel, parseKey, resolveEventAccent, resolveTodayKey } from "./_internal/calendar-shared"
 
 interface AgendaListProps extends Omit<React.ComponentProps<"div">, "onSelect"> {
   /** 予定（MonthCalendar と同じ形。date は "YYYY-MM-DD"） */
@@ -143,7 +143,23 @@ function AgendaList({
                 ) : (
                   <ul role="list" className="flex flex-col gap-1.5">
                     {dayEvents.map((event) => {
-                      const content = renderEvent ? renderEvent(event) : event.label
+                      const label = renderEvent ? renderEvent(event) : event.label
+                      const accent = resolveEventAccent(event.accentColor)
+                      // #716: 分類の識別色は行の先頭の点（行の面と文字は tone のまま）
+                      const content =
+                        accent !== undefined ? (
+                          <>
+                            <span
+                              aria-hidden="true"
+                              data-slot="agenda-list-event-dot"
+                              className={cn("size-2.5", ACCENT_DOT)}
+                              style={{ "--ksk-calendar-accent": accent } as React.CSSProperties}
+                            />
+                            <span className="min-w-0 flex-1">{label}</span>
+                          </>
+                        ) : (
+                          label
+                        )
                       const rowClass = cn(
                         "flex min-h-11 w-full min-w-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left typo-body-md",
                         CHIP_TONE[event.tone ?? "neutral"]

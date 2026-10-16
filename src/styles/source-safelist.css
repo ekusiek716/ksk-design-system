@@ -227,6 +227,7 @@
 @source inline("bg-[var(--Text-on-Inverse)]/20");
 @source inline("bg-[var(--Warning-Base)]");
 @source inline("bg-[var(--card-surface,var(--Surface-Primary))]");
+@source inline("bg-[var(--ksk-calendar-accent)]");
 @source inline("bg-[var(--ksk-kanban-accent)]");
 @source inline("bg-black/30");
 @source inline("bg-black/40");
@@ -1110,6 +1111,7 @@
 @source inline("size-14");
 @source inline("size-18");
 @source inline("size-2");
+@source inline("size-2.5");
 @source inline("size-20");
 @source inline("size-3");
 @source inline("size-3.5");

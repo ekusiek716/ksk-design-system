@@ -49,3 +49,12 @@ export const DOT_TONE: Record<CalendarEventTone, string> = {
   warning: "bg-[var(--Object-Warning)]",
   caution: "bg-[var(--Object-Caution)]",
 }
+
+/**
+ * 予定の分類の識別色（issue #716）。空白だけ・空文字は未指定と同じ（KanbanColumn の accentColor と同じ扱い）
+ */
+export const resolveEventAccent = (accentColor: string | undefined) =>
+  accentColor?.trim() ? accentColor : undefined
+
+/** 識別色の点。色は inline の変数 --ksk-calendar-accent で渡す（クラスは固定文字列のまま） */
+export const ACCENT_DOT = "shrink-0 rounded-full bg-[var(--ksk-calendar-accent)]"

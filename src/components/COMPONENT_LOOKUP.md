@@ -94,7 +94,7 @@
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
 | AddTile | `@/components/patterns/add-tile` | — | Default, Small, CustomIcon, Disabled, InGrid |
-| AgendaList | `@/components/patterns/agenda-list` | — | Default, WithSelectedDate, FixedDates, Empty, ReadOnly |
+| AgendaList | `@/components/patterns/agenda-list` | — | Default, WithSelectedDate, FixedDates, Empty, ReadOnly, CategoryAccent |
 | AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky, Glass — Liquid Glass (over gradient), Transparent — scrollable reveal, NavWithRenderSlot |
 | BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
 | Banner | `@/components/patterns/banner` | **density**: `default`, `compact`<br>**layout**: `card`, `bar`<br>**variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants, Compact, Bar |
@@ -137,7 +137,7 @@
 | MobileAppHeader | `@/components/patterns/mobile-app-header` | — | WithStatusSlot, WithPendingCount, WithTopAlignment |
 | MobileAppShell | `@/components/patterns/mobile-app-shell` | — | FourTabPwaShell, DesktopSidebarHandoff, FixedViewportApp |
 | MobileFloatingActionButton | `@/components/patterns/mobile-floating-action-button` | — | WithBottomNavOffset, WithLabel, Glass (Liquid Glass), Glass (with label), With pill BottomTabBar inline, Full width CTA, With ad banner offset (bottomOffsetExtra) |
-| MonthCalendar | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English, MobileWeekWithAgenda |
+| MonthCalendar | `@/components/patterns/month-calendar` | — | Default, Keyboard, MondayStart, English, MobileWeekWithAgenda, CategoryAccent |
 | NotificationBadge | `@/components/patterns/notification-badge` | — | SingleDigit, DoubleDigit, MaxOverflow, CustomMax, Zero, VariousCounts, WithIcon |
 | PhotoHero | `@/components/patterns/photo-hero` | — | BottomAligned, CenterAligned, NoOverlay |
 | PresenceIndicator | `@/components/patterns/presence-indicator` | — | Default, WithBadge, Offline, NameOnly, 狭幅で非表示にする例（className） |
