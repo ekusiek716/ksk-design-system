@@ -117,3 +117,12 @@
   background: var(--Nav-Selected-Surface, rgba(255, 255, 255, 0.20));
   box-shadow: var(--Nav-Selected-Shadow, inset 0 1px 0 rgba(255, 255, 255, 0.30));
 }
+
+/* ─── 選択プラッターのぼかし（issue #726）───
+   DS 既定はぼかし無し（none）。消費側が --Nav-Selected-Backdrop を宣言したときだけ付く。
+   :where() で詳細度 0 にし、消費側に残っている [data-slot="bottom-nav-selected-surface"] への
+   直書き（移行前の上書き）がある場合は読み込み順に関係なくそちらを勝たせる。 */
+:where([data-nav-platter]) {
+  -webkit-backdrop-filter: var(--Nav-Selected-Backdrop, none);
+  backdrop-filter: var(--Nav-Selected-Backdrop, none);
+}

@@ -181,6 +181,7 @@ function useBottomTabBarKeyboardState(keyboardBehavior: BottomTabBarKeyboardBeha
  *   --Nav-Center-Action-Shadow: 0 8px 24px rgb(0 0 0 / 0.18);
  *   --Nav-Selected-Surface: var(--Surface-Accent-Primary-Light);
  *   --Nav-Selected-Shadow: none;
+ *   --Nav-Selected-Backdrop: var(--glass-blur-sm);
  * }
  * ```
  *

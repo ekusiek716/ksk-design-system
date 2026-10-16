@@ -3051,6 +3051,7 @@
         "Use floatingPosition='left'|'right' (variant='pill' only) when a FAB is placed on the opposite side; default 'center' keeps the existing centered float.",
         "Native Expo Router / React Navigation consumers should use createExpoRouterTabBar instead of local floating tab bars.",
         "寸法・面のプロダクト差分は公開 CSS 変数 --Nav-*（--Nav-Pill-* / --Nav-Item-* / --Nav-Center-Action-* / --Nav-Selected-*）で表現する。contracts/product-theme-overrides.json の nav グループが正本（issue #471）。",
+        "選択面（選択中のタブの下に敷くプラッター）のぼかしは --Nav-Selected-Backdrop（既定 none・例: var(--glass-blur-sm)）。[data-slot=\"bottom-nav-selected-surface\"] に backdrop-filter を直書きしない（issue #726）",
         "消費側は DS の内部マークアップ（[data-slot=\"bottom-nav-pill\"] > :is(a, button)、span:first-child / span:last-child、[data-global-nav-add-icon]）を !important や :has() で叩かない。DOM を狙う場合も公開 data-slot だけを使う。",
         "--Nav-Item-Min-Height / --Nav-Center-Action-Size は max(44px, var(...)) で参照するため、44px（HIG のタップ領域下限）より縮まない。",
         "--Nav-Center-Action-Surface / -Border / -Shadow と --Nav-Selected-Surface / -Shadow は宣言したときだけ DS 既定（.glass-accent / ガラスの選択プラッター）を置き換える。未宣言なら tone / dark の出し分けは DS 側が持つ。",
