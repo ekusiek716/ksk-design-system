@@ -222,6 +222,7 @@
 @source inline("bg-[var(--Text-on-Inverse)]/20");
 @source inline("bg-[var(--Warning-Base)]");
 @source inline("bg-[var(--card-surface,var(--Surface-Primary))]");
+@source inline("bg-[var(--ksk-kanban-accent)]");
 @source inline("bg-black/30");
 @source inline("bg-black/40");
 @source inline("bg-black/55");

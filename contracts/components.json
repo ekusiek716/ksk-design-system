@@ -2816,6 +2816,7 @@
       ],
       "rules": [
         "列の上辺に太い色帯を付けない。状態は tone の色ドットと見出しの言葉で示す",
+        "分類の識別色（カテゴリ別ボード等）は accentColor に var(--Categorical-N) を渡す（tone より優先。issue #702）。title の中に色の点を自作しない",
         "中のカードは Card elevation=\"none\"（面の中の面は影なし）",
         "ドラッグ＆ドロップは持たない。consumer のライブラリで包む",
         "native は未提供（INTENTIONAL_NATIVE_GAPS）"

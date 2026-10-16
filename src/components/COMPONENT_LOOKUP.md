@@ -127,7 +127,7 @@
 | FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
-| KanbanColumn | `@/components/patterns/kanban-column` | — | Board |
+| KanbanColumn | `@/components/patterns/kanban-column` | — | Board, CategoryBoard |
 | KeyboardAwareSheetFooter | `@/components/patterns/keyboard-aware-sheet-footer` | — | Fixed, HideWhenKeyboardOpen, Glass |
 | ListItem | `@/components/patterns/list-item` | — | WithSlots, Interactive, WithBottomSlot, AlignCenter, DensityCompact, WithFooterSlot, WithSecondaryAction, RightSlotWidth |
 | ListSkeleton, GridSkeleton | `@/components/patterns/list-skeletons` | — | Default, WithoutFilter, FewRows |

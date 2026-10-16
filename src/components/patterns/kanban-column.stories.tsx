@@ -29,3 +29,22 @@ export const Board: Story = {
     </div>
   ),
 }
+
+/**
+ * 分類別のボード（issue #702）。見出しのドットを分類の識別色（`--Categorical-*`）で塗る。
+ * 状態（意味）の色は `tone`、分類の色は `accentColor` を使い分ける。
+ * 色だけで分類を伝えない（見出しの言葉が正）。
+ */
+export const CategoryBoard: Story = {
+  render: () => (
+    <div className="flex gap-4 overflow-x-auto">
+      <KanbanColumn title="会場" count={1} accentColor="var(--Categorical-1)">
+        <Card elevation="none" onClick={() => {}}><CardTitle>会場見学の予約</CardTitle></Card>
+      </KanbanColumn>
+      <KanbanColumn title="衣装" count={1} accentColor="var(--Categorical-5)">
+        <Card elevation="none" onClick={() => {}}><CardTitle>試着の日程</CardTitle></Card>
+      </KanbanColumn>
+      <KanbanColumn title="写真" count={0} accentColor="var(--Categorical-9)" />
+    </div>
+  ),
+}
