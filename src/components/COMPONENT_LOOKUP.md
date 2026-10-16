@@ -126,7 +126,7 @@
 | FilterChip | `@/components/patterns/filter-chip` | — | Inactive, ActiveWithValue, Toggle, Group |
 | FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears, WithIcon |
 | Footer | `@/components/patterns/footer` | — | Default, Minimal, WithRenderSlot, WithExtra, WithPaymentIcons |
-| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm, HorizontalRows |
+| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm, HorizontalRows, GroupRows |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
 | KanbanColumn | `@/components/patterns/kanban-column` | — | Board, CategoryBoard |

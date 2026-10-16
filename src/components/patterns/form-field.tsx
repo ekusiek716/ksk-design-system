@@ -51,6 +51,14 @@ interface FormFieldProps extends React.ComponentProps<"div"> {
    * 説明文・エラーは入力欄の下の行に出るので、center でもラベルは入力欄の行にそろったまま動かない。
    */
   labelAlign?: "center" | "start"
+  /**
+   * 右（下）に置く中身の種類（issue #720）。
+   * - "field"（既定）: 入力欄 1 つ。ラベルは `<label htmlFor>`、子の要素に aria-invalid / aria-describedby を足す（従来）
+   * - "group": チップ・トグル・ラジオ等の選択肢のまとまり。ラベルを `<span id>` で描き、中身の列を
+   *   `role="group"` + `aria-labelledby`（説明文・エラーは aria-describedby）にする。htmlFor は使わない。
+   *   `<span>` + `<div role="group">` + `w-20` のラベルで行を自作しない
+   */
+  as?: "field" | "group"
 }
 
 function FormField({
@@ -65,6 +73,7 @@ function FormField({
   orientation = "vertical",
   labelWidth = "5rem",
   labelAlign = "center",
+  as = "field",
   children,
   style,
   ...props
@@ -77,12 +86,17 @@ function FormField({
   const reactId = React.useId()
   const descId = `${reactId}-desc`
   const errId = `${reactId}-err`
+  const labelId = `${reactId}-label`
+  const isGroup = as === "group"
   const showDesc = description != null && !error
   const describedBy =
     [error ? errId : null, showDesc ? descId : null].filter(Boolean).join(" ") || undefined
 
   // 単一の要素 children のときだけ aria を注入（複数 / テキストはそのまま）。
-  const field = React.isValidElement(children)
+  // as="group" では中身を role=group の列で包み、aria は列に付ける（子へは注入しない）。
+  const field = isGroup
+    ? children
+    : React.isValidElement(children)
     ? React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
         "aria-invalid": error
           ? true
@@ -97,9 +111,10 @@ function FormField({
       })
     : children
 
+  const LabelTag = isGroup ? "span" : "label"
   const labelOnly = (
-    <label
-      htmlFor={htmlFor}
+    <LabelTag
+      {...(isGroup ? { id: labelId } : { htmlFor })}
       className="typo-label-md text-[var(--Text-High-Emphasis)] inline-flex items-center gap-1.5"
     >
       {label}
@@ -125,8 +140,11 @@ function FormField({
           {required ? defaultLabels.required : defaultLabels.optional}
         </span>
       )}
-    </label>
+    </LabelTag>
   )
+  const groupProps = isGroup
+    ? { role: "group" as const, "aria-labelledby": labelId, "aria-describedby": describedBy }
+    : undefined
   const endLabelNode = (
     <div
       data-slot="form-field-end-label"
@@ -195,7 +213,11 @@ function FormField({
           <div data-slot="form-field-label-cell" className="min-w-0 break-words">
             {labelOnly}
           </div>
-          <div data-slot="form-field-control" className={cn("min-w-0", endLabel != null && "flex items-center gap-2")}>
+          <div
+            data-slot="form-field-control"
+            className={cn("min-w-0", endLabel != null && "flex items-center gap-2")}
+            {...groupProps}
+          >
             {endLabel != null ? <div className="min-w-0 flex-1">{field}</div> : field}
             {endLabel != null && endLabelNode}
           </div>
@@ -217,7 +239,13 @@ function FormField({
       {...props}
     >
       {labelBlock}
-      {field}
+      {isGroup ? (
+        <div data-slot="form-field-control" {...groupProps}>
+          {field}
+        </div>
+      ) : (
+        field
+      )}
       {messages}
     </div>
   )

@@ -173,7 +173,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 | FormActions | あり | あり | 抽出不可 | 抽出不可 |  | 未検証 |
 | FormControl | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | FormDescription | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
-| FormField | あり | あり | htmlFor, requiredStyle, endLabel, orientation, labelWidth, labelAlign | children | htmlFor is a DOM label-association attribute with no RN equivalent; Native renders its input via children instead. orientation/labelWidth/labelAlign (issue #712) は CSS grid でラベル列をそろえる Web の項目行。native の詳細画面は SettingsListRow 等の行部品で組むため移植しない | 未検証 |
+| FormField | あり | あり | htmlFor, requiredStyle, endLabel, orientation, labelWidth, labelAlign, as | children | htmlFor is a DOM label-association attribute with no RN equivalent; Native renders its input via children instead. orientation/labelWidth/labelAlign (issue #712) は CSS grid でラベル列をそろえる Web の項目行。native の詳細画面は SettingsListRow 等の行部品で組むため移植しない。as="group"（issue #720）は DOM の role=group + aria-labelledby の結び付けで、native は accessibilityRole を中身側で持つため移植しない | 未検証 |
 | FormItem | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | FormLabel | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | FormMessage | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |

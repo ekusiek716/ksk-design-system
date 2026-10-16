@@ -121,3 +121,57 @@ describe('targetSize="comfortable"（#712）', () => {
     expect(compact.dataset.targetSize).toBeUndefined()
   })
 })
+
+describe('FormField as="group" / FieldGroup variant="rows"（#720）', () => {
+  it('as="group": ラベルは span[id]、右の列は role=group + aria-labelledby / aria-describedby', () => {
+    const el = host(
+      <FormField orientation="horizontal" as="group" label="役割" description="複数選べます" error="選んでください">
+        <div>chips</div>
+      </FormField>,
+    )
+    expect(el.querySelector("label")).toBeNull()
+    const group = el.querySelector<HTMLElement>('[data-slot="form-field-control"]')!
+    expect(group.getAttribute("role")).toBe("group")
+    const label = el.querySelector<HTMLElement>(`[id="${group.getAttribute("aria-labelledby")}"]`)!
+    expect(label.tagName).toBe("SPAN")
+    expect(label.textContent).toBe("役割")
+    const err = el.querySelector<HTMLElement>('[role="alert"]')!
+    expect(group.getAttribute("aria-describedby")).toBe(err.id)
+    // 子へは aria を注入しない
+    expect(el.querySelector("div > div:not([data-slot])")?.hasAttribute("aria-invalid") ?? false).toBe(false)
+  })
+
+  it('vertical でも as="group" は role=group の列で包む', () => {
+    const el = host(
+      <FormField as="group" label="性別">
+        <div>chips</div>
+      </FormField>,
+    )
+    const group = el.querySelector<HTMLElement>('[role="group"]')!
+    expect(group.dataset.slot).toBe("form-field-control")
+    expect(el.querySelector(`[id="${group.getAttribute("aria-labelledby")}"]`)?.textContent).toBe("性別")
+  })
+
+  it("as 未指定の DOM は従来どおり（label htmlFor・子に aria）", () => {
+    const html = renderToStaticMarkup(
+      <FormField label="名前" htmlFor="n">
+        <Input id="n" />
+      </FormField>,
+    )
+    expect(html).toContain('<label for="n"')
+    expect(html).not.toContain('role="group"')
+  })
+
+  it('FieldGroup variant="rows": 区切り線 + 直下の FormField に py-3。既定は従来の gap-4', async () => {
+    const { FieldGroup } = await import("../src/components/patterns/field")
+    const rows = host(<FieldGroup variant="rows" />).firstElementChild as HTMLElement
+    expect(rows.dataset.variant).toBe("rows")
+    expect(rows.className).toContain("divide-y")
+    expect(rows.className).toContain("divide-[var(--Border-Low-Emphasis)]")
+    expect(rows.className).toContain("[&>[data-slot=form-field]]:py-3")
+    expect(rows.className).not.toContain("gap-4")
+    const stack = host(<FieldGroup />).firstElementChild as HTMLElement
+    expect(stack.className).toBe("flex min-w-0 flex-col gap-4")
+    expect(stack.hasAttribute("data-variant")).toBe(false)
+  })
+})
