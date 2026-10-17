@@ -25,7 +25,7 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 以下は次回の版に入る変更です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
 
 - **FieldGroup `variant="rows"` の余白（#733）**: 直下の FormField 以外（Switch の行・ImageAttachmentPicker・Banner 等）にも上下 12px（`py-3`）が付きます。これらに `py-3` を手で書いていた場合は同じ値なので外せます。`my-2` 等のマージンは足し算になるので外してください。CollapsibleChipField は対象外（従来どおり）。
-- 追加のみ（既定の見た目は不変）: FormField `as="group"` 内の ChipSelector が名前を自動で取る（#734）、Banner の `onDismiss` / `dismissLabel`（#735）、MonthCalendarHeader の `live`（#736）、AdminShell の `overlay`（z-index は `--Z-Overlay`。背景の inert は重ねる側で付ける。#737）、NavigationBar `leftLabelVisible` の文字幅（title なしは上限なし・ありは 160px。#732）。
+- 追加のみ（既定の見た目は不変）: FormField `as="group"` 内の ChipSelector が名前なしの警告を出さない（外側の group が名前を持つ。#734）、Banner の `onDismiss` / `dismissLabel`（#735）、MonthCalendarHeader の `live`（#736）、AdminShell の `overlay`（z-index は `--Z-Overlay`。背景の inert は重ねる側で付ける。#737）、NavigationBar `leftLabelVisible` の文字幅（title なしは上限なし・ありは 160px。#732）。
 
 ## v2.15.0 の導入注意
 

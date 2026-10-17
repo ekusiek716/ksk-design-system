@@ -876,7 +876,7 @@
         "leftButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
         "shareButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
         "headerProps": "title を除く header の属性・ref を根へ転送（issue #649）",
-        "leftLabelVisible": "boolean — 左ボタンに leftLabel の文字も表示（高さ 44px・文字は title なしなら幅の上限なし（右の要素を押し出さず残り幅で省略）・title ありなら max-w-40（160px・日本語8文字程度）で省略し title 属性で全文。title ありは左|中央|右の 3 列 grid（左右は同じ幅）で、短い文言ならタイトルが広く残る。既定 false。issue #729）"
+        "leftLabelVisible": "boolean — 左ボタンに leftLabel の文字も表示（高さ 44px・文字は title なしなら幅の上限なし（右の要素を押し出さず残り幅で省略）・title ありなら max-w-44（176px・日本語8文字が収まる）で省略し title 属性で全文。title ありは左|中央|右の 3 列 grid（左右は同じ幅）で、短い文言ならタイトルが広く残る。既定 false。issue #729）"
       },
       "accessibility": [
         "aria-label auto-set for back/close/share",

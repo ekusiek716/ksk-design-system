@@ -51,7 +51,7 @@ export interface NavigationBarProps extends Omit<React.ComponentProps<"header">,
   /**
    * 左ボタンに leftLabel の文字も表示する（「＜ メニューに戻る」・issue #729）。既定 false（アイコンだけ）。
    * 高さ 44px・アイコン + 文字のボタンになる。title が無いときは幅の上限なし（右の要素を押し出さず、
-   * 残り幅で省略する）、title があるときは 160px（max-w-40・日本語 8 文字程度）まで、超えた分は省略する。
+   * 残り幅で省略する）、title があるときは 176px（max-w-44・日本語 8 文字が文字幅の差を含めて収まる）まで、超えた分は省略する。
    * title があるときは左・中央・右の 3 列 grid にし、左右の列は同じ幅（広い方に合わせる）なので、
    * 短い文言（「戻る」）ならタイトルが広く残り、重ならず中央のまま。文字付きの戻るボタンを Button で自作しない
    */
@@ -149,7 +149,7 @@ function NavigationBar({
           variant={btnVariant}
           size="default"
           data-label-visible=""
-          className={cn("h-11 min-w-0 shrink gap-1 pl-2 pr-3", hasTitle ? "max-w-40" : "max-w-full", gridMode && "justify-self-start")}
+          className={cn("h-11 min-w-0 shrink gap-1 pl-2 pr-3", hasTitle ? "max-w-44" : "max-w-full", gridMode && "justify-self-start")}
           {...leftButtonProps}
           onClick={onLeft}
         >

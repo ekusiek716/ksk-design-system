@@ -26,8 +26,8 @@ describe("NavigationBar leftLabelVisible (#729)", () => {
     expect(html).toContain('<span class="min-w-0 truncate" title="メニューに戻る">メニューに戻る</span>')
     expect(html).not.toContain('aria-label="メニューに戻る"')
     expect(html).toContain("h-11")
-    // title あり: 上限 160px（max-w-40）と、左 | 中央 | 右 の 3 列 grid（余白を固定値にしない。issue #732）
-    expect(html).toContain("max-w-40")
+    // title あり: 上限 176px（max-w-44）と、左 | 中央 | 右 の 3 列 grid（余白を固定値にしない。issue #732）
+    expect(html).toContain("max-w-44")
     expect(html).toContain("grid-cols-[1fr_minmax(0,auto)_1fr]")
     expect(html).not.toContain("absolute inset-0")
     // title なし／空: 上限なし
@@ -37,7 +37,7 @@ describe("NavigationBar leftLabelVisible (#729)", () => {
       // 右の要素を押し出さないよう残り幅で縮む
       expect(h).toContain("min-w-0 shrink")
       expect(h).not.toContain("grid-cols-")
-      expect(h).not.toContain("max-w-40")
+      expect(h).not.toContain("max-w-44")
     }
     // 未指定の既定は不変（アイコンのみ・余白 px-16）
     const def = renderToStaticMarkup(<NavigationBar title="設定" onLeft={() => {}} />)
