@@ -57,8 +57,8 @@ export interface NavigationBarProps extends Omit<React.ComponentProps<"header">,
   leftLabel?: string
   /**
    * 左ボタンに leftLabel の文字も表示する（「＜ メニューに戻る」・issue #729）。既定 false（アイコンだけ）。
-   * 高さ 44px・アイコン + 文字のボタンになり、文字は 112px（max-w-28）で省略する。中央タイトルの左右の
-   * 余白も同じ幅に広げ、重ならず中央のまま。文字付きの戻るボタンを Button で自作しない
+   * 高さ 44px・アイコン + 文字のボタンになる。title が無いときは幅の上限なし、title があるときは 160px
+   * （max-w-40・日本語 8 文字程度）まで、超えた分は省略する。中央タイトルの左右の余白も同じ幅に広げ、重ならず中央のまま。文字付きの戻るボタンを Button で自作しない
    */
   leftLabelVisible?: boolean
   /**
@@ -120,6 +120,7 @@ function NavigationBar({
   const defaultLeftLabel = leftIcon === "close" ? defaultLabels.close : defaultLabels.back
   const shareLabel = shareLabelProp ?? defaultLabels.share
   const btnVariant = glass ? "glass" : "secondary"
+  const hasTitle = Boolean(title)
 
   return (
     <header
@@ -150,7 +151,7 @@ function NavigationBar({
           variant={btnVariant}
           size="default"
           data-label-visible=""
-          className="h-11 max-w-28 gap-1 pl-2 pr-3"
+          className={cn("h-11 gap-1 pl-2 pr-3", hasTitle ? "max-w-40" : "max-w-full")}
           {...leftButtonProps}
           onClick={onLeft}
         >
@@ -163,12 +164,12 @@ function NavigationBar({
       )}
 
       {/* Center title — absolute, always visually centered */}
-      {title && (
+      {hasTitle && (
         <div
           className={cn(
             "absolute inset-0 flex justify-center items-center pointer-events-none",
-            // 文字付きの左ボタン（max-w-28 + 左の px-3）と重ならないよう、左右とも同じだけ空けて中央を保つ
-            onLeft && leftLabelVisible ? "px-32" : "px-16"
+            // 文字付きの左ボタン（max-w-40 + 左の px-3）と重ならないよう、左右とも同じだけ空けて中央を保つ
+            onLeft && leftLabelVisible ? "px-[calc(0.75rem_+_10rem_+_0.5rem)]" : "px-16"
           )}
         >
           <span className="typo-heading-sm text-[var(--Text-High-Emphasis)] min-w-0 truncate">

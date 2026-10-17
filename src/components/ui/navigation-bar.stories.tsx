@@ -119,7 +119,7 @@ export const GlassOverPhoto: Story = {
 
 /**
  * 文字付きの戻るボタン（issue #729）。`leftLabelVisible` で leftLabel を画面にも出す。
- * 高さ 44px・文字は 112px で省略。中央タイトルは左右を同じだけ空けて中央のまま。Button で自作しない。
+ * 高さ 44px・文字は title なしなら無制限・title ありなら 160px で省略。中央タイトルは左右を同じだけ空けて中央のまま。Button で自作しない。
  */
 export const LabeledBack: Story = {
   tags: ["interaction"],
@@ -132,6 +132,59 @@ export const LabeledBack: Story = {
     const back = within(canvasElement).getByRole("button", { name: "メニューに戻る" })
     await expect(back.hasAttribute("aria-label")).toBe(false)
     await expect(Math.round(back.getBoundingClientRect().height)).toBe(44)
+    const title = within(canvasElement).getByText("設定").getBoundingClientRect()
+    await expect(title.left).toBeGreaterThanOrEqual(back.getBoundingClientRect().right)
+  },
+}
+
+const LONG_BACK = "メニューに戻る一覧へ" // 日本語 10 文字
+
+/** 長い戻る文言・タイトルなし: 上限なしで省略されない（issue #732） */
+export const LabeledBackLongNoTitle: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="w-[480px] bg-[var(--Surface-Primary)]">
+      <NavigationBar leftIcon="back" leftLabel={LONG_BACK} leftLabelVisible onLeft={() => {}} onShare={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const back = within(canvasElement).getByRole("button", { name: LONG_BACK })
+    const label = within(back).getByText(LONG_BACK)
+    await expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
+    await expect(back.getBoundingClientRect().width).toBeGreaterThan(160)
+  },
+}
+
+/** 長い戻る文言・タイトルあり: 8 文字は収まり、タイトルと重ならず中央のまま（issue #732） */
+export const LabeledBackLongWithTitle: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="w-[480px] bg-[var(--Surface-Primary)]">
+      <NavigationBar title="設定" leftIcon="back" leftLabel="メニューに戻るよ" leftLabelVisible onLeft={() => {}} onShare={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const back = within(canvasElement).getByRole("button", { name: "メニューに戻るよ" })
+    const label = within(back).getByText("メニューに戻るよ")
+    await expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
+    await expect(back.getBoundingClientRect().width).toBeLessThanOrEqual(160)
+    const title = within(canvasElement).getByText("設定").getBoundingClientRect()
+    await expect(title.left).toBeGreaterThanOrEqual(back.getBoundingClientRect().right)
+    const bar = canvasElement.querySelector("header")!.getBoundingClientRect()
+    await expect(Math.abs((title.left + title.right) / 2 - (bar.left + bar.right) / 2)).toBeLessThan(2)
+  },
+}
+
+/** 10 文字超はタイトルありなら省略（重なり回避を優先） */
+export const LabeledBackOverflowWithTitle: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="w-[480px] bg-[var(--Surface-Primary)]">
+      <NavigationBar title="設定" leftIcon="back" leftLabel={LONG_BACK + "に戻る"} leftLabelVisible onLeft={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const back = within(canvasElement).getByRole("button")
     const title = within(canvasElement).getByText("設定").getBoundingClientRect()
     await expect(title.left).toBeGreaterThanOrEqual(back.getBoundingClientRect().right)
   },
