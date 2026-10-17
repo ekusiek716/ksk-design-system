@@ -20,12 +20,13 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 - **余白・項目行・ダイアログ・アプリ枠・予定の色（#711–#716）**: Container / ChipFilterBar の `gutter="fluid"`（`--Container-Gutter-Fluid`）、FormField の `orientation="horizontal"`・Input / Textarea の `targetSize="comfortable"`、Dialog の `centerFrom`・`height="fill"`・`size="2xl"`・`DialogHeader variant="bar"`、FieldSet の `gap`・FieldLegend の `size="sm"`、MobileAppShell の `viewport="fixed"`・`safeAreaTop`・`safeAreaBottom`・`bottomPadding="native-tab-bar"`（`--Native-Tab-Bar-Height`。ネイティブ側が書く任意フック <!-- docs-drift-ignore: --Native-Tab-Bar-Height -->）、MonthCalendar / AgendaList の予定の `accentColor` を追加します。すべて任意指定で、既定の見た目は変わりません。
 - **CollapsibleChipField の見出し（#717）**: `label` の既定の見た目が `typo-label-sm` + `Text-Medium-Emphasis`（12px）から、フォームの項目名と同じ `typo-label-md` + `Text-High-Emphasis`（14px 太字）に変わります（同じ詳細シートの `<Label>` / `FormField` と大きさをそろえるため）。従来の見た目が要る画面は `labelSize="sm"` を指定してください。展開中の選択肢のまとまりは見える見出しと `aria-labelledby` で結ばれます（`ariaLabel` を指定した場合は従来どおり `aria-label`）。`label` も `icon` も渡さない行は、先頭の 24px の空きが無くなります。native の CollapsibleChipField は変わりません。
 
-## 次の版（未リリース）の導入注意
+## v2.15.0 の導入注意
 
-以下は次の版の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
+以下はv2.15.0の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
 
 - **DetailSheetHeader の文字列 title がシート / ダイアログの名前になる（#727・既定動作の変更）**: Sheet / Dialog（ResponsiveOverlayFrame・BottomSheetFrame・SideDrawerFrame 経由を含む）の中で `DetailSheetHeader title="…"` に文字列を渡すと、その見出しを SheetTitle / DialogTitle（Radix の Title）として描き、シート / ダイアログの読み上げ名（`aria-labelledby`）にします。見た目（`typo-heading-lg`）は変わりません。`data-slot` が `sheet-title` / `dialog-title` になり、`autoFocus="title"` の対象にもなります。**同じシートに sr-only の `SheetTitle` / `DialogTitle` を別に置いている場合は消してください**（残すと id が重複します。開発ビルドで console.error）。従来どおり別の Title で名前を付けたい画面は `overlayTitle={false}` を指定してください。オーバーレイの外・AlertDialog の中・`titleEditor` や ReactNode の `title` は変わりません。
 - **DetailSheetHeader の leading が空のときの題名の位置（#729）**: `leading` を渡さない（null / undefined / false）見出しは左の列を描かなくなり、題名が 12px 左へ寄ってヘッダーの左の余白（20px）にそろいます（従来は幅 0 の列と 12px の間隔が残っていました）。`[data-slot="detail-sheet-header-leading"]` もその場合は出ません。
+- **MonthCalendarExpandToggle の読み上げ名（#721）**: 読み上げ名（label）は開閉で変わらず 1 つです。開いているかどうかは `aria-expanded` が伝えます。開閉で文言を切り替えていた独自ボタンから置き換える場合は、label を 1 つにしてください。
 
 <!-- deprecations:start（自動生成・手で編集しない） -->
 

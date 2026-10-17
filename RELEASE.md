@@ -2,6 +2,26 @@
 
 `ksk-design-system` のリリーススケジュール・運用ルール。
 
+## v2.15.0（2026-10-17）
+
+2.14.0以降に、consumer側の上書きをなくすためのAPIを10件追加したminorリリース。追加のみのAPIが中心です。次の2点は既定の挙動・見た目が変わります。
+
+- シート / ダイアログの中の `DetailSheetHeader` の文字列 title を、そのシート / ダイアログの名前として描くようにしました。従来どおりにするには `overlayTitle={false}` を指定します（#727）。
+- `leading` を渡さない `DetailSheetHeader` は左の空き列を作らず、題名が12px左へ寄ります（#729）。
+
+主な追加は次のとおりです。
+- FormFieldに `as="group"`、FieldGroupに `variant="rows"`（#720）。
+- 月カレンダーの見出し `MonthCalendarHeader` と開閉ボタン `MonthCalendarExpandToggle`。開閉ボタンの読み上げ名は1つで、状態は `aria-expanded` が伝えます（#721）。
+- DetailSheetHeader / DialogHeaderに `onClose` / `closeLabel`（#722）。
+- DS部品の既定文言のロケールを切り替える `KskLabelsProvider`（#723）。
+- AdminShellに `safeAreaTop`（#724）。
+- Chipの色アニメーションをホバー端末のみにし、Android Chromeのちらつきを抑えました（#725）。
+- 下部ナビの選択面のぼかしを調整できるようにしました（#726）。
+- composition.json の admin 節を実装に合わせました（#728）。
+- NavigationBarに文字付きの戻る `leftLabelVisible`（#729）。
+
+導入時は [2.15.0の注意](./MIGRATION.md#v2150-の導入注意) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。consumerへの取り込みとアプリ配布は別工程で、今回のDS公開準備には含めません。
+
 ## v2.14.0（2026-10-17）
 
 2.13.0以降に、consumer側の上書きをなくすためのAPIを7件追加したminorリリース。追加のみのAPIが中心です。
