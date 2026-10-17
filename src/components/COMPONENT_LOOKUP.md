@@ -51,7 +51,7 @@
 | KskLabelsProvider, KSK_DEFAULT_LABELS | `@/components/ui/ksk-labels` | — | Default, English, CustomLabels |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, Unstyled, DisabledState |
 | MultiSelect | `@/components/ui/multi-select` | — | Default, WithTriggerLabel, InvalidInFormField, FocusReturnsToTriggerAfterClear |
-| NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone, LabeledBack |
+| NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone, LabeledBack, LabeledBackLongNoTitle, LabeledBackLongWithTitle, LabeledBackOverflowWithTitle, LabeledBackShortNarrow, LabeledBackLongNoTitleNarrow |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis, WithBuildPageItems, AsChildRouterLink |
 | PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small, FullWidthThree, FullWidthTwo, FullWidthFour |
@@ -98,7 +98,7 @@
 | AgendaList | `@/components/patterns/agenda-list` | — | Default, WithSelectedDate, FixedDates, Empty, ReadOnly, CategoryAccent |
 | AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky, Glass — Liquid Glass (over gradient), Transparent — scrollable reveal, NavWithRenderSlot |
 | BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
-| Banner | `@/components/patterns/banner` | **density**: `default`, `compact`<br>**layout**: `card`, `bar`<br>**variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants, Compact, Bar |
+| Banner | `@/components/patterns/banner` | **density**: `default`, `compact`<br>**layout**: `card`, `bar`<br>**variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants, Compact, Bar, Dismissible |
 | BottomSheetForm | `@/components/patterns/bottom-sheet-form` | — | Default, WithLoading |
 | BottomSheetFrame | `@/components/patterns/bottom-sheet-frame` | — | MobileFull, MobileForm, DesktopFloating, Glass — mobile snap, MobilePage, KeyboardHideFallback, swipeToClose + DetailSheetScaffold (#164), TitleLevelPageDefault, TitleLevelPartialDefault, TitleLevelExplicit |
 | CategoryNav | `@/components/patterns/category-nav` | — | Default, WithSelection |
@@ -126,7 +126,7 @@
 | FilterChip | `@/components/patterns/filter-chip` | — | Inactive, ActiveWithValue, Toggle, Group |
 | FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears, WithIcon |
 | Footer | `@/components/patterns/footer` | — | Default, Minimal, WithRenderSlot, WithExtra, WithPaymentIcons |
-| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm, HorizontalRows, GroupRows |
+| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm, HorizontalRows, GroupRows, GroupChipSelectorAutoName |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
 | KanbanColumn | `@/components/patterns/kanban-column` | — | Board, CategoryBoard |
@@ -198,7 +198,7 @@
 
 | Component | Import | Variants | Stories |
 |-----------|--------|----------|---------|
-| AdminShell | `@/components/patterns/shells/admin-shell` | — | Default, WithoutHeader, MobileDrawer, SafeAreaTopOverlay |
+| AdminShell | `@/components/patterns/shells/admin-shell` | — | Default, WithoutHeader, MobileDrawer, SafeAreaTopOverlay, Overlay |
 | AppShell | `@/components/patterns/shells/app-shell` | — | Default |
 | MarketingShell | `@/components/patterns/shells/marketing-shell` | — | Default |
 

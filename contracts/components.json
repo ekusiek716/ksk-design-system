@@ -876,7 +876,7 @@
         "leftButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
         "shareButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
         "headerProps": "title を除く header の属性・ref を根へ転送（issue #649）",
-        "leftLabelVisible": "boolean — 左ボタンに leftLabel の文字も表示（高さ 44px・文字は max-w-28 で省略し title 属性で全文・タイトルの左右を px-32 に広げる。既定 false。issue #729）"
+        "leftLabelVisible": "boolean — 左ボタンに leftLabel の文字も表示（高さ 44px・文字は title なしなら幅の上限なし（右の要素を押し出さず残り幅で省略）・title ありなら max-w-44（176px・日本語8文字が収まる）で省略し title 属性で全文。title ありは左|中央|右の 3 列 grid（左右は同じ幅）で、短い文言ならタイトルが広く残る。既定 false。issue #729）"
       },
       "accessibility": [
         "aria-label auto-set for back/close/share",
@@ -1471,7 +1471,8 @@
       "rules": [
         "Color + icon + text (never color alone)",
         "density: default(gap-3 p-4) / compact(gap-2 px-3 py-2)。余白を詰めたいときは density=\"compact\"。`!p-2` 等の className で上書きしない（issue #683）",
-        "layout: card(既定・角丸の囲み) / bar(全幅・角丸なし・下線のみ)。画面上端の注意帯は layout=\"bar\" を使い、div で帯を自作しない（issue #683。native Banner は画像バナーで別 API のため Web のみ）"
+        "layout: card(既定・角丸の囲み) / bar(全幅・角丸なし・下線のみ)。画面上端の注意帯は layout=\"bar\" を使い、div で帯を自作しない（issue #683。native Banner は画像バナーで別 API のため Web のみ）",
+        "閉じるボタンは onDismiss（右端の icon-sm ghost・読み上げ名は dismissLabel、既定は KskLabels の close）。閉じる処理は consumer が持つ。×ボタンを自作して並べない（issue #735）"
       ]
     },
     {
@@ -1684,7 +1685,8 @@
         "horizontal で枠の無い入力欄（variant=\"inline\"）を置くときは targetSize=\"comfortable\" で 44px の当たり判定を持たせる。外側に py-2 を足して稼がない（issue #712）",
         "orientation=\"horizontal\" は置き場所の幅（@container）が 15rem 未満なら縦積みに戻る。endLabel は入力欄の右に出る（issue #712）",
         "チップ・トグル・ラジオ等の選択肢のまとまりを右（下）に置く行は as=\"group\"（ラベルは span[id]、中身の列は role=group + aria-labelledby、説明文・エラーは aria-describedby）。<span> + <div role=\"group\"> + w-20 のラベルで行を自作しない。htmlFor は渡さない（開発ビルドで警告）。required は読み上げに伝わらないので、必須は description か label の文言で補う（issue #720）",
-        "区切り線で並べる項目行の一覧は FieldGroup variant=\"rows\"（divide-y + 直下の FormField に py-3）に入れる。FormField に className=\"py-3\" を足さない（issue #720）"
+        "区切り線で並べる項目行の一覧は FieldGroup variant=\"rows\"（divide-y + 直下の FormField に py-3）に入れる。FormField に className=\"py-3\" を足さない（issue #720）",
+        "FormField as=\"group\" の中の ChipSelector（single）は aria-label / aria-labelledby を省いても名前なしの警告が出ない（外側の group がラベルで名前を持つ。内側へ同じ名前は結ばない = 二重読み上げにしない。issue #734）"
       ]
     },
     {
@@ -1705,7 +1707,7 @@
       ],
       "rules": [
         "FieldSet は gap-6（24px）、FieldGroup は gap-4（16px）の縦リズムを正本とする",
-        "詳細シートの区切り線の一覧は FieldGroup variant=\"rows\"（子の間に Border-Low-Emphasis の線・直下の FormField に上下 12px）。CollapsibleChipField は自前の py-3 を持つのでそのまま並べる。divide-y と py-3 を自作しない（issue #720）",
+        "詳細シートの区切り線の一覧は FieldGroup variant=\"rows\"（子の間に Border-Low-Emphasis の線・直下の要素（FormField に限らず Switch の行・ImageAttachmentPicker・Banner 等。FieldSeparator / FieldLegend / FieldDescription / FieldError は除く。詳細度 0 なので子の py-* が勝つ）に上下 12px）。CollapsibleChipField は自前の py-3 を持つのでそのまま並べる。divide-y と py-3 を自作しない（issue #720 / #733）",
         "個々の入力は既存 FormField を FieldGroup 内に並べる",
         "FieldDescription はセクション・グループの補足、FieldError はグループ単位のエラーに使う",
         "グループ横断の区切りは FieldSeparator を使い、中央ラベルは children で渡す",
@@ -1981,7 +1983,8 @@
         "Use selectionMode=\"single\" for single-select (multiple=false は非推奨). Use max to limit selection count.",
         "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior.",
         "PillToggle は 2〜4 択の segmented control 専用。5択以上・折り返しが要る単一選択はこの selectionMode=\"single\" を使う(issue #418)。",
-        "グループ名は aria-labelledby（見出しの id）か aria-label で渡す(issue #666)。単一選択の radiogroup は名前が必須で、どちらも無いと開発ビルドで console.warn する。id / aria-describedby もルートへ渡せる。native は accessibilityLabel / accessibilityLabelledBy"
+        "グループ名は aria-labelledby（見出しの id）か aria-label で渡す(issue #666)。単一選択の radiogroup は名前が必須で、どちらも無いと開発ビルドで console.warn する。id / aria-describedby もルートへ渡せる。native は accessibilityLabel / accessibilityLabelledBy",
+        "FormField as=\"group\" の中では aria-label / aria-labelledby を省いても警告が出ない（外側の group が名前を持つ）。明示した指定が優先（issue #734）"
       ]
     },
     {
@@ -2862,6 +2865,7 @@
         "native は未提供（INTENTIONAL_NATIVE_GAPS）",
         "分類の識別色（カテゴリ別の予定）は MonthCalendarEvent.accentColor に var(--Categorical-N) を渡す。md 以上はチップの先頭の点、md 未満は日付の下の点（tone より優先）。チップの面と文字は tone のまま。renderEvent の中で色の点を自作しない（issue #716）",
         "月の見出し（月名・今日へ・前後の月）は MonthCalendarHeader（month・onToday / onPrev / onNext・size md=スマホ / lg=PC・headingLevel）を grid の上に置く。前後は icon-sm + aria-label（既定「前の月」「次の月」）。見出しは aria-live=\"polite\" で月の切り替えを読み上げる。h2 + Button で自作しない（issue #721）",
+        "見出しは月が変わると aria-live で読み上げる。一覧のスクロールで月が変わる画面は MonthCalendarHeader live={false} で切る（issue #736）",
         "週の帯 ⇄ 月全体の開閉は MonthCalendarExpandToggle（expanded / onExpandedChange・読み上げ名は固定で状態は aria-expanded・aria-controls に MonthCalendar の id）を grid の下に置き、expanded を view=\"month\" / \"week\" に渡す。Button ghost icon-sm w-full で自作しない（issue #721）"
       ]
     },
@@ -3306,7 +3310,8 @@
         "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）",
         "lg 未満でナビへ辿れるようにするときは mobileDrawer（issue #705）。ヘッダー左端のメニューボタン（44px・aria-expanded・aria-label 既定「メニューを開く」）から左の Sheet に同じ sidebar を開く。ハンバーガーと Sheet side=\"left\" を consumer で自作しない",
         "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 false、明示 true で有効）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange",
-        "上端の safe-area は safeAreaTop（ヘッダーは下線込み 64px + 安全領域、lg 以上のサイドバーと mobileDrawer のドロワーも上に足す。header が無いときは本文の列）。アプリ内で全画面に重ねるときは className=\"h-full\" と組み、外枠に pt-[var(--Safe-Area-Inset-Top)] や背景を書かない（外枠は fixed と重ね順だけ。issue #724）"
+        "上端の safe-area は safeAreaTop（ヘッダーは下線込み 64px + 安全領域、lg 以上のサイドバーと mobileDrawer のドロワーも上に足す。header が無いときは本文の列）。アプリ内で全画面に重ねるときは className=\"h-full\" と組み、外枠に pt-[var(--Safe-Area-Inset-Top)] や背景を書かない（外枠は fixed と重ね順だけ。issue #724）",
+        "アプリ内で全画面に重ねるときは overlay（fixed inset-0 z-[var(--Z-Overlay)] h-full を DS が持つ。Sheet / Dialog の overlay と同じ層で、後に開いたものが上に出る）。背景の inert は重ねる側が付ける。className で fixed / z-index を書かない（issue #737）"
       ]
     },
     {

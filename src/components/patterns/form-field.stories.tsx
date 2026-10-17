@@ -4,10 +4,11 @@
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import { useState } from "react"
-import { expect, userEvent } from "storybook/test"
+import { expect, userEvent, within } from "storybook/test"
 import { FormField } from "./form-field"
-import { FieldGroup } from "./field"
+import { FieldGroup, FieldSeparator } from "./field"
 import { Chip } from "./chip"
+import { ChipSelector } from "./chip-selector"
 import { CollapsibleChipField } from "./collapsible-chip-field"
 import { Input } from "../ui/input"
 import { Textarea } from "../ui/textarea"
@@ -217,5 +218,47 @@ export const GroupRows: Story = {
     await expect(Math.abs(chipLeft - controlLeft)).toBeLessThanOrEqual(1)
     await userEvent.click(group.querySelectorAll("button")[1])
     await expect(group.querySelectorAll("button")[1].getAttribute("aria-pressed")).toBe("true")
+  },
+}
+
+/**
+ * as="group" の中の ChipSelector（single）は、aria-labelledby を省くとグループのラベルを自動で名前に使う（issue #734）。
+ * FieldGroup variant="rows" は FormField 以外の直下の行（ここでは div）にも py-3 を付ける（issue #733）。
+ */
+export const GroupChipSelectorAutoName: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [kind, setKind] = useState<string | null>("a")
+    return (
+      <div className="w-full max-w-md">
+        <FieldGroup variant="rows">
+          <FormField as="group" orientation="horizontal" label="種別">
+            <ChipSelector
+              selectionMode="single"
+              options={[{ value: "a", label: "親族" }, { value: "b", label: "友人" }]}
+              value={kind}
+              onChange={setKind}
+            />
+          </FormField>
+          <div data-testid="plain-row">FormField ではない行</div>
+          <div data-testid="own-py-row" className="py-0">自分で py-0 を指定した行</div>
+          <FieldSeparator />
+        </FieldGroup>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    // 外側の group だけが「種別」で名前を持つ（内側の radiogroup に同じ名前を結ばない = 二重読み上げにしない）
+    await expect(within(canvasElement).getByRole("group", { name: "種別" })).toBeTruthy()
+    await expect(within(canvasElement).getAllByRole("radiogroup")).toHaveLength(1)
+    const row = within(canvasElement).getByTestId("plain-row")
+    await expect(getComputedStyle(row).paddingTop).toBe("12px")
+    await expect(getComputedStyle(row).paddingBottom).toBe("12px")
+    // 子の className の py-* が勝つ（詳細度 0）
+    const own = within(canvasElement).getByTestId("own-py-row")
+    await expect(getComputedStyle(own).paddingTop).toBe("0px")
+    // Separator / Legend 等には付けない
+    const sep = canvasElement.querySelector<HTMLElement>('[data-slot="field-separator"]')!
+    await expect(getComputedStyle(sep).paddingTop).toBe("8px")
   },
 }

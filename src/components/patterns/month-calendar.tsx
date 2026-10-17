@@ -504,6 +504,11 @@ interface MonthCalendarHeaderProps extends Omit<React.ComponentProps<"div">, "ti
   prevLabel?: string
   /** 次の月ボタンの読み上げ名。既定は KskLabelsProvider の calendarNextMonth（無ければ「次の月」） */
   nextLabel?: string
+  /**
+   * 見出しの aria-live（月が変わったら読み上げる）を付けるか（issue #736）。既定 true。
+   * 一覧のスクロールに合わせて月が変わる画面では、スクロールのたびに読み上げが走るので `false` にする
+   */
+  live?: boolean
 }
 
 /**
@@ -526,6 +531,7 @@ function MonthCalendarHeader({
   todayLabel,
   prevLabel,
   nextLabel,
+  live = true,
   className,
   ...props
 }: MonthCalendarHeaderProps) {
@@ -547,8 +553,8 @@ function MonthCalendarHeader({
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <Heading
           // 前後の月・今日へで見出しが変わったことをスクリーンリーダーへ知らせる（ボタンを押した位置から動かずに分かる）
-          aria-live="polite"
-          aria-atomic="true"
+          aria-live={live ? "polite" : undefined}
+          aria-atomic={live ? "true" : undefined}
           className={cn(
             "min-w-0 truncate tabular-nums text-[var(--Text-High-Emphasis)]",
             size === "lg" ? "typo-heading-lg" : "typo-heading-md"

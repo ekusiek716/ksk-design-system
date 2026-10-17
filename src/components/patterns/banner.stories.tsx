@@ -3,6 +3,7 @@
  * @description フィードバックバナーコンポーネント。4つのバリアント（info / success / warning / caution）にタイトルと説明を表示
  */
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, fn, userEvent, within } from "storybook/test"
 import { Banner } from "./banner"
 import { Button } from "../ui/button"
 
@@ -107,4 +108,24 @@ export const Bar: Story = {
       <div className="p-4 typo-body-sm text-[var(--Text-Medium-Emphasis)]">画面の本文</div>
     </div>
   ),
+}
+
+/** onDismiss（issue #735）: 右端の閉じるボタン。読み上げ名は dismissLabel（既定は KskLabels の close）。 */
+export const Dismissible: Story = {
+  tags: ["interaction"],
+  args: { onDismiss: fn() },
+  render: (args) => (
+    <div className="flex w-full max-w-md flex-col gap-3">
+      <Banner variant="info" density="compact" description="新しいお知らせがあります" onDismiss={args.onDismiss} />
+      <Banner variant="warning" title="保存できませんでした" description="通信状態を確認してください" onDismiss={args.onDismiss} dismissLabel="お知らせを閉じる" />
+    </div>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(canvas.getByRole("button", { name: "閉じる" }))
+    await expect(args.onDismiss).toHaveBeenCalledTimes(1)
+    await userEvent.click(canvas.getByRole("button", { name: "お知らせを閉じる" }))
+    await expect(args.onDismiss).toHaveBeenCalledTimes(2)
+    // onDismiss が無ければ出さない
+  },
 }

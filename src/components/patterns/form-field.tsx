@@ -2,6 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useKskLabels } from "../ui/ksk-labels"
 import { warnOnceInDev } from "@/lib/dev-warn"
+import { FormFieldGroupLabelContext } from "./form-field-context"
 
 /**
  * `required` の見た目をどう出すか。
@@ -58,6 +59,7 @@ interface FormFieldProps extends React.ComponentProps<"div"> {
    * - "group": チップ・トグル・ラジオ等の選択肢のまとまり。ラベルを `<span id>` で描き、中身の列を
    *   `role="group"` + `aria-labelledby`（説明文・エラーは aria-describedby）にする。htmlFor は使わない
    *   （渡すと開発ビルドで警告）。`<span>` + `<div role="group">` + `w-20` のラベルで行を自作しない。
+   *   中の ChipSelector（single）は aria-label / aria-labelledby を省いても名前なしの警告を出さない（外側の group がこのラベルで名前を持つ。内側へ同じ名前は結ばない = 二重読み上げにしない。issue #734）。
    *   **required は読み上げに伝わらない**（role=group は aria-required を持てず、* / 必須バッジは aria-hidden）。
    *   必須であることは description（例: 「1 つ以上選んでください」）か label の文言で補う
    */
@@ -106,7 +108,7 @@ function FormField({
   // 単一の要素 children のときだけ aria を注入（複数 / テキストはそのまま）。
   // as="group" では中身を role=group の列で包み、aria は列に付ける（子へは注入しない）。
   const field = isGroup
-    ? children
+    ? <FormFieldGroupLabelContext.Provider value={labelId}>{children}</FormFieldGroupLabelContext.Provider>
     : React.isValidElement(children)
     ? React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
         "aria-invalid": error

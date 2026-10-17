@@ -72,8 +72,10 @@ interface FieldGroupProps extends React.ComponentProps<"div"> {
    * 並べ方（issue #720）。
    * - "stack"（既定）: 16px の縦リズム（従来）
    * - "rows": 区切り線の一覧。子の間に Border-Low-Emphasis の線（divide-y）を引き、直下の FormField に
-   *   上下 12px（py-3）を付ける。詳細シートの「ラベル左置きの項目行」（FormField orientation="horizontal"）向け。
-   *   CollapsibleChipField は自前で py-3 を持つのでそのまま並べられる。FormField に className="py-3" を足さない
+   *   上下 12px（py-3）を付ける（issue #733）。FormField だけでなく Switch の行・ImageAttachmentPicker・Banner など
+   *   FormField 以外の直下の要素にも付く（行ごとに py-3 / my-2 を手で書かない）。CollapsibleChipField は自前で py-3 を持つので
+   *   二重にならない（対象外）。FieldSeparator / FieldLegend / FieldDescription / FieldError にも付けない。
+   *   余白は詳細度 0（:where）なので、子の className の py-* が常に勝つ。詳細シートの「ラベル左置きの項目行」（FormField orientation="horizontal"）向け。FormField に className="py-3" を足さない
    */
   variant?: "stack" | "rows"
 }
@@ -88,7 +90,7 @@ function FieldGroup({ className, variant = "stack", ...props }: FieldGroupProps)
       role="group"
       className={cn(
         variant === "rows"
-          ? "flex min-w-0 flex-col divide-y divide-[var(--Border-Low-Emphasis)] [&>[data-slot=form-field]]:py-3"
+          ? "flex min-w-0 flex-col divide-y divide-[var(--Border-Low-Emphasis)] [:where(&)>:where(:not([data-slot=collapsible-chip-field],[data-slot=field-separator],[data-slot=field-legend],[data-slot=field-description],[data-slot=field-error]))]:py-3"
           : "flex min-w-0 flex-col gap-4",
         className
       )}

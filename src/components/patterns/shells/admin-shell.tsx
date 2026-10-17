@@ -50,6 +50,16 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
    * アプリ内で全画面に重ねて出すときは `className="h-full"` と組み、外枠に safe-area と背景を書かない
    */
   safeAreaTop?: boolean
+  /**
+   * アプリ内で画面全体に重ねて出す（issue #737）。既定 false。
+   * `fixed inset-0 z-[var(--Z-Overlay)] h-full` を DS が持つ（h-screen の代わり。className で
+   * 重ねる位置や z-index を書かない）。safeAreaTop と組む。
+   * z-index は Sheet / Dialog の overlay と同じ層（--Z-Overlay）。シェルより後に開いた Sheet / Dialog は
+   * 暗転ごとシェルの上に出る（--Z-Modal だと、その暗転がシェルの下に隠れる）。
+   * **背景は操作不能にしない**（inert / focus trap / aria-modal は付けない）。重ねる側（consumer）が
+   * 下のアプリの根に `inert` を付ける。シェル自体は閉じる操作を持たない（閉じるボタンは header に置く）。
+   */
+  overlay?: boolean
 }
 
 /** ドロワーを閉じる対象（ナビゲーションとみなす要素） */
@@ -120,6 +130,7 @@ function AdminShell({
   mobileDrawerTitle: mobileDrawerTitleProp,
   closeMobileDrawerOnNavigate = false,
   safeAreaTop = false,
+  overlay = false,
   ...props
 }: AdminShellProps) {
   const defaultLabels = useKskLabels()
@@ -170,7 +181,12 @@ function AdminShell({
   return (
     <div
       data-slot="admin-shell"
-      className={cn("flex h-screen bg-[var(--Surface-Secondary)]", className)}
+      data-overlay={overlay ? "" : undefined}
+      className={cn(
+        "flex bg-[var(--Surface-Secondary)]",
+        overlay ? "fixed inset-0 z-[var(--Z-Overlay)] h-full" : "h-screen",
+        className
+      )}
       {...props}
     >
       {/* skipLinkLabel 未指定は KskLabelsProvider の既定（issue #723）。null / "" は従来どおり出さない */}
