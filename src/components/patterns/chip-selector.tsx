@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Chip } from "@/components/patterns/chip"
+import { FormFieldGroupLabelContext } from "@/components/patterns/form-field"
 
 interface ChipSelectorOption<T extends string = string> {
   label: string
@@ -197,10 +198,13 @@ function ChipSelector<T extends string = string>({
   size = "md",
   className,
   "aria-label": ariaLabel,
-  "aria-labelledby": ariaLabelledby,
+  "aria-labelledby": ariaLabelledbyProp,
   "aria-describedby": ariaDescribedby,
   id,
 }: ChipSelectorProps<T>) {
+  // issue #734: FormField as="group" の中では、名前の指定が無ければそのラベルの id を aria-labelledby に使う
+  const groupLabelId = React.useContext(FormFieldGroupLabelContext)
+  const ariaLabelledby = ariaLabelledbyProp ?? (ariaLabel ? undefined : groupLabelId)
   // selectionMode が指定されていればそれが正本。未指定なら従来の multiple から導出するので、
   // 既存の呼び出しは 1 行も変えずに同じ DOM / 同じ挙動になる（issue #352）。
   const isMultiple = selectionMode ? selectionMode === "multiple" : multiple

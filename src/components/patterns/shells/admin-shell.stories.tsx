@@ -225,3 +225,29 @@ export const SafeAreaTopOverlay: Story = {
     await expect(Math.round(shell.getBoundingClientRect().height)).toBe(480)
   },
 }
+
+/**
+ * overlay（issue #737）: アプリ内で全画面に重ねる。`fixed inset-0 z-[var(--Z-Modal)] h-full` は DS が持つので
+ * className で書かない。ここでは transform した枠（fixed の基準になる）の中で確認する。
+ */
+export const Overlay: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="relative h-[480px]" style={{ transform: "translateZ(0)", "--Safe-Area-Inset-Top": "24px" } as React.CSSProperties}>
+      <AdminShell
+        overlay
+        safeAreaTop
+        sidebar={<SidebarContent collapsed={false} onToggle={() => {}} />}
+        header={<HeaderContent />}
+      >
+        <SectionHeader title="注文一覧" description="アプリの上に全画面で重ねる。" />
+      </AdminShell>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const shell = canvasElement.querySelector<HTMLElement>('[data-slot="admin-shell"]')!
+    await expect(getComputedStyle(shell).position).toBe("fixed")
+    await expect(Math.round(shell.getBoundingClientRect().height)).toBe(480)
+    await expect(getComputedStyle(shell).zIndex).not.toBe("auto")
+  },
+}

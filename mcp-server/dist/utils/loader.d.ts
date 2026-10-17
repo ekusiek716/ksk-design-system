@@ -1,3 +1,4 @@
+export declare const projectRoot: string;
 export interface ComponentEntry {
     name: string;
     path: string;

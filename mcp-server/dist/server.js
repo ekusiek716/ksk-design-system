@@ -1,12 +1,13 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { CallToolRequestSchema, ListToolsRequestSchema, } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequestSchema, ListResourcesRequestSchema, ListToolsRequestSchema, ReadResourceRequestSchema, } from "@modelcontextprotocol/sdk/types.js";
 import { getComponent } from "./tools/get-component.js";
 import { getToken } from "./tools/get-token.js";
 import { checkRule } from "./tools/check-rule.js";
 import { search } from "./tools/search.js";
+import { CONTRACT_DEFINITIONS, getContract, listContracts, readContractText, } from "./tools/get-contract.js";
 export function createServer() {
-    const server = new Server({ name: "ksk-ds", version: "1.0.0" }, { capabilities: { tools: {} } });
+    const server = new Server({ name: "ksk-ds", version: "1.0.0" }, { capabilities: { tools: {}, resources: {} } });
     server.setRequestHandler(ListToolsRequestSchema, async () => ({
         tools: [
             {
@@ -67,8 +68,67 @@ export function createServer() {
                     required: ["query"],
                 },
             },
+            {
+                name: "list_contracts",
+                description: "配信している正本（contracts/*.json・tokens.json・DESIGN.md・COMPONENT_LOOKUP.md）の名前・説明・URI を一覧する。" +
+                    "resources を読めないクライアントでも get_contract で同じ内容を取得できる。",
+                inputSchema: { type: "object", properties: {} },
+            },
+            {
+                name: "get_contract",
+                description: "正本を名前で取得する（例: components / rules / tokens / composition / screen-patterns / design）。" +
+                    "JSON は path（ドット区切り。例: meta.counts）、Markdown は section（見出しの部分一致。例: Colors）で部分取得できる。" +
+                    "大きい契約は path / section 省略時に目次だけ返す（full:true で全文）。",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        name: {
+                            type: "string",
+                            description: '契約名 (list_contracts の name。例: "components", "design", "DESIGN.md")',
+                        },
+                        path: {
+                            type: "string",
+                            description: "JSON 契約のドット区切り部分取得 (例: \"meta.counts\", \"ui.0\")",
+                        },
+                        section: {
+                            type: "string",
+                            description: 'Markdown 契約の見出し部分一致 (例: "Colors")',
+                        },
+                        full: {
+                            type: "boolean",
+                            description: "true で大きい契約も全文を返す",
+                        },
+                    },
+                    required: ["name"],
+                },
+            },
         ],
     }));
+    server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+        resources: CONTRACT_DEFINITIONS.map((d) => ({
+            uri: d.uri,
+            name: d.name,
+            description: d.description,
+            mimeType: d.mimeType,
+        })),
+    }));
+    server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+        const definition = CONTRACT_DEFINITIONS.find((d) => d.uri === request.params.uri);
+        if (!definition) {
+            throw new Error(`Unknown resource: ${request.params.uri}`);
+        }
+        // 読み込み失敗は MCP のエラー応答（JSON-RPC error）として返す。理由をメッセージに含める
+        let text;
+        try {
+            text = readContractText(definition);
+        }
+        catch (error) {
+            throw new Error(`Failed to read resource ${definition.uri}: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
+        }
+        return {
+            contents: [{ uri: definition.uri, mimeType: definition.mimeType, text }],
+        };
+    });
     server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const { name, arguments: args } = request.params;
         switch (name) {
@@ -124,6 +184,36 @@ export function createServer() {
                                 : `${results.length}件の結果:\n${JSON.stringify(results, null, 2)}`,
                         },
                     ],
+                };
+            }
+            case "list_contracts": {
+                return {
+                    content: [
+                        { type: "text", text: JSON.stringify(listContracts(), null, 2) },
+                    ],
+                };
+            }
+            case "get_contract": {
+                let result;
+                try {
+                    result = getContract(String(args?.name ?? ""), {
+                        path: typeof args?.path === "string" ? args.path : undefined,
+                        section: typeof args?.section === "string" ? args.section : undefined,
+                        full: args?.full === true,
+                    });
+                }
+                catch (error) {
+                    // ファイル欠落・JSON 破損などで例外になっても、クライアントには isError で返す
+                    result = {
+                        ok: false,
+                        error: `get_contract に失敗しました: ${error instanceof Error ? error.message : String(error)}`,
+                    };
+                }
+                return {
+                    content: [
+                        { type: "text", text: result.ok ? result.text : result.error },
+                    ],
+                    ...(result.ok ? {} : { isError: true }),
                 };
             }
             default:

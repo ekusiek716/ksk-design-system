@@ -1,6 +1,9 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { Button } from "../ui/button"
+import { IconClose } from "../ui/navigation-bar"
+import { useKskLabels } from "../ui/ksk-labels"
 
 const bannerVariants = cva(
   "flex items-start border border-[var(--Border-Info)]",
@@ -41,6 +44,10 @@ interface BannerProps
   title?: string
   description?: string
   action?: React.ReactNode
+  /** 閉じるボタンを右端に出す（issue #735）。渡さなければ出さない。閉じる処理（非表示にする）は consumer が持つ */
+  onDismiss?: () => void
+  /** 閉じるボタンの読み上げ名。既定は KskLabelsProvider の close（無ければ「閉じる」） */
+  dismissLabel?: string
 }
 
 function Banner({
@@ -52,9 +59,12 @@ function Banner({
   title,
   description,
   action,
+  onDismiss,
+  dismissLabel,
   children,
   ...props
 }: BannerProps) {
+  const labels = useKskLabels()
   return (
     <div
       data-slot="banner"
@@ -75,6 +85,19 @@ function Banner({
         {children}
       </div>
       {action && <div className="shrink-0">{action}</div>}
+      {onDismiss && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          data-slot="banner-dismiss"
+          aria-label={dismissLabel ?? labels.close}
+          onClick={onDismiss}
+          className="shrink-0 -my-1 -mr-1"
+        >
+          <IconClose size={16} />
+        </Button>
+      )}
     </div>
   )
 }

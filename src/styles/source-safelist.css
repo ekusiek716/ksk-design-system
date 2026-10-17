@@ -14,9 +14,11 @@
 @source inline("-inset-3");
 @source inline("-mb-px");
 @source inline("-ml-2");
+@source inline("-mr-1");
 @source inline("-mt-6");
 @source inline("-mx-1");
 @source inline("-mx-6");
+@source inline("-my-1");
 @source inline("-outline-offset-2");
 @source inline("-right-0.5");
 @source inline("-right-1");
@@ -41,10 +43,10 @@
 @source inline("[&>*]:flex-col");
 @source inline("[&>*]:min-w-[140px]");
 @source inline("[&>*]:shrink-0");
+@source inline("[&>:where(:not([data-slot=collapsible-chip-field]))]:py-3");
 @source inline("[&>[data-slot=field-legend]]:mb-2");
 @source inline("[&>[data-slot=field-legend]]:mb-4");
 @source inline("[&>[data-slot=field-legend]]:mb-6");
-@source inline("[&>[data-slot=form-field]]:py-3");
 @source inline("[&>button]:bg-[var(--Brand-Primary)]");
 @source inline("[&>button]:bg-transparent!");
 @source inline("[&>button]:hover:bg-[var(--Brand-Primary)]");

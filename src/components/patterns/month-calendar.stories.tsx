@@ -218,3 +218,20 @@ export const HeaderAndExpandToggle: Story = {
     await expect(toggle.getBoundingClientRect().width).toBe(grid.getBoundingClientRect().width)
   },
 }
+
+/** live={false}（issue #736）: 一覧のスクロールで月が変わる画面。見出しの aria-live を外す。既定は polite。 */
+export const HeaderLiveOff: StoryObj<typeof MonthCalendarHeader> = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <MonthCalendarHeader month={new Date(2026, 9, 1)} />
+      <MonthCalendarHeader month={new Date(2026, 9, 1)} live={false} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const [on, off] = Array.from(canvasElement.querySelectorAll("h2"))
+    await expect(on.getAttribute("aria-live")).toBe("polite")
+    await expect(off.hasAttribute("aria-live")).toBe(false)
+    await expect(off.hasAttribute("aria-atomic")).toBe(false)
+  },
+}

@@ -3,7 +3,7 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // mcp-server/ -> project root
-const projectRoot = resolve(__dirname, "../../..");
+export const projectRoot = resolve(__dirname, "../../..");
 // --- Caches ---
 let componentsCache = null;
 let rulesCache = null;

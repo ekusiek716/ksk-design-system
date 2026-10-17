@@ -13,6 +13,13 @@ import { warnOnceInDev } from "@/lib/dev-warn"
  */
 type RequiredStyle = "asterisk" | "pill" | "none"
 
+/**
+ * as="group" の FormField が描くラベルの id（issue #734）。中の ChipSelector（single = radiogroup）が
+ * aria-label / aria-labelledby 未指定のとき、この id を自動で aria-labelledby に使う。
+ * 内部用。consumer は使わない
+ */
+const FormFieldGroupLabelContext = React.createContext<string | undefined>(undefined)
+
 interface FormFieldProps extends React.ComponentProps<"div"> {
   label: string
   htmlFor?: string
@@ -58,6 +65,7 @@ interface FormFieldProps extends React.ComponentProps<"div"> {
    * - "group": チップ・トグル・ラジオ等の選択肢のまとまり。ラベルを `<span id>` で描き、中身の列を
    *   `role="group"` + `aria-labelledby`（説明文・エラーは aria-describedby）にする。htmlFor は使わない
    *   （渡すと開発ビルドで警告）。`<span>` + `<div role="group">` + `w-20` のラベルで行を自作しない。
+   *   中の ChipSelector（single）は aria-label / aria-labelledby を省くと、このラベルを自動で名前に使う（issue #734）。
    *   **required は読み上げに伝わらない**（role=group は aria-required を持てず、* / 必須バッジは aria-hidden）。
    *   必須であることは description（例: 「1 つ以上選んでください」）か label の文言で補う
    */
@@ -106,7 +114,7 @@ function FormField({
   // 単一の要素 children のときだけ aria を注入（複数 / テキストはそのまま）。
   // as="group" では中身を role=group の列で包み、aria は列に付ける（子へは注入しない）。
   const field = isGroup
-    ? children
+    ? <FormFieldGroupLabelContext.Provider value={labelId}>{children}</FormFieldGroupLabelContext.Provider>
     : React.isValidElement(children)
     ? React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
         "aria-invalid": error
@@ -262,5 +270,5 @@ function FormField({
   )
 }
 
-export { FormField }
+export { FormField, FormFieldGroupLabelContext }
 export type { FormFieldProps, RequiredStyle }
