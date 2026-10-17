@@ -43,7 +43,6 @@
 @source inline("[&>*]:flex-col");
 @source inline("[&>*]:min-w-[140px]");
 @source inline("[&>*]:shrink-0");
-@source inline("[&>:where(:not([data-slot=collapsible-chip-field]))]:py-3");
 @source inline("[&>[data-slot=field-legend]]:mb-2");
 @source inline("[&>[data-slot=field-legend]]:mb-4");
 @source inline("[&>[data-slot=field-legend]]:mb-6");
@@ -86,6 +85,7 @@
 @source inline("[--ksk-fab-bottom-offset:5rem]");
 @source inline("[--ksk-fab-bottom-offset:6rem]");
 @source inline("[-webkit-tap-highlight-color:transparent]");
+@source inline("[:where(&)>:where(:not([data-slot=collapsible-chip-field],[data-slot=field-separator],[data-slot=field-legend],[data-slot=field-description],[data-slot=field-error]))]:py-3");
 @source inline("[@media(any-pointer:coarse)]:min-w-11");
 @source inline("[@media(hover:hover)_and_(pointer:fine)]:transition-colors");
 @source inline("[@media(hover:hover)_and_(pointer:fine)]:w-[max(2rem,var(--Chip-Remove-Width))]");
@@ -504,6 +504,7 @@
 @source inline("grid-cols-3");
 @source inline("grid-cols-4");
 @source inline("grid-cols-7");
+@source inline("grid-cols-[1fr_minmax(0,auto)_1fr]");
 @source inline("grid-cols-[auto_minmax(0,1fr)_auto]");
 @source inline("grid-cols-[minmax(0,1fr)_8rem]");
 @source inline("grid-cols-[minmax(0,1fr)_auto]");
@@ -656,6 +657,8 @@
 @source inline("justify-center");
 @source inline("justify-end");
 @source inline("justify-items-center");
+@source inline("justify-self-end");
+@source inline("justify-self-start");
 @source inline("landscape:flex-row");
 @source inline("last:border-b-0");
 @source inline("last:border-r-0");
@@ -1005,7 +1008,6 @@
 @source inline("px-4!");
 @source inline("px-5");
 @source inline("px-6");
-@source inline("px-[calc(0.75rem_+_10rem_+_0.5rem)]");
 @source inline("px-[var(--Container-Gutter-Fluid,clamp(1rem,4vw,1.75rem))]");
 @source inline("px-[var(--Control-Padding-X-Lg)]");
 @source inline("px-[var(--Control-Padding-X-Md)]");

@@ -16,41 +16,60 @@ const OPTIONS = [
 describe("FieldGroup rows の余白 (#733)", () => {
   it("FormField 以外の直下にも py-3 を付け、CollapsibleChipField は除く", () => {
     const html = renderToStaticMarkup(<FieldGroup variant="rows"><div>x</div></FieldGroup>)
-    expect(html.replace(/&amp;/g, "&").replace(/&gt;/g, ">")).toContain("[&>:where(:not([data-slot=collapsible-chip-field]))]:py-3")
+    const cls = html.replace(/&amp;/g, "&").replace(/&gt;/g, ">")
+    // 詳細度 0（:where）なので子の py-* が勝つ。CollapsibleChipField / Separator / Legend / Description / Error は除く
+    expect(cls).toContain("[:where(&)>:where(:not(")
+    for (const slot of ["collapsible-chip-field", "field-separator", "field-legend", "field-description", "field-error"]) {
+      expect(cls).toContain(`[data-slot=${slot}]`)
+    }
     expect(renderToStaticMarkup(<FieldGroup><div>x</div></FieldGroup>)).not.toContain("py-3")
   })
 })
 
 describe("FormField as=group → ChipSelector (#734)", () => {
-  it("名前の指定が無ければグループのラベル id を aria-labelledby に使う", () => {
-    const html = renderToStaticMarkup(
-      <FormField as="group" label="種別">
-        <ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} />
-      </FormField>
-    )
-    const labelId = /<span id="([^"]+)"/.exec(html)![1]
-    expect(html).toContain(`role="radiogroup"`)
-    // radiogroup 側にも同じ id が結ばれる
-    expect(html.split(`aria-labelledby="${labelId}"`).length - 1).toBe(2)
-  })
+  const render = (chip: React.ReactNode) =>
+    renderToStaticMarkup(<FormField as="group" label="種別">{chip}</FormField>)
 
-  it("明示した aria-label / aria-labelledby が優先で、警告も出ない", () => {
+  it("外側の group だけがラベルで名前を持つ（内側の radiogroup へ同じ名前を結ばず、二重読み上げにしない）", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-    const html = renderToStaticMarkup(
-      <FormField as="group" label="種別">
-        <ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} aria-label="独自" />
-      </FormField>
-    )
-    expect(html).toContain('aria-label="独自"')
+    const html = render(<ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} />)
+    const labelId = /<span id="([^"]+)"/.exec(html)![1]
+    expect(html.split(`aria-labelledby="${labelId}"`).length - 1).toBe(1)
+    expect(html).toContain('role="group"')
+    expect(html).toContain('role="radiogroup"')
+    // 名前なしの警告は出ない
     expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
   })
 
-  it("FormField の外では従来どおり（名前を足さない）", () => {
-    const html = renderToStaticMarkup(
-      <ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} aria-label="x" />
+  it("同じ group 内の複数の ChipSelector でも警告なし・名前を足さない", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const html = render(
+      <>
+        <ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} />
+        <ChipSelector selectionMode="single" options={OPTIONS} value="b" onChange={() => {}} />
+      </>
     )
-    expect(html).not.toContain("aria-labelledby")
+    expect(html.split('role="radiogroup"').length - 1).toBe(2)
+    expect(html.split("aria-labelledby=").length - 1).toBe(1)
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+
+  it("multiple モードは従来どおり（role=group・名前を足さない）", () => {
+    const html = render(<ChipSelector selectionMode="multiple" options={OPTIONS} value={["a"]} onChange={() => {}} />)
+    expect(html.split("aria-labelledby=").length - 1).toBe(1)
+    expect(html).not.toContain("radiogroup")
+  })
+
+  it("明示した aria-labelledby / aria-label は優先される", () => {
+    const html = render(
+      <ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} aria-labelledby="mine" />
+    )
+    expect(html).toContain('aria-labelledby="mine"')
+    expect(
+      render(<ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} aria-label="独自" />)
+    ).toContain('aria-label="独自"')
   })
 })
 
@@ -77,9 +96,9 @@ describe("MonthCalendarHeader の live (#736)", () => {
 })
 
 describe("AdminShell の overlay (#737)", () => {
-  it("overlay で fixed inset-0 z-Modal h-full、既定は h-screen のまま", () => {
+  it("overlay で fixed inset-0 z-Overlay h-full、既定は h-screen のまま", () => {
     const on = renderToStaticMarkup(<AdminShell overlay sidebar={<nav />}>x</AdminShell>)
-    expect(on).toContain("fixed inset-0 z-[var(--Z-Modal)] h-full")
+    expect(on).toContain("fixed inset-0 z-[var(--Z-Overlay)] h-full")
     expect(on).not.toContain("h-screen")
     const off = renderToStaticMarkup(<AdminShell sidebar={<nav />}>x</AdminShell>)
     expect(off).toContain("h-screen")

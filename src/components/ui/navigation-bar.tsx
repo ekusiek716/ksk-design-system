@@ -2,16 +2,9 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "./button"
 import { useKskLabels } from "./ksk-labels"
+import { IconClose } from "../icons/close"
 
 // ─── Inline icons (pure SVG, no external dep) ────────────────────────────────
-
-function IconClose({ size = 20 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
 
 function IconBack({ size = 20 }: { size?: number }) {
   return (
@@ -57,8 +50,10 @@ export interface NavigationBarProps extends Omit<React.ComponentProps<"header">,
   leftLabel?: string
   /**
    * 左ボタンに leftLabel の文字も表示する（「＜ メニューに戻る」・issue #729）。既定 false（アイコンだけ）。
-   * 高さ 44px・アイコン + 文字のボタンになる。title が無いときは幅の上限なし、title があるときは 160px
-   * （max-w-40・日本語 8 文字程度）まで、超えた分は省略する。中央タイトルの左右の余白も同じ幅に広げ、重ならず中央のまま。文字付きの戻るボタンを Button で自作しない
+   * 高さ 44px・アイコン + 文字のボタンになる。title が無いときは幅の上限なし（右の要素を押し出さず、
+   * 残り幅で省略する）、title があるときは 160px（max-w-40・日本語 8 文字程度）まで、超えた分は省略する。
+   * title があるときは左・中央・右の 3 列 grid にし、左右の列は同じ幅（広い方に合わせる）なので、
+   * 短い文言（「戻る」）ならタイトルが広く残り、重ならず中央のまま。文字付きの戻るボタンを Button で自作しない
    */
   leftLabelVisible?: boolean
   /**
@@ -121,13 +116,16 @@ function NavigationBar({
   const shareLabel = shareLabelProp ?? defaultLabels.share
   const btnVariant = glass ? "glass" : "secondary"
   const hasTitle = Boolean(title)
+  // title + 文字付きの左ボタン: 左 | 中央 | 右 の 3 列 grid（左右は同じ幅）。タイトルの余白を固定値にせず実幅に合わせる（issue #732）
+  const gridMode = Boolean(onLeft) && leftLabelVisible && hasTitle
 
   return (
     <header
       {...props}
       data-slot="navigation-bar"
       className={cn(
-        "relative flex items-center h-[60px] px-3",
+        "items-center h-[60px] px-3",
+        gridMode ? "grid grid-cols-[1fr_minmax(0,auto)_1fr]" : "relative flex",
         !transparent && "bg-[var(--Surface-Primary)]",
         className
       )}
@@ -151,7 +149,7 @@ function NavigationBar({
           variant={btnVariant}
           size="default"
           data-label-visible=""
-          className={cn("h-11 gap-1 pl-2 pr-3", hasTitle ? "max-w-40" : "max-w-full")}
+          className={cn("h-11 min-w-0 shrink gap-1 pl-2 pr-3", hasTitle ? "max-w-40" : "max-w-full", gridMode && "justify-self-start")}
           {...leftButtonProps}
           onClick={onLeft}
         >
@@ -167,9 +165,9 @@ function NavigationBar({
       {hasTitle && (
         <div
           className={cn(
-            "absolute inset-0 flex justify-center items-center pointer-events-none",
-            // 文字付きの左ボタン（max-w-40 + 左の px-3）と重ならないよう、左右とも同じだけ空けて中央を保つ
-            onLeft && leftLabelVisible ? "px-[calc(0.75rem_+_10rem_+_0.5rem)]" : "px-16"
+            "flex justify-center items-center pointer-events-none",
+            // grid のときは中央の列（左右は同じ幅なので重ならず中央のまま）。それ以外は従来どおり絶対配置
+            gridMode ? "min-w-0 px-2" : "absolute inset-0 px-16"
           )}
         >
           <span className="typo-heading-sm text-[var(--Text-High-Emphasis)] min-w-0 truncate">
@@ -179,7 +177,7 @@ function NavigationBar({
       )}
 
       {/* Right slot — Button コンポーネントを利用 */}
-      <div className="ml-auto">
+      <div className={cn("ml-auto shrink-0", gridMode && "justify-self-end")}>
         {rightSlot ?? (
           onShare ? (
             <Button

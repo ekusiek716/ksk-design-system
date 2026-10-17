@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Chip } from "@/components/patterns/chip"
-import { FormFieldGroupLabelContext } from "@/components/patterns/form-field"
+import { FormFieldGroupLabelContext } from "@/components/patterns/form-field-context"
 
 interface ChipSelectorOption<T extends string = string> {
   label: string
@@ -202,9 +202,10 @@ function ChipSelector<T extends string = string>({
   "aria-describedby": ariaDescribedby,
   id,
 }: ChipSelectorProps<T>) {
-  // issue #734: FormField as="group" の中では、名前の指定が無ければそのラベルの id を aria-labelledby に使う
-  const groupLabelId = React.useContext(FormFieldGroupLabelContext)
-  const ariaLabelledby = ariaLabelledbyProp ?? (ariaLabel ? undefined : groupLabelId)
+  // issue #734: FormField as="group" の中では外側の group がラベルで名前を持つ。内側の radiogroup へ同じ名前は
+  // 結ばず（二重読み上げになる）、名前なしの警告だけ出さない。aria-label / aria-labelledby の明示は常に優先
+  const inNamedFormGroup = React.useContext(FormFieldGroupLabelContext) !== undefined
+  const ariaLabelledby = ariaLabelledbyProp
   // selectionMode が指定されていればそれが正本。未指定なら従来の multiple から導出するので、
   // 既存の呼び出しは 1 行も変えずに同じ DOM / 同じ挙動になる（issue #352）。
   const isMultiple = selectionMode ? selectionMode === "multiple" : multiple
@@ -272,7 +273,7 @@ function ChipSelector<T extends string = string>({
 
   // issue #666: radiogroup は名前が必須。名前なしの単一選択は開発ビルドで 1 回だけ警告する
   // （roving tabindex の effect は毎レンダー走るので、そこには入れない）。
-  const isUnnamedRadiogroup = isSingle && !ariaLabel && !ariaLabelledby
+  const isUnnamedRadiogroup = isSingle && !ariaLabel && !ariaLabelledby && !inNamedFormGroup
   React.useEffect(() => {
     if (!isUnnamedRadiogroup || !isDev()) return
     console.warn(

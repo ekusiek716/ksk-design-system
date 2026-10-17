@@ -168,7 +168,7 @@ describe('FormField as="group" / FieldGroup variant="rows"（#720）', () => {
     expect(rows.dataset.variant).toBe("rows")
     expect(rows.className).toContain("divide-y")
     expect(rows.className).toContain("divide-[var(--Border-Low-Emphasis)]")
-    expect(rows.className).toContain("[&>:where(:not([data-slot=collapsible-chip-field]))]:py-3")
+    expect(rows.className).toContain("[:where(&)>:where(:not([data-slot=collapsible-chip-field],[data-slot=field-separator],[data-slot=field-legend],[data-slot=field-description],[data-slot=field-error]))]:py-3")
     expect(rows.className).not.toContain("gap-4")
     const stack = host(<FieldGroup />).firstElementChild as HTMLElement
     expect(stack.className).toBe("flex min-w-0 flex-col gap-4")

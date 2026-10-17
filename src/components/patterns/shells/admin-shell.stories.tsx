@@ -227,7 +227,7 @@ export const SafeAreaTopOverlay: Story = {
 }
 
 /**
- * overlay（issue #737）: アプリ内で全画面に重ねる。`fixed inset-0 z-[var(--Z-Modal)] h-full` は DS が持つので
+ * overlay（issue #737）: アプリ内で全画面に重ねる。`fixed inset-0 z-[var(--Z-Overlay)] h-full` は DS が持つので（Sheet / Dialog の overlay と同じ層。後に開いたものが暗転ごと上に出る。背景の inert は重ねる側が付ける）
  * className で書かない。ここでは transform した枠（fixed の基準になる）の中で確認する。
  */
 export const Overlay: Story = {
@@ -248,6 +248,6 @@ export const Overlay: Story = {
     const shell = canvasElement.querySelector<HTMLElement>('[data-slot="admin-shell"]')!
     await expect(getComputedStyle(shell).position).toBe("fixed")
     await expect(Math.round(shell.getBoundingClientRect().height)).toBe(480)
-    await expect(getComputedStyle(shell).zIndex).not.toBe("auto")
+    await expect(getComputedStyle(shell).zIndex).toBe("50")
   },
 }

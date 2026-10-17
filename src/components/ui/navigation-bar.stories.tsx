@@ -189,3 +189,41 @@ export const LabeledBackOverflowWithTitle: Story = {
     await expect(title.left).toBeGreaterThanOrEqual(back.getBoundingClientRect().right)
   },
 }
+
+/** title あり + 短い文言（「戻る」）: 左右の実幅に合わせるので 375px でもタイトルが十分見える（issue #732） */
+export const LabeledBackShortNarrow: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="w-[375px] bg-[var(--Surface-Primary)]">
+      <NavigationBar title="ゲスト一覧の編集画面です" leftIcon="back" leftLabel="戻る" leftLabelVisible onLeft={() => {}} onShare={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const back = within(canvasElement).getByRole("button", { name: "戻る" })
+    const titleEl = within(canvasElement).getByText("ゲスト一覧の編集画面です")
+    const title = titleEl.getBoundingClientRect()
+    await expect(titleEl.scrollWidth).toBeLessThanOrEqual(titleEl.clientWidth)
+    await expect(title.width).toBeGreaterThan(150)
+    await expect(title.left).toBeGreaterThanOrEqual(back.getBoundingClientRect().right)
+    const bar = canvasElement.querySelector("header")!.getBoundingClientRect()
+    await expect(Math.abs((title.left + title.right) / 2 - (bar.left + bar.right) / 2)).toBeLessThan(2)
+  },
+}
+
+/** title なし + 長い文言 + 右の要素: 左ラベルが残り幅で省略され、右のシェアボタンを押し出さない（issue #732） */
+export const LabeledBackLongNoTitleNarrow: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="w-[200px] bg-[var(--Surface-Primary)]">
+      <NavigationBar leftIcon="back" leftLabel={LONG_BACK} leftLabelVisible onLeft={() => {}} onShare={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const back = within(canvasElement).getByRole("button", { name: LONG_BACK }).getBoundingClientRect()
+    const share = within(canvasElement).getByRole("button", { name: "シェア" }).getBoundingClientRect()
+    const bar = canvasElement.querySelector("header")!.getBoundingClientRect()
+    await expect(share.right).toBeLessThanOrEqual(bar.right)
+    await expect(share.width).toBeGreaterThanOrEqual(43)
+    await expect(back.right).toBeLessThanOrEqual(share.left)
+  },
+}

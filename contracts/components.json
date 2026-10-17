@@ -876,7 +876,7 @@
         "leftButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
         "shareButtonProps": "Button の属性・ref（variant / size / onClick / children を除く）",
         "headerProps": "title を除く header の属性・ref を根へ転送（issue #649）",
-        "leftLabelVisible": "boolean — 左ボタンに leftLabel の文字も表示（高さ 44px・文字は title なしなら幅の上限なし・title ありなら max-w-40（160px・日本語8文字程度）で省略し title 属性で全文・タイトルの左右を同じ幅に広げる。既定 false。issue #729）"
+        "leftLabelVisible": "boolean — 左ボタンに leftLabel の文字も表示（高さ 44px・文字は title なしなら幅の上限なし（右の要素を押し出さず残り幅で省略）・title ありなら max-w-40（160px・日本語8文字程度）で省略し title 属性で全文。title ありは左|中央|右の 3 列 grid（左右は同じ幅）で、短い文言ならタイトルが広く残る。既定 false。issue #729）"
       },
       "accessibility": [
         "aria-label auto-set for back/close/share",
@@ -1686,7 +1686,7 @@
         "orientation=\"horizontal\" は置き場所の幅（@container）が 15rem 未満なら縦積みに戻る。endLabel は入力欄の右に出る（issue #712）",
         "チップ・トグル・ラジオ等の選択肢のまとまりを右（下）に置く行は as=\"group\"（ラベルは span[id]、中身の列は role=group + aria-labelledby、説明文・エラーは aria-describedby）。<span> + <div role=\"group\"> + w-20 のラベルで行を自作しない。htmlFor は渡さない（開発ビルドで警告）。required は読み上げに伝わらないので、必須は description か label の文言で補う（issue #720）",
         "区切り線で並べる項目行の一覧は FieldGroup variant=\"rows\"（divide-y + 直下の FormField に py-3）に入れる。FormField に className=\"py-3\" を足さない（issue #720）",
-        "FormField as=\"group\" の中の ChipSelector（single）は aria-label / aria-labelledby を省くとグループのラベルを自動で名前に使う（名前必須の警告も出ない）。aria-labelledby を手で結ばない（issue #734）"
+        "FormField as=\"group\" の中の ChipSelector（single）は aria-label / aria-labelledby を省いても名前なしの警告が出ない（外側の group がラベルで名前を持つ。内側へ同じ名前は結ばない = 二重読み上げにしない。issue #734）"
       ]
     },
     {
@@ -1707,7 +1707,7 @@
       ],
       "rules": [
         "FieldSet は gap-6（24px）、FieldGroup は gap-4（16px）の縦リズムを正本とする",
-        "詳細シートの区切り線の一覧は FieldGroup variant=\"rows\"（子の間に Border-Low-Emphasis の線・直下の要素（FormField に限らず Switch の行・ImageAttachmentPicker・Banner 等）に上下 12px）。CollapsibleChipField は自前の py-3 を持つのでそのまま並べる。divide-y と py-3 を自作しない（issue #720 / #733）",
+        "詳細シートの区切り線の一覧は FieldGroup variant=\"rows\"（子の間に Border-Low-Emphasis の線・直下の要素（FormField に限らず Switch の行・ImageAttachmentPicker・Banner 等。FieldSeparator / FieldLegend / FieldDescription / FieldError は除く。詳細度 0 なので子の py-* が勝つ）に上下 12px）。CollapsibleChipField は自前の py-3 を持つのでそのまま並べる。divide-y と py-3 を自作しない（issue #720 / #733）",
         "個々の入力は既存 FormField を FieldGroup 内に並べる",
         "FieldDescription はセクション・グループの補足、FieldError はグループ単位のエラーに使う",
         "グループ横断の区切りは FieldSeparator を使い、中央ラベルは children で渡す",
@@ -1984,7 +1984,7 @@
         "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior.",
         "PillToggle は 2〜4 択の segmented control 専用。5択以上・折り返しが要る単一選択はこの selectionMode=\"single\" を使う(issue #418)。",
         "グループ名は aria-labelledby（見出しの id）か aria-label で渡す(issue #666)。単一選択の radiogroup は名前が必須で、どちらも無いと開発ビルドで console.warn する。id / aria-describedby もルートへ渡せる。native は accessibilityLabel / accessibilityLabelledBy",
-        "FormField as=\"group\" の中では aria-label / aria-labelledby を省ける（FormField のラベルを自動で使う）。明示した指定が優先（issue #734）"
+        "FormField as=\"group\" の中では aria-label / aria-labelledby を省いても警告が出ない（外側の group が名前を持つ）。明示した指定が優先（issue #734）"
       ]
     },
     {
@@ -3311,7 +3311,7 @@
         "lg 未満でナビへ辿れるようにするときは mobileDrawer（issue #705）。ヘッダー左端のメニューボタン（44px・aria-expanded・aria-label 既定「メニューを開く」）から左の Sheet に同じ sidebar を開く。ハンバーガーと Sheet side=\"left\" を consumer で自作しない",
         "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 false、明示 true で有効）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange",
         "上端の safe-area は safeAreaTop（ヘッダーは下線込み 64px + 安全領域、lg 以上のサイドバーと mobileDrawer のドロワーも上に足す。header が無いときは本文の列）。アプリ内で全画面に重ねるときは className=\"h-full\" と組み、外枠に pt-[var(--Safe-Area-Inset-Top)] や背景を書かない（外枠は fixed と重ね順だけ。issue #724）",
-        "アプリ内で全画面に重ねるときは overlay（fixed inset-0 z-[var(--Z-Modal)] h-full を DS が持つ）。className で fixed / z-index を書かない（issue #737）"
+        "アプリ内で全画面に重ねるときは overlay（fixed inset-0 z-[var(--Z-Overlay)] h-full を DS が持つ。Sheet / Dialog の overlay と同じ層で、後に開いたものが上に出る）。背景の inert は重ねる側が付ける。className で fixed / z-index を書かない（issue #737）"
       ]
     },
     {

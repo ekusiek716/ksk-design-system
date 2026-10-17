@@ -51,7 +51,7 @@
 | KskLabelsProvider, KSK_DEFAULT_LABELS | `@/components/ui/ksk-labels` | — | Default, English, CustomLabels |
 | Label | `@/components/ui/label` | — | Default, WithRequiredMarker, Unstyled, DisabledState |
 | MultiSelect | `@/components/ui/multi-select` | — | Default, WithTriggerLabel, InvalidInFormField, FocusReturnsToTriggerAfterClear |
-| NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone, LabeledBack, LabeledBackLongNoTitle, LabeledBackLongWithTitle, LabeledBackOverflowWithTitle |
+| NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone, LabeledBack, LabeledBackLongNoTitle, LabeledBackLongWithTitle, LabeledBackOverflowWithTitle, LabeledBackShortNarrow, LabeledBackLongNoTitleNarrow |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis, WithBuildPageItems, AsChildRouterLink |
 | PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small, FullWidthThree, FullWidthTwo, FullWidthFour |
@@ -126,7 +126,7 @@
 | FilterChip | `@/components/patterns/filter-chip` | — | Inactive, ActiveWithValue, Toggle, Group |
 | FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears, WithIcon |
 | Footer | `@/components/patterns/footer` | — | Default, Minimal, WithRenderSlot, WithExtra, WithPaymentIcons |
-| FormField, FormFieldGroupLabelContext | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm, HorizontalRows, GroupRows, GroupChipSelectorAutoName |
+| FormField | `@/components/patterns/form-field` | — | WithInput, Required, WithError, WithDescription, WithTextarea, WithCharacterCountAndError, WithSelect, CompleteForm, HorizontalRows, GroupRows, GroupChipSelectorAutoName |
 | FormRoot, FormSection, FormActions | `@/components/patterns/form` | — | Default |
 | ImageOverlayAction | `@/components/patterns/image-overlay-action` | — | FavoriteToggle, CarouselArrows, Sizes, KeepsHitAreaAndStopsPropagation |
 | KanbanColumn | `@/components/patterns/kanban-column` | — | Board, CategoryBoard |

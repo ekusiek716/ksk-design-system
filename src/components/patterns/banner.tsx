@@ -2,7 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Button } from "../ui/button"
-import { IconClose } from "../ui/navigation-bar"
+import { IconClose } from "../icons/close"
 import { useKskLabels } from "../ui/ksk-labels"
 
 const bannerVariants = cva(
