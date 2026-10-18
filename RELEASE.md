@@ -2,6 +2,22 @@
 
 `ksk-design-system` のリリーススケジュール・運用ルール。
 
+## v2.17.0（2026-10-18）
+
+2.16.0以降に、consumer側の上書きをなくすためのAPIを4件追加したminorリリース。追加のみのAPIが中心です。次の3点は既定の読み上げ・見た目が変わります。
+
+- Banner の読み上げが variant で変わります。`info` / `success` は `role="status"`（読み上げの区切りで伝える）になり、`warning` / `caution` は従来どおり `role="alert"` です。割り込ませたい画面は `live="assertive"`、静的な説明は `live="off"` を指定します（#740）。
+- 閉じるボタン・trailing だけの `DetailSheetHeader` は、下線と下余白を出さなくなります。従来の下線が要る画面は `bordered` を指定します（#742）。
+- FormField `as="group"` の中の ChipSelector 単一選択（radiogroup）は、`aria-label` / `aria-labelledby` を省くとラベルを `aria-labelledby` で結ぶようになり、読み上げ名が付きます。見た目は変わりません（#741）。
+
+主な追加は次のとおりです。
+- Banner に `live`（#740）。
+- PillToggle に `aria-label` / `aria-labelledby`・`semantics="radio"`・`name`（#741）。
+- DetailSheetHeader に `bordered`（#742）。
+- MonthCalendarHeader に `trailing`（#743）。
+
+導入時は [2.17.0の注意](./MIGRATION.md#v2170-の導入注意) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。consumerへの取り込みとアプリ配布は別工程で、今回のDS公開準備には含めません。
+
 ## v2.16.0（2026-10-18）
 
 2.15.0以降に、NavigationBarの文字付きの戻るの切れを直し、consumer側の上書きをなくすためのAPIを5件追加したminorリリース。追加のみのAPIが中心です。次の1点は既定の見た目が変わります。
