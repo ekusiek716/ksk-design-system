@@ -2,6 +2,19 @@
 
 `ksk-design-system` のリリーススケジュール・運用ルール。
 
+## v2.19.0（2026-10-19）
+
+2.18.0以降に、consumer の上書きを減らす読み上げ・当たり判定の調整と、native の Sheet などが Web で約0.8秒止まってから出る不具合の修正をまとめたminorリリース。次の点は既定の見た目・読み上げ・動きが変わります。
+
+- FormField `as="group"` の中で名前を省いた QuickActionGrid 単一選択（`role="radiogroup"`）は、その FormField のラベルで読まれます（#751）。
+- KebabMenu のトリガーは見た目32pxのまま押せる範囲が44pxに広がり、読み上げ名の既定が KskLabels の `menu` になります。DetailSheetHeader の trailing の間隔は4pxから8pxに広がります（#752）。
+- react-native-web で動かしたとき、native の Sheet（全方向・snap mode）とそれを中で使う部品（スマホ幅の ResponsiveDialog・Select・MultiSelect・Combobox・DatePicker・TimePicker・DropdownFilter・BottomSheetForm・MenuDrawer・ReviewOverlay）、overlay の Celebration のカードが、約0.8秒止まってから一気に出ていたのを直します。開いた直後から入口アニメーションで出ます。iOS / Android の開き方は変わりません（#753）。
+- matchMedia の無い環境（jsdom など）で、native の useReduceMotion を使う部品が unmount 時に落ちていたのを直します（#757）。
+
+主な追加は KskLabels の `menu`（型では optional。#752）です。
+
+導入時は [2.19.0の注意](./MIGRATION.md#v2190-の導入注意) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。
+
 ## v2.18.0（2026-10-18）
 
 2.17.0以降に、FieldSet の見出し下の間隔と StarRating の読み上げ名を整えたminorリリース。次の2点は既定の見た目・読み上げが変わります。
