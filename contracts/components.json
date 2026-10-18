@@ -828,7 +828,7 @@
       ],
       "props": {
         "fullWidth": "boolean (既定 false) — 横幅いっぱいに広げ、各項目を等幅にする(issue #500)。既定はラベル幅(w-fit)",
-        "aria-label / aria-labelledby": "string — 何を選ぶ欄かの読み上げ名(issue #741)。FormField as=\"group\" の中では省いてよい（外側の group がラベルで名前を持つ）",
+        "aria-label / aria-labelledby": "string — 何を選ぶ欄かの読み上げ名(issue #741)。FormField as=\"group\" の中では省いてよい（semantics=\"radio\" は radiogroup をそのラベルで名付ける）",
         "semantics": "\"tabs\" | \"radio\" (既定 \"tabs\") — 読み上げの役割(issue #741)。tabs=tablist/tab（表示の切り替え）、radio=radiogroup/radio（フォームの値選び）。見た目・矢印キー操作は同じ"
       },
       "rules": [
@@ -836,7 +836,7 @@
         "5択以上・折り返しが要る単一選択は ChipSelector の selectionMode=\"single\" を使う(issue #418)。選択中の1つだけ見せて畳む場合は CollapsibleChipField(issue #419)。パネル連動が要るなら Tabs。",
         "等幅・全幅にしたいときは fullWidth を使う。className=\"grid w-full grid-cols-N\" で TabsList に届かせる回避策は内部構造依存なので使わない(issue #500)。",
         "pill の trigger は透明な before 擬似要素でタップ領域を44pxまで確保済み。消費側で [role=\"tab\"] に追加の min-height を当てないこと(見えている面がトラックより高くなる)。",
-        "名前を付ける: 見える見出しがあれば aria-labelledby、無ければ aria-label。フォームの値選び（性別・単位など）は semantics=\"radio\" にし、FormField as=\"group\" で包む（ラベルが外側の group の名前になるので aria-label は不要。内側へ同じ名前を足さない＝二重読み上げにしない）。画面内の表示の切り替え（一覧の絞り込み・週/月）は既定の tabs のまま(issue #741)"
+        "名前を付ける: 見える見出しがあれば aria-labelledby、無ければ aria-label。フォームの値選び（性別・単位など）は semantics=\"radio\" にし、FormField as=\"group\" で包む（radiogroup 自身もそのラベルで名付けるので aria-label は不要）。画面内の表示の切り替え（一覧の絞り込み・週/月）は既定の tabs のまま(issue #741)"
       ]
     },
     {

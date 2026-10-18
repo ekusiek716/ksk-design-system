@@ -37,8 +37,7 @@ type PillToggleProps<T extends string = string> =
       className?: string
       /**
        * 読み上げ名（issue #741）。「何を選ぶ欄か」を伝える。見える見出しがあるなら aria-labelledby を使う。
-       * FormField `as="group"` の中では外側の group がそのラベルで名前を持つので省いてよい
-       * （内側へ同じ名前は結ばない = 二重読み上げにしない。ChipSelector #734 と同じ）
+       * FormField `as="group"` の中では省いてよい（`semantics="radio"` は radiogroup をそのラベルで名付ける）
        */
       "aria-label"?: string
       /** 見える見出しの id（issue #741）。aria-label より優先して読まれる */
@@ -71,8 +70,7 @@ type PillToggleProps<T extends string = string> =
       className?: string
       /**
        * 読み上げ名（issue #741）。「何を選ぶ欄か」を伝える。見える見出しがあるなら aria-labelledby を使う。
-       * FormField `as="group"` の中では外側の group がそのラベルで名前を持つので省いてよい
-       * （内側へ同じ名前は結ばない = 二重読み上げにしない。ChipSelector #734 と同じ）
+       * FormField `as="group"` の中では省いてよい（`semantics="radio"` は radiogroup をそのラベルで名付ける）
        */
       "aria-label"?: string
       /** 見える見出しの id（issue #741）。aria-label より優先して読まれる */
@@ -121,7 +119,7 @@ type PillToggleProps<T extends string = string> =
  *
  * ### 名前と読み上げの役割（issue #741）
  * `aria-label` / `aria-labelledby` で「何を選ぶ欄か」を名付ける。FormField `as="group"` の中では
- * 外側の group がラベルで名前を持つので省いてよい。
+ * 省いてよい（`semantics="radio"` は radiogroup をそのラベルで名付ける。tabs は外側の group の名前に任せる）。
  * フォームの値選び（性別・単位など）は `semantics="radio"`（radiogroup / radio）で読ませる。
  * 既定の `"tabs"`（tablist / tab）は画面内の表示の切り替え向けで、従来どおり。
  * ```tsx
@@ -170,9 +168,12 @@ function PillToggle<T extends string = string>({
   semantics = "tabs",
 }: PillToggleProps<T>) {
   const handleChange = onChange ?? onValueChange
-  // issue #741: FormField as="group" の中では外側の group がラベルで名前を持つ（#734 と同じ。内側へ同じ名前は結ばない）
-  const inNamedFormGroup = React.useContext(FormFieldGroupLabelContext) !== undefined
-  const isUnnamedRadiogroup = semantics === "radio" && !ariaLabel && !ariaLabelledby && !inNamedFormGroup
+  // issue #741: FormField as="group" の中で名前が未指定なら、radiogroup 自身もそのラベルで名付ける
+  // （WAI-ARIA の radio group パターンは radiogroup 自体が見える見出しを参照することを求める。
+  // 外側の group の名前は内側へ継承されない）。tabs は従来どおり外側の group の名前に任せる
+  const groupLabelId = React.useContext(FormFieldGroupLabelContext)
+  const radioLabelledby = ariaLabelledby ?? (ariaLabel ? undefined : groupLabelId)
+  const isUnnamedRadiogroup = semantics === "radio" && !ariaLabel && !radioLabelledby
   React.useEffect(() => {
     if (!isUnnamedRadiogroup) return
     warnOnceInDev(
@@ -199,7 +200,7 @@ function PillToggle<T extends string = string>({
         value={value}
         onValueChange={(v) => handleChange?.(v as T)}
         aria-label={ariaLabel}
-        aria-labelledby={ariaLabelledby}
+        aria-labelledby={radioLabelledby}
         className={cn(RADIO_LIST, fullWidth && "flex w-full", className)}
       >
         {options.map((opt) => (

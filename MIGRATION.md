@@ -26,7 +26,7 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 
 - **Banner の読み上げ（#740・既定の読み上げの変更）**: これまで variant に関係なく `role="alert"`（今の読み上げに割り込む）でしたが、`info` / `success` は `role="status"`（読み上げの区切りで伝える）に変わります。`warning` / `caution` は従来どおり `role="alert"` です。見た目は変わりません。info / success でも割り込ませたい画面は `live="assertive"`、画面を開いたときから出ている静的な説明は `live="off"`（role なし）を指定してください。`role` を明示している呼び出しは従来どおりそちらが優先です。テストで `getByRole("alert")` により info / success の Banner を探している場合は `getByRole("status")` に直してください。
 - **DetailSheetHeader の閉じるだけの形（#742・既定の見た目の変更）**: title / titleEditor / description / leading / children のどれも渡さない（閉じるボタン・trailing だけの）ヘッダーは、下線と下余白（`border-b pb-4`）を出さなくなります。className で `border-0 pb-0` 等を上書きしていた場合は外せます。従来の下線が要る画面は `bordered` を指定してください。
-- 追加のみ（既定の見た目・読み上げは不変）: PillToggle の `aria-label` / `aria-labelledby`・`semantics="radio"`（フォームの値選び向け。FormField `as="group"` の中では外側の group が名前を持つ。#741）、MonthCalendarHeader の `trailing`（#743）。
+- 追加のみ（既定の見た目・読み上げは不変）: PillToggle の `aria-label` / `aria-labelledby`・`semantics="radio"`（フォームの値選び向け。FormField `as="group"` の中では radiogroup をそのラベルで名付ける。#741）、MonthCalendarHeader の `trailing`（#743）。
 
 ## v2.16.0 の導入注意
 

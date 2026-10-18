@@ -148,7 +148,7 @@ export const FullWidthFour: Story = {
 
 /**
  * semantics="radio"（issue #741）: フォームの値選びは radiogroup / radio で読ませる。
- * FormField as="group" の中では外側の group がラベルで名前を持つ（aria-label は不要）。
+ * FormField as="group" の中では radiogroup 自身もそのラベルで名付ける（aria-label は不要）。
  * 矢印キーで選択が移り、Tab キーでは選択中の 1 つにだけ止まる（tabs と同じ操作）。
  */
 export const RadioInFormField: Story = {
@@ -176,6 +176,7 @@ export const RadioInFormField: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByRole("group", { name: "表示単位" })).toBeInTheDocument()
+    await expect(canvas.getByRole("radiogroup", { name: "表示単位" })).toBeInTheDocument()
     const radios = canvas.getAllByRole("radio")
     await expect(radios).toHaveLength(3)
     await expect(radios[0]).toHaveAttribute("aria-checked", "true")

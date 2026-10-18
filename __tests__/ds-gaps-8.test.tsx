@@ -70,18 +70,42 @@ describe("PillToggle の名前と semantics (#741)", () => {
     expect(el.querySelector('[role="tabpanel"]')).toBeNull()
   })
 
-  it("FormField as=group の中では外側の group だけが名前を持ち（二重に結ばない）、警告も出さない", () => {
+  it("FormField as=group の中では radiogroup 自身もそのラベルで名付け、警告を出さない", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
-    const html = renderToStaticMarkup(
+    const el = host(
       <FormField as="group" label="表示単位">
         <PillToggle semantics="radio" options={OPTIONS} value="week" onChange={() => {}} />
       </FormField>
     )
-    const labelId = /<span id="([^"]+)"/.exec(html)![1]
-    expect(html.split(`aria-labelledby="${labelId}"`).length - 1).toBe(1)
-    expect(html).toContain('role="group"')
-    expect(html).toContain('role="radiogroup"')
+    const labelId = el.querySelector("span[id]")!.id
+    expect(el.querySelector('[role="group"]')!.getAttribute("aria-labelledby")).toBe(labelId)
+    expect(el.querySelector('[role="radiogroup"]')!.getAttribute("aria-labelledby")).toBe(labelId)
     expect(warn).not.toHaveBeenCalled()
+  })
+
+  it("aria-label / aria-labelledby の明示は group のラベルより優先する。tabs は内側へ名前を足さない", () => {
+    const inGroup = (ui: React.ReactElement) => host(<FormField as="group" label="表示単位">{ui}</FormField>)
+    const a = inGroup(<PillToggle semantics="radio" aria-label="単位" options={OPTIONS} value="week" onChange={() => {}} />)
+    expect(a.querySelector('[role="radiogroup"]')!.getAttribute("aria-label")).toBe("単位")
+    expect(a.querySelector('[role="radiogroup"]')!.hasAttribute("aria-labelledby")).toBe(false)
+    const b = inGroup(<PillToggle semantics="radio" aria-labelledby="x" options={OPTIONS} value="week" onChange={() => {}} />)
+    expect(b.querySelector('[role="radiogroup"]')!.getAttribute("aria-labelledby")).toBe("x")
+    const t = inGroup(<PillToggle options={OPTIONS} value="week" onChange={() => {}} />)
+    expect(t.querySelector('[role="tablist"]')!.hasAttribute("aria-labelledby")).toBe(false)
+  })
+
+  it("radio で名前も group も無いときだけ開発ビルドで警告する", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const { createRoot } = await import("react-dom/client")
+    const { act } = await import("react")
+    const div = document.createElement("div")
+    const root = createRoot(div)
+    ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+    await act(async () => root.render(<PillToggle options={OPTIONS} value="week" onChange={() => {}} />))
+    expect(warn).not.toHaveBeenCalled()
+    await act(async () => root.render(<PillToggle semantics="radio" options={OPTIONS} value="week" onChange={() => {}} />))
+    expect(warn).toHaveBeenCalledTimes(1)
+    await act(async () => root.unmount())
   })
 })
 
