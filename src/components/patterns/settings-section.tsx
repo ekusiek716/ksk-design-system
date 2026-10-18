@@ -29,6 +29,12 @@ interface SettingsListRowControlProps {
   id?: string
   /** description があるときだけ入る（description の要素の id）。 */
   "aria-describedby"?: string
+  /**
+   * title の要素（`<label>`）の id（issue #763。`${id}-label`）。`<label htmlFor>` が名前を付けられない
+   * radiogroup（ChipSelector 単一選択・PillToggle `semantics="radio"` 等の div）にも title を名前として結ぶ。
+   * Switch 等の labelable な部品では label と同じ title を指すので、読み上げ名は変わらない。
+   */
+  "aria-labelledby"?: string
   /** 行に disabled を付けたときだけ true が入る（ラベルを押しても切り替わらないように操作部品も止める）。 */
   disabled?: boolean
 }
@@ -40,15 +46,17 @@ interface SettingsListRowProps
   /** 行頭のアイコンやアバター。寸法は渡した要素を保ち、装飾用の余白を追加しない。 */
   leading?: React.ReactNode
   /**
-   * 右端の操作部品・表示。関数を渡すと `{ id, "aria-describedby", disabled }` を受け取り、
-   * title（`<label htmlFor>`）・description（`aria-describedby`）と結ばれる（issue #759）。
+   * 右端の操作部品・表示。関数を渡すと `{ id, "aria-describedby", "aria-labelledby", disabled }` を受け取り、
+   * title（`<label htmlFor>` と `aria-labelledby`）・description（`aria-describedby`）と結ばれる（issue #759 / #763）。
+   * `aria-labelledby` があるので、`<label>` が名前を付けられない radiogroup（ChipSelector 単一選択等）も
+   * `{...control}` を渡すだけで title が名前になる（title と同じ aria-label を重ねない）。
    * 関数が null / undefined / false を返したとき、要素が条件で null / false になったときは結ばない（title は従来どおり `<p>`）。
    * interactive / onClick の行では `{}` で呼ばれ、描画はするが結ばない。
    */
   rightSlot?: React.ReactNode | ((control: SettingsListRowControlProps) => React.ReactNode)
   /**
    * rightSlot の操作部品（Switch / Checkbox 等）の id（issue #759）。指定すると title を
-   * `<label htmlFor={controlId}>`、description に `${controlId}-description` の id を付ける。
+   * `<label htmlFor={controlId}>`（id は `${controlId}-label`）、description に `${controlId}-description` の id を付ける。
    * rightSlot に要素を渡すなら、操作部品側に `id={controlId}` と（description があれば）
    * `aria-describedby={`${controlId}-description`}` を自分で付ける（id が見つからないと開発ビルドで警告）。
    * rightSlot に関数を渡すなら省略可（省略時は自動採番）。行全体が button になる interactive / onClick の行では結ばない。
@@ -169,6 +177,8 @@ function SettingsListRow({
   // React 19.1+ の useId は «r1» / _r_1_ 形式なので、id に使える文字だけ残す
   const resolvedControlId = controlId ?? `settings-row-${autoId.replace(/[^a-zA-Z0-9_-]/g, "")}-control`
   const candidateDescriptionId = canLink && description ? `${resolvedControlId}-description` : undefined
+  // title の <label> の id（issue #763）。label[for] が名前を付けられない radiogroup（div）にも結べるように渡す
+  const labelId = `${resolvedControlId}-label`
   if (isButtonRow && wantsLink) {
     warnOnceInDev(
       "settings-list-row-control-in-button",
@@ -181,6 +191,7 @@ function SettingsListRow({
       canLink
         ? {
             id: resolvedControlId,
+            "aria-labelledby": labelId,
             ...(candidateDescriptionId ? { "aria-describedby": candidateDescriptionId } : {}),
             ...(disabled ? { disabled: true } : {}),
           }
@@ -218,6 +229,7 @@ function SettingsListRow({
         {linked ? (
           <label
             data-slot="settings-list-row-label"
+            id={labelId}
             htmlFor={resolvedControlId}
             className={cn("block", !disabled && "cursor-pointer", typeof title === "string" && titleClassName)}
           >

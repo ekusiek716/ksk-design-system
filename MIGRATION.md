@@ -20,6 +20,12 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 - **余白・項目行・ダイアログ・アプリ枠・予定の色（#711–#716）**: Container / ChipFilterBar の `gutter="fluid"`（`--Container-Gutter-Fluid`）、FormField の `orientation="horizontal"`・Input / Textarea の `targetSize="comfortable"`、Dialog の `centerFrom`・`height="fill"`・`size="2xl"`・`DialogHeader variant="bar"`、FieldSet の `gap`・FieldLegend の `size="sm"`、MobileAppShell の `viewport="fixed"`・`safeAreaTop`・`safeAreaBottom`・`bottomPadding="native-tab-bar"`（`--Native-Tab-Bar-Height`。ネイティブ側が書く任意フック <!-- docs-drift-ignore: --Native-Tab-Bar-Height -->）、MonthCalendar / AgendaList の予定の `accentColor` を追加します。すべて任意指定で、既定の見た目は変わりません。
 - **CollapsibleChipField の見出し（#717）**: `label` の既定の見た目が `typo-label-sm` + `Text-Medium-Emphasis`（12px）から、フォームの項目名と同じ `typo-label-md` + `Text-High-Emphasis`（14px 太字）に変わります（同じ詳細シートの `<Label>` / `FormField` と大きさをそろえるため）。従来の見た目が要る画面は `labelSize="sm"` を指定してください。展開中の選択肢のまとまりは見える見出しと `aria-labelledby` で結ばれます（`ariaLabel` を指定した場合は従来どおり `aria-label`）。`label` も `icon` も渡さない行は、先頭の 24px の空きが無くなります。native の CollapsibleChipField は変わりません。
 
+## 次回リリース（未リリース）の導入注意
+
+以下は次回の版に入る変更です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
+
+- **SettingsListRow の右の選択肢の並びを項目名で読ませる（#763・追加のみ）**: 関数の `rightSlot` が受け取る属性（型 `SettingsListRowControlProps`）に `"aria-labelledby"`（title の `<label>` の id。`controlId` を渡した行は `${controlId}-label`）が加わります。`<label>` は ChipSelector 単一選択・PillToggle `semantics="radio"`・QuickActionGrid 単一選択・StarRating の選択肢の並び（`role="radiogroup"` の div）を名付けられないため、これまでは title と同じ文字を `aria-label` に重ねる必要がありました。`rightSlot={(control) => <ChipSelector {...control} selectionMode="single" … />}`、id / aria-describedby を受け取らない部品は `rightSlot={(control) => <PillToggle aria-labelledby={control["aria-labelledby"]} semantics="radio" … />}` と書けば title が読み上げ名になるので、重ねていた `aria-label` は外せます。Switch 等を `{...control}` で渡している行は `aria-labelledby` も付きますが、label と同じ title を指すので読み上げ名は変わりません。ただし `{...control}` と一緒に title と違う文字の `aria-label` を付けている部品は、`aria-labelledby` が優先されて title で読まれるようになります。別の名前で読ませたい場合は `aria-labelledby={undefined}` を後ろに書いて打ち消してください（`{...control}` より後ろに書いた `aria-labelledby` が優先されます）。見た目、interactive / onClick の行（`{}` で呼ばれる）、関数が null を返した行の扱いは変わりません。
+
 ## v2.20.0 の導入注意
 
 以下はv2.20.0の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
