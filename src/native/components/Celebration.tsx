@@ -238,7 +238,8 @@ function Celebration({
   }, [active, overlay, opacity, pop, revealCard, revealLifecycle])
 
   useEffect(() => {
-    // inline は Modal を挟まないのでそのまま開始できる
+    // inline は Modal を挟まないのでそのまま開始できる。onShow との順序の問題が無いので、
+    // 開始の時機は従来どおり useEffect のまま（native の挙動を変えない。#753）
     if (active && !overlay) startCardEntrance(() => {})
   }, [active, overlay, startCardEntrance])
 
