@@ -20,6 +20,14 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 - **余白・項目行・ダイアログ・アプリ枠・予定の色（#711–#716）**: Container / ChipFilterBar の `gutter="fluid"`（`--Container-Gutter-Fluid`）、FormField の `orientation="horizontal"`・Input / Textarea の `targetSize="comfortable"`、Dialog の `centerFrom`・`height="fill"`・`size="2xl"`・`DialogHeader variant="bar"`、FieldSet の `gap`・FieldLegend の `size="sm"`、MobileAppShell の `viewport="fixed"`・`safeAreaTop`・`safeAreaBottom`・`bottomPadding="native-tab-bar"`（`--Native-Tab-Bar-Height`。ネイティブ側が書く任意フック <!-- docs-drift-ignore: --Native-Tab-Bar-Height -->）、MonthCalendar / AgendaList の予定の `accentColor` を追加します。すべて任意指定で、既定の見た目は変わりません。
 - **CollapsibleChipField の見出し（#717）**: `label` の既定の見た目が `typo-label-sm` + `Text-Medium-Emphasis`（12px）から、フォームの項目名と同じ `typo-label-md` + `Text-High-Emphasis`（14px 太字）に変わります（同じ詳細シートの `<Label>` / `FormField` と大きさをそろえるため）。従来の見た目が要る画面は `labelSize="sm"` を指定してください。展開中の選択肢のまとまりは見える見出しと `aria-labelledby` で結ばれます（`ariaLabel` を指定した場合は従来どおり `aria-label`）。`label` も `icon` も渡さない行は、先頭の 24px の空きが無くなります。native の CollapsibleChipField は変わりません。
 
+## 次回リリース（未リリース）の導入注意
+
+以下は次回の版に入る変更です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
+
+- **QuickActionGrid 単一選択の読み上げ名（#751・既定の読み上げの変更）**: FormField `as="group"` の中で `aria-label` / `aria-labelledby` を省いた `selectionMode="single"`（`role="radiogroup"`）は、その FormField のラベルで読まれるようになります（ChipSelector 単一選択・PillToggle `semantics="radio"`・StarRating と同じ）。見た目は変わりません。`selectionMode` 未指定 / `"multiple"`、`role` を上書きした場合、明示した `aria-label` / `aria-labelledby` は従来どおりです。group の中に `aria-label` を手で付けていた場合は外せます。
+- **KebabMenu のトリガー（#752）**: 見た目の大きさ（32px）は変わらず、押せる範囲（透明な `before`）が 44px に広がります（周りのレイアウトは動きません）。隣の要素と 6px 未満で接している場合は、その隙間ぶん押せる範囲が重なるので、近すぎる配置は間を空けてください。読み上げ名の既定は KskLabels の `menu` になり、`KskLabelsProvider locale="en"` の配下では「メニュー」ではなく「Menu」と読まれます（Provider 無し・`locale="ja"` は従来どおり「メニュー」、`menuLabel` を渡した呼び出しは不変）。テストで英語の Provider の中の KebabMenu を `getByRole("button", { name: "メニュー" })` で探している場合は「Menu」で探してください。
+- 追加のみ: KskLabels の `menu`（型 `KskLabels` では optional なので、既存の完全な翻訳オブジェクトはそのまま型チェックを通る。#752）。
+
 ## v2.18.0 の導入注意
 
 以下はv2.18.0の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。

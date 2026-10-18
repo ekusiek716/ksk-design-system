@@ -128,6 +128,8 @@ describe("KskLabelsProvider", () => {
       ratingGroup: "評価",
       ratingValue: "{value}/{max}点",
       ratingStar: "{value}点",
+      // KebabMenu（issue #752）: 従来の直書きの既定と同じ文言
+      menu: "メニュー",
     })
     const nav = renderToStaticMarkup(<NavigationBar onLeft={() => {}} onShare={() => {}} />)
     expect(nav).toContain('aria-label="戻る"')
