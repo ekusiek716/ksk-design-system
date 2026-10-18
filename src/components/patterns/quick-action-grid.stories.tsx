@@ -2,6 +2,7 @@ import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { expect, userEvent, within } from "storybook/test"
 import { Add, Heart, NoteText, Star1 } from "iconsax-reactjs"
+import { FormField } from "@/components/patterns/form-field"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { cn } from "@/lib/utils"
 import { ActionTile, QuickActionGrid } from "./quick-action-grid"
@@ -189,6 +190,44 @@ export const SingleSelection: Story = {
     await expect(radios[3]).toHaveAttribute("aria-checked", "true")
     await expect(radios[3]).toHaveAttribute("tabindex", "0")
     await expect(radios[0]).toHaveAttribute("tabindex", "-1")
+  },
+}
+
+const THEMES = [
+  { value: "pink", label: "ピンク" },
+  { value: "blue", label: "ブルー" },
+]
+
+function InFormFieldGroupDemo() {
+  const [theme, setTheme] = React.useState("pink")
+  return (
+    <div className="max-w-md">
+      <FormField as="group" label="テーマ">
+        <QuickActionGrid columns={2} selectionMode="single">
+          {THEMES.map((t) => (
+            <ActionTile key={t.value} label={t.label} selected={theme === t.value} onClick={() => setTheme(t.value)} />
+          ))}
+        </QuickActionGrid>
+      </FormField>
+    </div>
+  )
+}
+
+/**
+ * issue #751: FormField as="group" の中の単一選択は、aria-label を渡さなくても radiogroup 自身が
+ * そのラベル（「テーマ」）で読まれる（ChipSelector 単一選択・PillToggle radio・StarRating と同じ）。
+ */
+export const InFormFieldGroup: Story = {
+  tags: ["interaction"],
+  render: () => <InFormFieldGroupDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const group = canvas.getByRole("radiogroup", { name: "テーマ" })
+    await expect(group).not.toHaveAttribute("aria-label")
+    const radios = within(group).getAllByRole("radio")
+    radios[0].focus()
+    await userEvent.keyboard("{ArrowRight}")
+    await expect(radios[1]).toHaveAttribute("aria-checked", "true")
   },
 }
 

@@ -84,6 +84,7 @@ export const EditableTitle: Story = {
  * 閉じるボタンを DS が出す（issue #722）。`onClose` に閉じる処理を渡すと、trailing の右端に
  * 40px の閉じるボタン（閉じるアイコン 20px・読み上げ名は closeLabel、既定「閉じる」）が出る。
  * trailing の KebabMenu 等はそのまま左に並ぶ。閉じるボタンを trailing に自作しない。
+ * trailing の間隔は 8px で、KebabMenu と閉じるボタンの当たり判定（44px）が重ならない（issue #752）。
  */
 export const WithCloseButton: Story = {
   tags: ["interaction"],
@@ -116,6 +117,14 @@ export const WithCloseButton: Story = {
     await expect(parseFloat(hit.height)).toBeGreaterThanOrEqual(44)
     // trailing の末尾（右端）に置く
     await expect(close.parentElement?.lastElementChild).toBe(close)
+    // KebabMenu と閉じるボタンの当たり判定（透明な before）が重ならない（issue #752 Codex P2）
+    const kebab = canvasElement.querySelector<HTMLElement>('[data-slot="kebab-menu"]')!
+    const hitBox = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect()
+      const w = parseFloat(getComputedStyle(el, "::before").width)
+      return { left: r.left + r.width / 2 - w / 2, right: r.left + r.width / 2 + w / 2 }
+    }
+    await expect(hitBox(kebab).right).toBeLessThanOrEqual(hitBox(close).left + 0.5)
     await userEvent.click(close)
     await expect(canvas.getByText("閉じた回数: 1")).toBeInTheDocument()
   },

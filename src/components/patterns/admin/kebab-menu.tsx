@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../../ui/ksk-labels"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -28,7 +29,10 @@ type KebabMenuItem = KebabMenuActionItem | KebabMenuSeparatorItem
 
 interface KebabMenuProps extends React.ComponentProps<"button"> {
   items: KebabMenuItem[]
-  /** トリガーボタンの aria-label。@default "メニュー"（DataTableActionCell.menuLabel と同名） */
+  /**
+   * トリガーボタンの aria-label（DataTableActionCell.menuLabel と同名）。
+   * 省略時は KskLabels の `menu`（Provider 無しなら「メニュー」、locale="en" なら「Menu」。issue #752）
+   */
   menuLabel?: string
 }
 
@@ -40,7 +44,8 @@ function isSeparator(item: KebabMenuItem): item is KebabMenuSeparatorItem {
  * 縦三点メニュー。DropdownMenu（Radix）を内部利用しており、
  * キーボード操作・Esc クローズ・フォーカス管理・role="menu" を備える。
  */
-function KebabMenu({ items, className, menuLabel = "メニュー", ...props }: KebabMenuProps) {
+function KebabMenu({ items, className, menuLabel, ...props }: KebabMenuProps) {
+  const defaultLabels = useKskLabels()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -49,9 +54,12 @@ function KebabMenu({ items, className, menuLabel = "メニュー", ...props }: K
           data-slot="kebab-menu"
           className={cn(
             "flex size-8 shrink-0 items-center justify-center rounded-lg hover:bg-[var(--Surface-Secondary)] transition-colors",
+            // 見た目は 32px のまま、当たり判定を 44px に広げる（DetailSheetHeader の閉じるボタンと同じ透明な before。issue #752）。
+            // relative は before の基準。consumer が className で absolute 等を渡せば tailwind-merge でそちらが勝ち、基準は保たれる
+            "relative before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:size-full before:min-h-11 before:min-w-11 before:content-['']",
             className
           )}
-          aria-label={menuLabel}
+          aria-label={menuLabel ?? defaultLabels.menu}
           {...props}
         >
           <svg

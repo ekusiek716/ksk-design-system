@@ -156,7 +156,9 @@ function DetailSheetHeader({
       </div>
       <div
         data-slot="detail-sheet-header-trailing"
-        className="flex min-h-10 shrink-0 items-center justify-end gap-1"
+        // 間隔 8px: KebabMenu（見た目 32px・当たり判定 44px で左右 6px はみ出す）と閉じるボタン（40px・44px で 2px）・
+        // 素の icon Button（40px）の当たり判定が重ならない最小の間隔（issue #752 Codex P2。旧 gap-1 = 4px では重なった）
+        className="flex min-h-10 shrink-0 items-center justify-end gap-2"
       >
         {trailing}
         {onClose && (
