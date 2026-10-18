@@ -4,6 +4,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FormFieldGroupLabelContext } from "@/lib/form-field-group-context"
 import { warnOnceInDev } from "@/lib/dev-warn"
 import { cn } from "@/lib/utils"
+import {
+  PILL_ITEM_HIT_AREA,
+  PILL_ITEM_SHAPE,
+  PILL_LIST_SHAPE,
+  SEGMENT_ITEM_BASE,
+  SEGMENT_ITEM_FOCUS_DISABLED,
+  SEGMENT_LIST_BASE,
+} from "@/lib/pill-segment-classes"
 
 interface PillToggleOption<T extends string = string> {
   label: string
@@ -51,7 +59,8 @@ type PillToggleProps<T extends string = string> =
       semantics?: "tabs" | "radio"
       /**
        * フォーム送信時の名前（`semantics="radio"` のときだけ有効。issue #741）。
-       * `<form>` の中では選択中の value が FormData / ネイティブ送信にこの名前で入る
+       * `<form>` の中では選択中の value が FormData / ネイティブ送信にこの名前で入る。
+       * tabs で渡すと使われず、開発ビルドで 1 回警告する
        */
       name?: string
       onChange: (value: T) => void
@@ -89,7 +98,8 @@ type PillToggleProps<T extends string = string> =
       semantics?: "tabs" | "radio"
       /**
        * フォーム送信時の名前（`semantics="radio"` のときだけ有効。issue #741）。
-       * `<form>` の中では選択中の value が FormData / ネイティブ送信にこの名前で入る
+       * `<form>` の中では選択中の value が FormData / ネイティブ送信にこの名前で入る。
+       * tabs で渡すと使われず、開発ビルドで 1 回警告する
        */
       name?: string
       onChange?: undefined
@@ -150,16 +160,14 @@ const TRIGGER_SIZE = {
   md: "h-9 px-4 typo-label-sm",
 } as const
 
-// semantics="radio"（issue #741）の見た目は TabsList / TabsTrigger の variant="pill" と同じにする
-// （tabs.tsx の pill の class と揃えること）。選択状態の属性だけが違う（Tabs: data-state=active / radio: checked）
-const RADIO_LIST =
-  "inline-flex w-fit max-w-full overflow-x-auto items-center gap-1 bg-[var(--Surface-Tertiary)] p-1 text-[var(--Text-Medium-Emphasis)] h-11 rounded-[var(--Control-Radius)]"
+// semantics="radio"（issue #741）の見た目は TabsList / TabsTrigger の variant="pill" と同じ。
+// 共通部分は src/lib/pill-segment-classes.ts を tabs.tsx と共有し、選択状態の属性（data-state=checked）だけここに書く
+const RADIO_LIST = cn(SEGMENT_LIST_BASE, PILL_LIST_SHAPE)
 const RADIO_ITEM = cn(
-  "inline-flex items-center justify-center whitespace-nowrap typo-label-sm transition-all",
-  "relative rounded-[var(--Control-Radius)] px-[var(--Control-Padding-X-Md)] py-1.5 gap-1.5",
-  "before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
-  "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
-  "disabled:pointer-events-none disabled:opacity-50",
+  SEGMENT_ITEM_BASE,
+  PILL_ITEM_SHAPE,
+  PILL_ITEM_HIT_AREA,
+  SEGMENT_ITEM_FOCUS_DISABLED,
   "data-[state=checked]:bg-[var(--Surface-Primary)] data-[state=checked]:text-[var(--Text-High-Emphasis)] data-[state=checked]:shadow-sm",
   "forced-colors:data-[state=checked]:bg-[Highlight] forced-colors:data-[state=checked]:text-[HighlightText]",
   "data-[state=unchecked]:hover:text-[var(--Text-High-Emphasis)]"
@@ -192,6 +200,14 @@ function PillToggle<T extends string = string>({
       'PillToggle: semantics="radio"（role="radiogroup"）には名前が必要です。見出しの id を aria-labelledby に渡すか、aria-label を指定してください（FormField as="group" の中なら不要。issue #741）。'
     )
   }, [isUnnamedRadiogroup])
+  const nameIgnored = semantics !== "radio" && name != null
+  React.useEffect(() => {
+    if (!nameIgnored) return
+    warnOnceInDev(
+      "pill-toggle-name-tabs",
+      'PillToggle: name は semantics="radio" のときだけ使われます（tabs はフォームへ値を送りません）。フォームの値選びなら semantics="radio" を指定してください（issue #741）。'
+    )
+  }, [nameIgnored])
 
   const renderContent = (opt: PillToggleOption<T>) => (
     <>

@@ -226,7 +226,10 @@ describe("公開変数の配線", () => {
   })
 
   it("Tabs の default variant が Control / Field 変数を参照する", async () => {
-    const source = readFileSync(join(ROOT, "src/components/ui/tabs.tsx"), "utf8")
+    // pill の class は PillToggle semantics="radio" と共有する定数へ出した（issue #741）ので両方を読む
+    const source =
+      readFileSync(join(ROOT, "src/components/ui/tabs.tsx"), "utf8") +
+      readFileSync(join(ROOT, "src/lib/pill-segment-classes.ts"), "utf8")
     expect(source).toContain("h-[var(--Control-Height-Md)]")
     expect(source).toContain("rounded-[var(--Field-Radius)]")
     expect(source).toContain("px-[var(--Control-Padding-X-Sm)]")

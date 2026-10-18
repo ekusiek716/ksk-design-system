@@ -222,7 +222,7 @@ export const GroupRows: Story = {
 }
 
 /**
- * as="group" の中の ChipSelector（single）は、aria-labelledby を省くとグループのラベルを自動で名前に使う（issue #734）。
+ * as="group" の中の ChipSelector（single）は、aria-labelledby を省くとグループのラベルを radiogroup の名前にも使う（issue #734 / #741）。
  * FieldGroup variant="rows" は FormField 以外の直下の行（ここでは div）にも py-3 を付ける（issue #733）。
  */
 export const GroupChipSelectorAutoName: Story = {
@@ -248,9 +248,9 @@ export const GroupChipSelectorAutoName: Story = {
     )
   },
   play: async ({ canvasElement }) => {
-    // 外側の group だけが「種別」で名前を持つ（内側の radiogroup に同じ名前を結ばない = 二重読み上げにしない）
+    // 外側の group と内側の radiogroup の両方が「種別」で名前を持つ（radiogroup は名前必須。issue #741）
     await expect(within(canvasElement).getByRole("group", { name: "種別" })).toBeTruthy()
-    await expect(within(canvasElement).getAllByRole("radiogroup")).toHaveLength(1)
+    await expect(within(canvasElement).getByRole("radiogroup", { name: "種別" })).toBeTruthy()
     const row = within(canvasElement).getByTestId("plain-row")
     await expect(getComputedStyle(row).paddingTop).toBe("12px")
     await expect(getComputedStyle(row).paddingBottom).toBe("12px")

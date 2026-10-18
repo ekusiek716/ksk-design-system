@@ -837,6 +837,7 @@
         "5択以上・折り返しが要る単一選択は ChipSelector の selectionMode=\"single\" を使う(issue #418)。選択中の1つだけ見せて畳む場合は CollapsibleChipField(issue #419)。パネル連動が要るなら Tabs。",
         "等幅・全幅にしたいときは fullWidth を使う。className=\"grid w-full grid-cols-N\" で TabsList に届かせる回避策は内部構造依存なので使わない(issue #500)。",
         "pill の trigger は透明な before 擬似要素でタップ領域を44pxまで確保済み。消費側で [role=\"tab\"] に追加の min-height を当てないこと(見えている面がトラックより高くなる)。",
+        "semantics=\"radio\" の項目（[role=\"radio\"] / data-slot=\"pill-toggle-item\"）も同じ before でタップ領域を確保済み。追加の min-height を当てない(issue #741)。",
         "名前を付ける: 見える見出しがあれば aria-labelledby、無ければ aria-label。フォームの値選び（性別・単位など）は semantics=\"radio\" にし、FormField as=\"group\" で包む（radiogroup 自身もそのラベルで名付けるので aria-label は不要）。画面内の表示の切り替え（一覧の絞り込み・週/月）は既定の tabs のまま(issue #741)"
       ]
     },
@@ -1691,7 +1692,7 @@
         "orientation=\"horizontal\" は置き場所の幅（@container）が 15rem 未満なら縦積みに戻る。endLabel は入力欄の右に出る（issue #712）",
         "チップ・トグル・ラジオ等の選択肢のまとまりを右（下）に置く行は as=\"group\"（ラベルは span[id]、中身の列は role=group + aria-labelledby、説明文・エラーは aria-describedby）。<span> + <div role=\"group\"> + w-20 のラベルで行を自作しない。htmlFor は渡さない（開発ビルドで警告）。required は読み上げに伝わらないので、必須は description か label の文言で補う（issue #720）",
         "区切り線で並べる項目行の一覧は FieldGroup variant=\"rows\"（divide-y + 直下の FormField に py-3）に入れる。FormField に className=\"py-3\" を足さない（issue #720）",
-        "FormField as=\"group\" の中の ChipSelector（single）は aria-label / aria-labelledby を省いても名前なしの警告が出ない（外側の group がラベルで名前を持つ。内側へ同じ名前は結ばない = 二重読み上げにしない。issue #734）"
+        "FormField as=\"group\" の中の radiogroup（ChipSelector single・PillToggle semantics=\"radio\"）は aria-label / aria-labelledby を省くとラベルを aria-labelledby で結ぶ（radiogroup は名前必須・外側の group の名前は継承されない。issue #741）。複数選択の ChipSelector と PillToggle tabs は結ばない（issue #734）"
       ]
     },
     {
@@ -1990,7 +1991,7 @@
         "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior.",
         "PillToggle は 2〜4 択の segmented control 専用。5択以上・折り返しが要る単一選択はこの selectionMode=\"single\" を使う(issue #418)。",
         "グループ名は aria-labelledby（見出しの id）か aria-label で渡す(issue #666)。単一選択の radiogroup は名前が必須で、どちらも無いと開発ビルドで console.warn する。id / aria-describedby もルートへ渡せる。native は accessibilityLabel / accessibilityLabelledBy",
-        "FormField as=\"group\" の中では aria-label / aria-labelledby を省いても警告が出ない（外側の group が名前を持つ）。明示した指定が優先（issue #734）"
+        "FormField as=\"group\" の中では aria-label / aria-labelledby を省いてよい。単一選択（radiogroup）はラベルを aria-labelledby で結ぶ（radiogroup は名前必須・外側の group の名前は継承されない。issue #741）。複数選択（role=group）は結ばず外側の group が名前を持つ（issue #734）。明示した指定が優先"
       ]
     },
     {

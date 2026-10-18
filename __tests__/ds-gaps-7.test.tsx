@@ -30,19 +30,20 @@ describe("FormField as=group → ChipSelector (#734)", () => {
   const render = (chip: React.ReactNode) =>
     renderToStaticMarkup(<FormField as="group" label="種別">{chip}</FormField>)
 
-  it("外側の group だけがラベルで名前を持つ（内側の radiogroup へ同じ名前を結ばず、二重読み上げにしない）", () => {
+  it("単一選択（radiogroup）は外側の group と同じラベルで名付ける（radiogroup は名前必須。#741 で方針変更）", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
     const html = render(<ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} />)
     const labelId = /<span id="([^"]+)"/.exec(html)![1]
-    expect(html.split(`aria-labelledby="${labelId}"`).length - 1).toBe(1)
+    // 外側の group と内側の radiogroup の 2 か所
+    expect(html.split(`aria-labelledby="${labelId}"`).length - 1).toBe(2)
+    expect(html).toMatch(new RegExp(`aria-labelledby="${labelId}"[^>]*role="radiogroup"|role="radiogroup"[^>]*aria-labelledby="${labelId}"`))
     expect(html).toContain('role="group"')
-    expect(html).toContain('role="radiogroup"')
     // 名前なしの警告は出ない
     expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
   })
 
-  it("同じ group 内の複数の ChipSelector でも警告なし・名前を足さない", () => {
+  it("同じ group 内の複数の ChipSelector（単一選択）はどちらも同じラベルで名付け、警告なし", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
     const html = render(
       <>
@@ -51,7 +52,7 @@ describe("FormField as=group → ChipSelector (#734)", () => {
       </>
     )
     expect(html.split('role="radiogroup"').length - 1).toBe(2)
-    expect(html.split("aria-labelledby=").length - 1).toBe(1)
+    expect(html.split("aria-labelledby=").length - 1).toBe(3)
     expect(warn).not.toHaveBeenCalled()
     warn.mockRestore()
   })
@@ -67,9 +68,10 @@ describe("FormField as=group → ChipSelector (#734)", () => {
       <ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} aria-labelledby="mine" />
     )
     expect(html).toContain('aria-labelledby="mine"')
-    expect(
-      render(<ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} aria-label="独自" />)
-    ).toContain('aria-label="独自"')
+    const labelled = render(<ChipSelector selectionMode="single" options={OPTIONS} value="a" onChange={() => {}} aria-label="独自" />)
+    expect(labelled).toContain('aria-label="独自"')
+    // aria-label を明示したら group のラベルは結ばない（外側の group の 1 か所だけ）
+    expect(labelled.split("aria-labelledby=").length - 1).toBe(1)
   })
 })
 
