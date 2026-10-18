@@ -1890,6 +1890,7 @@
       "rules": [
         "SheetContent 内で使い、Sheet の autoFocus=false と組み合わせる",
         "KebabMenu は DetailSheetHeader trailing に置く",
+        "trailing の要素どうし・閉じるボタンとの間隔は 8px（gap-2）。KebabMenu と閉じるボタンの当たり判定（44px）が重ならない最小の間隔なので、className 等で詰めない（issue #752）",
         "editable title は titleEditor slot に置く",
         "DetailSheetHeader の titleEditor には <CommitInput variant=\"inline-title\" aria-label=… /> を渡す（issue #675）",
         "閉じるボタンは DetailSheetHeader onClose（trailing の右端に Button ghost icon 40px + 閉じるアイコン 20px。読み上げ名は closeLabel、既定は KskLabelsProvider の close＝「閉じる」）。trailing に閉じる Button を自作しない（issue #722）",
