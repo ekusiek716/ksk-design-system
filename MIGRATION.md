@@ -20,6 +20,12 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 - **余白・項目行・ダイアログ・アプリ枠・予定の色（#711–#716）**: Container / ChipFilterBar の `gutter="fluid"`（`--Container-Gutter-Fluid`）、FormField の `orientation="horizontal"`・Input / Textarea の `targetSize="comfortable"`、Dialog の `centerFrom`・`height="fill"`・`size="2xl"`・`DialogHeader variant="bar"`、FieldSet の `gap`・FieldLegend の `size="sm"`、MobileAppShell の `viewport="fixed"`・`safeAreaTop`・`safeAreaBottom`・`bottomPadding="native-tab-bar"`（`--Native-Tab-Bar-Height`。ネイティブ側が書く任意フック <!-- docs-drift-ignore: --Native-Tab-Bar-Height -->）、MonthCalendar / AgendaList の予定の `accentColor` を追加します。すべて任意指定で、既定の見た目は変わりません。
 - **CollapsibleChipField の見出し（#717）**: `label` の既定の見た目が `typo-label-sm` + `Text-Medium-Emphasis`（12px）から、フォームの項目名と同じ `typo-label-md` + `Text-High-Emphasis`（14px 太字）に変わります（同じ詳細シートの `<Label>` / `FormField` と大きさをそろえるため）。従来の見た目が要る画面は `labelSize="sm"` を指定してください。展開中の選択肢のまとまりは見える見出しと `aria-labelledby` で結ばれます（`ariaLabel` を指定した場合は従来どおり `aria-label`）。`label` も `icon` も渡さない行は、先頭の 24px の空きが無くなります。native の CollapsibleChipField は変わりません。
 
+## 次回リリース（未リリース）の導入注意
+
+以下は次回の版に入る変更です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
+
+- **native の Sheet / ResponsiveDialog / Celebration の Web での開き方（#753・Web の開き方の修正）**: react-native-web で動かしたとき、下からの Sheet（スマホ幅の ResponsiveDialog を含む）と overlay の Celebration のカードが、開いてから約 0.8 秒画面外（カードは不可視）に止まり、最後に一気に出ていたのを直します。開いた直後から入口アニメーション（Sheet 220ms・snap の Sheet 180ms・カード 160ms）で出ます。iOS / Android の開き方（Modal の表示完了を待ってから動かす）は変わりません。API は変わりません。Web の E2E テストで「出るまで約 0.8 秒待つ」前提の固定待ちを入れていた場合は短くできます。
+
 ## v2.18.0 の導入注意
 
 以下はv2.18.0の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import {
   Animated,
   Easing,
@@ -226,7 +226,10 @@ function Celebration({
     [opacity, pop],
   )
 
-  useEffect(() => {
+  // onShow より先に走らせるため layout effect（#753）。react-native-web の Modal は
+  // 表示した commit の中で子の useEffect から onShow を呼ぶため、ここが useEffect だと
+  // onShow で始めたカードの入場を止め、保険（800ms）まで不可視のまま残る。
+  useLayoutEffect(() => {
     activeRef.current = active
     revealLifecycle.cancel()
     if (!active) return
