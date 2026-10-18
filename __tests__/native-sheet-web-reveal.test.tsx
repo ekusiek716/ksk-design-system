@@ -135,26 +135,38 @@ const sheets = {
   },
 }
 
+/** open にした直後から入口アニメーションが動き、onShow 不達の保険を待たずに出きることを確かめる。 */
+function expectRevealWithoutFallback(closed: number, settled: number) {
+  expect(panelTranslateY()).toBeCloseTo(closed)
+
+  // 数フレーム後には画面外から動き始め、まだ途中にいる（一気に跳んでいない）
+  advance(100)
+  const moving = panelTranslateY()
+  expect(moving).toBeLessThan(closed)
+  expect(moving).toBeGreaterThan(settled)
+
+  // 入口アニメーション（≤ 220ms）を待てば最終位置に着いている
+  advance(300)
+  expect(panelTranslateY()).toBeCloseTo(settled)
+
+  // 保険の時刻を過ぎても位置は変わらない
+  advance(SHOW_FALLBACK_DELAY)
+  expect(panelTranslateY()).toBeCloseTo(settled)
+}
+
 describe("native Sheet / ResponsiveDialog on react-native-web (#753)", () => {
   for (const [name, { view, closed, settled }] of Object.entries(sheets)) {
     it(`${name}: open 直後から入口アニメーションが動き、onShow 不達の保険を待たずに出きる`, () => {
       render(view(false))
       render(view(true))
-      expect(panelTranslateY()).toBeCloseTo(closed)
+      expectRevealWithoutFallback(closed, settled)
+    })
 
-      // 数フレーム後には画面外から動き始め、まだ途中にいる（一気に跳んでいない）
-      advance(100)
-      const moving = panelTranslateY()
-      expect(moving).toBeLessThan(closed)
-      expect(moving).toBeGreaterThan(settled)
-
-      // 入口アニメーション（≤ 220ms）を待てば最終位置に着いている
-      advance(300)
-      expect(panelTranslateY()).toBeCloseTo(settled)
-
-      // 保険の時刻を過ぎても位置は変わらない
-      advance(SHOW_FALLBACK_DELAY)
-      expect(panelTranslateY()).toBeCloseTo(settled)
+    // exam-kit の分野プレビューは、初回はデータと open を同じ更新で渡すため、開いた状態で mount する
+    it(`${name}: 開いた状態で mount しても直後から動く`, () => {
+      render(null)
+      render(view(true))
+      expectRevealWithoutFallback(closed, settled)
     })
 
     it(`${name}: 閉じてから開き直しても直後から動く`, () => {
@@ -163,19 +175,36 @@ describe("native Sheet / ResponsiveDialog on react-native-web (#753)", () => {
       render(view(false))
       advance(1_000)
       render(view(true))
-      expect(panelTranslateY()).toBeCloseTo(closed)
-      advance(100)
-      expect(panelTranslateY()).toBeLessThan(closed)
-      advance(300)
-      expect(panelTranslateY()).toBeCloseTo(settled)
+      expectRevealWithoutFallback(closed, settled)
     })
   }
+
+  // snap mode の open 処理と onShow は configRef を読む。configRef の更新が open 処理より
+  // 後（passive effect）だと、snapPoints を同じ更新で変えたとき古い snap で動き、
+  // パネルが画面外に止まる。
+  it("Sheet（snap mode）: snapPoints と open を同じ更新で変えても新しい snap の位置に出る", () => {
+    const snap = (open: boolean, snapPoints: number[]) => (
+      <Sheet open={open} onClose={() => {}} title={TITLE} snapPoints={snapPoints}>
+        {null}
+      </Sheet>
+    )
+    render(snap(false, [0.5, 0.9]))
+    render(snap(true, [0.3, 0.6]))
+    expectRevealWithoutFallback(Math.round(SCREEN_HEIGHT * 0.6), (0.6 - 0.3) * SCREEN_HEIGHT)
+  })
 })
 
 describe("native Celebration（overlay）on react-native-web (#753)", () => {
-  it("表示の直後からカードが現れ始め、保険を待たずに出きる", () => {
+  it("表示の直後からカードが現れ始め、保険を待たずに出きる", async () => {
     render(null)
-    render(<Celebration active trigger="emoji" title={TITLE} />)
+    // 「視差効果を減らす」の初回取得（Promise）の state 更新も act の中で済ませる
+    await act(async () => {
+      root.render(
+        <ThemeProvider>
+          <Celebration active trigger="emoji" title={TITLE} />
+        </ThemeProvider>,
+      )
+    })
     const card = () => Number(closestStyled("opacity").style.opacity)
     expect(card()).toBe(0)
 

@@ -24,7 +24,7 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 
 以下は次回の版に入る変更です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
 
-- **native の Sheet / ResponsiveDialog / Celebration の Web での開き方（#753・Web の開き方の修正）**: react-native-web で動かしたとき、下からの Sheet（スマホ幅の ResponsiveDialog を含む）と overlay の Celebration のカードが、開いてから約 0.8 秒画面外（カードは不可視）に止まり、最後に一気に出ていたのを直します。開いた直後から入口アニメーション（Sheet 220ms・snap の Sheet 180ms・カード 160ms）で出ます。iOS / Android の開き方（Modal の表示完了を待ってから動かす）は変わりません。API は変わりません。Web の E2E テストで「出るまで約 0.8 秒待つ」前提の固定待ちを入れていた場合は短くできます。
+- **native の Sheet / ResponsiveDialog / Celebration の Web での開き方（#753・Web の開き方の修正）**: react-native-web で動かしたとき、native の Sheet（全方向・snap mode）と、それを中で使う部品（スマホ幅の ResponsiveDialog・Select・MultiSelect・Combobox・DatePicker・TimePicker・DropdownFilter・BottomSheetForm・MenuDrawer・ReviewOverlay）、overlay の Celebration（CelebrationDialog を含む）のカードが、開いてから約 0.8 秒画面外（カードは不可視）に止まり、最後に一気に出ていたのを直します。開いた直後から入口アニメーション（Sheet 220ms・snap の Sheet 180ms・カード 160ms）で出ます。iOS / Android の開き方（Modal の表示完了を待ってから動かす）は変わりません。API は変わりません。Web の E2E テストで「出るまで約 0.8 秒待つ」前提の固定待ちを入れていた場合は短くできます。
 
 ## v2.18.0 の導入注意
 

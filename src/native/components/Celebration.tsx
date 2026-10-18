@@ -226,23 +226,21 @@ function Celebration({
     [opacity, pop],
   )
 
-  // onShow より先に走らせるため layout effect（#753）。react-native-web の Modal は
-  // 表示した commit の中で子の useEffect から onShow を呼ぶため、ここが useEffect だと
-  // onShow で始めたカードの入場を止め、保険（800ms）まで不可視のまま残る。
+  // onShow より先に走らせるため layout effect（#753。理由は createRevealLifecycle の注記）
   useLayoutEffect(() => {
     activeRef.current = active
     revealLifecycle.cancel()
-    if (!active) return
-    if (!overlay) {
-      // inline は Modal を挟まないのでそのまま開始できる
-      startCardEntrance(() => {})
-      return
-    }
+    if (!active || !overlay) return
     // overlay は Modal 表示完了（onShow）を待つ。待つ間は不可視なので保険を張る。
     pop.setValue(0.94)
     opacity.setValue(0)
     revealLifecycle.onOpen(revealCard)
-  }, [active, overlay, opacity, pop, revealCard, revealLifecycle, startCardEntrance])
+  }, [active, overlay, opacity, pop, revealCard, revealLifecycle])
+
+  useEffect(() => {
+    // inline は Modal を挟まないのでそのまま開始できる
+    if (active && !overlay) startCardEntrance(() => {})
+  }, [active, overlay, startCardEntrance])
 
   useEffect(() => () => revealLifecycle.cancel(), [revealLifecycle])
 

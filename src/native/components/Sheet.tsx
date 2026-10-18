@@ -88,17 +88,6 @@ export interface SheetProps {
  */
 const REVEAL_SHOW_FALLBACK_DELAY = 800
 
-/*
- * open の切り替え処理（入口アニメーションの巻き戻し・onShow 不達の保険）は
- * useLayoutEffect で行う（#753）。react-native-web の Modal は visible が true に
- * なった commit の中で、子の useEffect から onShow を呼ぶ。React は子の effect を
- * 親より先に実行するため、ここを useEffect にすると onShow で始めた入口アニメーションを
- * この処理が止めてしまい、Web では保険（800ms）が切れるまでパネルが画面外に残って
- * 最後に一気に出た。layout effect は commit の中で全ての useEffect より先に走るので、
- * Web でも「open の処理 → onShow」の順になる。iOS / Android の onShow は表示完了後に
- * 非同期で届くため、順序も入口アニメーションの開始点（onShow）も従来どおり。
- */
-
 export function Sheet(props: SheetProps) {
   const { side = "bottom", snapPoints } = props
   if (snapPoints && snapPoints.length > 0 && side === "bottom") {
@@ -156,7 +145,7 @@ function PlainSheet({
     setRevealed(true)
   }, [anim])
 
-  // onShow より先に走らせるため layout effect（#753。理由はファイル冒頭の注記）
+  // onShow より先に走らせるため layout effect（#753。理由は createRevealLifecycle の注記）
   useLayoutEffect(() => {
     openRef.current = open
     revealLifecycle.cancel()
@@ -459,7 +448,7 @@ function SnapBottomSheet({
     }
   }, [initialActive, initialTranslateY, translateY, setTranslateY])
 
-  // onShow より先に走らせるため layout effect（#753。理由はファイル冒頭の注記）
+  // onShow より先に走らせるため layout effect（#753。理由は createRevealLifecycle の注記）
   useLayoutEffect(() => {
     openRef.current = open
     revealLifecycle.cancel()
