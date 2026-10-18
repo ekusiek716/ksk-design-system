@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import {
   Animated,
   Dimensions,
@@ -145,7 +145,8 @@ function PlainSheet({
     setRevealed(true)
   }, [anim])
 
-  useEffect(() => {
+  // onShow より先に走らせるため layout effect（#753。理由は createRevealLifecycle の注記）
+  useLayoutEffect(() => {
     openRef.current = open
     revealLifecycle.cancel()
     anim.stopAnimation()
@@ -376,7 +377,9 @@ function SnapBottomSheet({
     }),
   )
 
-  useEffect(() => {
+  // 下の open 処理（layout effect）と onShow が同じ commit の最新値を読めるよう、
+  // こちらも layout effect で先に更新する（#753）
+  useLayoutEffect(() => {
     configRef.current = { points, minSnap, maxSnap, panelH, H, dismissible, onClose }
   }, [points, minSnap, maxSnap, panelH, H, dismissible, onClose])
 
@@ -445,7 +448,8 @@ function SnapBottomSheet({
     }
   }, [initialActive, initialTranslateY, translateY, setTranslateY])
 
-  useEffect(() => {
+  // onShow より先に走らせるため layout effect（#753。理由は createRevealLifecycle の注記）
+  useLayoutEffect(() => {
     openRef.current = open
     revealLifecycle.cancel()
     translateY.stopAnimation()

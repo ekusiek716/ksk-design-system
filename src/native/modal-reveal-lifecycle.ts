@@ -16,6 +16,14 @@ export interface RevealLifecycleDelays {
  * - onShow がそもそも届かない                  → showFallbackDelay 後に最終状態へ復旧（#250）
  *
  * cancel 後に古い animation callback / timer が到着しても次の open へ影響させない。
+ *
+ * 呼び出し側の約束（#753）: open の切り替えで呼ぶ cancel / onOpen（と、その前の
+ * 入場前の値への巻き戻し）は useLayoutEffect で行う。react-native-web の Modal は
+ * visible が true になった commit の中で、子の useEffect から onShow を呼ぶ。React は
+ * 子の effect を親より先に実行するため、useEffect だと onShow で始めた入口アニメーションを
+ * open 処理が止め、Web では showFallbackDelay が切れるまで不可視のまま残って最後に一気に出る。
+ * layout effect は commit の中で全ての useEffect より先に走るので「open 処理 → onShow」の
+ * 順になる。iOS / Android の onShow は表示完了後に非同期で届くため、順序は従来どおり。
  */
 export function createRevealLifecycle({
   animationFallbackDelay,
