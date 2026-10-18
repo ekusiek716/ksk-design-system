@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Chip } from "@/components/patterns/chip"
-import { FormFieldGroupLabelContext } from "@/components/patterns/form-field-context"
+import { FormFieldGroupLabelContext } from "@/lib/form-field-group-context"
 
 interface ChipSelectorOption<T extends string = string> {
   label: string

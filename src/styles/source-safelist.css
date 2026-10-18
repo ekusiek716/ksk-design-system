@@ -368,6 +368,8 @@
 @source inline("data-[state=checked]:bg-[var(--Surface-Primary)]");
 @source inline("data-[state=checked]:border-[var(--Brand-Primary)]");
 @source inline("data-[state=checked]:border-[var(--Object-Accent-Primary)]");
+@source inline("data-[state=checked]:shadow-sm");
+@source inline("data-[state=checked]:text-[var(--Text-High-Emphasis)]");
 @source inline("data-[state=checked]:text-[var(--Text-on-Inverse)]");
 @source inline("data-[state=checked]:translate-x-5");
 @source inline("data-[state=closed]:animate-accordion-up");
@@ -398,6 +400,7 @@
 @source inline("data-[state=open]:slide-in-from-top");
 @source inline("data-[state=open]:zoom-in-95");
 @source inline("data-[state=unchecked]:bg-[var(--Surface-Switch-Off,var(--Surface-Quaternary))]");
+@source inline("data-[state=unchecked]:hover:text-[var(--Text-High-Emphasis)]");
 @source inline("data-[state=unchecked]:invisible");
 @source inline("data-[state=unchecked]:translate-x-0");
 @source inline("data-[variant=destructive]:focus:bg-[var(--Surface-Caution)]");
@@ -477,6 +480,8 @@
 @source inline("font-semibold");
 @source inline("forced-colors:data-[state=active]:bg-[Highlight]");
 @source inline("forced-colors:data-[state=active]:text-[HighlightText]");
+@source inline("forced-colors:data-[state=checked]:bg-[Highlight]");
+@source inline("forced-colors:data-[state=checked]:text-[HighlightText]");
 @source inline("from-[var(--Brand-Primary)]");
 @source inline("gap-0");
 @source inline("gap-0.5");

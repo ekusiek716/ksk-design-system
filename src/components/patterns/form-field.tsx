@@ -2,7 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useKskLabels } from "../ui/ksk-labels"
 import { warnOnceInDev } from "@/lib/dev-warn"
-import { FormFieldGroupLabelContext } from "./form-field-context"
+import { FormFieldGroupLabelContext } from "@/lib/form-field-group-context"
 
 /**
  * `required` の見た目をどう出すか。

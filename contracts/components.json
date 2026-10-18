@@ -827,13 +827,16 @@
         "md"
       ],
       "props": {
-        "fullWidth": "boolean (既定 false) — 横幅いっぱいに広げ、各項目を等幅にする(issue #500)。既定はラベル幅(w-fit)"
+        "fullWidth": "boolean (既定 false) — 横幅いっぱいに広げ、各項目を等幅にする(issue #500)。既定はラベル幅(w-fit)",
+        "aria-label / aria-labelledby": "string — 何を選ぶ欄かの読み上げ名(issue #741)。FormField as=\"group\" の中では省いてよい（外側の group がラベルで名前を持つ）",
+        "semantics": "\"tabs\" | \"radio\" (既定 \"tabs\") — 読み上げの役割(issue #741)。tabs=tablist/tab（表示の切り替え）、radio=radiogroup/radio（フォームの値選び）。見た目・矢印キー操作は同じ"
       },
       "rules": [
         "Use for 2-4 options only. 1行固定の segmented control で折り返せない。",
         "5択以上・折り返しが要る単一選択は ChipSelector の selectionMode=\"single\" を使う(issue #418)。選択中の1つだけ見せて畳む場合は CollapsibleChipField(issue #419)。パネル連動が要るなら Tabs。",
         "等幅・全幅にしたいときは fullWidth を使う。className=\"grid w-full grid-cols-N\" で TabsList に届かせる回避策は内部構造依存なので使わない(issue #500)。",
-        "pill の trigger は透明な before 擬似要素でタップ領域を44pxまで確保済み。消費側で [role=\"tab\"] に追加の min-height を当てないこと(見えている面がトラックより高くなる)。"
+        "pill の trigger は透明な before 擬似要素でタップ領域を44pxまで確保済み。消費側で [role=\"tab\"] に追加の min-height を当てないこと(見えている面がトラックより高くなる)。",
+        "名前を付ける: 見える見出しがあれば aria-labelledby、無ければ aria-label。フォームの値選び（性別・単位など）は semantics=\"radio\" にし、FormField as=\"group\" で包む（ラベルが外側の group の名前になるので aria-label は不要。内側へ同じ名前を足さない＝二重読み上げにしない）。画面内の表示の切り替え（一覧の絞り込み・週/月）は既定の tabs のまま(issue #741)"
       ]
     },
     {
@@ -1472,7 +1475,8 @@
         "Color + icon + text (never color alone)",
         "density: default(gap-3 p-4) / compact(gap-2 px-3 py-2)。余白を詰めたいときは density=\"compact\"。`!p-2` 等の className で上書きしない（issue #683）",
         "layout: card(既定・角丸の囲み) / bar(全幅・角丸なし・下線のみ)。画面上端の注意帯は layout=\"bar\" を使い、div で帯を自作しない（issue #683。native Banner は画像バナーで別 API のため Web のみ）",
-        "閉じるボタンは onDismiss（右端の icon-sm ghost・読み上げ名は dismissLabel、既定は KskLabels の close）。閉じる処理は consumer が持つ。×ボタンを自作して並べない（issue #735）"
+        "閉じるボタンは onDismiss（右端の icon-sm ghost・読み上げ名は dismissLabel、既定は KskLabels の close）。閉じる処理は consumer が持つ。×ボタンを自作して並べない（issue #735）",
+        "読み上げは live で使い分ける（issue #740）。assertive=role=\"alert\"（今の読み上げに割り込む: 保存の失敗・期限切れなど、操作の結果ですぐ伝えるもの）/ polite=role=\"status\"（読み上げの区切りで伝える: 常時表示の案内・完了の知らせ）/ off=role なし（画面を開いたときから出ている静的な説明）。既定は variant から決まる: warning / caution=assertive、info / success=polite。常時出している注意帯（layout=\"bar\" のサンプルモード表示など）は live=\"polite\" か \"off\" にする。role を明示した場合はそちらが優先"
       ]
     },
     {
@@ -1884,6 +1888,7 @@
         "DetailSheetHeader の titleEditor には <CommitInput variant=\"inline-title\" aria-label=… /> を渡す（issue #675）",
         "閉じるボタンは DetailSheetHeader onClose（trailing の右端に Button ghost icon 40px + 閉じるアイコン 20px。読み上げ名は closeLabel、既定は KskLabelsProvider の close＝「閉じる」）。trailing に閉じる Button を自作しない（issue #722）",
         "leading を渡さないときは左の列を描かない（題名の左端がヘッダーの左の余白にそろう）。空の leading を埋めるために <span /> 等を渡さない（issue #729）",
+        "閉じるボタン（と trailing）だけのヘッダーは title 等を渡さなければ下線・下余白が自動で消える。className で border-0 / pb-0 を上書きしない。明示するときは bordered={true | false}（issue #742）",
         "Sheet / Dialog の中の文字列 title はシート / ダイアログの名前（SheetTitle / DialogTitle）として描かれる。sr-only の SheetTitle / DialogTitle を併用しない（id が重複する。同じ Content の Title の登録数で検出し、開発ビルドで console.error）。別の Title で名前を付けるときだけ overlayTitle={false}（issue #727）"
       ]
     },
@@ -2866,6 +2871,7 @@
         "分類の識別色（カテゴリ別の予定）は MonthCalendarEvent.accentColor に var(--Categorical-N) を渡す。md 以上はチップの先頭の点、md 未満は日付の下の点（tone より優先）。チップの面と文字は tone のまま。renderEvent の中で色の点を自作しない（issue #716）",
         "月の見出し（月名・今日へ・前後の月）は MonthCalendarHeader（month・onToday / onPrev / onNext・size md=スマホ / lg=PC・headingLevel）を grid の上に置く。前後は icon-sm + aria-label（既定「前の月」「次の月」）。見出しは aria-live=\"polite\" で月の切り替えを読み上げる。h2 + Button で自作しない（issue #721）",
         "見出しは月が変わると aria-live で読み上げる。一覧のスクロールで月が変わる画面は MonthCalendarHeader live={false} で切る（issue #736）",
+        "見出しの右に置く部品（「月／週」の PillToggle size=\"sm\"・追加ボタン等）は MonthCalendarHeader trailing に渡す（前後の月ボタンの右・前後ボタンが無くても右側に出る）。見出しの外で flex を組んで並べない（issue #743）",
         "週の帯 ⇄ 月全体の開閉は MonthCalendarExpandToggle（expanded / onExpandedChange・読み上げ名は固定で状態は aria-expanded・aria-controls に MonthCalendar の id）を grid の下に置き、expanded を view=\"month\" / \"week\" に渡す。Button ghost icon-sm w-full で自作しない（issue #721）"
       ]
     },
