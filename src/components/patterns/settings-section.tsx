@@ -42,7 +42,7 @@ interface SettingsListRowProps
   /**
    * 右端の操作部品・表示。関数を渡すと `{ id, "aria-describedby", disabled }` を受け取り、
    * title（`<label htmlFor>`）・description（`aria-describedby`）と結ばれる（issue #759）。
-   * 関数が null / undefined / boolean を返したときは結ばない（title は従来どおり `<p>`）。
+   * 関数が null / undefined / false を返したとき、要素が条件で null / false になったときは結ばない（title は従来どおり `<p>`）。
    * interactive / onClick の行では `{}` で呼ばれ、描画はするが結ばない。
    */
   rightSlot?: React.ReactNode | ((control: SettingsListRowControlProps) => React.ReactNode)
@@ -189,10 +189,9 @@ function SettingsListRow({
   } else {
     resolvedRightSlot = rightSlot
   }
-  // 関数が何も描かなかったときは label[for] が宙に浮くので結ばない
-  const linked =
-    canLink &&
-    (typeof rightSlot !== "function" || (resolvedRightSlot != null && typeof resolvedRightSlot !== "boolean"))
+  // rightSlot が何も描かないとき（関数が null を返した・要素が条件で null / false になった）は
+  // label[for] が宙に浮くので結ばない。描画条件（rightSlot が truthy）と同じ判定にそろえる
+  const linked = canLink && Boolean(resolvedRightSlot)
   const descriptionId = linked ? candidateDescriptionId : undefined
   const checkMissingControl = linked && typeof rightSlot !== "function" && controlId != null
   React.useEffect(() => {

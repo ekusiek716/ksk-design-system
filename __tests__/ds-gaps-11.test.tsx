@@ -246,4 +246,15 @@ describe("SettingsListRow の操作部品との結び付け (#759)", () => {
     const id = container.querySelector('[role="switch"]')!.id
     expect(id).toMatch(/^settings-row-[a-zA-Z0-9_-]+-control$/)
   })
+
+  it("controlId を渡しても rightSlot の要素が null / false なら結ばない", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    for (const slot of [null, false, undefined]) {
+      const el = host(<SettingsListRow title="通知" description="説明" controlId="cond" rightSlot={slot} />)
+      expect(el.querySelector("label")).toBeNull()
+      expect(el.querySelector("[id]")).toBeNull()
+    }
+    mount(<SettingsListRow title="通知" controlId="cond2" rightSlot={false} />)
+    expect(warn).not.toHaveBeenCalled()
+  })
 })

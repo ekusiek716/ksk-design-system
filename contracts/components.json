@@ -2674,7 +2674,7 @@
         "SettingsListRow"
       ],
       "props": {
-        "rightSlot": "ReactNode | ((control: { id?: string; \"aria-describedby\"?: string; disabled?: boolean }) => ReactNode) — 関数を渡すと操作部品へ展開する属性を受け取り、title / description と結ばれる。行が disabled なら disabled: true も入る。interactive / onClick の行では {} で呼ばれ結ばない。関数が null を返したら結ばない（issue #759。型は SettingsListRowControlProps）",
+        "rightSlot": "ReactNode | ((control: { id?: string; \"aria-describedby\"?: string; disabled?: boolean }) => ReactNode) — 関数を渡すと操作部品へ展開する属性を受け取り、title / description と結ばれる。行が disabled なら disabled: true も入る。interactive / onClick の行では {} で呼ばれ結ばない。関数が null を返した・要素が null / false のときは結ばない（issue #759。型は SettingsListRowControlProps）",
         "controlId": "string (任意) — rightSlot の操作部品の id。指定すると title を <label htmlFor>、description に `${controlId}-description` の id を付ける。rightSlot に要素を渡すなら部品に id と aria-describedby を自分で付ける（見つからないと開発ビルドで警告）。関数の rightSlot なら省略可（自動採番）。interactive / onClick の行では無視して開発ビルドで警告。title にリンク等の操作要素を入れる行では使わない（issue #759）"
       }
     },
