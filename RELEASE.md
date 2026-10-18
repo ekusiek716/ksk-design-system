@@ -2,6 +2,19 @@
 
 `ksk-design-system` のリリーススケジュール・運用ルール。
 
+## v2.18.0（2026-10-18）
+
+2.17.0以降に、FieldSet の見出し下の間隔と StarRating の読み上げ名を整えたminorリリース。次の2点は既定の見た目・読み上げが変わります。
+
+- `gap` を省いた FieldSet でも、FieldLegend の下に子の間隔と同じ24px（`mb-6`）が付きます。見出しの直下を詰めたい画面は `<FieldLegend className="mb-0">`、子の間隔ごと詰めるなら `gap="sm"` / `gap="md"` を指定します（#747）。
+- FormField `as="group"` の中で名前を省いた入力用の StarRating は、「評価」ではなくその FormField のラベルで読まれるようになります。見た目は変わりません。native の StarRating は対象外です（#746）。
+
+主な追加は次のとおりです。
+- StarRating に `aria-label` / `aria-labelledby`、KskLabels に `ratingGroup` / `ratingValue` / `ratingStar`（型では optional。#746）。
+- contracts の StarRating `sizes` に実装済みの `xl` を追加（#748）。
+
+導入時は [2.18.0の注意](./MIGRATION.md#v2180-の導入注意) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。consumerへの取り込みとアプリ配布は別工程で、今回のDS公開準備には含めません。
+
 ## v2.17.0（2026-10-18）
 
 2.16.0以降に、consumer側の上書きをなくすためのAPIを4件追加したminorリリース。追加のみのAPIが中心です。次の3点は既定の読み上げ・見た目が変わります。
