@@ -57,6 +57,34 @@ describe("StarRating の名前と既定文言 (#746)", () => {
     expect(group(withLabelledby).hasAttribute("aria-label")).toBe(false)
   })
 
+  it("label と aria-labelledby を併用したら aria-labelledby が名前になる（group の内外とも）", () => {
+    // accname 1.2 の手順 2B: aria-labelledby は aria-label より先に評価されるので、参照先の見出しが名前になる
+    const nameOf = (el: HTMLElement) => {
+      const g = group(el)
+      const ids = g.getAttribute("aria-labelledby")
+      if (ids) return ids.split(/\s+/).map((id) => el.querySelector(`[id="${id}"]`)?.textContent ?? "").join(" ")
+      return g.getAttribute("aria-label")
+    }
+    const outside = host(
+      <div>
+        <h3 id="rating-heading">総合満足度</h3>
+        <StarRating value={2} onChange={noop} label="使われない" aria-labelledby="rating-heading" />
+      </div>
+    )
+    expect(group(outside).getAttribute("aria-labelledby")).toBe("rating-heading")
+    expect(nameOf(outside)).toBe("総合満足度")
+
+    const inside = host(
+      <FormField as="group" label="満足度">
+        <h3 id="rating-heading-2">総合満足度</h3>
+        <StarRating value={2} onChange={noop} label="使われない" aria-labelledby="rating-heading-2" />
+      </FormField>
+    )
+    // group のラベル id ではなく、明示した aria-labelledby を使う
+    expect(group(inside).getAttribute("aria-labelledby")).toBe("rating-heading-2")
+    expect(nameOf(inside)).toBe("総合満足度")
+  })
+
   it("group の外では従来どおり「評価」・各星は「n点」（Provider 無しの既定は 1 文字も変えない）", () => {
     const el = host(<StarRating value={2} onChange={noop} />)
     expect(group(el).getAttribute("aria-label")).toBe("評価")
