@@ -34,6 +34,12 @@ interface KskLabels {
   calendarNextMonth: string
   /** MonthCalendarExpandToggle の読み上げ名（開閉で変えない。状態は aria-expanded） */
   calendarExpand: string
+  /** StarRating（入力用）の radiogroup の読み上げ名。FormField as="group" の中では使わず見出しで名付ける（issue #746） */
+  ratingGroup: string
+  /** StarRating（表示専用・role="img"）の読み上げ名。`{value}` / `{max}` を値に置き換える（issue #746） */
+  ratingValue: string
+  /** StarRating（入力用）の各星（radio）の読み上げ名。`{value}` / `{max}` を値に置き換える（issue #746） */
+  ratingStar: string
 }
 
 const KSK_DEFAULT_LABELS: Record<KskLocale, KskLabels> = {
@@ -50,6 +56,9 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, KskLabels> = {
     calendarPrevMonth: "前の月",
     calendarNextMonth: "次の月",
     calendarExpand: "月全体を表示",
+    ratingGroup: "評価",
+    ratingValue: "{value}/{max}点",
+    ratingStar: "{value}点",
   },
   en: {
     skipLink: "Skip to content",
@@ -64,6 +73,9 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, KskLabels> = {
     calendarPrevMonth: "Previous month",
     calendarNextMonth: "Next month",
     calendarExpand: "Show full month",
+    ratingGroup: "Rating",
+    ratingValue: "Rated {value} of {max}",
+    ratingStar: "{value} of {max}",
   },
 }
 
@@ -151,6 +163,16 @@ function stripUndefined(labels: Partial<KskLabels> | undefined): Partial<KskLabe
   return out
 }
 
+/**
+ * 文言の `{value}` / `{max}` 等の差し込み口を値に置き換える（issue #746）。
+ * 値の無い差し込み口はそのまま残す。
+ */
+function formatKskLabel(template: string, values: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
+    Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : match
+  )
+}
+
 /** 配下の DS 既定文言（Provider が無ければ日本語）。 */
 function useKskLabels(): KskLabels {
   return React.useContext(KskLabelsContext).labels
@@ -161,5 +183,5 @@ function useKskLocale(): KskLocale | undefined {
   return React.useContext(KskLabelsContext).locale
 }
 
-export { KskLabelsProvider, useKskLabels, useKskLocale, KSK_DEFAULT_LABELS }
+export { KskLabelsProvider, useKskLabels, useKskLocale, KSK_DEFAULT_LABELS, formatKskLabel }
 export type { KskLabels, KskLabelsProviderProps, KskLocale }

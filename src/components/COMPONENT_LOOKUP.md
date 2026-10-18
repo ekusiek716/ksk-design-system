@@ -75,7 +75,7 @@
 | SocialIcon, SOCIAL_ICON_PLATFORMS, SOCIAL_ICON_LABELS | `@/components/ui/social-icon` | — | Default, AllPlatforms, AllMono, Tones |
 | SocialLoginButton | `@/components/ui/social-login-button` | — | Line, Google, Apple, Amazon, AllProviders, LightAndDark, Loading |
 | Spinner | `@/components/ui/spinner` | — | Default, AllSizes |
-| StarRating | `@/components/ui/star-rating` | — | Interactive, AllowClear, ReadOnly, Sizes |
+| StarRating | `@/components/ui/star-rating` | — | Interactive, AllowClear, ReadOnly, Sizes, InFormFieldGroup, EnglishLabels |
 | StatusActionBadge, SyncStatusButton | `@/components/ui/status-action-badge` | — | AllStates, Actionable, Compact |
 | SubNav | `@/components/ui/sub-nav` | — | Underline, Chip, WithBadge, WithDescriptions |
 | Switch | `@/components/ui/switch` | — | Default, Checked, Disabled, DisabledChecked, WithLabel, SettingsList |
@@ -121,7 +121,7 @@
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
 | ErrorState, NotFoundIllustration | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry, NotFound |
 | FeatureComparisonTable | `@/components/patterns/feature-comparison-table` | — | Default, ThreeColumns |
-| FieldSet, FieldLegend, FieldGroup, FieldDescription, FieldError, FieldSeparator | `@/components/patterns/field` | — | 3セクションの長いフォーム, SeparatorWithLabel, CompactFilterGroups |
+| FieldSet, FieldLegend, FieldGroup, FieldDescription, FieldError, FieldSeparator | `@/components/patterns/field` | — | 3セクションの長いフォーム, SeparatorWithLabel, CompactFilterGroups, LegendSpacing |
 | FileUpload | `@/components/patterns/file-upload` | — | Default, Multiple |
 | FilterChip | `@/components/patterns/filter-chip` | — | Inactive, ActiveWithValue, Toggle, Group |
 | FilterPill | `@/components/patterns/filter-pill` | — | Default, Active, ActiveWithoutClear, Bar, OpensPanelAndClears, WithIcon |

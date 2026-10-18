@@ -43,9 +43,6 @@
 @source inline("[&>*]:flex-col");
 @source inline("[&>*]:min-w-[140px]");
 @source inline("[&>*]:shrink-0");
-@source inline("[&>[data-slot=field-legend]]:mb-2");
-@source inline("[&>[data-slot=field-legend]]:mb-4");
-@source inline("[&>[data-slot=field-legend]]:mb-6");
 @source inline("[&>button]:bg-[var(--Brand-Primary)]");
 @source inline("[&>button]:bg-transparent!");
 @source inline("[&>button]:hover:bg-[var(--Brand-Primary)]");
@@ -86,6 +83,9 @@
 @source inline("[--ksk-fab-bottom-offset:6rem]");
 @source inline("[-webkit-tap-highlight-color:transparent]");
 @source inline("[:where(&)>:where(:not([data-slot=collapsible-chip-field],[data-slot=field-separator],[data-slot=field-legend],[data-slot=field-description],[data-slot=field-error]))]:py-3");
+@source inline("[:where(&)>:where([data-slot=field-legend])]:mb-2");
+@source inline("[:where(&)>:where([data-slot=field-legend])]:mb-4");
+@source inline("[:where(&)>:where([data-slot=field-legend])]:mb-6");
 @source inline("[@media(any-pointer:coarse)]:min-w-11");
 @source inline("[@media(hover:hover)_and_(pointer:fine)]:transition-colors");
 @source inline("[@media(hover:hover)_and_(pointer:fine)]:w-[max(2rem,var(--Chip-Remove-Width))]");
@@ -782,6 +782,7 @@
 @source inline("max-w-sm");
 @source inline("max-w-xl");
 @source inline("max-w-xs");
+@source inline("mb-0");
 @source inline("mb-1");
 @source inline("mb-1.5");
 @source inline("mb-2");

@@ -145,3 +145,50 @@ export const CompactFilterGroups: Story = {
     await expect(getComputedStyle(legend).fontSize).toBe("14px")
   },
 }
+
+/**
+ * gap を省いた既定でも legend の下に子の間隔と同じ 24px が付く（issue #747）。
+ * 詰めたい画面は `<FieldLegend className="mb-0">`（legend の余白は詳細度 0 なので className が勝つ）。
+ */
+export const LegendSpacing: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="flex w-80 flex-col gap-8">
+      <FieldSet data-testid="default">
+        <FieldLegend>既定</FieldLegend>
+        <FormField label="氏名" htmlFor="legend-spacing-name">
+          <Input id="legend-spacing-name" />
+        </FormField>
+        <FormField label="メールアドレス" htmlFor="legend-spacing-email">
+          <Input id="legend-spacing-email" type="email" />
+        </FormField>
+      </FieldSet>
+      <FieldSet data-testid="tight">
+        <FieldLegend className="mb-0">詰めた legend</FieldLegend>
+        <FormField label="電話番号" htmlFor="legend-spacing-tel">
+          <Input id="legend-spacing-tel" type="tel" />
+        </FormField>
+      </FieldSet>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const measure = (testId: string) => {
+      const set = canvasElement.querySelector<HTMLElement>(`[data-testid="${testId}"]`)!
+      const legend = set.querySelector<HTMLElement>('[data-slot="field-legend"]')!
+      const first = legend.nextElementSibling as HTMLElement
+      const second = first.nextElementSibling as HTMLElement | null
+      return {
+        legendGap: first.getBoundingClientRect().top - legend.getBoundingClientRect().bottom,
+        childGap: second ? second.getBoundingClientRect().top - first.getBoundingClientRect().bottom : undefined,
+      }
+    }
+    const def = measure("default")
+    // 既定: legend の下の間隔は子どうしの間隔と同じ（0 ではない）
+    await expect(def.legendGap).toBeGreaterThan(0)
+    await expect(Math.abs(def.legendGap - def.childGap!)).toBeLessThanOrEqual(1)
+    // className="mb-0" は既定の余白より勝つ
+    const tight = measure("tight")
+    await expect(tight.legendGap).toBeLessThan(def.legendGap)
+    await expect(Math.abs(tight.legendGap)).toBeLessThanOrEqual(1)
+  },
+}

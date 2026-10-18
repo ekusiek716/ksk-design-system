@@ -124,6 +124,10 @@ describe("KskLabelsProvider", () => {
       calendarPrevMonth: "前の月",
       calendarNextMonth: "次の月",
       calendarExpand: "月全体を表示",
+      // StarRating（issue #746）: 従来の直書きの既定と同じ文言（`{value}` / `{max}` は値に置き換える）
+      ratingGroup: "評価",
+      ratingValue: "{value}/{max}点",
+      ratingStar: "{value}点",
     })
     const nav = renderToStaticMarkup(<NavigationBar onLeft={() => {}} onShare={() => {}} />)
     expect(nav).toContain('aria-label="戻る"')

@@ -10,7 +10,8 @@ describe("FieldSet gap / FieldLegend size（#714）", () => {
     const markup = renderToStaticMarkup(<FieldSet gap="sm"><FieldLegend>x</FieldLegend></FieldSet>)
     expect(markup).toContain("gap-2")
     expect(markup).not.toContain("gap-6")
-    expect(markup).toContain("[&amp;&gt;[data-slot=field-legend]]:mb-2")
+    expect(markup).toContain("[:where(&amp;)&gt;:where([data-slot=field-legend])]:mb-2")
+    expect(markup).not.toContain(":mb-6")
     expect(markup).toContain('data-gap="sm"')
   })
 
@@ -21,10 +22,21 @@ describe("FieldSet gap / FieldLegend size（#714）", () => {
     expect(markup).toContain('data-size="sm"')
   })
 
-  it("既定は従来どおり", () => {
+  it("既定（gap 未指定）でも legend の下に子の間隔と同じ 24px を付ける（#747）", () => {
     expect(renderToStaticMarkup(<FieldSet>a</FieldSet>)).toBe(
-      '<fieldset data-slot="field-set" class="m-0 flex min-w-0 flex-col gap-6 border-0 p-0">a</fieldset>',
+      '<fieldset data-slot="field-set" class="m-0 flex min-w-0 flex-col border-0 p-0 gap-6 [:where(&amp;)&gt;:where([data-slot=field-legend])]:mb-6">a</fieldset>',
     )
+    // gap 未指定は data-gap を出さない（従来どおり）
+    expect(renderToStaticMarkup(<FieldSet>a</FieldSet>)).not.toContain("data-gap")
+  })
+
+  it("className の gap-* は子の間隔を上書きする（legend の余白は gap 指定で変える）", () => {
+    const markup = renderToStaticMarkup(<FieldSet className="gap-3">a</FieldSet>)
+    expect(markup).toContain("gap-3")
+    expect(markup).not.toContain(" gap-6 ")
+  })
+
+  it("FieldLegend の既定は従来どおり", () => {
     expect(renderToStaticMarkup(<FieldLegend>a</FieldLegend>)).toBe(
       '<legend data-slot="field-legend" class="typo-heading-md text-[var(--Text-High-Emphasis)]">a</legend>',
     )
