@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { useComposedRef } from "@/lib/compose-ref"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { Spinner } from "@/components/ui/spinner"
+import { FormFieldGroupLabelContext } from "@/lib/form-field-group-context"
 
 type ActionTileVariant = "neutral" | "selected" | "success" | "info" | "caution"
 type QuickActionGridColumns = 2 | 3 | 4 | "auto"
@@ -94,6 +95,9 @@ interface QuickActionGridProps extends React.ComponentProps<"div"> {
    * - 未指定（既定）: 起動ボタンの集まりとして扱う。grid は role を持たず、タイルは `aria-pressed`
    * - `"single"`: `role="radiogroup"` + `role="radio"`。矢印キー移動と roving tabindex が有効になる
    * - `"multiple"`: タイルは `aria-pressed`（トグルボタンであることを明示的に選んだ状態）
+   *
+   * `"single"` の radiogroup は名前が必須（WAI-ARIA）。`aria-label` / `aria-labelledby` を省くと、
+   * `FormField as="group"` の中ではそのラベルを `aria-labelledby` で結ぶ（issue #751）。
    */
   selectionMode?: QuickActionGridSelectionMode
 }
@@ -284,6 +288,8 @@ function QuickActionGrid({
   onKeyDown,
   ref,
   children,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledbyProp,
   ...props
 }: QuickActionGridProps) {
   const innerRef = React.useRef<HTMLDivElement | null>(null)
@@ -295,6 +301,13 @@ function QuickActionGrid({
   }, [])
   const mergedRef = useComposedRef(setInnerElement, ref)
   const isSingle = selectionMode === "single"
+  const resolvedRole = role ?? (isSingle ? "radiogroup" : undefined)
+  // issue #751（#741 / #746 と同じ方針）: radiogroup は WAI-ARIA 1.2 で名前が必須で、外側の group の名前は
+  // 継承されない。FormField as="group" の中の単一選択は、名前が未指定ならそのラベルを aria-labelledby で結ぶ。
+  // selectionMode 未指定 / "multiple"、consumer が role を上書きした場合は結ばない。明示の aria-label / aria-labelledby が優先
+  const groupLabelId = React.useContext(FormFieldGroupLabelContext)
+  const ariaLabelledby =
+    ariaLabelledbyProp ?? (resolvedRole === "radiogroup" && isSingle && !ariaLabel ? groupLabelId : undefined)
 
   // roving tabindex: 選択中のタイルだけ tabIndex=0（未選択なら先頭）。
   // 依存配列を持たせず毎レンダー同期する（子の選択状態は grid の props に現れないため）。
@@ -351,7 +364,9 @@ function QuickActionGrid({
     <div
       data-slot="quick-action-grid"
       ref={mergedRef}
-      role={role ?? (isSingle ? "radiogroup" : undefined)}
+      role={resolvedRole}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledby}
       data-selection-mode={selectionMode}
       onKeyDown={handleKeyDown}
       className={cn(

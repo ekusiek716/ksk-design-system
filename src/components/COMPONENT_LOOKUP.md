@@ -145,7 +145,7 @@
 | ProgressSteps | `@/components/patterns/progress-steps` | — | Step2Active, FirstStep, ThirdStep, AllComplete, ThreeSteps |
 | AUTO_PROMPT_SUPPRESSION_EVENT, AutoPrompt, PromptCoordinatorProvider | `@/components/patterns/prompt-coordinator` | — | Default, 予約した案内を順番に表示する |
 | Prose | `@/components/patterns/prose` | — | PrivacyPolicy, SingleSection |
-| ActionTile, QuickActionGrid | `@/components/patterns/quick-action-grid` | — | EmojiOnly, IconAndLabel, WithMeta, IndicatorOverride, SelectedWithoutDescription, NarrowWithLongMeta, SingleSelection, MultipleSelection, LaunchersWithoutSelectionMode, Illustration, ColorSwatch |
+| ActionTile, QuickActionGrid | `@/components/patterns/quick-action-grid` | — | EmojiOnly, IconAndLabel, WithMeta, IndicatorOverride, SelectedWithoutDescription, NarrowWithLongMeta, SingleSelection, InFormFieldGroup, MultipleSelection, LaunchersWithoutSelectionMode, Illustration, ColorSwatch |
 | ResponsiveOverlayFrame, ResponsiveOverlayFooter | `@/components/patterns/responsive-overlay-frame` | — | Short form (mobile-form), Long keyboard-aware form (mobile-page), mobile-full preset, breakpoint=lg, breakpoint=product-theme, snapPoints は dialog に変換されない, float サイド（カード型）, float-glass サイド（ガラス素材）, float サイド（長い内容・既定の最大高さと safe-area）, plain preset（素の bottom シート） |
 | ReviewOverlay | `@/components/patterns/review-overlay` | — | Default, WithPins |
 | Screen | `@/components/patterns/screen` | — | ScrollableWithFooter, WithHeader, FixedPhotoHero, OnboardingCard, NestedInAppMain |
@@ -172,7 +172,7 @@
 | ChartControls | `@/components/patterns/admin/chart-controls` | — | Default, PeriodOnly |
 | DataTable, DataTableTable, DataTableHeader, DataTableBody, DataTableRow, DataTableHead, DataTableCell, DataTableAvatarCell, DataTableImageCell, DataTableCheckboxCell, DataTableActionCell, DataTableInputCell, DataTableSelectCell, DataTableDateCell, DataTableNumberCell, DataTableDragHandleCell, DataTableLinkCell, DataTableBulkActions, DataTableSectionRow, DataTableAddRow, DataTableEmptyState, DATA_TABLE_WIDTH_PX | `@/components/patterns/admin/data-table` | **align**: `left`, `center`, `right`<br>**width**: `auto`, `narrow`, `checkbox`, `action`, `sm`, `md`, `lg`, `xl`, `flex` | Default, Rows / Columns API, Rich Columns (CellContext API), Empty, WithSections, CellVariants, Row Click / Full Cell Hit Area, Flexible Column Width, Sticky Columns (左端固定), Drag & Drop (行の並べ替え), 固定列（オフセット自動計算）, サーバーページング |
 | ImageUploader | `@/components/patterns/admin/image-uploader` | — | Default, Empty |
-| KebabMenu | `@/components/patterns/admin/kebab-menu` | — | Default, WithMetadata |
+| KebabMenu | `@/components/patterns/admin/kebab-menu` | — | Default, WithMetadata, LabelsAndHitArea |
 | NotificationList | `@/components/patterns/admin/notification-list` | — | Vertical, Horizontal, Empty |
 | SearchPanel | `@/components/patterns/admin/search-panel` | — | Default |
 | StatusTabs | `@/components/patterns/admin/status-tabs` | — | Default |

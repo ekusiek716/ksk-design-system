@@ -13,10 +13,10 @@ import { KskLabelsProvider } from "../src/components/ui/ksk-labels"
 const noop = () => {}
 
 describe("DetailSheetHeader onClose", () => {
-  it("onClose 無しは閉じるボタンを出さない（従来の DOM）", () => {
+  it("onClose 無しは閉じるボタンを出さない（trailing の間隔は #752 から 8px）", () => {
     const html = renderToStaticMarkup(<DetailSheetHeader title="詳細" trailing={<span>t</span>} />)
     expect(html).not.toContain("detail-sheet-header-close")
-    expect(html).toContain('<div data-slot="detail-sheet-header-trailing" class="flex min-h-10 shrink-0 items-center justify-end gap-1"><span>t</span></div>')
+    expect(html).toContain('<div data-slot="detail-sheet-header-trailing" class="flex min-h-10 shrink-0 items-center justify-end gap-2"><span>t</span></div>')
   })
 
   it("onClose で trailing の末尾に 40px の閉じるボタン（既定「閉じる」）", () => {

@@ -534,7 +534,7 @@
     {
       "name": "KskLabelsProvider",
       "path": "src/components/ui/ksk-labels.tsx",
-      "description": "DS 部品の既定文言（スキップリンク・管理画面のメニュー・FormField の必須/任意・閉じるボタン・NavigationBar の戻る/閉じる/シェア・カレンダー見出し・StarRating の読み上げ名）と MonthCalendar / AgendaList の locale 既定をまとめて切り替える Provider（issue #723）。アプリの一番外側に 1 回置く。",
+      "description": "DS 部品の既定文言（スキップリンク・管理画面のメニュー・FormField の必須/任意・閉じるボタン・NavigationBar の戻る/閉じる/シェア・カレンダー見出し・StarRating の読み上げ名・KebabMenu のトリガー）と MonthCalendar / AgendaList の locale 既定をまとめて切り替える Provider（issue #723）。アプリの一番外側に 1 回置く。",
       "subcomponents": [
         "useKskLabels",
         "useKskLocale",
@@ -1890,6 +1890,7 @@
       "rules": [
         "SheetContent 内で使い、Sheet の autoFocus=false と組み合わせる",
         "KebabMenu は DetailSheetHeader trailing に置く",
+        "trailing の要素どうし・閉じるボタンとの間隔は 8px（gap-2）。KebabMenu と閉じるボタンの当たり判定（44px）が重ならない最小の間隔なので、className 等で詰めない（issue #752）",
         "editable title は titleEditor slot に置く",
         "DetailSheetHeader の titleEditor には <CommitInput variant=\"inline-title\" aria-label=… /> を渡す（issue #675）",
         "閉じるボタンは DetailSheetHeader onClose（trailing の右端に Button ghost icon 40px + 閉じるアイコン 20px。読み上げ名は closeLabel、既定は KskLabelsProvider の close＝「閉じる」）。trailing に閉じる Button を自作しない（issue #722）",
@@ -2775,6 +2776,7 @@
         "button semantics",
         "aria-pressed when selected (selected prop または variant=\"selected\" のどちらでも true)",
         "selectionMode=\"single\" のとき grid が role=\"radiogroup\"、tile が role=\"radio\" + aria-checked(web) / accessibilityRole=\"radiogroup\"|\"radio\" + accessibilityState.checked(native)。この場合 aria-pressed / selected は出さない(意味論の二重化を避ける)",
+        "selectionMode=\"single\" の radiogroup は名前が必須。aria-label / aria-labelledby を省くと、FormField as=\"group\" の中ではそのラベルを aria-labelledby で結ぶ(web・issue #751。明示した aria-label / aria-labelledby が優先。selectionMode 未指定 / multiple、role を上書きした場合は結ばない)",
         "selectionMode=\"single\" の web は roving tabindex(選択中のタイルのみ tabIndex=0、未選択なら先頭)と上下左右矢印での移動+選択を持つ(WAI-ARIA APG の radio group パターン。端で折り返し、disabled は移動対象外)",
         "選択状態は色だけでなく既定チェック(indicator省略時)でも伝える(WCAG 1.4.1)",
         "既定チェックは読み上げ対象外(aria-hidden / accessibilityElementsHidden)。選択状態の正本は aria-pressed(web) / accessibilityState.selected(native)"
@@ -2784,6 +2786,7 @@
         "shortcut row/grid の columns/gap を consumer 側で決め打ちしない",
         "children には ActionTile を使う",
         "選択状態は selected prop を使う",
+        "フォームの単一選択は FormField as=\"group\" で包む(radiogroup 自身をそのラベルで名付けるので aria-label は不要。issue #751)。FormField の外では見出しの id を aria-labelledby に渡すか aria-label を指定する",
         "単一選択(アンケートの単一回答など)には selectionMode=\"single\" を指定する。複数選択と明示したい場合は \"multiple\"。未指定は「選択の集合ではない起動ボタン」の意味で、従来どおり grid に role を付けず tile は aria-pressed のみ(issue #318)",
         "selectionMode=\"single\" で選択中の ActionTile が 2 つ以上あると開発ビルドで console.warn する(ChipSelector の既定モード問題と同じ静かな誤動作の検出)",
         "ActionTile 側の selectionMode 明示は親 grid より優先される(grid 外の単体使用・混在時の逃げ道)",
@@ -3226,10 +3229,14 @@
       "rules": [
         "For table row actions only",
         "description は補足説明、shortcut は右側表示",
-        "{ type: \"separator\" } で区切り線を挿入"
+        "{ type: \"separator\" } で区切り線を挿入",
+        "英語の画面は KskLabelsProvider locale=\"en\" でトリガーの読み上げ名が「Menu」になる。KebabMenu ごとに menuLabel を渡して回らない（issue #752）"
+      ],
+      "accessibility": [
+        "トリガーは見た目 32px のまま、透明な before で当たり判定を 44px に広げる（DetailSheetHeader の閉じるボタンと同じ。issue #752）"
       ],
       "props": {
-        "menuLabel": "string (既定 \"メニュー\") — トリガーボタンの aria-label（issue #428、DataTableActionCell.menuLabel と同名）"
+        "menuLabel": "string (既定 KskLabels の menu「メニュー」/ en「Menu」) — トリガーボタンの aria-label（issue #428 / #752、DataTableActionCell.menuLabel と同名）"
       }
     },
     {

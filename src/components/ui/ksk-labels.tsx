@@ -42,6 +42,8 @@ interface KskLabels {
   ratingValue?: string
   /** StarRating（入力用）の各星（radio）の読み上げ名。`{value}` / `{max}` を値に置き換える（issue #746） */
   ratingStar?: string
+  /** KebabMenu のトリガー（縦三点ボタン）の読み上げ名（issue #752） */
+  menu?: string
 }
 
 /** 全キーを解決済みの文言（部品の中・既定値で使う）。 */
@@ -64,6 +66,7 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, ResolvedKskLabels> = {
     ratingGroup: "評価",
     ratingValue: "{value}/{max}点",
     ratingStar: "{value}点",
+    menu: "メニュー",
   },
   en: {
     skipLink: "Skip to content",
@@ -81,6 +84,7 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, ResolvedKskLabels> = {
     ratingGroup: "Rating",
     ratingValue: "Rated {value} of {max}",
     ratingStar: "{value} of {max}",
+    menu: "Menu",
   },
 }
 
