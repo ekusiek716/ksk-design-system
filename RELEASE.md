@@ -2,6 +2,16 @@
 
 `ksk-design-system` のリリーススケジュール・運用ルール。
 
+## v2.20.0（2026-10-19）
+
+2.19.0以降に、SettingsListRow の項目名・説明を右の操作部品（Switch など）と結べるようにしたminorリリース。追加のみで、指定しない行の見た目・読み上げ・動きは変わりません。
+
+- SettingsListRow に `controlId` と、`rightSlot` に関数（`{ id, "aria-describedby" }` を受け取る。型 `SettingsListRowControlProps`）を渡す書き方を追加します。結ぶと title が右の操作部品の `<label>`（押すと切り替わる）、description がその説明になり、読み上げの重複がなくなります（#759）。
+- interactive / onClick の行（行全体が button）では結ばれません。native の SettingsListRow は対象外です。
+- `rightSlot` の型が `ReactNode | (control) => ReactNode` に広がります。この型を取り出して自前で描画している consumer は型エラーになりえます。
+
+導入時は [2.20.0の注意](./MIGRATION.md#v2200-の導入注意) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。
+
 ## v2.19.0（2026-10-19）
 
 2.18.0以降に、consumer の上書きを減らす読み上げ・当たり判定の調整と、native の Sheet などが Web で約0.8秒止まってから出る不具合の修正をまとめたminorリリース。次の点は既定の見た目・読み上げ・動きが変わります。
