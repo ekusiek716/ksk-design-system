@@ -152,7 +152,7 @@
 | SearchBar | `@/components/patterns/search-bar` | — | Default, WithValue, Disabled, WithOnSearch, AsForm |
 | SectionHeader | `@/components/patterns/section-header` | — | WithAction, WithoutAction, TitleOnly, WithGhostButton |
 | SelectableTile | `@/components/patterns/selectable-tile` | — | Shapes, MovableGrid, KeyboardMove |
-| SettingsSection, SettingsListRow | `@/components/patterns/settings-section` | — | Group, Card, Danger, CompactSpacing, WithIconAndChevron |
+| SettingsSection, SettingsListRow | `@/components/patterns/settings-section` | — | Group, Card, Danger, CompactSpacing, WithIconAndChevron, LinkedControl |
 | ShareButtons | `@/components/patterns/share-buttons` | — | Circle, Inline, SelectiveProviders, JapanDefault, ExtendedProviders, With onShare tracking, BlockPrimary |
 | SideDrawerFrame | `@/components/patterns/side-drawer-frame` | — | RightDrawer, LeftDrawer, RightDrawer — swipeToClose, LeftDrawer — swipeToClose, Glass |
 | SidebarNav | `@/components/patterns/sidebar-nav` | — | Default, Collapsed, Links, LongLabel, RouterLinkRender, Inverse |

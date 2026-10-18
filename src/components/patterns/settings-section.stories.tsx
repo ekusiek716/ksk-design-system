@@ -1,4 +1,6 @@
+import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
+import { expect, userEvent, within } from "storybook/test"
 import { Notification, Setting2, ShieldSecurity } from "iconsax-reactjs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -28,7 +30,7 @@ export const Group: Story = {
           title="通知"
           description="毎日のリマインダー"
           leading={<Notification size={22} className="text-[var(--Object-Medium-Emphasis)]" />}
-          rightSlot={<Switch checked aria-label="通知" />}
+          rightSlot={(control) => <Switch checked {...control} />}
         />
       </SettingsSection>
     </div>
@@ -93,4 +95,51 @@ export const WithIconAndChevron: Story = {
       </SettingsSection>
     </div>
   ),
+}
+
+function LinkedControlDemo() {
+  const [notify, setNotify] = React.useState(false)
+  const [mail, setMail] = React.useState(true)
+  return (
+    <div className="w-full max-w-md">
+      <SettingsSection variant="card" title="通知">
+        <SettingsListRow
+          title="プッシュ通知"
+          description="毎日 9 時にリマインダーを送ります"
+          rightSlot={(control) => <Switch {...control} checked={notify} onCheckedChange={setNotify} />}
+        />
+        <SettingsListRow
+          title="メール通知"
+          controlId="settings-mail"
+          rightSlot={<Switch id="settings-mail" checked={mail} onCheckedChange={setMail} />}
+        />
+      </SettingsSection>
+    </div>
+  )
+}
+
+/**
+ * 項目名・説明を右の操作部品と結ぶ（issue #759）。rightSlot に関数を渡すと `{ id, "aria-describedby" }`
+ * を受け取り、title がその部品のラベル（押すと切り替わる）、description が説明になる。
+ * 自分で id を決めるなら `controlId` と、部品側の `id` / `aria-describedby`（`${controlId}-description`）。
+ * Switch に title と同じ aria-label を重ねて書かない。
+ */
+export const LinkedControl: Story = {
+  tags: ["interaction"],
+  render: () => <LinkedControlDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const push = canvas.getByRole("switch", { name: "プッシュ通知" })
+    await expect(push).toHaveAccessibleDescription("毎日 9 時にリマインダーを送ります")
+    await expect(push).toHaveAttribute("aria-checked", "false")
+    // 項目名を押すと 1 回だけ切り替わる（二重発火で元に戻らない）
+    await userEvent.click(canvas.getByText("プッシュ通知"))
+    await expect(push).toHaveAttribute("aria-checked", "true")
+    await userEvent.click(push)
+    await expect(push).toHaveAttribute("aria-checked", "false")
+    const mail = canvas.getByRole("switch", { name: "メール通知" })
+    await expect(mail).toHaveAttribute("aria-checked", "true")
+    await userEvent.click(canvas.getByText("メール通知"))
+    await expect(mail).toHaveAttribute("aria-checked", "false")
+  },
 }

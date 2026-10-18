@@ -287,7 +287,7 @@ export type {
   ListItemSlotWidth,
 } from "./components/patterns/list-item"
 export { SettingsListRow, SettingsSection } from "./components/patterns/settings-section"
-export type { SettingsListRowProps, SettingsSectionProps, SettingsSectionVariant } from "./components/patterns/settings-section"
+export type { SettingsListRowControlProps, SettingsListRowProps, SettingsSectionProps, SettingsSectionVariant } from "./components/patterns/settings-section"
 export { NotificationBadge } from "./components/patterns/notification-badge"
 export { ProgressSteps } from "./components/patterns/progress-steps"
 export { SearchBar } from "./components/patterns/search-bar"

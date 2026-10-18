@@ -2656,12 +2656,15 @@
       ],
       "accessibility": [
         "interactive rows render button semantics",
-        "minimum touch height 56px"
+        "minimum touch height 56px",
+        "rightSlot の操作部品（Switch / Checkbox 等）は title・description と結ぶ。rightSlot に関数を渡すと { id, aria-describedby } を受け取り、title が <label htmlFor>（押すと操作部品が 1 回切り替わる）、description が aria-describedby になる。controlId で id を自分で決めることもできる（description の id は `${controlId}-description`）。interactive / onClick の行（行全体が button）では結ばない（web・issue #759）"
       ],
       "rules": [
         "設定画面で SectionHeader + Card + ListItem の wrapper を consumer 側に作らない",
         "設定一覧で ad-hoc flex row を作らず SettingsListRow を使う",
         "switch / badge / button は rightSlot に置く",
+        "トグル等の操作部品は rightSlot={(control) => <Switch {...control} />}（または controlId + 部品の id）で title と結ぶ。Switch に title と同じ aria-label を重ねて書かない（読み上げが 2 回になる。issue #759）",
+        "操作部品を置く行に interactive / onClick を付けない（button の中に操作部品を入れられない）",
         "danger variant は削除・ログアウトなど不可逆操作のグループに限定する",
         "見出しアイコンは SettingsSection の icon（見出しの左・aria-hidden・20px・Object-Medium-Emphasis）。title を span で包んでアイコンを並べない（issue #690）",
         "次の画面へ進む行は SettingsListRow の showChevron（右端・ArrowRight2 16px・Object-Low-Emphasis・aria-hidden）。矢印を手書きしない。トグル等その場で完結する行には付けない。native も同名（issue #690）"
@@ -2669,7 +2672,11 @@
       "subcomponents": [
         "SettingsSection",
         "SettingsListRow"
-      ]
+      ],
+      "props": {
+        "rightSlot": "ReactNode | ((control: { id: string; \"aria-describedby\"?: string }) => ReactNode) — 関数を渡すと操作部品へ展開する属性を受け取り、title / description と結ばれる（issue #759。型は SettingsListRowControlProps）",
+        "controlId": "string (任意) — rightSlot の操作部品の id。指定すると title を <label htmlFor>、description に `${controlId}-description` の id を付ける。関数の rightSlot なら省略可（自動採番）。interactive / onClick の行では無視して開発ビルドで警告（issue #759）"
+      }
     },
     {
       "name": "MobileAppShell",
