@@ -829,7 +829,8 @@
       "props": {
         "fullWidth": "boolean (既定 false) — 横幅いっぱいに広げ、各項目を等幅にする(issue #500)。既定はラベル幅(w-fit)",
         "aria-label / aria-labelledby": "string — 何を選ぶ欄かの読み上げ名(issue #741)。FormField as=\"group\" の中では省いてよい（semantics=\"radio\" は radiogroup をそのラベルで名付ける）",
-        "semantics": "\"tabs\" | \"radio\" (既定 \"tabs\") — 読み上げの役割(issue #741)。tabs=tablist/tab（表示の切り替え）、radio=radiogroup/radio（フォームの値選び）。見た目・矢印キー操作は同じ"
+        "semantics": "\"tabs\" | \"radio\" (既定 \"tabs\") — 読み上げの役割(issue #741)。tabs=tablist/tab（表示の切り替え）、radio=radiogroup/radio（フォームの値選び）。見た目・矢印キー操作は同じ",
+        "name": "string — semantics=\"radio\" のときのフォーム送信名(issue #741)。<form> の中で選択中の value が FormData に入る"
       },
       "rules": [
         "Use for 2-4 options only. 1行固定の segmented control で折り返せない。",

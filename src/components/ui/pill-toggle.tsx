@@ -49,6 +49,11 @@ type PillToggleProps<T extends string = string> =
        * どちらも矢印キーで選択が移り、Tab キーでは選択中の 1 つにだけ止まる。見た目は同じ
        */
       semantics?: "tabs" | "radio"
+      /**
+       * フォーム送信時の名前（`semantics="radio"` のときだけ有効。issue #741）。
+       * `<form>` の中では選択中の value が FormData / ネイティブ送信にこの名前で入る
+       */
+      name?: string
       onChange: (value: T) => void
       /**
        * @deprecated `onChange` を使ってください。後方互換のために残しているエイリアスで、
@@ -82,6 +87,11 @@ type PillToggleProps<T extends string = string> =
        * どちらも矢印キーで選択が移り、Tab キーでは選択中の 1 つにだけ止まる。見た目は同じ
        */
       semantics?: "tabs" | "radio"
+      /**
+       * フォーム送信時の名前（`semantics="radio"` のときだけ有効。issue #741）。
+       * `<form>` の中では選択中の value が FormData / ネイティブ送信にこの名前で入る
+       */
+      name?: string
       onChange?: undefined
       /**
        * @deprecated `onChange` を使ってください。後方互換のために残しているエイリアスで、
@@ -166,6 +176,7 @@ function PillToggle<T extends string = string>({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   semantics = "tabs",
+  name,
 }: PillToggleProps<T>) {
   const handleChange = onChange ?? onValueChange
   // issue #741: FormField as="group" の中で名前が未指定なら、radiogroup 自身もそのラベルで名付ける
@@ -197,6 +208,7 @@ function PillToggle<T extends string = string>({
       <RadioGroupPrimitive.Root
         data-slot="pill-toggle"
         data-semantics="radio"
+        name={name}
         value={value}
         onValueChange={(v) => handleChange?.(v as T)}
         aria-label={ariaLabel}

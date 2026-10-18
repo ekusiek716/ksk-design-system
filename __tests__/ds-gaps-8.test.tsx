@@ -94,6 +94,28 @@ describe("PillToggle の名前と semantics (#741)", () => {
     expect(t.querySelector('[role="tablist"]')!.hasAttribute("aria-labelledby")).toBe(false)
   })
 
+  it('semantics="radio" の name は <form> の送信値（FormData）に入る', async () => {
+    const { createRoot } = await import("react-dom/client")
+    const { act } = await import("react")
+    ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+    // jsdom に無い ResizeObserver（Radix の hidden input の大きさ合わせで使う）を空実装で補う
+    vi.stubGlobal("ResizeObserver", class { observe() {} unobserve() {} disconnect() {} })
+    const div = document.createElement("div")
+    document.body.appendChild(div)
+    const root = createRoot(div)
+    await act(async () =>
+      root.render(
+        <form>
+          <PillToggle semantics="radio" name="unit" aria-label="単位" options={OPTIONS} value="month" onChange={() => {}} />
+        </form>
+      )
+    )
+    expect(new FormData(div.querySelector("form")!).get("unit")).toBe("month")
+    await act(async () => root.unmount())
+    div.remove()
+    vi.unstubAllGlobals()
+  })
+
   it("radio で名前も group も無いときだけ開発ビルドで警告する", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
     const { createRoot } = await import("react-dom/client")
