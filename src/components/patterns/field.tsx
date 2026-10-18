@@ -6,36 +6,39 @@ import { Separator } from "@/components/ui/separator"
 type FieldSetGap = "sm" | "md" | "lg"
 
 /**
- * gap 指定時のクラス。`<legend>` は fieldset の枠側に描かれ flex の並びに入らないため、
- * 子の間隔（gap）とは別に legend の下にも同じ間隔（margin-bottom）を付ける。
+ * 子の間隔（gap）と legend の下の間隔。`<legend>` は fieldset の枠側に描かれ flex の並びに入らないため、
+ * 子の間隔とは別に legend の下にも同じ間隔（margin-bottom）を付ける。
+ * legend の余白は詳細度 0（:where）なので、`<FieldLegend className="mb-0">` 等の明示指定が常に勝つ（issue #747）。
  * クラスは完全な文字列で持つ（safelist の静的抽出のため）。
  */
 const fieldSetGapClasses: Record<FieldSetGap, string> = {
-  sm: "gap-2 [&>[data-slot=field-legend]]:mb-2",
-  md: "gap-4 [&>[data-slot=field-legend]]:mb-4",
-  lg: "gap-6 [&>[data-slot=field-legend]]:mb-6",
+  sm: "gap-2 [:where(&)>:where([data-slot=field-legend])]:mb-2",
+  md: "gap-4 [:where(&)>:where([data-slot=field-legend])]:mb-4",
+  lg: "gap-6 [:where(&)>:where([data-slot=field-legend])]:mb-6",
 }
 
 interface FieldSetProps extends React.ComponentProps<"fieldset"> {
   /**
-   * 子の間隔（issue #714）。"sm"=8px / "md"=16px / "lg"=24px。
-   * 指定すると FieldLegend の下にも同じ間隔を空ける（legend は flex の並びに入らないので gap が効かない）。
-   * 未指定は従来どおり gap-6（24px）で、legend の直下は 0px のまま（見た目を変えないため）。
+   * 子の間隔（issue #714）。"sm"=8px / "md"=16px / "lg"=24px。未指定は "lg" と同じ 24px。
+   * FieldLegend の下にも同じ間隔を空ける（legend は flex の並びに入らないので gap が効かない）。
+   * 未指定でも legend の下に 24px が付く（issue #747。v2.17.0 までは gap 指定時だけで、未指定は 0px だった）。
+   * legend の直下を詰めたい画面は `<FieldLegend className="mb-0">`（legend の余白は詳細度 0 なので className が勝つ）。
    * 絞り込みシートの選択肢グループのような詰めた並びは `gap="sm"` + `<FieldLegend size="sm">`。
+   * className の `gap-*` で子の間隔だけ変えると legend の下は変わらないので、間隔は `gap` で指定する。
    */
   gap?: FieldSetGap
 }
 
 /**
  * フォーム全体 / 大きな入力セクションを fieldset semantics で束ねる。
- * description・FieldGroup を 24px の縦リズムで配置する（legend の下の間隔は `gap` 指定時だけ付く）。
+ * legend・description・FieldGroup を 24px の縦リズムで配置する（`gap` で 8 / 16 / 24px を選べる）。
  */
 function FieldSet({ className, gap, ...props }: FieldSetProps) {
   return (
     <fieldset
       data-slot="field-set"
       data-gap={gap}
-      className={cn("m-0 flex min-w-0 flex-col gap-6 border-0 p-0", gap && fieldSetGapClasses[gap], className)}
+      className={cn("m-0 flex min-w-0 flex-col border-0 p-0", fieldSetGapClasses[gap ?? "lg"], className)}
       {...props}
     />
   )

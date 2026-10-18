@@ -534,7 +534,7 @@
     {
       "name": "KskLabelsProvider",
       "path": "src/components/ui/ksk-labels.tsx",
-      "description": "DS 部品の既定文言（スキップリンク・管理画面のメニュー・FormField の必須/任意・閉じるボタン・NavigationBar の戻る/閉じる/シェア・カレンダー見出し）と MonthCalendar / AgendaList の locale 既定をまとめて切り替える Provider（issue #723）。アプリの一番外側に 1 回置く。",
+      "description": "DS 部品の既定文言（スキップリンク・管理画面のメニュー・FormField の必須/任意・閉じるボタン・NavigationBar の戻る/閉じる/シェア・カレンダー見出し・StarRating の読み上げ名）と MonthCalendar / AgendaList の locale 既定をまとめて切り替える Provider（issue #723）。アプリの一番外側に 1 回置く。",
       "subcomponents": [
         "useKskLabels",
         "useKskLocale",
@@ -848,16 +848,20 @@
       "sizes": [
         "sm",
         "md",
-        "lg"
+        "lg",
+        "xl"
       ],
       "props": {
         "allowClear": "boolean (既定 false) — 有効時、現在値と同じ星の再クリックで onChange(0)",
-        "label": "string (既定 \"評価\") — interactive 時の radiogroup aria-label",
-        "valueLabel": "(value: number, max: number) => string (既定 `${value}/${max}点`) — read-only 時の aria-label",
-        "starLabel": "(value: number) => string (既定 `${value}点`) — interactive 時の各星（radio）の aria-label"
+        "label": "string — interactive 時の radiogroup aria-label。省略時は FormField as=\"group\" の中ならそのラベルを aria-labelledby で結び、それ以外は KskLabels の ratingGroup（既定「評価」）(issue #746)",
+        "aria-label": "string — label と同じ（両方あればこちらが優先）(issue #746)",
+        "aria-labelledby": "string — interactive 時の radiogroup を見える見出しで名付ける。aria-label より優先 (issue #746)",
+        "valueLabel": "(value: number, max: number) => string (既定 KskLabels の ratingValue「{value}/{max}点」) — read-only 時の aria-label",
+        "starLabel": "(value: number) => string (既定 KskLabels の ratingStar「{value}点」) — interactive 時の各星（radio）の aria-label"
       },
       "rules": [
-        "Omit onChange for read-only display. Pass onChange for interactive input."
+        "Omit onChange for read-only display. Pass onChange for interactive input.",
+        "フォームの評価欄は FormField as=\"group\" で包む（radiogroup 自身をそのラベルで名付けるので label / aria-label は不要）。英語の画面は KskLabelsProvider locale=\"en\" で既定文言が切り替わる。星ごとに starLabel を渡して回らない (issue #746)"
       ],
       "accessibility": [
         "入力用（radio）の選択前の星は var(--Border-Control, var(--Border-Medium-Emphasis))。prefers-contrast: more / root の data-contrast=\"more\" のときだけ 3:1 以上に切り替わり、表示専用（role=img）の星は据え置き（issue #636）"
@@ -1718,7 +1722,7 @@
         "FieldDescription はセクション・グループの補足、FieldError はグループ単位のエラーに使う",
         "グループ横断の区切りは FieldSeparator を使い、中央ラベルは children で渡す",
         "FormSection は title/description 一体の簡易 API、FieldSet は legend や複数 FieldGroup を明示構成する長いフォーム向け",
-        "詰めた並び（絞り込みシートの選択肢グループ等）は FieldSet gap（sm=8 / md=16 / lg=24px）+ FieldLegend size=\"sm\"（typo-label-md + Text-Medium-Emphasis）。className に space-y-* や typo-* を足して上書きしない。gap 指定時は legend の下にも同じ間隔が付く（未指定の既定は legend の直下 0px のまま）（issue #714）"
+        "詰めた並び（絞り込みシートの選択肢グループ等）は FieldSet gap（sm=8 / md=16 / lg=24px）+ FieldLegend size=\"sm\"（typo-label-md + Text-Medium-Emphasis）。className に space-y-* や typo-* を足して上書きしない。legend の下にも子と同じ間隔が付く（gap 未指定の既定も 24px。v2.17.0 までは未指定だと 0px だった）。legend の直下だけ詰めたいときは <FieldLegend className=\"mb-0\">（legend の余白は詳細度 0 なので className が勝つ）。className の gap-* では legend の下は変わらないので間隔は gap で指定する（issue #714 / #747）"
       ]
     },
     {

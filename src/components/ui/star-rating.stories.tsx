@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
 import { expect, userEvent, within } from "storybook/test"
+import { FormField } from "@/components/patterns/form-field"
+import { KskLabelsProvider } from "./ksk-labels"
 import { StarRating } from "./star-rating"
 
 const meta: Meta<typeof StarRating> = {
@@ -111,6 +113,62 @@ export const Sizes: Story = {
       <StarRating value={4} size="sm" />
       <StarRating value={4} size="md" />
       <StarRating value={4} size="lg" />
+      <StarRating value={4} size="xl" />
     </div>
   ),
+}
+
+/**
+ * FormField as="group" の中では radiogroup 自身をそのラベルで名付ける（issue #746）。
+ * label / aria-label を渡さなくても「満足度」と読まれる。明示した label は優先される。
+ */
+export const InFormFieldGroup: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [v, setV] = React.useState(0)
+    const [v2, setV2] = React.useState(4)
+    return (
+      <div className="flex flex-col gap-6 p-4">
+        <FormField as="group" label="満足度">
+          <StarRating value={v} onChange={setV} />
+        </FormField>
+        <FormField as="group" label="おすすめ度">
+          <StarRating value={v2} onChange={setV2} label="おすすめ度（5段階）" />
+        </FormField>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const group = canvas.getByRole("radiogroup", { name: "満足度" })
+    await expect(group).not.toHaveAttribute("aria-label")
+    await expect(canvas.getByRole("radiogroup", { name: "おすすめ度（5段階）" })).toBeInTheDocument()
+
+    const radios = within(group).getAllByRole("radio")
+    await userEvent.click(radios[1])
+    await expect(radios[1]).toHaveAttribute("aria-checked", "true")
+    await expect(radios[1]).toHaveAccessibleName("2点")
+  },
+}
+
+/** KskLabelsProvider locale="en" で既定の読み上げ文言が英語になる（issue #746）。 */
+export const EnglishLabels: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [v, setV] = React.useState(3)
+    return (
+      <KskLabelsProvider locale="en">
+        <div className="flex flex-col gap-4 p-4">
+          <StarRating value={v} onChange={setV} />
+          <StarRating value={4} />
+        </div>
+      </KskLabelsProvider>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const group = canvas.getByRole("radiogroup", { name: "Rating" })
+    await expect(within(group).getAllByRole("radio")[2]).toHaveAccessibleName("3 of 5")
+    await expect(canvas.getByRole("img", { name: "Rated 4 of 5" })).toBeInTheDocument()
+  },
 }

@@ -1,6 +1,8 @@
 import * as React from "react"
 import { Button } from "./button"
+import { formatKskLabel, useKskLabels } from "./ksk-labels"
 import { cn } from "@/lib/utils"
+import { FormFieldGroupLabelContext } from "@/lib/form-field-group-context"
 
 interface StarRatingProps {
   value: number
@@ -17,11 +19,19 @@ interface StarRatingProps {
    * 意図的な逸脱。クリア後は aria-checked がすべて false になる。
    */
   allowClear?: boolean
-  /** interactive 時（onChange 指定時）の radiogroup 全体の aria-label。既定は "評価"。 */
+  /**
+   * interactive 時（onChange 指定時）の radiogroup 全体の aria-label。
+   * 省略時は FormField as="group" の中ならそのラベルを aria-labelledby で結び（issue #746）、
+   * それ以外は KskLabelsProvider の ratingGroup（無ければ「評価」）。
+   */
   label?: string
-  /** read-only 時の aria-label を組み立てる関数。既定は `${value}/${max}点`。 */
+  /** interactive 時の radiogroup の aria-label（`label` と同じ。両方あればこちらが優先）。 */
+  "aria-label"?: string
+  /** interactive 時の radiogroup を見える見出しで名付ける（id を空白区切りで）。指定時は aria-label より優先。 */
+  "aria-labelledby"?: string
+  /** read-only 時の aria-label を組み立てる関数。既定は KskLabels の ratingValue（無ければ `${value}/${max}点`）。 */
   valueLabel?: (value: number, max: number) => string
-  /** interactive 時の各星（radio）の aria-label を組み立てる関数。既定は `${value}点`。 */
+  /** interactive 時の各星（radio）の aria-label を組み立てる関数。既定は KskLabels の ratingStar（無ければ `${value}点`）。 */
   starLabel?: (value: number) => string
   className?: string
 }
@@ -82,11 +92,25 @@ function StarRating({
   size = "md",
   showLabel = false,
   allowClear = false,
-  label = "評価",
-  valueLabel = (v, m) => `${v}/${m}点`,
-  starLabel = (v) => `${v}点`,
+  label,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
+  valueLabel,
+  starLabel,
   className,
 }: StarRatingProps) {
+  const labels = useKskLabels()
+  // issue #746: FormField as="group" の中で名前が未指定なら、radiogroup 自身をそのラベルで名付ける
+  // （ChipSelector 単一選択 / PillToggle semantics="radio" と同じ方針。外側の group の名前は内側へ継承されない）。
+  // 表示専用（role="img"）は値の要約が名前なので結ばない（値の読み上げを消さない）
+  const groupLabelId = React.useContext(FormFieldGroupLabelContext)
+  const explicitName = ariaLabel ?? label
+  const groupLabelledby = ariaLabelledby ?? (explicitName ? undefined : groupLabelId)
+  const groupName = groupLabelledby ? explicitName : (explicitName ?? labels.ratingGroup)
+  const formatValue = (v: number, m: number) =>
+    valueLabel ? valueLabel(v, m) : formatKskLabel(labels.ratingValue, { value: v, max: m })
+  const formatStar = (v: number) =>
+    starLabel ? starLabel(v) : formatKskLabel(labels.ratingStar, { value: v, max })
   const [hovered, setHovered] = React.useState<number | null>(null)
   const starRefs = React.useRef<Array<HTMLButtonElement | null>>([])
   const interactive = !!onChange
@@ -130,7 +154,8 @@ function StarRating({
       // 単一のまとまりとして読み上げさせる（axe: aria-prohibited-attr 対策。
       // role なし div への aria-label は無効）。
       role={interactive ? "radiogroup" : "img"}
-      aria-label={interactive ? label : valueLabel(value, max)}
+      aria-label={interactive ? groupName : formatValue(value, max)}
+      aria-labelledby={interactive ? groupLabelledby : undefined}
       className={cn("inline-flex items-center gap-1", className)}
     >
       {Array.from({ length: max }, (_, i) => {
@@ -166,7 +191,7 @@ function StarRating({
             size="icon-xl"
             role="radio"
             aria-checked={value === starValue}
-            aria-label={starLabel(starValue)}
+            aria-label={formatStar(starValue)}
             tabIndex={starValue === selectedValue ? 0 : -1}
             onClick={() => {
               const clearing = allowClear && value === starValue
