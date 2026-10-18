@@ -93,7 +93,7 @@ export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from "./compon
 export { PortalContainerProvider, usePortalContainer } from "./components/ui/portal-container"
 export type { PortalContainer, PortalContainerProviderProps } from "./components/ui/portal-container"
 export { KskLabelsProvider, useKskLabels, useKskLocale, KSK_DEFAULT_LABELS } from "./components/ui/ksk-labels"
-export type { KskLabels, KskLabelsProviderProps, KskLocale } from "./components/ui/ksk-labels"
+export type { KskLabels, KskLabelsProviderProps, KskLocale, ResolvedKskLabels } from "./components/ui/ksk-labels"
 export { Progress } from "./components/ui/progress"
 export type { ProgressAutoColorConfig, ProgressDuration, ProgressProps, ProgressVariant } from "./components/ui/progress"
 export { RadioGroup, RadioGroupItem } from "./components/ui/radio-group"

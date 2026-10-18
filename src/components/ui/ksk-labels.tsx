@@ -8,6 +8,8 @@ type KskLocale = "ja" | "en"
 
 /**
  * DS 部品の既定文言（issue #723）。部品に prop で文言を渡したときは常にそちらが勝つ。
+ * v2.17.0 より後に足したキーは optional（consumer が型付けした完全な翻訳オブジェクトを minor アップで壊さないため。
+ * 省略時は locale の既定 → 日本語で補う）。部品の中では `ResolvedKskLabels`（全キー必須）で扱う。
  */
 interface KskLabels {
   /** SkipLink / Screen / AppShell / MarketingShell / AdminShell のスキップリンク */
@@ -35,14 +37,17 @@ interface KskLabels {
   /** MonthCalendarExpandToggle の読み上げ名（開閉で変えない。状態は aria-expanded） */
   calendarExpand: string
   /** StarRating（入力用）の radiogroup の読み上げ名。FormField as="group" の中では使わず見出しで名付ける（issue #746） */
-  ratingGroup: string
+  ratingGroup?: string
   /** StarRating（表示専用・role="img"）の読み上げ名。`{value}` / `{max}` を値に置き換える（issue #746） */
-  ratingValue: string
+  ratingValue?: string
   /** StarRating（入力用）の各星（radio）の読み上げ名。`{value}` / `{max}` を値に置き換える（issue #746） */
-  ratingStar: string
+  ratingStar?: string
 }
 
-const KSK_DEFAULT_LABELS: Record<KskLocale, KskLabels> = {
+/** 全キーを解決済みの文言（部品の中・既定値で使う）。 */
+type ResolvedKskLabels = Required<KskLabels>
+
+const KSK_DEFAULT_LABELS: Record<KskLocale, ResolvedKskLabels> = {
   ja: {
     skipLink: "コンテンツへ移動",
     mobileMenu: "メニューを開く",
@@ -82,7 +87,7 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, KskLabels> = {
 interface KskLabelsContextValue {
   /** Provider が無いときは undefined（部品は自分の既定 locale を使う） */
   locale: KskLocale | undefined
-  labels: KskLabels
+  labels: ResolvedKskLabels
 }
 
 const DEFAULT_CONTEXT: KskLabelsContextValue = {
@@ -174,7 +179,7 @@ function formatKskLabel(template: string, values: Record<string, string | number
 }
 
 /** 配下の DS 既定文言（Provider が無ければ日本語）。 */
-function useKskLabels(): KskLabels {
+function useKskLabels(): ResolvedKskLabels {
   return React.useContext(KskLabelsContext).labels
 }
 
@@ -184,4 +189,4 @@ function useKskLocale(): KskLocale | undefined {
 }
 
 export { KskLabelsProvider, useKskLabels, useKskLocale, KSK_DEFAULT_LABELS, formatKskLabel }
-export type { KskLabels, KskLabelsProviderProps, KskLocale }
+export type { KskLabels, KskLabelsProviderProps, KskLocale, ResolvedKskLabels }
