@@ -43,6 +43,13 @@ interface DetailSheetHeaderProps extends Omit<React.ComponentProps<"div">, "titl
   onClose?: () => void
   /** 閉じるボタンの読み上げ名。既定は KskLabelsProvider の close（無ければ「閉じる」） */
   closeLabel?: string
+  /**
+   * 下線と下余白（16px）を出すか（issue #742）。
+   * 未指定は自動: title / titleEditor / description / leading / children のどれも無い
+   * （閉じるボタン・trailing だけの）ときは出さず、それ以外は出す（従来どおり）。
+   * true / false で強制する。
+   */
+  bordered?: boolean
 }
 
 function DetailSheetScaffold({
@@ -83,6 +90,7 @@ function DetailSheetHeader({
   onClose,
   closeLabel,
   overlayTitle = true,
+  bordered,
   children,
   ...props
 }: DetailSheetHeaderProps) {
@@ -93,16 +101,22 @@ function DetailSheetHeader({
   const asOverlayTitle = overlayTitle && overlaySlot != null && titleEditor == null && typeof title === "string"
   // #727: 同じ Content の Title の数で重複を検出する（SheetTitle / DialogTitle も同じ登録を行う）
   useRegisterOverlayTitle(asOverlayTitle)
+  const isPresent = (node: React.ReactNode) => node != null && node !== false && node !== ""
+  // #742: 閉じるボタン・trailing だけのときは、何も無い帯（下線 + 下余白）を引かない
+  const actionsOnly =
+    !hasLeading && !isPresent(titleContent) && !isPresent(description) && !isPresent(children)
+  const showBorder = bordered ?? !actionsOnly
 
   return (
     <div
       data-slot="detail-sheet-header"
+      data-bordered={showBorder ? "true" : "false"}
       className={cn(
         // #729: leading が空なら列ごと描かない（空の auto 列 + gap-3 で題名が 12px 右にずれるため）
         hasLeading
           ? "grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 px-5 pt-5"
           : "grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3 px-5 pt-5",
-        "border-b border-[var(--Border-Low-Emphasis)] pb-4",
+        showBorder && "border-b border-[var(--Border-Low-Emphasis)] pb-4",
         className
       )}
       {...props}

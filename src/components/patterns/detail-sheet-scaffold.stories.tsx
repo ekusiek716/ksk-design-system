@@ -175,3 +175,25 @@ export const WithoutLeading: Story = {
     await expect(Math.round(title.getBoundingClientRect().left - header.getBoundingClientRect().left)).toBe(20)
   },
 }
+
+/**
+ * 閉じるボタンだけ（issue #742）: title / leading 等が無いときは下線と下余白を出さない（空の帯を引かない）。
+ * 明示するときは bordered（true / false）。
+ */
+export const CloseOnly: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="max-w-md rounded-2xl border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)]">
+      <DetailSheetScaffold header={<DetailSheetHeader onClose={() => {}} />}>
+        <p className="typo-body-md text-[var(--Text-Medium-Emphasis)]">写真のプレビューなど、題名の要らない詳細。</p>
+      </DetailSheetScaffold>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const header = canvasElement.querySelector<HTMLElement>('[data-slot="detail-sheet-header"]')!
+    await expect(header.dataset.bordered).toBe("false")
+    await expect(getComputedStyle(header).borderBottomWidth).toBe("0px")
+    await expect(getComputedStyle(header).paddingBottom).toBe("0px")
+    await expect(within(canvasElement).getByRole("button", { name: "閉じる" })).toBeInTheDocument()
+  },
+}

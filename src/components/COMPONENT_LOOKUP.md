@@ -54,7 +54,7 @@
 | NavigationBar | `@/components/ui/navigation-bar` | — | Default, WithCloseButton, TitleOnly, CustomRightSlot, Liquid Glass — over gradient, Liquid Glass — over photo tone, LabeledBack, LabeledBackLongNoTitle, LabeledBackLongWithTitle, LabeledBackOverflowWithTitle, LabeledBackShortNarrow, LabeledBackLongNoTitleNarrow |
 | NumberInput | `@/components/ui/number-input` | — | Default, WithMinMax, WithStep, CurrencyFormat, Disabled |
 | Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis | `@/components/ui/pagination` | — | FivePages, WithEllipsis, WithBuildPageItems, AsChildRouterLink |
-| PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small, FullWidthThree, FullWidthTwo, FullWidthFour |
+| PillToggle | `@/components/ui/pill-toggle` | — | Default, TwoState, Small, FullWidthThree, FullWidthTwo, FullWidthFour, RadioInFormField, Named |
 | Popover, PopoverTrigger, PopoverContent, PopoverAnchor | `@/components/ui/popover` | — | ClickToShow, SimpleContent |
 | PortalContainerProvider | `@/components/ui/portal-container` | — | Dialog がスコープ内テーマを継承する, DropdownMenu がスコープ内テーマを継承する, Select がスコープ内テーマを継承する, Provider 無しでは document.body へ描画する（後方互換） |
 | ProgressRing | `@/components/ui/progress-ring` | — | Default, Empty, Full, AllSizes, CustomLabel, Animated, 任意サイズ・ストローク, 配色のカスタマイズ, 過大なストロークの丸め, トーン（意味名の色指定）, 線端 |
@@ -98,7 +98,7 @@
 | AgendaList | `@/components/patterns/agenda-list` | — | Default, WithSelectedDate, FixedDates, Empty, ReadOnly, CategoryAccent |
 | AppHeader | `@/components/patterns/app-header` | — | Default, WithBack, WithSubtitle, WithMenu, Sticky, Glass — Liquid Glass (over gradient), Transparent — scrollable reveal, NavWithRenderSlot |
 | BannerCarousel | `@/components/patterns/banner-carousel` | — | Default, NoHeader, Tall |
-| Banner | `@/components/patterns/banner` | **density**: `default`, `compact`<br>**layout**: `card`, `bar`<br>**variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants, Compact, Bar, Dismissible |
+| Banner | `@/components/patterns/banner` | **density**: `default`, `compact`<br>**layout**: `card`, `bar`<br>**variant**: `info`, `success`, `warning`, `caution` | Info, Success, Warning, Caution, WithAction, AllVariants, Compact, Bar, Dismissible, LiveRegions |
 | BottomSheetForm | `@/components/patterns/bottom-sheet-form` | — | Default, WithLoading |
 | BottomSheetFrame | `@/components/patterns/bottom-sheet-frame` | — | MobileFull, MobileForm, DesktopFloating, Glass — mobile snap, MobilePage, KeyboardHideFallback, swipeToClose + DetailSheetScaffold (#164), TitleLevelPageDefault, TitleLevelPartialDefault, TitleLevelExplicit |
 | CategoryNav | `@/components/patterns/category-nav` | — | Default, WithSelection |
@@ -116,7 +116,7 @@
 | ContentCarousel | `@/components/patterns/content-carousel` | — | Default, AutoPlay, WithoutControls |
 | CookieConsent | `@/components/patterns/cookie-consent` | — | Default, CustomLabels, OnDecideCallback |
 | CountdownHero | `@/components/patterns/countdown-hero` | — | Upcoming, Today, Past, With Illustration Slot, ISO String targetDate, With dateLabel (目標日を数字の下に), Today with todayValue (0 の代わりに文字), Interactive |
-| DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle, WithCloseButton, InSheetTitleIsSheetName, WithoutLeading |
+| DetailSheetScaffold, DetailSheetHeader, DetailSheetBody | `@/components/patterns/detail-sheet-scaffold` | — | ReadOnlyTitle, EditableTitle, WithCloseButton, InSheetTitleIsSheetName, WithoutLeading, CloseOnly |
 | DocumentPage | `@/components/patterns/document-page` | — | PrivacyPolicy, WithoutLastUpdated |
 | EmptyState | `@/components/patterns/empty-state` | — | WithAction, Minimal, WithIconOnly, With dual action (recommended layout), Compact, Inline |
 | ErrorState, NotFoundIllustration | `@/components/patterns/error-state` | — | DefaultWithRetry, CustomMessages, WithoutRetry, NotFound |

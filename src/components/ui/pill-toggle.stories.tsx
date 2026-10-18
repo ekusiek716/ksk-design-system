@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
-import { expect } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
+import { FormField } from "@/components/patterns/form-field"
 import { PillToggle } from "./pill-toggle"
 
 const meta: Meta<typeof PillToggle> = {
@@ -142,5 +143,76 @@ export const FullWidthFour: Story = {
         />
       </div>
     )
+  },
+}
+
+/**
+ * semantics="radio"（issue #741）: フォームの値選びは radiogroup / radio で読ませる。
+ * FormField as="group" の中では radiogroup 自身もそのラベルで名付ける（aria-label は不要）。
+ * 矢印キーで選択が移り、Tab キーでは選択中の 1 つにだけ止まる（tabs と同じ操作）。
+ */
+export const RadioInFormField: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [v, setV] = React.useState("cm")
+    return (
+      <div className="w-[360px]">
+        <FormField as="group" label="表示単位">
+          <PillToggle
+            semantics="radio"
+            fullWidth
+            options={[
+              { label: "cm", value: "cm" },
+              { label: "inch", value: "inch" },
+              { label: "mm", value: "mm" },
+            ]}
+            value={v}
+            onChange={setV}
+          />
+        </FormField>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByRole("group", { name: "表示単位" })).toBeInTheDocument()
+    await expect(canvas.getByRole("radiogroup", { name: "表示単位" })).toBeInTheDocument()
+    const radios = canvas.getAllByRole("radio")
+    await expect(radios).toHaveLength(3)
+    await expect(radios[0]).toHaveAttribute("aria-checked", "true")
+    // Tab で選択中の 1 つに止まり、→ で次が選ばれる
+    await userEvent.tab()
+    await expect(radios[0]).toHaveFocus()
+    // Radix は矢印キーを押している間に移ったフォーカスで選択する（focus 移動は setTimeout 後）。
+    // 実機の押下に合わせ、押したまま移動を待ってから離す
+    await userEvent.keyboard("{ArrowRight>}")
+    await waitFor(() => expect(radios[1]).toHaveFocus())
+    await userEvent.keyboard("{/ArrowRight}")
+    await waitFor(() => expect(radios[1]).toHaveAttribute("aria-checked", "true"))
+    await expect(radios[0]).toHaveAttribute("aria-checked", "false")
+  },
+}
+
+/** aria-label（issue #741）: 見える見出しが無い表示の切り替えにも名前を付ける（既定の tabs のまま）。 */
+export const Named: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [v, setV] = React.useState("week")
+    return (
+      <PillToggle
+        size="sm"
+        aria-label="表示の切り替え"
+        options={[
+          { label: "週", value: "week" },
+          { label: "月", value: "month" },
+        ]}
+        value={v}
+        onChange={setV}
+      />
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByRole("tablist", { name: "表示の切り替え" })).toBeInTheDocument()
   },
 }

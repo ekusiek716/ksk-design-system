@@ -129,3 +129,25 @@ export const Dismissible: Story = {
     // onDismiss が無ければ出さない
   },
 }
+
+/**
+ * live（issue #740）: 読み上げの割り込み方。既定は variant から決まる
+ * （warning / caution = role="alert" で割り込む、info / success = role="status" で待つ）。
+ * 画面を開いたときから出ている静的な説明は live="off"（role なし）。
+ */
+export const LiveRegions: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div className="flex w-full max-w-md flex-col gap-3">
+      <Banner data-testid="info" variant="info" density="compact" description="サンプルデータを表示しています" />
+      <Banner data-testid="warning" variant="warning" density="compact" description="保存できませんでした" />
+      <Banner data-testid="off" variant="caution" density="compact" live="off" description="この画面の内容は 24 時間で消えます" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const role = (id: string) => canvasElement.querySelector(`[data-testid="${id}"]`)!.getAttribute("role")
+    await expect(role("info")).toBe("status")
+    await expect(role("warning")).toBe("alert")
+    await expect(role("off")).toBeNull()
+  },
+}

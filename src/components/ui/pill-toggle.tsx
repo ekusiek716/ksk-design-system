@@ -1,6 +1,17 @@
 import * as React from "react"
+import { RadioGroup as RadioGroupPrimitive } from "radix-ui"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { FormFieldGroupLabelContext } from "@/lib/form-field-group-context"
+import { warnOnceInDev } from "@/lib/dev-warn"
 import { cn } from "@/lib/utils"
+import {
+  PILL_ITEM_HIT_AREA,
+  PILL_ITEM_SHAPE,
+  PILL_LIST_SHAPE,
+  SEGMENT_ITEM_BASE,
+  SEGMENT_ITEM_FOCUS_DISABLED,
+  SEGMENT_LIST_BASE,
+} from "@/lib/pill-segment-classes"
 
 interface PillToggleOption<T extends string = string> {
   label: string
@@ -32,6 +43,26 @@ type PillToggleProps<T extends string = string> =
        */
       fullWidth?: boolean
       className?: string
+      /**
+       * 読み上げ名（issue #741）。「何を選ぶ欄か」を伝える。見える見出しがあるなら aria-labelledby を使う。
+       * FormField `as="group"` の中では省いてよい（`semantics="radio"` は radiogroup をそのラベルで名付ける）
+       */
+      "aria-label"?: string
+      /** 見える見出しの id（issue #741）。aria-label より優先して読まれる */
+      "aria-labelledby"?: string
+      /**
+       * 読み上げの役割（issue #741）。
+       * - "tabs"（既定・従来どおり）: tablist / tab。画面内の表示の切り替え（一覧の絞り込み・週/月）
+       * - "radio": radiogroup / radio。フォームの値選び（性別・単位など）。FormField `as="group"` の中ではこちらを推奨
+       * どちらも矢印キーで選択が移り、Tab キーでは選択中の 1 つにだけ止まる。見た目は同じ
+       */
+      semantics?: "tabs" | "radio"
+      /**
+       * フォーム送信時の名前（`semantics="radio"` のときだけ有効。issue #741）。
+       * `<form>` の中では選択中の value が FormData / ネイティブ送信にこの名前で入る。
+       * tabs で渡すと使われず、開発ビルドで 1 回警告する
+       */
+      name?: string
       onChange: (value: T) => void
       /**
        * @deprecated `onChange` を使ってください。後方互換のために残しているエイリアスで、
@@ -51,6 +82,26 @@ type PillToggleProps<T extends string = string> =
        */
       fullWidth?: boolean
       className?: string
+      /**
+       * 読み上げ名（issue #741）。「何を選ぶ欄か」を伝える。見える見出しがあるなら aria-labelledby を使う。
+       * FormField `as="group"` の中では省いてよい（`semantics="radio"` は radiogroup をそのラベルで名付ける）
+       */
+      "aria-label"?: string
+      /** 見える見出しの id（issue #741）。aria-label より優先して読まれる */
+      "aria-labelledby"?: string
+      /**
+       * 読み上げの役割（issue #741）。
+       * - "tabs"（既定・従来どおり）: tablist / tab。画面内の表示の切り替え（一覧の絞り込み・週/月）
+       * - "radio": radiogroup / radio。フォームの値選び（性別・単位など）。FormField `as="group"` の中ではこちらを推奨
+       * どちらも矢印キーで選択が移り、Tab キーでは選択中の 1 つにだけ止まる。見た目は同じ
+       */
+      semantics?: "tabs" | "radio"
+      /**
+       * フォーム送信時の名前（`semantics="radio"` のときだけ有効。issue #741）。
+       * `<form>` の中では選択中の value が FormData / ネイティブ送信にこの名前で入る。
+       * tabs で渡すと使われず、開発ビルドで 1 回警告する
+       */
+      name?: string
       onChange?: undefined
       /**
        * @deprecated `onChange` を使ってください。後方互換のために残しているエイリアスで、
@@ -86,6 +137,18 @@ type PillToggleProps<T extends string = string> =
  * 長いラベルは省略記号で畳まれる（折り返しはしない）ので、`fullWidth` では
  * 短いラベルを使うこと。
  *
+ * ### 名前と読み上げの役割（issue #741）
+ * `aria-label` / `aria-labelledby` で「何を選ぶ欄か」を名付ける。FormField `as="group"` の中では
+ * 省いてよい（`semantics="radio"` は radiogroup をそのラベルで名付ける。tabs は外側の group の名前に任せる）。
+ * フォームの値選び（性別・単位など）は `semantics="radio"`（radiogroup / radio）で読ませる。
+ * 既定の `"tabs"`（tablist / tab）は画面内の表示の切り替え向けで、従来どおり。
+ * ```tsx
+ * <FormField as="group" label="表示単位">
+ *   <PillToggle semantics="radio" options={UNITS} value={unit} onChange={setUnit} />
+ * </FormField>
+ * <PillToggle aria-label="表示の切り替え" options={VIEWS} value={view} onChange={setView} />
+ * ```
+ *
  * ### 高さを外から足さないこと
  * pill の trigger は見た目の高さ（`h-9`/`h-8`）を保ったまま、透明な `before`
  * 擬似要素で当たり判定だけをトラック全高 44px に広げている。消費側で
@@ -97,6 +160,19 @@ const TRIGGER_SIZE = {
   md: "h-9 px-4 typo-label-sm",
 } as const
 
+// semantics="radio"（issue #741）の見た目は TabsList / TabsTrigger の variant="pill" と同じ。
+// 共通部分は src/lib/pill-segment-classes.ts を tabs.tsx と共有し、選択状態の属性（data-state=checked）だけここに書く
+const RADIO_LIST = cn(SEGMENT_LIST_BASE, PILL_LIST_SHAPE)
+const RADIO_ITEM = cn(
+  SEGMENT_ITEM_BASE,
+  PILL_ITEM_SHAPE,
+  PILL_ITEM_HIT_AREA,
+  SEGMENT_ITEM_FOCUS_DISABLED,
+  "data-[state=checked]:bg-[var(--Surface-Primary)] data-[state=checked]:text-[var(--Text-High-Emphasis)] data-[state=checked]:shadow-sm",
+  "forced-colors:data-[state=checked]:bg-[Highlight] forced-colors:data-[state=checked]:text-[HighlightText]",
+  "data-[state=unchecked]:hover:text-[var(--Text-High-Emphasis)]"
+)
+
 function PillToggle<T extends string = string>({
   options,
   value,
@@ -105,8 +181,70 @@ function PillToggle<T extends string = string>({
   size = "md",
   fullWidth = false,
   className,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
+  semantics = "tabs",
+  name,
 }: PillToggleProps<T>) {
   const handleChange = onChange ?? onValueChange
+  // issue #741: FormField as="group" の中で名前が未指定なら、radiogroup 自身もそのラベルで名付ける
+  // （WAI-ARIA の radio group パターンは radiogroup 自体が見える見出しを参照することを求める。
+  // 外側の group の名前は内側へ継承されない）。tabs は従来どおり外側の group の名前に任せる
+  const groupLabelId = React.useContext(FormFieldGroupLabelContext)
+  const radioLabelledby = ariaLabelledby ?? (ariaLabel ? undefined : groupLabelId)
+  const isUnnamedRadiogroup = semantics === "radio" && !ariaLabel && !radioLabelledby
+  React.useEffect(() => {
+    if (!isUnnamedRadiogroup) return
+    warnOnceInDev(
+      "pill-toggle-radio-unnamed",
+      'PillToggle: semantics="radio"（role="radiogroup"）には名前が必要です。見出しの id を aria-labelledby に渡すか、aria-label を指定してください（FormField as="group" の中なら不要。issue #741）。'
+    )
+  }, [isUnnamedRadiogroup])
+  const nameIgnored = semantics !== "radio" && name != null
+  React.useEffect(() => {
+    if (!nameIgnored) return
+    warnOnceInDev(
+      "pill-toggle-name-tabs",
+      'PillToggle: name は semantics="radio" のときだけ使われます（tabs はフォームへ値を送りません）。フォームの値選びなら semantics="radio" を指定してください（issue #741）。'
+    )
+  }, [nameIgnored])
+
+  const renderContent = (opt: PillToggleOption<T>) => (
+    <>
+      {opt.icon && <span className="shrink-0">{opt.icon}</span>}
+      {/* fullWidth では枠幅がラベル長で決まらないため、長いラベルは省略記号で畳む。
+          TabsTrigger は既定で whitespace-nowrap なので折り返して高さが崩れることはなく、
+          truncate を足すことで枠外へはみ出す代わりに「…」で収める。 */}
+      <span className={cn(fullWidth && "truncate")}>{opt.label}</span>
+    </>
+  )
+
+  if (semantics === "radio") {
+    return (
+      <RadioGroupPrimitive.Root
+        data-slot="pill-toggle"
+        data-semantics="radio"
+        name={name}
+        value={value}
+        onValueChange={(v) => handleChange?.(v as T)}
+        aria-label={ariaLabel}
+        aria-labelledby={radioLabelledby}
+        className={cn(RADIO_LIST, fullWidth && "flex w-full", className)}
+      >
+        {options.map((opt) => (
+          <RadioGroupPrimitive.Item
+            key={opt.value}
+            value={opt.value}
+            data-slot="pill-toggle-item"
+            className={cn(RADIO_ITEM, TRIGGER_SIZE[size], fullWidth && "flex-1 min-w-0 overflow-hidden")}
+          >
+            {renderContent(opt)}
+          </RadioGroupPrimitive.Item>
+        ))}
+      </RadioGroupPrimitive.Root>
+    )
+  }
+
   return (
     <Tabs
       data-slot="pill-toggle"
@@ -115,6 +253,8 @@ function PillToggle<T extends string = string>({
     >
       <TabsList
         variant="pill"
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledby}
         className={cn(fullWidth && "flex w-full", className)}
       >
         {options.map((opt) => (
@@ -123,11 +263,7 @@ function PillToggle<T extends string = string>({
             value={opt.value}
             className={cn(TRIGGER_SIZE[size], fullWidth && "flex-1 min-w-0 overflow-hidden")}
           >
-            {opt.icon && <span className="shrink-0">{opt.icon}</span>}
-            {/* fullWidth では枠幅がラベル長で決まらないため、長いラベルは省略記号で畳む。
-                TabsTrigger は既定で whitespace-nowrap なので折り返して高さが崩れることはなく、
-                truncate を足すことで枠外へはみ出す代わりに「…」で収める。 */}
-            <span className={cn(fullWidth && "truncate")}>{opt.label}</span>
+            {renderContent(opt)}
           </TabsTrigger>
         ))}
       </TabsList>

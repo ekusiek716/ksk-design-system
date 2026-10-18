@@ -1,6 +1,14 @@
 import * as React from "react"
 import { Tabs as TabsPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import {
+  PILL_ITEM_HIT_AREA,
+  PILL_ITEM_SHAPE,
+  PILL_LIST_SHAPE,
+  SEGMENT_ITEM_BASE,
+  SEGMENT_ITEM_FOCUS_DISABLED,
+  SEGMENT_LIST_BASE,
+} from "@/lib/pill-segment-classes"
 
 type TabsVariant = "default" | "pill"
 
@@ -49,13 +57,11 @@ function TabsList({
         data-slot="tabs-list"
         data-variant={variant}
         className={cn(
-          "inline-flex w-fit max-w-full overflow-x-auto items-center gap-1 bg-[var(--Surface-Tertiary)] p-1 text-[var(--Text-Medium-Emphasis)]",
-          // 高さ・角丸は product theme の公開変数を参照する（issue #364 追補）。
-          // pill(44px)は Control スケール（40/48px）のどちらとも一致しないため
-          // Chip の縦タッチターゲットと同じ理由（WCAG 2.5.5 相当の当たり判定）で
-          // 固定値のまま据え置き、角丸だけ Button と同じ --Control-Radius を共有する。
+          // pill の class は PillToggle semantics="radio" と共有する（src/lib/pill-segment-classes.ts。issue #741）
+          SEGMENT_LIST_BASE,
+          // 高さ・角丸は product theme の公開変数を参照する（issue #364 追補。pill の 44px の理由は共有定数側）
           variant === "pill"
-            ? "h-11 rounded-[var(--Control-Radius)]"
+            ? PILL_LIST_SHAPE
             : "h-[var(--Control-Height-Md)] rounded-[var(--Field-Radius)]",
           VERTICAL_LIST,
           className
@@ -73,17 +79,12 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
       data-slot="tabs-trigger"
       data-variant={variant}
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap typo-label-sm transition-all",
+        SEGMENT_ITEM_BASE,
         // 横 padding・角丸も product theme の公開変数を参照する（issue #364 追補）。
-        variant === "pill"
-          ? "relative rounded-[var(--Control-Radius)] px-[var(--Control-Padding-X-Md)] py-1.5 gap-1.5"
-          : "rounded-[var(--Field-Radius)] px-[var(--Control-Padding-X-Sm)] py-1.5",
-        // pill は見た目の高さ(h-9/h-8)を維持したまま、当たり判定だけをトラック全高(44px)まで
-        // 透明な before 擬似要素で拡張する。本体の height は変更しない（belle-todo 事例の再発防止）。
-        variant === "pill" &&
-          "before:absolute before:inset-x-0 before:top-1/2 before:-translate-y-1/2 before:min-h-11 before:content-['']",
-        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
-        "disabled:pointer-events-none disabled:opacity-50",
+        variant === "pill" ? PILL_ITEM_SHAPE : "rounded-[var(--Field-Radius)] px-[var(--Control-Padding-X-Sm)] py-1.5",
+        // pill は当たり判定だけを透明な before で 44px に広げる（共有定数側に理由）
+        variant === "pill" && PILL_ITEM_HIT_AREA,
+        SEGMENT_ITEM_FOCUS_DISABLED,
         "data-[state=active]:bg-[var(--Surface-Primary)] data-[state=active]:text-[var(--Text-High-Emphasis)] data-[state=active]:shadow-sm",
         // forced-colors（Windows ハイコントラスト）では背景色・box-shadow が消え、選択中の
         // 白地（Surface-Primary + shadow-sm）が描画されず、どのタブが選択中か分からなくなる。

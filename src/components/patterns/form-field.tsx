@@ -2,7 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useKskLabels } from "../ui/ksk-labels"
 import { warnOnceInDev } from "@/lib/dev-warn"
-import { FormFieldGroupLabelContext } from "./form-field-context"
+import { FormFieldGroupLabelContext } from "@/lib/form-field-group-context"
 
 /**
  * `required` の見た目をどう出すか。
@@ -59,7 +59,7 @@ interface FormFieldProps extends React.ComponentProps<"div"> {
    * - "group": チップ・トグル・ラジオ等の選択肢のまとまり。ラベルを `<span id>` で描き、中身の列を
    *   `role="group"` + `aria-labelledby`（説明文・エラーは aria-describedby）にする。htmlFor は使わない
    *   （渡すと開発ビルドで警告）。`<span>` + `<div role="group">` + `w-20` のラベルで行を自作しない。
-   *   中の ChipSelector（single）は aria-label / aria-labelledby を省いても名前なしの警告を出さない（外側の group がこのラベルで名前を持つ。内側へ同じ名前は結ばない = 二重読み上げにしない。issue #734）。
+   *   中の radiogroup（ChipSelector single・PillToggle semantics="radio"）は aria-label / aria-labelledby を省くと、このラベルを aria-labelledby で結ぶ（radiogroup は名前が必須で外側の group の名前は継承されないため。issue #741）。複数選択の ChipSelector と PillToggle tabs は結ばない（issue #734）。
    *   **required は読み上げに伝わらない**（role=group は aria-required を持てず、* / 必須バッジは aria-hidden）。
    *   必須であることは description（例: 「1 つ以上選んでください」）か label の文言で補う
    */

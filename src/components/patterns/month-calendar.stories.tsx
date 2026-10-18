@@ -235,3 +235,34 @@ export const HeaderLiveOff: StoryObj<typeof MonthCalendarHeader> = {
     await expect(off.hasAttribute("aria-atomic")).toBe(false)
   },
 }
+
+/**
+ * trailing（issue #743）: 右側の並びの右端に consumer の部品を置く（「月／週」の切り替え・追加ボタンなど）。
+ * 見出しの外で並びを自作しない。
+ */
+export const HeaderWithTrailing: StoryObj<typeof MonthCalendarHeader> = {
+  tags: ["interaction"],
+  render: function Render() {
+    const [month, setMonth] = React.useState(new Date(2026, 9, 1))
+    return (
+      <div className="w-[390px] max-w-full">
+        <MonthCalendarHeader
+          month={month}
+          onPrev={() => setMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
+          onNext={() => setMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
+          trailing={<Button size="sm" variant="secondary">追加</Button>}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const actions = canvasElement.querySelector<HTMLElement>('[data-slot="month-calendar-header-actions"]')!
+    const next = actions.querySelector<HTMLElement>('[data-slot="month-calendar-next"]')!
+    const add = Array.from(actions.querySelectorAll("button")).find((b) => b.textContent === "追加")!
+    await expect(add).toBeTruthy()
+    // 右端（次の月ボタンの右）で、重ならない
+    await expect(add.getBoundingClientRect().left).toBeGreaterThanOrEqual(next.getBoundingClientRect().right)
+    const header = canvasElement.querySelector<HTMLElement>('[data-slot="month-calendar-header"]')!
+    await expect(add.getBoundingClientRect().right).toBeLessThanOrEqual(header.getBoundingClientRect().right + 0.5)
+  },
+}

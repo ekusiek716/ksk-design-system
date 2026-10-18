@@ -509,6 +509,12 @@ interface MonthCalendarHeaderProps extends Omit<React.ComponentProps<"div">, "ti
    * 一覧のスクロールに合わせて月が変わる画面では、スクロールのたびに読み上げが走るので `false` にする
    */
   live?: boolean
+  /**
+   * 右側の並びの右端（前後の月ボタンの後ろ）に置く部品（issue #743）。
+   * 「月／週」の切り替え（PillToggle size="sm"）や予定の追加ボタンなど。見出しの外で並びを自作しない。
+   * 前後の月ボタンが無くても、trailing だけで右側の並びを出す
+   */
+  trailing?: React.ReactNode
 }
 
 /**
@@ -532,6 +538,7 @@ function MonthCalendarHeader({
   prevLabel,
   nextLabel,
   live = true,
+  trailing,
   className,
   ...props
 }: MonthCalendarHeaderProps) {
@@ -539,6 +546,7 @@ function MonthCalendarHeader({
   const providerLocale = useKskLocale()
   const locale = localeProp ?? providerLocale ?? "ja"
   const start = toMonthStart(month)
+  const hasTrailing = trailing != null && trailing !== false
   const defaultTitle =
     locale === "ja"
       ? `${start.getFullYear()}年${start.getMonth() + 1}月`
@@ -568,9 +576,9 @@ function MonthCalendarHeader({
           </Button>
         )}
       </div>
-      {(onPrev || onNext) && (
+      {(onPrev || onNext || hasTrailing) && (
         // icon-sm（見た目 32px・当たり判定 44px）を並べるので、見た目の端同士は 12px（gap-3）空ける
-        <div className="flex shrink-0 items-center gap-3">
+        <div data-slot="month-calendar-header-actions" className="flex shrink-0 items-center gap-3">
           {onPrev && (
             <Button
               type="button"
@@ -595,6 +603,7 @@ function MonthCalendarHeader({
               <ArrowRight2 size={16} aria-hidden="true" />
             </Button>
           )}
+          {hasTrailing && trailing}
         </div>
       )}
     </div>

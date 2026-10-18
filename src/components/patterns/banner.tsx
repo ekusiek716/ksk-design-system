@@ -48,6 +48,23 @@ interface BannerProps
   onDismiss?: () => void
   /** 閉じるボタンの読み上げ名。既定は KskLabelsProvider の close（無ければ「閉じる」） */
   dismissLabel?: string
+  /**
+   * 読み上げの割り込み方（issue #740）。
+   * - "assertive": `role="alert"`。今の読み上げを止めて割り込む（保存の失敗・期限切れなど、すぐ伝えるもの）
+   * - "polite": `role="status"`。今の読み上げが終わってから伝える（常時表示の案内・完了の知らせ）
+   * - "off": role を付けない（画面を開いたときから出ている静的な説明）
+   *
+   * 既定は variant から決める: `warning` / `caution` は "assertive"、`info` / `success` は "polite"。
+   * `role` を明示した場合はそちらが優先（live は無視）。
+   */
+  live?: "assertive" | "polite" | "off"
+}
+
+const LIVE_ROLE = { assertive: "alert", polite: "status", off: undefined } as const
+
+/** variant から既定の live を決める（issue #740）。注意・警告だけ割り込む */
+function defaultBannerLive(variant: BannerProps["variant"]): NonNullable<BannerProps["live"]> {
+  return variant === "warning" || variant === "caution" ? "assertive" : "polite"
 }
 
 function Banner({
@@ -61,14 +78,17 @@ function Banner({
   action,
   onDismiss,
   dismissLabel,
+  live,
   children,
   ...props
 }: BannerProps) {
   const labels = useKskLabels()
+  const resolvedLive = live ?? defaultBannerLive(variant)
   return (
     <div
       data-slot="banner"
-      role="alert"
+      // consumer の role 明示は ...props で上書きされる（従来どおり）
+      role={LIVE_ROLE[resolvedLive]}
       data-density={density ?? "default"}
       data-layout={layout ?? "card"}
       className={cn(bannerVariants({ variant, density, layout }), className)}

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Chip } from "@/components/patterns/chip"
-import { FormFieldGroupLabelContext } from "@/components/patterns/form-field-context"
+import { FormFieldGroupLabelContext } from "@/lib/form-field-group-context"
 
 interface ChipSelectorOption<T extends string = string> {
   label: string
@@ -202,14 +202,16 @@ function ChipSelector<T extends string = string>({
   "aria-describedby": ariaDescribedby,
   id,
 }: ChipSelectorProps<T>) {
-  // issue #734: FormField as="group" の中では外側の group がラベルで名前を持つ。内側の radiogroup へ同じ名前は
-  // 結ばず（二重読み上げになる）、名前なしの警告だけ出さない。aria-label / aria-labelledby の明示は常に優先
-  const inNamedFormGroup = React.useContext(FormFieldGroupLabelContext) !== undefined
-  const ariaLabelledby = ariaLabelledbyProp
   // selectionMode が指定されていればそれが正本。未指定なら従来の multiple から導出するので、
   // 既存の呼び出しは 1 行も変えずに同じ DOM / 同じ挙動になる（issue #352）。
   const isMultiple = selectionMode ? selectionMode === "multiple" : multiple
   const isSingle = !isMultiple
+  // issue #741（#734 の方針変更）: radiogroup は WAI-ARIA 1.2 で名前が必須で、外側の group の名前は継承されない。
+  // FormField as="group" の中の単一選択（radiogroup）は、名前が未指定ならそのラベルを aria-labelledby で結ぶ。
+  // 複数選択（role=group）は従来どおり結ばない（外側の group が名前を持つ）。aria-label / aria-labelledby の明示が優先
+  const groupLabelId = React.useContext(FormFieldGroupLabelContext)
+  const inNamedFormGroup = groupLabelId !== undefined
+  const ariaLabelledby = ariaLabelledbyProp ?? (isSingle && !ariaLabel ? groupLabelId : undefined)
   const containerRef = React.useRef<HTMLDivElement | null>(null)
 
   // 単一選択は value がスカラーでも配列でも受ける（issue #418）。

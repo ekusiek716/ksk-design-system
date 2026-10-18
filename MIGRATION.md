@@ -20,6 +20,15 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 - **余白・項目行・ダイアログ・アプリ枠・予定の色（#711–#716）**: Container / ChipFilterBar の `gutter="fluid"`（`--Container-Gutter-Fluid`）、FormField の `orientation="horizontal"`・Input / Textarea の `targetSize="comfortable"`、Dialog の `centerFrom`・`height="fill"`・`size="2xl"`・`DialogHeader variant="bar"`、FieldSet の `gap`・FieldLegend の `size="sm"`、MobileAppShell の `viewport="fixed"`・`safeAreaTop`・`safeAreaBottom`・`bottomPadding="native-tab-bar"`（`--Native-Tab-Bar-Height`。ネイティブ側が書く任意フック <!-- docs-drift-ignore: --Native-Tab-Bar-Height -->）、MonthCalendar / AgendaList の予定の `accentColor` を追加します。すべて任意指定で、既定の見た目は変わりません。
 - **CollapsibleChipField の見出し（#717）**: `label` の既定の見た目が `typo-label-sm` + `Text-Medium-Emphasis`（12px）から、フォームの項目名と同じ `typo-label-md` + `Text-High-Emphasis`（14px 太字）に変わります（同じ詳細シートの `<Label>` / `FormField` と大きさをそろえるため）。従来の見た目が要る画面は `labelSize="sm"` を指定してください。展開中の選択肢のまとまりは見える見出しと `aria-labelledby` で結ばれます（`ariaLabel` を指定した場合は従来どおり `aria-label`）。`label` も `icon` も渡さない行は、先頭の 24px の空きが無くなります。native の CollapsibleChipField は変わりません。
 
+## 次回リリース（未リリース）の導入注意
+
+以下は次回の版に入る変更です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
+
+- **Banner の読み上げ（#740・既定の読み上げの変更）**: これまで variant に関係なく `role="alert"`（今の読み上げに割り込む）でしたが、`info` / `success` は `role="status"`（読み上げの区切りで伝える）に変わります。`warning` / `caution` は従来どおり `role="alert"` です。見た目は変わりません。info / success でも割り込ませたい画面は `live="assertive"`、画面を開いたときから出ている静的な説明は `live="off"`（role なし）を指定してください。`role` を明示している呼び出しは従来どおりそちらが優先です。テストで `getByRole("alert")` により info / success の Banner を探している場合は `getByRole("status")` に直してください。
+- **DetailSheetHeader の閉じるだけの形（#742・既定の見た目の変更）**: title / titleEditor / description / leading / children のどれも渡さない（閉じるボタン・trailing だけの）ヘッダーは、下線と下余白（`border-b pb-4`）を出さなくなります。className で `border-0 pb-0` 等を上書きしていた場合は外せます。従来の下線が要る画面は `bordered` を指定してください。
+- **FormField `as="group"` 内の ChipSelector 単一選択の名前（#741・既定の読み上げの変更）**: #734 では内側の radiogroup に名前を結ばない方針でしたが、radiogroup は WAI-ARIA 1.2 で名前が必須で外側の group の名前は継承されないため、`aria-label` / `aria-labelledby` を省いた単一選択はラベルを `aria-labelledby` で結ぶように変わります（PillToggle `semantics="radio"` も同じ）。複数選択は従来どおり結びません。明示した指定は優先されます。見た目は変わりません。
+- 追加のみ（既定の見た目・読み上げは不変）: PillToggle の `aria-label` / `aria-labelledby`・`semantics="radio"`（フォームの値選び向け。FormField `as="group"` の中では radiogroup をそのラベルで名付ける。#741）、MonthCalendarHeader の `trailing`（#743）。
+
 ## v2.16.0 の導入注意
 
 以下はv2.16.0の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
