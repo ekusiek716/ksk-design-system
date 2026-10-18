@@ -22,9 +22,15 @@ interface SettingsSectionProps extends Omit<React.ComponentProps<"section">, "ti
  * `<Switch {...control} />` のように渡すと、title がその部品のラベル、description が説明になる。
  */
 interface SettingsListRowControlProps {
-  id: string
+  /**
+   * 操作部品の id（title の `<label htmlFor>` と同じ）。interactive / onClick の行（行全体が button）では
+   * 結ばないので `{}` で呼ばれ、undefined になる。
+   */
+  id?: string
   /** description があるときだけ入る（description の要素の id）。 */
   "aria-describedby"?: string
+  /** 行に disabled を付けたときだけ true が入る（ラベルを押しても切り替わらないように操作部品も止める）。 */
+  disabled?: boolean
 }
 
 interface SettingsListRowProps
@@ -34,15 +40,19 @@ interface SettingsListRowProps
   /** 行頭のアイコンやアバター。寸法は渡した要素を保ち、装飾用の余白を追加しない。 */
   leading?: React.ReactNode
   /**
-   * 右端の操作部品・表示。関数を渡すと `{ id, "aria-describedby" }` を受け取り、
+   * 右端の操作部品・表示。関数を渡すと `{ id, "aria-describedby", disabled }` を受け取り、
    * title（`<label htmlFor>`）・description（`aria-describedby`）と結ばれる（issue #759）。
+   * 関数が null / undefined / boolean を返したときは結ばない（title は従来どおり `<p>`）。
+   * interactive / onClick の行では `{}` で呼ばれ、描画はするが結ばない。
    */
   rightSlot?: React.ReactNode | ((control: SettingsListRowControlProps) => React.ReactNode)
   /**
    * rightSlot の操作部品（Switch / Checkbox 等）の id（issue #759）。指定すると title を
    * `<label htmlFor={controlId}>`、description に `${controlId}-description` の id を付ける。
-   * 操作部品側に `id={controlId}` と `aria-describedby` を付けるか、rightSlot に関数を渡す
-   * （関数を渡すなら省略可。省略時は自動採番）。行全体が button になる interactive / onClick の行では結ばない。
+   * rightSlot に要素を渡すなら、操作部品側に `id={controlId}` と（description があれば）
+   * `aria-describedby={`${controlId}-description`}` を自分で付ける（id が見つからないと開発ビルドで警告）。
+   * rightSlot に関数を渡すなら省略可（省略時は自動採番）。行全体が button になる interactive / onClick の行では結ばない。
+   * title にリンク等の操作要素を入れる行では controlId / 関数の rightSlot を使わない（label の中に操作要素を置けないため）。
    */
   controlId?: string
   interactive?: boolean
@@ -153,20 +163,47 @@ function SettingsListRow({
 }: SettingsListRowProps) {
   const autoId = React.useId()
   const isButtonRow = interactive || onClick != null
+  const wantsLink = controlId != null || typeof rightSlot === "function"
   // 行全体が button の行は、中に label・操作部品を入れられないので結ばない（issue #759）。
-  const linked = !isButtonRow && (controlId != null || typeof rightSlot === "function")
-  const resolvedControlId = controlId ?? `settings-row-${autoId.replace(/:/g, "")}-control`
-  const descriptionId = linked && description ? `${resolvedControlId}-description` : undefined
-  if (isButtonRow && (controlId != null || typeof rightSlot === "function")) {
+  const canLink = !isButtonRow && wantsLink
+  // React 19.1+ の useId は «r1» / _r_1_ 形式なので、id に使える文字だけ残す
+  const resolvedControlId = controlId ?? `settings-row-${autoId.replace(/[^a-zA-Z0-9_-]/g, "")}-control`
+  const candidateDescriptionId = canLink && description ? `${resolvedControlId}-description` : undefined
+  if (isButtonRow && wantsLink) {
     warnOnceInDev(
       "settings-list-row-control-in-button",
       "SettingsListRow: interactive / onClick の行（行全体が button）では controlId / 関数の rightSlot による結び付けは行いません。操作部品は button の中に置けないため、トグルの行は interactive / onClick を外してください。"
     )
   }
-  const resolvedRightSlot =
-    typeof rightSlot === "function"
-      ? rightSlot({ id: resolvedControlId, ...(descriptionId ? { "aria-describedby": descriptionId } : {}) })
-      : rightSlot
+  let resolvedRightSlot: React.ReactNode
+  if (typeof rightSlot === "function") {
+    resolvedRightSlot = rightSlot(
+      canLink
+        ? {
+            id: resolvedControlId,
+            ...(candidateDescriptionId ? { "aria-describedby": candidateDescriptionId } : {}),
+            ...(disabled ? { disabled: true } : {}),
+          }
+        : {}
+    )
+  } else {
+    resolvedRightSlot = rightSlot
+  }
+  // 関数が何も描かなかったときは label[for] が宙に浮くので結ばない
+  const linked =
+    canLink &&
+    (typeof rightSlot !== "function" || (resolvedRightSlot != null && typeof resolvedRightSlot !== "boolean"))
+  const descriptionId = linked ? candidateDescriptionId : undefined
+  const checkMissingControl = linked && typeof rightSlot !== "function" && controlId != null
+  React.useEffect(() => {
+    if (!checkMissingControl || !controlId || typeof document === "undefined") return
+    if (!document.getElementById(controlId)) {
+      warnOnceInDev(
+        `settings-list-row-missing-control:${controlId}`,
+        `SettingsListRow: controlId="${controlId}" の要素が見つかりません。rightSlot に要素を渡すときは、操作部品に id="${controlId}"（description があれば aria-describedby="${controlId}-description"）を付けるか、rightSlot={(control) => <Switch {...control} />} の形にしてください。`
+      )
+    }
+  }, [checkMissingControl, controlId])
   const titleClassName = cn(
     "typo-label-md truncate",
     destructive ? "text-[var(--Text-Caution)]" : "text-[var(--Text-High-Emphasis)]"

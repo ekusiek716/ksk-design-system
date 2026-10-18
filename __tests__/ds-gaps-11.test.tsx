@@ -160,4 +160,90 @@ describe("SettingsListRow の操作部品との結び付け (#759)", () => {
     const labels = [...container.querySelectorAll<HTMLButtonElement>('[role="switch"]')].map((s) => s.labels?.[0]?.textContent)
     expect(labels).toEqual(["通知", "メール"])
   })
+
+  it("interactive / onClick の行では関数の rightSlot を {} で呼び、描画はするが結ばない", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    const calls: unknown[] = []
+    mount(
+      <SettingsListRow
+        title="ログイン方法"
+        description="メール"
+        onClick={() => {}}
+        rightSlot={(control) => {
+          calls.push(control)
+          return <span data-testid="right" id={control.id}>メール</span>
+        }}
+      />
+    )
+    expect(calls).toEqual([{}])
+    const right = container.querySelector('[data-testid="right"]')!
+    expect(right.textContent).toBe("メール")
+    expect(right.hasAttribute("id")).toBe(false)
+    expect(container.querySelector("label")).toBeNull()
+    expect(container.querySelector("[id$='-description']")).toBeNull()
+  })
+
+  it("controlId だけ渡して rightSlot の要素にその id が無いと、開発ビルドで描画後に警告する", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    mount(<SettingsListRow title="通知" controlId="missing-id" rightSlot={<Switch aria-label="通知" />} />)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(String(warn.mock.calls[0][0])).toContain('controlId="missing-id"')
+  })
+
+  it("controlId と同じ id の操作部品があれば警告しない", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    mount(<SettingsListRow title="通知" controlId="present-id" rightSlot={<Switch id="present-id" />} />)
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it("disabled の行は label に cursor-pointer を付けず、関数の rightSlot に disabled を渡してラベルを押しても切り替わらない", () => {
+    const onCheckedChange = vi.fn()
+    const calls: unknown[] = []
+    mount(
+      <SettingsListRow
+        title="通知"
+        disabled
+        rightSlot={(control) => {
+          calls.push(control)
+          return <Switch {...control} onCheckedChange={onCheckedChange} />
+        }}
+      />
+    )
+    const label = container.querySelector<HTMLLabelElement>("label")!
+    expect(label.className).not.toContain("cursor-pointer")
+    expect(calls.at(-1)).toMatchObject({ disabled: true })
+    act(() => {
+      label.click()
+    })
+    expect(onCheckedChange).not.toHaveBeenCalled()
+  })
+
+  it("disabled でない行の label には cursor-pointer が付き、disabled は渡さない", () => {
+    const calls: unknown[] = []
+    mount(
+      <SettingsListRow
+        title="通知"
+        rightSlot={(control) => {
+          calls.push(control)
+          return <Switch {...control} />
+        }}
+      />
+    )
+    expect(container.querySelector("label")!.className).toContain("cursor-pointer")
+    expect(calls.at(-1)).not.toHaveProperty("disabled")
+  })
+
+  it("関数の rightSlot が null を返したら結ばない（title は <p>、description に id を振らない）", () => {
+    const el = host(<SettingsListRow title="通知" description="説明" rightSlot={() => null} />)
+    expect(el.querySelector("label")).toBeNull()
+    expect(el.querySelector('[data-slot="settings-list-row-body"] > p')?.textContent).toBe("通知")
+    expect(el.querySelector("[id]")).toBeNull()
+    expect(el.querySelector('[data-slot="settings-list-row-right"]')).toBeNull()
+  })
+
+  it("自動採番の id は id に使える文字だけで組み立てる", () => {
+    mount(<SettingsListRow title="通知" rightSlot={(c) => <Switch {...c} />} />)
+    const id = container.querySelector('[role="switch"]')!.id
+    expect(id).toMatch(/^settings-row-[a-zA-Z0-9_-]+-control$/)
+  })
 })
