@@ -50,6 +50,11 @@
       "dsIssue": 608,
       "consumerIssue": "https://github.com/ekusiek716/camera-app/issues/257",
       "fixPr": 631
+    },
+    {
+      "dsIssue": 753,
+      "consumerIssue": "https://github.com/ekusiek716/exam-kit/issues/1539",
+      "fixPr": 756
     }
   ]
 }
