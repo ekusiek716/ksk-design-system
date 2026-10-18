@@ -20,14 +20,12 @@ export function useReduceMotionState(): ReduceMotionState {
     let receivedEvent = false
     // react-native-web は matchMedia の無い環境（jsdom など）で購読を返さない（undefined）。
     // 型は常に返す前提なので、ここで undefined もあり得る形に広げ、後片付けで落ちないようにする（#757）。
-    const subscription: { remove: () => void } | undefined = AccessibilityInfo.addEventListener(
-      "reduceMotionChanged",
-      (enabled) => {
-        if (!mounted) return
-        receivedEvent = true
-        setState({ reduceMotion: enabled, resolved: true })
-      },
-    )
+    // 型注釈だと代入で undefined が外れて `?.` を消しても型検査が気づかないため、as で受ける。
+    const subscription = AccessibilityInfo.addEventListener("reduceMotionChanged", (enabled) => {
+      if (!mounted) return
+      receivedEvent = true
+      setState({ reduceMotion: enabled, resolved: true })
+    }) as { remove: () => void } | undefined
     AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
       // 設定変更後に届いた初回取得結果で、新しい設定を巻き戻さない。
       if (mounted && !receivedEvent) setState({ reduceMotion: enabled, resolved: true })
