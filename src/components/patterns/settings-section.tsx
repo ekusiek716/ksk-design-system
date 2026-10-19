@@ -64,6 +64,12 @@ interface SettingsListRowProps
    * title にリンク等の操作要素を入れる行では controlId / 関数の rightSlot を使わない（label の中に操作要素を置けないため）。
    */
   controlId?: string
+  /**
+   * rightSlot の置き場所（issue #763）。既定 `"inline"` は右端（縮まない）。`"stacked"` は title・description の下に
+   * 行幅いっぱいで置くので、ChipSelector の 4 択以上・長いラベルのように右端に収まらない選択肢の並びが折り返せる。
+   * 結び付け（label / aria-labelledby / aria-describedby）は同じ。
+   */
+  controlLayout?: "inline" | "stacked"
   interactive?: boolean
   disabled?: boolean
   destructive?: boolean
@@ -167,6 +173,7 @@ function SettingsListRow({
   onClick,
   showChevron = false,
   controlId,
+  controlLayout = "inline",
   children,
   ...props
 }: SettingsListRowProps) {
@@ -249,9 +256,14 @@ function SettingsListRow({
           ) : (
             <div id={descriptionId} className="mt-1">{description}</div>
           ))}
+        {controlLayout === "stacked" && resolvedRightSlot && (
+          <div data-slot="settings-list-row-right" data-layout="stacked" className="mt-2 min-w-0">
+            {resolvedRightSlot}
+          </div>
+        )}
         {children}
       </div>
-      {resolvedRightSlot && (
+      {controlLayout !== "stacked" && resolvedRightSlot && (
         <div data-slot="settings-list-row-right" className="shrink-0">
           {resolvedRightSlot}
         </div>

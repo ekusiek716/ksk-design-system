@@ -214,6 +214,90 @@ describe("SettingsListRow の関数 rightSlot が title を指す aria-labelledb
     expect(calls.at(-1)).toMatchObject({ disabled: true, "aria-labelledby": label.id })
   })
 
+  it("disabled の行は {...control} の ChipSelector と disabled={control.disabled} の PillToggle も止まる", () => {
+    const onTheme = vi.fn()
+    const onLang = vi.fn()
+    mount(
+      <>
+        <SettingsListRow
+          title="テーマ"
+          disabled
+          rightSlot={(control) => (
+            <ChipSelector {...control} selectionMode="single" options={THEMES} value="light" onChange={onTheme} />
+          )}
+        />
+        <SettingsListRow
+          title="言語"
+          disabled
+          rightSlot={(control) => (
+            <PillToggle
+              aria-labelledby={control["aria-labelledby"]}
+              disabled={control.disabled}
+              semantics="radio"
+              options={[
+                { value: "ja", label: "日本語" },
+                { value: "en", label: "English" },
+              ]}
+              value="ja"
+              onChange={onLang}
+            />
+          )}
+        />
+      </>
+    )
+    const radios = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="radio"]'))
+    expect(radios).toHaveLength(4)
+    for (const radio of radios) {
+      expect(radio.disabled).toBe(true)
+      act(() => {
+        radio.click()
+      })
+    }
+    expect(onTheme).not.toHaveBeenCalled()
+    expect(onLang).not.toHaveBeenCalled()
+  })
+
+  it("PillToggle tabs も disabled で止まり、ChipSelector / PillToggle は既定では止まらない", () => {
+    const onChange = vi.fn()
+    mount(
+      <>
+        <PillToggle aria-label="表示" disabled options={THEMES} value="light" onChange={onChange} />
+        <ChipSelector aria-label="種別" selectionMode="single" options={THEMES} value="light" onChange={() => {}} />
+      </>
+    )
+    expect(Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]')).every((t) => t.disabled)).toBe(true)
+    expect(Array.from(container.querySelectorAll<HTMLButtonElement>('[role="radio"]')).some((r) => r.disabled)).toBe(false)
+  })
+
+  it('controlLayout="stacked" は操作部品を title・description の下（本文の中）に置き、結び付けは同じ', () => {
+    mount(
+      <SettingsListRow
+        title="テーマ"
+        description="画面の明るさ"
+        controlLayout="stacked"
+        rightSlot={(control) => (
+          <ChipSelector {...control} selectionMode="single" options={THEMES} value="light" onChange={() => {}} />
+        )}
+      />
+    )
+    const body = container.querySelector('[data-slot="settings-list-row-body"]')!
+    const right = container.querySelectorAll('[data-slot="settings-list-row-right"]')
+    expect(right).toHaveLength(1)
+    expect(body.contains(right[0])).toBe(true)
+    expect(right[0].className).not.toContain("shrink-0")
+    const group = container.querySelector<HTMLElement>('[role="radiogroup"]')!
+    expect(computeAccessibleName(group)).toBe("テーマ")
+    expect(computeAccessibleDescription(group)).toBe("画面の明るさ")
+  })
+
+  it("controlLayout 既定（inline）は従来どおり右端（本文の外・shrink-0）", () => {
+    mount(<SettingsListRow title="通知" rightSlot={(control) => <Switch {...control} />} />)
+    const body = container.querySelector('[data-slot="settings-list-row-body"]')!
+    const right = container.querySelector('[data-slot="settings-list-row-right"]')!
+    expect(body.contains(right)).toBe(false)
+    expect(right.className).toContain("shrink-0")
+  })
+
   it("関数が null を返した行は label を出さず、id の宙づりも無い", () => {
     mount(<SettingsListRow title="テーマ" description="説明" rightSlot={() => null} />)
     expect(container.querySelector("label")).toBeNull()

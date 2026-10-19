@@ -168,6 +168,7 @@ function LinkedRadioGroupDemo() {
         <SettingsListRow
           title="テーマ"
           description="画面の明るさ"
+          controlLayout="stacked"
           rightSlot={(control) => (
             <ChipSelector
               {...control}
@@ -184,6 +185,7 @@ function LinkedRadioGroupDemo() {
           rightSlot={(control) => (
             <PillToggle
               aria-labelledby={control["aria-labelledby"]}
+              disabled={control.disabled}
               semantics="radio"
               size="sm"
               options={[...LANGUAGES]}
@@ -198,10 +200,11 @@ function LinkedRadioGroupDemo() {
 }
 
 /**
- * 右に選択肢の並び（radiogroup）を置く行（issue #763）。`<label>` は div の radiogroup を名付けられないので、
+ * 選択肢の並び（radiogroup）を置く行（issue #763）。`<label>` は div の radiogroup を名付けられないので、
  * 関数の rightSlot が渡す `aria-labelledby`（title の id）で title を名前にする。ChipSelector は
  * `{...control}` をそのまま、id / aria-describedby を受け取らない部品は `aria-labelledby` だけ渡す。
- * title と同じ aria-label を重ねて書かない。
+ * title と同じ aria-label を重ねて書かない。右端に収まらない並び（4 択以上・長いラベル）は
+ * `controlLayout="stacked"` で title の下に置く。行の disabled は `control.disabled` で部品も止める。
  */
 export const LinkedRadioGroup: Story = {
   tags: ["interaction"],
