@@ -57,6 +57,7 @@ interface SettingsListRowProps
   /**
    * rightSlot の操作部品（Switch / Checkbox 等）の id（issue #759）。指定すると title を
    * `<label htmlFor={controlId}>`（id は `${controlId}-label`）、description に `${controlId}-description` の id を付ける。
+   * `${controlId}-label` / `${controlId}-description` は DS が使う id なので、画面の他の要素に付けない。
    * rightSlot に要素を渡すなら、操作部品側に `id={controlId}` と（description があれば）
    * `aria-describedby={`${controlId}-description`}` を自分で付ける（id が見つからないと開発ビルドで警告）。
    * rightSlot に関数を渡すなら省略可（省略時は自動採番）。行全体が button になる interactive / onClick の行では結ばない。

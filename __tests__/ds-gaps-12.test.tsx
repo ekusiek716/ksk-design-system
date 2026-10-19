@@ -137,6 +137,50 @@ describe("SettingsListRow の関数 rightSlot が title を指す aria-labelledb
     expect(computeAccessibleDescription(sw)).toBe("毎日のリマインダー")
   })
 
+  it("{...control} と別名の aria-label を併用すると、aria-labelledby が優先されて title で読まれる", () => {
+    mount(<SettingsListRow title="通知" rightSlot={(control) => <Switch {...control} aria-label="別名" />} />)
+    const sw = container.querySelector<HTMLButtonElement>('[role="switch"]')!
+    expect(sw.getAttribute("aria-label")).toBe("別名")
+    expect(computeAccessibleName(sw)).toBe("通知")
+  })
+
+  it("{...control} の後ろに aria-labelledby={undefined} を置くと aria-label の名前に戻る", () => {
+    mount(
+      <SettingsListRow
+        title="通知"
+        rightSlot={(control) => <Switch {...control} aria-label="別名" aria-labelledby={undefined} />}
+      />
+    )
+    const sw = container.querySelector<HTMLButtonElement>('[role="switch"]')!
+    expect(sw.hasAttribute("aria-labelledby")).toBe(false)
+    expect(computeAccessibleName(sw)).toBe("別名")
+  })
+
+  it("同じ画面に行を 2 つ並べると label の id は別になり、それぞれの title で読まれる", () => {
+    mount(
+      <>
+        <SettingsListRow
+          title="テーマ"
+          rightSlot={(control) => (
+            <ChipSelector {...control} selectionMode="single" options={THEMES} value="light" onChange={() => {}} />
+          )}
+        />
+        <SettingsListRow
+          title="文字の大きさ"
+          rightSlot={(control) => (
+            <ChipSelector {...control} selectionMode="single" options={THEMES} value="dark" onChange={() => {}} />
+          )}
+        />
+      </>
+    )
+    const labels = Array.from(container.querySelectorAll<HTMLLabelElement>("label"))
+    expect(labels).toHaveLength(2)
+    expect(labels[0].id).not.toBe(labels[1].id)
+    const groups = Array.from(container.querySelectorAll<HTMLElement>('[role="radiogroup"]'))
+    expect(groups.map((g) => g.getAttribute("aria-labelledby"))).toEqual(labels.map((l) => l.id))
+    expect(groups.map((g) => computeAccessibleName(g))).toEqual(["テーマ", "文字の大きさ"])
+  })
+
   it("interactive / onClick の行では従来どおり {} で呼ばれ、aria-labelledby も渡さない", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {})
     const calls: unknown[] = []
