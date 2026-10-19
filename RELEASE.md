@@ -2,6 +2,17 @@
 
 `ksk-design-system` のリリーススケジュール・運用ルール。
 
+## v2.21.0（2026-10-19）
+
+2.20.0以降に、SettingsListRow の右側に選択肢の並び（ChipSelector・PillToggle など）を置く行を、追加の指定なしで項目名どおりに読ませるminorリリース。追加のみですが、`{...control}` と別名の `aria-label` を併用していた行は読み上げ名が変わります。
+
+- SettingsListRow の関数 `rightSlot` が受け取る属性に、title の `<label>` を指す `aria-labelledby` を追加します。これまで title と同じ文字を `aria-label` に重ねていた行は、重ねを外せます（#763）。
+- `{...control}` と title と違う文字の `aria-label` を併用していた行は、`aria-labelledby` が優先されて title で読まれます。別名で読ませたい場合は `{...control}` の後ろに `aria-labelledby={undefined}` を書いて打ち消します。`${controlId}-label` / `${controlId}-description` は DS が使う id です。
+- SettingsListRow に `controlLayout`（既定 `"inline"`。`"stacked"` で title・description の下に行幅いっぱいで置く）、ChipSelector と PillToggle に `disabled` を追加します。
+- native の SettingsListRow・ChipSelector・PillToggle は対象外です。
+
+導入時は [2.21.0の注意](./MIGRATION.md#v2210-の導入注意) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。
+
 ## v2.20.0（2026-10-19）
 
 2.19.0以降に、SettingsListRow の項目名・説明を右の操作部品（Switch など）と結べるようにしたminorリリース。追加のみで、指定しない行の見た目・読み上げ・動きは変わりません。
