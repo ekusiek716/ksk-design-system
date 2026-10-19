@@ -63,6 +63,11 @@ type PillToggleProps<T extends string = string> =
        * tabs で渡すと使われず、開発ビルドで 1 回警告する
        */
       name?: string
+      /**
+       * すべての項目を押せなくする（issue #763。native の PillToggle と同じ名前）。SettingsListRow の関数 rightSlot が
+       * 行の disabled を `disabled: true` で渡すので、`disabled={control.disabled}` で行と一緒に止める。
+       */
+      disabled?: boolean
       onChange: (value: T) => void
       /**
        * @deprecated `onChange` を使ってください。後方互換のために残しているエイリアスで、
@@ -102,6 +107,11 @@ type PillToggleProps<T extends string = string> =
        * tabs で渡すと使われず、開発ビルドで 1 回警告する
        */
       name?: string
+      /**
+       * すべての項目を押せなくする（issue #763。native の PillToggle と同じ名前）。SettingsListRow の関数 rightSlot が
+       * 行の disabled を `disabled: true` で渡すので、`disabled={control.disabled}` で行と一緒に止める。
+       */
+      disabled?: boolean
       onChange?: undefined
       /**
        * @deprecated `onChange` を使ってください。後方互換のために残しているエイリアスで、
@@ -185,6 +195,7 @@ function PillToggle<T extends string = string>({
   "aria-labelledby": ariaLabelledby,
   semantics = "tabs",
   name,
+  disabled = false,
 }: PillToggleProps<T>) {
   const handleChange = onChange ?? onValueChange
   // issue #741: FormField as="group" の中で名前が未指定なら、radiogroup 自身もそのラベルで名付ける
@@ -225,6 +236,7 @@ function PillToggle<T extends string = string>({
         data-slot="pill-toggle"
         data-semantics="radio"
         name={name}
+        disabled={disabled}
         value={value}
         onValueChange={(v) => handleChange?.(v as T)}
         aria-label={ariaLabel}
@@ -261,6 +273,7 @@ function PillToggle<T extends string = string>({
           <TabsTrigger
             key={opt.value}
             value={opt.value}
+            disabled={disabled || undefined}
             className={cn(TRIGGER_SIZE[size], fullWidth && "flex-1 min-w-0 overflow-hidden")}
           >
             {renderContent(opt)}

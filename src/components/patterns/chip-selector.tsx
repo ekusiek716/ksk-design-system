@@ -83,6 +83,11 @@ type ChipSelectorProps<T extends string = string> =
       "aria-describedby"?: string
       /** ルート要素の id（issue #666） */
       id?: string
+      /**
+       * すべてのチップを押せなくする（issue #763）。SettingsListRow の関数 rightSlot が行の disabled を
+       * `disabled: true` で渡すので、`{...control}` を展開すると行と一緒に止まる。
+       */
+      disabled?: boolean
       /** 単一選択では無効（複数選択時のみ有効） */
       max?: never
       /** @deprecated `selectionMode` を使うこと。単一選択では指定できない */
@@ -117,6 +122,11 @@ type ChipSelectorProps<T extends string = string> =
       "aria-describedby"?: string
       /** ルート要素の id（issue #666） */
       id?: string
+      /**
+       * すべてのチップを押せなくする（issue #763）。SettingsListRow の関数 rightSlot が行の disabled を
+       * `disabled: true` で渡すので、`{...control}` を展開すると行と一緒に止まる。
+       */
+      disabled?: boolean
       max?: never
       multiple?: never
     }
@@ -160,6 +170,11 @@ type ChipSelectorProps<T extends string = string> =
       "aria-describedby"?: string
       /** ルート要素の id（issue #666） */
       id?: string
+      /**
+       * すべてのチップを押せなくする（issue #763）。SettingsListRow の関数 rightSlot が行の disabled を
+       * `disabled: true` で渡すので、`{...control}` を展開すると行と一緒に止まる。
+       */
+      disabled?: boolean
     }
 
 /**
@@ -201,6 +216,7 @@ function ChipSelector<T extends string = string>({
   "aria-labelledby": ariaLabelledbyProp,
   "aria-describedby": ariaDescribedby,
   id,
+  disabled: groupDisabled = false,
 }: ChipSelectorProps<T>) {
   // selectionMode が指定されていればそれが正本。未指定なら従来の multiple から導出するので、
   // 既存の呼び出しは 1 行も変えずに同じ DOM / 同じ挙動になる（issue #352）。
@@ -333,7 +349,7 @@ function ChipSelector<T extends string = string>({
     >
       {options.map((opt) => {
         const selected = selectedValues.includes(opt.value)
-        const disabled = !selected && !!max && selectedValues.length >= max
+        const disabled = groupDisabled || (!selected && !!max && selectedValues.length >= max)
         return (
           <Chip
             key={opt.value}

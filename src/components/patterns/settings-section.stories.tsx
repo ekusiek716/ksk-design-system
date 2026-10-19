@@ -4,7 +4,9 @@ import { expect, userEvent, within } from "storybook/test"
 import { Notification, Setting2, ShieldSecurity } from "iconsax-reactjs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { PillToggle } from "@/components/ui/pill-toggle"
 import { Switch } from "@/components/ui/switch"
+import { ChipSelector } from "./chip-selector"
 import { SettingsListRow, SettingsSection } from "./settings-section"
 
 const meta: Meta<typeof SettingsSection> = {
@@ -141,5 +143,80 @@ export const LinkedControl: Story = {
     await expect(mail).toHaveAttribute("aria-checked", "true")
     await userEvent.click(canvas.getByText("メール通知"))
     await expect(mail).toHaveAttribute("aria-checked", "false")
+  },
+}
+
+const THEMES = [
+  { value: "light", label: "ライト" },
+  { value: "dark", label: "ダーク" },
+  { value: "system", label: "端末に合わせる" },
+] as const
+type Theme = (typeof THEMES)[number]["value"]
+
+const LANGUAGES = [
+  { value: "ja", label: "日本語" },
+  { value: "en", label: "English" },
+] as const
+type Language = (typeof LANGUAGES)[number]["value"]
+
+function LinkedRadioGroupDemo() {
+  const [theme, setTheme] = React.useState<Theme | null>("system")
+  const [language, setLanguage] = React.useState<Language>("ja")
+  return (
+    <div className="w-full max-w-md">
+      <SettingsSection variant="card" title="表示">
+        <SettingsListRow
+          title="テーマ"
+          description="画面の明るさ"
+          controlLayout="stacked"
+          rightSlot={(control) => (
+            <ChipSelector
+              {...control}
+              selectionMode="single"
+              size="sm"
+              options={[...THEMES]}
+              value={theme}
+              onChange={setTheme}
+            />
+          )}
+        />
+        <SettingsListRow
+          title="言語"
+          rightSlot={(control) => (
+            <PillToggle
+              aria-labelledby={control["aria-labelledby"]}
+              disabled={control.disabled}
+              semantics="radio"
+              size="sm"
+              options={[...LANGUAGES]}
+              value={language}
+              onChange={setLanguage}
+            />
+          )}
+        />
+      </SettingsSection>
+    </div>
+  )
+}
+
+/**
+ * 選択肢の並び（radiogroup）を置く行（issue #763）。`<label>` は div の radiogroup を名付けられないので、
+ * 関数の rightSlot が渡す `aria-labelledby`（title の id）で title を名前にする。ChipSelector は
+ * `{...control}` をそのまま、id / aria-describedby を受け取らない部品は `aria-labelledby` だけ渡す。
+ * title と同じ aria-label を重ねて書かない。右端に収まらない並び（4 択以上・長いラベル）は
+ * `controlLayout="stacked"` で title の下に置く。行の disabled は `control.disabled` で部品も止める。
+ */
+export const LinkedRadioGroup: Story = {
+  tags: ["interaction"],
+  render: () => <LinkedRadioGroupDemo />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const theme = canvas.getByRole("radiogroup", { name: "テーマ" })
+    await expect(theme).toHaveAccessibleDescription("画面の明るさ")
+    await userEvent.click(within(theme).getByRole("radio", { name: "ダーク" }))
+    await expect(within(theme).getByRole("radio", { name: "ダーク" })).toHaveAttribute("aria-checked", "true")
+    const language = canvas.getByRole("radiogroup", { name: "言語" })
+    await userEvent.click(within(language).getByRole("radio", { name: "English" }))
+    await expect(within(language).getByRole("radio", { name: "English" })).toHaveAttribute("aria-checked", "true")
   },
 }
