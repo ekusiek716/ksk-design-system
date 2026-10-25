@@ -84,7 +84,7 @@ interface KskLabels {
   sectionNav?: string
   /** SyncStatusBadge の同期中の文言 */
   syncStatusSyncing?: string
-  /** SyncStatusBadge のエラー件数の文言。`{count}` を件数に置き換える */
+  /** SyncStatusBadge のエラー件数の文言。`{count}` を件数に置き換える。英語の単複（1 error / 2 errors）は文言では出し分けられないので、必要なら errorLabel（関数 prop）で渡す */
   syncStatusError?: string
   /** SyncStatusBadge の保存済みの文言 */
   syncStatusSaved?: string

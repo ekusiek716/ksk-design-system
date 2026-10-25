@@ -4,12 +4,17 @@
  * KskLabelsProvider の網羅（issue #723 の続き）。
  *
  * 1. 代表部品で「Provider 無し=従来の日本語 / locale="en" で英語 / prop が最優先」を固定する
- * 2. `src/components/**` を走査し、引数デフォルトに日本語を直書きした
- *    `xxxLabel = "日本語"` / `"aria-label": x = "日本語"` が**新たに増えたら落とす**
- *    （英語アプリで部品ごとに prop を渡すしかない状態を増やさない）
+ * 2. `src/components/**` を走査し、日本語の文言を直書きした既定値が**新たに増えたら落とす**
+ *    （英語アプリで部品ごとに prop を渡すしかない状態を増やさない）。検出するのは次の 3 種類:
+ *    A. 引数デフォルト  `xxxLabel = "日本語"` / `"aria-label": x = "日本語"` / `xxxLabel = (n) => \`…日本語…\``
+ *    B. Label 名の const  `const defaultXxxLabel = "日本語"`（モジュール直下も関数本体も）
+ *    C. 本体内のフォールバック  `x ?? "日本語"`（次の行に折り返した三項演算子の中も）
  *
  * 2 は ratchet 方式。まだ Provider に乗っていない箇所は UNMIGRATED に理由付きで残してあり、
- * 移行したら（=直書きが消えたら）エントリを消さないと落ちる。
+ * 移行したら（=直書きが消えたら）エントリを消さないと落ちる。正当な例外は理由付きで UNMIGRATED に足せる。
+ *
+ * 今回の対象外（検出もしない）: placeholder（選択してください・検索...・日付を選択）、
+ * 単位（日/時間/分/秒）、オブジェクト形の DEFAULT_LABELS（ErrorBoundary / CoachMarkOverlay / CookieConsent）。
  */
 import * as React from "react"
 import { act } from "react"
@@ -293,20 +298,23 @@ describe("KskLabelsProvider の網羅: Provider 無しは日本語 / en で英�
   })
 })
 
-// ─── 引数デフォルトに日本語を直書きしない（ratchet） ──────────────────────────────
+// ─── 日本語の直書きの既定値を増やさない（ratchet） ──────────────────────────────
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const COMPONENTS = path.join(ROOT, "src", "components")
 const JP = "[ぁ-んァ-ン一-龥]"
+/** 日本語を含む文字列（"…" / `…`）が 1 つでもあるか。テンプレートの `${…}` の中の "…" も拾う。 */
+const HAS_JP_STRING = new RegExp(`"[^"\\n]*${JP}[^"\\n]*"|\`[^\`\\n]*${JP}[^\`\\n]*\``)
 
-/** `xxxLabel = "日本語"` / `"aria-label": x = "日本語"` / `xxxLabel = (n) => \`…日本語…\`` */
-const HARDCODED_DEFAULT = new RegExp(
-  [
-    `(?:^|[^\\w.$])("aria-label"|\\w*[lL]abel)\\s=\\s"[^"\\n]*${JP}[^"\\n]*"`,
-    `(?:^|[^\\w.$])(\\w*[lL]abel)\\s=\\s\\([^)\\n]*\\)\\s=>\\s[\`"][^\`"\\n]*${JP}`,
-  ].join("|"),
-  "g"
-)
+/** 検出の種類。UNMIGRATED のキーは種類ごとに接頭辞を付ける（A は接頭辞なし）。 */
+// A: 引数デフォルト  `xxxLabel = "日本語"` / `"aria-label": x = "日本語"` / `xxxLabel = (n) => \`…日本語…\``（関数の中の " も含む）
+// B: *Label 名の const への代入  `const defaultXxxLabel = "日本語"` / `= (n) => \`…件\``（モジュール直下・関数本体の両方）
+// C: 本体内のフォールバック  `x ?? "日本語"`（`??` の次の行に続く三項演算子の中も見る）
+const ARG_DEFAULT = /(?:^|[^\w.$])("aria-label"|\w*[lL]abel)\s=\s/g
+/** 1 行に既定が並ぶ書き方（`a = "x", b = "y"`）で、次の既定より後ろを見ないための区切り */
+const NEXT_DEFAULT = /,\s*(?:"aria-label"|\w+)\s=\s/
+const LABEL_CONST = /^\s*(?:export\s+)?const\s+(\w*[lL]abel\w*)\b[^=\n]*=\s*(.*)$/
+const NULLISH = /(\w+)\s*\?\?\s*(.*)$/
 
 function walk(dir: string): string[] {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
@@ -320,70 +328,132 @@ function stripComments(source: string): string {
   return source.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/(^|[^:])\/\/.*$/gm, "$1")
 }
 
+/** 行の続き。式が次の行に折り返しているとき（行末が `=` / `??` / `=>` 等）は数行ぶん足す。 */
+function withContinuation(lines: string[], i: number, rest: string): string {
+  if (!/(=|\?\?|=>|\?|:|\()\s*$/.test(rest.trimEnd()) && rest.trim() !== "") return rest
+  return [rest, ...lines.slice(i + 1, i + 5)].join(" ")
+}
+
+/** ソース 1 ファイルぶんの直書きを `A: id` 相当の id で返す（A は接頭辞なし / B は `const:` / C は `??:`）。 */
+function scanSource(source: string): string[] {
+  const found = new Set<string>()
+  const lines = stripComments(source).split("\n")
+  lines.forEach((line, i) => {
+    const isDecl = /^\s*(?:export\s+)?(?:const|let|var)\s/.test(line)
+    // A: 引数デフォルト（const / let / var で始まる行は変数宣言なので B で見る）
+    if (!isDecl) {
+      // 1 行に既定が複数あるとき（`a = "x", b = "y"`）は 1 つずつ、次の既定の手前までを見る
+      for (const m of line.matchAll(ARG_DEFAULT)) {
+        const after = line.slice((m.index ?? 0) + m[0].length)
+        const own = after.split(NEXT_DEFAULT)[0]
+        if (HAS_JP_STRING.test(withContinuation(lines, i, own))) found.add(m[1])
+      }
+    }
+    // B: *Label 名の const
+    const c = LABEL_CONST.exec(line)
+    if (c && HAS_JP_STRING.test(withContinuation(lines, i, c[2]))) found.add(`const:${c[1]}`)
+    // C: `?? "日本語"`（1 行に複数あるときは全部見る）
+    for (const m of line.matchAll(new RegExp(NULLISH.source, "g"))) {
+      const rest = line.slice((m.index ?? 0) + m[0].indexOf("??") + 2)
+      if (HAS_JP_STRING.test(withContinuation(lines, i, rest))) found.add(`??:${m[1]}`)
+    }
+  })
+  return [...found].sort()
+}
+
 function findHardcoded(): Record<string, string[]> {
   const out: Record<string, string[]> = {}
   for (const file of walk(COMPONENTS)) {
     const rel = path.relative(ROOT, file).split(path.sep).join("/")
-    const found = new Set<string>()
-    for (const line of stripComments(fs.readFileSync(file, "utf8")).split("\n")) {
-      // `const label = "…"` のような通常の変数は対象外（引数デフォルトだけを見る）
-      if (/^\s*(const|let|var)\s/.test(line)) continue
-      for (const m of line.matchAll(HARDCODED_DEFAULT)) found.add(m[1] ?? m[2])
-    }
-    if (found.size) out[rel] = [...found].sort()
+    const ids = scanSource(fs.readFileSync(file, "utf8"))
+    if (ids.length) out[rel] = ids
   }
   return out
 }
 
 /**
  * まだ Provider に乗っていない直書き（ratchet）。移行したらここから消す（消し忘れも落ちる）。
- * 理由: 本 PR は「英語アプリで読み上げ・主要操作の文言がそのまま日本語になる部品」を優先して移行した。
- * 以下は後続の移行対象（いずれも移行不能ではない）。
+ * 新しい直書きを足したくなったら、まず `useKskLabels()` のキーにできないか考える。
+ * 本当に移せない理由があるときだけ、理由付きでここに足す（理由なしは不可）。
+ *
+ * 検出対象外（今回の網羅の対象外。後続で扱う）:
+ * - placeholder（「選択してください」「検索...」「日付を選択」等）
+ * - 単位（CountdownTimer の 日/時間/分/秒 等）
+ * - オブジェクト形の既定文言（ErrorBoundary / CoachMarkOverlay / CookieConsent の DEFAULT_LABELS、Toaster の toastLabels）
  */
-const UNMIGRATED_REASON = "未移行（#723 の続き。Provider のキーを足して順次移行する）"
-const UNMIGRATED: Record<string, string[]> = {
-  "src/components/patterns/_internal/carousel-primitives.tsx": ["nextLabel", "previousLabel"],
-  "src/components/patterns/admin/bulk-actions.tsx": ["clearLabel", "countLabel"],
-  "src/components/patterns/admin/data-table.tsx": ["countLabel", "emptyLabel", "label", "menuLabel", "selectAllLabel", "selectionColumnLabel"],
-  "src/components/patterns/admin/image-uploader.tsx": ["addLabel"],
-  "src/components/patterns/banner-carousel.tsx": ["moreLabel", "regionLabel"],
-  "src/components/patterns/commerce/bottom-tab-bar.tsx": ["navLabel"],
-  "src/components/patterns/commerce/filter-bar.tsx": ["moreFiltersLabel", "navLabel"],
-  "src/components/patterns/commerce/image-carousel.tsx": ["nextLabel", "previousLabel", "regionLabel"],
-  "src/components/patterns/commerce/order-summary.tsx": ["totalLabel"],
-  "src/components/patterns/commerce/product-card.tsx": ["cartButtonLabel"],
-  "src/components/patterns/commerce/product-carousel.tsx": ["moreLabel"],
-  "src/components/patterns/commerce/quantity-selector.tsx": ["decreaseLabel", "deleteLabel", "groupLabel", "increaseLabel"],
-  "src/components/patterns/compact-file-picker.tsx": ["label", "loadingLabel", "triggerLabel"],
-  "src/components/patterns/confirm-dialog.tsx": ["cancelLabel", "confirmLabel", "loadingLabel"],
-  "src/components/patterns/content-carousel.tsx": ["ariaLabel"],
-  "src/components/patterns/feature-comparison-table.tsx": ["availableLabel", "featureLabel", "unavailableLabel"],
-  "src/components/patterns/file-upload.tsx": ["browseLabel", "dragLabel", "maxFilesLabel", "maxSizeLabel", "orLabel", "removeLabel"],
-  "src/components/patterns/media-action-cluster.tsx": ["ariaLabel"],
-  "src/components/patterns/sidebar-nav.tsx": ["navLabel"],
-  "src/components/patterns/swipe-row.tsx": ["actionsLabel"],
+type Unmigrated = readonly [file: string, ids: readonly string[], reason: string]
+const R_LATER = "未移行（#723 の続き。Provider のキーを足して順次移行する）"
+const R_FN = "件数・名前を差し込む関数形の既定。Provider の `{count}` / `{index}` 差し込みで移行できるが別 PR（#723 の続き）"
+const R_FALLBACK = "他の prop が無いときの最終フォールバック（読み上げ補助）。Provider のキーを足して別 PR で移行（#723 の続き）"
+const R_LOCALE = "`locale` prop（ja / en）で出し分け済み。Provider 未対応だが英語でも崩れない（#723 の続き）"
+const UNMIGRATED: readonly Unmigrated[] = [
+  ["src/components/patterns/_internal/carousel-primitives.tsx", ["nextLabel", "previousLabel"], R_LATER],
+  ["src/components/patterns/admin/bulk-actions.tsx", ["countLabel"], R_FN],
+  ["src/components/patterns/admin/bulk-actions.tsx", ["clearLabel"], R_LATER],
+  ["src/components/patterns/admin/data-table.tsx", ["??:ariaLabel"], R_FALLBACK],
+  ["src/components/patterns/admin/data-table.tsx", ["countLabel"], R_FN],
+  ["src/components/patterns/admin/data-table.tsx", ["emptyLabel", "label", "menuLabel", "selectAllLabel", "selectionColumnLabel"], R_LATER],
+  ["src/components/patterns/admin/image-uploader.tsx", ["addLabel"], R_LATER],
+  ["src/components/patterns/agenda-list.tsx", ["??:emptyDayLabel", "const:headingLabel", "const:noEventsLabel"], R_LOCALE],
+  ["src/components/patterns/banner-carousel.tsx", ["moreLabel", "regionLabel"], R_LATER],
+  ["src/components/patterns/celebration.tsx", ["??:title"], R_FALLBACK],
+  ["src/components/patterns/chip-filter-bar.tsx", ["const:defaultResultCountLabel"], R_FN],
+  ["src/components/patterns/chip.tsx", ["const:removeLabel"], R_FN],
+  ["src/components/patterns/commerce/bottom-tab-bar.tsx", ["navLabel"], R_LATER],
+  ["src/components/patterns/commerce/filter-bar.tsx", ["??:label", "??:sortLabel"], R_FALLBACK],
+  ["src/components/patterns/commerce/filter-bar.tsx", ["moreFiltersLabel", "navLabel"], R_LATER],
+  ["src/components/patterns/commerce/image-carousel.tsx", ["nextLabel", "previousLabel", "regionLabel"], R_LATER],
+  ["src/components/patterns/commerce/order-summary.tsx", ["totalLabel"], R_LATER],
+  ["src/components/patterns/commerce/product-card.tsx", ["cartButtonLabel"], R_LATER],
+  ["src/components/patterns/commerce/product-carousel.tsx", ["moreLabel"], R_LATER],
+  ["src/components/patterns/commerce/quantity-selector.tsx", ["decreaseLabel", "deleteLabel", "groupLabel", "increaseLabel"], R_LATER],
+  ["src/components/patterns/compact-file-picker.tsx", ["??:name", "removeLabel"], R_FN],
+  ["src/components/patterns/compact-file-picker.tsx", ["label", "loadingLabel", "triggerLabel"], R_LATER],
+  ["src/components/patterns/confirm-dialog.tsx", ["cancelLabel", "confirmLabel", "loadingLabel"], R_LATER],
+  ["src/components/patterns/content-carousel.tsx", ["ariaLabel"], R_LATER],
+  ["src/components/patterns/error-state.tsx", ["??:description", "??:title"], R_FALLBACK],
+  ["src/components/patterns/feature-comparison-table.tsx", ["availableLabel", "featureLabel", "unavailableLabel"], R_LATER],
+  ["src/components/patterns/file-upload.tsx", ["browseLabel", "dragLabel", "maxFilesLabel", "maxSizeLabel", "orLabel", "removeLabel"], R_LATER],
+  ["src/components/patterns/filter-pill.tsx", ["??:clearLabel", "??:panelLabel"], R_FALLBACK],
+  ["src/components/patterns/kanban-column.tsx", ["??:countLabel", "const:label"], R_FN],
+  ["src/components/patterns/media-action-cluster.tsx", ["ariaLabel"], R_LATER],
+  ["src/components/patterns/month-calendar.tsx", ["??:ariaLabel", "??:moreLabel", "const:gridLabel"], R_LOCALE],
+  ["src/components/patterns/review-overlay.tsx", ["??:comment"], R_FALLBACK],
+  ["src/components/patterns/sidebar-nav.tsx", ["navLabel"], R_LATER],
+  ["src/components/patterns/swipe-row.tsx", ["actionsLabel"], R_LATER],
+  ["src/components/patterns/tag-input.tsx", ["??:inputLabel", "const:resolvedInputLabel"], R_FALLBACK],
+  ["src/components/ui/code-input.tsx", ["const:defaultCellLabel"], R_FN],
+  ["src/components/ui/progress-ring.tsx", ["??:ariaLabel"], R_FALLBACK],
+  ["src/components/ui/progress.tsx", ["??:ariaLabel"], R_FALLBACK],
+]
+
+// 同じファイルに複数の理由があるので、ファイル単位に畳む
+const UNMIGRATED_MAP = new Map<string, Set<string>>()
+for (const [file, ids] of UNMIGRATED) {
+  UNMIGRATED_MAP.set(file, new Set([...(UNMIGRATED_MAP.get(file) ?? []), ...ids]))
 }
 
-describe("引数デフォルトの日本語直書き（ratchet）", () => {
+describe("日本語の直書きの既定値（ratchet）", () => {
   const found = findHardcoded()
 
   it("新しい直書きが増えていない（Provider のキーを使う）", () => {
     const added: string[] = []
     for (const [file, ids] of Object.entries(found)) {
       for (const id of ids) {
-        if (!UNMIGRATED[file]?.includes(id)) added.push(`${file}: ${id}`)
+        if (!UNMIGRATED_MAP.get(file)?.has(id)) added.push(`${file}: ${id}`)
       }
     }
     expect(
       added,
-      "引数デフォルトに日本語を直書きしている。`label ?? useKskLabels().xxx` の形にして ksk-labels.tsx にキーを足す。" +
-        `移行できない理由があるときだけ UNMIGRATED に理由付きで足す（${UNMIGRATED_REASON}）`
+      "日本語を直書きした既定値がある（A=引数デフォルト / const:=Label 名の const / ??:=フォールバック）。" +
+        "`label ?? useKskLabels().xxx` の形にして ksk-labels.tsx にキーを足す。" +
+        "移行できない理由があるときだけ UNMIGRATED に理由付きで足す"
     ).toEqual([])
   })
 
   it("UNMIGRATED に移行済み・存在しない項目が残っていない", () => {
     const stale: string[] = []
-    for (const [file, ids] of Object.entries(UNMIGRATED)) {
+    for (const [file, ids] of UNMIGRATED) {
       for (const id of ids) {
         if (!found[file]?.includes(id)) stale.push(`${file}: ${id}`)
       }
@@ -391,7 +461,25 @@ describe("引数デフォルトの日本語直書き（ratchet）", () => {
     expect(stale, "移行済みの項目を UNMIGRATED から消す").toEqual([])
   })
 
-  it("検出器自体が動いている（見つかる件数が 0 でない）", () => {
-    expect(Object.keys(found).length).toBeGreaterThan(0)
+  it("UNMIGRATED の各エントリに理由がある", () => {
+    for (const [file, , reason] of UNMIGRATED) {
+      expect(reason.trim().length, file).toBeGreaterThan(10)
+    }
+  })
+
+  it("検出器が 3 種類とも動いている（関数既定の中の \" / モジュール直下の const / `??`）", () => {
+    expect(scanSource("  removeLabel = (image) => `${image.name ?? \"画像\"}を削除`,")).toContain("removeLabel")
+    expect(scanSource("  copyLabel = \"コピー\",")).toEqual(["copyLabel"])
+    // 1 行に既定が並んでいても 1 つずつ見る（前の既定が英語なら巻き込まない）
+    expect(scanSource("function F({ aLabel = \"x\", bLabel = \"数量\", cLabel = \"y\" }) {}")).toEqual(["bLabel"])
+    expect(scanSource("const defaultResultCountLabel = (n: number) => `${n}件`")).toContain("const:defaultResultCountLabel")
+    expect(scanSource("  const resolvedTitle =\n    title ??\n    (notFound ? \"見つかりません\" : \"エラー\")")).toContain(
+      "??:title"
+    )
+    // 日本語の無い既定・Provider 経由・文字列の外の日本語は対象外
+    expect(scanSource("  const x = labelProp ?? defaultLabels.close")).toEqual([])
+    expect(scanSource("  const label = \"Close\"")).toEqual([])
+    expect(scanSource("  const y = a ?? \"b\"} 日本語")).toEqual([])
+    expect(scanSource("  // copyLabel = \"コピー\"")).toEqual([])
   })
 })
