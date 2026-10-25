@@ -14,8 +14,12 @@
 // - 検査を落とす 600 / 400 は、通る値まで自動で補正して警告を出す。
 // =============================================================
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
 import { basename, dirname, extname, join, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
+
+/** このファイル（bin/theme.js）から見たパッケージのルート */
+const DEFAULT_PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 
 export const SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]
 
@@ -175,6 +179,14 @@ const FALLBACK_CONTEXT = {
   darkOnInverse: "#18181B",
 }
 
+function statOrNull(path) {
+  try {
+    return statSync(path)
+  } catch {
+    return null
+  }
+}
+
 function readIfExists(path) {
   try {
     return existsSync(path) ? readFileSync(path, "utf8") : null
@@ -309,10 +321,31 @@ export function evaluateChecks(ramp, ctx) {
 
 // ─── ランプ生成 ──────────────────────────────────────────────
 
-/** 500 の明度を軸に、50・900 を固定して目標値を比例配分する */
+/**
+ * 隣接段の明度差（OKLCH L）の下限。
+ * - 生成側は MIN_STEP_DESIGN を狙って段を押し広げる（hex の丸めで縮んでも割らないよう余裕を持たせる）
+ * - 検査側は MIN_STEP の未満を必須エラー（exit 1）にする
+ * hover（700）/ active（800）がボタン面（600）と見分けられる最低限の差として採った。
+ * 既存テーマの最小は green の 50→100（0.0195）なので、検査は 0.015 とする。
+ * 生成側は 0.025（足りないときでも MIN_STEP + 0.0015）を狙って段を押し広げる。
+ */
+export const MIN_STEP = 0.015
+const MIN_STEP_DESIGN = 0.025
+/** 50 の明度の上限の目安（これを超えるなら段差を詰めて白への張り付きを避ける） */
+const TOP_LIMIT = 0.99
+
+/**
+ * 500 の明度を軸に、50・900 を固定して目標値を比例配分する。
+ *
+ * 暗い 500（L ≲ 0.4）では 600〜900 を入れる空間が足りなくなるため、900 を
+ * 「500 − 0.11」まで下げて空間を確保する（600〜900 の最小の段は全体の約 0.2 倍なので
+ * 0.11 あれば 0.02 を超える）。500 の下側に空間が取れない色（ほぼ黒。L ≲ 0.13）や
+ * 上側に取れない色（ほぼ白）は、後段の段差検査で必須エラーになる
+ * （500 は指定値なので 600 側へ回したり動かしたりしない）。
+ */
 function lightnessCurve(l500) {
   const top = Math.min(0.995, Math.max(LIGHTNESS_TARGET[50], l500 + 0.05))
-  const bottom = Math.max(0.02, Math.min(LIGHTNESS_TARGET[900], l500 - 0.08))
+  const bottom = Math.max(0.02, Math.min(LIGHTNESS_TARGET[900], l500 - 0.11))
   const t500 = LIGHTNESS_TARGET[500]
   const out = {}
   for (const shade of SHADES) {
@@ -322,6 +355,53 @@ function lightnessCurve(l500) {
     else out[shade] = l500 - ((t500 - t) / (t500 - LIGHTNESS_TARGET[900])) * (l500 - bottom)
   }
   return out
+}
+
+/** 500 より明るい側（400→50）を、隣の段より MIN_STEP_DESIGN 以上明るくなるよう押し上げる */
+function enforceUpper(lightness, from = 400) {
+  const order = SHADES.filter((shade) => shade <= from).reverse()
+  const apply = (gap) => {
+    const next = { ...lightness }
+    for (const shade of order) {
+      const below = SHADES[SHADES.indexOf(shade) + 1]
+      next[shade] = Math.max(lightness[shade], next[below] + gap)
+    }
+    return next
+  }
+  // 50 が白（L=1）に張り付くと Surface-Primary と区別できなくなる。上限（0.99）を超えるときだけ、
+  // 余裕を削った最小限の段差（MIN_STEP + 丸め分）で詰め直す。
+  let result = apply(MIN_STEP_DESIGN)
+  if (result[50] > TOP_LIMIT) result = apply(MIN_STEP + 0.0015)
+  Object.assign(lightness, result)
+}
+
+/** 500 より暗い側（600→900）を、隣の段より MIN_STEP_DESIGN 以上暗くなるよう押し下げる */
+function enforceLower(lightness, from = 600) {
+  for (const shade of SHADES.filter((s) => s >= from)) {
+    const above = SHADES[SHADES.indexOf(shade) - 1]
+    lightness[shade] = Math.min(lightness[shade], lightness[above] - MIN_STEP_DESIGN)
+  }
+}
+
+/**
+ * 隣接段（50→100 … 800→900）の明度差を hex の実値で検査する。
+ * 明度が下がらない・段差が MIN_STEP 未満（hover / active がボタン面と同色になる等）は NG。
+ */
+export function evaluateRampSteps(ramp) {
+  const steps = []
+  for (let i = 1; i < SHADES.length; i++) {
+    const from = SHADES[i - 1]
+    const to = SHADES[i]
+    const diff = hexToOklch(ramp[from]).l - hexToOklch(ramp[to]).l
+    steps.push({ from, to, diff, min: MIN_STEP, pass: diff >= MIN_STEP - 1e-9 })
+  }
+  return steps
+}
+
+function stepIssueMessages(steps) {
+  return steps
+    .filter((st) => !st.pass)
+    .map((st) => `Brand-${st.from} → Brand-${st.to} の明度差が ${st.diff.toFixed(3)} で ${st.min} 未満です（明度が下がらない・段差が潰れている）。`)
 }
 
 const fmtL = (v) => v.toFixed(3)
@@ -336,10 +416,12 @@ const fmtRatio = (v) => v.toFixed(2)
 export function generateTheme(inputHex, options = {}) {
   const base = normalizeHex(inputHex)
   if (!base) throw new Error(`色の形式が不正です: ${inputHex}（#RRGGBB 形式で指定してください）`)
-  const ctx = options.ctx ?? loadThemeContext(options.pkgRoot ?? resolve(dirname(new URL(import.meta.url).pathname), ".."))
+  const ctx = options.ctx ?? loadThemeContext(options.pkgRoot ?? DEFAULT_PKG_ROOT)
   const { l: l500, c: c500, h } = hexToOklch(base)
 
   const lightness = lightnessCurve(l500)
+  enforceUpper(lightness)
+  enforceLower(lightness)
   const colorAt = (shade, l) => oklchToHex(l, c500 * CHROMA_RELATIVE[shade], h)
   const ramp = {}
   for (const shade of SHADES) ramp[shade] = shade === 500 ? base : colorAt(shade, lightness[shade])
@@ -350,7 +432,7 @@ export function generateTheme(inputHex, options = {}) {
   // 400: ダークの文字/面（4.5・必須）とフォーカスリング（3.0・できれば）を両立する明度を探す。
   {
     const target = lightness[400]
-    const minL = hexToOklch(ramp[500]).l + 0.01
+    const minL = hexToOklch(ramp[500]).l + MIN_STEP_DESIGN
     const dark = (hex) => contrastRatio(hex, ctx.darkSurface) >= 4.5 && contrastRatio(ctx.darkOnInverse, hex) >= 4.5
     const focus = (hex) => contrastRatio(hex, ctx.lightSurface) >= 3
     const search = (accept) => {
@@ -375,6 +457,11 @@ export function generateTheme(inputHex, options = {}) {
       )
       ramp[400] = found.hex
     }
+    // 400 が動いたら、その上側（300→50）が詰まらないよう押し上げ直す
+    lightness[400] = hexToOklch(ramp[400]).l
+    const before = { ...lightness }
+    enforceUpper(lightness, 300)
+    for (const shade of [300, 200, 100, 50]) if (lightness[shade] !== before[shade]) ramp[shade] = colorAt(shade, lightness[shade])
   }
 
   // 600: 白文字 4.5（面）・白背景の文字 4.5・Brand-50 上の文字 4.5。通るまで暗くし、700〜900 も連動させる。
@@ -393,8 +480,14 @@ export function generateTheme(inputHex, options = {}) {
       const l900New = Math.max(0.02, Math.min(l900Old, l600New - 0.12))
       const scale = (l600New - l900New) / (l600Old - l900Old)
       const linked = []
+      lightness[600] = l600New
       for (const shade of [700, 800, 900]) {
         const lNew = l900New + (lightness[shade] - l900Old) * scale
+        lightness[shade] = lNew
+      }
+      enforceLower(lightness, 700)
+      for (const shade of [700, 800, 900]) {
+        const lNew = lightness[shade]
         const from = ramp[shade]
         ramp[shade] = colorAt(shade, lNew)
         linked.push(shade)
@@ -408,20 +501,17 @@ export function generateTheme(inputHex, options = {}) {
     }
   }
 
-  // 単調性（明度が 50→900 で下がり続けるか）。補正の副作用の検知用で、破れたら警告する。
+  // 隣接段の明度差。補正後の hex の実値で検査し、足りなければ必須エラー（exit 1）にする。
   const finalL = Object.fromEntries(SHADES.map((s) => [s, hexToOklch(ramp[s]).l]))
-  for (let i = 1; i < SHADES.length; i++) {
-    if (finalL[SHADES[i]] >= finalL[SHADES[i - 1]]) {
-      warnings.push(`Brand-${SHADES[i - 1]} → Brand-${SHADES[i]} の明度が下がっていません（${fmtL(finalL[SHADES[i - 1]])} → ${fmtL(finalL[SHADES[i]])}）。`)
-    }
-  }
+  const steps = evaluateRampSteps(ramp)
 
   const checks = evaluateChecks(ramp, ctx)
   const failing = checks.filter((c) => c.level === "error" && !c.pass)
   return {
     input: base,
-    ok: failing.length === 0,
+    ok: failing.length === 0 && steps.every((st) => st.pass),
     ramp,
+    steps,
     oklch: Object.fromEntries(SHADES.map((s) => [s, { l: round(finalL[s], 4), c: round(hexToOklch(ramp[s]).c, 4), h: round(hexToOklch(ramp[s]).h, 1) }])),
     corrections,
     warnings,
@@ -451,7 +541,8 @@ export function checkThemeCss(css, ctx) {
     return { error: `--Primitive-Brand-${missing.join(", ")} が見つかりません（50〜900 の 10 段が必要です）${hint}` }
   }
   const checks = evaluateChecks(ramp, ctx)
-  return { ok: checks.every((c) => c.level !== "error" || c.pass), ramp, checks, context: ctx }
+  const steps = evaluateRampSteps(ramp)
+  return { ok: checks.every((c) => c.level !== "error" || c.pass) && steps.every((st) => st.pass), ramp, steps, checks, context: ctx }
 }
 
 // ─── 出力 ────────────────────────────────────────────────────
@@ -505,6 +596,7 @@ function toJson(result, extra = {}) {
       oklch: result.oklch,
       corrections: result.corrections,
       warnings: result.warnings,
+      steps: result.steps.map((st) => ({ ...st, diff: round(st.diff, 4) })),
       checks: result.checks.map((c) => ({ ...c, ratio: round(c.ratio, 3) })),
       context: result.context,
     },
@@ -518,13 +610,15 @@ function toJson(result, extra = {}) {
 const HELP = `ksk-ds theme — ブランド色 1 色から Brand ランプ（50〜900）を生成して検査する
 
 使い方:
-  npx ksk-ds theme <hex> [--name my-client] [--out path.css] [--json]
+  npx ksk-ds theme <hex> [--name my-client] [--out path.css [--force]] [--json]
   npx ksk-ds theme --check <file.css> [--json]
 
   <hex>             ブランド色（#RRGGBB）。Brand-500 にそのまま置く。
                     シェルでは # がコメント扱いになるので "#0EA5E9" と引用符で囲む（# 省略も可）
   --name <name>     テーマ名（CSS 先頭のコメントと @import 例に使う。既定: --out のファイル名 / custom）
-  --out <path.css>  CSS をファイルへ書き出す（省略時は stdout。警告は stderr）
+  --out <path.css>  CSS をファイルへ書き出す（省略時は stdout。警告は stderr）。
+                    既存ファイルは --force が無ければ上書きせず exit 2。ディレクトリは指定不可
+  --force           --out の既存ファイルを上書きする
   --json            ランプ・補正・コントラスト結果を JSON で stdout に出す
   --check <file>    既存テーマ CSS のコントラストだけを検査する（生成しない）。
                     default テーマは src/styles/primitive.css を指定する
@@ -535,6 +629,9 @@ const HELP = `ksk-ds theme — ブランド色 1 色から Brand ランプ（50�
   参考（注意表示のみ・exit code に影響しない）: フォーカス 400 on 白 >= 3.0、
           ダーク hover/active（500/600 の面）、ダークの 400 on 900
 
+段差: 隣接段の明度差（OKLCH L）が 0.015 未満（明度が下がらない・hover/active がボタン面と同色）は
+      必須エラー。生成側は段を押し広げて確保し、それでも足りない色（ほぼ黒・ほぼ白）は exit 1。
+
 補正: 600 が AA 未達なら 600〜900 を暗くし、400 はダークとフォーカスを両立する明度へ寄せる。
       補正した場合は警告を出す（500 は指定値のまま）。
 
@@ -542,7 +639,7 @@ const HELP = `ksk-ds theme — ブランド色 1 色から Brand ランプ（50�
 `
 
 function parseArgs(argv) {
-  const opts = { json: false, help: false }
+  const opts = { json: false, help: false, force: false }
   const rest = [...argv]
   while (rest.length > 0) {
     const arg = rest.shift()
@@ -554,6 +651,7 @@ function parseArgs(argv) {
     }
     if (flag === "--help" || flag === "-h") opts.help = true
     else if (flag === "--json") opts.json = true
+    else if (flag === "--force") opts.force = true
     else if (flag === "--name") opts.name = value()
     else if (flag === "--out") opts.out = value()
     else if (flag === "--check") opts.check = value()
@@ -567,7 +665,7 @@ function parseArgs(argv) {
 /**
  * `ksk-ds theme` の本体。終了コードを返す（0 通過 / 1 必須ペア未達 / 2 入力エラー）。
  */
-export function runThemeCli(argv, { cwd = process.cwd(), pkgRoot = resolve(".") } = {}) {
+export function runThemeCli(argv, { cwd = process.cwd(), pkgRoot = DEFAULT_PKG_ROOT } = {}) {
   let opts
   try {
     opts = parseArgs(argv)
@@ -583,8 +681,8 @@ export function runThemeCli(argv, { cwd = process.cwd(), pkgRoot = resolve(".") 
   const ctx = loadThemeContext(pkgRoot)
 
   if (opts.check !== undefined) {
-    if (opts.hex !== undefined || opts.out !== undefined || opts.name !== undefined) {
-      console.error("✗ --check は <hex> / --out / --name と併用できません")
+    if (opts.hex !== undefined || opts.out !== undefined || opts.name !== undefined || opts.force) {
+      console.error("✗ --check は <hex> / --out / --name / --force と併用できません")
       return 2
     }
     const file = resolve(cwd, opts.check)
@@ -603,7 +701,8 @@ export function runThemeCli(argv, { cwd = process.cwd(), pkgRoot = resolve(".") 
     } else {
       console.log(`${opts.check}（Brand-500 = ${result.ramp[500]}）`)
       for (const c of result.checks) console.log(`  ${checkLine(c)}`)
-      console.log(result.ok ? "✓ 必須ペアは全て通過" : "✗ 必須ペアが未達です")
+      for (const message of stepIssueMessages(result.steps)) console.log(`  [NG  ] ${message}`)
+      console.log(result.ok ? "✓ 必須ペアと段差は全て通過" : "✗ 必須ペアまたは段差が未達です")
     }
     return result.ok ? 0 : 1
   }
@@ -624,6 +723,20 @@ export function runThemeCli(argv, { cwd = process.cwd(), pkgRoot = resolve(".") 
     return 2
   }
 
+  // --out の入力エラーは生成の前に止める（ディレクトリ・既存ファイル）
+  const outPath = opts.out ? resolve(cwd, opts.out) : null
+  if (outPath) {
+    const stat = statOrNull(outPath)
+    if (stat?.isDirectory()) {
+      console.error(`✗ --out にはファイルを指定してください（ディレクトリです）: ${opts.out}`)
+      return 2
+    }
+    if (stat && !opts.force) {
+      console.error(`✗ ${opts.out} は既に存在します。上書きするには --force を付けてください`)
+      return 2
+    }
+  }
+
   const result = generateTheme(hex, { ctx })
   const command = `npx ksk-ds theme "${hex}"${opts.name ? ` --name ${opts.name}` : ""}`
 
@@ -634,20 +747,25 @@ export function runThemeCli(argv, { cwd = process.cwd(), pkgRoot = resolve(".") 
     for (const c of result.checks.filter((x) => x.level === "error" && !x.pass)) {
       console.error(`✗ ${checkLine(c)}`)
     }
+    for (const message of stepIssueMessages(result.steps)) console.error(`✗ ${message}`)
     // 参考ペア（exit code には影響しない）。CSS の先頭コメントにも同じ表が入る
     for (const c of result.checks.filter((x) => x.level === "advisory" && !x.pass)) {
       console.error(`ℹ ${checkLine(c)}`)
     }
   }
   if (!result.ok) {
-    if (!opts.json) console.error("✗ 補正しても通らないペアがあるため、CSS は出力しません")
+    if (!opts.json) console.error("✗ 補正しても通らない必須ペア・段差があるため、CSS は出力しません")
     return 1
   }
   const css = renderThemeCss(result, { name, command })
   if (opts.out) {
-    const outPath = resolve(cwd, opts.out)
-    mkdirSync(dirname(outPath), { recursive: true })
-    writeFileSync(outPath, css)
+    try {
+      mkdirSync(dirname(outPath), { recursive: true })
+      writeFileSync(outPath, css)
+    } catch (error) {
+      console.error(`✗ ${opts.out} に書き込めません: ${error.code ?? error.message}`)
+      return 2
+    }
     if (!opts.json) {
       console.log(`✓ ${opts.out} を書き出しました（Brand-500 = ${hex}）`)
       for (const c of result.checks) console.log(`  ${checkLine(c)}`)

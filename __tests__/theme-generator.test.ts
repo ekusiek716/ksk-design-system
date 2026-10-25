@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest"
-import { mkdtempSync, readFileSync, readdirSync, writeFileSync, existsSync } from "node:fs"
+import { afterAll, describe, expect, it } from "vitest"
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync, existsSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { spawnSync } from "node:child_process"
@@ -8,6 +8,8 @@ import {
   checkThemeCss,
   clampChroma,
   contrastRatio,
+  MIN_STEP,
+  evaluateRampSteps,
   generateTheme,
   hexToOklch,
   linearRgbToOklab,
@@ -23,6 +25,16 @@ import {
 
 const ROOT = process.cwd()
 const ctx = loadThemeContext(ROOT)
+
+const tempDirs: string[] = []
+function makeTempDir(prefix: string) {
+  const dir = mkdtempSync(join(tmpdir(), prefix))
+  tempDirs.push(dir)
+  return dir
+}
+afterAll(() => {
+  for (const dir of tempDirs) rmSync(dir, { recursive: true, force: true })
+})
 
 function runCli(args: string[]) {
   return spawnSync(process.execPath, [join(ROOT, "bin/init.js"), "theme", ...args], {
@@ -159,6 +171,32 @@ describe("generateTheme", () => {
     expect(lightness[600]).toBeLessThan(lightness[500])
   })
 
+  it("隣接段の明度差は最小値以上で、500 の上下に段が並ぶ（#1E293B・#FACC15・#0EA5E9）", () => {
+    for (const hex of ["#1E293B", "#FACC15", "#0EA5E9"]) {
+      const result = generateTheme(hex, { ctx })
+      expect(result.ok, hex).toBe(true)
+      for (const step of evaluateRampSteps(result.ramp)) {
+        expect(step.diff, `${hex} ${step.from}->${step.to}`).toBeGreaterThanOrEqual(MIN_STEP)
+      }
+      // hover / active（700 / 800）はボタン面（600）と別の色
+      expect(new Set([result.ramp[600], result.ramp[700], result.ramp[800]]).size).toBe(3)
+    }
+  })
+
+  it("暗い入力 #1E293B は 600〜900 が 500 より暗く、段が潰れない", () => {
+    const result = generateTheme("#1E293B", { ctx })
+    const l = Object.fromEntries(SHADES.map((s) => [s, hexToOklch(result.ramp[s]).l]))
+    for (const shade of [600, 700, 800, 900]) expect(l[shade]).toBeLessThan(l[shade - 100] - 0.02)
+  })
+
+  it("500 の上にも下にも段を置けない色（#000000 / #FFFFFF）は必須エラーになる", () => {
+    for (const hex of ["#000000", "#FFFFFF"]) {
+      const result = generateTheme(hex, { ctx })
+      expect(result.ok, hex).toBe(false)
+      expect(result.steps.some((st: { pass: boolean }) => !st.pass), hex).toBe(true)
+    }
+  })
+
   it("不正な hex は例外", () => {
     expect(() => generateTheme("nope", { ctx })).toThrow(/色の形式が不正/)
   })
@@ -244,7 +282,7 @@ describe("CLI（子プロセス）", () => {
   })
 
   it("--out はファイルへ書き出す", () => {
-    const dir = mkdtempSync(join(tmpdir(), "ksk-theme-"))
+    const dir = makeTempDir("ksk-theme-")
     const out = join(dir, "nested", "my-client.css")
     const r = runCli(["#16A34A", "--out", out])
     expect(r.status).toBe(0)
@@ -257,17 +295,53 @@ describe("CLI（子プロセス）", () => {
   it("--check は green.css を検査して exit 0", () => {
     const r = runCli(["--check", "src/themes/green.css"])
     expect(r.status).toBe(0)
-    expect(r.stdout).toContain("必須ペアは全て通過")
+    expect(r.stdout).toContain("必須ペアと段差は全て通過")
   })
 
   it("--check は 600 が AA 未満の CSS で exit 1", () => {
-    const dir = mkdtempSync(join(tmpdir(), "ksk-theme-check-"))
+    const dir = makeTempDir("ksk-theme-check-")
     const file = join(dir, "bad.css")
     const css = readFileSync(join(ROOT, "src/themes/green.css"), "utf8").replace(/(--Primitive-Brand-600:\s*)#[0-9A-Fa-f]{6}/, "$1#FACC15")
     writeFileSync(file, css)
     const r = runCli(["--check", file])
     expect(r.status).toBe(1)
     expect(r.stdout).toContain("[NG  ]")
+  })
+
+  it("#000000 / #FFFFFF は段差エラーで exit 1・CSS は出さない", () => {
+    for (const hex of ["#000000", "#FFFFFF"]) {
+      const r = runCli([hex])
+      expect(r.status, hex).toBe(1)
+      expect(r.stdout, hex).toBe("")
+      expect(r.stderr).toContain("明度差")
+    }
+  })
+
+  it("--out にディレクトリを渡すと exit 2（スタックトレースを出さない）", () => {
+    const dir = makeTempDir("ksk-theme-dir-")
+    const r = runCli(["#16A34A", "--out", dir])
+    expect(r.status).toBe(2)
+    expect(r.stderr).toContain("ディレクトリ")
+    expect(r.stderr).not.toContain("EISDIR")
+    expect(r.stderr).not.toContain("at ")
+  })
+
+  it("--out の既存ファイルは --force が無ければ exit 2、--force で上書きできる", () => {
+    const dir = makeTempDir("ksk-theme-force-")
+    mkdirSync(dir, { recursive: true })
+    const out = join(dir, "t.css")
+    writeFileSync(out, "old")
+    const refused = runCli(["#16A34A", "--out", out])
+    expect(refused.status).toBe(2)
+    expect(refused.stderr).toContain("--force")
+    expect(readFileSync(out, "utf8")).toBe("old")
+    const forced = runCli(["#16A34A", "--out", out, "--force"])
+    expect(forced.status).toBe(0)
+    expect(readFileSync(out, "utf8")).toContain("--Primitive-Brand-500: #16A34A;")
+  })
+
+  it("--check は --force と併用できない（exit 2）", () => {
+    expect(runCli(["--check", "src/themes/green.css", "--force"]).status).toBe(2)
   })
 
   it("不正な hex・引数なし・未知のオプション・ファイル不在は exit 2", () => {
