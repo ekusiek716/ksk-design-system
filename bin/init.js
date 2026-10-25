@@ -20,6 +20,7 @@
 //   npx ksk-ds check-duplicates src     # DS と同名のローカル実装を検査
 //   npx ksk-ds report-ignores <dir...>  # lint の理由付き ignore を複数リポ横断で集計
 //   npx ksk-ds codemod <name> ./src     # scripts/codemod/<name>.mjs を実行
+//   npx ksk-ds theme "#0EA5E9"          # ブランド色 1 色から Brand ランプを生成・検査
 
 import { copyFileSync, existsSync, readdirSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
@@ -72,6 +73,9 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   npx ksk-ds check-migration ./src --format=json  CI 向け JSON 出力
   npx ksk-ds check-duplicates [DIR]    DS と同名のローカル実装を検査
   npx ksk-ds check-duplicates --strict 検出時に exit 1（CI 向け）
+  npx ksk-ds theme <hex> [--name N] [--out F.css [--force]] [--json]
+                                     ブランド色 1 色から Brand ランプ(50〜900)を生成しコントラスト検査
+  npx ksk-ds theme --check <file.css>  既存テーマ CSS のコントラストだけを検査
   npx ksk-ds report-ignores <dir...>   lint の理由付き ignore を複数リポ横断で集計（--json / --min-repos N / --rule ID）
   npx ksk-ds codemod                   利用できる codemod を一覧
   npx ksk-ds codemod <name> [DIR] --dry 破壊変更の自動移行（事前確認）
@@ -124,6 +128,11 @@ if (cmd === "check-duplicates") {
     pkgRoot,
   })
   await exitWith(status)
+}
+
+if (cmd === "theme") {
+  const { runThemeCli } = await import("./theme.js")
+  await exitWith(runThemeCli(args.slice(1), { cwd: process.cwd(), pkgRoot }))
 }
 
 if (cmd === "codemod") {
