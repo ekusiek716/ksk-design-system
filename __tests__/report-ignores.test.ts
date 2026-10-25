@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest"
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { spawnSync } from "node:child_process"
@@ -192,10 +192,63 @@ describe("buildIgnoreReport", () => {
       "src/weak.tsx:1:P002",
       "src/weak.tsx:2:P002",
       "src/weak.tsx:3:ksk-ds-allow-custom-ui",
-      "src/weak.tsx:4:ksk-ds-local-fallback",
     ])
     expect(report.invalid.every((i) => i.repo === "app-b")).toBe(true)
     expect(report.byRule.find((r) => r.rule === "P002")).toBeUndefined()
+  })
+
+  it("local-fallback は lint 上の「無効」に入れず、別枠（incompleteFallbacks）で理由・issue 番号の不足を報告する", () => {
+    const paths = fixture({
+      app: {
+        "src/a.tsx": [
+          "// ksk-ds-local-fallback", // 理由なし
+          "// ksk-ds-local-fallback: DS に ActionTile が追加されたら削除", // 理由あり・issue なし
+          "// ksk-ds-local-fallback: DS に ActionTile が追加されたら削除 (issue #5)", // 完全
+          "// ksk-ds-local-fallback: 背景は #333 の濃色にする暫定対応", // 色コードは issue ではない
+        ].join("\n"),
+      },
+    })
+    const report = buildIgnoreReport([paths.app])
+    expect(report.invalid).toEqual([])
+    expect(report.incompleteFallbacks.map((i) => i.line)).toEqual([1, 2, 4])
+    const fallback = report.byRule.find((r) => r.rule === "ksk-ds-local-fallback")!
+    expect(fallback.issues).toEqual([{ number: 5, repos: ["app"] }])
+    const text = cli([paths.app]).stdout
+    expect(text).toContain("■ 理由・issue 番号が不足した local-fallback: 3 件")
+    expect(text).not.toContain("lint 上は無効な ignore")
+  })
+
+  it("lint が有効とする入力（閉じ記号付きの短い理由）を理由不足にしない", () => {
+    const paths = fixture({
+      app: {
+        "src/a.tsx": [
+          "{/* ksk-ds-allow-custom-ui: abcd */}", // lint は `abcd */}` を見るので有効
+          "/* ksk-ds-allow-custom-ui: abcd */", // lint は `abcd */` → 末尾の */ を除いて 4 文字 → 無効
+          "// ksk-ds-lint-ignore P008 -- abcd",
+        ].join("\n"),
+      },
+    })
+    const report = buildIgnoreReport([paths.app])
+    expect(report.invalid.map((i) => i.line)).toEqual([2, 3])
+    expect(report.byRule.find((r) => r.rule === "ksk-ds-allow-custom-ui")!.count).toBe(1)
+    // 表示用の理由は閉じ記号を外す
+    expect(report.invalid[0].reason).toBe("abcd")
+  })
+
+  it("lint の既定除外（out / .nuxt / .output / .svelte-kit）と .expo は走査しない", () => {
+    const marker = "// ksk-ds-lint-ignore P008 -- 除外ディレクトリの中は数えない\n"
+    const paths = fixture({
+      app: {
+        "out/a.js": marker,
+        ".nuxt/a.js": marker,
+        ".output/a.js": marker,
+        ".svelte-kit/a.js": marker,
+        ".expo/a.js": marker,
+        "src/ok.ts": "// ksk-ds-lint-ignore P008 -- 走査される通常のソースです\n",
+      },
+    })
+    const report = buildIgnoreReport([paths.app])
+    expect(report.byRule[0].files.map((f) => f.file)).toEqual(["src/ok.ts"])
   })
 
   it("local-fallback は issue 番号を抽出し、同じ理由なら issue 番号違いでも 1 つにまとめる", () => {
@@ -259,13 +312,14 @@ describe("ksk-ds report-ignores（CLI）", () => {
     const result = cli([paths["app-a"], paths["app-b"], paths["app-c"], "--json"])
     expect(result.status).toBe(0)
     const json = JSON.parse(result.stdout)
-    expect(Object.keys(json).sort()).toEqual(["byRule", "candidates", "invalid", "repos"])
+    expect(Object.keys(json).sort()).toEqual(["byRule", "candidates", "incompleteFallbacks", "invalid", "repos"])
     expect(json.repos).toHaveLength(3)
     const p008 = json.byRule.find((r: { rule: string }) => r.rule === "P008")
     expect(p008).toMatchObject({ rule: "P008", count: 4, repos: ["app-a", "app-b"] })
     expect(p008.reasons[0]).toEqual({ text: expect.any(String), count: 3 })
     expect(p008.files[0]).toEqual({ repo: "app-a", file: "src/consts.ts", line: 1 })
-    expect(json.invalid).toHaveLength(4)
+    expect(json.invalid).toHaveLength(3)
+    expect(json.incompleteFallbacks).toHaveLength(1)
     expect(json.candidates.map((c: { rule: string }) => c.rule)).toContain("P008")
   })
 
@@ -278,6 +332,22 @@ describe("ksk-ds report-ignores（CLI）", () => {
     expect(min1.candidates.map((c: { rule: string }) => c.rule)).toContain("P099")
     const only = JSON.parse(cli([...all, "--json", "--rule", "P099"]).stdout)
     expect(only.byRule.map((r: { rule: string }) => r.rule)).toEqual(["P099"])
+  })
+
+  it("symlink のディレクトリを引数に渡しても集計できる（サブディレクトリの symlink は辿らない）", () => {
+    const real = fixture({ real: { "src/a.ts": "// ksk-ds-lint-ignore P008 -- 実体側のディレクトリの理由\n" } })
+    const linkBase = mkdtempSync(join(tmpdir(), "ksk-report-ignores-link-"))
+    dirs.push(linkBase)
+    const link = join(linkBase, "linked-app")
+    symlinkSync(real.real, link)
+    // サブディレクトリの symlink（ループ防止のため辿らない）
+    symlinkSync(real.real, join(real.real, "src", "loop"))
+
+    const result = cli([link, "--json"])
+    expect(result.status).toBe(0)
+    const json = JSON.parse(result.stdout)
+    expect(json.repos[0]).toMatchObject({ name: "linked-app", files: 1 })
+    expect(json.byRule[0]).toMatchObject({ rule: "P008", count: 1 })
   })
 
   it("マーカーが 1 件も無くても exit 0", () => {
@@ -295,6 +365,7 @@ describe("ksk-ds report-ignores（CLI）", () => {
     expect(cli([paths.a, "--min-repos", "0"]).status).toBe(2)
     expect(cli([paths.a, "--min-repos", "abc"]).status).toBe(2)
     expect(cli([paths.a, "--rule"]).status).toBe(2)
+    expect(cli([paths.a, "--rule", "--json"]).status).toBe(2)
     expect(cli([]).stderr).toContain("report-ignores")
   })
 

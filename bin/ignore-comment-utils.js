@@ -80,3 +80,33 @@ export function maskCodeStrings(source) {
 
   return result
 }
+
+// ビルド生成物。ここを走査すると、バンドルされた DS 自身の CSS を
+// 「consumer が DS 変数を上書きしている」と誤認して P049 が大量に出る（#378）。
+// Next.js の `output: "export"` は out/、Nuxt は .output/、Vercel/Turbo は
+// それぞれ .vercel/ .turbo/ を既定の出力先にする。
+export const DEFAULT_IGNORES = [
+  ".git",
+  ".next",
+  ".nuxt",
+  ".output",
+  ".svelte-kit",
+  ".turbo",
+  ".vercel",
+  "build",
+  "coverage",
+  "dist",
+  ".claude",
+  "node_modules",
+  "out",
+  "storybook-static",
+]
+
+// パス単位で除外するもの（セグメント名だけでは絞れないケース）。
+// Capacitor は web のビルド成果物をネイティブプロジェクト配下へコピーするので、
+// そこも DS 自身の CSS を含む（#378）。`public` をセグメントで除外すると
+// Next.js の public/ まで巻き込むため、パス形で限定する。
+export const DEFAULT_IGNORE_PATHS = [
+  "ios/App/App/public",
+  "android/app/src/main/assets/public",
+]

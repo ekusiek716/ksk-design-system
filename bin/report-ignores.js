@@ -14,32 +14,35 @@
 // 文字列リテラル中のマーカーは数えない（lint.js と同じ maskCodeStrings を共有）。
 // 集計ツールなので exit code は常に 0。引数不正のみ 2。
 
-import { existsSync, lstatSync, readFileSync, readdirSync } from "node:fs"
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { basename, extname, join, relative, resolve } from "node:path"
-import { MIN_ESCAPE_REASON_LENGTH, isMeaningfulReason, maskCodeStrings } from "./ignore-comment-utils.js"
+import {
+  DEFAULT_IGNORES,
+  DEFAULT_IGNORE_PATHS,
+  MIN_ESCAPE_REASON_LENGTH,
+  isMeaningfulReason,
+  maskCodeStrings,
+} from "./ignore-comment-utils.js"
 
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".css"])
 
-/** 走査しないディレクトリ名（依存・生成物・VCS・worktree） */
-const IGNORED_DIRECTORIES = new Set([
-  ".git",
-  ".expo",
-  ".next",
-  ".turbo",
-  ".cache",
-  ".vercel",
-  ".claude",
-  "build",
-  "coverage",
-  "dist",
-  "node_modules",
-  "storybook-static",
-])
+/**
+ * 走査しないディレクトリ名。lint の DEFAULT_IGNORES を共有し、
+ * lint が見ない Expo / キャッシュ系だけ追加する。
+ */
+const IGNORED_DIRECTORIES = new Set([...DEFAULT_IGNORES, ".expo", ".cache"])
 
-/** Capacitor の同期済み Web アセット（lint の DEFAULT_IGNORE_PATHS と同じ） */
-const IGNORED_PATHS = ["ios/App/App/public", "android/app/src/main/assets/public"]
+/** パス単位の除外（Capacitor の同期済み Web アセット。lint の DEFAULT_IGNORE_PATHS を共有） */
+const IGNORED_PATHS = DEFAULT_IGNORE_PATHS
 
-/** 行スコープ・ファイルスコープ ignore。lint.js の RULE_IGNORE_RE と同じ文法（ルール ID は P008 / KFX001 のような英大文字始まり＋数字を含む形に限る） */
+/**
+ * 行スコープ・ファイルスコープ ignore。`ksk-ds-lint-ignore(-file) RULE -- 理由` の骨格と
+ * 理由の取り方（`--` 以降・`*` の手前まで）は lint.js の RULE_IGNORE_RE と同じ。
+ * ただしルール ID は lint.js の `[A-Za-z][A-Za-z0-9_]*` より狭く、P008 / KFX001 のような
+ * 「英大文字始まりで数字を含む」形に限る。lint では散文中の
+ * `ksk-ds-lint-ignore to suppress` のような言及の `to` も ID として読まれるが、
+ * 集計ではそれをルールとして数えたくないため。DS のルール ID（P###・AI#・A### 等）は全てこの形。
+ */
 const LINT_IGNORE_RE = /ksk-ds-lint-ignore(-file)?\s+([A-Z][A-Za-z]*\d[A-Za-z0-9_]*)\s*(?:--\s*([^*]*))?/g
 /** DS 内部用の ksk-lint-ignore */
 const INTERNAL_IGNORE_RE = /ksk-lint-ignore\s+([A-Z][A-Za-z]*\d[A-Za-z0-9_]*)\s*(?:--\s*([^*]*))?/g
@@ -66,7 +69,7 @@ consumer アプリが DS の lint を外した理由付きコメントを、複�
   <dir...>        1 ディレクトリ = 1 リポ（プロダクト）として集計（リポ名はディレクトリ名）
 
 オプション:
-  --json          機械可読 JSON を出力（{ repos, byRule, candidates, invalid }）
+  --json          機械可読 JSON を出力（{ repos, byRule, candidates, invalid, incompleteFallbacks }）
   --min-repos N   N リポ以上で同じルールが外されていたら DS issue 候補にする（既定 ${DEFAULT_MIN_REPOS}）
   --rule ID       指定ルールだけ集計（例: P008 / ${ALLOW_CUSTOM_UI_RULE} / ${LOCAL_FALLBACK_RULE}）
   --help, -h      このヘルプ
@@ -79,7 +82,8 @@ consumer アプリが DS の lint を外した理由付きコメントを、複�
 
 対象拡張子は .ts .tsx .js .jsx .mjs .css。node_modules / dist / build / .git / .expo /
 storybook-static 等は除外。文字列リテラル中のマーカーは数えません。理由が
-${MIN_ESCAPE_REASON_LENGTH} 文字未満のものは「理由不足」として別に数えます。
+${MIN_ESCAPE_REASON_LENGTH} 文字未満のものは「理由不足」として別に数えます（判定は lint と同じ入力）。
+ksk-ds-local-fallback は理由か issue 番号が欠けているものを別見出しで報告します。
 読み取り専用。終了コードは常に 0（引数不正のみ 2）。
 `
 
@@ -92,13 +96,16 @@ export function collectIgnoreMarkers(source) {
   const found = []
 
   const push = (kind, rule, line, rawReason) => {
+    // 有効/無効の判定は lint.js が見ている文字列（マッチした生の理由）そのままで行う。
+    // 閉じ記号を外すのは表示・集計用の reason だけ（外してから判定すると、lint では有効な
+    // `{/* ksk-ds-allow-custom-ui: abcd */}` が理由不足に見えてしまう）。
     const reason = cleanReason(rawReason)
     found.push({
       kind,
       rule,
       line,
       reason,
-      valid: isMeaningfulReason(reason),
+      valid: isMeaningfulReason(rawReason),
       issues: extractIssueNumbers(reason),
     })
   }
@@ -134,7 +141,8 @@ function cleanReason(raw) {
 
 function extractIssueNumbers(reason) {
   const numbers = []
-  for (const match of reason.matchAll(/issues?\s*#?(\d+)|#(\d+)/gi)) {
+  // `issue #N` と `(#N)` の形だけ。色コード（#333）やアンカーは拾わない。
+  for (const match of reason.matchAll(/issues?\s*#(\d+)(?![0-9A-Za-z])|#(\d+)(?![0-9A-Za-z])\s*\)/gi)) {
     numbers.push(Number(match[1] ?? match[2]))
   }
   return [...new Set(numbers)]
@@ -204,7 +212,7 @@ function parseArgs(argv) {
       }
     } else if (arg === "--rule" || arg.startsWith("--rule=")) {
       const raw = arg.includes("=") ? arg.slice(arg.indexOf("=") + 1) : argv[++i]
-      if (!raw) options.error = "--rule にはルール ID を指定してください"
+      if (!raw || raw.startsWith("-")) options.error = `--rule にはルール ID を指定してください: ${raw ?? "(未指定)"}`
       else options.rule = raw
     } else if (arg.startsWith("-")) {
       options.error = `未知のオプションです: ${arg}`
@@ -250,8 +258,15 @@ export function buildIgnoreReport(dirs, { minRepos = DEFAULT_MIN_REPOS, rule = n
     repos.push({ name: repo, path: dir, files: files.length, markers: markerCount })
   })
 
+  // local-fallback は lint 側に有効/無効の概念が無い（check-duplicates の抑制マーカー）ので、
+  // 「lint 上は無効」の invalid には入れず、別枠（incompleteFallbacks）で報告する。
+  const incompleteFallbacks = occurrences
+    .filter((o) => o.kind === "local-fallback" && (!o.valid || o.issues.length === 0))
+    .map((o) => ({ repo: o.repo, file: o.file, line: o.line, rule: o.rule, kind: o.kind, reason: o.reason }))
+    .sort(compareLocation)
+
   const invalid = occurrences
-    .filter((o) => !o.valid)
+    .filter((o) => !o.valid && o.kind !== "local-fallback")
     .map((o) => ({ repo: o.repo, file: o.file, line: o.line, rule: o.rule, kind: o.kind, reason: o.reason }))
     .sort(compareLocation)
 
@@ -307,7 +322,7 @@ export function buildIgnoreReport(dirs, { minRepos = DEFAULT_MIN_REPOS, rule = n
       ...(entry.issues ? { issues: entry.issues } : {}),
     }))
 
-  return { repos, byRule, candidates, invalid }
+  return { repos, byRule, candidates, invalid, incompleteFallbacks }
 }
 
 function compareLocation(a, b) {
@@ -325,7 +340,7 @@ function formatText(report, { minRepos, rule }) {
   const validCount = report.byRule.reduce((sum, entry) => sum + entry.count, 0)
   out.push(
     `ksk-ds report-ignores: ${report.repos.length} リポ / ${totalFiles} ファイルを走査 / ignore ${validCount} 件` +
-      `（理由不足 ${report.invalid.length} 件）${rule ? ` [--rule ${rule}]` : ""}`,
+      `（理由不足 ${report.invalid.length} 件 / 不備のある local-fallback ${report.incompleteFallbacks.length} 件）${rule ? ` [--rule ${rule}]` : ""}`,
   )
   for (const repo of report.repos) {
     out.push(`  - ${repo.name}: ${repo.files} ファイル / マーカー ${repo.markers} 件`)
@@ -353,6 +368,14 @@ function formatText(report, { minRepos, rule }) {
     for (const item of report.invalid) {
       out.push(`  ${item.repo}/${item.file}:${item.line} ${item.rule}（理由: ${item.reason ? `"${item.reason}"` : "なし"}）`)
     }
+  }
+
+  if (report.incompleteFallbacks.length > 0) {
+    out.push(`\n■ 理由・issue 番号が不足した local-fallback: ${report.incompleteFallbacks.length} 件`)
+    for (const item of report.incompleteFallbacks) {
+      out.push(`  ${item.repo}/${item.file}:${item.line}（理由: ${item.reason ? `"${item.reason}"` : "なし"}）`)
+    }
+    out.push("  ※ 書式: // ksk-ds-local-fallback: DS に X が追加されたら削除 (issue #123)")
   }
 
   out.push(`\n■ DS issue 候補（${minRepos} リポ以上で同じルールが外されている）: ${report.candidates.length} 件`)
@@ -390,7 +413,7 @@ export function runReportIgnoresCli(
   const dirs = []
   for (const dir of options.dirs) {
     const abs = resolve(cwd, dir)
-    if (!existsSync(abs) || !lstatSync(abs).isDirectory()) {
+    if (!existsSync(abs) || !statSync(abs).isDirectory()) {
       error(`ksk-ds report-ignores: ディレクトリが見つかりません: ${abs}`)
       return 2
     }

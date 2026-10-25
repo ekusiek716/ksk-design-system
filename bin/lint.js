@@ -8,6 +8,8 @@ import {
 } from "./product-theme-override.js"
 import { inspectUnlayeredGlobalOverrides } from "./unlayered-global-override.js"
 import {
+  DEFAULT_IGNORES,
+  DEFAULT_IGNORE_PATHS,
   MIN_ESCAPE_REASON_LENGTH,
   blankChar,
   isMeaningfulReason,
@@ -60,35 +62,8 @@ const DEFAULT_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx"])
  * engine: "product-theme-override" を持つルールだけをここに流す（issue #364）。
  */
 const CSS_EXTENSIONS = new Set([".css"])
-// ビルド生成物。ここを走査すると、バンドルされた DS 自身の CSS を
-// 「consumer が DS 変数を上書きしている」と誤認して P049 が大量に出る（#378）。
-// Next.js の `output: "export"` は out/、Nuxt は .output/、Vercel/Turbo は
-// それぞれ .vercel/ .turbo/ を既定の出力先にする。
-const DEFAULT_IGNORES = [
-  ".git",
-  ".next",
-  ".nuxt",
-  ".output",
-  ".svelte-kit",
-  ".turbo",
-  ".vercel",
-  "build",
-  "coverage",
-  "dist",
-  ".claude",
-  "node_modules",
-  "out",
-  "storybook-static",
-]
-
-// パス単位で除外するもの（セグメント名だけでは絞れないケース）。
-// Capacitor は web のビルド成果物をネイティブプロジェクト配下へコピーするので、
-// そこも DS 自身の CSS を含む（#378）。`public` をセグメントで除外すると
-// Next.js の public/ まで巻き込むため、パス形で限定する。
-const DEFAULT_IGNORE_PATHS = [
-  "ios/App/App/public",
-  "android/app/src/main/assets/public",
-]
+// 走査除外ディレクトリ（DEFAULT_IGNORES / DEFAULT_IGNORE_PATHS）は report-ignores と
+// 共有するため ignore-comment-utils.js へ移した（挙動不変）。
 
 /** appliesTo に書けるプラットフォーム識別子（後方互換のため引き続き解釈する） */
 export const PLATFORMS = ["web", "native"]
