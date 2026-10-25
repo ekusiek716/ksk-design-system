@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "./ksk-labels"
 
 interface GalleryImage {
   src: string
@@ -13,17 +14,17 @@ interface ImageGalleryProps {
   onImageClick?: (index: number) => void
   className?: string
   /**
-   * 前の画像ボタンの aria-label。i18n 対応: 英語では "Previous image" を渡す。@default "前の画像"
+   * 前の画像ボタンの aria-label。省略時は KskLabelsProvider の `imageGalleryPrev`（Provider 無しは "前の画像"。locale="en" で "Previous image"）。
    */
   prevLabel?: string
   /**
-   * 次の画像ボタンの aria-label。i18n 対応: 英語では "Next image" を渡す。@default "次の画像"
+   * 次の画像ボタンの aria-label。省略時は KskLabelsProvider の `imageGalleryNext`（Provider 無しは "次の画像"。locale="en" で "Next image"）。
    */
   nextLabel?: string
   /**
    * 画像インデックスラベル生成関数。サムネイル / ドットの aria-label と alt テキストに使用。
-   * i18n 対応: 英語では `(i) => \`Image ${i + 1}\`` を渡す。
-   * @default (i) => `画像 ${i + 1}`
+   * 省略時は KskLabelsProvider の `imageGalleryImage`（`{index}` を 1 始まりの番号に置換。
+   * Provider 無しは "画像 N"。locale="en" で "Image N"）。
    */
   imageLabel?: (index: number) => string
 }
@@ -41,10 +42,15 @@ function ImageGallery({
   aspectRatio = "4/3",
   onImageClick,
   className,
-  prevLabel = "前の画像",
-  nextLabel = "次の画像",
-  imageLabel = (i) => `画像 ${i + 1}`,
+  prevLabel: prevLabelProp,
+  nextLabel: nextLabelProp,
+  imageLabel: imageLabelProp,
 }: ImageGalleryProps) {
+  const defaultLabels = useKskLabels()
+  const prevLabel = prevLabelProp ?? defaultLabels.imageGalleryPrev
+  const nextLabel = nextLabelProp ?? defaultLabels.imageGalleryNext
+  const imageLabel =
+    imageLabelProp ?? ((i: number) => formatKskLabel(defaultLabels.imageGalleryImage, { index: i + 1 }))
   const [active, setActive] = React.useState(0)
 
   const handlePrev = () => setActive((i) => Math.max(0, i - 1))

@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 export interface DropdownFilterOption<K extends string = string> {
   key: K
@@ -19,6 +20,7 @@ export interface DropdownFilterProps<K extends string = string> {
   onSelect: (key: K | "all") => void
   /** "すべて" オプションを非表示にする */
   hideAll?: boolean
+  /** "すべて" オプションの文言。省略時は KskLabelsProvider の `dropdownFilterAll`（Provider 無しは "すべて"。locale="en" で "All"） */
   allLabel?: string
   /**
    * 選択 key を表示用テキストに変換する (例: enum key → 日本語ラベル)。
@@ -32,7 +34,7 @@ export interface DropdownFilterProps<K extends string = string> {
    * 例: "追加順" を pristine とすれば、追加順のときは「並び替え」と表示し pristine 配色に。
    */
   pristineValue?: K
-  /** オーバーレイを閉じる不可視ボタンの aria-label。既定は "閉じる"。 */
+  /** オーバーレイを閉じる不可視ボタンの aria-label。省略時は KskLabelsProvider の `close`（Provider 無しは "閉じる"）。 */
   closeLabel?: string
   className?: string
 }
@@ -43,13 +45,16 @@ function DropdownFilter<K extends string = string>({
   options,
   onSelect,
   hideAll = false,
-  allLabel = "すべて",
+  allLabel: allLabelProp,
   getDisplayLabel,
   valueOnly = false,
   pristineValue,
-  closeLabel = "閉じる",
+  closeLabel: closeLabelProp,
   className,
 }: DropdownFilterProps<K>) {
+  const defaultLabels = useKskLabels()
+  const allLabel = allLabelProp ?? defaultLabels.dropdownFilterAll
+  const closeLabel = closeLabelProp ?? defaultLabels.close
   const [open, setOpen] = React.useState(false)
   const btnRef = React.useRef<HTMLButtonElement>(null)
   const [pos, setPos] = React.useState({ top: 0, left: 0 })

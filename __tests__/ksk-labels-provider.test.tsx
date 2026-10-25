@@ -111,7 +111,9 @@ describe("KskLabelsProvider", () => {
   })
 
   it("Provider 無しの既定文言は 2.14 までの日本語と 1 文字も違わない", () => {
-    expect(KSK_DEFAULT_LABELS.ja).toEqual({
+    // 既存キーの文言が 1 文字も変わらないことを固定する。v2.21 以降に足したキー（Pagination 等）は
+    // ksk-labels-coverage.test.tsx が Provider 無し=日本語で固定するため、ここは既存キーだけ見る
+    expect(KSK_DEFAULT_LABELS.ja).toMatchObject({
       skipLink: "コンテンツへ移動",
       mobileMenu: "メニューを開く",
       mobileDrawerTitle: "メニュー",

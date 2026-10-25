@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../ui/ksk-labels"
 
 interface CountdownHeroProps {
   /**
@@ -8,11 +9,11 @@ interface CountdownHeroProps {
    * タイムゾーンで 1 日ずれるため自前でパースする）。それ以外の文字列は `new Date()` に委譲。
    */
   targetDate: Date | string
-  /** 残り日数の上に表示するラベル（既定 "残り"） */
+  /** 残り日数の上に表示するラベル。省略時は KskLabelsProvider の `countdownRemaining`（Provider 無しは "残り"） */
   label?: string
-  /** 当日（残り 0 日）時のラベル（既定 "本日"） */
+  /** 当日（残り 0 日）時のラベル。省略時は KskLabelsProvider の `countdownToday`（Provider 無しは "本日"） */
   todayLabel?: string
-  /** 経過後（残り日数が負）のラベル（既定 "経過"） */
+  /** 経過後（残り日数が負）のラベル。省略時は KskLabelsProvider の `countdownPast`（Provider 無しは "経過"。locale="en" で "Elapsed"） */
   pastLabel?: string
   /** 日数の単位テキスト（既定 "days"、装飾セリフ書体で表示） */
   unit?: string
@@ -88,9 +89,9 @@ function calcDaysLeft(target: Date): number {
  */
 function CountdownHero({
   targetDate,
-  label = "残り",
-  todayLabel = "本日",
-  pastLabel = "経過",
+  label: labelProp,
+  todayLabel: todayLabelProp,
+  pastLabel: pastLabelProp,
   unit = "days",
   dateLabel,
   todayValue,
@@ -101,6 +102,10 @@ function CountdownHero({
   disabled = false,
   className,
 }: CountdownHeroProps) {
+  const defaultLabels = useKskLabels()
+  const label = labelProp ?? defaultLabels.countdownRemaining
+  const todayLabel = todayLabelProp ?? defaultLabels.countdownToday
+  const pastLabel = pastLabelProp ?? defaultLabels.countdownPast
   const contentId = React.useId()
   const actionable = Boolean(onClick || href)
   const target = React.useMemo(() => parseTargetDate(targetDate), [targetDate])

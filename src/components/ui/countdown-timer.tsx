@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 type Granularity = "day" | "hour" | "minute" | "second"
 
@@ -14,11 +15,11 @@ interface CountdownTimerProps {
    * - "second": 秒まで (旧デフォルト、競技的カウントダウン)
    */
   granularity?: Granularity
-  /** ラベルテキスト（カウント中、既定 "残り"） */
+  /** ラベルテキスト（カウント中）。省略時は KskLabelsProvider の `countdownRemaining`（Provider 無しは "残り"。locale="en" で "Time left"）。"" で非表示 */
   label?: string
-  /** 終了時テキスト（既定 "受付終了"） */
+  /** 終了時テキスト。省略時は KskLabelsProvider の `countdownEnded`（Provider 無しは "受付終了"。locale="en" で "Closed"） */
   endedLabel?: string
-  /** 当日 (残り 0 日) 時のテキスト。granularity="day" で使用（既定 "本日"） */
+  /** 当日 (残り 0 日) 時のテキスト。granularity="day" で使用。省略時は KskLabelsProvider の `countdownToday`（Provider 無しは "本日"。locale="en" で "Today"） */
   todayLabel?: string
   variant?: "filled" | "ghost"
   /** [hh:mm:ss モードのみ] 時間を非表示にして 分:秒 のみ表示 */
@@ -62,14 +63,18 @@ function calcDaysLeft(target: Date): number {
 
 function DayCountdown({
   targetDate,
-  label = "残り",
-  endedLabel = "受付終了",
-  todayLabel = "本日",
+  label: labelProp,
+  endedLabel: endedLabelProp,
+  todayLabel: todayLabelProp,
   variant = "filled",
   className,
   onEnd,
   dayUnit = "日",
 }: CountdownTimerProps) {
+  const defaultLabels = useKskLabels()
+  const label = labelProp ?? defaultLabels.countdownRemaining
+  const endedLabel = endedLabelProp ?? defaultLabels.countdownEnded
+  const todayLabel = todayLabelProp ?? defaultLabels.countdownToday
   const [now, setNow] = React.useState(() => Date.now())
   const daysLeft = React.useMemo(() => {
     void now
@@ -148,8 +153,8 @@ function DayCountdown({
 function TimeCountdown({
   targetDate,
   granularity = "second",
-  label = "残り",
-  endedLabel = "受付終了",
+  label: labelProp,
+  endedLabel: endedLabelProp,
   variant = "filled",
   compact = false,
   className,
@@ -158,6 +163,9 @@ function TimeCountdown({
   minuteUnit = "分",
   secondUnit = "秒",
 }: CountdownTimerProps) {
+  const defaultLabels = useKskLabels()
+  const label = labelProp ?? defaultLabels.countdownRemaining
+  const endedLabel = endedLabelProp ?? defaultLabels.countdownEnded
   const [remaining, setRemaining] = React.useState(() => calcRemaining(targetDate))
   const [state, setState] = React.useState<State>(() =>
     Date.now() >= targetDate.getTime() ? "ended" : "active",

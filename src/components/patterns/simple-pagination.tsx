@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "../ui/button"
+import { useKskLabels } from "../ui/ksk-labels"
 
 /**
  * SimplePagination のラベル形式。
@@ -23,11 +24,11 @@ interface SimplePaginationBaseProps
   format?: SimplePaginationFormat
   /** モバイル時にラベルを省略表示（"3 / 10" のような簡略表示） */
   compact?: boolean
-  /** 「前へ」ボタンのラベル / aria-label */
+  /** 「前へ」ボタンのラベル / aria-label。省略時は KskLabelsProvider の `simplePaginationPrevious`（Provider 無しは "前へ"。locale="en" で "Previous"） */
   previousLabel?: string
-  /** 「次へ」ボタンのラベル / aria-label */
+  /** 「次へ」ボタンのラベル / aria-label。省略時は KskLabelsProvider の `simplePaginationNext`（Provider 無しは "次へ"。locale="en" で "Next"） */
   nextLabel?: string
-  /** nav 要素の aria-label。@default "ページネーション" */
+  /** nav 要素の aria-label。省略時は KskLabelsProvider の `simplePaginationNav`（Provider 無しは "ページネーション"。locale="en" で "Pagination"） */
   navLabel?: string
   /**
    * 中央ラベルのカスタムレンダラ。
@@ -122,9 +123,9 @@ function SimplePagination({
   onPageChange,
   format,
   compact = false,
-  previousLabel = "前へ",
-  nextLabel = "次へ",
-  navLabel = "ページネーション",
+  previousLabel: previousLabelProp,
+  nextLabel: nextLabelProp,
+  navLabel: navLabelProp,
   renderLabel,
   className,
   total,
@@ -132,6 +133,10 @@ function SimplePagination({
   totalPages,
   ...props
 }: SimplePaginationProps) {
+  const defaultLabels = useKskLabels()
+  const previousLabel = previousLabelProp ?? defaultLabels.simplePaginationPrevious
+  const nextLabel = nextLabelProp ?? defaultLabels.simplePaginationNext
+  const navLabel = navLabelProp ?? defaultLabels.simplePaginationNav
   // 形式の推定
   const resolvedFormat: SimplePaginationFormat =
     format ?? (totalPages !== undefined ? "pages" : "items")

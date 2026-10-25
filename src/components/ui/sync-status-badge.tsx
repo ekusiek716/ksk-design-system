@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "./ksk-labels"
 
 export type SyncState = "idle" | "syncing" | "success" | "error" | "offline"
 
@@ -8,7 +9,12 @@ export interface SyncStatusBadgeProps {
   errorCount?: number
   /** 再試行ボタン押下時のコールバック */
   onRetry?: () => void
-  /** i18n ラベル */
+  /**
+   * i18n ラベル。syncing / success / offline / retry は省略時に KskLabelsProvider の
+   * `syncStatusSyncing` / `syncStatusSaved` / `syncStatusOffline` / `syncStatusRetry`
+   * （Provider 無しは "同期中" / "保存済み" / "オフライン" / "再試行"）。
+   * errorLabel（件数を受け取る関数）の既定は Provider の `syncStatusError`（`{count}` を件数に置換。Provider 無しは "N件のエラー"）。
+   */
   syncingLabel?: string
   successLabel?: string
   errorLabel?: (count: number) => string
@@ -21,13 +27,19 @@ function SyncStatusBadge({
   state,
   errorCount = 0,
   onRetry,
-  syncingLabel = "同期中",
-  successLabel = "保存済み",
-  errorLabel = (n) => `${n}件のエラー`,
-  offlineLabel = "オフライン",
-  retryLabel = "再試行",
+  syncingLabel: syncingLabelProp,
+  successLabel: successLabelProp,
+  errorLabel: errorLabelProp,
+  offlineLabel: offlineLabelProp,
+  retryLabel: retryLabelProp,
   className,
 }: SyncStatusBadgeProps) {
+  const defaultLabels = useKskLabels()
+  const syncingLabel = syncingLabelProp ?? defaultLabels.syncStatusSyncing
+  const successLabel = successLabelProp ?? defaultLabels.syncStatusSaved
+  const offlineLabel = offlineLabelProp ?? defaultLabels.syncStatusOffline
+  const retryLabel = retryLabelProp ?? defaultLabels.syncStatusRetry
+  const errorLabel = errorLabelProp ?? ((n: number) => formatKskLabel(defaultLabels.syncStatusError, { count: n }))
   if (state === "idle" && errorCount === 0) return null
 
   const base =

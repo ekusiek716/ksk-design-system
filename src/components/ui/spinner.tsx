@@ -1,13 +1,13 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
   /** スピナーのサイズ。デフォルト "md" */
   size?: "sm" | "md" | "lg"
   /**
    * スクリーンリーダー向けローディングラベル。
-   * i18n 対応: 英語では "Loading" を渡す。
-   * @default "読み込み中"
+   * 省略時は KskLabelsProvider の `spinnerLoading`（Provider 無しは "読み込み中"。locale="en" で "Loading"）。
    */
   label?: string
 }
@@ -20,7 +20,9 @@ interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
  * <Spinner size="md" />
  * ```
  */
-function Spinner({ className, size = "md", label = "読み込み中", ...props }: SpinnerProps) {
+function Spinner({ className, size = "md", label: labelProp, ...props }: SpinnerProps) {
+  const defaultLabels = useKskLabels()
+  const label = labelProp ?? defaultLabels.spinnerLoading
   // check-border-color-ignore-file: 色は下の cn() 内の border-[var(--Border-Medium-Emphasis)] /
   // border-t-[var(--Brand-Primary)] と必ず合成されるため、ここは幅のみでよい。
   const sizeClasses = {

@@ -534,7 +534,7 @@
     {
       "name": "KskLabelsProvider",
       "path": "src/components/ui/ksk-labels.tsx",
-      "description": "DS 部品の既定文言（スキップリンク・管理画面のメニュー・FormField の必須/任意・閉じるボタン・NavigationBar の戻る/閉じる/シェア・カレンダー見出し・StarRating の読み上げ名・KebabMenu のトリガー）と MonthCalendar / AgendaList の locale 既定をまとめて切り替える Provider（issue #723）。アプリの一番外側に 1 回置く。",
+      "description": "DS 部品の既定文言（スキップリンク・管理画面のメニュー・FormField の必須/任意・閉じるボタン・NavigationBar の戻る/閉じる/シェア・カレンダー見出し・StarRating の読み上げ名・KebabMenu のトリガー・Pagination / SimplePagination / Spinner / Breadcrumb / SectionNav / NumberInput / ImageGallery / MultiSelect / Combobox / DropdownFilter / SyncStatusBadge / CountdownTimer / CountdownHero / CoachMark / ShareButtons / CodeDisplay / ErrorState / Celebration / BottomSheetForm の既定文言）と MonthCalendar / AgendaList の locale 既定をまとめて切り替える Provider（issue #723）。アプリの一番外側に 1 回置く。",
       "subcomponents": [
         "useKskLabels",
         "useKskLocale",
@@ -634,7 +634,7 @@
       "path": "src/components/ui/pagination.tsx",
       "description": "ページネーション。リスト・テーブルのページ送りに使用。",
       "props": {
-        "navLabel": "string (既定 \"ページネーション\") — nav 要素の aria-label（issue #428、SimplePagination.navLabel と同名）",
+        "navLabel": "string (既定 \"ページネーション\"、KskLabelsProvider の paginationNav) — nav 要素の aria-label（issue #428、SimplePagination.navLabel と同名）",
         "PaginationLink.asChild": "boolean (既定 false) — as=\"a\" 経路で <a> の代わりに子（next/link 等）へ見た目・aria を渡す（Radix Slot）。disabled は href を外せない代わりに aria-disabled / tabIndex=-1 / pointer-events-none / クリック抑止。PaginationPrevious・PaginationNext も asChild を受け、子の children をラベルとしてアイコンと一緒に子の中へ入れ直す"
       },
       "subcomponents": [
@@ -907,9 +907,9 @@
       "accessibility": [],
       "rules": [],
       "props": {
-        "nextLabel": "string (既定 \"次へ →\") — 次へボタンの文言。矢印は文言に含まれる（issue #477）",
-        "skipLabel": "string (既定 \"スキップ\") — スキップボタンの文言（issue #477）",
-        "ariaLabel": "string — バルーンの aria-label。未指定時は content が string ならその文字列、それ以外は \"コーチマーク\"（issue #477）"
+        "nextLabel": "string (既定 \"次へ →\"、KskLabelsProvider の coachMarkNext) — 次へボタンの文言。矢印は文言に含まれる（issue #477）",
+        "skipLabel": "string (既定 \"スキップ\"、KskLabelsProvider の coachMarkSkip) — スキップボタンの文言（issue #477）",
+        "ariaLabel": "string — バルーンの aria-label。未指定時は content が string ならその文字列、それ以外は \"コーチマーク\"（KskLabelsProvider の coachMarkLabel。issue #477）"
       }
     },
     {
@@ -1084,7 +1084,7 @@
       ],
       "accessibility": [
         "role=\"status\"",
-        "aria-label=\"読み込み中\"",
+        "aria-label=\"読み込み中\"（label prop で変更。省略時は KskLabelsProvider の spinnerLoading）",
         "native (src/native/components/Spinner.tsx): label prop（既定 \"読み込み中\"）を持ち、accessibilityLabel / aria-label の両方に既定で渡す。呼び出し側の明示値が優先される"
       ],
       "rules": [
@@ -1272,7 +1272,7 @@
         "3 件以上選択する用途に。少数なら CheckboxGroup を優先"
       ],
       "props": {
-        "clearLabel": "string (既定 \"選択をクリア\") — クリアボタンの aria-label（issue #428）",
+        "clearLabel": "string (既定 \"選択をクリア\"、KskLabelsProvider の multiSelectClear) — クリアボタンの aria-label（issue #428）",
         "triggerLabel": "string — trigger のスクリーンリーダー向けラベル。未指定時は未選択なら placeholder、選択済みならチップの表示テキストが読み上げられる（issue #426。React Native 版は accessibilityLabel）"
       }
     },
@@ -1855,7 +1855,7 @@
         "effect は既定 \"fall\"（後方互換）。クラッカーが弾けた感じにしたい達成演出は effect=\"burst\" を使う（中央から全方位 360° に放射）"
       ],
       "props": {
-        "dismissLabel": "string (既定 \"閉じる\") — タップで閉じる不可視ボタンの aria-label（issue #428）"
+        "dismissLabel": "string (既定 \"閉じる\"、KskLabelsProvider の celebrationDismiss) — タップで閉じる不可視ボタンの aria-label（issue #428）"
       }
     },
     {
@@ -2214,7 +2214,7 @@
         "表示ラベル・アクセシブルネームの上書きは labels（例: { line: \"LINE で招待を送る\" }）"
       ],
       "props": {
-        "groupLabel": "string (既定 \"シェア\") — role=\"group\" 全体ラッパーの aria-label（issue #428）"
+        "groupLabel": "string (既定 \"シェア\"、KskLabelsProvider の share) — role=\"group\" 全体ラッパーの aria-label（issue #428）"
       }
     },
     {
@@ -2353,7 +2353,7 @@
         "フル機能は Pagination (ui/) を使う"
       ],
       "props": {
-        "navLabel": "string (既定 \"ページネーション\") — nav 要素の aria-label（issue #428）"
+        "navLabel": "string (既定 \"ページネーション\"、KskLabelsProvider の simplePaginationNav) — nav 要素の aria-label（issue #428）"
       }
     },
     {

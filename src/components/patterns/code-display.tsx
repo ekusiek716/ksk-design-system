@@ -2,6 +2,7 @@ import * as React from "react"
 import { Copy, TickCircle, CloseCircle } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
 import { Button } from "../ui/button"
+import { useKskLabels } from "../ui/ksk-labels"
 
 type CodeDisplaySize = "md" | "lg"
 type CodeDisplayTone = "neutral" | "accent"
@@ -20,11 +21,11 @@ interface CodeDisplayProps extends Omit<React.ComponentProps<"div">, "children" 
   copyable?: boolean
   /** コピー後に呼ぶ（成功・失敗の両方。計測・トースト用） */
   onCopy?: (result: CodeDisplayCopyResult) => void
-  /** コピーボタンの文言。@default "コピー" */
+  /** コピーボタンの文言。省略時は KskLabelsProvider の `codeDisplayCopy`（Provider 無しは "コピー"。locale="en" で "Copy"） */
   copyLabel?: string
-  /** コピー成功の文言（ボタン表示と読み上げ）。@default "コピーしました" */
+  /** コピー成功の文言（ボタン表示と読み上げ）。省略時は KskLabelsProvider の `codeDisplayCopied`（Provider 無しは "コピーしました"） */
   copiedLabel?: string
-  /** コピー失敗の文言。@default "コピーできませんでした" */
+  /** コピー失敗の文言。省略時は KskLabelsProvider の `codeDisplayCopyError`（Provider 無しは "コピーできませんでした"） */
   copyErrorLabel?: string
   /** 成功・失敗の表示を元に戻すまでの ms。@default 2000 */
   feedbackDuration?: number
@@ -52,13 +53,17 @@ function CodeDisplay({
   tone = "neutral",
   copyable = true,
   onCopy,
-  copyLabel = "コピー",
-  copiedLabel = "コピーしました",
-  copyErrorLabel = "コピーできませんでした",
+  copyLabel: copyLabelProp,
+  copiedLabel: copiedLabelProp,
+  copyErrorLabel: copyErrorLabelProp,
   feedbackDuration = 2000,
   className,
   ...props
 }: CodeDisplayProps) {
+  const defaultLabels = useKskLabels()
+  const copyLabel = copyLabelProp ?? defaultLabels.codeDisplayCopy
+  const copiedLabel = copiedLabelProp ?? defaultLabels.codeDisplayCopied
+  const copyErrorLabel = copyErrorLabelProp ?? defaultLabels.codeDisplayCopyError
   const [result, setResult] = React.useState<CodeDisplayCopyResult | null>(null)
   const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   React.useEffect(() => () => {

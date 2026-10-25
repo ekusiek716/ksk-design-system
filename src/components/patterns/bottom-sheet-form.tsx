@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useKskLabels } from "@/components/ui/ksk-labels"
 import {
   Sheet,
   SheetContent,
@@ -14,7 +15,9 @@ interface BottomSheetFormProps {
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
+  /** 保存ボタンの文言。省略時は KskLabelsProvider の `bottomSheetFormSubmit`（Provider 無しは "保存"。locale="en" で "Save"） */
   submitLabel?: string
+  /** キャンセルボタンの文言。省略時は KskLabelsProvider の `bottomSheetFormCancel`（Provider 無しは "キャンセル"。locale="en" で "Cancel"） */
   cancelLabel?: string
   onSubmit: () => void | Promise<void>
   loading?: boolean
@@ -28,13 +31,16 @@ function BottomSheetForm({
   onOpenChange,
   title,
   description,
-  submitLabel = "保存",
-  cancelLabel = "キャンセル",
+  submitLabel: submitLabelProp,
+  cancelLabel: cancelLabelProp,
   onSubmit,
   loading = false,
   children,
   className,
 }: BottomSheetFormProps) {
+  const defaultLabels = useKskLabels()
+  const submitLabel = submitLabelProp ?? defaultLabels.bottomSheetFormSubmit
+  const cancelLabel = cancelLabelProp ?? defaultLabels.bottomSheetFormCancel
   const [pending, setPending] = React.useState(false)
   const isLoading = loading || pending
 
@@ -87,7 +93,7 @@ function BottomSheetForm({
               className="flex-1"
               disabled={isLoading}
             >
-              {isLoading ? "保存中…" : submitLabel}
+              {isLoading ? defaultLabels.bottomSheetFormSaving : submitLabel}
             </Button>
           </div>
         </form>

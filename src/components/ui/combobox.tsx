@@ -2,6 +2,7 @@ import * as React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 import { Label } from "./label"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 export interface ComboboxOption {
   value: string
@@ -15,6 +16,7 @@ export interface ComboboxProps {
   onChange?: (value: string) => void
   placeholder?: string
   searchPlaceholder?: string
+  /** 候補が 0 件のときの表示。省略時は KskLabelsProvider の `comboboxEmpty`（Provider 無しは "該当なし"。locale="en" で "No results"） */
   emptyLabel?: string
   disabled?: boolean
   className?: string
@@ -34,7 +36,7 @@ function Combobox({
   onChange,
   placeholder = "選択してください",
   searchPlaceholder = "検索...",
-  emptyLabel = "該当なし",
+  emptyLabel: emptyLabelProp,
   disabled = false,
   className,
   triggerLabel,
@@ -42,6 +44,8 @@ function Combobox({
   "aria-invalid": ariaInvalid,
   "aria-describedby": ariaDescribedBy,
 }: ComboboxProps) {
+  const defaultLabels = useKskLabels()
+  const emptyLabel = emptyLabelProp ?? defaultLabels.comboboxEmpty
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)

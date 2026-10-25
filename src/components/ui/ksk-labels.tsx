@@ -44,6 +44,92 @@ interface KskLabels {
   ratingStar?: string
   /** KebabMenu のトリガー（縦三点ボタン）の読み上げ名（issue #752） */
   menu?: string
+  /** Pagination の nav の読み上げ名（aria-label） */
+  paginationNav?: string
+  /** PaginationPrevious の読み上げ名とボタン文言 */
+  paginationPrevious?: string
+  /** PaginationNext の読み上げ名とボタン文言 */
+  paginationNext?: string
+  /** PaginationEllipsis（省略記号）の読み上げ名 */
+  paginationEllipsis?: string
+  /** SimplePagination の nav の読み上げ名（aria-label） */
+  simplePaginationNav?: string
+  /** SimplePagination の「前へ」ボタンの文言と読み上げ名 */
+  simplePaginationPrevious?: string
+  /** SimplePagination の「次へ」ボタンの文言と読み上げ名 */
+  simplePaginationNext?: string
+  /** Spinner の読み上げ名（role="status"） */
+  spinnerLoading?: string
+  /** Breadcrumb の nav の読み上げ名（aria-label） */
+  breadcrumbNav?: string
+  /** Combobox の候補が 0 件のときの表示 */
+  comboboxEmpty?: string
+  /** MultiSelect の候補が 0 件のときの表示 */
+  multiSelectEmpty?: string
+  /** MultiSelect の選択クリアボタンの読み上げ名 */
+  multiSelectClear?: string
+  /** NumberInput の減らすボタンの読み上げ名 */
+  numberInputDecrement?: string
+  /** NumberInput の増やすボタンの読み上げ名 */
+  numberInputIncrement?: string
+  /** ImageGallery のメイン画像・サムネイル・ドットの読み上げ名と alt の既定。`{index}` を 1 始まりの番号に置き換える */
+  imageGalleryImage?: string
+  /** ImageGallery の前の画像ボタンの読み上げ名 */
+  imageGalleryPrev?: string
+  /** ImageGallery の次の画像ボタンの読み上げ名 */
+  imageGalleryNext?: string
+  /** DropdownFilter の「すべて」（絞り込み解除）の文言 */
+  dropdownFilterAll?: string
+  /** SectionNav の nav の読み上げ名（aria-label） */
+  sectionNav?: string
+  /** SyncStatusBadge の同期中の文言 */
+  syncStatusSyncing?: string
+  /** SyncStatusBadge のエラー件数の文言。`{count}` を件数に置き換える */
+  syncStatusError?: string
+  /** SyncStatusBadge の保存済みの文言 */
+  syncStatusSaved?: string
+  /** SyncStatusBadge のオフラインの文言 */
+  syncStatusOffline?: string
+  /** SyncStatusBadge の再試行ボタンの文言 */
+  syncStatusRetry?: string
+  /** CountdownTimer / CountdownHero の「残り」の見出し */
+  countdownRemaining?: string
+  /** CountdownTimer の終了後の文言 */
+  countdownEnded?: string
+  /** CountdownTimer / CountdownHero の当日の文言 */
+  countdownToday?: string
+  /** CountdownHero の期日を過ぎたあとの文言 */
+  countdownPast?: string
+  /** CoachMark の次へボタンの文言 */
+  coachMarkNext?: string
+  /** CoachMark のバルーンの読み上げ名（content が string でないときの既定） */
+  coachMarkLabel?: string
+  /** CoachMark のスキップボタンの文言 */
+  coachMarkSkip?: string
+  /** ShareButtons の email ボタンの文言 */
+  shareEmail?: string
+  /** ShareButtons の copy（リンクをコピー）ボタンの文言 */
+  shareLink?: string
+  /** ShareButtons のコピー成功の文言 */
+  shareCopied?: string
+  /** ShareButtons のコピー失敗の文言 */
+  shareCopyError?: string
+  /** BottomSheetForm の保存（送信）ボタンの文言 */
+  bottomSheetFormSubmit?: string
+  /** BottomSheetForm の保存中（送信中）の文言 */
+  bottomSheetFormSaving?: string
+  /** BottomSheetForm のキャンセルボタンの文言 */
+  bottomSheetFormCancel?: string
+  /** CodeDisplay のコピーボタンの文言 */
+  codeDisplayCopy?: string
+  /** CodeDisplay のコピー成功の文言 */
+  codeDisplayCopied?: string
+  /** CodeDisplay のコピー失敗の文言 */
+  codeDisplayCopyError?: string
+  /** ErrorState の再試行ボタンの文言 */
+  errorStateRetry?: string
+  /** Celebration の閉じるボタンの文言と読み上げ名 */
+  celebrationDismiss?: string
 }
 
 /** 全キーを解決済みの文言（部品の中・既定値で使う）。 */
@@ -67,6 +153,49 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, ResolvedKskLabels> = {
     ratingValue: "{value}/{max}点",
     ratingStar: "{value}点",
     menu: "メニュー",
+    paginationNav: "ページネーション",
+    paginationPrevious: "前へ",
+    paginationNext: "次へ",
+    paginationEllipsis: "その他のページ",
+    simplePaginationNav: "ページネーション",
+    simplePaginationPrevious: "前へ",
+    simplePaginationNext: "次へ",
+    spinnerLoading: "読み込み中",
+    breadcrumbNav: "パンくずリスト",
+    comboboxEmpty: "該当なし",
+    multiSelectEmpty: "該当なし",
+    multiSelectClear: "選択をクリア",
+    numberInputDecrement: "減らす",
+    numberInputIncrement: "増やす",
+    imageGalleryImage: "画像 {index}",
+    imageGalleryPrev: "前の画像",
+    imageGalleryNext: "次の画像",
+    dropdownFilterAll: "すべて",
+    sectionNav: "ページ内セクション",
+    syncStatusSyncing: "同期中",
+    syncStatusError: "{count}件のエラー",
+    syncStatusSaved: "保存済み",
+    syncStatusOffline: "オフライン",
+    syncStatusRetry: "再試行",
+    countdownRemaining: "残り",
+    countdownEnded: "受付終了",
+    countdownToday: "本日",
+    countdownPast: "経過",
+    coachMarkNext: "次へ →",
+    coachMarkSkip: "スキップ",
+    coachMarkLabel: "コーチマーク",
+    shareEmail: "メール",
+    shareLink: "リンク",
+    shareCopied: "コピーしました",
+    shareCopyError: "コピーできませんでした",
+    bottomSheetFormSubmit: "保存",
+    bottomSheetFormSaving: "保存中…",
+    bottomSheetFormCancel: "キャンセル",
+    codeDisplayCopy: "コピー",
+    codeDisplayCopied: "コピーしました",
+    codeDisplayCopyError: "コピーできませんでした",
+    errorStateRetry: "再試行",
+    celebrationDismiss: "閉じる",
   },
   en: {
     skipLink: "Skip to content",
@@ -85,6 +214,49 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, ResolvedKskLabels> = {
     ratingValue: "Rated {value} of {max}",
     ratingStar: "{value} of {max}",
     menu: "Menu",
+    paginationNav: "Pagination",
+    paginationPrevious: "Previous",
+    paginationNext: "Next",
+    paginationEllipsis: "More pages",
+    simplePaginationNav: "Pagination",
+    simplePaginationPrevious: "Previous",
+    simplePaginationNext: "Next",
+    spinnerLoading: "Loading",
+    breadcrumbNav: "Breadcrumb",
+    comboboxEmpty: "No results",
+    multiSelectEmpty: "No results",
+    multiSelectClear: "Clear selection",
+    numberInputDecrement: "Decrease",
+    numberInputIncrement: "Increase",
+    imageGalleryImage: "Image {index}",
+    imageGalleryPrev: "Previous image",
+    imageGalleryNext: "Next image",
+    dropdownFilterAll: "All",
+    sectionNav: "On this page",
+    syncStatusSyncing: "Syncing",
+    syncStatusError: "{count} errors",
+    syncStatusSaved: "Saved",
+    syncStatusOffline: "Offline",
+    syncStatusRetry: "Retry",
+    countdownRemaining: "Time left",
+    countdownEnded: "Closed",
+    countdownToday: "Today",
+    countdownPast: "Elapsed",
+    coachMarkNext: "Next →",
+    coachMarkSkip: "Skip",
+    coachMarkLabel: "Coach mark",
+    shareEmail: "Email",
+    shareLink: "Link",
+    shareCopied: "Copied",
+    shareCopyError: "Could not copy",
+    bottomSheetFormSubmit: "Save",
+    bottomSheetFormSaving: "Saving…",
+    bottomSheetFormCancel: "Cancel",
+    codeDisplayCopy: "Copy",
+    codeDisplayCopied: "Copied",
+    codeDisplayCopyError: "Could not copy",
+    errorStateRetry: "Retry",
+    celebrationDismiss: "Close",
   },
 }
 
