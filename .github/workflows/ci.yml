@@ -38,6 +38,12 @@ jobs:
       - name: build:lib (dist 生成)
         run: npm run build:lib
 
+      # 配布物サイズの予算（contracts/bundle-size-budget.json）。エントリ別の gzip サイズと、
+      # Button だけ import したときの tree-shaking 後サイズを測る。dist を使うので build:lib の直後。
+      # CI では --update を使わない（予算を自動更新すると超過を検出できなくなる）。
+      - name: Bundle size budget (配布物サイズ・tree-shaking 予算)
+        run: npm run lint:bundle-size
+
       - name: tsc / lint-scratch / deps / drift / COMPONENT_LOOKUP --check
         run: npm run check
 
