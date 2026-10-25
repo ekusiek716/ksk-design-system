@@ -477,6 +477,25 @@ DS を import して委譲するだけの薄いラッパー（段階移行の型
 <!-- docs-drift-ignore: CandidateOverflowMenu -->
 ただし、ファイルが `ksk-design-system`（`/native` 等のサブパス含む）から named import し、その import した識別子を JSX またはコールとして実際に使っている場合は、名前が DS と異なっていても「DS 委譲ラッパー」とみなし疑い検出の対象から除外します（例: `CandidateOverflowMenu` が `DropdownMenu` を import して `<DropdownMenu>` として使うケース）。DS を import しているだけで実際には使っていない場合はこの除外の対象外です。
 
+### Consumer ignore report
+
+consumer アプリが DS の lint を外すときは、理由付きのコメントを残します（`ksk-ds-lint-ignore` / `ksk-ds-lint-ignore-file` / `ksk-ds-allow-custom-ui` / `ksk-ds-local-fallback`）。複数のアプリが同じ理由で DS を迂回していれば、それは DS に足りない部品・API の候補です。`report-ignores` はその理由コメントを複数リポ横断で集計します（読み取り専用）。
+
+```bash
+# 引数の各ディレクトリを 1 リポ（プロダクト）として集計
+npx ksk-ds report-ignores ../app-a ../app-b ../app-c
+npx ksk-ds report-ignores ../app-a ../app-b --min-repos 3 --rule P008
+npx ksk-ds report-ignores ../app-a ../app-b --json
+```
+
+- ルール ID 別に件数・リポ数・代表的な理由（小文字化・空白圧縮・句読点除去で重複をまとめる）・出現ファイルを出し、末尾に「`--min-repos`（既定 2）以上のリポで同じルールが外されている」DS issue 候補を並べます。`ksk-ds-local-fallback` は理由中の `issue #N` も抽出します。
+- `--rule` は `P008` のようなルール ID のほか、`ksk-ds-allow-custom-ui` / `ksk-ds-local-fallback` を指定できます。`--json` は `{ repos, byRule, candidates, invalid }` を出力します。
+- 対象拡張子は `.ts` `.tsx` `.js` `.jsx` `.mjs` `.css`。`node_modules` / `dist` / `build` / `.git` / `.expo` / `storybook-static` 等は除外し、文字列リテラル中のマーカーは数えません。
+- 理由が 5 文字未満（lint が ignore として無効扱いにするもの）は「理由不足」として別に数えます。
+- 終了コードは常に 0（集計ツールのため）。引数不正のみ 2 です。
+
+候補になったルールは、consumer 側に別の台帳を作らず、DS 側に issue を登録してください（[DS依頼の登録](#ds公開通知)を参照）。
+
 ### Media overlay utilities
 
 動画・写真の上に文字や操作を置く場合は、`--Text-on-Media` と `.text-on-media` / `.text-on-media-secondary`、上下の `.media-scrim-top` / `.media-scrim-bottom` を使います。TikTok / Reels 型の操作群は `MediaActionCluster` が glass ボタン、ラベル、safe-area anchor、idle auto-hide をまとめて扱います。
