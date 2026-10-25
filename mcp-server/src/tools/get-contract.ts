@@ -61,6 +61,7 @@ export const CONTRACT_DEFINITIONS: readonly ContractDefinition[] = [
 /** contracts/ にあるが配信しないファイルと、その理由（登録漏れ検査の許可リスト）。 */
 export const UNSERVED_CONTRACT_FILES: Readonly<Record<string, string>> = {
   "contracts/consumer-requests.json": "DS 運用の依頼台帳で、AI の実装判断には使わない",
+  "contracts/bundle-size-budget.json": "配布物サイズ予算の CI ゲート用データで、AI の実装判断には使わない",
 };
 
 /** `design` / `DESIGN.md` / `rules.json` のような表記ゆれを定義に寄せる。 */

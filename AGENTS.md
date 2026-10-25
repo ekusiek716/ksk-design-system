@@ -323,6 +323,9 @@ npm run lint:deprecations
 # 未定義 CSS 変数の参照検査（変数名のタイプミス検出。実行時注入の変数は scripts/check-css-vars.mjs の ALLOWLIST）
 npm run lint:css-vars
 
+# 配布物サイズ予算の検査（先に npm run build:lib が必要。エントリ別 gzip と tree-shaking 後サイズを contracts/bundle-size-budget.json と比較。npm run check には入っていない・CI は build:lib 直後に実行。意図したサイズ増のみ `node scripts/check-bundle-size.mjs --update` で予算更新）
+npm run lint:bundle-size
+
 # `Closes #N` 誤リンク監査（gh 必須。npm run check には入っていない）
 npm run audit:issue-links -- --recent 60
 

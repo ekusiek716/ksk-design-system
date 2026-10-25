@@ -41,6 +41,13 @@ jobs:
       - name: tsc / lint-scratch / deps / drift / COMPONENT_LOOKUP --check
         run: npm run check
 
+      # 配布物サイズの予算（contracts/bundle-size-budget.json）。エントリ別の gzip サイズと、
+      # Button だけ import したときの tree-shaking 後サイズを測る。dist を使うので build:lib の後。
+      # 予算超過でも上の check の結果が同じ run で見えるよう、check の後ろに置く。
+      # CI では --update を使わない（予算を自動更新すると超過を検出できなくなる）。
+      - name: Bundle size budget (配布物サイズ・tree-shaking 予算)
+        run: npm run lint:bundle-size
+
       # mcp-server のテストは MCP SDK のクライアントで resources を読むため、
       # 単体テストより前に mcp-server の依存を入れておく
       - name: mcp-server 依存のインストール

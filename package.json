@@ -192,6 +192,7 @@
     "lint:screen-contracts": "node scripts/check-screen-contracts.mjs",
     "lint:deprecations": "node scripts/check-deprecations.mjs",
     "lint:css-vars": "node scripts/check-css-vars.mjs",
+    "lint:bundle-size": "node scripts/check-bundle-size.mjs",
     "audit:issue-links": "node scripts/check-issue-close-links.mjs",
     "lint:migration-doc": "node scripts/generate-migration-doc.mjs --check",
     "generate:migration-doc": "node scripts/generate-migration-doc.mjs",
