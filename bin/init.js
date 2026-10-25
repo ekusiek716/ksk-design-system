@@ -18,6 +18,7 @@
 //   npx ksk-design-system demo [dir]    # DS リポを clone + setup（お試し用）
 //   npx ksk-ds lint src                 # contracts/rules.json に基づき consumer UI を検査
 //   npx ksk-ds check-duplicates src     # DS と同名のローカル実装を検査
+//   npx ksk-ds report-ignores <dir...>  # lint の理由付き ignore を複数リポ横断で集計
 //   npx ksk-ds codemod <name> ./src     # scripts/codemod/<name>.mjs を実行
 
 import { copyFileSync, existsSync, readdirSync } from "node:fs"
@@ -71,6 +72,7 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
   npx ksk-ds check-migration ./src --format=json  CI 向け JSON 出力
   npx ksk-ds check-duplicates [DIR]    DS と同名のローカル実装を検査
   npx ksk-ds check-duplicates --strict 検出時に exit 1（CI 向け）
+  npx ksk-ds report-ignores <dir...>   lint の理由付き ignore を複数リポ横断で集計（--json / --min-repos N / --rule ID）
   npx ksk-ds codemod                   利用できる codemod を一覧
   npx ksk-ds codemod <name> [DIR] --dry 破壊変更の自動移行（事前確認）
   npx ksk-ds codemod <name> [DIR]      破壊変更の自動移行（書き込み）
@@ -108,6 +110,11 @@ if (cmd === "check-migration") {
   }
   const status = mod.runCheckMigrationCli(args.slice(1), { cwd: process.cwd(), pkgRoot })
   await exitWith(status)
+}
+
+if (cmd === "report-ignores") {
+  const { runReportIgnoresCli } = await import("./report-ignores.js")
+  await exitWith(runReportIgnoresCli(args.slice(1), { cwd: process.cwd() }))
 }
 
 if (cmd === "check-duplicates") {
