@@ -12,10 +12,10 @@
       "specifier": "ksk-design-system",
       "file": "dist/index.js",
       "description": "Web 全コンポーネント。dist/index.js + 静的 import で辿れるチャンク（server-variants / prompt-coordinator）の合計。",
-      "baselineBytes": 230712,
+      "baselineBytes": 230692,
       "budgetBytes": 253800,
-      "baselineRawBytes": 951254,
-      "baselineBrotliBytes": 180485
+      "baselineRawBytes": 950723,
+      "baselineBrotliBytes": 180511
     },
     {
       "id": "class-names",

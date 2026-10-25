@@ -9,6 +9,7 @@ import {
   computeBudget,
   exportedJsEntries,
   judge,
+  moduleSideEffectsFor,
   validateBudget,
 } from "../scripts/lib/bundle-size.mjs"
 
@@ -188,6 +189,32 @@ describe("collectStaticGraph", () => {
     const dir = mkdtempSync(join(tmpdir(), "bundle-size-"))
     writeFileSync(join(dir, "entry.js"), 'import "./missing.js"\n')
     await expect(collectStaticGraph(join(dir, "entry.js"))).rejects.toThrow(/missing\.js/)
+  })
+})
+
+describe("moduleSideEffectsFor（package.json の sideEffects を測定に反映）", () => {
+  it('["*.css"] なら dist の JS は副作用なし、CSS は副作用あり', () => {
+    expect(moduleSideEffectsFor(["*.css"], "dist/index.js")).toBe(false)
+    expect(moduleSideEffectsFor(["*.css"], "dist/native/ui.js")).toBe(false)
+    expect(moduleSideEffectsFor(["*.css"], "src/styles/x.css")).toBe(true)
+  })
+
+  it("false は常に副作用なし、true・未指定は常に副作用あり（退行時に測定へ反映される）", () => {
+    expect(moduleSideEffectsFor(false, "dist/index.js")).toBe(false)
+    expect(moduleSideEffectsFor(true, "dist/index.js")).toBe(true)
+    expect(moduleSideEffectsFor(undefined, "dist/index.js")).toBe(true)
+  })
+
+  it("パス付きパターンも扱う", () => {
+    expect(moduleSideEffectsFor(["./dist/polyfill.js"], "dist/polyfill.js")).toBe(true)
+    expect(moduleSideEffectsFor(["./dist/polyfill.js"], "dist/index.js")).toBe(false)
+    expect(moduleSideEffectsFor(["dist/*.js"], "dist/index.js")).toBe(true)
+    expect(moduleSideEffectsFor(["dist/*.js"], "dist/native/ui.js")).toBe(false)
+    expect(moduleSideEffectsFor(["dist/**/*.js"], "dist/native/ui.js")).toBe(true)
+  })
+
+  it("実際の package.json は dist の JS を副作用なしとして扱う", () => {
+    for (const { file } of exportedJsEntries(realPkg)) expect(moduleSideEffectsFor(realPkg.sideEffects, file), file).toBe(false)
   })
 })
 

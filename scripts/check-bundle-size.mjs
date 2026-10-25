@@ -14,8 +14,10 @@
 //     consumer が `import { Button } from "ksk-design-system"` だけしたときに、
 //     バンドラが残すコードの大きさ。vite（devDependencies の vite = rolldown）で
 //     dist を実際にバンドルし、minify した出力を gzip / brotli で測る。
-//     sideEffects 設定の退行や、モジュールのトップレベルの副作用（createContext の
-//     呼び出し・Map 生成など、消せない文の混入）で tree-shaking が効かなくなると、
+//     package.json の sideEffects は resolveId の moduleSideEffects に反映して測る
+//     （dist の JS は副作用なし扱い。dist はほぼ単一ファイルなので、sideEffects を true に
+//     戻しても実測差は数十バイトで、この項目単独の検出感度は低い）。dist のトップレベルに消せない文（createContext の
+//     呼び出し・cva() 呼び出しなど）や同梱依存が増えて tree-shaking が効かなくなると、
 //     ここが膨らんで落ちる。
 //
 //     external の方針: bare specifier（react / react-dom / radix-ui / iconsax-reactjs /
@@ -36,7 +38,7 @@
 // contracts/bundle-size-budget.json の meta を参照。
 // =============================================================
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { isAbsolute, join } from "node:path"
+import { isAbsolute, join, relative } from "node:path"
 import { fileURLToPath } from "node:url"
 import {
   BUDGET_PATH,
@@ -48,6 +50,7 @@ import {
   judge,
   loadBudget,
   measureFiles,
+  moduleSideEffectsFor,
   validateBudget,
 } from "./lib/bundle-size.mjs"
 
@@ -55,8 +58,12 @@ const root = join(fileURLToPath(new URL("..", import.meta.url)))
 const update = process.argv.includes("--update")
 const dumpIndex = process.argv.indexOf("--dump")
 const dumpDir = dumpIndex >= 0 ? process.argv[dumpIndex + 1] : undefined
-if (dumpIndex >= 0 && !dumpDir) {
-  console.error("✗ --dump には出力先ディレクトリを指定してください")
+if (dumpIndex >= 0 && (!dumpDir || dumpDir.startsWith("-"))) {
+  console.error("✗ --dump には出力先ディレクトリを指定してください（次の値が無い、または - で始まっています）")
+  process.exit(1)
+}
+if (update && process.env.CI) {
+  console.error("✗ --update は CI では使えません（予算を自動更新すると超過を検出できなくなります）。ローカルで実行してください")
   process.exit(1)
 }
 const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
@@ -105,7 +112,11 @@ async function bundleCase(caseItem) {
         enforce: "pre",
         resolveId(id) {
           if (id === virtualId) return id
-          return specifierToFile.get(id) // ksk-design-system[/subpath] → exports が指す dist ファイル
+          // ksk-design-system[/subpath] → exports が指す dist ファイル。package.json の sideEffects
+          // （["*.css"] など）を moduleSideEffects に反映し、実際の consumer と同じ扱いで測る。
+          const file = specifierToFile.get(id)
+          if (!file) return undefined
+          return { id: file, moduleSideEffects: moduleSideEffectsFor(pkg.sideEffects, relative(root, file)) }
         },
         load(id) {
           return id === virtualId ? buildCaseEntrySource(caseItem.imports) : undefined
@@ -189,7 +200,7 @@ if (over.length) {
     console.error(`  - ${row.section}:${row.item.id} gzip ${row.measured.gzip} B > 予算 ${row.item.budgetBytes} B（+${row.verdict.diff} B）  ${row.item.description}`)
   }
   console.error("  意図したサイズ増なら、`npm run build:lib && node scripts/check-bundle-size.mjs --update` で予算を更新し、PR に理由を書いてください（CI では --update を使わない）。")
-  console.error("  意図しない増加なら、tree-shaking ケースの超過はトップレベルの副作用や sideEffects 設定の退行を疑ってください。")
+  console.error("  意図しない増加なら、tree-shaking ケースの超過は dist のトップレベルの副作用（cva() / createContext 等の消せない文）や同梱依存の増加を疑ってください（--dump DIR で残ったコードを確認できます）。")
   process.exit(1)
 }
 console.log(`\n✓ 配布物サイズは予算内です（entries ${budget.entries.length} / treeShaking ${budget.treeShaking.length}）`)

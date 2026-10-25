@@ -202,3 +202,26 @@ export function buildCaseEntrySource(imports) {
   lines.push(`console.log(${used.join(", ")})`)
   return lines.join("\n")
 }
+
+/**
+ * package.json の `sideEffects` を、あるファイル（パッケージ root からの相対パス）に当てはめた結果。
+ * バンドラの規約どおり、false=副作用なし / true・未指定=あり / 配列=一致するファイルだけ副作用あり。
+ * パターンは `*.css` のような「スラッシュなし＝ファイル名に一致」と、`./dist/*.js` のような
+ * 「パス付き」を扱う（`*` は `/` を除く任意文字列、`**` は `/` を含む任意文字列）。
+ */
+export function moduleSideEffectsFor(sideEffects, relativeFile) {
+  if (sideEffects === false) return false
+  if (!Array.isArray(sideEffects)) return true
+  const file = relativeFile.replace(/^\.\//, "")
+  const base = file.split("/").pop()
+  return sideEffects.some((raw) => {
+    const pattern = String(raw).replace(/^\.\//, "")
+    const target = pattern.includes("/") ? file : base
+    const source = pattern
+      .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+      .replace(/\*\*/g, "\0")
+      .replace(/\*/g, "[^/]*")
+      .replace(/\0/g, ".*")
+    return new RegExp(`^${source}$`).test(target)
+  })
+}
