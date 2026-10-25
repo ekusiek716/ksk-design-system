@@ -7,6 +7,14 @@ import {
   loadProductThemeContract,
 } from "./product-theme-override.js"
 import { inspectUnlayeredGlobalOverrides } from "./unlayered-global-override.js"
+import {
+  DEFAULT_IGNORES,
+  DEFAULT_IGNORE_PATHS,
+  MIN_ESCAPE_REASON_LENGTH,
+  blankChar,
+  isMeaningfulReason,
+  maskCodeStrings,
+} from "./ignore-comment-utils.js"
 
 // card-child-spacing.js / overlay-footer-padding.js は `import ts from "typescript"` している
 // （P046 / P051 専用エンジン）。typescript は 24MB 前後あり、AST が要るのはこの2ルールだけなので、
@@ -54,44 +62,15 @@ const DEFAULT_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx"])
  * engine: "product-theme-override" を持つルールだけをここに流す（issue #364）。
  */
 const CSS_EXTENSIONS = new Set([".css"])
-// ビルド生成物。ここを走査すると、バンドルされた DS 自身の CSS を
-// 「consumer が DS 変数を上書きしている」と誤認して P049 が大量に出る（#378）。
-// Next.js の `output: "export"` は out/、Nuxt は .output/、Vercel/Turbo は
-// それぞれ .vercel/ .turbo/ を既定の出力先にする。
-const DEFAULT_IGNORES = [
-  ".git",
-  ".next",
-  ".nuxt",
-  ".output",
-  ".svelte-kit",
-  ".turbo",
-  ".vercel",
-  "build",
-  "coverage",
-  "dist",
-  ".claude",
-  "node_modules",
-  "out",
-  "storybook-static",
-]
-
-// パス単位で除外するもの（セグメント名だけでは絞れないケース）。
-// Capacitor は web のビルド成果物をネイティブプロジェクト配下へコピーするので、
-// そこも DS 自身の CSS を含む（#378）。`public` をセグメントで除外すると
-// Next.js の public/ まで巻き込むため、パス形で限定する。
-const DEFAULT_IGNORE_PATHS = [
-  "ios/App/App/public",
-  "android/app/src/main/assets/public",
-]
+// 走査除外ディレクトリ（DEFAULT_IGNORES / DEFAULT_IGNORE_PATHS）は report-ignores と
+// 共有するため ignore-comment-utils.js へ移した（挙動不変）。
 
 /** appliesTo に書けるプラットフォーム識別子（後方互換のため引き続き解釈する） */
 export const PLATFORMS = ["web", "native"]
 
-/**
- * escape コメントの理由に要求する最低文字数（issue #405）。
- * 「x」「-」のような空虚な 1 文字で全ルールを恒久無効化できてしまうのを防ぐ。
- */
-export const MIN_ESCAPE_REASON_LENGTH = 5
+// escape の理由の最低文字数・有意判定・文字列マスクは report-ignores と共有するため
+// ignore-comment-utils.js へ切り出した（挙動不変）。
+export { MIN_ESCAPE_REASON_LENGTH }
 
 /**
  * 自動生成物の先頭ヘッダに現れるマーカー（issue #408）。
@@ -889,12 +868,6 @@ function toFinding(rule, file, line, platform = "web") {
   }
 }
 
-/** escape の理由として実質的な内容があるか（issue #405） */
-function isMeaningfulReason(reason) {
-  const trimmed = (reason ?? "").trim().replace(/[-*/\s]+$/, "").trim()
-  return trimmed.length >= MIN_ESCAPE_REASON_LENGTH
-}
-
 /**
  * ファイル全体・全ルールの escape（`ksk-ds-allow-custom-ui: 理由`）。
  *
@@ -984,68 +957,6 @@ function collectRuleIgnores(source, file) {
   }
 }
 
-/**
- * 文字列リテラルの**中身**だけを空白へ潰し、コメントはそのまま残す（issue #405）。
- * 文字数・行番号は元の source と完全に一致する。maskComments とはちょうど逆で、
- * 「コメントに書く前提のマーカー」を安全に探すために使う。CSS にもそのまま使える。
- */
-function maskCodeStrings(source) {
-  let result = ""
-  const n = source.length
-  let i = 0
-
-  while (i < n) {
-    const ch = source[i]
-
-    if (ch === "/" && source[i + 1] === "/") {
-      while (i < n && source[i] !== "\n" && source[i] !== "\r") {
-        result += source[i]
-        i += 1
-      }
-      continue
-    }
-
-    if (ch === "/" && source[i + 1] === "*") {
-      result += "/*"
-      i += 2
-      while (i < n && !(source[i] === "*" && source[i + 1] === "/")) {
-        result += source[i]
-        i += 1
-      }
-      if (i < n) {
-        result += "*/"
-        i += 2
-      }
-      continue
-    }
-
-    if (ch === "'" || ch === '"' || ch === "`") {
-      result += ch
-      i += 1
-      while (i < n) {
-        if (source[i] === "\\" && i + 1 < n) {
-          result += blankChar(source[i]) + blankChar(source[i + 1])
-          i += 2
-          continue
-        }
-        if (source[i] === ch) {
-          result += ch
-          i += 1
-          break
-        }
-        result += blankChar(source[i])
-        i += 1
-      }
-      continue
-    }
-
-    result += ch
-    i += 1
-  }
-
-  return result
-}
-
 function lineForIndex(source, index) {
   return source.slice(0, index).split(/\r?\n/).length
 }
@@ -1124,11 +1035,6 @@ function maskComments(source) {
   }
 
   return result
-}
-
-/** 文字数と行番号を保ったまま 1 文字を潰す（改行だけは残す） */
-function blankChar(ch) {
-  return ch === "\n" || ch === "\r" ? ch : " "
 }
 
 const ALL_STRING_DELIMITERS = new Set(["'", '"', "`"])
