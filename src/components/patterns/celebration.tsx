@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../ui/ksk-labels"
 
 type CelebrationTrigger = "confetti" | "emoji" | "both" | "none"
 type CelebrationPlacement = "overlay" | "inline"
@@ -54,7 +55,7 @@ interface CelebrationProps extends React.ComponentProps<"div"> {
   autoDismissMs?: number
   onTapDismiss?: () => void
   onDone?: () => void
-  /** タップで閉じる不可視ボタンの aria-label。@default "閉じる" */
+  /** タップで閉じる不可視ボタンの aria-label。省略時は KskLabelsProvider の `celebrationDismiss`（Provider 無しは "閉じる"。locale="en" で "Close"） */
   dismissLabel?: string
 }
 
@@ -119,11 +120,13 @@ function Celebration({
   autoDismissMs,
   onTapDismiss,
   onDone,
-  dismissLabel = "閉じる",
+  dismissLabel: dismissLabelProp,
   className,
   style,
   ...props
 }: CelebrationProps) {
+  const defaultLabels = useKskLabels()
+  const dismissLabel = dismissLabelProp ?? defaultLabels.celebrationDismiss
   const reducedMotion = usePrefersReducedMotion()
   const resolvedDurationMs = autoDismissMs ?? durationMs
   const isBurst = effect === "burst"

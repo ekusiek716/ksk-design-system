@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../ui/ksk-labels"
 
 type ErrorStateKind = "error" | "notFound"
 
@@ -78,6 +79,7 @@ interface ErrorStateProps extends React.ComponentProps<"div"> {
   description?: string
   action?: React.ReactNode
   onRetry?: () => void
+  /** 再試行ボタンの文言。省略時は KskLabelsProvider の `errorStateRetry`（Provider 無しは "再試行"。locale="en" で "Retry"） */
   retryLabel?: string
 }
 
@@ -89,9 +91,11 @@ function ErrorState({
   description,
   action,
   onRetry,
-  retryLabel = "再試行",
+  retryLabel: retryLabelProp,
   ...props
 }: ErrorStateProps) {
+  const defaultLabels = useKskLabels()
+  const retryLabel = retryLabelProp ?? defaultLabels.errorStateRetry
   const notFound = kind === "notFound"
   const resolvedIcon =
     icon === undefined && notFound ? <NotFoundIllustration /> : icon

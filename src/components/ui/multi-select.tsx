@@ -2,6 +2,7 @@ import * as React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 import { ScrollArea } from "./scroll-area"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 export interface MultiSelectOption {
   value: string
@@ -15,6 +16,7 @@ export interface MultiSelectProps {
   onChange?: (values: string[]) => void
   placeholder?: string
   searchPlaceholder?: string
+  /** 候補が 0 件のときの表示。省略時は KskLabelsProvider の `multiSelectEmpty`（Provider 無しは "該当なし"。locale="en" で "No results"） */
   emptyLabel?: string
   disabled?: boolean
   className?: string
@@ -22,7 +24,7 @@ export interface MultiSelectProps {
   maxDisplay?: number
   /** 選択済みをクリアするボタンを表示 @default true */
   clearable?: boolean
-  /** クリアボタンの aria-label。@default "選択をクリア" */
+  /** クリアボタンの aria-label。省略時は KskLabelsProvider の `multiSelectClear`（Provider 無しは "選択をクリア"。locale="en" で "Clear selection"） */
   clearLabel?: string
   /**
    * trigger のスクリーンリーダー向けラベル（issue #426）。
@@ -43,17 +45,20 @@ function MultiSelect({
   onChange,
   placeholder = "選択してください",
   searchPlaceholder = "検索...",
-  emptyLabel = "該当なし",
+  emptyLabel: emptyLabelProp,
   disabled = false,
   className,
   maxDisplay = 3,
   clearable = true,
-  clearLabel = "選択をクリア",
+  clearLabel: clearLabelProp,
   triggerLabel,
   id,
   "aria-invalid": ariaInvalid,
   "aria-describedby": ariaDescribedBy,
 }: MultiSelectProps) {
+  const defaultLabels = useKskLabels()
+  const emptyLabel = emptyLabelProp ?? defaultLabels.multiSelectEmpty
+  const clearLabel = clearLabelProp ?? defaultLabels.multiSelectClear
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)

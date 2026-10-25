@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 interface SectionNavItem {
   /** activeKey と照合する安定キー。 */
@@ -36,9 +37,12 @@ function SectionNav({
   orientation = "vertical",
   onItemClick,
   className,
-  "aria-label": ariaLabel = "ページ内セクション",
+  "aria-label": ariaLabelProp,
   ...props
 }: SectionNavProps) {
+  const defaultLabels = useKskLabels()
+  // aria-label の既定: KskLabelsProvider の `sectionNav`（Provider 無しは "ページ内セクション"）
+  const ariaLabel = ariaLabelProp ?? defaultLabels.sectionNav
   const horizontal = orientation === "horizontal"
 
   return (

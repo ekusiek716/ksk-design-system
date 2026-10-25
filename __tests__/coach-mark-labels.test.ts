@@ -19,6 +19,10 @@ const coachMarkSource = readFileSync(
   join(__dirname, "..", "src/components/ui/coach-mark.tsx"),
   "utf8",
 )
+const kskLabelsSource = readFileSync(
+  join(__dirname, "..", "src/components/ui/ksk-labels.tsx"),
+  "utf8",
+)
 const overlaySource = readFileSync(
   join(__dirname, "..", "src/components/patterns/coach-mark-overlay.tsx"),
   "utf8",
@@ -26,8 +30,11 @@ const overlaySource = readFileSync(
 
 describe("CoachMark のボタン文言 prop（#477）", () => {
   it("nextLabel / skipLabel を受け取り、既定は現行文言（後方互換）", () => {
-    expect(coachMarkSource).toContain('nextLabel = "次へ →"')
-    expect(coachMarkSource).toContain('skipLabel = "スキップ"')
+    // 既定は KskLabelsProvider（useKskLabels）経由。Provider 無しの日本語は ksk-labels.tsx の ja が持つ
+    expect(coachMarkSource).toContain("nextLabelProp ?? defaultLabels.coachMarkNext")
+    expect(coachMarkSource).toContain("skipLabelProp ?? defaultLabels.coachMarkSkip")
+    expect(kskLabelsSource).toContain('coachMarkNext: "次へ →"')
+    expect(kskLabelsSource).toContain('coachMarkSkip: "スキップ"')
   })
 
   it("ボタンはリテラルではなく prop を描画する", () => {
@@ -40,8 +47,9 @@ describe("CoachMark のボタン文言 prop（#477）", () => {
 
   it("ariaLabel prop で上書きでき、未指定時は従来のフォールバックを保つ", () => {
     expect(coachMarkSource).toContain(
-      'ariaLabelProp ?? (typeof content === "string" ? content : "コーチマーク")',
+      "ariaLabelProp ?? (typeof content === \"string\" ? content : defaultLabels.coachMarkLabel)",
     )
+    expect(kskLabelsSource).toContain('coachMarkLabel: "コーチマーク"')
   })
 })
 

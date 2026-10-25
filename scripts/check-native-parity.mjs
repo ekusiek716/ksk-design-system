@@ -256,6 +256,9 @@ const RD_TEXT_DRIFT =
 const RD_API_SHAPE =
   "required-vs-optional (or shape) differs by design between the two platforms' own Props type, so only one side needs a fallback default — a deliberate API surface difference, not a missed port"
 
+const KSK_LABELS_WEB =
+  "Web resolves this default from KskLabelsProvider (`useKskLabels()`; issue #723) at render time, so it has no destructure default — without a Provider the text is identical to Native's literal default. Native has no KskLabelsProvider (see INTENTIONAL_NATIVE_GAPS) and keeps its own literal default."
+
 const INTENTIONAL_DEFAULT_GAPS = new Map([
   ["BannerCarousel", [
     { prop: "itemWidth", reason: "Web defaults to a fixed 200px card width; Native intentionally has no destructure default and instead computes a responsive width (`Dimensions.get(\"window\").width - 32`) inside the function body so cards fit the device screen — a deliberate platform difference, not a missed port" },
@@ -266,9 +269,19 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
   ]],
   ["CoachMark", [
     { prop: "nextLabel", reason: "Web's default text carries the trailing arrow (\"次へ →\") because the Web balloon's next button is a text-only link-ish control where the arrow is the only affordance; Native's button is a filled pill with its own visual affordance, so its default is the bare \"次へ\" (issue #477). Consumers passing an i18n string replace the whole label on either platform." },
+    { prop: "skipLabel", reason: KSK_LABELS_WEB },
+  ]],
+  ["CodeDisplay", [
+    { prop: "copyLabel", reason: KSK_LABELS_WEB },
+    { prop: "copiedLabel", reason: KSK_LABELS_WEB },
   ]],
   ["CompactFilePicker", [
     { prop: "loadingLabel", reason: "Web's default \"処理中\" (issue #539) is required because the Web CompactFilePicker does not use Button's `loading` spinner (it predates the Web Button loading port) — CompactFilePicker swaps the trigger's own text for `loadingLabel` while loading, so an unset default would render a blank-looking button. Native instead forwards loading/loadingLabel straight into Native Button's own `loading` prop, whose ButtonContent renders an ActivityIndicator and only appends a text node when `loadingLabel` is explicitly passed (src/native/components/Button.tsx) — the spinner alone already signals busy state there, so no default caption is needed. Each platform's own Button loading API decides whether a default is required, not a missed port." },
+  ]],
+  ["CountdownHero", [
+    { prop: "label", reason: KSK_LABELS_WEB },
+    { prop: "todayLabel", reason: KSK_LABELS_WEB },
+    { prop: "pastLabel", reason: KSK_LABELS_WEB },
   ]],
   ["ErrorState", [
     { prop: "title", reason: `Web has no destructure default but falls back to the *same* text ("エラーが発生しました") via \`title ?? (notFound ? … : "エラーが発生しました")\` inside the function body. ${RD_BLIND_SPOT} — verified identical effective text, not just a shape artifact.` },
@@ -299,6 +312,9 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
   ["Skeleton", [
     { prop: "width", reason: "Web still has no destructure default for `width` (the legacy `className`-only compat mode described in the JSDoc example must keep working), but as of 2026-08-10 the component's base `className` now always includes `h-4 w-full` ahead of the caller's `className` in `cn()` — so an unstyled `<Skeleton />` renders at the same 16px/100% size as Native's `height=16`/`width=\"100%\"` defaults, and `tailwind-merge` still lets an explicit caller `className` (e.g. `h-4 w-32`) override it exactly as before. Visually resolved; not a real gap, just invisible to this destructure-only extractor because the fix lives in `className`, not a prop default." },
     { prop: "height", reason: "Same resolution as `width`: the new base `h-4` class (see above) matches Native's `height=16` default. Visually resolved via `className`, invisible to this extractor." },
+  ]],
+  ["Spinner", [
+    { prop: "label", reason: KSK_LABELS_WEB },
   ]],
   ["StarRating", [
     { prop: "size", reason: `Web's "md" token is Tailwind's \`size-5\` = 20px (1.25rem); Native's own default is the literal 20 (px). ${RD_EQUIVALENT_UNIT} — verified same 20px value.` },

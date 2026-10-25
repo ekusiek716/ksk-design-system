@@ -2,6 +2,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "./button"
+import { useKskLabels } from "./ksk-labels"
 import type { VariantProps } from "class-variance-authority"
 
 type PaginationLinkOwnProps = {
@@ -38,12 +39,17 @@ type PaginationLinkProps =
   | (PaginationLinkOwnProps & { as: "button" } & React.ComponentProps<"button">)
 
 type PaginationProps = React.ComponentProps<"nav"> & {
-  /** nav 要素の aria-label。@default "ページネーション"（SimplePagination.navLabel と同名） */
+  /**
+   * nav 要素の aria-label。
+   * 省略時は KskLabelsProvider の `paginationNav`（Provider 無しは "ページネーション"）。
+   * i18n 対応: Provider の locale="en" で "Pagination" になる。個別に変えるときはこの prop を渡す。
+   */
   navLabel?: string
 }
 
-function Pagination({ className, navLabel = "ページネーション", ...props }: PaginationProps) {
-  return <nav role="navigation" aria-label={navLabel} data-slot="pagination" className={cn("mx-auto flex w-full justify-center", className)} {...props} />
+function Pagination({ className, navLabel, ...props }: PaginationProps) {
+  const defaultLabels = useKskLabels()
+  return <nav role="navigation" aria-label={navLabel ?? defaultLabels.paginationNav} data-slot="pagination" className={cn("mx-auto flex w-full justify-center", className)} {...props} />
 }
 
 function PaginationContent({ className, ...props }: React.ComponentProps<"ul">) {
@@ -140,7 +146,7 @@ function PaginationLink({
 }
 
 type PaginationPreviousProps = React.ComponentProps<typeof PaginationLink> & {
-  /** aria-label とボタンテキスト。i18n 対応: 英語では "Previous" を渡す。@default "前へ" */
+  /** aria-label とボタンテキスト。省略時は KskLabelsProvider の `paginationPrevious`（Provider 無しは "前へ"。locale="en" で "Previous"） */
   label?: string
 }
 
@@ -180,7 +186,9 @@ function isSlottableChild(props: object, children: React.ReactNode): boolean {
   return Boolean((props as { asChild?: boolean }).asChild) && React.isValidElement(children)
 }
 
-function PaginationPrevious({ className, label = "前へ", ...props }: PaginationPreviousProps) {
+function PaginationPrevious({ className, label: labelProp, ...props }: PaginationPreviousProps) {
+  const defaultLabels = useKskLabels()
+  const label = labelProp ?? defaultLabels.paginationPrevious
   const { children, ...rest } = props as typeof props & { children?: React.ReactNode }
   const asChild = isSlottableChild(rest, children)
   return (
@@ -198,11 +206,13 @@ function PaginationPrevious({ className, label = "前へ", ...props }: Paginatio
 }
 
 type PaginationNextProps = React.ComponentProps<typeof PaginationLink> & {
-  /** aria-label とボタンテキスト。i18n 対応: 英語では "Next" を渡す。@default "次へ" */
+  /** aria-label とボタンテキスト。省略時は KskLabelsProvider の `paginationNext`（Provider 無しは "次へ"。locale="en" で "Next"） */
   label?: string
 }
 
-function PaginationNext({ className, label = "次へ", ...props }: PaginationNextProps) {
+function PaginationNext({ className, label: labelProp, ...props }: PaginationNextProps) {
+  const defaultLabels = useKskLabels()
+  const label = labelProp ?? defaultLabels.paginationNext
   const { children, ...rest } = props as typeof props & { children?: React.ReactNode }
   const asChild = isSlottableChild(rest, children)
   return (
@@ -219,11 +229,13 @@ function PaginationNext({ className, label = "次へ", ...props }: PaginationNex
 }
 
 type PaginationEllipsisProps = React.ComponentProps<"span"> & {
-  /** スクリーンリーダー向けラベル。@default "その他のページ" */
+  /** スクリーンリーダー向けラベル。省略時は KskLabelsProvider の `paginationEllipsis`（Provider 無しは "その他のページ"） */
   label?: string
 }
 
-function PaginationEllipsis({ className, label = "その他のページ", ...props }: PaginationEllipsisProps) {
+function PaginationEllipsis({ className, label: labelProp, ...props }: PaginationEllipsisProps) {
+  const defaultLabels = useKskLabels()
+  const label = labelProp ?? defaultLabels.paginationEllipsis
   return (
     <span aria-hidden data-slot="pagination-ellipsis" className={cn("flex size-10 items-center justify-center text-[var(--Text-Medium-Emphasis)]", className)} {...props}>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="3" cy="8" r="1" fill="currentColor" /><circle cx="8" cy="8" r="1" fill="currentColor" /><circle cx="13" cy="8" r="1" fill="currentColor" /></svg>

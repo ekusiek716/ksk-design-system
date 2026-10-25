@@ -2,6 +2,7 @@ import * as React from "react"
 import { Tooltip as TooltipPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { usePortalContainer } from "./portal-container"
+import { useKskLabels } from "./ksk-labels"
 
 type CoachMarkPlacement = "top" | "bottom" | "left" | "right"
 type CoachMarkVariant = "default" | "brand"
@@ -25,15 +26,15 @@ interface CoachMarkProps {
   showClose?: boolean
   onClose?: () => void
   /**
-   * 次へボタンの文言（既定 "次へ →"）。i18n はアプリ側で解決して渡す。
+   * 次へボタンの文言。省略時は KskLabelsProvider の `coachMarkNext`（Provider 無しは "次へ →"。locale="en" で "Next →"）。
    * 矢印は文言に含まれるため、渡すと矢印も置き換わる（例: "Next →"）。
    */
   nextLabel?: string
-  /** スキップボタンの文言（既定 "スキップ"） */
+  /** スキップボタンの文言。省略時は KskLabelsProvider の `coachMarkSkip`（Provider 無しは "スキップ"。locale="en" で "Skip"） */
   skipLabel?: string
   /**
    * バルーンの aria-label。content が string ならその文字列、
-   * それ以外は既定 "コーチマーク"（issue #477）。
+   * それ以外は KskLabelsProvider の `coachMarkLabel`（Provider 無しは "コーチマーク"。issue #477）。
    */
   ariaLabel?: string
   delayDuration?: number
@@ -59,12 +60,15 @@ function CoachMark({
   onNext,
   showClose,
   onClose,
-  nextLabel = "次へ →",
-  skipLabel = "スキップ",
+  nextLabel: nextLabelProp,
+  skipLabel: skipLabelProp,
   ariaLabel: ariaLabelProp,
   delayDuration = 0,
   className,
 }: CoachMarkProps) {
+  const defaultLabels = useKskLabels()
+  const nextLabel = nextLabelProp ?? defaultLabels.coachMarkNext
+  const skipLabel = skipLabelProp ?? defaultLabels.coachMarkSkip
   const isOnboarding = step !== undefined
 
   // Radix Tooltip renders a visually-hidden role="tooltip" copy of Content's
@@ -75,7 +79,7 @@ function CoachMark({
   // children in that copy, so no button (and no Arrow) is ever duplicated while
   // screen readers still get an accessible description via the role="tooltip" node.
   const ariaLabel =
-    ariaLabelProp ?? (typeof content === "string" ? content : "コーチマーク")
+    ariaLabelProp ?? (typeof content === "string" ? content : defaultLabels.coachMarkLabel)
 
   // PortalContainerProvider があればそのスコープ内へ、無ければ document.body（#360）
   const portalContainer = usePortalContainer()

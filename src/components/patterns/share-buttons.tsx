@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { CloseCircle, TickCircle } from "iconsax-reactjs"
+import { useKskLabels } from "../ui/ksk-labels"
 
 type ShareProvider = "line" | "x" | "facebook" | "copy" | "instagram" | "email" | "whatsapp" | "telegram"
 type ShareLayout = "circle" | "inline" | "block"
@@ -28,10 +29,12 @@ interface ShareButtonsProps {
   className?: string
   onShare?: (provider: ShareProvider) => void
   onCopy?: (result: ShareCopyResult) => void
+  /** コピー成功の文言。省略時は KskLabelsProvider の `shareCopied`（Provider 無しは "コピーしました"。locale="en" で "Copied"） */
   copiedLabel?: string
+  /** コピー失敗の文言。省略時は KskLabelsProvider の `shareCopyError`（Provider 無しは "コピーできませんでした"） */
   copyErrorLabel?: string
   feedbackDuration?: number
-  /** 全体を囲む role="group" の aria-label。@default "シェア" */
+  /** 全体を囲む role="group" の aria-label。省略時は KskLabelsProvider の `share`（Provider 無しは "シェア"） */
   groupLabel?: string
 }
 
@@ -188,11 +191,17 @@ function ShareButtons({
   className,
   onShare,
   onCopy,
-  copiedLabel = "コピーしました",
-  copyErrorLabel = "コピーできませんでした",
+  copiedLabel: copiedLabelProp,
+  copyErrorLabel: copyErrorLabelProp,
   feedbackDuration = 2000,
-  groupLabel = "シェア",
+  groupLabel: groupLabelProp,
 }: ShareButtonsProps) {
+  const defaultLabels = useKskLabels()
+  const copiedLabel = copiedLabelProp ?? defaultLabels.shareCopied
+  const copyErrorLabel = copyErrorLabelProp ?? defaultLabels.shareCopyError
+  const groupLabel = groupLabelProp ?? defaultLabels.share
+  const defaultProviderLabel = (p: ShareProvider, fallback: string) =>
+    p === "email" ? defaultLabels.shareEmail : p === "copy" ? defaultLabels.shareLink : fallback
   const [copyFeedback, setCopyFeedback] = React.useState<{
     provider: ShareProvider
     result: ShareCopyResult
@@ -272,7 +281,7 @@ function ShareButtons({
         {activeProviders.map((p) => {
           const meta = PROVIDER_META[p]
           const feedback = copyFeedback?.provider === p ? copyFeedback.result : null
-          const label = labels?.[p] ?? meta.label
+          const label = labels?.[p] ?? defaultProviderLabel(p, meta.label)
           const feedbackLabel =
             feedback === "success" ? copiedLabel : feedback === "error" ? copyErrorLabel : label
           return (
@@ -320,7 +329,7 @@ function ShareButtons({
         {activeProviders.map((p) => {
           const meta = PROVIDER_META[p]
           const feedback = copyFeedback?.provider === p ? copyFeedback.result : null
-          const label = labels?.[p] ?? meta.label
+          const label = labels?.[p] ?? defaultProviderLabel(p, meta.label)
           const feedbackLabel =
             feedback === "success" ? copiedLabel : feedback === "error" ? copyErrorLabel : label
           return (
@@ -368,7 +377,7 @@ function ShareButtons({
       {activeProviders.map((p) => {
         const meta = PROVIDER_META[p]
         const feedback = copyFeedback?.provider === p ? copyFeedback.result : null
-        const label = labels?.[p] ?? meta.label
+        const label = labels?.[p] ?? defaultProviderLabel(p, meta.label)
         const feedbackLabel =
           feedback === "success" ? copiedLabel : feedback === "error" ? copyErrorLabel : label
         return (

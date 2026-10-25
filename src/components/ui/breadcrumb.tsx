@@ -1,17 +1,19 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 interface BreadcrumbProps extends React.ComponentProps<"nav"> {
   /**
-   * nav 要素の aria-label。i18n 対応: 英語では "Breadcrumb" を渡す。
-   * @default "パンくずリスト"
+   * nav 要素の aria-label。省略時は KskLabelsProvider の `breadcrumbNav`
+   * （Provider 無しは "パンくずリスト"。locale="en" で "Breadcrumb"）。
    */
   label?: string
 }
 
-function Breadcrumb({ label = "パンくずリスト", ...props }: BreadcrumbProps) {
-  return <nav aria-label={label} data-slot="breadcrumb" {...props} />
+function Breadcrumb({ label, ...props }: BreadcrumbProps) {
+  const defaultLabels = useKskLabels()
+  return <nav aria-label={label ?? defaultLabels.breadcrumbNav} data-slot="breadcrumb" {...props} />
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {

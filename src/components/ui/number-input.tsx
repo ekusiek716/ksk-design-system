@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { isImeComposing } from "@/lib/ime"
+import { useKskLabels } from "./ksk-labels"
 
 interface NumberInputProps extends Omit<React.ComponentProps<"input">, "value" | "onChange" | "type" | "size" | "min" | "max" | "step" | "defaultValue"> {
   value?: number
@@ -14,9 +15,9 @@ interface NumberInputProps extends Omit<React.ComponentProps<"input">, "value" |
   disabled?: boolean
   size?: "sm" | "md"
   className?: string
-  /** 減算ボタンの aria-label。i18n 対応: 英語では "Decrease" を渡す。@default "減らす" */
+  /** 減算ボタンの aria-label。省略時は KskLabelsProvider の `numberInputDecrement`（Provider 無しは "減らす"。locale="en" で "Decrease"） */
   decrementLabel?: string
-  /** 加算ボタンの aria-label。i18n 対応: 英語では "Increase" を渡す。@default "増やす" */
+  /** 加算ボタンの aria-label。省略時は KskLabelsProvider の `numberInputIncrement`（Provider 無しは "増やす"。locale="en" で "Increase"） */
   incrementLabel?: string
 }
 
@@ -36,13 +37,16 @@ function NumberInput({
   disabled = false,
   size = "md",
   className,
-  decrementLabel = "減らす",
-  incrementLabel = "増やす",
+  decrementLabel: decrementLabelProp,
+  incrementLabel: incrementLabelProp,
   onFocus,
   onBlur,
   onKeyDown,
   ...inputProps
 }: NumberInputProps) {
+  const defaultLabels = useKskLabels()
+  const decrementLabel = decrementLabelProp ?? defaultLabels.numberInputDecrement
+  const incrementLabel = incrementLabelProp ?? defaultLabels.numberInputIncrement
   const [raw, setRaw] = React.useState(String(value))
   const [focused, setFocused] = React.useState(false)
 
