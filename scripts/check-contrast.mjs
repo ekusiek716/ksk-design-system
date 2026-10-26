@@ -296,6 +296,50 @@ for (const entry of ledger.contrast) {
   if (!usedExceptions.has(entry.pair)) ledgerErrors.push(`contrast: ${entry.pair} は検査ペアに存在しません。${LEDGER_PATH} から登録を削除してください`)
 }
 
+// 写真・ガラス・任意色の上に乗る操作子の二重リング（内側 2px 白 + 外側 2px Gray-900。
+// src/lib/server-variants/overlay-focus-ring.ts と glass.css の --glass-focus-ring）。
+// 下地の色が分からないので、固定のペアではなく「任意の下地 c について、c と白 / c と濃色のうち
+// 大きい方の比」の最悪値を調べる。コントラスト比は相対輝度だけで決まるので、輝度 0〜1 を走査すれば
+// 全色を覆える。あわせて sRGB の格子（4096 色）を実色でも検査し、輝度の走査と食い違わないことを確かめる。
+// 最悪は中間グレー（相対輝度 約 0.199）の 4.21:1。白と濃色どうし（17.7:1）は二重リングの帯の見分けやすさ。
+{
+  const ringWhite = resolve("var(--Primitive-White)")
+  const ringDark = resolve("var(--Primitive-Gray-900)")
+  for (const path of ["src/lib/server-variants/overlay-focus-ring.ts", "src/styles/glass.css"]) {
+    const source = readFileSync(join(root, path), "utf8")
+    for (const token of ["--Primitive-White", "--Primitive-Gray-900"]) {
+      if (!source.includes(token)) ledgerErrors.push(`二重リング: ${path} が ${token} を参照していません（検査対象の色と実装がずれています）`)
+    }
+  }
+  const lWhite = lum(ringWhite)
+  const lDark = lum(ringDark)
+  const ratioOfLum = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+  let worst = Infinity
+  let worstL = 0
+  for (let i = 0; i <= 100000; i++) {
+    const L = i / 100000
+    const best = Math.max(ratioOfLum(L, lWhite), ratioOfLum(L, lDark))
+    if (best < worst) { worst = best; worstL = L }
+  }
+  let worstGrid = Infinity
+  let worstGridHex = ""
+  for (let r = 0; r < 256; r += 17) for (let g = 0; g < 256; g += 17) for (let b = 0; b < 256; b += 17) {
+    const hex = "#" + [r, g, b].map((c) => c.toString(16).padStart(2, "0")).join("")
+    const best = Math.max(contrast(hex, ringWhite), contrast(hex, ringDark))
+    if (best < worstGrid) { worstGrid = best; worstGridHex = hex }
+  }
+  const extra = [
+    [worst, `二重リング（白 + Gray-900）: 任意の下地 c での max(c/白, c/濃色) の最悪値（輝度 ${worstL.toFixed(3)} の中間グレー・非テキスト）`],
+    [worstGrid, `二重リング（白 + Gray-900）: sRGB 格子 4096 色での最悪値（${worstGridHex}・非テキスト）`],
+    [contrast(ringWhite, ringDark), "二重リング: 内側の白 / 外側の Gray-900（帯どうしの見分けやすさ・非テキスト）"],
+  ]
+  for (const [ratio, label] of extra) {
+    const ok = ratio >= 3
+    if (!ok) fail++
+    rows.push({ label, ratio: ratio.toFixed(2), min: 3, ok, isException: false })
+  }
+}
+
 console.log("🎨 KSK — コントラスト検査 (WCAG AA・文字 4.5 / 非テキスト 3)")
 console.log("=======================================")
 for (const r of rows) {

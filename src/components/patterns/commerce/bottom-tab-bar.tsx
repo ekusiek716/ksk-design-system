@@ -2,6 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
 import { useSoftKeyboardFocus } from "@/lib/use-soft-keyboard-focus"
+import { OVERLAY_FOCUS_RING_INSET } from "@/lib/server-variants/overlay-focus-ring"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -644,7 +645,9 @@ function NavItem({
         "relative flex min-h-[max(2.75rem,var(--Nav-Item-Min-Height))] flex-col items-center justify-center gap-[var(--Nav-Item-Gap)] rounded-full",
         // iOS 26 のガラスは押下で沈む（ゲル感）。opacity だけでなく scale も入れる
         "transition-[transform,opacity] duration-[var(--Motion-Duration-Fast)] active:scale-95 active:opacity-80",
-        "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
+        // pill（.glass-specular は overflow:hidden）の中なので外側リングは切られる。
+        // 内側の二重リング（白 + 濃色。下地がガラス・プラッター・写真のどれでも溶けない）にする
+        OVERLAY_FOCUS_RING_INSET,
         // prominent（ラベル表示）のタブの高さは公開契約 --Nav-Item-Height（issue #699）。
         // 未宣言なら従来の h-full（100%）と同じ値。下限 44px は上の min-h が守る。
         compact

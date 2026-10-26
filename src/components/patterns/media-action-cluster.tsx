@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { OVERLAY_FOCUS_RING } from "@/lib/server-variants/overlay-focus-ring"
 
 type MediaActionClusterOrientation = "vertical" | "horizontal" | "auto"
 type MediaActionClusterAnchor =
@@ -222,7 +223,9 @@ function MediaActionClusterButton({
 
   const className = cn(
     "group inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full",
-    "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
+    // 写真・動画の上に乗る操作子なので、背景に依存しない二重リング（白 + 濃色）にする。
+    // 内側の glass 円は aria-hidden の装飾で、フォーカスを受けるのはこの外側の a / button
+    OVERLAY_FOCUS_RING,
     "disabled:pointer-events-none disabled:opacity-50",
     itemDirection,
   )

@@ -460,10 +460,13 @@
 @source inline("focus-visible:ring-[3px]");
 @source inline("focus-visible:ring-[var(--Focus-High-Emphasis)]");
 @source inline("focus-visible:ring-[var(--Object-on-Inverse)]");
+@source inline("focus-visible:ring-[var(--Primitive-Gray-900)]");
 @source inline("focus-visible:ring-inset");
 @source inline("focus-visible:ring-offset-2");
+@source inline("focus-visible:ring-offset-[var(--Primitive-White)]");
 @source inline("focus-visible:ring-offset-[var(--Surface-Primary)]");
 @source inline("focus-visible:rounded-sm");
+@source inline("focus-visible:shadow-[inset_0_0_0_2px_var(--Primitive-Gray-900),inset_0_0_0_4px_var(--Primitive-White)]");
 @source inline("focus-within:border-[var(--Border-Accent-Primary)]");
 @source inline("focus-within:relative");
 @source inline("focus-within:ring-[3px]");
