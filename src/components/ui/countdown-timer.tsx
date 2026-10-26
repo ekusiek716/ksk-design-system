@@ -29,7 +29,7 @@ interface CountdownTimerProps {
   /**
    * 日単位ラベル。granularity="day" で使用。以下の単位 prop（day / hour / minute / second）は表示用で、
    * 渡すと読み上げ（aria-label）にもそのまま使う（英語の単複はここで渡す）。省略時の読み上げは
-   * KskLabelsProvider の `countdownSpoken*`（ja は "5日" 等、en は "5 days" 等）。
+   * KskLabelsProvider の `countdownSpoken*`（ja は "5日" 等、en は "5 day(s)" 等）。
    * 表示の既定は KskLabelsProvider の `countdownUnitDay`（Provider 無しは "日"。locale="en" で "d"）。
    */
   dayUnit?: string
@@ -78,7 +78,7 @@ function DayCountdown({
 }: CountdownTimerProps) {
   const defaultLabels = useKskLabels()
   const dayUnit = dayUnitProp ?? defaultLabels.countdownUnitDay
-  // 読み上げ（aria-label）は表示の単位（"d"）ではなく単語（"5 days"）で読む。単位 prop を渡したときはそれを使う
+  // 読み上げ（aria-label）は表示の単位（"d"）ではなく単語（"5 day(s)"）で読む。単位 prop を渡したときはそれを使う
   const spokenDays = (count: number) =>
     dayUnitProp !== undefined
       ? `${count}${dayUnitProp}`

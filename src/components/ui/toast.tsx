@@ -107,11 +107,23 @@ const toastStore: ToastStore = {
 }
 
 /**
+ * `toast.connectionRestored()` などプリセット通知の文言。React の外（module 関数）で出すので
+ * KskLabelsProvider は届かない。英語化は `configureToast({ messages })` で渡す（未指定は日本語）。
+ */
+interface ToastPresetMessages {
+  connectionRestored?: string
+  saveComplete?: string
+  retryStarted?: string
+  retryFailed?: string
+}
+
+/**
  * fire-and-forget（auto-mount）経路の viewport 読み上げラベル。
  * `configureToast()` で上書きできるモジュールスコープの既定値（後勝ち・
  * リクエスト間で共有されるため SSR では呼ばないこと）。
  * `<Toaster>` 経由の描画は props（regionLabel / closeLabel）が直接
- * viewport に渡るため、この値には依存しない。
+ * viewport に渡るため、region / close / position はこの値に依存しない。
+ * `messages`（プリセット通知の文言）だけは `<Toaster>` を使っていてもここ（configureToast）でしか差し替えられない。
  * region / close は `configureToast()` で指定したときだけ値を持ち、未指定なら KskLabelsProvider の
  * `toastRegion` / `close`（Provider 無しは現行の日本語 "通知" / "閉じる"。後方互換）を使う。
  */
@@ -136,19 +148,9 @@ type ToastViewportPosition = "bottom-end" | "bottom-center"
 
 /**
  * fire-and-forget API（auto-mount viewport）用のラベル設定。
- * `<Toaster>` を使う場合は props で渡せばよく、これを呼ぶ必要はない。
+ * regionLabel / closeLabel / position は、`<Toaster>` を使う場合は props で渡せばよく、呼ぶ必要はない。
+ * ただし `messages`（プリセット通知の文言）は `<Toaster>` を使っていても `configureToast` でしか差し替えられない。
  */
-/**
- * `toast.connectionRestored()` などプリセット通知の文言。React の外（module 関数）で出すので
- * KskLabelsProvider は届かない。英語化は `configureToast({ messages })` で渡す（未指定は日本語）。
- */
-interface ToastPresetMessages {
-  connectionRestored?: string
-  saveComplete?: string
-  retryStarted?: string
-  retryFailed?: string
-}
-
 function configureToast(options: { regionLabel?: string; closeLabel?: string; position?: ToastViewportPosition; messages?: ToastPresetMessages }): void {
   if (options.regionLabel !== undefined) toastLabels.region = options.regionLabel
   if (options.closeLabel !== undefined) toastLabels.close = options.closeLabel

@@ -854,7 +854,8 @@ describe('残りの部品: Provider 無し=従来の日本語 / locale="en" で�
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const COMPONENTS = path.join(ROOT, "src", "components")
-const JP = "[ぁ-んァ-ン一-龥]"
+// ひらがな・カタカナ（長音「ー」・「ヴ」を含む）・半角カナ・漢字・々
+const JP = "[ぁ-んァ-ヶーヴ｡-ﾟ一-龥々]"
 /** 日本語を含む文字列（"…" / `…`）が 1 つでもあるか。テンプレートの `${…}` の中の "…" も拾う。 */
 const HAS_JP_STRING = new RegExp(`"[^"\\n]*${JP}[^"\\n]*"|\`[^\`\\n]*${JP}[^\`\\n]*\``)
 
