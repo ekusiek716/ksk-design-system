@@ -1,14 +1,13 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { ArrowDown2, ArrowLeft2, ArrowRight2 } from "iconsax-reactjs"
-import { useKskLabels, useKskLocale } from "../ui/ksk-labels"
+import { formatKskLabel, useKskLabels, useKskLabelsFor, useKskLocaleFor } from "../ui/ksk-labels"
+import { formatCalendarDay, formatCalendarMonth, shortWeekdays } from "@/lib/calendar-labels"
 import { Button, type ButtonProps } from "../ui/button"
 import {
   ACCENT_DOT,
   CHIP_TONE,
   DOT_TONE,
-  WEEKDAYS,
-  formatDayLabel,
   pad,
   parseKey,
   resolveEventAccent,
@@ -71,9 +70,18 @@ interface MonthCalendarProps extends Omit<React.ComponentProps<"div">, "onSelect
   weekendTone?: boolean
   /** 「今日」の基準日（"YYYY-MM-DD" / Date）。省略時は現在日。テスト・擬似日付用 */
   today?: Date | string
-  /** 表示言語（曜日・読み上げ・「+n件」の既定）。既定は KskLabelsProvider の locale（無ければ "ja"） */
+  /**
+   * 表示言語（曜日・読み上げ・「+n件」の既定）。既定は KskLabelsProvider の locale（無ければ "ja"）。
+   * 文言は KskLabelsProvider の `calendarWeekdaysShort` / `calendarMonthTitle` / `calendarDayLabel` / `calendarDayToday` /
+   * `calendarDayEvents` / `calendarEventsSeparator` / `calendarMore` で差し替えられる。
+   * Provider の locale と**異なる** locale を指定したときは、Provider の labels は使わず指定した言語の既定文言になる
+   * （日本語の差し替え文言が英語のカレンダーに混ざらないように）
+   */
   locale?: "ja" | "en"
-  /** 「+n件」の文言。既定 ja: `+${n}件` / en: `+${n} more` */
+  /**
+   * 「+n件」の文言を返す関数。既定は KskLabelsProvider の `calendarMore`（ja: `+${n}件` / en: `+${n} more`）。
+   * 英語の単複などを出し分けたいときはこの関数で渡す
+   */
   moreLabel?: (count: number) => string
   /** グリッドの読み上げ名。既定は「2026年10月」等 */
   "aria-label"?: string
@@ -158,9 +166,9 @@ function MonthCalendar({
   "aria-label": ariaLabel,
   ...props
 }: MonthCalendarProps) {
-  // 既定は KskLabelsProvider の locale（無ければ "ja"。issue #723）
-  const providerLocale = useKskLocale()
-  const locale = localeProp ?? providerLocale ?? "ja"
+  // 文言は prop > locale prop が Provider と違うときはその言語の既定 > Provider の labels > 日本語（issue #723）
+  const labels = useKskLabelsFor(localeProp)
+  const locale = useKskLocaleFor(localeProp)
   const monthStart = toMonthStart(month)
   const monthKey = `${monthStart.getFullYear()}-${pad(monthStart.getMonth() + 1)}`
   const weeks = buildMonthWeeks(monthStart, weekStartsOn)
@@ -230,21 +238,19 @@ function MonthCalendar({
     }
   }
 
-  const weekdayLabels = Array.from({ length: 7 }, (_, i) => WEEKDAYS[locale][(i + weekStartsOn) % 7])
-  const more = moreLabel ?? ((n: number) => (locale === "ja" ? `+${n}件` : `+${n} more`))
-  const gridLabel =
-    ariaLabel ??
-    (locale === "ja"
-      ? `${displayedMonthStart.getFullYear()}年${displayedMonthStart.getMonth() + 1}月`
-      : displayedMonthStart.toLocaleDateString("en", { year: "numeric", month: "long" }))
+  const weekdays = shortWeekdays(labels, locale)
+  const weekdayLabels = Array.from({ length: 7 }, (_, i) => weekdays[(i + weekStartsOn) % 7])
+  const more = moreLabel ?? ((n: number) => formatKskLabel(labels.calendarMore, { count: n }))
+  const gridLabel = ariaLabel ?? formatCalendarMonth(displayedMonthStart, labels, locale)
 
   const dayLabel = (key: string, dayEvents: MonthCalendarEvent[]) => {
-    const base = formatDayLabel(key, locale)
-    const todayPart = key === todayKey ? (locale === "ja" ? "、今日" : ", today") : ""
+    const base = formatCalendarDay(parseKey(key), labels, locale)
+    const todayPart = key === todayKey ? labels.calendarDayToday : ""
     const eventsPart = dayEvents.length
-      ? locale === "ja"
-        ? `、予定${dayEvents.length}件: ${dayEvents.map((e) => e.label).join("、")}`
-        : `, ${dayEvents.length} events: ${dayEvents.map((e) => e.label).join(", ")}`
+      ? formatKskLabel(labels.calendarDayEvents, {
+          count: dayEvents.length,
+          events: dayEvents.map((e) => e.label).join(labels.calendarEventsSeparator),
+        })
       : ""
     return `${base}${todayPart}${eventsPart}`
   }
@@ -496,7 +502,11 @@ interface MonthCalendarHeaderProps extends Omit<React.ComponentProps<"div">, "ti
   size?: "md" | "lg"
   /** 見出しの要素。既定 "h2"。置き場所の見出し階層に合わせる */
   headingLevel?: "h2" | "h3"
-  /** 表示言語（title の既定）。既定は KskLabelsProvider の locale（無ければ "ja"） */
+  /**
+   * 表示言語（title の既定の語順）。既定は KskLabelsProvider の locale（無ければ "ja"）。
+   * title の既定は KskLabelsProvider の `calendarMonthTitle` で差し替えられる（Provider の locale と異なる locale を指定したときは
+   * Provider の labels を使わず、指定した言語の既定）。ボタンの文言は `locale` では変わらず、Provider の labels に従う
+   */
   locale?: "ja" | "en"
   /** 「今日へ」の文言。既定は KskLabelsProvider の calendarToday（無ければ「今日へ」） */
   todayLabel?: string
@@ -543,14 +553,12 @@ function MonthCalendarHeader({
   ...props
 }: MonthCalendarHeaderProps) {
   const labels = useKskLabels()
-  const providerLocale = useKskLocale()
-  const locale = localeProp ?? providerLocale ?? "ja"
+  // 月の見出しの語順だけ locale prop に従う（ボタンの文言は従来どおり Provider の labels。locale prop は title の既定にだけ効く）
+  const titleLabels = useKskLabelsFor(localeProp)
+  const titleLocale = useKskLocaleFor(localeProp)
   const start = toMonthStart(month)
   const hasTrailing = trailing != null && trailing !== false
-  const defaultTitle =
-    locale === "ja"
-      ? `${start.getFullYear()}年${start.getMonth() + 1}月`
-      : start.toLocaleDateString("en", { year: "numeric", month: "long" })
+  const defaultTitle = formatCalendarMonth(start, titleLabels, titleLocale)
   return (
     <div
       data-slot="month-calendar-header"

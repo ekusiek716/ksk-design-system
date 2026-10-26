@@ -22,7 +22,7 @@
  * 検出の対象外（検出もしない・理由は下の「例外」に）:
  * - オブジェクト形の DEFAULT_LABELS を持つ ErrorBoundary / CookieConsent（既定が英語。下記）
  * - `console.warn` / `throw new Error` の開発者向けメッセージ（利用者に表示・読み上げされない）
- * - 日付の書式トークン・曜日（DatePicker の `dateFormat` 等。文言ではなく書式）
+ * （日付の語順・曜日名・月名は `calendarDayLabel` / `calendarWeekdaysShort` 等の文言キーに移行済みで、検出の対象）
  */
 import * as React from "react"
 import { act } from "react"
@@ -973,39 +973,13 @@ function findHardcoded(): Record<string, string[]> {
  * - ErrorBoundary / CookieConsent の `DEFAULT_LABELS`: 既定が英語（"Something went wrong" / "Cookies" 等）で、
  *   Provider 無し = ja の文言を変えずに Provider へ移すと ja が英語になってしまう。`labels` prop で
  *   アプリ側が翻訳して渡す設計（#477）のまま残す
- * - 開発者向けの `console.warn` / `throw`、日付の書式トークン・曜日
+ * - 開発者向けの `console.warn` / `throw`
  */
 type Unmigrated = readonly [file: string, ids: readonly string[], reason: string]
-const R_LOCALE =
-  "コンポーネント自身の `locale` prop（ja / en。既定は Provider の locale）で、日付・曜日の語順（「10月26日（月）」/ \"Mon, Oct 26\"）と" +
-  "件数の文（「予定2件」/ \"2 events\"）を組み立てている。Provider の locale=\"en\" なら既に英語になる。" +
-  "ラベルのキーに移すと、`locale` prop だけ渡す使い方（Provider 無し）で日本語に戻ってしまうため、locale 駆動のまま残す"
-const R_FORMAT =
-  "日付の書式トークン（EEE / EEEE）の曜日名で、文言ではなく書式。Provider の locale=\"en\" なら Intl の英語名になる（日本語は Provider 無しの従来表記）"
 const R_TOAST =
   "`toast.saveComplete()` などのプリセット通知は React の外（module 関数）で出すので Provider が届かない。" +
   "英語化は `configureToast({ messages })`、または `toast.success(t(...))` で文言を渡す（未指定は従来の日本語）"
 const UNMIGRATED: readonly Unmigrated[] = [
-  [
-    "src/components/patterns/agenda-list.tsx",
-    ["??:emptyDayLabel", "const:headingLabel", "const:noEventsLabel", "str:${formatDayLabel(key", "str:予定なし"],
-    R_LOCALE,
-  ],
-  [
-    "src/components/patterns/month-calendar.tsx",
-    [
-      "??:ariaLabel",
-      "??:moreLabel",
-      "const:gridLabel",
-      "str:${displayedMonthStar",
-      "str:${start.getFullYear(",
-      "str:+${n}件",
-      "str:、予定${dayEvents.lengt",
-      "str:、今日",
-    ],
-    R_LOCALE,
-  ],
-  ["src/components/ui/date-picker.tsx", ["str:${JA_WEEKDAYS[weekda", "str:日月火水木金土"], R_FORMAT],
   [
     "src/components/ui/toast.tsx",
     ["??:connectionRestored", "??:retryFailed", "??:retryStarted", "??:saveComplete", "str:保存しました", "str:再試行できませんでした", "str:再試行を開始しました", "str:接続が復旧しました"],
