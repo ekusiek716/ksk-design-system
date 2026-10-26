@@ -214,7 +214,9 @@ describe("面の上書きは var(--Nav-*, DS既定) で、未宣言なら見た�
       "border: var(--Nav-Center-Action-Border, var(--ksk-glass-accent-border));",
     )
     expect(NAV_CSS).toContain(
-      "box-shadow: var(--Nav-Center-Action-Shadow, var(--ksk-glass-accent-shadow));",
+      // 先頭の --ksk-glass-focus-ring は、この宣言が .glass-accent の box-shadow を置き換えても
+      // フォーカスリングが消えないよう置き直したもの（glass.css が :focus-visible のときだけ値を入れる）
+      "box-shadow: var(--ksk-glass-focus-ring, 0 0 #0000), var(--Nav-Center-Action-Shadow, var(--ksk-glass-accent-shadow));",
     )
   })
 
@@ -322,7 +324,7 @@ describe("pill 本体の面の公開変数（issue #486）", () => {
   })
 
   it("既定値は .glass 自身の宣言と同じ内部変数を指す（未宣言なら見た目が変わらない）", () => {
-    const glass = GLASS_CSS.slice(GLASS_CSS.indexOf(".glass {"), GLASS_CSS.indexOf(".glass {") + 260)
+    const glass = GLASS_CSS.slice(GLASS_CSS.indexOf(".glass {"), GLASS_CSS.indexOf(".glass {") + 360)
     // .glass が使う内部変数を、そのままフォールバックに使っていること
     for (const v of ["--glass-bg", "--glass-blur", "--glass-border"]) {
       expect(glass).toContain(`var(${v})`)

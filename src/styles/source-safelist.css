@@ -463,7 +463,6 @@
 @source inline("focus-visible:ring-inset");
 @source inline("focus-visible:ring-offset-2");
 @source inline("focus-visible:ring-offset-[var(--Surface-Primary)]");
-@source inline("focus-visible:ring-offset-transparent");
 @source inline("focus-visible:rounded-sm");
 @source inline("focus-within:border-[var(--Border-Accent-Primary)]");
 @source inline("focus-within:relative");

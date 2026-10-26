@@ -738,7 +738,10 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
         // src/styles/bottom-nav.css 側で上書きされる（issue #471）。
         "glass-accent glass-specular text-[var(--Text-on-Inverse)]",
         "typo-label-sm transition-transform duration-[var(--Motion-Duration-Fast)] active:scale-[0.96]",
-        "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+        // フォーカスリングは .glass-accent の非レイヤー box-shadow が Tailwind の ring を打ち消すため、
+        // glass.css が :focus-visible のときに重ねる二重リングが担う。pill（overflow:hidden）の中なので
+        // 外側リングは切られる。bottom-nav.css が内側リング（--glass-focus-ring-inset）へ切り替える。
+        "focus-visible:outline-hidden"
       )}
       aria-label={item.ariaLabel ?? item.label}
       {...tagProps}
