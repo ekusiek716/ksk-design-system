@@ -205,6 +205,15 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   }
 }
 
+// inline 入力欄（Input / Textarea の variant="inline"。src/lib/server-variants/inline-field.ts）のエラー枠
+// Border-Caution（aria-invalid:ring-2）。透明な欄は置かれた面の上にそのまま出るので、Surface-Primary に加え、
+// hover で出る面 Surface-Secondary の上でも 3:1（WCAG 1.4.11）。Surface-Primary 側は下の nonTextControls
+// （field-error-border）が検査する。
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const bg = resolve(s.surface.secondary)
+  pairs.push([resolveOver(s.border.caution, bg), bg, `${mode}: inline 入力欄（エラー）の枠 Border-Caution / Surface-Secondary（hover の面・非テキスト）`, 3])
+}
+
 // 検索一致のハイライト（<mark>・Highlight 部品・issue #692）。light / dark で AA。
 for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   pairs.push([resolve(s.text["on-highlight"]), resolve(s.surface.highlight), `${mode}: Text-on-Highlight / Surface-Highlight`, 4.5])
