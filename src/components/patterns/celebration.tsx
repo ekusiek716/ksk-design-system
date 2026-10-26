@@ -20,6 +20,7 @@ interface CelebrationProps extends React.ComponentProps<"div"> {
    */
   effect?: CelebrationEffect
   emoji?: string
+  /** 見出し。省略時の読み上げ文は KskLabelsProvider の `celebrationTitle`（Provider 無しは "達成しました"。locale="en" で "Achieved"。画面には出さない） */
   title?: string
   description?: string
   actions?: React.ReactNode
@@ -195,7 +196,7 @@ function Celebration({
   const showConfetti = !reducedMotion && (trigger === "confetti" || trigger === "both")
   const showMessage = !cardless && (trigger === "confetti" || trigger === "emoji" || trigger === "both")
   const canTapDismiss = Boolean(onTapDismiss || interactive)
-  const accessibleText = [title ?? "達成しました", description].filter(Boolean).join(" ")
+  const accessibleText = [title ?? defaultLabels.celebrationTitle, description].filter(Boolean).join(" ")
   const handleTapDismiss = () => {
     if (onTapDismiss) {
       onTapDismiss()

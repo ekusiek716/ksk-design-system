@@ -1,10 +1,12 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../ui/ksk-labels"
 import { isImeComposing } from "@/lib/ime"
 
 interface TagInputProps {
   value?: string[]
   onChange?: (tags: string[]) => void
+  /** 入力欄のプレースホルダー（タグが 0 件のときだけ表示）。省略時は KskLabelsProvider の `tagInputPlaceholder`（Provider 無しは "タグを入力して Enter"。locale="en" で "Type a tag and press Enter"） */
   placeholder?: string
   disabled?: boolean
   /** 最大タグ数 */
@@ -14,11 +16,11 @@ interface TagInputProps {
   className?: string
   /**
    * タグ入力フィールドの aria-label。
-   * i18n 対応: 英語では "Add tag" を渡す。
+   * 省略時は KskLabelsProvider の `tagInputLabel`（Provider 無しは "タグ入力"。locale="en" で "Tag input"）。
    *
    * `id`（`<label htmlFor>` / `FormField htmlFor` で結ぶ）か `aria-labelledby` を渡したときは
    * 既定では aria-label を付けない（付けると label より優先され、見出しが名前にならない）。
-   * @default "タグ入力"（id / aria-labelledby が無いとき）
+   * 既定の aria-label は id / aria-labelledby が無いときだけ付く。
    */
   inputLabel?: string
   /**
@@ -48,7 +50,7 @@ let warnedMissingLabel = false
 function TagInput({
   value = [],
   onChange,
-  placeholder = "タグを入力して Enter",
+  placeholder: placeholderProp,
   disabled = false,
   max,
   allowDuplicates = false,
@@ -60,6 +62,8 @@ function TagInput({
   "aria-describedby": ariaDescribedby,
   "aria-invalid": ariaInvalid,
 }: TagInputProps) {
+  const defaultLabels = useKskLabels()
+  const placeholder = placeholderProp ?? defaultLabels.tagInputPlaceholder
   // label（id 経由）/ aria-labelledby で名前が付くときは、明示されない限り aria-label を出さない。
   // id だけ渡して実際には <label for={id}> が無い場合に無名の入力欄にならないよう、マウント後に
   // label の有無を確かめ、無ければ既定の aria-label に戻す（開発ビルドでは 1 回 warn）。
@@ -88,7 +92,7 @@ function TagInput({
     [id, ariaLabelledby, inputLabel]
   )
   const resolvedInputLabel =
-    inputLabel ?? (ariaLabelledby || (id && !labelMissing) ? undefined : "タグ入力")
+    inputLabel ?? (ariaLabelledby || (id && !labelMissing) ? undefined : defaultLabels.tagInputLabel)
   const [input, setInput] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
   const skipBlurRef = React.useRef(false)
@@ -160,7 +164,7 @@ function TagInput({
               type="button"
               onClick={(e) => { e.stopPropagation(); removeTag(i) }}
               className="flex items-center justify-center w-3.5 h-3.5 rounded-full hover:bg-[var(--Brand-Light)] transition-colors"
-              aria-label={`${tag} を削除`}
+              aria-label={formatKskLabel(defaultLabels.tagInputRemove, { tag })}
             >
               <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
                 <path d="M1 1l6 6M7 1L1 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

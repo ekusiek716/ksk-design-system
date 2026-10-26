@@ -104,6 +104,31 @@ function ChevronRightIcon() {
 }
 
 /**
+ * 件数・ページ数の文言テンプレートを描画する。`{range}` のような差し込み口は数字（tabular-nums）、
+ * それ以外の文字は弱いトーンで出す（`1 - 10 / 全 100 件` の「/ 全」「件」を弱くする既存の見た目）。
+ */
+function renderCountTemplate(template: string, values: Record<string, React.ReactNode>) {
+  return template
+    .split(/(\{\w+\})/)
+    .filter(Boolean)
+    .map((part, i) => {
+      const token = /^\{(\w+)\}$/.exec(part)
+      if (token && token[1] in values) {
+        return (
+          <span key={i} className="tabular-nums">
+            {values[token[1]]}
+          </span>
+        )
+      }
+      return (
+        <span key={i} className="text-[var(--Text-Low-Emphasis)]">
+          {part}
+        </span>
+      )
+    })
+}
+
+/**
  * 最小ページネーション。「前へ / N - M / 全 T 件 / 次へ」または
  * 「前へ / N / M ページ / 次へ」の最小限の構成。
  *
@@ -193,29 +218,22 @@ function SimplePagination({
 
     if (resolvedFormat === "items" && total !== undefined && pageSize) {
       if (total === 0) {
-        return <span className="tabular-nums">0 件</span>
+        return <span className="tabular-nums">{defaultLabels.simplePaginationEmpty}</span>
       }
-      return (
-        <>
-          <span className="tabular-nums">
-            {from?.toLocaleString()} - {to?.toLocaleString()}
-          </span>
-          <span className="text-[var(--Text-Low-Emphasis)]"> / 全 </span>
-          <span className="tabular-nums">{total.toLocaleString()}</span>
-          <span className="text-[var(--Text-Low-Emphasis)]"> 件</span>
-        </>
-      )
+      return renderCountTemplate(defaultLabels.simplePaginationItems, {
+        range: `${from?.toLocaleString()} - ${to?.toLocaleString()}`,
+        total: total.toLocaleString(),
+      })
     }
 
-    return (
-      <>
-        <span className="tabular-nums">{safePage}</span>
-        <span className="text-[var(--Text-Low-Emphasis)]"> / </span>
-        <span className="tabular-nums">{resolvedTotalPages}</span>
-        <span className="text-[var(--Text-Low-Emphasis)]"> ページ</span>
-      </>
-    )
+    return renderCountTemplate(defaultLabels.simplePaginationPages, {
+      page: safePage,
+      pages: resolvedTotalPages,
+    })
   }, [
+    defaultLabels.simplePaginationEmpty,
+    defaultLabels.simplePaginationItems,
+    defaultLabels.simplePaginationPages,
     renderLabel,
     compact,
     resolvedFormat,
