@@ -36,4 +36,14 @@ const OVERLAY_FOCUS_RING =
 const OVERLAY_FOCUS_RING_INSET =
   "focus-visible:outline-hidden focus-visible:shadow-[inset_0_0_0_2px_var(--Primitive-Gray-900),inset_0_0_0_4px_var(--Primitive-White)]"
 
-export { OVERLAY_FOCUS_RING, OVERLAY_FOCUS_RING_INSET }
+/**
+ * OVERLAY_FOCUS_RING_INSET の「子が面を覆う」版。操作子の中に画像などの子（absolute inset-0）があると、
+ * 要素自身の inset box-shadow は子の下に描かれて隠れる。そこで ::after の覆い（pointer-events-none・
+ * 親の角丸を継承・子より前面の z-20）に同じ内側の二重リングを描く。
+ * 使う側は要素を `relative`（位置決めの基準）にすること。
+ * 例: 画像・グラデーション背景のバナー項目（BannerCarousel）。
+ */
+const OVERLAY_FOCUS_RING_INSET_OVER =
+  "focus-visible:outline-hidden after:pointer-events-none after:absolute after:inset-0 after:z-20 after:rounded-[inherit] after:content-[''] focus-visible:after:shadow-[inset_0_0_0_2px_var(--Primitive-Gray-900),inset_0_0_0_4px_var(--Primitive-White)]"
+
+export { OVERLAY_FOCUS_RING, OVERLAY_FOCUS_RING_INSET, OVERLAY_FOCUS_RING_INSET_OVER }

@@ -6,6 +6,8 @@ import { ImageOverlayAction } from "@/components/patterns/image-overlay-action"
 import { MediaActionCluster } from "@/components/patterns/media-action-cluster"
 import { BottomTabBar } from "@/components/patterns/commerce/bottom-tab-bar"
 import { ImageGallery } from "@/components/ui/image-gallery"
+import { ProductCard } from "@/components/patterns/commerce/product-card"
+import { BannerCarousel } from "@/components/patterns/banner-carousel"
 import "@/index.css"
 
 /**
@@ -142,5 +144,60 @@ describe("面全体を覆う・pill の中の操作子は二重リング（内�
     expectInsetRing(tab)
     // 内側リングは pill の縁で切られない（要素の内側に描くため、外側へは 1px もはみ出さない）
     expect(getComputedStyle(tab).boxShadow).not.toContain(OUTER_DARK)
+  })
+})
+
+describe("商品カードのお気に入りボタン・バナー項目（写真・グラデーションの上）", () => {
+  const IMG = "data:image/gif;base64,R0lGODlhAQABAAAAACw="
+
+  it("ProductCard 縦: お気に入りは外側の二重リング（画像枠の外・角から 6px）", async () => {
+    mount(<ProductCard name="商品" imageUrl={IMG} price={1000} onFavoriteToggle={() => {}} />)
+    const fav = container!.querySelector<HTMLElement>('button[aria-label="お気に入りに追加"]')!
+    await userEvent.tab()
+    expect(document.activeElement).toBe(fav)
+    expectOuterRing(fav)
+  })
+
+  it("ProductCard 横: お気に入りは内側の二重リング（overflow-hidden の画像枠の中）", async () => {
+    mount(
+      <ProductCard
+        orientation="horizontal"
+        name="商品"
+        imageUrl={IMG}
+        price={1000}
+        onFavoriteToggle={() => {}}
+      />,
+    )
+    const fav = container!.querySelector<HTMLElement>('button[aria-label="お気に入りに追加"]')!
+    await userEvent.tab()
+    expect(document.activeElement).toBe(fav)
+    expectInsetRing(fav)
+  })
+
+  it("BannerCarousel: 画像バナー項目は ::after に内側の二重リング（画像が自身の inset 影を隠すため）", async () => {
+    mount(<BannerCarousel items={[{ imageSrc: IMG, caption: "キャンペーン", onClick: () => {} }]} />)
+    const item = container!.querySelector<HTMLElement>("button")!
+    await userEvent.tab() // 先頭はスクロール枠（tabIndex=0）
+    await userEvent.tab()
+    expect(document.activeElement).toBe(item)
+    const after = getComputedStyle(item, "::after")
+    expect(after.boxShadow).toContain(INSET_DARK)
+    expect(after.boxShadow).toContain(INSET_WHITE)
+    // 覆いはクリックを奪わず、項目全面を覆う
+    expect(after.pointerEvents).toBe("none")
+    expect(after.position).toBe("absolute")
+  })
+
+  it("BannerCarousel: グラデーション背景の項目（a）も同じ", async () => {
+    mount(
+      <BannerCarousel
+        items={[{ gradient: "linear-gradient(135deg, #ff0, #f0f)", caption: "特集", href: "#a" }]}
+      />,
+    )
+    const item = container!.querySelector<HTMLElement>("a")!
+    await userEvent.tab()
+    await userEvent.tab()
+    expect(document.activeElement).toBe(item)
+    expect(getComputedStyle(item, "::after").boxShadow).toContain(INSET_DARK)
   })
 })

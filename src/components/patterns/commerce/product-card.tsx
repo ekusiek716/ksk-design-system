@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { OVERLAY_FOCUS_RING, OVERLAY_FOCUS_RING_INSET } from "@/lib/server-variants/overlay-focus-ring"
 import { PriceDisplay } from "./price-display"
 import { RatingDisplay } from "./rating-display"
 
@@ -175,7 +176,8 @@ function ProductCard({
             <div className="absolute top-1 right-1 z-10">
               <button
                 type="button"
-                className="flex size-8 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)]/80 backdrop-blur-sm"
+                // 写真の上・overflow-hidden の画像枠の中なので、背景に依存しない内側の二重リング
+                className={cn("flex size-8 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)]/80 backdrop-blur-sm", OVERLAY_FOCUS_RING_INSET)}
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
@@ -266,7 +268,8 @@ function ProductCard({
           <div className="absolute top-1.5 right-1.5 z-[4]">
             <button
               type="button"
-              className="flex size-9 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)]/80 backdrop-blur-sm transition-colors hover:bg-[var(--Surface-Tertiary)]"
+              // 写真の上。画像枠（overflow-hidden）の外に置かれ、カード角から 6px 内側なので外側の二重リング（4px）が切れない
+              className={cn("flex size-9 items-center justify-center rounded-full border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)]/80 backdrop-blur-sm transition-colors hover:bg-[var(--Surface-Tertiary)]", OVERLAY_FOCUS_RING)}
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()

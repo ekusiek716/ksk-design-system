@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { OVERLAY_FOCUS_RING_INSET_OVER } from "@/lib/server-variants/overlay-focus-ring"
 
 interface BannerItem {
   /** 背景画像URL（なければ gradient） */
@@ -99,7 +100,10 @@ function BannerCarousel({
                 background: item.imageSrc ? undefined : background,
               }}
               className={cn(
-                "rounded-xl overflow-hidden flex flex-col justify-end p-3 text-left",
+                "relative rounded-xl overflow-hidden flex flex-col justify-end p-3 text-left",
+                // 画像・グラデーションの上、かつ横スクロールの枠（overflow-x-auto は縦も切る）の中なので、
+                // 内側の二重リング。画像（absolute inset-0）が自身の inset 影を隠すため ::after に描く
+                OVERLAY_FOCUS_RING_INSET_OVER,
                 (item.href || item.onClick) && "cursor-pointer",
                 "hover:opacity-95 active:scale-[.98] transition-transform",
                 ASPECT[itemAspectRatio] ?? "aspect-[2/1]",

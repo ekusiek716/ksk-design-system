@@ -83,6 +83,7 @@
 @source inline("[--ksk-fab-bottom-offset:1rem]");
 @source inline("[--ksk-fab-bottom-offset:5rem]");
 @source inline("[--ksk-fab-bottom-offset:6rem]");
+@source inline("[--ksk-glass-focus-ring:0_0_0_2px_var(--Border-Accent-Primary)]");
 @source inline("[-webkit-tap-highlight-color:transparent]");
 @source inline("[:where(&)>:where(:not([data-slot=collapsible-chip-field],[data-slot=field-separator],[data-slot=field-legend],[data-slot=field-description],[data-slot=field-error]))]:py-3");
 @source inline("[:where(&)>:where([data-slot=field-legend])]:mb-2");
@@ -116,6 +117,12 @@
 @source inline("active:scale-[0.96]");
 @source inline("active:scale-[0.98]");
 @source inline("active:shadow-[var(--shadow-md)]");
+@source inline("after:absolute");
+@source inline("after:content-['']");
+@source inline("after:inset-0");
+@source inline("after:pointer-events-none");
+@source inline("after:rounded-[inherit]");
+@source inline("after:z-20");
 @source inline("animate-[celebration-emoji-pop_600ms_var(--Motion-Easing-Standard)_200ms_both]");
 @source inline("animate-[celebration-pop_360ms_var(--Motion-Easing-Bounce)_both]");
 @source inline("animate-fade-in");
@@ -451,6 +458,7 @@
 @source inline("flex-shrink");
 @source inline("flex-shrink-0");
 @source inline("flex-wrap");
+@source inline("focus-visible:after:shadow-[inset_0_0_0_2px_var(--Primitive-Gray-900),inset_0_0_0_4px_var(--Primitive-White)]");
 @source inline("focus-visible:bg-transparent");
 @source inline("focus-visible:border-[var(--Border-Accent-Primary)]");
 @source inline("focus-visible:border-[var(--Object-Accent-Primary)]");
@@ -1071,7 +1079,6 @@
 @source inline("ring");
 @source inline("ring-0");
 @source inline("ring-1");
-@source inline("ring-2");
 @source inline("ring-4");
 @source inline("ring-[3px]");
 @source inline("ring-[var(--Border-Accent-Primary)]");

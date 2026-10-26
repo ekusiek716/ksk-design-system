@@ -203,7 +203,9 @@ function MediaActionClusterButton({
         className={cn(
           "relative flex size-12 shrink-0 items-center justify-center rounded-full glass glass-specular glass-inverse",
           "transition-transform active:scale-[0.94]",
-          item.active && "ring-2 ring-[var(--Border-Accent-Primary)]",
+          // active は Border-Accent-Primary の 2px リング。.glass の非レイヤー box-shadow は Tailwind の ring を打ち消すため、
+          // glass.css が box-shadow の先頭に置く --ksk-glass-focus-ring（内部変数）へ値を入れて合成する
+          item.active && "[--ksk-glass-focus-ring:0_0_0_2px_var(--Border-Accent-Primary)]",
           item.disabled && "opacity-50",
         )}
         aria-hidden="true"

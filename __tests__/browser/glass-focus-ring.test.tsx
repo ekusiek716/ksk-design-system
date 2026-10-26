@@ -4,6 +4,7 @@ import { act } from "react"
 import { userEvent } from "vitest/browser"
 import { Button } from "@/components/ui/button"
 import { BottomTabBar } from "@/components/patterns/commerce/bottom-tab-bar"
+import { MediaActionCluster } from "@/components/patterns/media-action-cluster"
 import "@/index.css"
 
 /**
@@ -127,6 +128,38 @@ describe("glass 系 Button のフォーカスリング", () => {
     await vi.waitFor(() => {
       expect(getComputedStyle(button).boxShadow).toContain("rgb(255, 0, 0) 0px 0px 0px 6px")
     })
+  })
+})
+
+describe("MediaActionCluster の active 状態（glass の円）", () => {
+  /** CSS 変数を実色（rgb(...)）に解決する */
+  function resolveColor(variable: string) {
+    const probe = document.createElement("i")
+    probe.style.color = `var(${variable})`
+    container!.appendChild(probe)
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    return color
+  }
+
+  it("active の円は Border-Accent-Primary の 2px リングが描かれ、ガラスの影も残る。非 active には出ない", () => {
+    mount(
+      <MediaActionCluster
+        position="absolute"
+        items={[
+          { id: "a", label: "選択中", icon: <span />, active: true, onClick: () => {} },
+          { id: "b", label: "通常", icon: <span />, onClick: () => {} },
+        ]}
+      />,
+    )
+    const circles = container!.querySelectorAll<HTMLElement>("button span.glass")
+    expect(circles).toHaveLength(2)
+    const accent = resolveColor("--Border-Accent-Primary")
+    const [active, normal] = circles
+    // 以前は `ring-2` が .glass の非レイヤー box-shadow に負けて描かれなかった
+    expect(getComputedStyle(active).boxShadow).toContain(`${accent} 0px 0px 0px 2px`)
+    expect(getComputedStyle(active).boxShadow).toContain("rgba(0, 0, 0, 0.16) 0px 14px 40px -10px")
+    expect(getComputedStyle(normal).boxShadow).not.toContain(`${accent} 0px 0px 0px 2px`)
   })
 })
 
