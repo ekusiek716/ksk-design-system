@@ -9,7 +9,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "../../ui/dropdown-menu"
-import { useKskLabels } from "../../ui/ksk-labels"
+import { formatKskLabelNodes, useKskLabels } from "../../ui/ksk-labels"
 
 /** フィルターの選択肢 */
 interface FilterOption {
@@ -144,8 +144,6 @@ function FilterBar({
   const defaultLabels = useKskLabels()
   const navLabel = navLabelProp ?? defaultLabels.filterBarNav
   const moreFiltersLabel = moreFiltersLabelProp ?? defaultLabels.filterBarMore
-  // `{count}` の前後で分けて、件数だけを <strong> にする
-  const [resultBefore, resultAfter] = defaultLabels.filterBarResultCount.split("{count}")
 
   return (
     <nav
@@ -184,7 +182,9 @@ function FilterBar({
         <div className="flex items-center justify-between">
           {resultCount !== undefined && (
             <span className="typo-body-md text-[var(--Text-High-Emphasis)]">
-              {resultBefore}<strong className="typo-heading-md">{resultCount.toLocaleString()}</strong>{resultAfter}
+              {formatKskLabelNodes(defaultLabels.filterBarResultCount, {
+                count: <strong className="typo-heading-md">{resultCount.toLocaleString()}</strong>,
+              })}
             </span>
           )}
 

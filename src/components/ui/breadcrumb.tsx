@@ -63,6 +63,9 @@ function BreadcrumbSeparator({ children, className, ...props }: React.ComponentP
 }
 
 /**
+ * 注意: 親の span が `aria-hidden="true"`（従来どおり）なので、中の sr-only のテキストは実際には
+ * 読み上げられない。文言は将来 aria-hidden を外したときのためのもので、今の挙動は変えていない。
+ *
  * @param label 読み上げ名（sr-only）。省略時は KskLabelsProvider の `breadcrumbEllipsis`（Provider 無しは "その他"。locale="en" で "More"）
  */
 function BreadcrumbEllipsis({ className, label, ...props }: React.ComponentProps<"span"> & { label?: string }) {

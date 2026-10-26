@@ -113,7 +113,7 @@ function renderCountTemplate(template: string, values: Record<string, React.Reac
     .filter(Boolean)
     .map((part, i) => {
       const token = /^\{(\w+)\}$/.exec(part)
-      if (token && token[1] in values) {
+      if (token && Object.prototype.hasOwnProperty.call(values, token[1])) {
         return (
           <span key={i} className="tabular-nums">
             {values[token[1]]}

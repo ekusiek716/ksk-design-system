@@ -5,6 +5,9 @@ import { Calendar } from "./calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 import { useKskLabels, useKskLocale } from "./ksk-labels"
 
+/** 曜日名（EEE / EEEE トークン用）。日付の書式であって文言ではないので locale で出し分ける（Provider の locale="en" は Intl） */
+const JA_WEEKDAYS = "日月火水木金土"
+
 function formatDate(date: Date, fmt: string, locale: "ja" | "en" = "ja"): string {
   const y = date.getFullYear()
   const month = date.getMonth() + 1
@@ -19,11 +22,11 @@ function formatDate(date: Date, fmt: string, locale: "ja" | "en" = "ja"): string
     EEEE:
       locale === "en"
         ? date.toLocaleDateString("en", { weekday: "long" })
-        : `${["日", "月", "火", "水", "木", "金", "土"][weekday]}曜日`,
+        : `${JA_WEEKDAYS[weekday]}曜日`,
     EEE:
       locale === "en"
         ? date.toLocaleDateString("en", { weekday: "short" })
-        : ["日", "月", "火", "水", "木", "金", "土"][weekday],
+        : JA_WEEKDAYS[weekday],
   }
   return fmt.replace(/yyyy|EEEE|EEE|MM|M|dd|d/g, (token) => values[token])
 }

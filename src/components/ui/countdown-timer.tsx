@@ -1,6 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { useKskLabels } from "./ksk-labels"
+import { formatKskLabel, useKskLabels } from "./ksk-labels"
 
 type Granularity = "day" | "hour" | "minute" | "second"
 
@@ -26,7 +26,12 @@ interface CountdownTimerProps {
   compact?: boolean
   className?: string
   onEnd?: () => void
-  /** 日単位ラベル。granularity="day" で使用。省略時は KskLabelsProvider の `countdownUnitDay`（Provider 無しは "日"。locale="en" で "d"） */
+  /**
+   * 日単位ラベル。granularity="day" で使用。以下の単位 prop（day / hour / minute / second）は表示用で、
+   * 渡すと読み上げ（aria-label）にもそのまま使う（英語の単複はここで渡す）。省略時の読み上げは
+   * KskLabelsProvider の `countdownSpoken*`（ja は "5日" 等、en は "5 days" 等）。
+   * 表示の既定は KskLabelsProvider の `countdownUnitDay`（Provider 無しは "日"。locale="en" で "d"）。
+   */
   dayUnit?: string
   /** 時間単位ラベル。省略時は KskLabelsProvider の `countdownUnitHour`（Provider 無しは "時間"。locale="en" で "h"） */
   hourUnit?: string
@@ -73,6 +78,11 @@ function DayCountdown({
 }: CountdownTimerProps) {
   const defaultLabels = useKskLabels()
   const dayUnit = dayUnitProp ?? defaultLabels.countdownUnitDay
+  // 読み上げ（aria-label）は表示の単位（"d"）ではなく単語（"5 days"）で読む。単位 prop を渡したときはそれを使う
+  const spokenDays = (count: number) =>
+    dayUnitProp !== undefined
+      ? `${count}${dayUnitProp}`
+      : formatKskLabel(defaultLabels.countdownSpokenDay, { count })
   const label = labelProp ?? defaultLabels.countdownRemaining
   const endedLabel = endedLabelProp ?? defaultLabels.countdownEnded
   const todayLabel = todayLabelProp ?? defaultLabels.countdownToday
@@ -134,7 +144,7 @@ function DayCountdown({
       data-granularity="day"
       data-state="active"
       data-variant={variant}
-      aria-label={`${label} ${daysLeft}${dayUnit}`}
+      aria-label={`${label} ${spokenDays(daysLeft)}`}
       className={cn(
         "inline-flex items-baseline gap-1 px-3 py-2 rounded-lg font-variant-nums",
         variant === "filled"
@@ -165,6 +175,17 @@ function TimeCountdown({
   secondUnit: secondUnitProp,
 }: CountdownTimerProps) {
   const defaultLabels = useKskLabels()
+  // 読み上げ（aria-label）は表示の単位（"h" "m" "s"）ではなく単語（"1 hour 5 minutes"）で読む。
+  // 単位 prop を渡したものはそれを使う。英語の単複（1 hour / 2 hours）は単位 prop（hourUnit 等）で渡す
+  const spokenTime = (h: number, m: number, s: number) => {
+    const part = (count: number, unit: string | undefined, spoken: string) =>
+      unit !== undefined ? `${count}${unit}` : formatKskLabel(spoken, { count })
+    return [
+      part(h, hourUnitProp, defaultLabels.countdownSpokenHour),
+      part(m, minuteUnitProp, defaultLabels.countdownSpokenMinute),
+      part(s, secondUnitProp, defaultLabels.countdownSpokenSecond),
+    ].join(defaultLabels.countdownSpokenSeparator)
+  }
   const hourUnit = hourUnitProp ?? defaultLabels.countdownUnitHour
   const minuteUnit = minuteUnitProp ?? defaultLabels.countdownUnitMinute
   const secondUnit = secondUnitProp ?? defaultLabels.countdownUnitSecond
@@ -247,7 +268,7 @@ function TimeCountdown({
       data-state="active"
       data-variant={variant}
       aria-live="off"
-      aria-label={`${label} ${h}${hourUnit}${m}${minuteUnit}${s}${secondUnit}`}
+      aria-label={`${label} ${spokenTime(h, m, s)}`}
       className={cn(
         "inline-flex items-center gap-1 px-3 py-2 rounded-lg font-variant-nums",
         isFilled
