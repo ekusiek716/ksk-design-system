@@ -61,7 +61,7 @@ export function RadioGroup({
     >
       {options.map((o) => {
         const selected = value === o.value
-        const itemDisabled = disabled || o.disabled
+        const itemDisabled = Boolean(disabled || o.disabled)
         return (
           <Pressable
             key={o.value}
@@ -79,7 +79,10 @@ export function RadioGroup({
               opacity: itemDisabled ? 0.5 : 1,
             }}
             accessibilityRole="radio"
-            accessibilityState={{ selected, disabled: itemDisabled }}
+            // radio の選択状態は checked が正本（Radio / ChipSelector の単一選択と同じ形）。
+            // selected を残すと iOS で「選択済み」と「チェック済み」が二重に読まれるため undefined で打ち消す。
+            // disabled は Radio / Chip と同じく false も明示する
+            accessibilityState={{ checked: selected, selected: undefined, disabled: itemDisabled }}
             // react-native-web 0.21 は accessibilityState を aria-* に変換しないため、
             // RN 0.71+ の aria-* props を併記する（peerDependency は react-native >=0.74.0）
             aria-checked={selected}
