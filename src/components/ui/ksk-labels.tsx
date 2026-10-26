@@ -130,6 +130,200 @@ interface KskLabels {
   errorStateRetry?: string
   /** Celebration の閉じるボタンの文言と読み上げ名 */
   celebrationDismiss?: string
+  /** ImageCarousel / ContentCarousel の前へ矢印の読み上げ名 */
+  carouselPrevious?: string
+  /** ImageCarousel / ContentCarousel の次へ矢印の読み上げ名 */
+  carouselNext?: string
+  /** ImageCarousel / ContentCarousel のドット（各スライドへ移動）の読み上げ名。`{index}` を 1 始まりの番号に置き換える */
+  carouselSlide?: string
+  /** BannerCarousel / ProductCarousel の「もっと見る」の文言 */
+  carouselMore?: string
+  /** ImageCarousel のスクロール領域（role="region"）の読み上げ名 */
+  imageCarouselRegion?: string
+  /** ContentCarousel のスクロール領域の読み上げ名 */
+  contentCarouselRegion?: string
+  /** BannerCarousel のスクロール領域の読み上げ名 */
+  bannerCarouselRegion?: string
+  /** BulkActions の選択解除ボタンの読み上げ名 */
+  bulkActionsClear?: string
+  /** BulkActions / DataTableBulkActions の選択件数の文言（toolbar の読み上げ名も兼ねる）。`{count}` を件数に置き換える。英語の単複は関数 prop（countLabel）で */
+  bulkActionsCount?: string
+  /** ImageUploader の追加ボタンの読み上げ名 */
+  imageUploaderAdd?: string
+  /** ImageUploader の追加ボタンに見える短い文言 */
+  imageUploaderAddText?: string
+  /** ImageUploader の各画像の削除ボタンの読み上げ名。`{name}` を画像の alt に置き換える */
+  imageUploaderRemove?: string
+  /** DataTable の選択列ヘッダー（th）の読み上げ名 */
+  dataTableSelectionColumn?: string
+  /** DataTable の「すべて選択」チェックボックスの読み上げ名 */
+  dataTableSelectAll?: string
+  /** DataTableCheckboxCell（行側）の既定の読み上げ名 */
+  dataTableSelectRow?: string
+  /** DataTable の行チェックボックスの読み上げ名。`{id}` を行 ID に置き換える */
+  dataTableSelectRowId?: string
+  /** DataTableActionCell の行メニュー起動ボタンの読み上げ名 */
+  dataTableRowMenu?: string
+  /** DataTableInputCell の input の読み上げ名（aria-label / placeholder が無いとき） */
+  dataTableInput?: string
+  /** DataTableSelectCell / createDataTableSelectColumn の選択欄の読み上げ名・プレースホルダー（aria-label / placeholder が無いとき） */
+  dataTableSelect?: string
+  /** DataTableAddRow の追加ボタンの文言 */
+  dataTableAddRow?: string
+  /** DataTableEmptyState の見出し */
+  dataTableEmpty?: string
+  /** createDataTable*Column の値が無いセルの表示 */
+  dataTableEmptyValue?: string
+  /** OrderSummary の合計ラベル */
+  orderSummaryTotal?: string
+  /** ProductCard のカート追加ボタンの文言 */
+  productCardAddToCart?: string
+  /** ProductCard のお気に入りボタン（未登録のとき）の読み上げ名 */
+  productCardFavoriteAdd?: string
+  /** ProductCard のお気に入りボタン（登録済みのとき）の読み上げ名 */
+  productCardFavoriteRemove?: string
+  /** QuantitySelector 全体（role="group"）の読み上げ名 */
+  quantitySelectorGroup?: string
+  /** QuantitySelector の減らすボタンの読み上げ名 */
+  quantitySelectorDecrease?: string
+  /** QuantitySelector の増やすボタンの読み上げ名 */
+  quantitySelectorIncrease?: string
+  /** QuantitySelector の削除操作（trash 状態）の読み上げ名 */
+  quantitySelectorDelete?: string
+  /** FilterBar の nav の読み上げ名 */
+  filterBarNav?: string
+  /** FilterBar の絞り込みボタンの読み上げ名 */
+  filterBarMore?: string
+  /** FilterBar のドロップダウンの「選択を解除」の文言 */
+  filterBarClear?: string
+  /** FilterBar の並べ替えボタンの既定の文言 */
+  filterBarSort?: string
+  /** FilterBar の件数表示。`{count}` の部分だけ太字の数字になる（`{count}` の前後の文字がそのまま出る） */
+  filterBarResultCount?: string
+  /** BottomTabBar の nav の読み上げ名 */
+  bottomTabBarNav?: string
+  /** ChipFilterBar の件数表示。`{count}` を桁区切り済みの件数に置き換える。英語の単複は関数 prop（resultCountLabel）で */
+  chipFilterBarResultCount?: string
+  /** Chip の削除ボタンの読み上げ名（children が文字列でないとき） */
+  chipRemove?: string
+  /** Chip の削除ボタンの読み上げ名（children が文字列・数値のとき）。`{name}` を children に置き換える */
+  chipRemoveNamed?: string
+  /** CompactFilePicker の見出し */
+  compactFilePickerLabel?: string
+  /** CompactFilePicker のボタンの文言 */
+  compactFilePickerTrigger?: string
+  /** CompactFilePicker の処理中（loading）のボタンの文言 */
+  compactFilePickerLoading?: string
+  /** ImageAttachmentPicker のボタンの文言 */
+  imageAttachmentTrigger?: string
+  /** ImageAttachmentPicker の見出し・名前の無い画像の既定の名前 */
+  imageAttachmentLabel?: string
+  /** ImageAttachmentPicker の各画像の削除ボタンの読み上げ名。`{name}` を画像名に置き換える */
+  imageAttachmentRemove?: string
+  /** ConfirmDialog の確認ボタンの文言 */
+  confirmDialogConfirm?: string
+  /** ConfirmDialog のキャンセルボタンの文言 */
+  confirmDialogCancel?: string
+  /** ConfirmDialog の処理中の文言 */
+  confirmDialogLoading?: string
+  /** ErrorState（kind="error"）の見出し */
+  errorStateTitle?: string
+  /** ErrorState（kind="error"）の説明 */
+  errorStateDescription?: string
+  /** ErrorState（kind="notFound"）の見出し */
+  errorStateNotFoundTitle?: string
+  /** ErrorState（kind="notFound"）の説明 */
+  errorStateNotFoundDescription?: string
+  /** FeatureComparisonTable の左上の見出しセル（機能名の列） */
+  featureComparisonFeature?: string
+  /** FeatureComparisonTable の true のセルの読み上げ文言 */
+  featureComparisonAvailable?: string
+  /** FeatureComparisonTable の false のセルの読み上げ文言 */
+  featureComparisonUnavailable?: string
+  /** FileUpload のドラッグエリアのメイン文言 */
+  fileUploadDrag?: string
+  /** FileUpload の「または」 */
+  fileUploadOr?: string
+  /** FileUpload のファイル選択の文言 */
+  fileUploadBrowse?: string
+  /** FileUpload のサイズ上限の文言。`{size}` を "5.0 MB" のようなサイズに置き換える */
+  fileUploadMaxSize?: string
+  /** FileUpload のファイル数上限の文言。`{max}` を数に置き換える。英語の単複は関数 prop（maxFilesLabel）で */
+  fileUploadMaxFiles?: string
+  /** FileUpload の削除ボタンの語（fileUploadRemoveItem の `{label}` に入る） */
+  fileUploadRemove?: string
+  /** FileUpload の各ファイルの削除ボタンの読み上げ名。`{name}` をファイル名、`{label}` を fileUploadRemove（または removeLabel prop）に置き換える */
+  fileUploadRemoveItem?: string
+  /** FilterPill の Popover パネルの読み上げ名。`{label}` をピルのラベルに置き換える */
+  filterPillPanel?: string
+  /** FilterPill のクリアボタンの読み上げ名。`{label}` をピルのラベルに置き換える */
+  filterPillClear?: string
+  /** KanbanColumn の件数の読み上げ・表示の文言。`{count}` を件数に置き換える。英語の単複は関数 prop（countLabel）で */
+  kanbanColumnCount?: string
+  /** MediaActionCluster 全体の読み上げ名 */
+  mediaActionCluster?: string
+  /** SidebarNav の nav の読み上げ名 */
+  sidebarNav?: string
+  /** SwipeRow のアクション群（group）の読み上げ名 */
+  swipeRowActions?: string
+  /** ReviewOverlay のピン（コメントが無いとき）の読み上げ名 */
+  reviewOverlayPin?: string
+  /** TagInput の入力欄のプレースホルダー（タグが 0 件のとき） */
+  tagInputPlaceholder?: string
+  /** TagInput の入力欄の読み上げ名（id / aria-labelledby が無いとき） */
+  tagInputLabel?: string
+  /** TagInput の各タグの削除ボタンの読み上げ名。`{tag}` をタグに置き換える */
+  tagInputRemove?: string
+  /** CodeInput（cells）の各セルの読み上げ名。`{index}` を 1 始まりの桁、`{length}` を全桁数に置き換える */
+  codeInputCell?: string
+  /** Progress / ProgressRing の読み上げ名（aria-label / aria-labelledby / label が無いとき） */
+  progress?: string
+  /** Celebration の読み上げ文（title が無いとき。画面には出さない） */
+  celebrationTitle?: string
+  /** CoachMarkOverlay の面（overlay）の読み上げ名。ja の既定は従来どおり英語の "Onboarding coach mark"（Provider 無しの読み上げを変えないため） */
+  coachMarkOverlayLabel?: string
+  /** Combobox のトリガーのプレースホルダー */
+  comboboxPlaceholder?: string
+  /** Combobox の検索欄のプレースホルダー */
+  comboboxSearchPlaceholder?: string
+  /** Combobox の候補リストの読み上げ名。`{label}` をトリガーの名前（triggerLabel / placeholder）に置き換える */
+  comboboxOptions?: string
+  /** MultiSelect のトリガーのプレースホルダー */
+  multiSelectPlaceholder?: string
+  /** MultiSelect の検索欄のプレースホルダー */
+  multiSelectSearchPlaceholder?: string
+  /** DatePicker / DateTimePicker（日付側）のプレースホルダー */
+  datePickerPlaceholder?: string
+  /** DateRangePicker のプレースホルダー */
+  dateRangePickerPlaceholder?: string
+  /** TimePicker / DateTimePicker（時刻側）のプレースホルダー */
+  timePickerPlaceholder?: string
+  /** DateRangePicker の開始日と終了日の区切り（前後の空白を含む） */
+  dateRangePickerSeparator?: string
+  /** DateTimePicker の日付側の書式（`M` `d` `EEE` 等のトークン。DatePicker の `dateFormat` と同じ） */
+  dateTimePickerDateFormat?: string
+  /** TimePicker の時の列の見出し */
+  timePickerHour?: string
+  /** TimePicker の分の列の見出し */
+  timePickerMinute?: string
+  /** CountdownTimer（granularity="day"）の日の単位 */
+  countdownUnitDay?: string
+  /** CountdownTimer の時間の単位 */
+  countdownUnitHour?: string
+  /** CountdownTimer の分の単位 */
+  countdownUnitMinute?: string
+  /** CountdownTimer の秒の単位 */
+  countdownUnitSecond?: string
+  /** BreadcrumbEllipsis（省略記号）の読み上げ名 */
+  breadcrumbEllipsis?: string
+  /** SimplePagination の 0 件のときの中央表示 */
+  simplePaginationEmpty?: string
+  /** SimplePagination の件数表示（items 形式）。`{range}`（例 "1 - 10"）と `{total}` を数字に置き換える。`{…}` 以外の文字は弱いトーンで出る */
+  simplePaginationItems?: string
+  /** SimplePagination のページ表示（pages 形式）。`{page}` と `{pages}` を数字に置き換える。`{…}` 以外の文字は弱いトーンで出る */
+  simplePaginationPages?: string
+  /** Toaster / auto-mount の通知 viewport（role="region"）の読み上げ名。`configureToast({ regionLabel })` が優先 */
+  toastRegion?: string
 }
 
 /** 全キーを解決済みの文言（部品の中・既定値で使う）。 */
@@ -196,6 +390,103 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, ResolvedKskLabels> = {
     codeDisplayCopyError: "コピーできませんでした",
     errorStateRetry: "再試行",
     celebrationDismiss: "閉じる",
+    carouselPrevious: "前へ",
+    carouselNext: "次へ",
+    carouselSlide: "スライド {index}",
+    carouselMore: "もっと見る",
+    imageCarouselRegion: "画像カルーセル",
+    contentCarouselRegion: "コンテンツカルーセル",
+    bannerCarouselRegion: "バナー一覧",
+    bulkActionsClear: "選択を解除",
+    bulkActionsCount: "{count}件を選択中",
+    imageUploaderAdd: "画像を追加",
+    imageUploaderAddText: "追加",
+    imageUploaderRemove: "{name}を削除",
+    dataTableSelectionColumn: "行選択",
+    dataTableSelectAll: "すべて選択",
+    dataTableSelectRow: "行を選択",
+    dataTableSelectRowId: "{id} を選択",
+    dataTableRowMenu: "行メニュー",
+    dataTableInput: "入力",
+    dataTableSelect: "選択",
+    dataTableAddRow: "追加する",
+    dataTableEmpty: "データがありません",
+    dataTableEmptyValue: "未設定",
+    orderSummaryTotal: "合計（税込）",
+    productCardAddToCart: "カートに追加",
+    productCardFavoriteAdd: "お気に入りに追加",
+    productCardFavoriteRemove: "お気に入りから削除",
+    quantitySelectorGroup: "数量選択",
+    quantitySelectorDecrease: "数量を減らす",
+    quantitySelectorIncrease: "数量を増やす",
+    quantitySelectorDelete: "削除",
+    filterBarNav: "フィルター",
+    filterBarMore: "絞り込み",
+    filterBarClear: "選択を解除",
+    filterBarSort: "並べ替え",
+    filterBarResultCount: "対象商品: {count} 件",
+    bottomTabBarNav: "メインナビゲーション",
+    chipFilterBarResultCount: "{count}件",
+    chipRemove: "削除",
+    chipRemoveNamed: "削除: {name}",
+    compactFilePickerLabel: "ファイル",
+    compactFilePickerTrigger: "選択する",
+    compactFilePickerLoading: "処理中",
+    imageAttachmentTrigger: "画像を追加",
+    imageAttachmentLabel: "画像",
+    imageAttachmentRemove: "{name}を削除",
+    confirmDialogConfirm: "確認",
+    confirmDialogCancel: "キャンセル",
+    confirmDialogLoading: "処理中…",
+    errorStateTitle: "エラーが発生しました",
+    errorStateDescription: "しばらくしてからもう一度お試しください",
+    errorStateNotFoundTitle: "ページが見つかりません",
+    errorStateNotFoundDescription: "お探しのページは移動または削除された可能性があります。",
+    featureComparisonFeature: "機能",
+    featureComparisonAvailable: "利用できる",
+    featureComparisonUnavailable: "利用できない",
+    fileUploadDrag: "ここにファイルをドロップ",
+    fileUploadOr: "または",
+    fileUploadBrowse: "ファイルを選択",
+    fileUploadMaxSize: "最大 {size} まで",
+    fileUploadMaxFiles: "最大 {max} ファイルまで",
+    fileUploadRemove: "削除",
+    fileUploadRemoveItem: "{name} を{label}",
+    filterPillPanel: "{label}のフィルタ",
+    filterPillClear: "{label}をクリア",
+    kanbanColumnCount: "{count}件",
+    mediaActionCluster: "メディアアクション",
+    sidebarNav: "サイドナビゲーション",
+    swipeRowActions: "行の操作",
+    reviewOverlayPin: "レビューピン",
+    tagInputPlaceholder: "タグを入力して Enter",
+    tagInputLabel: "タグ入力",
+    tagInputRemove: "{tag} を削除",
+    codeInputCell: "{index}桁目（全{length}桁）",
+    progress: "進捗",
+    celebrationTitle: "達成しました",
+    coachMarkOverlayLabel: "Onboarding coach mark",
+    comboboxPlaceholder: "選択してください",
+    comboboxSearchPlaceholder: "検索...",
+    comboboxOptions: "{label}の候補",
+    multiSelectPlaceholder: "選択してください",
+    multiSelectSearchPlaceholder: "検索...",
+    datePickerPlaceholder: "日付を選択",
+    dateRangePickerPlaceholder: "期間を選択",
+    timePickerPlaceholder: "時刻を選択",
+    dateRangePickerSeparator: " 〜 ",
+    dateTimePickerDateFormat: "M月d日（EEE）",
+    timePickerHour: "時",
+    timePickerMinute: "分",
+    countdownUnitDay: "日",
+    countdownUnitHour: "時間",
+    countdownUnitMinute: "分",
+    countdownUnitSecond: "秒",
+    breadcrumbEllipsis: "その他",
+    simplePaginationEmpty: "0 件",
+    simplePaginationItems: "{range} / 全 {total} 件",
+    simplePaginationPages: "{page} / {pages} ページ",
+    toastRegion: "通知",
   },
   en: {
     skipLink: "Skip to content",
@@ -257,6 +548,103 @@ const KSK_DEFAULT_LABELS: Record<KskLocale, ResolvedKskLabels> = {
     codeDisplayCopyError: "Could not copy",
     errorStateRetry: "Retry",
     celebrationDismiss: "Close",
+    carouselPrevious: "Previous",
+    carouselNext: "Next",
+    carouselSlide: "Slide {index}",
+    carouselMore: "See more",
+    imageCarouselRegion: "Image carousel",
+    contentCarouselRegion: "Content carousel",
+    bannerCarouselRegion: "Banners",
+    bulkActionsClear: "Clear selection",
+    bulkActionsCount: "{count} selected",
+    imageUploaderAdd: "Add image",
+    imageUploaderAddText: "Add",
+    imageUploaderRemove: "Remove {name}",
+    dataTableSelectionColumn: "Selection",
+    dataTableSelectAll: "Select all",
+    dataTableSelectRow: "Select row",
+    dataTableSelectRowId: "Select {id}",
+    dataTableRowMenu: "Row menu",
+    dataTableInput: "Input",
+    dataTableSelect: "Select",
+    dataTableAddRow: "Add",
+    dataTableEmpty: "No data",
+    dataTableEmptyValue: "Not set",
+    orderSummaryTotal: "Total (incl. tax)",
+    productCardAddToCart: "Add to cart",
+    productCardFavoriteAdd: "Add to favorites",
+    productCardFavoriteRemove: "Remove from favorites",
+    quantitySelectorGroup: "Quantity",
+    quantitySelectorDecrease: "Decrease quantity",
+    quantitySelectorIncrease: "Increase quantity",
+    quantitySelectorDelete: "Remove",
+    filterBarNav: "Filters",
+    filterBarMore: "Filter",
+    filterBarClear: "Clear selection",
+    filterBarSort: "Sort",
+    filterBarResultCount: "Results: {count} items",
+    bottomTabBarNav: "Main navigation",
+    chipFilterBarResultCount: "{count} results",
+    chipRemove: "Remove",
+    chipRemoveNamed: "Remove: {name}",
+    compactFilePickerLabel: "File",
+    compactFilePickerTrigger: "Choose",
+    compactFilePickerLoading: "Processing",
+    imageAttachmentTrigger: "Add image",
+    imageAttachmentLabel: "Image",
+    imageAttachmentRemove: "Remove {name}",
+    confirmDialogConfirm: "Confirm",
+    confirmDialogCancel: "Cancel",
+    confirmDialogLoading: "Processing…",
+    errorStateTitle: "Something went wrong",
+    errorStateDescription: "Please try again in a few moments",
+    errorStateNotFoundTitle: "Page not found",
+    errorStateNotFoundDescription: "The page you are looking for may have been moved or deleted.",
+    featureComparisonFeature: "Feature",
+    featureComparisonAvailable: "Available",
+    featureComparisonUnavailable: "Not available",
+    fileUploadDrag: "Drop files here",
+    fileUploadOr: "or",
+    fileUploadBrowse: "Choose files",
+    fileUploadMaxSize: "Up to {size}",
+    fileUploadMaxFiles: "Up to {max} files",
+    fileUploadRemove: "Remove",
+    fileUploadRemoveItem: "{label} {name}",
+    filterPillPanel: "{label} filter",
+    filterPillClear: "Clear {label}",
+    kanbanColumnCount: "{count} items",
+    mediaActionCluster: "Media actions",
+    sidebarNav: "Sidebar navigation",
+    swipeRowActions: "Row actions",
+    reviewOverlayPin: "Review pin",
+    tagInputPlaceholder: "Type a tag and press Enter",
+    tagInputLabel: "Tag input",
+    tagInputRemove: "Remove {tag}",
+    codeInputCell: "Digit {index} of {length}",
+    progress: "Progress",
+    celebrationTitle: "Achieved",
+    coachMarkOverlayLabel: "Onboarding coach mark",
+    comboboxPlaceholder: "Select",
+    comboboxSearchPlaceholder: "Search...",
+    comboboxOptions: "{label} options",
+    multiSelectPlaceholder: "Select",
+    multiSelectSearchPlaceholder: "Search...",
+    datePickerPlaceholder: "Select date",
+    dateRangePickerPlaceholder: "Select date range",
+    timePickerPlaceholder: "Select time",
+    dateRangePickerSeparator: " – ",
+    dateTimePickerDateFormat: "EEE, M/d",
+    timePickerHour: "Hour",
+    timePickerMinute: "Min",
+    countdownUnitDay: "d",
+    countdownUnitHour: "h",
+    countdownUnitMinute: "m",
+    countdownUnitSecond: "s",
+    breadcrumbEllipsis: "More",
+    simplePaginationEmpty: "0 items",
+    simplePaginationItems: "{range} of {total} items",
+    simplePaginationPages: "Page {page} of {pages}",
+    toastRegion: "Notifications",
   },
 }
 
