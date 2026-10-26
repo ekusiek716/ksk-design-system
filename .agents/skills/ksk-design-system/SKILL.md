@@ -87,7 +87,7 @@ DS 全体でアイコンの線幅・スタイルを統一するため。
 実装後、以下を Yes/No で点検する:
 
 - [ ] タッチターゲット: 操作要素の実効ヒット領域 ≥44px（推奨48px）。チップは hitSlop で実効44px
-- [ ] フォーカスリング: 全操作要素に `focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50`
+- [ ] フォーカスリング: 全操作要素に `focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]`（不透明。`/50` 等は付けない。Brand 塗りの面の上では `focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]` で面から離す）
 - [ ] モーダリティ: 作業面=Dialog / 割り込み確認=AlertDialog・ConfirmDialog（外タップで閉じない）/ 軽い補助=Sheet。確認を素の Dialog で組んでいないか
 - [ ] elevation: 影が5段トークンに収まり「浮く高さと影の強さ」が対応しているか（Card=md、Popover=lg、Dialog=dialog）
 - [ ] コントラスト: 通常文字 ≥4.5:1、UI 要素 ≥3:1。状態表現は色＋アイコン＋テキストの3点セット

@@ -182,7 +182,7 @@ function Chip({
 
   // 選択時は Brand-Primary を強調表示 (CTA / PillRow と一貫)
   const selectedStyles = selected &&
-    "bg-[var(--Brand-Primary)]! text-[var(--Text-on-Inverse)]! hover:bg-[var(--Hover-Primary-Button)]! active:bg-[var(--Active-Primary-Button)]! border-[var(--Brand-Primary)]! shadow-sm hover:shadow"
+    "bg-[var(--Brand-Primary)]! text-[var(--Text-on-Inverse)]! hover:bg-[var(--Hover-Primary-Button)]! active:bg-[var(--Active-Primary-Button)]! border-[var(--Brand-Primary)]! shadow-sm hover:shadow focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]"
 
   const soldOutStyles = isSoldOut &&
     "border border-[var(--Text-Disable)] bg-[var(--Surface-Secondary)]! text-[var(--Text-Disable)]! cursor-not-allowed"

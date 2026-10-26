@@ -178,8 +178,8 @@ function ListItem({
     ),
     actionable && (
       isCompact
-        ? "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
-        : "min-h-11 focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+        ? "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]"
+        : "min-h-11 focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]"
     ),
     disabled && "cursor-not-allowed opacity-50",
     className,
@@ -253,7 +253,7 @@ function ListItem({
       (typeof description === "string" ? description : undefined)
     const overlayClassName = cn(
       "absolute inset-0",
-      "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+      "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]",
       disabled && "cursor-not-allowed",
     )
     return (

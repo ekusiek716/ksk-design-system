@@ -370,7 +370,7 @@ function MonthCalendar({
                 className={cn(
                   "relative flex min-h-14 min-w-0 cursor-pointer flex-col gap-1 border-r border-[var(--Border-Low-Emphasis)] p-1 last:border-r-0 md:min-h-24",
                   "transition-colors duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
-                  "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+                  "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]",
                   isSelected
                     ? "bg-[var(--Surface-Accent-Primary-Light)] ring-1 ring-inset ring-[var(--Border-Accent-Primary)]"
                     : "bg-[var(--Surface-Primary)] hover:bg-[var(--Surface-Secondary)]"

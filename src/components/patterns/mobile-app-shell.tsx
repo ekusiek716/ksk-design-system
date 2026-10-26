@@ -177,7 +177,7 @@ function MobileAppShell({
               // fixed の main はスクロール領域。中に操作できる要素が無くてもキーボードでスクロールできるよう
               // Tab で止まる（tabIndex=0）。フォーカスは他の部品と同じ Focus リング
               fixed &&
-                "overflow-y-auto focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+                "overflow-y-auto focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]",
               usesComposedPadding
                 ? "pb-[var(--ksk-shell-main-padding-bottom)]"
                 : // bottomPaddingExtra（issue #681）は指定時だけ加算する（未指定のクラスは従来どおり）

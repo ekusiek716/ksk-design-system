@@ -112,7 +112,7 @@ function SelectableTile({
       className={cn(
         "relative inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border border-[var(--Border-Low-Emphasis)] text-[var(--Text-High-Emphasis)]",
         "cursor-pointer transition-[background-color,border-color,box-shadow] duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
-        "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
         // 既定の outline は ring に置き換える。選択中は選択の outline を残す（上のコメント）
         !selected && "focus-visible:outline-hidden",
         "disabled:cursor-not-allowed disabled:opacity-50",

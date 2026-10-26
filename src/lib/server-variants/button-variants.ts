@@ -60,12 +60,29 @@ const TOUCH_TARGET_VARIANTS = [
   "ghost-inverse",
 ] as const
 
+/**
+ * 塗りつぶし variant（default / destructive / info / warning / success / accent）は、
+ * フォーカスリングを面から離す 2px のすき間（focus-visible:ring-offset-2、Surface-Primary 色）を各 variant に持つ。
+ * クラス名は完全な文字列で書く必要があるため定数にまとめず、各行へ直書きしている。
+ *
+ * ライトの Focus-High-Emphasis は Brand-600 で、default / accent の面（Brand-Primary = 600）と
+ * 同色になる。すき間が無いとリングが面に溶けて「少し大きくなっただけ」に見える。
+ * destructive / info / warning / success も、リングが隣り合う面と色相違いで明度が近く、
+ * 3px のリングだけだと境目が曖昧になるため同じ扱いにする。
+ *
+ * 付けない variant:
+ * - secondary / tertiary / ghost 系 / link: 面が淡色か無く、リングが面と同色にならない。
+ * - inverse: 面が Surface-Primary（白）なので、白のすき間は面が広がって見えるだけで効果が無い。
+ * - glass 系: 面が半透明のガラスで、不透明なすき間がガラス表現を壊す。また .glass は非レイヤー CSS で
+ *   box-shadow を宣言しており（glass.css）、レイヤー内の ring 系ユーティリティより優先されるため、
+ *   ring-offset を足しても意図どおりには効かない。
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-[var(--Control-Gap)] whitespace-nowrap typo-label-md transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:pointer-events-none disabled:opacity-50 aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 cursor-pointer",
+  "inline-flex items-center justify-center gap-[var(--Control-Gap)] whitespace-nowrap typo-label-md transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50 aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 cursor-pointer",
   {
     variants: {
       variant: {
-        default: "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Primary-Button)] active:bg-[var(--Active-Primary-Button)] rounded-[var(--Control-Radius)]",
+        default: "bg-[var(--Brand-Primary)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Primary-Button)] active:bg-[var(--Active-Primary-Button)] rounded-[var(--Control-Radius)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
         secondary: "bg-[var(--Surface-Secondary)] text-[var(--Text-High-Emphasis)] border border-[var(--Border-Medium-Emphasis)] hover:bg-[var(--Hover-Secondary-Button)] rounded-[var(--Control-Radius)]",
         "secondary-switch": "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)] border border-[var(--Border-Accent-Primary)] hover:bg-[var(--Hover-Secondary-Button)] rounded-[var(--Control-Radius)]",
         tertiary: "bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] border border-[var(--Border-Medium-Emphasis)] hover:bg-[var(--Hover-Tertiary-Button)] rounded-[var(--Control-Radius)]",
@@ -80,14 +97,14 @@ const buttonVariants = cva(
         // Surface-Success（半透明の *-Subtle だと light の ghost-success が AA を割るため）。
         "ghost-destructive": "text-[var(--Text-Caution)] hover:bg-[var(--Surface-Caution)] rounded-[var(--Control-Radius)]",
         "ghost-success": "text-[var(--Text-Success)] hover:bg-[var(--Surface-Success)] rounded-[var(--Control-Radius)]",
-        destructive: "bg-[var(--Caution-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Destructive-Button)] active:bg-[var(--Active-Destructive-Button)] rounded-[var(--Control-Radius)]",
+        destructive: "bg-[var(--Caution-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Destructive-Button)] active:bg-[var(--Active-Destructive-Button)] rounded-[var(--Control-Radius)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
         // info / warning / success — 状態色で意味を伝えるボタン（issue #598）。
         // ブランドに連動しない固定の状態色。文字は --Text-on-Inverse で、light / dark とも
         // 背景・hover・active の全段で WCAG AA（scripts/check-contrast.mjs で検査）。
         // 取り消せない操作は destructive を使う（warning は「注意を促す」用途）。
-        info: "bg-[var(--Info-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Info-Button)] active:bg-[var(--Active-Info-Button)] rounded-[var(--Control-Radius)]",
-        warning: "bg-[var(--Warning-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Warning-Button)] active:bg-[var(--Active-Warning-Button)] rounded-[var(--Control-Radius)]",
-        success: "bg-[var(--Success-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Success-Button)] active:bg-[var(--Active-Success-Button)] rounded-[var(--Control-Radius)]",
+        info: "bg-[var(--Info-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Info-Button)] active:bg-[var(--Active-Info-Button)] rounded-[var(--Control-Radius)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
+        warning: "bg-[var(--Warning-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Warning-Button)] active:bg-[var(--Active-Warning-Button)] rounded-[var(--Control-Radius)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
+        success: "bg-[var(--Success-Base)] text-[var(--Text-on-Inverse)] hover:bg-[var(--Hover-Success-Button)] active:bg-[var(--Active-Success-Button)] rounded-[var(--Control-Radius)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
         link: "text-[var(--Text-Accent-Primary)] underline-offset-4 hover:underline",
         // glass の押下は不透明度を落とさず「わずかに縮んで増光」させる
         // （iOS の Liquid Glass はタップでガラスがハイライトする挙動）。
@@ -97,7 +114,7 @@ const buttonVariants = cva(
         // glass-accent — ブランドカラーをティントした glass。FAB（円形アイコンボタン）等の
         // 主要アクションを、中立色の glass より一段強い存在感で目立たせたい時に使う。
         "glass-accent": "glass glass-specular glass-accent text-[var(--Text-on-Inverse)] transition-all duration-[var(--Motion-Duration-Slow)] ease-[var(--Motion-Easing-Bounce)] hover:brightness-[1.06] active:scale-[0.96] active:brightness-110 rounded-[var(--Control-Radius)]",
-        accent: "bg-gradient-to-r from-[var(--Brand-Primary)] to-[var(--Brand-Action)] text-[var(--Text-on-Inverse)] border border-transparent hover:opacity-90 rounded-[var(--Control-Radius)]",
+        accent: "bg-gradient-to-r from-[var(--Brand-Primary)] to-[var(--Brand-Action)] text-[var(--Text-on-Inverse)] border border-transparent hover:opacity-90 rounded-[var(--Control-Radius)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
         // inverse — 暗背景・ヒーローセクション上に乗せる primary CTA。
         // 白背景 + アクセント文字（Brand-Primary）。
         inverse:

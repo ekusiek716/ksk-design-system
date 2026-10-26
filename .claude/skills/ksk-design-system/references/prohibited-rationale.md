@@ -13,7 +13,7 @@
 | タグ | 意味 | 付けるルール |
 |---|---|---|
 | `dom` | 小文字の HTML 生タグ・`href` / `type` 等の DOM 属性が書ける | P001–P007, P024, P025, P027, P039, P045, P051, AI8 |
-| `tailwind` | `className` に Tailwind クラスを書く（web ＋ **NativeWind** の RN） | P009–P013, P016–P023, P028–P032, P041, P042, P044, P046, P048, P052, AI1–AI6, AI9 |
+| `tailwind` | `className` に Tailwind クラスを書く（web ＋ **NativeWind** の RN） | P009–P013, P016–P023, P028–P032, P041, P042, P044, P046, P048, P052, P054, AI1–AI6, AI9 |
 | `web` | CSS 変数・CSS 単位が効く純 web | P015, AI7 |
 | `native` | React Native のファイル | （現時点で専用ルールなし） |
 
@@ -102,9 +102,10 @@ web 前提の fix 文言が native で実行不能なルールは `fixNative` �
 
 - **P032 色を併記しない `border`** → **実害あり（consumer の求人系 Web アプリ）**。Tailwind v4 で border 既定色が currentColor になったため、無色 border は消費側の濃色テキストを透過して黒ずむ。`border-[var(--Border-Low-Emphasis)]` を必ず併記。状態切替系は `border-transparent` ＋ `data-[state=active]:border-[...]` のペアで
 
-## accessibility / form（P023–P027）
+## accessibility / form（P023–P027・P054）
 
-- **P023 `outline-none`** → フォーカスリング削除はキーボード利用者に「今どこにいるか」を消す WCAG 違反。`focus-visible:outline-hidden focus-visible:ring-[3px] ring-[var(--Focus-High-Emphasis)]/50` に置換（`outline-none` は強制配色モードでも枠が出ない。`outline-hidden` は forced-colors 時だけ OS 色の枠が出る。issue #620）
+- **P023 `outline-none`** → フォーカスリング削除はキーボード利用者に「今どこにいるか」を消す WCAG 違反。`focus-visible:outline-hidden focus-visible:ring-[3px] ring-[var(--Focus-High-Emphasis)]` に置換（`outline-none` は強制配色モードでも枠が出ない。`outline-hidden` は forced-colors 時だけ OS 色の枠が出る。issue #620）
+- **P054 フォーカスリングの半透明（`ring-[var(--Focus-High-Emphasis)]/50`）** → 半透明にすると実効コントラストが WCAG 1.4.11（非テキスト 3:1）を割る（旧実装は白の上で 1.34〜1.67:1・Gray-900 の上でも 2.43〜3.44:1）。`/数字` を外した不透明で使う。トークン自体はライト Brand-600 / ダーク Brand-400 で、不透明なら Surface-Primary の上でライト 5.0〜7.1・ダーク 6.0〜10.2:1。Brand 塗りの面（Button default 等）の上では `focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]` で面から離す
 - **P024 `<div onClick>`** → キーボード・スクリーンリーダーから操作不能。`<Button>`
 - **P025 `<img>` alt なし** → SR が読めない。装飾は `alt=""` を明示
 - **P026 placeholder のみでラベル省略** → SR は placeholder を読まない。入力中に説明が消える。`<Label htmlFor>` + `id`、または `aria-label` / `aria-labelledby` を必須。React Native は `accessibilityLabel` / `accessibilityLabelledBy`（lint は入力タグ内の id / aria-* / accessibility* の有無で判定）

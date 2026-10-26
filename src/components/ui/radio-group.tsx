@@ -49,7 +49,9 @@ function RadioGroupItem({
         // 未チェック時のみ hover で枠線をアクセント色に。チェック済みは既に
         // アクセント枠なので変化なし。disabled は hover を打ち消す（誤反応防止）。
         "hover:border-[var(--Brand-Primary)]",
-        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
+        // 選択中の枠が Brand-Primary で、リング（Brand-600）と同色になるため枠から 2px 離す
+        "focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
         "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--Border-Control,var(--Border-Medium-Emphasis))]",
         "data-[state=checked]:border-[var(--Brand-Primary)]",
         // ラベル内包時は複数行テキストとの頭揃えのため少し下げる

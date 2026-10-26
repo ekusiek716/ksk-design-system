@@ -8,7 +8,9 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
       data-slot="switch"
       className={cn(
         "peer inline-flex h-6 w-11 shrink-0 items-center rounded-full border-2 border-transparent shadow-[var(--shadow-sm)] transition-colors cursor-pointer",
-        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
+        // オンの地が Brand-Primary で、リング（Brand-600）と同色になるため地から 2px 離す
+        "focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "data-[state=checked]:bg-[var(--Brand-Primary)] data-[state=unchecked]:bg-[var(--Surface-Switch-Off,var(--Surface-Quaternary))]",
         // hover: off は溝を一段濃く、on は Brand を一段濃く（誤反応防止に

@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:caf9517ea4c5)
+// source: tokens.json v2.1.0 (sha256:9d3132fc2504)
 // =============================================================
 
 export const themes = {
@@ -117,7 +117,7 @@ export const themes = {
         "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
-        "high-emphasis": "#60A5FA"
+        "high-emphasis": "#2563EB"
       },
       "caution": {
         "base": "#DC2626",
@@ -364,7 +364,7 @@ export const themes = {
         "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
-        "high-emphasis": "#60A5FA"
+        "high-emphasis": "#2563EB"
       },
       "caution": {
         "base": "#DC2626",
@@ -611,7 +611,7 @@ export const themes = {
         "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
-        "high-emphasis": "#4398F8"
+        "high-emphasis": "#163FF4"
       },
       "caution": {
         "base": "#DC2626",
@@ -858,7 +858,7 @@ export const themes = {
         "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
-        "high-emphasis": "#FB923C"
+        "high-emphasis": "#C2410C"
       },
       "caution": {
         "base": "#DC2626",
@@ -1105,7 +1105,7 @@ export const themes = {
         "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
-        "high-emphasis": "#4ADE80"
+        "high-emphasis": "#15803D"
       },
       "caution": {
         "base": "#DC2626",
@@ -1352,7 +1352,7 @@ export const themes = {
         "light": "rgba(24, 24, 27, 0.08)"
       },
       "focus": {
-        "high-emphasis": "#A78BFA"
+        "high-emphasis": "#6D28D9"
       },
       "caution": {
         "base": "#DC2626",

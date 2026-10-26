@@ -20,7 +20,7 @@ const BASELINE_ROOT =
   "flex w-full items-start gap-3 border-b border-[var(--Border-Low-Emphasis)] px-4 py-3 text-left"
 const BASELINE_ACTIONABLE_SUFFIX =
   " cursor-pointer transition-colors hover:bg-[var(--Surface-Secondary)]" +
-  " min-h-11 focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+  " min-h-11 focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]"
 
 describe("ListItem 既定値の非破壊性 (issue #355)", () => {
   it("静的行は従来どおりのルート class / 構造を出力する", () => {

@@ -44,7 +44,7 @@ function AddTile({
         "cursor-pointer transition-colors duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
         "hover:border-[var(--Border-Accent-Primary)] hover:bg-[var(--Surface-Accent-Primary-Light)] hover:text-[var(--Text-Accent-Primary)]",
         "active:scale-[0.98]",
-        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
         "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--Border-Medium-Emphasis)] disabled:hover:bg-transparent disabled:hover:text-[var(--Text-Medium-Emphasis)]",
         size === "sm" ? "min-h-11" : "min-h-16",
         fullWidth && "w-full",

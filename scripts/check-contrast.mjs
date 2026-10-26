@@ -170,11 +170,28 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   }
 }
 
-// 暗色サイドバー（SidebarNav tone="inverse"）のフォーカスリング。既定の Focus-High-Emphasis/50 は
-// Surface-Inverse 上で 3:1 を割る（light 2.7 / dark 1.6）ため、inverse では Object-on-Inverse の不透明リングを使う。
+// 暗色サイドバー（SidebarNav tone="inverse"）のフォーカスリング。issue #680 当時、既定の Focus-High-Emphasis/50 は
+// Surface-Inverse 上で 3:1 を割った（light 2.7 / dark 1.6）ため、inverse では Object-on-Inverse の不透明リングを使う。
 for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   const surfaceInverse = resolve(s.surface.inverse)
   pairs.push([resolve(s.object["on-inverse"]), surfaceInverse, `${mode}: SidebarNav inverse のフォーカスリング / Surface-Inverse（非テキスト）`, 3])
+}
+
+// フォーカスリング（Focus-High-Emphasis）。操作部品のフォーカス表示は WCAG 1.4.11（非テキスト 3:1）で、
+// 置かれる面（Surface-Primary / Surface-Secondary）に対して light / dark の両方で検査する。
+// リングは不透明で使う前提（半透明にすると実効コントラストが落ちる。bin/lint.js の P054 が警告）。
+// default 以外のテーマは、Focus が指す Brand の段（semantic.css の割当）を各テーマのランプから読んで同じ組を検査する。
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const ring = resolve(s.focus["high-emphasis"])
+  for (const [surfaceLabel, surfaceVal] of [["Surface-Primary", s.surface.primary], ["Surface-Secondary", s.surface.secondary]]) {
+    pairs.push([ring, resolve(surfaceVal), `${mode}: Focus-High-Emphasis / ${surfaceLabel}（フォーカスリング・非テキスト）`, 3])
+  }
+  const shade = s.focus["high-emphasis"].match(/^var\(--Primitive-Brand-(\d+)\)$/)?.[1]
+  for (const theme of shade ? themes : []) {
+    for (const [surfaceLabel, surfaceVal] of [["Surface-Primary", s.surface.primary], ["Surface-Secondary", s.surface.secondary]]) {
+      pairs.push([readThemeBrandShade(theme, shade), resolve(surfaceVal), `${mode}: ${theme} Focus-High-Emphasis（Brand-${shade}）/ ${surfaceLabel}（フォーカスリング・非テキスト）`, 3])
+    }
+  }
 }
 
 // 検索一致のハイライト（<mark>・Highlight 部品・issue #692）。light / dark で AA。

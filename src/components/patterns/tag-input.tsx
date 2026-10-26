@@ -141,7 +141,7 @@ function TagInput({
       data-slot="tag-input"
       className={cn(
         "flex flex-wrap gap-1.5 min-h-12 w-full rounded-lg border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] bg-[var(--Surface-Primary)] px-3 py-2 transition-colors",
-        "focus-within:ring-[3px] focus-within:ring-[var(--Focus-High-Emphasis)]/50 focus-within:border-[var(--Border-Accent-Primary)]",
+        "focus-within:ring-[3px] focus-within:ring-[var(--Focus-High-Emphasis)] focus-within:border-[var(--Border-Accent-Primary)]",
         // aria-invalid は内側の input に付くため、枠（外側）はその状態を :has で拾う（Input と同じ Caution 枠）
         "has-[input[aria-invalid=true]]:border-[var(--Border-Caution)]",
         disabled && "cursor-not-allowed opacity-50",

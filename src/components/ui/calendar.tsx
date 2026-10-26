@@ -41,7 +41,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         ),
         // 通常選択（単一 or range の start/end）
         selected:
-          "[&>button]:bg-[var(--Brand-Primary)] [&>button]:text-[var(--Text-on-Inverse)] [&>button]:hover:bg-[var(--Brand-Primary)] [&>button]:hover:text-[var(--Text-on-Inverse)]",
+          "[&>button]:bg-[var(--Brand-Primary)] [&>button]:text-[var(--Text-on-Inverse)] [&>button]:hover:bg-[var(--Brand-Primary)] [&>button]:hover:text-[var(--Text-on-Inverse)] [&>button]:focus-visible:ring-offset-2 [&>button]:focus-visible:ring-offset-[var(--Surface-Primary)]",
         // range の start: 右半分を帯で塗る
         range_start:
           "bg-[var(--Brand-Ultra-Light)]",

@@ -306,7 +306,7 @@ describe("focus-visible:ring / focus:ring と outline 解除のペア (issue #59
 
   it("リグレッション確認: outline-none の無い cn() 呼び出しは検出される", () => {
     const violations = findViolations(
-      `cn("focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50")`,
+      `cn("focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]")`,
     )
     expect(violations).toHaveLength(1)
   })
@@ -317,8 +317,8 @@ describe("focus-visible:ring / focus:ring と outline 解除のペア (issue #59
         "flex w-full",
         actionable && (
           isCompact
-            ? "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
-            : "min-h-11 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+            ? "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]"
+            : "min-h-11 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]"
         ),
       )`,
     )
@@ -345,7 +345,7 @@ describe("focus-visible:ring / focus:ring と outline 解除のペア (issue #59
   it("cva() の base 文字列で ring と outline-none がペアなら許容する", () => {
     const violations = findViolations(
       `const buttonVariants = cva(
-        "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
         { variants: { size: { sm: "h-8" } } },
       )`,
     )
@@ -355,7 +355,7 @@ describe("focus-visible:ring / focus:ring と outline 解除のペア (issue #59
   it("cva() で ring はあるが outline-none が無ければ検出する", () => {
     const violations = findViolations(
       `const buttonVariants = cva(
-        "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
         { variants: { size: { sm: "h-8" } } },
       )`,
     )
@@ -476,5 +476,48 @@ describe("DS 本体で outline-none を一切禁止 (issue #620 フォローア�
     expect(
       findOutlineNoneUsages(`className="outline-none" // ksk-ds-lint-ignore OUTLINE_NONE -- 理由`),
     ).toHaveLength(0)
+  })
+})
+
+/**
+ * フォーカスリングの色（Focus-High-Emphasis）に不透明度を付けない。
+ *
+ * 旧実装は `ring-[var(--Focus-High-Emphasis)]/50` で、ライトの白の上で 1.34〜1.67:1・
+ * ダークの Gray-900 の上でも 2.43〜3.44:1 しか取れず、全テーマで WCAG 1.4.11（非テキスト 3:1）
+ * を割っていた。トークンを Brand-600（ライト）へ直したうえで、リングは不透明で使う。
+ * consumer 向けの検出は contracts/rules.json の P054。ここは DS 本体（components / lib /
+ * ストーリー）に同じ書き方を戻さないための機械検査。
+ */
+const FOCUS_RING_OPACITY_RE = /ring-\[var\(--Focus-High-Emphasis\)\]\/(?:\d+|\[[^\]]*\])/
+
+function findFocusRingOpacityUsages(rawSource: string): string[] {
+  const hits: string[] = []
+  stripComments(rawSource)
+    .split(/\r?\n/)
+    .forEach((line) => {
+      if (FOCUS_RING_OPACITY_RE.test(line)) hits.push(line.trim())
+    })
+  return hits
+}
+
+describe("DS 本体でフォーカスリングの半透明を禁止（WCAG 1.4.11）", () => {
+  it("DS コンポーネント・ストーリーに ring-[var(--Focus-High-Emphasis)]/<不透明度> が無い", () => {
+    const files = TARGET_DIRS.flatMap((dir) => collectFilesIncludingStories(join(ROOT, dir)))
+    const report: string[] = []
+    for (const file of files) {
+      const hits = findFocusRingOpacityUsages(readFileSync(file, "utf8"))
+      for (const h of hits) report.push(`${file.replace(`${ROOT}/`, "")}: ${h}`)
+    }
+    expect(report).toEqual([])
+  })
+
+  it("リグレッション確認: /50 付きも任意値の不透明度も検出する", () => {
+    expect(findFocusRingOpacityUsages(`cn("focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50")`)).toHaveLength(1)
+    expect(findFocusRingOpacityUsages(`cn("ring-[var(--Focus-High-Emphasis)]/[0.4]")`)).toHaveLength(1)
+  })
+
+  it("不透明のリングと別トークンの半透明は検出しない", () => {
+    expect(findFocusRingOpacityUsages(`cn("focus-visible:ring-[var(--Focus-High-Emphasis)]")`)).toHaveLength(0)
+    expect(findFocusRingOpacityUsages(`cn("aria-invalid:ring-[var(--Caution-Base)]/20")`)).toHaveLength(0)
   })
 })

@@ -143,7 +143,7 @@ function SidebarNavRow({ item, collapsed, tone }: { item: SidebarNavItem; collap
       // inverse の面では Focus-High-Emphasis/50 が 3:1 を割る（check-contrast.mjs）ため、Object-on-Inverse の不透明リング
       tone === "inverse"
         ? "focus-visible:ring-[var(--Object-on-Inverse)]"
-        : "focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        : "focus-visible:ring-[var(--Focus-High-Emphasis)]",
       collapsed ? "size-11 justify-center" : "w-full gap-3 px-3 text-left",
       tone === "inverse"
         ? item.isActive

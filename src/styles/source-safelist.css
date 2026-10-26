@@ -45,6 +45,8 @@
 @source inline("[&>*]:shrink-0");
 @source inline("[&>button]:bg-[var(--Brand-Primary)]");
 @source inline("[&>button]:bg-transparent!");
+@source inline("[&>button]:focus-visible:ring-offset-2");
+@source inline("[&>button]:focus-visible:ring-offset-[var(--Surface-Primary)]");
 @source inline("[&>button]:hover:bg-[var(--Brand-Primary)]");
 @source inline("[&>button]:hover:bg-[var(--Brand-Ultra-Light)]!");
 @source inline("[&>button]:hover:text-[var(--Text-on-Inverse)]");
@@ -456,17 +458,17 @@
 @source inline("focus-visible:ring-4");
 @source inline("focus-visible:ring-[3px]");
 @source inline("focus-visible:ring-[var(--Focus-High-Emphasis)]");
-@source inline("focus-visible:ring-[var(--Focus-High-Emphasis)]/50");
 @source inline("focus-visible:ring-[var(--Object-Accent-Primary)]/20");
 @source inline("focus-visible:ring-[var(--Object-on-Inverse)]");
 @source inline("focus-visible:ring-inset");
 @source inline("focus-visible:ring-offset-2");
+@source inline("focus-visible:ring-offset-[var(--Surface-Primary)]");
 @source inline("focus-visible:ring-offset-transparent");
 @source inline("focus-visible:rounded-sm");
 @source inline("focus-within:border-[var(--Border-Accent-Primary)]");
 @source inline("focus-within:relative");
 @source inline("focus-within:ring-[3px]");
-@source inline("focus-within:ring-[var(--Focus-High-Emphasis)]/50");
+@source inline("focus-within:ring-[var(--Focus-High-Emphasis)]");
 @source inline("focus-within:z-20");
 @source inline("focus:bg-[var(--Surface-Secondary)]");
 @source inline("focus:outline-hidden");
@@ -1071,7 +1073,7 @@
 @source inline("ring-[3px]");
 @source inline("ring-[var(--Border-Accent-Primary)]");
 @source inline("ring-[var(--Brand-Primary)]/20");
-@source inline("ring-[var(--Focus-High-Emphasis)]/50");
+@source inline("ring-[var(--Focus-High-Emphasis)]");
 @source inline("ring-[var(--Object-Caution)]/30");
 @source inline("ring-inset");
 @source inline("rotate-180");

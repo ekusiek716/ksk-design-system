@@ -8,6 +8,7 @@ import {
   checkThemeCss,
   clampChroma,
   contrastRatio,
+  evaluateChecks,
   MIN_STEP,
   evaluateRampSteps,
   generateTheme,
@@ -150,18 +151,50 @@ describe("generateTheme", () => {
     expect(result.ok).toBe(true)
   })
 
-  it("500 が明るい色ではフォーカスリング 3:1 は注意表示になり、必須ペアには含まれない", () => {
-    const result = generateTheme("#FACC15", { ctx })
-    const focus = result.checks.find((c: { id: string }) => c.id === "light-focus-400")
-    expect(focus.level).toBe("advisory")
-    expect(focus.pass).toBe(false)
+  it("フォーカスリング 3:1（ライト Brand-600 / 白、ダーク Brand-400 / Gray-900）は必須（error）で、明るい色でも補正で通る", () => {
+    expect(ctx.lightFocusShade).toBe(600)
+    expect(ctx.darkFocusShade).toBe(400)
+    for (const hex of [...inputs, "#FACC15", "#1E293B"]) {
+      const result = generateTheme(hex, { ctx })
+      const light = result.checks.find((c: { id: string }) => c.id === "light-focus")
+      const dark = result.checks.find((c: { id: string }) => c.id === "dark-focus")
+      expect(light.level, hex).toBe("error")
+      expect(dark.level, hex).toBe("error")
+      expect(light.pass, hex).toBe(true)
+      expect(dark.pass, hex).toBe(true)
+      expect(contrastRatio(result.ramp[600], ctx.lightSurface), hex).toBeGreaterThanOrEqual(3)
+      expect(contrastRatio(result.ramp[400], ctx.darkSurface), hex).toBeGreaterThanOrEqual(3)
+    }
   })
 
-  it("暗めの色では 400 がダークとフォーカスを両立する明度へ補正される", () => {
-    const result = generateTheme("#3B82F6", { ctx })
-    const focus = result.checks.find((c: { id: string }) => c.id === "light-focus-400")
-    expect(focus.pass).toBe(true)
-    expect(result.corrections.some((c: { shade: number }) => c.shade === 400)).toBe(true)
+  it("Brand-600 が白に 3:1 を取れない ramp は必須エラー（フォーカスリング）になり、注意表示の逃げ道は無い", () => {
+    const ramp = generateTheme("#3B82F6", { ctx }).ramp
+    const weak = { ...ramp, 600: "#93C5FD" }
+    const checks = evaluateChecks(weak, ctx)
+    const light = checks.find((c: { id: string }) => c.id === "light-focus")
+    expect(light.level).toBe("error")
+    expect(light.pass).toBe(false)
+    expect(light.note).toBeUndefined()
+    const weakDark = evaluateChecks({ ...ramp, 400: "#1E3A8A" }, ctx)
+    expect(weakDark.find((c: { id: string }) => c.id === "dark-focus").pass).toBe(false)
+  })
+
+  it("フォーカスの割当は semantic.css から読む（Brand の別段を指していれば追従する）", () => {
+    const dir = makeTempDir("ksk-theme-focus-shade-")
+    mkdirSync(join(dir, "src/styles"), { recursive: true })
+    const semantic = readFileSync(join(ROOT, "src/styles/semantic.css"), "utf8").replace(
+      /(:root\s*\{[\s\S]*?--Focus-High-Emphasis:\s*var\(--Primitive-Brand-)600/,
+      "$1700",
+    )
+    writeFileSync(join(dir, "src/styles/semantic.css"), semantic)
+    writeFileSync(join(dir, "src/styles/primitive.css"), readFileSync(join(ROOT, "src/styles/primitive.css"), "utf8"))
+    const shifted = loadThemeContext(dir)
+    expect(shifted.source).toBe("semantic.css")
+    expect(shifted.lightFocusShade).toBe(700)
+    expect(shifted.darkFocusShade).toBe(400)
+    const result = generateTheme("#3B82F6", { ctx: shifted })
+    const light = result.checks.find((c: { id: string }) => c.id === "light-focus")
+    expect(light.label).toContain("Brand-700")
   })
 
   it("暗い入力（#1E3A8A）でも 400 が 500 より明るく、600〜900 は 500 より暗い", () => {

@@ -27,7 +27,7 @@ describe("Button の状態色 variant（#598）", () => {
     expect(cls).toContain(`active:bg-[var(--Active-${Token}-Button)]`)
     expect(cls).toContain("rounded-[var(--Control-Radius)]")
     // focus ring と disabled は base と共通
-    expect(cls).toContain("focus-visible:ring-[var(--Focus-High-Emphasis)]/50")
+    expect(cls).toContain("focus-visible:ring-[var(--Focus-High-Emphasis)]")
     expect(cls).toContain("disabled:opacity-50")
     // 生の色は使わない
     expect(cls.join(" ")).not.toMatch(/#[0-9a-f]{3,8}\b|bg-(blue|orange|amber|green|yellow)-\d/i)

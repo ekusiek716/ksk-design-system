@@ -242,7 +242,7 @@ function Card({
   const overlayClassName = cn(
     "absolute inset-0 z-[1] rounded-[inherit]",
     // ring-inset: media variant の overflow-hidden でリングが切れないように内側に描く
-    "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+    "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]",
     disabled ? "cursor-not-allowed" : "cursor-pointer",
   )
   const a11yProps = {

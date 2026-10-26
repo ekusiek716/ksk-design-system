@@ -26,7 +26,9 @@ function CheckboxRoot({ className, ...props }: CheckboxRootProps) {
       data-slot="checkbox"
       className={cn(
         "peer size-5 shrink-0 rounded-[5px] border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] bg-[var(--Surface-Primary)]",
-        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
+        // 選択中の面・枠が Brand-Primary で、リング（Brand-600）と同色になるため面から 2px 離す
+        "focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "data-[state=checked]:bg-[var(--Brand-Primary)] data-[state=checked]:text-[var(--Text-on-Inverse)] data-[state=checked]:border-[var(--Brand-Primary)]",
         "data-[state=indeterminate]:bg-[var(--Brand-Primary)] data-[state=indeterminate]:text-[var(--Text-on-Inverse)] data-[state=indeterminate]:border-[var(--Brand-Primary)]",

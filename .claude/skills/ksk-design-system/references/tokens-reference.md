@@ -34,7 +34,7 @@ Layer 3 Bridge     --primary 等 shadcn 互換         ← shadcn 移植コー�
 | | `--Border-{Caution,Success,Warning,Info}` / `--Border-Accent-Primary` | 状態枠線 |
 | Brand | `--Brand-Primary`（600） / `--Brand-Action`（hover/active、700） / `--Brand-Light` / `--Brand-Ultra-Light` | ブランド |
 | Hover/Active | `--Hover-Primary-Button` 等（600→700→800 の段階） | ボタン状態はこのトークンで（自前で暗くしない） |
-| Focus | `--Focus-High-Emphasis`（Brand-400） | フォーカスリング専用 |
+| Focus | `--Focus-High-Emphasis`（ライト Brand-600 / ダーク Brand-400） | フォーカスリング専用。不透明で使う（`/50` 等は付けない。P054） |
 | Overlay | `--Overlay-Dark/Medium/Light` | モーダル背景等 |
 | 状態基準 | `--Caution-Base` / `--Info-Base`（600系）、`--Success-Base` / `--Warning-Base`（700系。白文字 AA 4.5:1 確保のため） | テキスト/アイコン基準の状態色 |
 
