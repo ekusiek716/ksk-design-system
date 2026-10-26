@@ -28,13 +28,13 @@ interface KskLabels {
   back: string
   /** NavigationBar のシェアボタン */
   share: string
-  /** MonthCalendarHeader の「今日へ」（issue #721） */
+  /** MonthCalendarHeader の「今日へ」（issue #721）。MonthCalendarHeader の `locale` prop が Provider と異なるときは使われない */
   calendarToday: string
-  /** MonthCalendarHeader の前の月ボタンの読み上げ名 */
+  /** MonthCalendarHeader の前の月ボタンの読み上げ名（`locale` prop の扱いは calendarToday と同じ） */
   calendarPrevMonth: string
-  /** MonthCalendarHeader の次の月ボタンの読み上げ名 */
+  /** MonthCalendarHeader の次の月ボタンの読み上げ名（`locale` prop の扱いは calendarToday と同じ） */
   calendarNextMonth: string
-  /** MonthCalendarExpandToggle の読み上げ名（開閉で変えない。状態は aria-expanded） */
+  /** MonthCalendarExpandToggle の読み上げ名（開閉で変えない。状態は aria-expanded）。MonthCalendarExpandToggle の `locale` prop が Provider と異なるときは使われない */
   calendarExpand: string
   /** StarRating（入力用）の radiogroup の読み上げ名。FormField as="group" の中では使わず見出しで名付ける（issue #746） */
   ratingGroup?: string
@@ -425,8 +425,8 @@ interface KskLabels {
    * 日の読み上げ名（MonthCalendar のセル・AgendaList の日ごとの見出し）。
    * 差し込み口: `{year}` `{month}`（数字）`{monthName}`（calendarMonthsLong）`{monthShort}`（calendarMonthsShort）`{day}` `{weekday}`（calendarWeekdaysShort）
    *
-   * 注意（calendar 系のキー全部に共通）: `labels` だけの Provider（`locale` 未指定）は ja 扱い。MonthCalendar / MonthCalendarHeader（月の見出し）/
-   * AgendaList に `locale="en"` を渡すと Provider の labels は無視されて英語の既定になる。英語の差し替え文言を効かせたいときは
+   * 注意（calendar 系のキー全部に共通）: `labels` だけの Provider（`locale` 未指定）は ja 扱い。MonthCalendar / MonthCalendarHeader（月の見出し・今日へ・前後の月ボタン）/
+   * MonthCalendarExpandToggle / AgendaList に `locale="en"` を渡すと Provider の labels は無視されて英語の既定になる。英語の差し替え文言を効かせたいときは
    * Provider にも `locale="en"` を指定する（部品の `locale` は省略するか、Provider と同じにする）
    */
   calendarDayLabel?: string
@@ -992,7 +992,7 @@ function useKskLocale(): KskLocale | undefined {
 }
 
 /**
- * 部品が自身の `locale` prop（ja / en）を持つときの既定文言（MonthCalendar / MonthCalendarHeader の月見出し / AgendaList）。
+ * 部品が自身の `locale` prop（ja / en）を持つときの既定文言（MonthCalendar / MonthCalendarHeader（見出しとボタン）/ MonthCalendarExpandToggle / AgendaList）。
  *
  * 優先順位（`localeProp` を見る部分。部品に直接渡した文言 prop・関数 prop はこの外で常に最優先）:
  * 1. `localeProp` が指定されていて、Provider の locale と**異なる**とき: Provider の labels は使わず、

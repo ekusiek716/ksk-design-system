@@ -553,7 +553,7 @@
         "i18n の文言で差し替えるときは labels に t() の結果を渡す（入れ子の Provider は外側の labels に重ねる）",
         "React context なので SSR でリクエスト間に共有されない。Toast の fire-and-forget 経路の文言は従来どおり configureToast（Toaster は props）",
         "Provider を置かないときの文言は従来どおり日本語（後方互換）",
-        "自身の locale prop を持つ部品（MonthCalendar / MonthCalendarHeader の月の見出し / AgendaList）の文言は「部品に渡した prop・関数 prop > locale prop が Provider の locale と異なるときはその言語の既定（Provider の labels は使わない） > Provider の labels > Provider の locale の既定 > 日本語」。日本語の差し替え文言が英語指定の部品に混ざらない",
+        "自身の locale prop を持つ部品（MonthCalendar / MonthCalendarHeader の見出しと今日へ・前後の月ボタン / MonthCalendarExpandToggle / AgendaList）の文言は「部品に渡した prop・関数 prop > locale prop が Provider の locale と異なるときはその言語の既定（Provider の labels は使わない） > Provider の labels > Provider の locale の既定 > 日本語」。日本語の差し替え文言が英語指定の部品に混ざらない",
         "日付の語順・曜日名・月名は文言キー: calendarDayLabel / calendarMonthTitle（差し込み口 {year} {month} {monthName} {monthShort} {day} {weekday}）、calendarWeekdaysShort / calendarWeekdaysLong（7 個）/ calendarMonthsLong / calendarMonthsShort（12 個）は半角カンマ区切りで、個数が合わないと日本語の既定で補う。英語の単複は文言では出し分けられず、関数 prop（MonthCalendar の moreLabel）で渡す"
       ]
     },
@@ -2896,7 +2896,7 @@
         "土日の色は weekendTone（既定 true。日曜 Text-Caution / 土曜 Text-Accent-Primary・Calendar と同じ語彙）",
         "native は未提供（INTENTIONAL_NATIVE_GAPS）",
         "分類の識別色（カテゴリ別の予定）は MonthCalendarEvent.accentColor に var(--Categorical-N) を渡す。md 以上はチップの先頭の点、md 未満は日付の下の点（tone より優先）。チップの面と文字は tone のまま。renderEvent の中で色の点を自作しない（issue #716）",
-        "月の見出し（月名・今日へ・前後の月）は MonthCalendarHeader（month・onToday / onPrev / onNext・size md=スマホ / lg=PC・headingLevel）を grid の上に置く。前後は icon-sm + aria-label（既定「前の月」「次の月」）。見出しは aria-live=\"polite\" で月の切り替えを読み上げる。h2 + Button で自作しない（issue #721）",
+        "月の見出し（月名・今日へ・前後の月）は MonthCalendarHeader（month・onToday / onPrev / onNext・size md=スマホ / lg=PC・headingLevel）を grid の上に置く。前後は icon-sm + aria-label（既定「前の月」「次の月」。locale=\"en\" なら Previous month / Next month。今日へ・見出しと同じく locale prop に従う）。見出しは aria-live=\"polite\" で月の切り替えを読み上げる。h2 + Button で自作しない（issue #721）",
         "見出しは月が変わると aria-live で読み上げる。一覧のスクロールで月が変わる画面は MonthCalendarHeader live={false} で切る（issue #736）",
         "見出しの右に置く部品（「月／週」の PillToggle size=\"sm\"・追加ボタン等）は MonthCalendarHeader trailing に渡す（前後の月ボタンの右・前後ボタンが無くても右側に出る）。見出しの外で flex を組んで並べない（issue #743）",
         "週の帯 ⇄ 月全体の開閉は MonthCalendarExpandToggle（expanded / onExpandedChange・読み上げ名は固定で状態は aria-expanded・aria-controls に MonthCalendar の id）を grid の下に置き、expanded を view=\"month\" / \"week\" に渡す。Button ghost icon-sm w-full で自作しない（issue #721）"
