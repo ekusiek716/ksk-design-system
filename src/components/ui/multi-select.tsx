@@ -106,7 +106,7 @@ function MultiSelect({
                 ? "border-[var(--Border-Accent-Primary)] ring-[3px] ring-[var(--Focus-High-Emphasis)]"
                 : "border-[var(--Border-Control,var(--Border-Medium-Emphasis))] hover:border-[var(--Border-High-Emphasis)]",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              "aria-invalid:border-[var(--Border-Caution)] aria-invalid:ring-[var(--Caution-Base)]/20",
+              "aria-invalid:border-[var(--Border-Caution)] aria-invalid:ring-[var(--Caution-Base)] aria-invalid:focus-visible:ring-[var(--Caution-Base)]",
               className
             )}
           >

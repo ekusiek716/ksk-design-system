@@ -378,7 +378,7 @@ className="focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasi
 className="bg-[var(--Brand-Primary)] focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]"
 ```
 
-`/数字` と `/[任意値]` の両方を検出します。別トークン（`ring-[var(--Caution-Base)]/20` 等）は対象外です。
+`/数字` と `/[任意値]` の両方を検出します。shadcn 既定の `ring-ring/50`・`ring-sidebar-ring/50`（`--ring` / `--sidebar-ring` は `Focus-High-Emphasis` を指す）、Tailwind v4 の省略記法 `ring-(--Focus-High-Emphasis)/50`、フォールバック付きの `ring-[var(--Focus-High-Emphasis,#3B82F6)]/50` も同じです。別トークン（`ring-[var(--Caution-Base)]/20` 等）は対象外です。
 
 #### ルールごとの除外（rules.json の excludes 系）
 

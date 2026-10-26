@@ -117,12 +117,17 @@ const buttonVariants = cva(
         accent: "bg-gradient-to-r from-[var(--Brand-Primary)] to-[var(--Brand-Action)] text-[var(--Text-on-Inverse)] border border-transparent hover:opacity-90 rounded-[var(--Control-Radius)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
         // inverse — 暗背景・ヒーローセクション上に乗せる primary CTA。
         // 白背景 + アクセント文字（Brand-Primary）。
+        // フォーカスリングは暗い面（Surface-Inverse）に置く前提で、SidebarNav inverse と同じ
+        // Object-on-Inverse の不透明リング。Focus-High-Emphasis は Surface-Inverse 上で 3:1 を割る
+        // （ライト Gray-900 面で cobalt 2.57 / violet 2.49、ダークは面が白で green 1.74 / orange 2.26 など。実測）。
+        // Object-on-Inverse / Surface-Inverse は light / dark とも 17.72:1（check-contrast.mjs が検査）。
+        // base の focus-visible:ring-[var(--Focus-High-Emphasis)] は Button では cn()（twMerge）が後勝ちで置き換える。
         inverse:
-          "bg-[var(--Surface-Primary)] text-[var(--Brand-Primary)] hover:bg-[var(--Primitive-White-Alpha-900)] active:bg-[var(--Primitive-White-Alpha-800)] disabled:bg-[var(--Primitive-White-Alpha-300)] disabled:text-[var(--Text-Disable)] rounded-[var(--Control-Radius)]",
+          "bg-[var(--Surface-Primary)] text-[var(--Brand-Primary)] hover:bg-[var(--Primitive-White-Alpha-900)] active:bg-[var(--Primitive-White-Alpha-800)] disabled:bg-[var(--Primitive-White-Alpha-300)] disabled:text-[var(--Text-Disable)] rounded-[var(--Control-Radius)] focus-visible:ring-[var(--Object-on-Inverse)]",
         // ghost-inverse — 暗背景・ヒーローセクション上の secondary CTA。
-        // 透過背景 + 白文字 + 白枠。
+        // 透過背景 + 白文字 + 白枠。フォーカスリングは inverse と同じ Object-on-Inverse。
         "ghost-inverse":
-          "border border-[var(--Primitive-White-Alpha-300)] bg-transparent text-[var(--Text-on-Inverse)] hover:bg-[var(--Primitive-White-Alpha-200)] hover:border-[var(--Primitive-White-Alpha-900)] active:bg-[var(--Primitive-White-Alpha-300)] disabled:border-[var(--Primitive-White-Alpha-200)] disabled:text-[var(--Primitive-White-Alpha-300)] rounded-[var(--Control-Radius)]",
+          "border border-[var(--Primitive-White-Alpha-300)] bg-transparent text-[var(--Text-on-Inverse)] hover:bg-[var(--Primitive-White-Alpha-200)] hover:border-[var(--Primitive-White-Alpha-900)] active:bg-[var(--Primitive-White-Alpha-300)] disabled:border-[var(--Primitive-White-Alpha-200)] disabled:text-[var(--Primitive-White-Alpha-300)] rounded-[var(--Control-Radius)] focus-visible:ring-[var(--Object-on-Inverse)]",
       },
       size: {
         xs: "h-[var(--Control-Height-Xs)] px-[var(--Control-Padding-X-Xs)] typo-label-xs",

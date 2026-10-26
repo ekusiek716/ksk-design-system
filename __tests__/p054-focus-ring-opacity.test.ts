@@ -54,6 +54,31 @@ describe("P054 フォーカスリングの半透明", () => {
     expect(p054(results)).toHaveLength(3)
   })
 
+  it("shadcn 既定の ring-ring/50・ring-sidebar-ring/50、v4 省略記法、フォールバック付きも検出する", async () => {
+    const results = await lint(
+      [
+        `export const A = () => <input className="focus-visible:ring-[3px] focus-visible:ring-ring/50" />`,
+        `export const B = () => <a className="focus-visible:ring-sidebar-ring/50" />`,
+        `export const C = () => <a className="focus-visible:ring-(--Focus-High-Emphasis)/50" />`,
+        `export const D = () => <a className="focus-visible:ring-(--Focus-High-Emphasis,#3B82F6)/50" />`,
+        `export const E = () => <a className="focus-visible:ring-[var(--Focus-High-Emphasis,#3B82F6)]/50" />`,
+        `export const F = () => <a className="focus-visible:ring-ring/[0.5]" />`,
+      ].join("\n") + "\n",
+    )
+    expect(p054(results)).toHaveLength(6)
+  })
+
+  it("不透明の ring-ring・ring-offset-ring や、別名の ring-ringed は検出しない", async () => {
+    const results = await lint(
+      [
+        `export const A = () => <a className="focus-visible:ring-ring focus-visible:ring-sidebar-ring" />`,
+        `export const B = () => <a className="focus-visible:ring-(--Focus-High-Emphasis)" />`,
+        `export const C = () => <a className="focus-visible:ring-offset-ring" />`,
+      ].join("\n") + "\n",
+    )
+    expect(p054(results)).toHaveLength(0)
+  })
+
   it("不透明のリングは検出しない", async () => {
     const results = await lint(
       `export const A = () => <Button className="focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]">a</Button>\n`,
@@ -70,7 +95,7 @@ describe("P054 フォーカスリングの半透明", () => {
 
   it("rules.json の fix 文字列自体が半透明を含まない（自分の警告を自分で出さない）", () => {
     const rules = JSON.parse(readFileSync(join(PKG_ROOT, "contracts/rules.json"), "utf8"))
-    const re = /ring-\[var\(--Focus-High-Emphasis\)\]\/(?:\d+|\[[^\]]*\])/
+    const re = /\bring-(?:\[var\(--Focus-High-Emphasis[^)]*\)\]|\(--Focus-High-Emphasis[^)]*\)|ring|sidebar-ring)\/(?:\d+|\[[^\]]*\])/
     const rule = rules.prohibited.find((r: { id: string }) => r.id === "P054")
     expect(new RegExp(rule.pattern).source).toBeTruthy()
     for (const r of rules.prohibited) if (typeof r.fix === "string") expect(r.fix, r.id).not.toMatch(re)
@@ -79,7 +104,7 @@ describe("P054 フォーカスリングの半透明", () => {
 })
 
 describe("DS 内部に半透明のフォーカスリングを増やさない", () => {
-  const RE = /ring-\[var\(--Focus-High-Emphasis\)\]\/(?:\d+|\[[^\]]*\])/
+  const RE = /\bring-(?:\[var\(--Focus-High-Emphasis[^)]*\)\]|\(--Focus-High-Emphasis[^)]*\)|ring|sidebar-ring)\/(?:\d+|\[[^\]]*\])/
 
   function walk(dir: string, out: string[] = []): string[] {
     for (const name of readdirSync(dir)) {

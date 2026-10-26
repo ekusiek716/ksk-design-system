@@ -174,7 +174,7 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
 // Surface-Inverse 上で 3:1 を割った（light 2.7 / dark 1.6）ため、inverse では Object-on-Inverse の不透明リングを使う。
 for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   const surfaceInverse = resolve(s.surface.inverse)
-  pairs.push([resolve(s.object["on-inverse"]), surfaceInverse, `${mode}: SidebarNav inverse のフォーカスリング / Surface-Inverse（非テキスト）`, 3])
+  pairs.push([resolve(s.object["on-inverse"]), surfaceInverse, `${mode}: SidebarNav inverse・Button inverse / ghost-inverse のフォーカスリング Object-on-Inverse / Surface-Inverse（非テキスト）`, 3])
 }
 
 // フォーカスリング（Focus-High-Emphasis）。操作部品のフォーカス表示は WCAG 1.4.11（非テキスト 3:1）で、
@@ -191,6 +191,17 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
     for (const [surfaceLabel, surfaceVal] of [["Surface-Primary", s.surface.primary], ["Surface-Secondary", s.surface.secondary]]) {
       pairs.push([readThemeBrandShade(theme, shade), resolve(surfaceVal), `${mode}: ${theme} Focus-High-Emphasis（Brand-${shade}）/ ${surfaceLabel}（フォーカスリング・非テキスト）`, 3])
     }
+  }
+}
+
+// 入力欄のエラー中のフォーカスリング（aria-invalid:focus-visible:ring-[var(--Caution-Base)]。Input / Textarea /
+// Select / DatePicker / TimePicker / Combobox / MultiSelect）。Focus-High-Emphasis の代わりに不透明な Caution-Base を使う
+// ため、Focus と同じく Surface-Primary / Surface-Secondary に対して 3:1（WCAG 1.4.11）を light / dark で検査する。
+// 20% の赤を重ねていた旧実装は白の上で 1.37:1 だった。
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const caution = resolve(s.caution.base)
+  for (const [surfaceLabel, surfaceVal] of [["Surface-Primary", s.surface.primary], ["Surface-Secondary", s.surface.secondary]]) {
+    pairs.push([caution, resolve(surfaceVal), `${mode}: エラー中のフォーカスリング Caution-Base / ${surfaceLabel}（非テキスト）`, 3])
   }
 }
 

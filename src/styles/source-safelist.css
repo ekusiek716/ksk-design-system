@@ -108,6 +108,7 @@
 @source inline("active:opacity-70");
 @source inline("active:opacity-80");
 @source inline("active:ring-6");
+@source inline("active:ring-[var(--Brand-Primary)]/20");
 @source inline("active:scale-110");
 @source inline("active:scale-95");
 @source inline("active:scale-[.98]");
@@ -125,9 +126,10 @@
 @source inline("appearance-none");
 @source inline("aria-disabled:opacity-50");
 @source inline("aria-invalid:border-[var(--Border-Caution)]");
+@source inline("aria-invalid:focus-visible:ring-[var(--Caution-Base)]");
 @source inline("aria-invalid:ring-2");
 @source inline("aria-invalid:ring-[var(--Border-Caution)]");
-@source inline("aria-invalid:ring-[var(--Caution-Base)]/20");
+@source inline("aria-invalid:ring-[var(--Caution-Base)]");
 @source inline("aspect-[2/1]");
 @source inline("aspect-[3/2]");
 @source inline("aspect-[3/4]");
@@ -455,10 +457,8 @@
 @source inline("focus-visible:outline-hidden");
 @source inline("focus-visible:ring-0");
 @source inline("focus-visible:ring-2");
-@source inline("focus-visible:ring-4");
 @source inline("focus-visible:ring-[3px]");
 @source inline("focus-visible:ring-[var(--Focus-High-Emphasis)]");
-@source inline("focus-visible:ring-[var(--Object-Accent-Primary)]/20");
 @source inline("focus-visible:ring-[var(--Object-on-Inverse)]");
 @source inline("focus-visible:ring-inset");
 @source inline("focus-visible:ring-offset-2");
@@ -634,6 +634,7 @@
 @source inline("hover:opacity-90");
 @source inline("hover:opacity-95");
 @source inline("hover:ring-4");
+@source inline("hover:ring-[var(--Brand-Primary)]/20");
 @source inline("hover:scale-125");
 @source inline("hover:shadow");
 @source inline("hover:text-[var(--Brand-Primary)]");
@@ -1072,7 +1073,6 @@
 @source inline("ring-4");
 @source inline("ring-[3px]");
 @source inline("ring-[var(--Border-Accent-Primary)]");
-@source inline("ring-[var(--Brand-Primary)]/20");
 @source inline("ring-[var(--Focus-High-Emphasis)]");
 @source inline("ring-[var(--Object-Caution)]/30");
 @source inline("ring-inset");

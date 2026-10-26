@@ -488,7 +488,7 @@ describe("DS 本体で outline-none を一切禁止 (issue #620 フォローア�
  * consumer 向けの検出は contracts/rules.json の P054。ここは DS 本体（components / lib /
  * ストーリー）に同じ書き方を戻さないための機械検査。
  */
-const FOCUS_RING_OPACITY_RE = /ring-\[var\(--Focus-High-Emphasis\)\]\/(?:\d+|\[[^\]]*\])/
+const FOCUS_RING_OPACITY_RE = /\bring-(?:\[var\(--Focus-High-Emphasis[^)]*\)\]|\(--Focus-High-Emphasis[^)]*\)|ring|sidebar-ring)\/(?:\d+|\[[^\]]*\])/
 
 function findFocusRingOpacityUsages(rawSource: string): string[] {
   const hits: string[] = []
@@ -514,6 +514,13 @@ describe("DS 本体でフォーカスリングの半透明を禁止（WCAG 1.4.1
   it("リグレッション確認: /50 付きも任意値の不透明度も検出する", () => {
     expect(findFocusRingOpacityUsages(`cn("focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50")`)).toHaveLength(1)
     expect(findFocusRingOpacityUsages(`cn("ring-[var(--Focus-High-Emphasis)]/[0.4]")`)).toHaveLength(1)
+  })
+
+  it("shadcn 既定の ring-ring/50・sidebar-ring・v4 省略記法・フォールバック付きも検出する", () => {
+    expect(findFocusRingOpacityUsages(`cn("focus-visible:ring-ring/50")`)).toHaveLength(1)
+    expect(findFocusRingOpacityUsages(`cn("focus-visible:ring-sidebar-ring/50")`)).toHaveLength(1)
+    expect(findFocusRingOpacityUsages(`cn("focus-visible:ring-(--Focus-High-Emphasis)/50")`)).toHaveLength(1)
+    expect(findFocusRingOpacityUsages(`cn("focus-visible:ring-[var(--Focus-High-Emphasis,#3B82F6)]/50")`)).toHaveLength(1)
   })
 
   it("不透明のリングと別トークンの半透明は検出しない", () => {

@@ -610,11 +610,11 @@
       "severity": "warning",
       "category": "accessibility",
       "appliesTo": ["tailwind"],
-      "pattern": "ring-\\[var\\(--Focus-High-Emphasis\\)\\]/(?:\\d+|\\[[^\\]]*\\])",
+      "pattern": "\\bring-(?:\\[var\\(--Focus-High-Emphasis[^)]*\\)\\]|\\(--Focus-High-Emphasis[^)]*\\)|ring|sidebar-ring)/(?:\\d+|\\[[^\\]]*\\])",
       "excludeLines": [],
-      "message": "フォーカスリングを半透明（ring-[var(--Focus-High-Emphasis)]/50 等）にしている（実効コントラストが WCAG 1.4.11 の 3:1 を割る）",
+      "message": "フォーカスリングを半透明（ring-[var(--Focus-High-Emphasis)]/50・ring-ring/50・ring-(--Focus-High-Emphasis)/50 等）にしている（実効コントラストが WCAG 1.4.11 の 3:1 を割る）",
       "fix": "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]（不透明。/数字 を付けない）",
-      "note": "2026-10 の実測で、ライトの Focus-High-Emphasis（旧 Brand-400）を /50 で重ねたリングは白の上で 1.34〜1.67:1、ダークでも Gray-900 の上で 2.43〜3.44:1 しか取れず、全テーマで WCAG 1.4.11（非テキスト 3:1）未達だった。DS はトークンをライト Brand-600 / ダーク Brand-400 に直し、リングを不透明で使う形に揃えた（不透明なら Surface-Primary の上でライト 5.0〜7.1 / ダーク 6.0〜10.2:1）。consumer が旧 fix 文字列（/50 付き）をコピーした箇所は、トークンが新しくなっても半透明のままコントラストが足りないので、この警告で拾って /数字 を外す。塗りつぶしの面（Brand-Primary 等）の上で使うときは focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)] で面から離す。別トークン（Object-Accent-Primary 等）の半透明リングは対象外"
+      "note": "2026-10 の実測で、ライトの Focus-High-Emphasis（旧 Brand-400）を /50 で重ねたリングは白の上で 1.34〜1.67:1、ダークでも Gray-900 の上で 2.43〜3.44:1 しか取れず、全テーマで WCAG 1.4.11（非テキスト 3:1）未達だった。DS はトークンをライト Brand-600 / ダーク Brand-400 に直し、リングを不透明で使う形に揃えた（不透明なら Surface-Primary の上でライト 5.0〜7.1 / ダーク 6.0〜10.2:1）。consumer が旧 fix 文字列（/50 付き）をコピーした箇所は、トークンが新しくなっても半透明のままコントラストが足りないので、この警告で拾って /数字 を外す。塗りつぶしの面（Brand-Primary 等）の上で使うときは focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)] で面から離す。shadcn 既定の ring-ring/50・ring-sidebar-ring/50（--ring / --sidebar-ring は Focus-High-Emphasis を指す）、Tailwind v4 の省略記法 ring-(--Focus-High-Emphasis)/50、フォールバック付き ring-[var(--Focus-High-Emphasis,#3B82F6)]/50 も同じく検出する。別トークン（Object-Accent-Primary 等）の半透明リングは対象外"
     }
   ],
   "aiPatterns": {
