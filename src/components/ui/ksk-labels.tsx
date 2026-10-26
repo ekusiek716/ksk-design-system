@@ -130,135 +130,686 @@ interface KskLabels {
   errorStateRetry?: string
   /** Celebration の閉じるボタンの文言と読み上げ名 */
   celebrationDismiss?: string
+  /** ImageCarousel / ContentCarousel の前へ矢印の読み上げ名 */
+  carouselPrevious?: string
+  /** ImageCarousel / ContentCarousel の次へ矢印の読み上げ名 */
+  carouselNext?: string
+  /** ImageCarousel / ContentCarousel のドット（各スライドへ移動）の読み上げ名。`{index}` を 1 始まりの番号に置き換える */
+  carouselSlide?: string
+  /** BannerCarousel / ProductCarousel の「もっと見る」の文言 */
+  carouselMore?: string
+  /** ImageCarousel のスクロール領域（role="region"）の読み上げ名 */
+  imageCarouselRegion?: string
+  /** ContentCarousel のスクロール領域の読み上げ名 */
+  contentCarouselRegion?: string
+  /** BannerCarousel のスクロール領域の読み上げ名 */
+  bannerCarouselRegion?: string
+  /** BulkActions の選択解除ボタンの読み上げ名 */
+  bulkActionsClear?: string
+  /** BulkActions / DataTableBulkActions の選択件数の文言（toolbar の読み上げ名も兼ねる）。`{count}` を件数に置き換える。英語の単複は関数 prop（countLabel）で */
+  bulkActionsCount?: string
+  /** ImageUploader の追加ボタンの読み上げ名 */
+  imageUploaderAdd?: string
+  /** ImageUploader の追加ボタンに見える短い文言 */
+  imageUploaderAddText?: string
+  /** ImageUploader の各画像の削除ボタンの読み上げ名。`{name}` を画像の alt に置き換える */
+  imageUploaderRemove?: string
+  /** DataTable の選択列ヘッダー（th）の読み上げ名 */
+  dataTableSelectionColumn?: string
+  /** DataTable の「すべて選択」チェックボックスの読み上げ名 */
+  dataTableSelectAll?: string
+  /** DataTableCheckboxCell（行側）の既定の読み上げ名 */
+  dataTableSelectRow?: string
+  /** DataTable の行チェックボックスの読み上げ名。`{id}` を行 ID に置き換える */
+  dataTableSelectRowId?: string
+  /** DataTableActionCell の行メニュー起動ボタンの読み上げ名 */
+  dataTableRowMenu?: string
+  /** DataTableInputCell の input の読み上げ名（aria-label / placeholder が無いとき） */
+  dataTableInput?: string
+  /** DataTableSelectCell / createDataTableSelectColumn の選択欄の読み上げ名・プレースホルダー（aria-label / placeholder が無いとき） */
+  dataTableSelect?: string
+  /** DataTableAddRow の追加ボタンの文言 */
+  dataTableAddRow?: string
+  /** DataTableEmptyState の見出し */
+  dataTableEmpty?: string
+  /** createDataTable*Column の値が無いセルの表示 */
+  dataTableEmptyValue?: string
+  /** OrderSummary の合計ラベル */
+  orderSummaryTotal?: string
+  /** ProductCard のカート追加ボタンの文言 */
+  productCardAddToCart?: string
+  /** ProductCard のお気に入りボタン（未登録のとき）の読み上げ名 */
+  productCardFavoriteAdd?: string
+  /** ProductCard のお気に入りボタン（登録済みのとき）の読み上げ名 */
+  productCardFavoriteRemove?: string
+  /** QuantitySelector 全体（role="group"）の読み上げ名 */
+  quantitySelectorGroup?: string
+  /** QuantitySelector の減らすボタンの読み上げ名 */
+  quantitySelectorDecrease?: string
+  /** QuantitySelector の増やすボタンの読み上げ名 */
+  quantitySelectorIncrease?: string
+  /** QuantitySelector の削除操作（trash 状態）の読み上げ名 */
+  quantitySelectorDelete?: string
+  /** FilterBar の nav の読み上げ名 */
+  filterBarNav?: string
+  /** FilterBar の絞り込みボタンの読み上げ名 */
+  filterBarMore?: string
+  /** FilterBar のドロップダウンの「選択を解除」の文言 */
+  filterBarClear?: string
+  /** FilterBar の並べ替えボタンの既定の文言 */
+  filterBarSort?: string
+  /** FilterBar の件数表示。`{count}` の部分だけ太字の数字になる（`{count}` の前後の文字がそのまま出る） */
+  filterBarResultCount?: string
+  /** BottomTabBar の nav の読み上げ名 */
+  bottomTabBarNav?: string
+  /** ChipFilterBar の件数表示。`{count}` を桁区切り済みの件数に置き換える。英語の単複は関数 prop（resultCountLabel）で */
+  chipFilterBarResultCount?: string
+  /** Chip の削除ボタンの読み上げ名（children が文字列でないとき） */
+  chipRemove?: string
+  /** Chip の削除ボタンの読み上げ名（children が文字列・数値のとき）。`{name}` を children に置き換える */
+  chipRemoveNamed?: string
+  /** CompactFilePicker の見出し */
+  compactFilePickerLabel?: string
+  /** CompactFilePicker のボタンの文言 */
+  compactFilePickerTrigger?: string
+  /** CompactFilePicker の処理中（loading）のボタンの文言 */
+  compactFilePickerLoading?: string
+  /** ImageAttachmentPicker のボタンの文言 */
+  imageAttachmentTrigger?: string
+  /** ImageAttachmentPicker の見出し・名前の無い画像の既定の名前 */
+  imageAttachmentLabel?: string
+  /** ImageAttachmentPicker の各画像の削除ボタンの読み上げ名。`{name}` を画像名に置き換える */
+  imageAttachmentRemove?: string
+  /** ConfirmDialog の確認ボタンの文言 */
+  confirmDialogConfirm?: string
+  /** ConfirmDialog のキャンセルボタンの文言 */
+  confirmDialogCancel?: string
+  /** ConfirmDialog の処理中の文言 */
+  confirmDialogLoading?: string
+  /** ErrorState（kind="error"）の見出し */
+  errorStateTitle?: string
+  /** ErrorState（kind="error"）の説明 */
+  errorStateDescription?: string
+  /** ErrorState（kind="notFound"）の見出し */
+  errorStateNotFoundTitle?: string
+  /** ErrorState（kind="notFound"）の説明 */
+  errorStateNotFoundDescription?: string
+  /** FeatureComparisonTable の左上の見出しセル（機能名の列） */
+  featureComparisonFeature?: string
+  /** FeatureComparisonTable の true のセルの読み上げ文言 */
+  featureComparisonAvailable?: string
+  /** FeatureComparisonTable の false のセルの読み上げ文言 */
+  featureComparisonUnavailable?: string
+  /** FileUpload のドラッグエリアのメイン文言 */
+  fileUploadDrag?: string
+  /** FileUpload の「または」 */
+  fileUploadOr?: string
+  /** FileUpload のファイル選択の文言 */
+  fileUploadBrowse?: string
+  /** FileUpload のサイズ上限の文言。`{size}` を "5.0 MB" のようなサイズに置き換える */
+  fileUploadMaxSize?: string
+  /** FileUpload のファイル数上限の文言。`{max}` を数に置き換える。英語の単複は関数 prop（maxFilesLabel）で */
+  fileUploadMaxFiles?: string
+  /** FileUpload の削除ボタンの語（fileUploadRemoveItem の `{label}` に入る） */
+  fileUploadRemove?: string
+  /** FileUpload の各ファイルの削除ボタンの読み上げ名。`{name}` をファイル名、`{label}` を fileUploadRemove（または removeLabel prop）に置き換える */
+  fileUploadRemoveItem?: string
+  /** FilterPill の Popover パネルの読み上げ名。`{label}` をピルのラベルに置き換える */
+  filterPillPanel?: string
+  /** FilterPill のクリアボタンの読み上げ名。`{label}` をピルのラベルに置き換える */
+  filterPillClear?: string
+  /** KanbanColumn の件数の読み上げ・表示の文言。`{count}` を件数に置き換える。英語の単複は関数 prop（countLabel）で */
+  kanbanColumnCount?: string
+  /** MediaActionCluster 全体の読み上げ名 */
+  mediaActionCluster?: string
+  /** SidebarNav の nav の読み上げ名 */
+  sidebarNav?: string
+  /** SwipeRow のアクション群（group）の読み上げ名 */
+  swipeRowActions?: string
+  /** ReviewOverlay のピン（コメントが無いとき）の読み上げ名 */
+  reviewOverlayPin?: string
+  /** TagInput の入力欄のプレースホルダー（タグが 0 件のとき） */
+  tagInputPlaceholder?: string
+  /** TagInput の入力欄の読み上げ名（id / aria-labelledby が無いとき） */
+  tagInputLabel?: string
+  /** TagInput の各タグの削除ボタンの読み上げ名。`{tag}` をタグに置き換える */
+  tagInputRemove?: string
+  /** CodeInput（cells）の各セルの読み上げ名。`{index}` を 1 始まりの桁、`{length}` を全桁数に置き換える */
+  codeInputCell?: string
+  /** Progress / ProgressRing の読み上げ名（aria-label / aria-labelledby / label が無いとき） */
+  progress?: string
+  /** Celebration の読み上げ文（title が無いとき。画面には出さない） */
+  celebrationTitle?: string
+  /** CoachMarkOverlay の面（overlay）の読み上げ名。ja の既定は従来どおり英語の "Onboarding coach mark"（Provider 無しの読み上げを変えないため） */
+  coachMarkOverlayLabel?: string
+  /** Combobox のトリガーのプレースホルダー */
+  comboboxPlaceholder?: string
+  /** Combobox の検索欄のプレースホルダー */
+  comboboxSearchPlaceholder?: string
+  /** Combobox の候補リストの読み上げ名。`{label}` をトリガーの名前（triggerLabel / placeholder）に置き換える */
+  comboboxOptions?: string
+  /** MultiSelect のトリガーのプレースホルダー */
+  multiSelectPlaceholder?: string
+  /** MultiSelect の検索欄のプレースホルダー */
+  multiSelectSearchPlaceholder?: string
+  /** DatePicker / DateTimePicker（日付側）のプレースホルダー */
+  datePickerPlaceholder?: string
+  /** DateRangePicker のプレースホルダー */
+  dateRangePickerPlaceholder?: string
+  /** TimePicker / DateTimePicker（時刻側）のプレースホルダー */
+  timePickerPlaceholder?: string
+  /** DateRangePicker の開始日と終了日の区切り（前後の空白を含む） */
+  dateRangePickerSeparator?: string
+  /** DateTimePicker の日付側の書式（`M` `d` `EEE` 等のトークン。DatePicker の `dateFormat` と同じ） */
+  dateTimePickerDateFormat?: string
+  /** TimePicker の時の列の見出し */
+  timePickerHour?: string
+  /** TimePicker の分の列の見出し */
+  timePickerMinute?: string
+  /** CountdownTimer（granularity="day"）の日の単位 */
+  countdownUnitDay?: string
+  /** CountdownTimer の時間の単位 */
+  countdownUnitHour?: string
+  /** CountdownTimer の分の単位 */
+  countdownUnitMinute?: string
+  /** CountdownTimer の秒の単位 */
+  countdownUnitSecond?: string
+  /** BreadcrumbEllipsis（省略記号）の読み上げ名 */
+  breadcrumbEllipsis?: string
+  /** SimplePagination の 0 件のときの中央表示 */
+  simplePaginationEmpty?: string
+  /** SimplePagination の件数表示（items 形式）。`{range}`（例 "1 - 10"）と `{total}` を数字に置き換える。`{…}` 以外の文字は弱いトーンで出る */
+  simplePaginationItems?: string
+  /** SimplePagination のページ表示（pages 形式）。`{page}` と `{pages}` を数字に置き換える。`{…}` 以外の文字は弱いトーンで出る */
+  simplePaginationPages?: string
+  /**
+   * Toaster の通知 viewport（role="region"）の読み上げ名。`configureToast({ regionLabel })` が優先。
+   * `toast()` が自動で出す viewport（`<Toaster>` を置かない経路）は別の React root に描画されるので Provider が届かない。
+   * その経路の英語化は `configureToast({ regionLabel, closeLabel, messages })` で行う。
+   */
+  toastRegion?: string
+  /** Slider のつまみの読み上げ名（aria-label / aria-labelledby が無いとき） */
+  sliderThumb?: string
+  /** Slider（範囲）の開始側のつまみの位置名（sliderThumbPosition の `{position}`） */
+  sliderStart?: string
+  /** Slider（範囲）の終了側のつまみの位置名（sliderThumbPosition の `{position}`） */
+  sliderEnd?: string
+  /** Slider（範囲）のつまみの読み上げ名。`{label}` を aria-label（無ければ sliderThumb）、`{position}` を sliderStart / sliderEnd に置き換える */
+  sliderThumbPosition?: string
+  /** SocialLoginButton（provider="line"）の既定文言 */
+  socialLoginLine?: string
+  /** SocialLoginButton（provider="google"）の既定文言 */
+  socialLoginGoogle?: string
+  /** SocialLoginButton（provider="apple"）の既定文言 */
+  socialLoginApple?: string
+  /** SocialLoginButton（provider="amazon"）の既定文言 */
+  socialLoginAmazon?: string
+  /** ProgressSteps の読み上げ名。`{current}`（1 始まり）/ `{total}` / `{name}`（現在のステップ名）を置き換える */
+  progressSteps?: string
+  /** MenuDrawer のシートの見出し（読み上げ専用） */
+  menuDrawerTitle?: string
+  /** ActionTile / QuickActionGrid の loading 中の Spinner の読み上げ名 */
+  quickActionGridLoading?: string
+  /** DocumentPage の最終更新日の表示。`{date}` を lastUpdated に置き換える */
+  documentPageLastUpdated?: string
+  /** RatingDisplay の読み上げ名（件数なし）。`{value}` を小数 1 桁の評価に置き換える */
+  ratingDisplay?: string
+  /** RatingDisplay の読み上げ名（件数あり）。`{value}` を評価、`{count}` を件数に置き換える。英語の単複（1 review）は表示側の件数で補う */
+  ratingDisplayWithCount?: string
+  /** PriceDisplay の「税込」（表示と読み上げ） */
+  priceDisplayTax?: string
+  /** ReviewSummary の件数表示。`{count}` を桁区切り済みの件数に置き換える */
+  reviewSummaryCount?: string
+  /** ReviewCard / StarRow の星の読み上げ名。`{rating}` を点数に置き換える */
+  reviewStarRating?: string
+  /** ReviewCard の「参考になった」ボタンの文言 */
+  reviewCardHelpful?: string
+  /** NotificationList が 0 件のときの文言 */
+  notificationListEmpty?: string
+  /** SearchPanel のリセットボタンの文言 */
+  searchPanelReset?: string
+  /** SearchPanel の検索ボタンの文言 */
+  searchPanelSearch?: string
+  /** ChartControls の粒度「時間」 */
+  chartGranularityHour?: string
+  /** ChartControls の粒度「日」 */
+  chartGranularityDay?: string
+  /** ChartControls の粒度「週」 */
+  chartGranularityWeek?: string
+  /** ChartControls の粒度「月」 */
+  chartGranularityMonth?: string
+  /** ChartControls の期間「7日」 */
+  chartPeriod7d?: string
+  /** ChartControls の期間「30日」 */
+  chartPeriod30d?: string
+  /** ChartControls の期間「90日」 */
+  chartPeriod90d?: string
+  /** ChartControls の期間「1年」 */
+  chartPeriod1y?: string
+  /** ChartControls の期間「カスタム」 */
+  chartPeriodCustom?: string
+  /** ChartControls の粒度行の見出し */
+  chartControlsGranularity?: string
+  /** ChartControls の期間行の見出し */
+  chartControlsPeriod?: string
+  /** ChartControls の比較行の見出し */
+  chartControlsComparison?: string
+  /** ChartControls の比較トグルの文言 */
+  chartControlsShowComparison?: string
+  /** CountdownTimer（日）の読み上げ。`{count}` を数に置き換える。表示の単位 prop（dayUnit）を渡したときはそちらが読み上げにも使われる。英語の単複は文言では出し分けられないので "day(s)" と読ませる（厳密にしたいときは dayUnit prop） */
+  countdownSpokenDay?: string
+  /** CountdownTimer の「時間」の読み上げ。`{count}` を数に置き換える（hourUnit prop が優先。単複は "hour(s)"） */
+  countdownSpokenHour?: string
+  /** CountdownTimer の「分」の読み上げ。`{count}` を数に置き換える（minuteUnit prop が優先。単複は "minute(s)"） */
+  countdownSpokenMinute?: string
+  /** CountdownTimer の「秒」の読み上げ。`{count}` を数に置き換える（secondUnit prop が優先。単複は "second(s)"） */
+  countdownSpokenSecond?: string
+  /** CountdownTimer の読み上げで、時間・分・秒をつなぐ区切り（ja は空、en は半角スペース） */
+  countdownSpokenSeparator?: string
 }
 
 /** 全キーを解決済みの文言（部品の中・既定値で使う）。 */
 type ResolvedKskLabels = Required<KskLabels>
 
-const KSK_DEFAULT_LABELS: Record<KskLocale, ResolvedKskLabels> = {
-  ja: {
-    skipLink: "コンテンツへ移動",
-    mobileMenu: "メニューを開く",
-    mobileDrawerTitle: "メニュー",
-    required: "必須",
-    optional: "任意",
-    close: "閉じる",
-    back: "戻る",
-    share: "シェア",
-    calendarToday: "今日へ",
-    calendarPrevMonth: "前の月",
-    calendarNextMonth: "次の月",
-    calendarExpand: "月全体を表示",
-    ratingGroup: "評価",
-    ratingValue: "{value}/{max}点",
-    ratingStar: "{value}点",
-    menu: "メニュー",
-    paginationNav: "ページネーション",
-    paginationPrevious: "前へ",
-    paginationNext: "次へ",
-    paginationEllipsis: "その他のページ",
-    simplePaginationNav: "ページネーション",
-    simplePaginationPrevious: "前へ",
-    simplePaginationNext: "次へ",
-    spinnerLoading: "読み込み中",
-    breadcrumbNav: "パンくずリスト",
-    comboboxEmpty: "該当なし",
-    multiSelectEmpty: "該当なし",
-    multiSelectClear: "選択をクリア",
-    numberInputDecrement: "減らす",
-    numberInputIncrement: "増やす",
-    imageGalleryImage: "画像 {index}",
-    imageGalleryPrev: "前の画像",
-    imageGalleryNext: "次の画像",
-    dropdownFilterAll: "すべて",
-    sectionNav: "ページ内セクション",
-    syncStatusSyncing: "同期中",
-    syncStatusError: "{count}件のエラー",
-    syncStatusSaved: "保存済み",
-    syncStatusOffline: "オフライン",
-    syncStatusRetry: "再試行",
-    countdownRemaining: "残り",
-    countdownEnded: "受付終了",
-    countdownToday: "本日",
-    countdownPast: "経過",
-    coachMarkNext: "次へ →",
-    coachMarkSkip: "スキップ",
-    coachMarkLabel: "コーチマーク",
-    shareEmail: "メール",
-    shareLink: "リンク",
-    shareCopied: "コピーしました",
-    shareCopyError: "コピーできませんでした",
-    bottomSheetFormSubmit: "保存",
-    bottomSheetFormSaving: "保存中…",
-    bottomSheetFormCancel: "キャンセル",
-    codeDisplayCopy: "コピー",
-    codeDisplayCopied: "コピーしました",
-    codeDisplayCopyError: "コピーできませんでした",
-    errorStateRetry: "再試行",
-    celebrationDismiss: "閉じる",
-  },
-  en: {
-    skipLink: "Skip to content",
-    mobileMenu: "Open menu",
-    mobileDrawerTitle: "Menu",
-    required: "Required",
-    optional: "Optional",
-    close: "Close",
-    back: "Back",
-    share: "Share",
-    calendarToday: "Today",
-    calendarPrevMonth: "Previous month",
-    calendarNextMonth: "Next month",
-    calendarExpand: "Show full month",
-    ratingGroup: "Rating",
-    ratingValue: "Rated {value} of {max}",
-    ratingStar: "{value} of {max}",
-    menu: "Menu",
-    paginationNav: "Pagination",
-    paginationPrevious: "Previous",
-    paginationNext: "Next",
-    paginationEllipsis: "More pages",
-    simplePaginationNav: "Pagination",
-    simplePaginationPrevious: "Previous",
-    simplePaginationNext: "Next",
-    spinnerLoading: "Loading",
-    breadcrumbNav: "Breadcrumb",
-    comboboxEmpty: "No results",
-    multiSelectEmpty: "No results",
-    multiSelectClear: "Clear selection",
-    numberInputDecrement: "Decrease",
-    numberInputIncrement: "Increase",
-    imageGalleryImage: "Image {index}",
-    imageGalleryPrev: "Previous image",
-    imageGalleryNext: "Next image",
-    dropdownFilterAll: "All",
-    sectionNav: "On this page",
-    syncStatusSyncing: "Syncing",
-    syncStatusError: "{count} errors",
-    syncStatusSaved: "Saved",
-    syncStatusOffline: "Offline",
-    syncStatusRetry: "Retry",
-    countdownRemaining: "Time left",
-    countdownEnded: "Closed",
-    countdownToday: "Today",
-    countdownPast: "Elapsed",
-    coachMarkNext: "Next →",
-    coachMarkSkip: "Skip",
-    coachMarkLabel: "Coach mark",
-    shareEmail: "Email",
-    shareLink: "Link",
-    shareCopied: "Copied",
-    shareCopyError: "Could not copy",
-    bottomSheetFormSubmit: "Save",
-    bottomSheetFormSaving: "Saving…",
-    bottomSheetFormCancel: "Cancel",
-    codeDisplayCopy: "Copy",
-    codeDisplayCopied: "Copied",
-    codeDisplayCopyError: "Could not copy",
-    errorStateRetry: "Retry",
-    celebrationDismiss: "Close",
-  },
+/** ja の既定文言（Provider 無しの文言。DEFAULT_CONTEXT だけがこれを参照するので、en は Provider / KSK_DEFAULT_LABELS を使わない import からは落ちる） */
+const JA_LABELS: ResolvedKskLabels = {
+  skipLink: "コンテンツへ移動",
+  mobileMenu: "メニューを開く",
+  mobileDrawerTitle: "メニュー",
+  required: "必須",
+  optional: "任意",
+  close: "閉じる",
+  back: "戻る",
+  share: "シェア",
+  calendarToday: "今日へ",
+  calendarPrevMonth: "前の月",
+  calendarNextMonth: "次の月",
+  calendarExpand: "月全体を表示",
+  ratingGroup: "評価",
+  ratingValue: "{value}/{max}点",
+  ratingStar: "{value}点",
+  menu: "メニュー",
+  paginationNav: "ページネーション",
+  paginationPrevious: "前へ",
+  paginationNext: "次へ",
+  paginationEllipsis: "その他のページ",
+  simplePaginationNav: "ページネーション",
+  simplePaginationPrevious: "前へ",
+  simplePaginationNext: "次へ",
+  spinnerLoading: "読み込み中",
+  breadcrumbNav: "パンくずリスト",
+  comboboxEmpty: "該当なし",
+  multiSelectEmpty: "該当なし",
+  multiSelectClear: "選択をクリア",
+  numberInputDecrement: "減らす",
+  numberInputIncrement: "増やす",
+  imageGalleryImage: "画像 {index}",
+  imageGalleryPrev: "前の画像",
+  imageGalleryNext: "次の画像",
+  dropdownFilterAll: "すべて",
+  sectionNav: "ページ内セクション",
+  syncStatusSyncing: "同期中",
+  syncStatusError: "{count}件のエラー",
+  syncStatusSaved: "保存済み",
+  syncStatusOffline: "オフライン",
+  syncStatusRetry: "再試行",
+  countdownRemaining: "残り",
+  countdownEnded: "受付終了",
+  countdownToday: "本日",
+  countdownPast: "経過",
+  coachMarkNext: "次へ →",
+  coachMarkSkip: "スキップ",
+  coachMarkLabel: "コーチマーク",
+  shareEmail: "メール",
+  shareLink: "リンク",
+  shareCopied: "コピーしました",
+  shareCopyError: "コピーできませんでした",
+  bottomSheetFormSubmit: "保存",
+  bottomSheetFormSaving: "保存中…",
+  bottomSheetFormCancel: "キャンセル",
+  codeDisplayCopy: "コピー",
+  codeDisplayCopied: "コピーしました",
+  codeDisplayCopyError: "コピーできませんでした",
+  errorStateRetry: "再試行",
+  celebrationDismiss: "閉じる",
+  carouselPrevious: "前へ",
+  carouselNext: "次へ",
+  carouselSlide: "スライド {index}",
+  carouselMore: "もっと見る",
+  imageCarouselRegion: "画像カルーセル",
+  contentCarouselRegion: "コンテンツカルーセル",
+  bannerCarouselRegion: "バナー一覧",
+  bulkActionsClear: "選択を解除",
+  bulkActionsCount: "{count}件を選択中",
+  imageUploaderAdd: "画像を追加",
+  imageUploaderAddText: "追加",
+  imageUploaderRemove: "{name}を削除",
+  dataTableSelectionColumn: "行選択",
+  dataTableSelectAll: "すべて選択",
+  dataTableSelectRow: "行を選択",
+  dataTableSelectRowId: "{id} を選択",
+  dataTableRowMenu: "行メニュー",
+  dataTableInput: "入力",
+  dataTableSelect: "選択",
+  dataTableAddRow: "追加する",
+  dataTableEmpty: "データがありません",
+  dataTableEmptyValue: "未設定",
+  orderSummaryTotal: "合計（税込）",
+  productCardAddToCart: "カートに追加",
+  productCardFavoriteAdd: "お気に入りに追加",
+  productCardFavoriteRemove: "お気に入りから削除",
+  quantitySelectorGroup: "数量選択",
+  quantitySelectorDecrease: "数量を減らす",
+  quantitySelectorIncrease: "数量を増やす",
+  quantitySelectorDelete: "削除",
+  filterBarNav: "フィルター",
+  filterBarMore: "絞り込み",
+  filterBarClear: "選択を解除",
+  filterBarSort: "並べ替え",
+  filterBarResultCount: "対象商品: {count} 件",
+  bottomTabBarNav: "メインナビゲーション",
+  chipFilterBarResultCount: "{count}件",
+  chipRemove: "削除",
+  chipRemoveNamed: "削除: {name}",
+  compactFilePickerLabel: "ファイル",
+  compactFilePickerTrigger: "選択する",
+  compactFilePickerLoading: "処理中",
+  imageAttachmentTrigger: "画像を追加",
+  imageAttachmentLabel: "画像",
+  imageAttachmentRemove: "{name}を削除",
+  confirmDialogConfirm: "確認",
+  confirmDialogCancel: "キャンセル",
+  confirmDialogLoading: "処理中…",
+  errorStateTitle: "エラーが発生しました",
+  errorStateDescription: "しばらくしてからもう一度お試しください",
+  errorStateNotFoundTitle: "ページが見つかりません",
+  errorStateNotFoundDescription: "お探しのページは移動または削除された可能性があります。",
+  featureComparisonFeature: "機能",
+  featureComparisonAvailable: "利用できる",
+  featureComparisonUnavailable: "利用できない",
+  fileUploadDrag: "ここにファイルをドロップ",
+  fileUploadOr: "または",
+  fileUploadBrowse: "ファイルを選択",
+  fileUploadMaxSize: "最大 {size} まで",
+  fileUploadMaxFiles: "最大 {max} ファイルまで",
+  fileUploadRemove: "削除",
+  fileUploadRemoveItem: "{name} を{label}",
+  filterPillPanel: "{label}のフィルタ",
+  filterPillClear: "{label}をクリア",
+  kanbanColumnCount: "{count}件",
+  mediaActionCluster: "メディアアクション",
+  sidebarNav: "サイドナビゲーション",
+  swipeRowActions: "行の操作",
+  reviewOverlayPin: "レビューピン",
+  tagInputPlaceholder: "タグを入力して Enter",
+  tagInputLabel: "タグ入力",
+  tagInputRemove: "{tag} を削除",
+  codeInputCell: "{index}桁目（全{length}桁）",
+  progress: "進捗",
+  celebrationTitle: "達成しました",
+  coachMarkOverlayLabel: "Onboarding coach mark",
+  comboboxPlaceholder: "選択してください",
+  comboboxSearchPlaceholder: "検索...",
+  comboboxOptions: "{label}の候補",
+  multiSelectPlaceholder: "選択してください",
+  multiSelectSearchPlaceholder: "検索...",
+  datePickerPlaceholder: "日付を選択",
+  dateRangePickerPlaceholder: "期間を選択",
+  timePickerPlaceholder: "時刻を選択",
+  dateRangePickerSeparator: " 〜 ",
+  dateTimePickerDateFormat: "M月d日（EEE）",
+  timePickerHour: "時",
+  timePickerMinute: "分",
+  countdownUnitDay: "日",
+  countdownUnitHour: "時間",
+  countdownUnitMinute: "分",
+  countdownUnitSecond: "秒",
+  breadcrumbEllipsis: "その他",
+  simplePaginationEmpty: "0 件",
+  simplePaginationItems: "{range} / 全 {total} 件",
+  simplePaginationPages: "{page} / {pages} ページ",
+  toastRegion: "通知",
+  sliderThumb: "スライダー",
+  sliderStart: "開始",
+  sliderEnd: "終了",
+  sliderThumbPosition: "{label}（{position}）",
+  socialLoginLine: "LINEでログイン",
+  socialLoginGoogle: "Googleでログイン",
+  socialLoginApple: "Appleでログイン",
+  socialLoginAmazon: "Amazonでログイン",
+  progressSteps: "ステップ {current} / {total}: {name}",
+  menuDrawerTitle: "メニュー",
+  quickActionGridLoading: "処理中",
+  documentPageLastUpdated: "最終更新日：{date}",
+  ratingDisplay: "評価 {value} / 5",
+  ratingDisplayWithCount: "評価 {value} / 5 ({count}件)",
+  priceDisplayTax: "税込",
+  reviewSummaryCount: "{count}件の口コミ",
+  reviewStarRating: "{rating}点 / 5点",
+  reviewCardHelpful: "参考になった",
+  notificationListEmpty: "新着のお知らせはありません",
+  searchPanelReset: "リセット",
+  searchPanelSearch: "検索",
+  chartGranularityHour: "時間",
+  chartGranularityDay: "日",
+  chartGranularityWeek: "週",
+  chartGranularityMonth: "月",
+  chartPeriod7d: "7日",
+  chartPeriod30d: "30日",
+  chartPeriod90d: "90日",
+  chartPeriod1y: "1年",
+  chartPeriodCustom: "カスタム",
+  chartControlsGranularity: "粒度",
+  chartControlsPeriod: "期間",
+  chartControlsComparison: "比較",
+  chartControlsShowComparison: "前期比を表示",
+  countdownSpokenDay: "{count}日",
+  countdownSpokenHour: "{count}時間",
+  countdownSpokenMinute: "{count}分",
+  countdownSpokenSecond: "{count}秒",
+  countdownSpokenSeparator: "",
 }
+
+/** en の既定文言（KskLabelsProvider locale="en"） */
+const EN_LABELS: ResolvedKskLabels = {
+  skipLink: "Skip to content",
+  mobileMenu: "Open menu",
+  mobileDrawerTitle: "Menu",
+  required: "Required",
+  optional: "Optional",
+  close: "Close",
+  back: "Back",
+  share: "Share",
+  calendarToday: "Today",
+  calendarPrevMonth: "Previous month",
+  calendarNextMonth: "Next month",
+  calendarExpand: "Show full month",
+  ratingGroup: "Rating",
+  ratingValue: "Rated {value} of {max}",
+  ratingStar: "{value} of {max}",
+  menu: "Menu",
+  paginationNav: "Pagination",
+  paginationPrevious: "Previous",
+  paginationNext: "Next",
+  paginationEllipsis: "More pages",
+  simplePaginationNav: "Pagination",
+  simplePaginationPrevious: "Previous",
+  simplePaginationNext: "Next",
+  spinnerLoading: "Loading",
+  breadcrumbNav: "Breadcrumb",
+  comboboxEmpty: "No results",
+  multiSelectEmpty: "No results",
+  multiSelectClear: "Clear selection",
+  numberInputDecrement: "Decrease",
+  numberInputIncrement: "Increase",
+  imageGalleryImage: "Image {index}",
+  imageGalleryPrev: "Previous image",
+  imageGalleryNext: "Next image",
+  dropdownFilterAll: "All",
+  sectionNav: "On this page",
+  syncStatusSyncing: "Syncing",
+  syncStatusError: "{count} errors",
+  syncStatusSaved: "Saved",
+  syncStatusOffline: "Offline",
+  syncStatusRetry: "Retry",
+  countdownRemaining: "Time left",
+  countdownEnded: "Closed",
+  countdownToday: "Today",
+  countdownPast: "Elapsed",
+  coachMarkNext: "Next →",
+  coachMarkSkip: "Skip",
+  coachMarkLabel: "Coach mark",
+  shareEmail: "Email",
+  shareLink: "Link",
+  shareCopied: "Copied",
+  shareCopyError: "Could not copy",
+  bottomSheetFormSubmit: "Save",
+  bottomSheetFormSaving: "Saving…",
+  bottomSheetFormCancel: "Cancel",
+  codeDisplayCopy: "Copy",
+  codeDisplayCopied: "Copied",
+  codeDisplayCopyError: "Could not copy",
+  errorStateRetry: "Retry",
+  celebrationDismiss: "Close",
+  carouselPrevious: "Previous",
+  carouselNext: "Next",
+  carouselSlide: "Slide {index}",
+  carouselMore: "See more",
+  imageCarouselRegion: "Image carousel",
+  contentCarouselRegion: "Content carousel",
+  bannerCarouselRegion: "Banners",
+  bulkActionsClear: "Clear selection",
+  bulkActionsCount: "{count} selected",
+  imageUploaderAdd: "Add image",
+  imageUploaderAddText: "Add",
+  imageUploaderRemove: "Remove {name}",
+  dataTableSelectionColumn: "Selection",
+  dataTableSelectAll: "Select all",
+  dataTableSelectRow: "Select row",
+  dataTableSelectRowId: "Select {id}",
+  dataTableRowMenu: "Row menu",
+  dataTableInput: "Input",
+  dataTableSelect: "Select",
+  dataTableAddRow: "Add",
+  dataTableEmpty: "No data",
+  dataTableEmptyValue: "Not set",
+  orderSummaryTotal: "Total (incl. tax)",
+  productCardAddToCart: "Add to cart",
+  productCardFavoriteAdd: "Add to favorites",
+  productCardFavoriteRemove: "Remove from favorites",
+  quantitySelectorGroup: "Quantity",
+  quantitySelectorDecrease: "Decrease quantity",
+  quantitySelectorIncrease: "Increase quantity",
+  quantitySelectorDelete: "Remove",
+  filterBarNav: "Filters",
+  filterBarMore: "Filter",
+  filterBarClear: "Clear selection",
+  filterBarSort: "Sort",
+  filterBarResultCount: "Results: {count} items",
+  bottomTabBarNav: "Main navigation",
+  chipFilterBarResultCount: "{count} results",
+  chipRemove: "Remove",
+  chipRemoveNamed: "Remove: {name}",
+  compactFilePickerLabel: "File",
+  compactFilePickerTrigger: "Choose",
+  compactFilePickerLoading: "Processing",
+  imageAttachmentTrigger: "Add image",
+  imageAttachmentLabel: "Image",
+  imageAttachmentRemove: "Remove {name}",
+  confirmDialogConfirm: "Confirm",
+  confirmDialogCancel: "Cancel",
+  confirmDialogLoading: "Processing…",
+  errorStateTitle: "Something went wrong",
+  errorStateDescription: "Please try again in a few moments",
+  errorStateNotFoundTitle: "Page not found",
+  errorStateNotFoundDescription: "The page you are looking for may have been moved or deleted.",
+  featureComparisonFeature: "Feature",
+  featureComparisonAvailable: "Available",
+  featureComparisonUnavailable: "Not available",
+  fileUploadDrag: "Drop files here",
+  fileUploadOr: "or",
+  fileUploadBrowse: "Choose files",
+  fileUploadMaxSize: "Up to {size}",
+  fileUploadMaxFiles: "Up to {max} files",
+  fileUploadRemove: "Remove",
+  fileUploadRemoveItem: "{label} {name}",
+  filterPillPanel: "{label} filter",
+  filterPillClear: "Clear {label}",
+  kanbanColumnCount: "{count} items",
+  mediaActionCluster: "Media actions",
+  sidebarNav: "Sidebar navigation",
+  swipeRowActions: "Row actions",
+  reviewOverlayPin: "Review pin",
+  tagInputPlaceholder: "Type a tag and press Enter",
+  tagInputLabel: "Tag input",
+  tagInputRemove: "Remove {tag}",
+  codeInputCell: "Digit {index} of {length}",
+  progress: "Progress",
+  celebrationTitle: "Achieved",
+  coachMarkOverlayLabel: "Onboarding coach mark",
+  comboboxPlaceholder: "Select",
+  comboboxSearchPlaceholder: "Search...",
+  comboboxOptions: "{label} options",
+  multiSelectPlaceholder: "Select",
+  multiSelectSearchPlaceholder: "Search...",
+  datePickerPlaceholder: "Select date",
+  dateRangePickerPlaceholder: "Select date range",
+  timePickerPlaceholder: "Select time",
+  dateRangePickerSeparator: " – ",
+  dateTimePickerDateFormat: "EEE, M/d",
+  timePickerHour: "Hour",
+  timePickerMinute: "Min",
+  countdownUnitDay: "d",
+  countdownUnitHour: "h",
+  countdownUnitMinute: "m",
+  countdownUnitSecond: "s",
+  breadcrumbEllipsis: "More",
+  simplePaginationEmpty: "0 items",
+  simplePaginationItems: "{range} of {total} items",
+  simplePaginationPages: "Page {page} of {pages}",
+  toastRegion: "Notifications",
+  sliderThumb: "Slider",
+  sliderStart: "Start",
+  sliderEnd: "End",
+  sliderThumbPosition: "{label} ({position})",
+  socialLoginLine: "Log in with LINE",
+  socialLoginGoogle: "Log in with Google",
+  socialLoginApple: "Log in with Apple",
+  socialLoginAmazon: "Log in with Amazon",
+  progressSteps: "Step {current} of {total}: {name}",
+  menuDrawerTitle: "Menu",
+  quickActionGridLoading: "Processing",
+  documentPageLastUpdated: "Last updated: {date}",
+  ratingDisplay: "Rated {value} out of 5",
+  ratingDisplayWithCount: "Rated {value} out of 5 ({count} reviews)",
+  priceDisplayTax: "Tax incl.",
+  reviewSummaryCount: "{count} reviews",
+  reviewStarRating: "{rating} out of 5",
+  reviewCardHelpful: "Helpful",
+  notificationListEmpty: "No new notifications",
+  searchPanelReset: "Reset",
+  searchPanelSearch: "Search",
+  chartGranularityHour: "Hour",
+  chartGranularityDay: "Day",
+  chartGranularityWeek: "Week",
+  chartGranularityMonth: "Month",
+  chartPeriod7d: "7 days",
+  chartPeriod30d: "30 days",
+  chartPeriod90d: "90 days",
+  chartPeriod1y: "1 year",
+  chartPeriodCustom: "Custom",
+  chartControlsGranularity: "Granularity",
+  chartControlsPeriod: "Period",
+  chartControlsComparison: "Compare",
+  chartControlsShowComparison: "Show vs. previous period",
+  countdownSpokenDay: "{count} day(s)",
+  countdownSpokenHour: "{count} hour(s)",
+  countdownSpokenMinute: "{count} minute(s)",
+  countdownSpokenSecond: "{count} second(s)",
+  countdownSpokenSeparator: " ",
+}
+
+const KSK_DEFAULT_LABELS: Record<KskLocale, ResolvedKskLabels> = { ja: JA_LABELS, en: EN_LABELS }
 
 interface KskLabelsContextValue {
   /** Provider が無いときは undefined（部品は自分の既定 locale を使う） */
@@ -268,7 +819,7 @@ interface KskLabelsContextValue {
 
 const DEFAULT_CONTEXT: KskLabelsContextValue = {
   locale: undefined,
-  labels: KSK_DEFAULT_LABELS.ja,
+  labels: JA_LABELS,
 }
 
 const KskLabelsContext = React.createContext<KskLabelsContextValue>(DEFAULT_CONTEXT)
@@ -354,6 +905,21 @@ function formatKskLabel(template: string, values: Record<string, string | number
   )
 }
 
+/**
+ * `formatKskLabel` の ReactNode 版。差し込み口（`{count}` 等）に要素を入れたいとき（件数だけ <strong> にする等）に使う。
+ * 差し込み口が無い・複数ある・値が無いときも壊れない（値の無い差し込み口は文字のまま残す）。
+ */
+function formatKskLabelNodes(template: string, values: Record<string, React.ReactNode>): React.ReactNode[] {
+  return template
+    .split(/(\{\w+\})/)
+    .filter((part) => part !== "")
+    .map((part, i) => {
+      const token = /^\{(\w+)\}$/.exec(part)
+      const node = token && Object.prototype.hasOwnProperty.call(values, token[1]) ? values[token[1]] : part
+      return <React.Fragment key={i}>{node}</React.Fragment>
+    })
+}
+
 /** 配下の DS 既定文言（Provider が無ければ日本語）。 */
 function useKskLabels(): ResolvedKskLabels {
   return React.useContext(KskLabelsContext).labels
@@ -364,5 +930,5 @@ function useKskLocale(): KskLocale | undefined {
   return React.useContext(KskLabelsContext).locale
 }
 
-export { KskLabelsProvider, useKskLabels, useKskLocale, KSK_DEFAULT_LABELS, formatKskLabel }
+export { KskLabelsProvider, useKskLabels, useKskLocale, KSK_DEFAULT_LABELS, formatKskLabel, formatKskLabelNodes }
 export type { KskLabels, KskLabelsProviderProps, KskLocale, ResolvedKskLabels }

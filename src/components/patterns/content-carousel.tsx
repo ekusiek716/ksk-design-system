@@ -1,18 +1,19 @@
 import * as React from "react"
 import {
-  carouselControls as CarouselControls,
+  CarouselControls,
   useCarouselController,
 } from "@/components/patterns/_internal/carousel-primitives"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../ui/ksk-labels"
 
 interface ContentCarouselProps extends React.ComponentProps<"div"> {
   /** 任意の React コンテンツを 1 枚ずつ表示する。 */
   slides: React.ReactNode[]
   showDots?: boolean
   showArrows?: boolean
-  /** 前へ矢印の aria-label。@default "前へ"（issue #428） */
+  /** 前へ矢印の aria-label。省略時は KskLabelsProvider の `carouselPrevious`（Provider 無しは "前へ"。issue #428） */
   previousLabel?: string
-  /** 次へ矢印の aria-label。@default "次へ"（issue #428） */
+  /** 次へ矢印の aria-label。省略時は KskLabelsProvider の `carouselNext`（Provider 無しは "次へ"。issue #428） */
   nextLabel?: string
   /** 自動送りの間隔（ms）。0 で無効。 */
   autoPlay?: number
@@ -47,7 +48,7 @@ function ContentCarousel({
   showArrows = true,
   autoPlay = 0,
   className,
-  "aria-label": ariaLabel = "コンテンツカルーセル",
+  "aria-label": ariaLabelProp,
   onKeyDown,
   onMouseEnter,
   onMouseLeave,
@@ -56,6 +57,8 @@ function ContentCarousel({
   tabIndex = 0,
   ...props
 }: ContentCarouselProps) {
+  const defaultLabels = useKskLabels()
+  const ariaLabel = ariaLabelProp ?? defaultLabels.contentCarouselRegion
   const normalizedSlides = React.Children.toArray(slides)
   const total = normalizedSlides.length
   const [interactionPaused, setInteractionPaused] = React.useState(false)

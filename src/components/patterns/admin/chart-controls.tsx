@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../../ui/ksk-labels"
 
 type Granularity = "hour" | "day" | "week" | "month"
 type Period = "7d" | "30d" | "90d" | "1y" | "custom"
@@ -15,20 +16,6 @@ interface ChartControlsProps {
   className?: string
 }
 
-const GRANULARITY_OPTIONS: { label: string; value: Granularity }[] = [
-  { label: "時間", value: "hour" },
-  { label: "日", value: "day" },
-  { label: "週", value: "week" },
-  { label: "月", value: "month" },
-]
-
-const PERIOD_OPTIONS: { label: string; value: Period }[] = [
-  { label: "7日", value: "7d" },
-  { label: "30日", value: "30d" },
-  { label: "90日", value: "90d" },
-  { label: "1年", value: "1y" },
-  { label: "カスタム", value: "custom" },
-]
 
 function ChipGroup<T extends string>({
   options,
@@ -70,6 +57,20 @@ function ChartControls({
   onCustomPeriod,
   className,
 }: ChartControlsProps) {
+  const defaultLabels = useKskLabels()
+  const granularityOptions: { label: string; value: Granularity }[] = [
+    { label: defaultLabels.chartGranularityHour, value: "hour" },
+    { label: defaultLabels.chartGranularityDay, value: "day" },
+    { label: defaultLabels.chartGranularityWeek, value: "week" },
+    { label: defaultLabels.chartGranularityMonth, value: "month" },
+  ]
+  const periodOptions: { label: string; value: Period }[] = [
+    { label: defaultLabels.chartPeriod7d, value: "7d" },
+    { label: defaultLabels.chartPeriod30d, value: "30d" },
+    { label: defaultLabels.chartPeriod90d, value: "90d" },
+    { label: defaultLabels.chartPeriod1y, value: "1y" },
+    { label: defaultLabels.chartPeriodCustom, value: "custom" },
+  ]
   const handlePeriodChange = (v: Period) => {
     if (v === "custom") {
       onCustomPeriod?.()
@@ -86,9 +87,9 @@ function ChartControls({
       {/* Granularity */}
       {onGranularityChange && (
         <div className="flex items-start gap-3">
-          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] w-10 shrink-0 pt-1.5">粒度</span>
+          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] min-w-10 shrink-0 pt-1.5">{defaultLabels.chartControlsGranularity}</span>
           <ChipGroup
-            options={GRANULARITY_OPTIONS}
+            options={granularityOptions}
             value={granularity}
             onChange={onGranularityChange}
           />
@@ -98,9 +99,9 @@ function ChartControls({
       {/* Period */}
       {onPeriodChange && (
         <div className="flex items-start gap-3">
-          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] w-10 shrink-0 pt-1.5">期間</span>
+          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] min-w-10 shrink-0 pt-1.5">{defaultLabels.chartControlsPeriod}</span>
           <ChipGroup
-            options={PERIOD_OPTIONS}
+            options={periodOptions}
             value={period}
             onChange={handlePeriodChange}
           />
@@ -110,7 +111,7 @@ function ChartControls({
       {/* Comparison toggle */}
       {onComparisonChange && (
         <div className="flex items-start gap-3">
-          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] w-10 shrink-0 pt-1.5">比較</span>
+          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)] min-w-10 shrink-0 pt-1.5">{defaultLabels.chartControlsComparison}</span>
           <button
             onClick={() => onComparisonChange(!showComparison)}
             aria-pressed={showComparison}
@@ -125,7 +126,7 @@ function ChartControls({
               "w-2 h-2 rounded-full",
               showComparison ? "bg-[var(--Brand-Primary)]" : "bg-[var(--Border-Control,var(--Border-Medium-Emphasis))]"
             )} />
-            前期比を表示
+            {defaultLabels.chartControlsShowComparison}
           </button>
         </div>
       )}

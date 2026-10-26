@@ -1,6 +1,7 @@
 import * as React from "react"
 import { TickCircle } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../ui/ksk-labels"
 
 interface FeatureComparisonColumn {
   /** rows[].values のキー */
@@ -25,11 +26,11 @@ interface FeatureComparisonTableProps extends Omit<React.ComponentProps<"table">
   rows: FeatureComparisonRow[]
   /** 表の名前（読み上げ用・画面には出さない）。例: "Free と Plus の機能比較" */
   caption?: string
-  /** 左上の見出しセル（機能名の列）の文言。@default "機能" */
+  /** 左上の見出しセル（機能名の列）の文言。省略時は KskLabelsProvider の `featureComparisonFeature`（Provider 無しは "機能"。locale="en" で "Feature"） */
   featureLabel?: string
-  /** true のセルの読み上げ文言。@default "利用できる" */
+  /** true のセルの読み上げ文言。省略時は KskLabelsProvider の `featureComparisonAvailable`（Provider 無しは "利用できる"。locale="en" で "Available"） */
   availableLabel?: string
-  /** false のセルの読み上げ文言。@default "利用できない" */
+  /** false のセルの読み上げ文言。省略時は KskLabelsProvider の `featureComparisonUnavailable`（Provider 無しは "利用できない"。locale="en" で "Not available"） */
   unavailableLabel?: string
 }
 
@@ -52,12 +53,16 @@ function FeatureComparisonTable({
   columns,
   rows,
   caption,
-  featureLabel = "機能",
-  availableLabel = "利用できる",
-  unavailableLabel = "利用できない",
+  featureLabel: featureLabelProp,
+  availableLabel: availableLabelProp,
+  unavailableLabel: unavailableLabelProp,
   className,
   ...props
 }: FeatureComparisonTableProps) {
+  const defaultLabels = useKskLabels()
+  const featureLabel = featureLabelProp ?? defaultLabels.featureComparisonFeature
+  const availableLabel = availableLabelProp ?? defaultLabels.featureComparisonAvailable
+  const unavailableLabel = unavailableLabelProp ?? defaultLabels.featureComparisonUnavailable
   const cellBg = (column: FeatureComparisonColumn) =>
     column.highlight ? "bg-[var(--Surface-Accent-Primary-Light)]" : undefined
 

@@ -3,6 +3,7 @@ import { Checkbox as CheckboxPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { useKskLabels } from "./ksk-labels"
 
 /**
  * CheckboxGroup / CheckboxGroupItem — チェックボックスグループ
@@ -40,6 +41,7 @@ function CheckboxGroup({
   children,
   className,
 }: CheckboxGroupProps) {
+  const defaultLabels = useKskLabels()
   const gridCols =
     columns === 1 ? "grid-cols-1" : columns === 3 ? "grid-cols-3" : "grid-cols-2"
 
@@ -53,7 +55,7 @@ function CheckboxGroup({
         <span className="typo-label-md text-[var(--Text-High-Emphasis)]">{label}</span>
         {required && (
           <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[var(--Surface-Accent-Primary-Light)] typo-label-xs text-[var(--Brand-Primary)]">
-            必須
+            {defaultLabels.required}
           </span>
         )}
       </legend>

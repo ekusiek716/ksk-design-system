@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../ui/ksk-labels"
 
 export interface SwipeAction {
   label: string
@@ -16,15 +17,16 @@ interface SwipeRowProps {
   className?: string
   /**
    * アクション群をまとめる group のラベル（支援技術向け）。
-   * i18n 対応: 英語では "Row actions" など任意文字列を渡す。
-   * @default "行の操作"
+   * 省略時は KskLabelsProvider の `swipeRowActions`（Provider 無しは "行の操作"。locale="en" で "Row actions"）。
    */
   actionsLabel?: string
 }
 
 const ACTION_WIDTH = 72 // px per action
 
-function SwipeRow({ children, actions = [], side = "right", className, actionsLabel = "行の操作" }: SwipeRowProps) {
+function SwipeRow({ children, actions = [], side = "right", className, actionsLabel: actionsLabelProp }: SwipeRowProps) {
+  const defaultLabels = useKskLabels()
+  const actionsLabel = actionsLabelProp ?? defaultLabels.swipeRowActions
   const [offset, setOffset] = React.useState(0)
   const [isDragging, setIsDragging] = React.useState(false)
   const startX = React.useRef(0)

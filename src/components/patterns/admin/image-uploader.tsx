@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../../ui/ksk-labels"
 
 interface ImageUploaderImage {
   src: string
@@ -12,11 +13,13 @@ interface ImageUploaderProps extends React.ComponentProps<"div"> {
   onRemove?: (index: number) => void
   maxImages?: number
   columns?: number
-  /** 追加ボタンの aria-label。@default "画像を追加" */
+  /** 追加ボタンの aria-label。省略時は KskLabelsProvider の `imageUploaderAdd`（Provider 無しは "画像を追加"。locale="en" で "Add image"） */
   addLabel?: string
 }
 
-function ImageUploader({ images = [], onAdd, onRemove, maxImages = 10, columns = 4, className, addLabel = "画像を追加", ...props }: ImageUploaderProps) {
+function ImageUploader({ images = [], onAdd, onRemove, maxImages = 10, columns = 4, className, addLabel: addLabelProp, ...props }: ImageUploaderProps) {
+  const defaultLabels = useKskLabels()
+  const addLabel = addLabelProp ?? defaultLabels.imageUploaderAdd
   return (
     <div data-slot="image-uploader" className={cn("grid gap-3", className)} style={{ gridTemplateColumns: `repeat(${Math.min(columns, 6)}, minmax(0, 1fr))` }} {...props}>
       {/* アップロード済み画像一覧 */}
@@ -25,7 +28,7 @@ function ImageUploader({ images = [], onAdd, onRemove, maxImages = 10, columns =
           <img src={img.src} alt={img.alt} className="absolute inset-0 size-full object-cover" />
           {/* ホバー時の削除オーバーレイ */}
           <div className="absolute inset-0 bg-[var(--Overlay-Medium)] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-center justify-center">
-            <button type="button" className="size-8 rounded-full bg-[var(--Surface-Primary)]/80 flex items-center justify-center" aria-label={`${img.alt}を削除`} onClick={() => onRemove?.(i)}>
+            <button type="button" className="size-8 rounded-full bg-[var(--Surface-Primary)]/80 flex items-center justify-center" aria-label={formatKskLabel(defaultLabels.imageUploaderRemove, { name: img.alt })} onClick={() => onRemove?.(i)}>
               {/* ゴミ箱アイコン */}
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4" stroke="var(--Caution-Base)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
@@ -39,7 +42,7 @@ function ImageUploader({ images = [], onAdd, onRemove, maxImages = 10, columns =
         <button type="button" className="aspect-square rounded-lg border-2 border-dashed border-[var(--Border-Control,var(--Border-Medium-Emphasis))] flex flex-col items-center justify-center gap-1 hover:border-[var(--Border-Accent-Primary)] hover:bg-[var(--Surface-Accent-Primary-Light)] transition-colors cursor-pointer" onClick={onAdd} aria-label={addLabel}>
           {/* プラスアイコン */}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">追加</span>
+          <span className="typo-label-xs text-[var(--Text-Low-Emphasis)]">{defaultLabels.imageUploaderAddText}</span>
         </button>
       )}
     </div>

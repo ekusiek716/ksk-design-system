@@ -75,7 +75,9 @@ function NotFoundIllustration({
 interface ErrorStateProps extends React.ComponentProps<"div"> {
   kind?: ErrorStateKind
   icon?: React.ReactNode
+  /** 見出し。省略時は KskLabelsProvider の `errorStateTitle` / `errorStateNotFoundTitle`（Provider 無しは "エラーが発生しました" / "ページが見つかりません"） */
   title?: string
+  /** 説明。省略時は KskLabelsProvider の `errorStateDescription` / `errorStateNotFoundDescription`（Provider 無しは日本語の既定文）。"" で非表示 */
   description?: string
   action?: React.ReactNode
   onRetry?: () => void
@@ -101,12 +103,12 @@ function ErrorState({
     icon === undefined && notFound ? <NotFoundIllustration /> : icon
   const resolvedTitle =
     title ??
-    (notFound ? "ページが見つかりません" : "エラーが発生しました")
+    (notFound ? defaultLabels.errorStateNotFoundTitle : defaultLabels.errorStateTitle)
   const resolvedDescription =
     description ??
     (notFound
-      ? "お探しのページは移動または削除された可能性があります。"
-      : "しばらくしてからもう一度お試しください")
+      ? defaultLabels.errorStateNotFoundDescription
+      : defaultLabels.errorStateDescription)
 
   return (
     <div

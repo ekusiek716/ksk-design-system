@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "../../ui/button"
+import { useKskLabels } from "../../ui/ksk-labels"
 
 interface SearchPanelProps extends React.ComponentProps<"div"> {
   onSearch?: () => void
@@ -16,6 +17,7 @@ const colsClass = {
 }
 
 function SearchPanel({ children, onSearch, onReset, columns = 4, layout = "grid", className, ...props }: SearchPanelProps) {
+  const defaultLabels = useKskLabels()
   const fieldsClass = layout === "flex"
     ? "flex flex-wrap items-end gap-3 [&>*]:flex [&>*]:flex-col [&>*]:min-w-[140px] [&>*]:flex-1"
     : cn("grid grid-cols-1 gap-3 items-end [&>*]:flex [&>*]:flex-col", colsClass[columns])
@@ -28,13 +30,13 @@ function SearchPanel({ children, onSearch, onReset, columns = 4, layout = "grid"
       <div className="flex items-center justify-end gap-2 mt-3">
         {onReset && (
           <Button variant="tertiary" size="sm" onClick={onReset}>
-            リセット
+            {defaultLabels.searchPanelReset}
           </Button>
         )}
         <Button size="sm" onClick={onSearch}>
           {/* 検索アイコン */}
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" /><path d="M10.5 10.5L13.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-          検索
+          {defaultLabels.searchPanelSearch}
         </Button>
       </div>
     </div>

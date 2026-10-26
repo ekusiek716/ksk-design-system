@@ -1,12 +1,14 @@
 import * as React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 export interface TimePickerProps {
   id?: string
   /** "HH:mm" 形式の値。例: "09:30" */
   value?: string
   onChange?: (time: string) => void
+  /** トリガーのプレースホルダー。省略時は KskLabelsProvider の `timePickerPlaceholder`（Provider 無しは "時刻を選択"。locale="en" で "Select time"） */
   placeholder?: string
   disabled?: boolean
   /** 分の刻み幅。@default 1 */
@@ -80,7 +82,7 @@ function TimePicker({
   id,
   value,
   onChange,
-  placeholder = "時刻を選択",
+  placeholder: placeholderProp,
   disabled = false,
   minuteStep = 1,
   className,
@@ -88,6 +90,8 @@ function TimePicker({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
 }: TimePickerProps) {
+  const defaultLabels = useKskLabels()
+  const placeholder = placeholderProp ?? defaultLabels.timePickerPlaceholder
   const [open, setOpen] = React.useState(false)
   const parsed = parseTime(value)
 
@@ -136,13 +140,13 @@ function TimePicker({
         <div className="flex gap-2 items-start">
           {/* Hour column */}
           <div className="flex-1">
-            <div className="typo-label-xs text-[var(--Text-Low-Emphasis)] text-center mb-1">時</div>
+            <div className="typo-label-xs text-[var(--Text-Low-Emphasis)] text-center mb-1">{defaultLabels.timePickerHour}</div>
             <TimePickerColumn items={hours} selected={currentH} onSelect={handleH} />
           </div>
           <div className="flex items-center justify-center h-48 typo-heading-md text-[var(--Text-Low-Emphasis)] select-none pt-6">:</div>
           {/* Minute column */}
           <div className="flex-1">
-            <div className="typo-label-xs text-[var(--Text-Low-Emphasis)] text-center mb-1">分</div>
+            <div className="typo-label-xs text-[var(--Text-Low-Emphasis)] text-center mb-1">{defaultLabels.timePickerMinute}</div>
             <TimePickerColumn items={minutes} selected={currentM} onSelect={handleM} />
           </div>
         </div>

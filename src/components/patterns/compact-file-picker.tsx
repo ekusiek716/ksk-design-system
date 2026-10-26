@@ -2,16 +2,18 @@ import * as React from "react"
 import { CloseCircle, DocumentUpload, Gallery } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { formatKskLabel, useKskLabels } from "../ui/ksk-labels"
 
 interface CompactFilePickerProps
   extends Omit<React.ComponentProps<"input">, "children" | "onChange" | "type"> {
+  /** 見出し。省略時は KskLabelsProvider の `compactFilePickerLabel`（Provider 無しは "ファイル"。locale="en" で "File"） */
   label?: React.ReactNode
   description?: React.ReactNode
+  /** ボタンの文言。省略時は KskLabelsProvider の `compactFilePickerTrigger`（Provider 無しは "選択する"。locale="en" で "Choose"） */
   triggerLabel?: React.ReactNode
   /**
    * loading 時にボタンへ表示する文言。
-   * i18n 対応: 英語では "Processing…" など任意文字列を渡す。
-   * @default "処理中"
+   * 省略時は KskLabelsProvider の `compactFilePickerLoading`（Provider 無しは "処理中"。locale="en" で "Processing"）。
    */
   loadingLabel?: React.ReactNode
   icon?: React.ReactNode
@@ -32,6 +34,7 @@ interface ImageAttachmentPickerProps
   images?: ImageAttachment[]
   accept?: string
   onRemove?: (id: string) => void
+  /** 削除ボタンの aria-label。省略時は KskLabelsProvider の `imageAttachmentRemove`（`{name}` を画像名に置換。Provider 無しは "名前を削除"） */
   removeLabel?: (image: ImageAttachment) => string
   previewVariant?: "grid" | "list"
 }
@@ -39,10 +42,10 @@ interface ImageAttachmentPickerProps
 function CompactFilePicker({
   className,
   inputClassName,
-  label = "ファイル",
+  label: labelProp,
   description,
-  triggerLabel = "選択する",
-  loadingLabel = "処理中",
+  triggerLabel: triggerLabelProp,
+  loadingLabel: loadingLabelProp,
   icon,
   loading = false,
   disabled,
@@ -51,6 +54,11 @@ function CompactFilePicker({
   onFilesChange,
   ...inputProps
 }: CompactFilePickerProps) {
+  const defaultLabels = useKskLabels()
+  // ReactNode なので null は「出さない」の意味を保つ（undefined のときだけ既定にする）
+  const label = labelProp === undefined ? defaultLabels.compactFilePickerLabel : labelProp
+  const triggerLabel = triggerLabelProp === undefined ? defaultLabels.compactFilePickerTrigger : triggerLabelProp
+  const loadingLabel = loadingLabelProp === undefined ? defaultLabels.compactFilePickerLoading : loadingLabelProp
   const generatedId = React.useId()
   const inputId = id ?? generatedId
   const inputRef = React.useRef<HTMLInputElement>(null)
@@ -107,13 +115,20 @@ function ImageAttachmentPicker({
   images = [],
   accept = "image/*",
   previewVariant = "grid",
-  triggerLabel = "画像を追加",
-  label = "画像",
+  triggerLabel: triggerLabelProp,
+  label: labelProp,
   description = "JPG / PNG / WebP",
   onRemove,
-  removeLabel = (image) => `${image.name ?? "画像"}を削除`,
+  removeLabel: removeLabelProp,
   ...props
 }: ImageAttachmentPickerProps) {
+  const defaultLabels = useKskLabels()
+  const triggerLabel = triggerLabelProp === undefined ? defaultLabels.imageAttachmentTrigger : triggerLabelProp
+  const label = labelProp === undefined ? defaultLabels.imageAttachmentLabel : labelProp
+  const removeLabel =
+    removeLabelProp ??
+    ((image: ImageAttachment) =>
+      formatKskLabel(defaultLabels.imageAttachmentRemove, { name: image.name ?? defaultLabels.imageAttachmentLabel }))
   return (
     <div data-slot="image-attachment-picker" className={cn("flex flex-col gap-3", className)}>
       <CompactFilePicker
@@ -151,7 +166,7 @@ function ImageAttachmentPicker({
               />
               {previewVariant === "list" && (
                 <span className="typo-label-sm min-w-0 flex-1 truncate text-[var(--Text-High-Emphasis)]">
-                  {image.name ?? image.alt ?? "画像"}
+                  {image.name ?? image.alt ?? defaultLabels.imageAttachmentLabel}
                 </span>
               )}
               {onRemove && (

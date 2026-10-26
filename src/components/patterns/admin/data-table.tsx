@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../../ui/ksk-labels"
 import { Checkbox } from "../../ui/checkbox"
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar"
 import {
@@ -449,9 +450,9 @@ interface DataTableProps<TRow = unknown> extends React.ComponentProps<"div"> {
   defaultPageIndex?: number
   /** ページ変更時のコールバック（0-indexed） */
   onPaginationChange?: (pageIndex: number) => void
-  /** 選択列ヘッダー（th）の aria-label。@default "行選択" */
+  /** 選択列ヘッダー（th）の aria-label。省略時は KskLabelsProvider の `dataTableSelectionColumn`（Provider 無しは "行選択"。locale="en" で "Selection"） */
   selectionColumnLabel?: string
-  /** 「すべて選択」チェックボックスの aria-label。@default "すべて選択" */
+  /** 「すべて選択」チェックボックスの aria-label。省略時は KskLabelsProvider の `dataTableSelectAll`（Provider 無しは "すべて選択"。locale="en" で "Select all"） */
   selectAllLabel?: string
 }
 
@@ -479,10 +480,13 @@ function DataTable<TRow = unknown>({
   pageIndex,
   defaultPageIndex = 0,
   onPaginationChange,
-  selectionColumnLabel = "行選択",
-  selectAllLabel = "すべて選択",
+  selectionColumnLabel: selectionColumnLabelProp,
+  selectAllLabel: selectAllLabelProp,
   ...props
 }: DataTableProps<TRow>) {
+  const defaultLabels = useKskLabels()
+  const selectionColumnLabel = selectionColumnLabelProp ?? defaultLabels.dataTableSelectionColumn
+  const selectAllLabel = selectAllLabelProp ?? defaultLabels.dataTableSelectAll
   const [internalSort, setInternalSort] = React.useState<DataTableSortState | null>(defaultSort)
   const [internalPageIndex, setInternalPageIndex] = React.useState(defaultPageIndex)
   const [internalSelectedIds, setInternalSelectedIds] = React.useState<DataTableRowId[]>(
@@ -743,7 +747,7 @@ function DataTable<TRow = unknown>({
                       <DataTableCheckboxCell
                         checked={selected}
                         onCheckedChange={() => toggleRow(rowId)}
-                        aria-label={`${String(rowId)} を選択`}
+                        aria-label={formatKskLabel(defaultLabels.dataTableSelectRowId, { id: String(rowId) })}
                       />
                     )}
                     {activeColumns.map((column) => {
@@ -1325,6 +1329,7 @@ function DataTableCheckboxCell({
   "aria-label": ariaLabel,
   ...props
 }: DataTableCheckboxCellProps) {
+  const defaultLabels = useKskLabels()
   const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset, Element === "th") : null
   return (
     <Element
@@ -1339,7 +1344,7 @@ function DataTableCheckboxCell({
       <Checkbox
         checked={indeterminate ? "indeterminate" : checked}
         onCheckedChange={(v) => onCheckedChange?.(v === true)}
-        aria-label={ariaLabel ?? (Element === "th" ? "すべて選択" : "行を選択")}
+        aria-label={ariaLabel ?? (Element === "th" ? defaultLabels.dataTableSelectAll : defaultLabels.dataTableSelectRow)}
       />
     </Element>
   )
@@ -1356,11 +1361,13 @@ interface DataTableActionMenuItem {
 
 interface DataTableActionCellProps extends React.ComponentProps<"td"> {
   items: DataTableActionMenuItem[]
-  /** 行メニュー起動ボタンの aria-label。@default "行メニュー" */
+  /** 行メニュー起動ボタンの aria-label。省略時は KskLabelsProvider の `dataTableRowMenu`（Provider 無しは "行メニュー"。locale="en" で "Row menu"） */
   menuLabel?: string
 }
 
-function DataTableActionCell({ className, items, menuLabel = "行メニュー", ...props }: DataTableActionCellProps) {
+function DataTableActionCell({ className, items, menuLabel: menuLabelProp, ...props }: DataTableActionCellProps) {
+  const defaultLabels = useKskLabels()
+  const menuLabel = menuLabelProp ?? defaultLabels.dataTableRowMenu
   return (
     <td
       data-slot="data-table-action-cell"
@@ -1403,7 +1410,7 @@ interface DataTableInputCellProps
   value?: string
   onChange?: (value: string) => void
   placeholder?: string
-  /** input の aria-label。省略時は placeholder、それも無ければ「入力」。 */
+  /** input の aria-label。省略時は placeholder、それも無ければ KskLabelsProvider の `dataTableInput`（Provider 無しは「入力」）。 */
   "aria-label"?: string
 }
 
@@ -1419,6 +1426,7 @@ function DataTableInputCell({
   "aria-label": ariaLabel,
   ...props
 }: DataTableInputCellProps) {
+  const defaultLabels = useKskLabels()
   const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
   return (
     <td
@@ -1437,7 +1445,7 @@ function DataTableInputCell({
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
-        aria-label={ariaLabel ?? placeholder ?? "入力"}
+        aria-label={ariaLabel ?? placeholder ?? defaultLabels.dataTableInput}
         className={cn(
           "w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 typo-body-md text-[var(--Text-High-Emphasis)]",
           "hover:border-[var(--Border-Low-Emphasis)]",
@@ -1461,7 +1469,7 @@ interface DataTableSelectCellProps
   contentPosition?: DataTableSelectContentPosition
   triggerClassName?: string
   contentClassName?: string
-  /** SelectTrigger の aria-label。省略時は placeholder、それも無ければ「選択」。 */
+  /** SelectTrigger の aria-label。省略時は placeholder、それも無ければ KskLabelsProvider の `dataTableSelect`（Provider 無しは「選択」）。 */
   "aria-label"?: string
 }
 
@@ -1481,6 +1489,7 @@ function DataTableSelectCell({
   "aria-label": ariaLabel,
   ...props
 }: DataTableSelectCellProps) {
+  const defaultLabels = useKskLabels()
   const stickyProps = sticky ? getStickyCellProps(sticky, stickyOffset) : null
   return (
     <td
@@ -1501,7 +1510,7 @@ function DataTableSelectCell({
             width === "flex" && "w-full",
             triggerClassName
           )}
-          aria-label={ariaLabel ?? placeholder ?? "選択"}
+          aria-label={ariaLabel ?? placeholder ?? defaultLabels.dataTableSelect}
         >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -1524,6 +1533,7 @@ interface DataTableDateCellProps
     Pick<DataTableCellProps, "width" | "sticky" | "stickyOffset"> {
   value?: Date
   onValueChange?: (date: Date | undefined) => void
+  /** プレースホルダー。省略時は DatePicker の既定（KskLabelsProvider の `datePickerPlaceholder`。Provider 無しは "日付を選択"） */
   placeholder?: string
   disabled?: boolean
   dateFormat?: string
@@ -1535,7 +1545,7 @@ function DataTableDateCell({
   className,
   value,
   onValueChange,
-  placeholder = "日付を選択",
+  placeholder,
   disabled,
   dateFormat,
   triggerLabel,
@@ -1658,18 +1668,20 @@ function DataTableLinkCell({
 
 interface DataTableBulkActionsProps extends React.ComponentProps<"div"> {
   selectedCount: number
-  /** 選択件数の表示と既定 aria-label。省略時は日本語。 */
+  /** 選択件数の表示と既定 aria-label。省略時は KskLabelsProvider の `bulkActionsCount`（`{count}` を件数に置換。Provider 無しは "N件を選択中"。英語の単複は関数 prop で） */
   countLabel?: (selectedCount: number) => string
 }
 
 function DataTableBulkActions({
   className,
   selectedCount,
-  countLabel = (n) => `${n}件を選択中`,
+  countLabel: countLabelProp,
   children,
   ...props
 }: DataTableBulkActionsProps) {
+  const defaultLabels = useKskLabels()
   if (selectedCount === 0) return null
+  const countLabel = countLabelProp ?? ((n: number) => formatKskLabel(defaultLabels.bulkActionsCount, { count: n }))
   const selectionLabel = countLabel(selectedCount)
   return (
     <div
@@ -1767,6 +1779,7 @@ function DataTableSectionRow({
 // ─── 19. DataTableAddRow ───
 
 interface DataTableAddRowProps extends React.ComponentProps<"tr"> {
+  /** ボタンの文言。省略時は KskLabelsProvider の `dataTableAddRow`（Provider 無しは "追加する"。locale="en" で "Add"） */
   label?: string
   onClick?: () => void
   colSpan?: number
@@ -1774,11 +1787,13 @@ interface DataTableAddRowProps extends React.ComponentProps<"tr"> {
 
 function DataTableAddRow({
   className,
-  label = "追加する",
+  label: labelProp,
   onClick,
   colSpan,
   ...props
 }: DataTableAddRowProps) {
+  const defaultLabels = useKskLabels()
+  const label = labelProp ?? defaultLabels.dataTableAddRow
   return (
     <tr
       data-slot="data-table-add-row"
@@ -1803,6 +1818,7 @@ function DataTableAddRow({
 
 interface DataTableEmptyStateProps extends React.ComponentProps<"tr"> {
   icon?: React.ReactNode
+  /** 見出し。省略時は KskLabelsProvider の `dataTableEmpty`（Provider 無しは "データがありません"。locale="en" で "No data"） */
   message?: string
   description?: string
   action?: React.ReactNode
@@ -1812,12 +1828,14 @@ interface DataTableEmptyStateProps extends React.ComponentProps<"tr"> {
 function DataTableEmptyState({
   className,
   icon,
-  message = "データがありません",
+  message: messageProp,
   description,
   action,
   colSpan,
   ...props
 }: DataTableEmptyStateProps) {
+  const defaultLabels = useKskLabels()
+  const message = messageProp ?? defaultLabels.dataTableEmpty
   return (
     <tr
       data-slot="data-table-empty-state"
@@ -1860,7 +1878,9 @@ interface DataTableDateColumnConfig<TRow>
   extends DataTableHelperColumnBase<TRow, Date | undefined> {
   value: (row: TRow, index: number) => Date | undefined
   onCommit?: (row: TRow, value: Date | undefined, index: number) => void
+  /** 編集時のプレースホルダー。省略時は DatePicker の既定（`datePickerPlaceholder`。Provider 無しは "日付を選択"） */
   placeholder?: string
+  /** 値が無いときの表示。省略時は KskLabelsProvider の `dataTableEmptyValue`（Provider 無しは "未設定"。locale="en" で "Not set"） */
   emptyLabel?: string
   format?: (value: Date, row: TRow, index: number) => React.ReactNode
 }
@@ -1876,6 +1896,7 @@ interface DataTableChipColumnConfig<TRow, TValue extends string = string>
   options: readonly DataTableColumnOption<TValue>[]
   onCommit?: (row: TRow, value: DataTableChipColumnValue<TValue>, index: number) => void
   multiple?: boolean
+  /** 値が無いときの表示。省略時は KskLabelsProvider の `dataTableEmptyValue`（Provider 無しは "未設定"） */
   emptyLabel?: string
 }
 
@@ -1884,7 +1905,9 @@ interface DataTableSelectColumnConfig<TRow, TValue extends string = string>
   value: (row: TRow, index: number) => TValue | undefined
   options: readonly DataTableColumnOption<TValue>[]
   onCommit?: (row: TRow, value: TValue, index: number) => void
+  /** 編集時のプレースホルダー。省略時は KskLabelsProvider の `dataTableSelect`（Provider 無しは "選択"。locale="en" で "Select"） */
   placeholder?: string
+  /** 値が無いときの表示。省略時は KskLabelsProvider の `dataTableEmptyValue`（Provider 無しは "未設定"） */
   emptyLabel?: string
   contentPosition?: DataTableSelectContentPosition
 }
@@ -1905,11 +1928,26 @@ function getSelectedOptions<TValue extends string>(
   return options.filter((option) => values.has(option.value))
 }
 
+/**
+ * 列ヘルパー（createDataTable*Column）の「未設定」表示。列定義は render の外で作られるので、
+ * 既定文言（KskLabelsProvider の `dataTableEmptyValue`）はこのコンポーネントの中で解決する。
+ */
+function DataTableEmptyValue({ label }: { label?: string }) {
+  const defaultLabels = useKskLabels()
+  return <span className="text-[var(--Text-Low-Emphasis)]">{label ?? defaultLabels.dataTableEmptyValue}</span>
+}
+
+/** createDataTableSelectColumn の SelectValue。placeholder の既定は `dataTableSelect`（Provider 無しは "選択"）。 */
+function DataTableSelectValue({ placeholder }: { placeholder?: string }) {
+  const defaultLabels = useKskLabels()
+  return <SelectValue placeholder={placeholder ?? defaultLabels.dataTableSelect} />
+}
+
 function createDataTableDateColumn<TRow>({
   value,
   onCommit,
-  placeholder = "日付を選択",
-  emptyLabel = "未設定",
+  placeholder,
+  emptyLabel,
   format,
   ...column
 }: DataTableDateColumnConfig<TRow>): DataTableColumn<TRow, Date | undefined> {
@@ -1927,7 +1965,7 @@ function createDataTableDateColumn<TRow>({
           formatDataTableDate(cellValue)
         )
       ) : (
-        <span className="text-[var(--Text-Low-Emphasis)]">{emptyLabel}</span>
+        <DataTableEmptyValue label={emptyLabel} />
       ),
     editCell: ({ value: cellValue, commitValue }) => (
       <DatePicker
@@ -1945,7 +1983,7 @@ function createDataTableChipColumn<TRow, TValue extends string = string>({
   options,
   onCommit,
   multiple = false,
-  emptyLabel = "未設定",
+  emptyLabel,
   ...column
 }: DataTableChipColumnConfig<TRow, TValue>): DataTableColumn<
   TRow,
@@ -1964,7 +2002,7 @@ function createDataTableChipColumn<TRow, TValue extends string = string>({
     cell: ({ value: cellValue }) => {
       const selectedOptions = getSelectedOptions(options, cellValue)
       if (selectedOptions.length === 0) {
-        return <span className="text-[var(--Text-Low-Emphasis)]">{emptyLabel}</span>
+        return <DataTableEmptyValue label={emptyLabel} />
       }
       return (
         <div className="flex flex-wrap gap-1.5">
@@ -2018,8 +2056,8 @@ function createDataTableSelectColumn<TRow, TValue extends string = string>({
   value,
   options,
   onCommit,
-  placeholder = "選択",
-  emptyLabel = "未設定",
+  placeholder,
+  emptyLabel,
   contentPosition = "popper",
   ...column
 }: DataTableSelectColumnConfig<TRow, TValue>): DataTableColumn<TRow, TValue | undefined> {
@@ -2037,13 +2075,13 @@ function createDataTableSelectColumn<TRow, TValue extends string = string>({
           {option.label}
         </span>
       ) : (
-        <span className="text-[var(--Text-Low-Emphasis)]">{emptyLabel}</span>
+        <DataTableEmptyValue label={emptyLabel} />
       )
     },
     editCell: ({ value: cellValue, commitValue }) => (
       <Select value={cellValue} onValueChange={(next) => commitValue(next as TValue)}>
         <SelectTrigger className="h-8 min-w-[120px] typo-body-md border-transparent hover:border-[var(--Border-Low-Emphasis)]">
-          <SelectValue placeholder={placeholder} />
+          <DataTableSelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent position={contentPosition}>
           {options.map((option) => (

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { OVERLAY_FOCUS_RING_INSET_OVER } from "@/lib/server-variants/overlay-focus-ring"
+import { useKskLabels } from "../ui/ksk-labels"
 
 interface BannerItem {
   /** 背景画像URL（なければ gradient） */
@@ -15,7 +16,7 @@ interface BannerItem {
 interface BannerCarouselProps {
   title?: string
   items: BannerItem[]
-  /** 「もっと見る」テキスト */
+  /** 「もっと見る」テキスト。省略時は KskLabelsProvider の `carouselMore`（Provider 無しは "もっと見る"。locale="en" で "See more"） */
   moreLabel?: string
   onMore?: () => void
   /** バナーの縦横比 */
@@ -23,7 +24,7 @@ interface BannerCarouselProps {
   /** バナー幅（px） */
   itemWidth?: number
   className?: string
-  /** スクロール領域 (role="region") の aria-label。@default "バナー一覧" */
+  /** スクロール領域 (role="region") の aria-label。省略時は KskLabelsProvider の `bannerCarouselRegion`（Provider 無しは "バナー一覧"。locale="en" で "Banners"） */
   regionLabel?: string
 }
 
@@ -48,13 +49,16 @@ const ASPECT: Record<string, string> = {
 function BannerCarousel({
   title,
   items,
-  moreLabel = "もっと見る",
+  moreLabel: moreLabelProp,
   onMore,
   itemAspectRatio = "2/1",
   itemWidth = 200,
   className,
-  regionLabel = "バナー一覧",
+  regionLabel: regionLabelProp,
 }: BannerCarouselProps) {
+  const defaultLabels = useKskLabels()
+  const moreLabel = moreLabelProp ?? defaultLabels.carouselMore
+  const regionLabel = regionLabelProp ?? defaultLabels.bannerCarouselRegion
   return (
     <div data-slot="banner-carousel" className={cn("w-full", className)}>
       {/* Header */}

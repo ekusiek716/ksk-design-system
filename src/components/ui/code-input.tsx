@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { inputBaseClass } from "./input"
+import { formatKskLabel, useKskLabels } from "./ksk-labels"
 
 /**
  * 1 文字として受け付ける文字種（issue #669）。
@@ -47,8 +48,8 @@ interface CodeInputProps {
   "aria-labelledby"?: string
   "aria-describedby"?: string
   /**
-   * 各セルの読み上げ名（cells のみ・i18n 用）。
-   * @default (index, length) => `${index + 1}桁目（全${length}桁）`
+   * 各セルの読み上げ名（cells のみ）。省略時は KskLabelsProvider の `codeInputCell`
+   * （`{index}`（1 始まり）/ `{length}` を置換。Provider 無しは `${index + 1}桁目（全${length}桁）`、locale="en" で `Digit N of M`）。
    */
   cellLabel?: (index: number, length: number) => string
   /**
@@ -72,7 +73,6 @@ const isDev = () => {
   return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
 }
 
-const defaultCellLabel = (index: number, length: number) => `${index + 1}桁目（全${length}桁）`
 
 function acceptsChar(char: string, pattern: CodeInputPattern) {
   if (pattern === "numeric") return /^[0-9]$/.test(char)
@@ -128,11 +128,16 @@ function CodeInput({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   "aria-describedby": ariaDescribedby,
-  cellLabel = defaultCellLabel,
+  cellLabel: cellLabelProp,
   autoComplete,
   placeholder,
   className,
 }: CodeInputProps) {
+  const defaultLabels = useKskLabels()
+  const cellLabel =
+    cellLabelProp ??
+    ((index: number, length: number) =>
+      formatKskLabel(defaultLabels.codeInputCell, { index: index + 1, length }))
   const isControlled = valueProp !== undefined
   const [innerValue, setInnerValue] = React.useState(() =>
     sanitize(defaultValue, pattern, uppercase).slice(0, length)

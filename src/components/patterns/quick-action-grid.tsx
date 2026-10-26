@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { useComposedRef } from "@/lib/compose-ref"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { Spinner } from "@/components/ui/spinner"
+import { useKskLabels } from "../ui/ksk-labels"
 import { FormFieldGroupLabelContext } from "@/lib/form-field-group-context"
 
 type ActionTileVariant = "neutral" | "selected" | "success" | "info" | "caution"
@@ -136,6 +137,7 @@ function ActionTile({
   mediaSize = "md",
   ...props
 }: ActionTileProps) {
+  const defaultLabels = useKskLabels()
   const contextSelectionMode = React.useContext(QuickActionGridSelectionContext)
   // 明示 prop > 親 grid > 未指定（従来挙動）
   const mode = selectionMode ?? contextSelectionMode
@@ -217,7 +219,7 @@ function ActionTile({
           <span className="typo-label-md min-w-0 truncate">{label}</span>
         </span>
         {loading ? (
-          <Spinner size="sm" label="処理中" />
+          <Spinner size="sm" label={defaultLabels.quickActionGridLoading} />
         ) : hasIndicator ? (
           <span
             className={cn(

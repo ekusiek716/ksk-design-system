@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../ui/ksk-labels"
 
 type KanbanColumnTone = "neutral" | "accent" | "info" | "success" | "warning" | "caution"
 
@@ -21,7 +22,7 @@ interface KanbanColumnProps extends Omit<React.ComponentProps<"section">, "title
   action?: React.ReactNode
   /** 列の末尾（AddTile size="sm" 等） */
   footer?: React.ReactNode
-  /** 件数の読み上げ・表示の文言。既定 `${n}件` */
+  /** 件数の読み上げ・表示の文言。省略時は KskLabelsProvider の `kanbanColumnCount`（`{count}` を件数に置換。Provider 無しは `${n}件`、locale="en" で `${n} items`。英語の単複は関数 prop で） */
   countLabel?: (count: number) => string
   /** 列の幅。fixed=18rem（横スクロールのボード向け・既定）/ fluid=親幅 */
   width?: "fixed" | "fluid"
@@ -58,7 +59,8 @@ function KanbanColumn({
   ...props
 }: KanbanColumnProps) {
   const titleId = React.useId()
-  const label = countLabel ?? ((n: number) => `${n}件`)
+  const defaultLabels = useKskLabels()
+  const label = countLabel ?? ((n: number) => formatKskLabel(defaultLabels.kanbanColumnCount, { count: n }))
   // 空文字（未設定の分類色を "" で渡す等）は指定なしとして tone へフォールバックする
   const accent = accentColor?.trim() ? accentColor : undefined
   return (

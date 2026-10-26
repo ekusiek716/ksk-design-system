@@ -1,13 +1,14 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels, useKskLocale } from "../ui/ksk-labels"
 
 interface ChipFilterBarProps {
   children: React.ReactNode
   /** 検索結果件数。指定すると children の下に件数テキストを表示する */
   resultCount?: number
   /**
-   * 件数テキストのフォーマッタ。未指定時は `"{n}件"` を表示する。
-   * i18n が必要な消費側はここに関数を渡して差し替える。
+   * 件数テキストのフォーマッタ。未指定時は KskLabelsProvider の `chipFilterBarResultCount`（`{count}` を件数に置換。Provider 無しは `"{n}件"`、locale="en" で `"{n} results"`。数値は ja は ja-JP / en は en-US で桁区切り）。
+   * 英語の単複（1 result / 2 results）まで出し分けたい消費側はここに関数を渡して差し替える。
    */
   resultCountLabel?: (n: number) => string
   /**
@@ -50,9 +51,6 @@ const GUTTER_CLASS = {
   fluid: "px-[var(--Container-Gutter-Fluid,clamp(1rem,4vw,1.75rem))]",
 } as const
 
-// ロケールを明示する（SSR 環境とブラウザでロケールが異なると hydration mismatch になるため）
-const defaultResultCountLabel = (n: number) => `${n.toLocaleString("ja-JP")}件`
-
 /**
  * ChipFilterBar — Chip を横スクロール表示するフィルターバーパターン。
  * belle-todo の FilterBar（Chips.tsx 107-134行）を移植。
@@ -63,7 +61,7 @@ const defaultResultCountLabel = (n: number) => `${n.toLocaleString("ja-JP")}件`
 function ChipFilterBar({
   children,
   resultCount,
-  resultCountLabel = defaultResultCountLabel,
+  resultCountLabel: resultCountLabelProp,
   sticky = false,
   stickyOffset = 0,
   bare = false,
@@ -71,6 +69,15 @@ function ChipFilterBar({
   contentClassName,
   className,
 }: ChipFilterBarProps) {
+  const defaultLabels = useKskLabels()
+  const locale = useKskLocale() ?? "ja"
+  // ロケールを明示する（SSR 環境とブラウザでロケールが異なると hydration mismatch になるため）
+  const resultCountLabel =
+    resultCountLabelProp ??
+    ((n: number) =>
+      formatKskLabel(defaultLabels.chipFilterBarResultCount, {
+        count: n.toLocaleString(locale === "en" ? "en-US" : "ja-JP"),
+      }))
   if (bare) return <>{children}</>
   const innerClassName = cn(GUTTER_CLASS[gutter], contentClassName)
 

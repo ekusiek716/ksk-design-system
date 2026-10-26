@@ -9,6 +9,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "../../ui/dropdown-menu"
+import { formatKskLabelNodes, useKskLabels } from "../../ui/ksk-labels"
 
 /** フィルターの選択肢 */
 interface FilterOption {
@@ -45,14 +46,15 @@ interface FilterBarProps extends React.ComponentProps<"nav"> {
   onSortClick?: () => void
   onMoreFilters?: () => void
   activeFilterCount?: number
-  /** nav 要素の aria-label。@default "フィルター" */
+  /** nav 要素の aria-label。省略時は KskLabelsProvider の `filterBarNav`（Provider 無しは "フィルター"。locale="en" で "Filters"） */
   navLabel?: string
-  /** 絞り込みボタンの aria-label。@default "絞り込み" */
+  /** 絞り込みボタンの aria-label。省略時は KskLabelsProvider の `filterBarMore`（Provider 無しは "絞り込み"。locale="en" で "Filter"） */
   moreFiltersLabel?: string
 }
 
 /** フィルターチップ + ドロップダウン */
 function FilterChipButton({ filter }: { filter: FilterChip }) {
+  const defaultLabels = useKskLabels()
   const [open, setOpen] = React.useState(false)
   const hasOptions = filter.options && filter.options.length > 0
   const isActive = filter.isActive || !!filter.selectedValue
@@ -103,7 +105,7 @@ function FilterChipButton({ filter }: { filter: FilterChip }) {
               className="text-[var(--Text-Low-Emphasis)]"
               onSelect={() => filter.onSelect?.(null)}
             >
-              選択を解除
+              {defaultLabels.filterBarClear}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>
@@ -135,10 +137,13 @@ function FilterBar({
   onMoreFilters,
   activeFilterCount,
   className,
-  navLabel = "フィルター",
-  moreFiltersLabel = "絞り込み",
+  navLabel: navLabelProp,
+  moreFiltersLabel: moreFiltersLabelProp,
   ...props
 }: FilterBarProps) {
+  const defaultLabels = useKskLabels()
+  const navLabel = navLabelProp ?? defaultLabels.filterBarNav
+  const moreFiltersLabel = moreFiltersLabelProp ?? defaultLabels.filterBarMore
 
   return (
     <nav
@@ -177,7 +182,9 @@ function FilterBar({
         <div className="flex items-center justify-between">
           {resultCount !== undefined && (
             <span className="typo-body-md text-[var(--Text-High-Emphasis)]">
-              対象商品: <strong className="typo-heading-md">{resultCount.toLocaleString()}</strong> 件
+              {formatKskLabelNodes(defaultLabels.filterBarResultCount, {
+                count: <strong className="typo-heading-md">{resultCount.toLocaleString()}</strong>,
+              })}
             </span>
           )}
 
@@ -192,7 +199,7 @@ function FilterBar({
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M3 4h7M3 8h5M3 12h3M13 5v8M11 11l2 2 2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  {sortOptions.find(o => o.value === selectedSort)?.label ?? sortLabel ?? "並べ替え"}
+                  {sortOptions.find(o => o.value === selectedSort)?.label ?? sortLabel ?? defaultLabels.filterBarSort}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[160px]">
@@ -217,7 +224,7 @@ function FilterBar({
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M3 4h7M3 8h5M3 12h3M13 5v8M11 11l2 2 2-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              {sortLabel ?? "並べ替え"}
+              {sortLabel ?? defaultLabels.filterBarSort}
             </button>
           )}
         </div>

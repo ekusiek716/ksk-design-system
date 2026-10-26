@@ -9,18 +9,20 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
+import { useKskLabels } from "../ui/ksk-labels"
 
 interface ConfirmDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
   description?: string
+  /** 確認ボタンの文言。省略時は KskLabelsProvider の `confirmDialogConfirm`（Provider 無しは "確認"。locale="en" で "Confirm"） */
   confirmLabel?: string
+  /** キャンセルボタンの文言。省略時は KskLabelsProvider の `confirmDialogCancel`（Provider 無しは "キャンセル"。locale="en" で "Cancel"） */
   cancelLabel?: string
   /**
    * 処理中に表示するラベル。
-   * i18n 対応: 英語では "Processing…" など任意文字列を渡す。
-   * @default "処理中…"
+   * 省略時は KskLabelsProvider の `confirmDialogLoading`（Provider 無しは "処理中…"。locale="en" で "Processing…"）。
    */
   loadingLabel?: string
   /** destructive にすると確認ボタンが赤くなる */
@@ -52,14 +54,18 @@ function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = "確認",
-  cancelLabel = "キャンセル",
-  loadingLabel = "処理中…",
+  confirmLabel: confirmLabelProp,
+  cancelLabel: cancelLabelProp,
+  loadingLabel: loadingLabelProp,
   variant = "default",
   onConfirm,
   loading = false,
   onCloseAutoFocus,
 }: ConfirmDialogProps) {
+  const defaultLabels = useKskLabels()
+  const confirmLabel = confirmLabelProp ?? defaultLabels.confirmDialogConfirm
+  const cancelLabel = cancelLabelProp ?? defaultLabels.confirmDialogCancel
+  const loadingLabel = loadingLabelProp ?? defaultLabels.confirmDialogLoading
   const [pending, setPending] = React.useState(false)
   const isLoading = loading || pending
 

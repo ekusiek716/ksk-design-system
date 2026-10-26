@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { OVERLAY_FOCUS_RING } from "@/lib/server-variants/overlay-focus-ring"
+import { useKskLabels } from "../ui/ksk-labels"
 
 type MediaActionClusterOrientation = "vertical" | "horizontal" | "auto"
 type MediaActionClusterAnchor =
@@ -34,6 +35,7 @@ interface MediaActionClusterProps extends Omit<React.HTMLAttributes<HTMLDivEleme
   autoHideMs?: number | null
   defaultVisible?: boolean
   onVisibleChange?: (visible: boolean) => void
+  /** クラスタ全体（role="group"）の aria-label。省略時は KskLabelsProvider の `mediaActionCluster`（Provider 無しは "メディアアクション"。locale="en" で "Media actions"） */
   "aria-label"?: string
 }
 
@@ -78,9 +80,11 @@ function MediaActionCluster({
   defaultVisible = true,
   onVisibleChange,
   className,
-  "aria-label": ariaLabel = "メディアアクション",
+  "aria-label": ariaLabelProp,
   ...props
 }: MediaActionClusterProps) {
+  const defaultLabels = useKskLabels()
+  const ariaLabel = ariaLabelProp ?? defaultLabels.mediaActionCluster
   const autoHideEnabled = autoHideMs != null && autoHideMs > 0
   const [visibility, setVisibility] = React.useState({
     autoHideEnabled,

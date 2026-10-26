@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 import { OVERLAY_FOCUS_RING, OVERLAY_FOCUS_RING_INSET } from "@/lib/server-variants/overlay-focus-ring"
 import { PriceDisplay } from "./price-display"
 import { RatingDisplay } from "./rating-display"
+import { useKskLabels } from "../../ui/ksk-labels"
 
 // タグのバリアント定義
 interface ProductCardTag {
@@ -31,6 +32,7 @@ interface ProductCardProps extends React.ComponentProps<"div"> {
   orientation?: "vertical" | "horizontal"
   showCartButton?: boolean
   onCartAdd?: () => void
+  /** カート追加ボタンの文言。省略時は KskLabelsProvider の `productCardAddToCart`（Provider 無しは "カートに追加"。locale="en" で "Add to cart"） */
   cartButtonLabel?: string
 }
 
@@ -116,9 +118,12 @@ function ProductCard({
   orientation = "vertical",
   showCartButton = false,
   onCartAdd,
-  cartButtonLabel = "カートに追加",
+  cartButtonLabel: cartButtonLabelProp,
   ...props
 }: ProductCardProps) {
+  const defaultLabels = useKskLabels()
+  const cartButtonLabel = cartButtonLabelProp ?? defaultLabels.productCardAddToCart
+  const favoriteLabel = isFavorite ? defaultLabels.productCardFavoriteRemove : defaultLabels.productCardFavoriteAdd
   // 割引率の計算
   const discountPercent =
     originalPrice && originalPrice > price
@@ -183,9 +188,7 @@ function ProductCard({
                   e.stopPropagation()
                   onFavoriteToggle()
                 }}
-                aria-label={
-                  isFavorite ? "お気に入りから削除" : "お気に入りに追加"
-                }
+                aria-label={favoriteLabel}
               >
                 <HeartIcon filled={isFavorite} size={16} />
               </button>
@@ -275,9 +278,7 @@ function ProductCard({
                 e.stopPropagation()
                 onFavoriteToggle()
               }}
-              aria-label={
-                isFavorite ? "お気に入りから削除" : "お気に入りに追加"
-              }
+              aria-label={favoriteLabel}
             >
               <HeartIcon filled={isFavorite} size={20} />
             </button>

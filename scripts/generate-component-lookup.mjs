@@ -34,13 +34,15 @@ const OUTPUT = path.join(SRC, "components/COMPONENT_LOOKUP.md")
 /*  ファイル探索                                                        */
 /* ------------------------------------------------------------------ */
 
-/** ディレクトリ（再帰）から .tsx ファイルを取得（.stories.tsx を除く） */
+/** ディレクトリ（再帰）から .tsx ファイルを取得（.stories.tsx と `_internal/` を除く） */
 function getComponentFiles(dir) {
   if (!fs.existsSync(dir)) return []
   const results = []
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name)
     if (entry.isDirectory()) {
+      // `_internal/` は DS 内部の共有部品（consumer から import できない）。一覧に載せない
+      if (entry.name === "_internal") continue
       results.push(...getComponentFiles(full))
     } else if (entry.isFile() && entry.name.endsWith(".tsx") && !entry.name.endsWith(".stories.tsx")) {
       results.push(full)

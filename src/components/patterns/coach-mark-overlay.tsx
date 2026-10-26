@@ -4,6 +4,7 @@ import { CoachMark, type CoachMarkVariant } from "../ui/coach-mark"
 import { cn } from "@/lib/utils"
 import { FocusScope } from "radix-ui/internal"
 import { PortalContainerProvider } from "../ui/portal-container"
+import { useKskLabels } from "../ui/ksk-labels"
 
 export interface CoachStep {
   /** querySelector で要素を特定。要素が無ければ画面中央にフォールバック表示。 */
@@ -29,16 +30,17 @@ export interface CoachMarkOverlayProps {
   maxWidth?: number
   /**
    * 表示文言。i18n はアプリ側で解決して string で渡す（issue #477）。
-   * 未指定キーは既定値（日本語 + aria-label は英語）を使う。
+   * 未指定キーは KskLabelsProvider の `coachMarkNext` / `coachMarkSkip` / `coachMarkOverlayLabel`
+   * （Provider 無しは日本語 + aria-label は英語の "Onboarding coach mark"）。
    */
   labels?: {
-    /** 次へボタン（既定 "次へ →"）。矢印は文言に含まれるため、渡すと矢印も置き換わる */
+    /** 次へボタン（既定は `coachMarkNext`。Provider 無しは "次へ →"）。矢印は文言に含まれるため、渡すと矢印も置き換わる */
     next?: string
     /** 最終ステップの次へボタン（未指定なら next にフォールバック） */
     done?: string
-    /** スキップボタン（既定 "スキップ"） */
+    /** スキップボタン（既定は `coachMarkSkip`。Provider 無しは "スキップ"） */
     skip?: string
-    /** overlay の aria-label（既定 "Onboarding coach mark"） */
+    /** overlay の aria-label（既定は `coachMarkOverlayLabel`。Provider 無しは "Onboarding coach mark"） */
     ariaLabel?: string
   }
   /**
@@ -65,12 +67,6 @@ export interface CoachMarkOverlayProps {
    */
   closeOnEsc?: boolean
 }
-
-const DEFAULT_LABELS = {
-  next: "次へ →",
-  skip: "スキップ",
-  ariaLabel: "Onboarding coach mark",
-} as const
 
 const COACH_KEY_DEFAULT = "ksk-coach-done"
 const COACH_VERSION_DEFAULT = "v1"
@@ -135,7 +131,13 @@ export function CoachMarkOverlay({
   restoreFocusOnClose = true,
   closeOnEsc = true,
 }: CoachMarkOverlayProps) {
-  const resolvedLabels = { ...DEFAULT_LABELS, ...labels }
+  const defaultLabels = useKskLabels()
+  const resolvedLabels = {
+    next: labels?.next ?? defaultLabels.coachMarkNext,
+    done: labels?.done,
+    skip: labels?.skip ?? defaultLabels.coachMarkSkip,
+    ariaLabel: labels?.ariaLabel ?? defaultLabels.coachMarkOverlayLabel,
+  }
   const [idx, setIdx] = React.useState(0)
   const [rect, setRect] = React.useState<DOMRect | null>(null)
   // #504: aria-modal="true" を名乗る以上、Tab は面の中に閉じ込める。

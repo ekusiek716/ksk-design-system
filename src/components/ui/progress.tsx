@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Progress as ProgressPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 type ProgressVariant = "default" | "success" | "warning" | "caution"
 type ProgressDuration = "none" | "sm" | "md" | "lg"
@@ -128,6 +129,7 @@ function Progress({
   "aria-labelledby": ariaLabelledby,
   ...props
 }: ProgressProps) {
+  const defaultLabels = useKskLabels()
   const duration = DURATION_TOKEN[transitionDuration]
   // masked 時は autoColor による色分岐も value に依存するため使わない（バー幅だけでなく色からの逆算も防ぐ）。
   const resolvedVariant = masked ? variant : getAutoProgressVariant(value, variant, autoColor)
@@ -141,7 +143,7 @@ function Progress({
       // role="progressbar" は Radix が付与するが accessible name は持たない。
       // 呼び出し側が aria-label / aria-labelledby を渡さない場合の既定値
       // （A006 相当・axe: aria-progressbar-name）。
-      aria-label={ariaLabel ?? (ariaLabelledby ? undefined : "進捗")}
+      aria-label={ariaLabel ?? (ariaLabelledby ? undefined : defaultLabels.progress)}
       aria-labelledby={ariaLabelledby}
       className={cn(
         "relative h-2 w-full overflow-hidden rounded-full bg-[var(--Surface-Tertiary)]",

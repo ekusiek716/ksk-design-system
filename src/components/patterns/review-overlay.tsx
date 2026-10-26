@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../ui/ksk-labels"
 
 export interface ReviewPin {
   id: string
@@ -35,6 +36,7 @@ function ReviewOverlay({
   className,
   children,
 }: ReviewOverlayProps) {
+  const defaultLabels = useKskLabels()
   const containerRef = React.useRef<HTMLDivElement>(null)
   const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const [spotlight, setSpotlight] = React.useState<{ x: number; y: number } | null>(null)
@@ -98,7 +100,7 @@ function ReviewOverlay({
           <button
             key={pin.id}
             type="button"
-            aria-label={pin.comment ?? `レビューピン`}
+            aria-label={pin.comment ?? defaultLabels.reviewOverlayPin}
             onClick={() => onPinClick?.(pin)}
             className="absolute -translate-x-1/2 -translate-y-1/2 z-10 group"
             style={{ left: `${pin.x * 100}%`, top: `${pin.y * 100}%` }}

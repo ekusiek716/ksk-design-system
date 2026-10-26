@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../ui/ksk-labels"
 
 export interface UploadedFile {
   file: File
@@ -19,17 +20,17 @@ export interface FileUploadProps {
   disabled?: boolean
   className?: string
   // i18n
-  /** ドラッグエリアのメインラベル @default "ここにファイルをドロップ" */
+  /** ドラッグエリアのメインラベル 省略時は KskLabelsProvider の `fileUploadDrag`（Provider 無しは "ここにファイルをドロップ"。locale="en" で "Drop files here"） */
   dragLabel?: string
-  /** またはテキスト @default "または" */
+  /** またはテキスト 省略時は KskLabelsProvider の `fileUploadOr`（Provider 無しは "または"。locale="en" で "or"） */
   orLabel?: string
-  /** ブラウズボタンのラベル @default "ファイルを選択" */
+  /** ブラウズボタンのラベル 省略時は KskLabelsProvider の `fileUploadBrowse`（Provider 無しは "ファイルを選択"。locale="en" で "Choose files"） */
   browseLabel?: string
-  /** ファイルサイズ超過エラーメッセージ生成関数 */
+  /** ファイルサイズ超過エラーメッセージ生成関数。省略時は KskLabelsProvider の `fileUploadMaxSize`（`{size}` を "5.0 MB" 等に置換。Provider 無しは "最大 5.0 MB まで"） */
   maxSizeLabel?: (maxBytes: number) => string
-  /** 最大ファイル数超過エラーメッセージ生成関数 */
+  /** 最大ファイル数超過エラーメッセージ生成関数。省略時は KskLabelsProvider の `fileUploadMaxFiles`（`{max}` を件数に置換。Provider 無しは "最大 N ファイルまで"） */
   maxFilesLabel?: (max: number) => string
-  /** 削除ボタンの aria-label @default "削除" */
+  /** 削除ボタンの語（aria-label は「{name} を{removeLabel}」/ en は「{removeLabel} {name}」）。省略時は KskLabelsProvider の `fileUploadRemove`（Provider 無しは "削除"。locale="en" で "Remove"） */
   removeLabel?: string
 }
 
@@ -47,13 +48,22 @@ function FileUpload({
   onUpload,
   disabled = false,
   className,
-  dragLabel = "ここにファイルをドロップ",
-  orLabel = "または",
-  browseLabel = "ファイルを選択",
-  maxSizeLabel = (max) => `最大 ${formatBytes(max)} まで`,
-  maxFilesLabel = (max) => `最大 ${max} ファイルまで`,
-  removeLabel = "削除",
+  dragLabel: dragLabelProp,
+  orLabel: orLabelProp,
+  browseLabel: browseLabelProp,
+  maxSizeLabel: maxSizeLabelProp,
+  maxFilesLabel: maxFilesLabelProp,
+  removeLabel: removeLabelProp,
 }: FileUploadProps) {
+  const defaultLabels = useKskLabels()
+  const dragLabel = dragLabelProp ?? defaultLabels.fileUploadDrag
+  const orLabel = orLabelProp ?? defaultLabels.fileUploadOr
+  const browseLabel = browseLabelProp ?? defaultLabels.fileUploadBrowse
+  const maxSizeLabel =
+    maxSizeLabelProp ?? ((max: number) => formatKskLabel(defaultLabels.fileUploadMaxSize, { size: formatBytes(max) }))
+  const maxFilesLabel =
+    maxFilesLabelProp ?? ((max: number) => formatKskLabel(defaultLabels.fileUploadMaxFiles, { max }))
+  const removeLabel = removeLabelProp ?? defaultLabels.fileUploadRemove
   const [dragging, setDragging] = React.useState(false)
   const [files, setFiles] = React.useState<File[]>([])
   const [error, setError] = React.useState<string | null>(null)
@@ -171,7 +181,7 @@ function FileUpload({
               </div>
               <button
                 type="button"
-                aria-label={`${f.name} を${removeLabel}`}
+                aria-label={formatKskLabel(defaultLabels.fileUploadRemoveItem, { name: f.name, label: removeLabel })}
                 onClick={() => removeFile(i)}
                 className="flex size-7 shrink-0 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] hover:text-[var(--Object-High-Emphasis)] hover:bg-[var(--Surface-Tertiary)] transition-colors"
               >

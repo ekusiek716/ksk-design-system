@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "../../ui/button"
+import { useKskLabels } from "../../ui/ksk-labels"
 
 /** 注文サマリーの明細行 */
 interface OrderSummaryLineItem {
@@ -13,7 +14,7 @@ interface OrderSummaryLineItem {
 interface OrderSummaryProps extends React.ComponentProps<"div"> {
   /** 明細行の配列 */
   lineItems?: OrderSummaryLineItem[]
-  /** 合計ラベル */
+  /** 合計ラベル。省略時は KskLabelsProvider の `orderSummaryTotal`（Provider 無しは "合計（税込）"。locale="en" で "Total (incl. tax)"） */
   totalLabel?: string
   /** 合計金額の表示文字列 */
   totalValue: string
@@ -27,7 +28,9 @@ interface OrderSummaryProps extends React.ComponentProps<"div"> {
   fixed?: boolean
 }
 
-function OrderSummary({ className, lineItems, totalLabel = "合計（税込）", totalValue, ctaLabel, onCTAClick, ctaDisabled = false, fixed = false, ...props }: OrderSummaryProps) {
+function OrderSummary({ className, lineItems, totalLabel: totalLabelProp, totalValue, ctaLabel, onCTAClick, ctaDisabled = false, fixed = false, ...props }: OrderSummaryProps) {
+  const defaultLabels = useKskLabels()
+  const totalLabel = totalLabelProp ?? defaultLabels.orderSummaryTotal
   const content = (
     <div className="space-y-3 px-4 py-3">
       {/* 明細行 */}

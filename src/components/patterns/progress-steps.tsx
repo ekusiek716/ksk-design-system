@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../ui/ksk-labels"
 
 interface ProgressStepsProps extends React.ComponentProps<"div"> {
   steps: string[]
@@ -12,6 +13,7 @@ function ProgressSteps({
   currentStep,
   ...props
 }: ProgressStepsProps) {
+  const defaultLabels = useKskLabels()
   return (
     <div
       data-slot="progress-steps"
@@ -20,7 +22,7 @@ function ProgressSteps({
       aria-valuenow={currentStep + 1}
       aria-valuemin={1}
       aria-valuemax={steps.length}
-      aria-label={`ステップ ${currentStep + 1} / ${steps.length}: ${steps[currentStep] ?? ""}`}
+      aria-label={formatKskLabel(defaultLabels.progressSteps, { current: currentStep + 1, total: steps.length, name: steps[currentStep] ?? "" })}
       {...props}
     >
       {steps.map((step, index) => {

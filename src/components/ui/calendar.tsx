@@ -1,16 +1,22 @@
 import * as React from "react"
 import { DayPicker } from "react-day-picker"
-import { ja } from "react-day-picker/locale"
+import { enUS, ja } from "react-day-picker/locale"
 import { cn } from "@/lib/utils"
+import { useKskLocale } from "./ksk-labels"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
+/**
+ * 月・曜日の表記は KskLabelsProvider の locale に従う（"en" で英語。Provider 無しは従来どおり日本語）。
+ * `locale` prop を渡したときはそちらが優先。
+ */
 function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
+  const providerLocale = useKskLocale()
   return (
     <DayPicker
       data-slot="calendar"
       showOutsideDays={showOutsideDays}
-      locale={ja}
+      locale={providerLocale === "en" ? enUS : ja}
       className={cn("p-4", className)}
       classNames={{
         root: "relative w-fit",

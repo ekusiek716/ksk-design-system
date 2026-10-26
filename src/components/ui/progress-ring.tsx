@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 const SIZE_MAP = {
   sm: { size: 32, stroke: 3 },
@@ -126,7 +127,7 @@ interface ProgressRingProps {
    * 省略時は `label` が文字列ならそれを使うが、"✓" のような記号や絵文字は
    * スクリーンリーダーで意味が通らないため、その場合は明示的に指定すること
    * （例: "アップロード進捗 完了"）。`label` が ReactNode（非文字列）のときの
-   * 既定値は「進捗」。
+   * 既定値は KskLabelsProvider の `progress`（Provider 無しは「進捗」。locale="en" で "Progress"）。
    */
   "aria-label"?: string
 }
@@ -144,6 +145,7 @@ function ProgressRing({
   className,
   "aria-label": ariaLabel,
 }: ProgressRingProps) {
+  const defaultLabels = useKskLabels()
   // 計算途中に NaN / 負値が混ざると <circle r="NaN"> になり、無警告で何も描画されない。
   // 壊れた値は握り潰さず既定プリセットへ落とし、開発時だけ理由を警告する。
   const rawPx = typeof size === "number" ? size : SIZE_MAP[size].size
@@ -197,7 +199,7 @@ function ProgressRing({
       aria-valuenow={clamped}
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-label={ariaLabel ?? (typeof label === "string" ? label : "進捗")}
+      aria-label={ariaLabel ?? (typeof label === "string" ? label : defaultLabels.progress)}
     >
       <svg width={px} height={px} className="-rotate-90">
         {/* Track */}

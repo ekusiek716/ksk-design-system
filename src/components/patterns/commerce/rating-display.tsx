@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../../ui/ksk-labels"
 
 interface RatingDisplayProps extends React.ComponentProps<"div"> {
   /** 評価値（0〜5） */
@@ -31,12 +32,13 @@ const sizeMap = {
 } as const
 
 function RatingDisplay({ className, rating, reviewCount, size = "sm", showCount = true, showValue = true, ...props }: RatingDisplayProps) {
+  const defaultLabels = useKskLabels()
   /** 0〜5の範囲にクランプ */
   const clamped = Math.max(0, Math.min(5, rating))
   const { icon, val, cnt } = sizeMap[size]
 
   return (
-    <div data-slot="rating-display" className={cn("inline-flex items-center gap-0.5", className)} role="img" aria-label={`評価 ${clamped.toFixed(1)} / 5${reviewCount != null ? ` (${reviewCount}件)` : ""}`} {...props}>
+    <div data-slot="rating-display" className={cn("inline-flex items-center gap-0.5", className)} role="img" aria-label={formatKskLabel(reviewCount != null ? defaultLabels.ratingDisplayWithCount : defaultLabels.ratingDisplay, { value: clamped.toFixed(1), count: reviewCount ?? 0 })} {...props}>
       {/* 星アイコン */}
       <StarIcon size={icon} className="text-[var(--Object-High-Emphasis)]" />
       {/* 評価値 */}

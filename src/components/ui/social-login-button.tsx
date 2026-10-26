@@ -1,8 +1,12 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { SocialIcon } from "./social-icon"
+import { useKskLabels } from "./ksk-labels"
 
 type SocialProvider = "line" | "google" | "apple" | "amazon"
+
+/** ボタンの既定文言を引く KskLabels のキー（children を渡さなかったとき） */
+type SocialLoginLabelKey = "socialLoginLine" | "socialLoginGoogle" | "socialLoginApple" | "socialLoginAmazon"
 
 interface SocialLoginButtonProps extends React.ComponentProps<"button"> {
   provider: SocialProvider
@@ -14,24 +18,24 @@ interface SocialLoginButtonProps extends React.ComponentProps<"button"> {
 // ボタンの配色（罫線・背景）は外部ブランド色トークンを使用。
 const PROVIDER_CONFIG: Record<
   SocialProvider,
-  { label: string; platform: string; iconTone: "brand" | "mono"; className: string }
+  { labelKey: SocialLoginLabelKey; platform: string; iconTone: "brand" | "mono"; className: string }
 > = {
   line: {
-    label: "LINEでログイン",
+    labelKey: "socialLoginLine",
     platform: "line",
     iconTone: "brand",
     className:
       "border-[var(--Brand-Line)] text-[var(--Text-High-Emphasis)] bg-[var(--Surface-Primary)] hover:bg-[var(--Surface-Success)]",
   },
   google: {
-    label: "Googleでログイン",
+    labelKey: "socialLoginGoogle",
     platform: "google",
     iconTone: "brand",
     className:
       "border-[var(--Brand-Google-Border)] text-[var(--Text-High-Emphasis)] bg-[var(--Surface-Primary)] hover:bg-[var(--Surface-Secondary)]",
   },
   apple: {
-    label: "Appleでログイン",
+    labelKey: "socialLoginApple",
     platform: "apple",
     // Apple HIG: ライトでは黒ボタン（白文字）、ダークでは白ボタン（黒文字）。
     // 面と前景は .dark で反転する専用トークン。ロゴは mono（currentColor）で文字色に追従。
@@ -41,7 +45,7 @@ const PROVIDER_CONFIG: Record<
       "border-[var(--Brand-Apple-Surface)] text-[var(--Brand-on-Apple)] bg-[var(--Brand-Apple-Surface)] hover:opacity-90",
   },
   amazon: {
-    label: "Amazonでログイン",
+    labelKey: "socialLoginAmazon",
     platform: "amazon",
     iconTone: "brand",
     className:
@@ -58,6 +62,7 @@ function SocialLoginButton({
   children,
   ...props
 }: SocialLoginButtonProps) {
+  const defaultLabels = useKskLabels()
   const config = PROVIDER_CONFIG[provider]
 
   return (
@@ -81,13 +86,13 @@ function SocialLoginButton({
             <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" strokeDasharray="30" strokeDashoffset="10" />
           </svg>
         ) : (
-          // ボタン自体に可視テキストラベル（config.label 等）があるため、
+          // ボタン自体に可視テキストラベル（既定文言 等）があるため、
           // アイコンの accessible name は読み上げの二重になる。装飾扱いにする。
           <SocialIcon platform={config.platform} tone={config.iconTone} size={22} aria-hidden="true" />
         )}
       </span>
       <span className="flex-1 text-center">
-        {children ?? config.label}
+        {children ?? defaultLabels[config.labelKey]}
       </span>
     </button>
   )

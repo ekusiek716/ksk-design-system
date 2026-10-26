@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { SectionHeader } from "@/components/patterns/section-header"
+import { useKskLabels } from "../ui/ksk-labels"
 
 export interface CategoryScrollItem {
   /** カテゴリ名 */
@@ -82,6 +83,7 @@ function CategoryScroll({
   gridRows = 3,
   className,
 }: CategoryScrollProps) {
+  const defaultLabels = useKskLabels()
   const shapeClass = thumbnailShape === "circle" ? "rounded-full" : "rounded-lg"
 
   const itemEl = (item: CategoryScrollItem, gridMode?: boolean) => (
@@ -128,7 +130,7 @@ function CategoryScroll({
               href={moreHref}
               className="typo-body-sm text-[var(--Text-Accent-Primary)] hover:underline shrink-0"
             >
-              もっと見る
+              {defaultLabels.carouselMore}
             </a>
           ) : undefined
         }

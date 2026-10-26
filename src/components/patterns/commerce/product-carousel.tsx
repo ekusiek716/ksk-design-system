@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../../ui/ksk-labels"
 import { ProductCard, type ProductCardProps } from "./product-card"
 
 // カードサイズごとの幅クラス
@@ -14,6 +15,7 @@ interface ProductCarouselProps extends React.ComponentProps<"section"> {
   title: string
   subtitle?: string
   moreHref?: string
+  /** 「もっと見る」テキスト。省略時は KskLabelsProvider の `carouselMore`（Provider 無しは "もっと見る"。locale="en" で "See more"） */
   moreLabel?: string
   onMoreClick?: () => void
   products: ProductCardProps[]
@@ -28,7 +30,7 @@ function ProductCarousel({
   title,
   subtitle,
   moreHref,
-  moreLabel = "もっと見る",
+  moreLabel: moreLabelProp,
   onMoreClick,
   products,
   cardSize = "sm",
@@ -36,6 +38,8 @@ function ProductCarousel({
   showCartButton = false,
   ...props
 }: ProductCarouselProps) {
+  const defaultLabels = useKskLabels()
+  const moreLabel = moreLabelProp ?? defaultLabels.carouselMore
   return (
     <section
       data-slot="product-carousel"
