@@ -316,6 +316,7 @@
         "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
+        "Native RadioGroup は常に単一選択なので外側が accessibilityRole=\"radiogroup\"。グループの読み上げ名は accessibilityLabel / accessibilityLabelledBy（Web の aria-label / aria-labelledby と対・ChipSelector の単一選択と同じ名前）で渡す。radiogroup は名前が必須のため、どちらも無いと開発ビルドで console.warn する（issue #765）。各行は accessibilityRole=\"radio\" + accessibilityState の selected / checked / disabled",
         "Native は単体 Radio（ksk-design-system/native/ui）を共用。selected/onChange/size/disabled/decorative を持つ。decorative は親 radio の操作と読み上げに委ねる。単体使用では accessibilityLabel を指定し、onChange は常に true（排他制御は親）。"
       ]
     },

@@ -11,19 +11,54 @@ export interface RadioOption {
   disabled?: boolean
 }
 
+/**
+ * 開発ビルド判定（ChipSelector / QuickActionGrid と同じ形）。`proc` の存在を先に必須にして、
+ * process 自体が無い環境で本番でも警告が出続けないようにする。
+ */
+function isDev() {
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+  return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
+}
+
 export interface RadioGroupProps {
   options: RadioOption[]
   value?: string
   onChange?: (value: string) => void
   disabled?: boolean
+  /**
+   * グループの読み上げ名（issue #765・ChipSelector の単一選択・Web の `aria-label` と対）。
+   * RadioGroup は常に単一選択なので外側は `accessibilityRole="radiogroup"` で、radiogroup は名前が必須。
+   * 「何を選ぶ欄か」を表す見出しの文言を渡す（未指定は開発ビルドで警告）。
+   */
+  accessibilityLabel?: string
+  /** 見出し要素の nativeID（Android の accessibilityLabelledBy・Web の `aria-labelledby` と対） */
+  accessibilityLabelledBy?: string
 }
 
-export function RadioGroup({ options, value, onChange, disabled = false }: RadioGroupProps) {
+export function RadioGroup({
+  options,
+  value,
+  onChange,
+  disabled = false,
+  accessibilityLabel,
+  accessibilityLabelledBy,
+}: RadioGroupProps) {
   const { theme, scales } = useTheme()
+  if (isDev() && !accessibilityLabel && !accessibilityLabelledBy) {
+    // issue #765: radiogroup は名前が必須。何を選ぶ欄か読み上げで分からなくなる
+    console.warn(
+      "[ksk-ds] RadioGroup: radiogroup には accessibilityLabel（または accessibilityLabelledBy）が必要です。",
+    )
+  }
   // 各行が touchTargets.buttonCTA.min（44）の高さを自前で持つため、行間はここで足しすぎない。
   // scale[3] だと 1 行ラベルでピッチが過剰に空く（issue #315）
   return (
-    <View style={{ gap: scales.spacing.scale[1] }}>
+    <View
+      accessibilityRole="radiogroup"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityLabelledBy={accessibilityLabelledBy}
+      style={{ gap: scales.spacing.scale[1] }}
+    >
       {options.map((o) => {
         const selected = value === o.value
         const itemDisabled = disabled || o.disabled
@@ -44,7 +79,8 @@ export function RadioGroup({ options, value, onChange, disabled = false }: Radio
               opacity: itemDisabled ? 0.5 : 1,
             }}
             accessibilityRole="radio"
-            accessibilityState={{ selected, disabled: itemDisabled }}
+            // radio は checked が選択状態の正本（Radio / ChipSelector と同じ）。TalkBack は checked を読む
+            accessibilityState={{ selected, checked: selected, disabled: itemDisabled }}
             // react-native-web 0.21 は accessibilityState を aria-* に変換しないため、
             // RN 0.71+ の aria-* props を併記する（peerDependency は react-native >=0.74.0）
             aria-checked={selected}

@@ -83,6 +83,7 @@ export const ChoiceGroupSpacing: Story = {
           ]}
         />
         <RadioGroup
+          accessibilityLabel="目的"
           value={radio}
           onChange={setRadio}
           options={[
