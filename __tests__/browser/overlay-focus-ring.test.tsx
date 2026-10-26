@@ -1,4 +1,4 @@
-import { describe, expect, it, afterEach } from "vitest"
+import { describe, expect, it, afterEach, vi } from "vitest"
 import { createRoot, type Root } from "react-dom/client"
 import { act } from "react"
 import { userEvent } from "vitest/browser"
@@ -142,6 +142,10 @@ describe("面全体を覆う・pill の中の操作子は二重リング（内�
     await userEvent.tab()
     expect(document.activeElement).toBe(tab)
     expectInsetRing(tab)
+    // 非選択のタブは opacity-60 で薄いが、フォーカス中は不透明に戻す（リングが一緒に薄くなり、
+    // 白い下地で Gray-900 の帯が rgb(150) まで落ちて下地との比が約 1.2:1 になった実測への対応）
+    // transition-[transform,opacity] の途中を見ないよう待つ
+    await vi.waitFor(() => expect(getComputedStyle(tab).opacity).toBe("1"))
     // 内側リングは pill の縁で切られない（要素の内側に描くため、外側へは 1px もはみ出さない）
     expect(getComputedStyle(tab).boxShadow).not.toContain(OUTER_DARK)
   })

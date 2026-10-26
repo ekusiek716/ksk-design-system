@@ -46,4 +46,21 @@ const OVERLAY_FOCUS_RING_INSET =
 const OVERLAY_FOCUS_RING_INSET_OVER =
   "focus-visible:outline-hidden after:pointer-events-none after:absolute after:inset-0 after:z-20 after:rounded-[inherit] after:content-[''] focus-visible:after:shadow-[inset_0_0_0_2px_var(--Primitive-Gray-900),inset_0_0_0_4px_var(--Primitive-White)]"
 
-export { OVERLAY_FOCUS_RING, OVERLAY_FOCUS_RING_INSET, OVERLAY_FOCUS_RING_INSET_OVER }
+/**
+ * 親（`group` を付けた操作子）の :focus-visible で内側の二重リングを出す、独立した覆い要素（span）用。
+ * `.glass-specular` を持つ操作子は ::before（スペキュラ。白 最大 0.36 のグラデーション）と ::after（縁のリム）を
+ * 使い、要素自身の inset box-shadow は ::before の下に描かれる。実測（BottomTabBar の中央アクション、
+ * 上端中央）で、Gray-900 の帯が約 rgb(118) まで白で持ち上げられ、下地が中間グレーのとき
+ * 帯と下地の比が 1.8:1 まで落ちた。::before / ::after は使えないので、`aria-hidden` の子 span を
+ * 絶対配置で全面に敷き（z-[3] は ::after の z-index:2 より上）、そこに描く。
+ * 親は `relative`（または positioned）にし、`group` クラスを付けること。
+ */
+const OVERLAY_FOCUS_RING_COVER =
+  "pointer-events-none absolute inset-0 z-[3] rounded-[inherit] group-focus-visible:shadow-[inset_0_0_0_2px_var(--Primitive-Gray-900),inset_0_0_0_4px_var(--Primitive-White)]"
+
+export {
+  OVERLAY_FOCUS_RING,
+  OVERLAY_FOCUS_RING_INSET,
+  OVERLAY_FOCUS_RING_INSET_OVER,
+  OVERLAY_FOCUS_RING_COVER,
+}

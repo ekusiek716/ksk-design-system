@@ -1,7 +1,7 @@
 import { describe, expect, it, afterEach, vi } from "vitest"
 import { createRoot, type Root } from "react-dom/client"
 import { act } from "react"
-import { userEvent } from "vitest/browser"
+import { page, userEvent } from "vitest/browser"
 import { Button } from "@/components/ui/button"
 import { BottomTabBar } from "@/components/patterns/commerce/bottom-tab-bar"
 import { MediaActionCluster } from "@/components/patterns/media-action-cluster"
@@ -131,6 +131,36 @@ describe("glass 系 Button のフォーカスリング", () => {
   })
 })
 
+describe("--glass-focus-ring の上書き（公開変数）", () => {
+  async function focusedShadow(value: string) {
+    mount(
+      <div style={{ "--glass-focus-ring": value } as React.CSSProperties}>
+        <Button variant="glass">送信</Button>
+      </div>,
+    )
+    await userEvent.tab()
+    const button = container!.querySelector("button")!
+    expect(document.activeElement).toBe(button)
+    return button
+  }
+
+  it("`0 0 #0000` ならリングだけ消え、ガラスの影は残る（リングを消す正しい書き方）", async () => {
+    const button = await focusedShadow("0 0 #0000")
+    await vi.waitFor(() => {
+      const shadow = getComputedStyle(button).boxShadow
+      expect(shadow).not.toContain(OUTER_DARK)
+      expect(shadow).toContain("rgba(0, 0, 0, 0.16) 0px 14px 40px -10px")
+    })
+  })
+
+  it("`none` は不可: box-shadow 全体が無効になり、リングだけでなくガラスの影も消える", async () => {
+    const button = await focusedShadow("none")
+    await vi.waitFor(() => {
+      expect(getComputedStyle(button).boxShadow).toBe("none")
+    })
+  })
+})
+
 describe("MediaActionCluster の active 状態（glass の円）", () => {
   /** CSS 変数を実色（rgb(...)）に解決する */
   function resolveColor(variable: string) {
@@ -187,11 +217,83 @@ describe("BottomTabBar（pill の中は overflow:hidden）のフォーカスリ�
     expect(document.activeElement).toBe(center)
 
     const shadow = getComputedStyle(center).boxShadow
-    // pill の中なので外側リングは切られる → 内側リング
-    expect(shadow).toContain(INSET_DARK)
-    expect(shadow).toContain(INSET_WHITE)
+    // pill の中なので外側リングは切られる。要素自身の inset 影も .glass-specular の ::before に
+    // 覆われるので使わず、リングは子の覆い span に描く（下のピクセル測定のテスト参照）
     expect(shadow).not.toContain(OUTER_DARK)
+    expect(shadow).not.toContain(INSET_DARK)
+    const cover = center.querySelector<HTMLElement>('[data-slot="bottom-nav-center-action-focus-ring"]')!
+    expect(getComputedStyle(cover).boxShadow).toContain(INSET_DARK)
+    expect(getComputedStyle(cover).boxShadow).toContain(INSET_WHITE)
+    // 覆いはクリックを奪わない
+    expect(getComputedStyle(cover).pointerEvents).toBe("none")
     // .glass-accent の影（外側ドロップシャドウ）は残る
     expect(shadow).toContain("rgba(0, 0, 0, 0.16) 0px 14px 40px -10px")
   })
+
+  it("フォーカスしていないとき、覆いにリングは出ない", () => {
+    mount(
+      <BottomTabBar
+        variant="pill"
+        pillPosition="absolute"
+        items={[{ label: "ホーム", icon: <span />, onClick: () => {} }]}
+        centerAction={{ label: "作成", icon: <span />, onClick: () => {} }}
+      />,
+    )
+    const cover = container!.querySelector<HTMLElement>('[data-slot="bottom-nav-center-action-focus-ring"]')!
+    expect(getComputedStyle(cover).boxShadow).toBe("none")
+  })
+
+  /**
+   * ピクセル測定（独立レビューの指摘: .glass-specular の ::before が要素自身の inset リングの上に
+   * 描かれ、Gray-900 の帯が白で持ち上がる疑い）。修正前の実測: 上端付近で帯が rgb 約 107〜118 まで
+   * 持ち上がり、下地が中間グレーのとき帯と下地の比が 1.8:1 まで落ちた。覆い span に描く現在は、
+   * 白・黒・中間グレーのどの下地でも帯が Gray-900（24,24,27）のまま残る。
+   * スクリーンショットは縮小されて再サンプルされるため、完全一致ではなく「十分に暗い画素がある」で判定する。
+   */
+  for (const bg of ["#ffffff", "#7c7c7c", "#000000"]) {
+    it(`中央アクション上端のリングの暗い帯が下地 ${bg} でも Gray-900 近くを保つ（ピクセル測定）`, async () => {
+      mount(
+        <div style={{ background: bg, padding: 40, width: 360, height: 200, position: "relative" }}>
+          <BottomTabBar
+            variant="pill"
+            pillPosition="absolute"
+            items={[
+              { label: "ホーム", icon: <span />, isActive: true, onClick: () => {} },
+              { label: "検索", icon: <span />, onClick: () => {} },
+            ]}
+            centerAction={{ label: "作成", icon: <span />, onClick: () => {} }}
+          />
+        </div>,
+      )
+      const center = container!.querySelector<HTMLElement>('[data-slot="bottom-nav-center-action"]')!
+      for (let i = 0; i < 6 && document.activeElement !== center; i++) await userEvent.tab()
+      expect(document.activeElement).toBe(center)
+      // glass 系の transition が落ち着くのを待つ
+      await new Promise((resolve) => setTimeout(resolve, 600))
+
+      const shot = (await page.screenshot({ element: center, save: false, base64: true } as never)) as
+        | string
+        | { base64: string }
+      const base64 = typeof shot === "string" ? shot : shot.base64
+      const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
+      const bitmap = await createImageBitmap(new Blob([bytes], { type: "image/png" }))
+      const canvas = document.createElement("canvas")
+      canvas.width = bitmap.width
+      canvas.height = bitmap.height
+      const ctx = canvas.getContext("2d")!
+      ctx.drawImage(bitmap, 0, 0)
+
+      // 上端 6 行 × 横 4 か所（曲がった縁の影響を避けるため複数）の最も暗い画素
+      let darkest = 255
+      for (const fx of [0.2, 0.35, 0.5, 0.8]) {
+        const x = Math.floor(bitmap.width * fx)
+        for (let y = 0; y < 6; y++) {
+          const [r, g, b] = ctx.getImageData(x, y, 1, 1).data
+          darkest = Math.min(darkest, Math.round((r + g + b) / 3))
+        }
+      }
+      // 修正前は 107 以上。Gray-900 は 24。
+      expect(darkest).toBeLessThanOrEqual(60)
+    })
+  }
 })

@@ -98,7 +98,11 @@
      box-shadow 全体が無効化されないようフォールバックを持たせている。
      --glass-focus-ring       : 要素の外側に描く（ほとんどの操作子）
      --glass-focus-ring-inset : 要素の内側に描く（overflow:hidden の親に収まる操作子。
-                                BottomTabBar の pill の中のタブ・中央アクション等） */
+                                BottomTabBar の pill の中のタブ・中央アクション等）
+     この 2 変数は --glass-* の中で唯一の公開変数（contracts/product-theme-overrides.json の
+     allowedVariables.glassFocus。上書きしても lint P049 にならない。他の --glass-* は内部変数で上書き禁止）。
+     値は box-shadow の層リスト（カンマ区切り）。消したいときは `0 0 #0000`。`none` や空値は不可:
+     box-shadow の層リストの一部として展開されるため宣言全体が無効になり、ガラスの影まで消える。 */
   --glass-focus-ring:       0 0 0 2px var(--Primitive-White, #FFFFFF),
                             0 0 0 4px var(--Primitive-Gray-900, #18181B);
   --glass-focus-ring-inset: inset 0 0 0 2px var(--Primitive-Gray-900, #18181B),
@@ -375,7 +379,8 @@
    ⚠️ セレクタは :where() で詳細度を (0,1,0) に抑えている。BottomTabBar の中央アクション
    （bottom-nav.css）のように「overflow:hidden の pill の中なので内側リングへ切り替える」
    上書きが、読み込み順に関係なく 1 クラス指定で勝てるようにするため。
-   消費側がリングを変えたいときは --glass-focus-ring を上書きする（消すなら `0 0 #0000`）。
+   消費側がリングを変えたいときは --glass-focus-ring を上書きする（公開変数。消すなら `0 0 #0000`。
+   `none` は不可でガラスの影も消える。上のトークン定義のコメント参照）。
    リングを足す素材クラスを増やすときは、box-shadow の先頭に同じ変数を置き、下の一覧にも追加すること。
 
    forced-colors（強制配色）では box-shadow が描かれないが、Button は
