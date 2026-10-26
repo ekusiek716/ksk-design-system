@@ -3,6 +3,7 @@ import { usePortalContainer, type PortalContainer } from "./portal-container"
 import { createPortal } from "react-dom"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "./ksk-labels"
 
 const toastVariants = cva(
   "relative flex w-full items-center gap-3 overflow-hidden rounded-lg border border-[var(--Border-Low-Emphasis)] p-4 shadow-[var(--shadow-lg)] transition-all animate-fade-in-up",
@@ -110,11 +111,13 @@ const toastStore: ToastStore = {
  * `configureToast()` で上書きできるモジュールスコープの既定値（後勝ち・
  * リクエスト間で共有されるため SSR では呼ばないこと）。
  * `<Toaster>` 経由の描画は props（regionLabel / closeLabel）が直接
- * viewport に渡るため、この値には依存しない。既定は現行の日本語（後方互換）。
+ * viewport に渡るため、この値には依存しない。
+ * region / close は `configureToast()` で指定したときだけ値を持ち、未指定なら KskLabelsProvider の
+ * `toastRegion` / `close`（Provider 無しは現行の日本語 "通知" / "閉じる"。後方互換）を使う。
  */
-const toastLabels: { region: string; close: string; position: ToastViewportPosition } = {
-  region: "通知",
-  close: "閉じる",
+const toastLabels: { region: string | undefined; close: string | undefined; position: ToastViewportPosition } = {
+  region: undefined,
+  close: undefined,
   position: "bottom-end",
 }
 
@@ -226,6 +229,7 @@ function useToast(): ToastContextValue {
 // =============================================================
 
 function ToastViewport({ regionLabel, closeLabel, container, position }: { regionLabel?: string; closeLabel?: string; container?: PortalContainer; position?: ToastViewportPosition } = {}) {
+  const defaultLabels = useKskLabels()
   const resolvedPosition = position ?? toastLabels.position
   const portalContainer = usePortalContainer(container)
   const toasts = useToastStoreSnapshot()
@@ -236,7 +240,7 @@ function ToastViewport({ regionLabel, closeLabel, container, position }: { regio
     <div
       data-slot="toast-viewport"
       role="region"
-      aria-label={regionLabel ?? toastLabels.region}
+      aria-label={regionLabel ?? toastLabels.region ?? defaultLabels.toastRegion}
       // 常設コンテナを live region にする（トースト要素自身への role="status" 付与は
       // 挿入時に読み上げられない SR があるため、追加を polite で通知する構成）
       aria-live="polite"
@@ -282,7 +286,7 @@ function ToastViewport({ regionLabel, closeLabel, container, position }: { regio
             data-slot="button"
             onClick={() => toastStore.dismiss(t.id)}
             className="shrink-0 text-[var(--Object-Medium-Emphasis)] hover:text-[var(--Object-High-Emphasis)] cursor-pointer"
-            aria-label={closeLabel ?? toastLabels.close}
+            aria-label={closeLabel ?? toastLabels.close ?? defaultLabels.close}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -303,9 +307,9 @@ interface ToasterProps {
   /** 描画先。未指定は Provider、null は document.body。Shadow DOM では Toaster を明示配置する。 */
   container?: PortalContainer
   children?: React.ReactNode
-  /** viewport (role="region") の aria-label。@default "通知" */
+  /** viewport (role="region") の aria-label。省略時は `configureToast` の値 > KskLabelsProvider の `toastRegion`（Provider 無しは "通知"。locale="en" で "Notifications"） */
   regionLabel?: string
-  /** 各トーストの閉じるボタンの aria-label。@default "閉じる" */
+  /** 各トーストの閉じるボタンの aria-label。省略時は `configureToast` の値 > KskLabelsProvider の `close`（Provider 無しは "閉じる"。locale="en" で "Close"） */
   closeLabel?: string
   /**
    * viewport の水平位置（issue #691）。"bottom-end"（既定・従来どおり右下）/ "bottom-center"（中央）。

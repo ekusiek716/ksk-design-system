@@ -3,8 +3,9 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Calendar } from "./calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+import { useKskLabels, useKskLocale } from "./ksk-labels"
 
-function formatDate(date: Date, fmt: string): string {
+function formatDate(date: Date, fmt: string, locale: "ja" | "en" = "ja"): string {
   const y = date.getFullYear()
   const month = date.getMonth() + 1
   const day = date.getDate()
@@ -15,8 +16,14 @@ function formatDate(date: Date, fmt: string): string {
     M: String(month),
     dd: String(day).padStart(2, "0"),
     d: String(day),
-    EEEE: `${["日", "月", "火", "水", "木", "金", "土"][weekday]}曜日`,
-    EEE: ["日", "月", "火", "水", "木", "金", "土"][weekday],
+    EEEE:
+      locale === "en"
+        ? date.toLocaleDateString("en", { weekday: "long" })
+        : `${["日", "月", "火", "水", "木", "金", "土"][weekday]}曜日`,
+    EEE:
+      locale === "en"
+        ? date.toLocaleDateString("en", { weekday: "short" })
+        : ["日", "月", "火", "水", "木", "金", "土"][weekday],
   }
   return fmt.replace(/yyyy|EEEE|EEE|MM|M|dd|d/g, (token) => values[token])
 }
@@ -55,8 +62,7 @@ interface DatePickerProps {
   onChange?: (date: Date | undefined) => void
   /**
    * トリガーボタンのプレースホルダーテキスト。
-   * i18n 対応: 英語では "Select date"、日本語では "日付を選択" を渡す。
-   * @default "日付を選択"
+   * 省略時は KskLabelsProvider の `datePickerPlaceholder`（Provider 無しは "日付を選択"。locale="en" で "Select date"）。
    */
   placeholder?: string
   disabled?: boolean
@@ -86,7 +92,7 @@ function DatePicker({
   id,
   value,
   onChange,
-  placeholder = "日付を選択",
+  placeholder: placeholderProp,
   disabled = false,
   className,
   dateFormat = "yyyy/MM/dd",
@@ -97,8 +103,11 @@ function DatePicker({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
 }: DatePickerProps) {
+  const defaultLabels = useKskLabels()
+  const placeholder = placeholderProp ?? defaultLabels.datePickerPlaceholder
+  const locale = useKskLocale() ?? "ja"
   const [open, setOpen] = React.useState(false)
-  const formatted = value ? formatDate(value, dateFormat) : null
+  const formatted = value ? formatDate(value, dateFormat, locale) : null
   // ポインタ（マウス/タップ）で日付を選んで閉じたかの記録。
   // その場合 Radix のフォーカス返却でトリガーの focus-visible リングが一瞬点灯し、
   // open 中リングの消灯と重なって明滅（ちらつき）して見えるため、返却を抑止する。
@@ -166,7 +175,7 @@ interface DateRangePickerProps {
   onChange?: (range: { from?: Date; to?: Date } | undefined) => void
   /**
    * トリガーボタンのプレースホルダーテキスト。
-   * @default "期間を選択"
+   * 省略時は KskLabelsProvider の `dateRangePickerPlaceholder`（Provider 無しは "期間を選択"。locale="en" で "Select date range"）。
    */
   placeholder?: string
   /**
@@ -195,18 +204,21 @@ interface DateRangePickerProps {
 function DateRangePicker({
   value,
   onChange,
-  placeholder = "期間を選択",
+  placeholder: placeholderProp,
   disabled = false,
   className,
   dateFormat = "yyyy/MM/dd",
   triggerLabel,
   defaultMonth,
 }: DateRangePickerProps) {
+  const defaultLabels = useKskLabels()
+  const placeholder = placeholderProp ?? defaultLabels.dateRangePickerPlaceholder
+  const locale = useKskLocale() ?? "ja"
   const [open, setOpen] = React.useState(false)
   const formatted = value?.from
     ? value.to
-      ? `${formatDate(value.from, dateFormat)} 〜 ${formatDate(value.to, dateFormat)}`
-      : formatDate(value.from, dateFormat)
+      ? `${formatDate(value.from, dateFormat, locale)}${defaultLabels.dateRangePickerSeparator}${formatDate(value.to, dateFormat, locale)}`
+      : formatDate(value.from, dateFormat, locale)
     : null
 
   return (

@@ -2,7 +2,7 @@ import * as React from "react"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 import { Label } from "./label"
 import { cn } from "@/lib/utils"
-import { useKskLabels } from "./ksk-labels"
+import { formatKskLabel, useKskLabels } from "./ksk-labels"
 
 export interface ComboboxOption {
   value: string
@@ -14,7 +14,9 @@ export interface ComboboxProps {
   options: ComboboxOption[]
   value?: string
   onChange?: (value: string) => void
+  /** トリガーのプレースホルダー。省略時は KskLabelsProvider の `comboboxPlaceholder`（Provider 無しは "選択してください"。locale="en" で "Select"） */
   placeholder?: string
+  /** 検索欄のプレースホルダー。省略時は KskLabelsProvider の `comboboxSearchPlaceholder`（Provider 無しは "検索..."。locale="en" で "Search..."） */
   searchPlaceholder?: string
   /** 候補が 0 件のときの表示。省略時は KskLabelsProvider の `comboboxEmpty`（Provider 無しは "該当なし"。locale="en" で "No results"） */
   emptyLabel?: string
@@ -34,8 +36,8 @@ function Combobox({
   options,
   value,
   onChange,
-  placeholder = "選択してください",
-  searchPlaceholder = "検索...",
+  placeholder: placeholderProp,
+  searchPlaceholder: searchPlaceholderProp,
   emptyLabel: emptyLabelProp,
   disabled = false,
   className,
@@ -46,6 +48,8 @@ function Combobox({
 }: ComboboxProps) {
   const defaultLabels = useKskLabels()
   const emptyLabel = emptyLabelProp ?? defaultLabels.comboboxEmpty
+  const placeholder = placeholderProp ?? defaultLabels.comboboxPlaceholder
+  const searchPlaceholder = searchPlaceholderProp ?? defaultLabels.comboboxSearchPlaceholder
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
@@ -125,7 +129,7 @@ function Combobox({
         {/* List */}
         <div
           role="listbox"
-          aria-label={`${triggerLabel ?? placeholder}の候補`}
+          aria-label={formatKskLabel(defaultLabels.comboboxOptions, { label: triggerLabel ?? placeholder })}
           className="max-h-60 overflow-y-auto p-1"
         >
           {filtered.length === 0 ? (

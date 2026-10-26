@@ -14,7 +14,9 @@ export interface MultiSelectProps {
   options: MultiSelectOption[]
   value?: string[]
   onChange?: (values: string[]) => void
+  /** トリガーのプレースホルダー。省略時は KskLabelsProvider の `multiSelectPlaceholder`（Provider 無しは "選択してください"。locale="en" で "Select"） */
   placeholder?: string
+  /** 検索欄のプレースホルダー。省略時は KskLabelsProvider の `multiSelectSearchPlaceholder`（Provider 無しは "検索..."。locale="en" で "Search..."） */
   searchPlaceholder?: string
   /** 候補が 0 件のときの表示。省略時は KskLabelsProvider の `multiSelectEmpty`（Provider 無しは "該当なし"。locale="en" で "No results"） */
   emptyLabel?: string
@@ -43,8 +45,8 @@ function MultiSelect({
   options,
   value = [],
   onChange,
-  placeholder = "選択してください",
-  searchPlaceholder = "検索...",
+  placeholder: placeholderProp,
+  searchPlaceholder: searchPlaceholderProp,
   emptyLabel: emptyLabelProp,
   disabled = false,
   className,
@@ -59,6 +61,8 @@ function MultiSelect({
   const defaultLabels = useKskLabels()
   const emptyLabel = emptyLabelProp ?? defaultLabels.multiSelectEmpty
   const clearLabel = clearLabelProp ?? defaultLabels.multiSelectClear
+  const placeholder = placeholderProp ?? defaultLabels.multiSelectPlaceholder
+  const searchPlaceholder = searchPlaceholderProp ?? defaultLabels.multiSelectSearchPlaceholder
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)

@@ -26,13 +26,13 @@ interface CountdownTimerProps {
   compact?: boolean
   className?: string
   onEnd?: () => void
-  /** 日単位ラベル。granularity="day" で使用。@default "日" */
+  /** 日単位ラベル。granularity="day" で使用。省略時は KskLabelsProvider の `countdownUnitDay`（Provider 無しは "日"。locale="en" で "d"） */
   dayUnit?: string
-  /** 時間単位ラベル。@default "時間" */
+  /** 時間単位ラベル。省略時は KskLabelsProvider の `countdownUnitHour`（Provider 無しは "時間"。locale="en" で "h"） */
   hourUnit?: string
-  /** 分単位ラベル。@default "分" */
+  /** 分単位ラベル。省略時は KskLabelsProvider の `countdownUnitMinute`（Provider 無しは "分"。locale="en" で "m"） */
   minuteUnit?: string
-  /** 秒単位ラベル。@default "秒" */
+  /** 秒単位ラベル。省略時は KskLabelsProvider の `countdownUnitSecond`（Provider 無しは "秒"。locale="en" で "s"） */
   secondUnit?: string
 }
 
@@ -69,9 +69,10 @@ function DayCountdown({
   variant = "filled",
   className,
   onEnd,
-  dayUnit = "日",
+  dayUnit: dayUnitProp,
 }: CountdownTimerProps) {
   const defaultLabels = useKskLabels()
+  const dayUnit = dayUnitProp ?? defaultLabels.countdownUnitDay
   const label = labelProp ?? defaultLabels.countdownRemaining
   const endedLabel = endedLabelProp ?? defaultLabels.countdownEnded
   const todayLabel = todayLabelProp ?? defaultLabels.countdownToday
@@ -159,11 +160,14 @@ function TimeCountdown({
   compact = false,
   className,
   onEnd,
-  hourUnit = "時間",
-  minuteUnit = "分",
-  secondUnit = "秒",
+  hourUnit: hourUnitProp,
+  minuteUnit: minuteUnitProp,
+  secondUnit: secondUnitProp,
 }: CountdownTimerProps) {
   const defaultLabels = useKskLabels()
+  const hourUnit = hourUnitProp ?? defaultLabels.countdownUnitHour
+  const minuteUnit = minuteUnitProp ?? defaultLabels.countdownUnitMinute
+  const secondUnit = secondUnitProp ?? defaultLabels.countdownUnitSecond
   const label = labelProp ?? defaultLabels.countdownRemaining
   const endedLabel = endedLabelProp ?? defaultLabels.countdownEnded
   const [remaining, setRemaining] = React.useState(() => calcRemaining(targetDate))

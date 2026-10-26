@@ -3,6 +3,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { DatePicker } from "./date-picker"
 import { TimePicker } from "./time-picker"
+import { useKskLabels } from "./ksk-labels"
 
 interface DateTimePickerProps
   extends Omit<React.ComponentProps<"div">, "onChange" | "defaultValue"> {
@@ -13,7 +14,9 @@ interface DateTimePickerProps
   min?: Date
   max?: Date
   disabled?: boolean
+  /** 日付側のプレースホルダー。省略時は DatePicker の既定（KskLabelsProvider の `datePickerPlaceholder`。Provider 無しは "日付を選択"） */
   datePlaceholder?: string
+  /** 時刻側のプレースホルダー。省略時は TimePicker の既定（KskLabelsProvider の `timePickerPlaceholder`。Provider 無しは "時刻を選択"） */
   timePlaceholder?: string
   dateTriggerLabel?: string
   timeTriggerLabel?: string
@@ -73,8 +76,8 @@ function DateTimePicker({
   min,
   max,
   disabled = false,
-  datePlaceholder = "日付を選択",
-  timePlaceholder = "時刻を選択",
+  datePlaceholder,
+  timePlaceholder,
   dateTriggerLabel,
   timeTriggerLabel,
   className,
@@ -82,6 +85,7 @@ function DateTimePicker({
   "aria-invalid": ariaInvalid,
   ...props
 }: DateTimePickerProps) {
+  const defaultLabels = useKskLabels()
   const timeValue = value
     ? `${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}`
     : undefined
@@ -102,7 +106,7 @@ function DateTimePicker({
         }}
         placeholder={datePlaceholder}
         triggerLabel={dateTriggerLabel}
-        dateFormat="M月d日（EEE）"
+        dateFormat={defaultLabels.dateTimePickerDateFormat}
         min={min}
         max={max}
         disabled={disabled}

@@ -62,11 +62,15 @@ function BreadcrumbSeparator({ children, className, ...props }: React.ComponentP
   )
 }
 
-function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<"span">) {
+/**
+ * @param label 読み上げ名（sr-only）。省略時は KskLabelsProvider の `breadcrumbEllipsis`（Provider 無しは "その他"。locale="en" で "More"）
+ */
+function BreadcrumbEllipsis({ className, label, ...props }: React.ComponentProps<"span"> & { label?: string }) {
+  const defaultLabels = useKskLabels()
   return (
     <span role="presentation" aria-hidden="true" data-slot="breadcrumb-ellipsis" className={cn("flex size-9 items-center justify-center", className)} {...props}>
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="3" cy="8" r="1" fill="currentColor" /><circle cx="8" cy="8" r="1" fill="currentColor" /><circle cx="13" cy="8" r="1" fill="currentColor" /></svg>
-      <span className="sr-only">その他</span>
+      <span className="sr-only">{label ?? defaultLabels.breadcrumbEllipsis}</span>
     </span>
   )
 }
