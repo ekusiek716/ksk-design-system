@@ -73,12 +73,12 @@ describe("native RadioGroup のグループ名と役割（#765）", () => {
     expect(group().props.accessibilityLabelledBy).toBe("heading")
   })
 
-  it("各行は radio ロールで、selected / checked / disabled の状態を持つ", () => {
+  it("各行は radio ロールで、accessibilityState は main と同一（selected / disabled のみ）", () => {
     render(<RadioGroup accessibilityLabel="通知時刻" value="a" options={options} />)
     const radios = hosts.records.filter(r => r.props.accessibilityRole === "radio")
     expect(radios.map(r => r.props.accessibilityState)).toEqual([
-      { selected: true, checked: true, disabled: undefined },
-      { selected: false, checked: false, disabled: true },
+      { selected: true, disabled: undefined },
+      { selected: false, disabled: true },
     ])
     expect(radios.map(r => r.props["aria-checked"])).toEqual([true, false])
   })

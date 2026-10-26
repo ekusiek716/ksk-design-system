@@ -48,17 +48,38 @@ export function splitGlassContainerStyle(style: StyleInput): { outer: ViewStyle;
 }
 
 /**
- * 見た目が最小タップ寸法（既定 44pt）に満たない数値の width / height を hitSlop で補う。
+ * 見た目が最小タップ寸法（既定 44pt）に満たない分を hitSlop で補う。
  * IconButton と同じ考え方（見た目は小さくてもタップ領域は 44pt 以上・WCAG 2.5.5）。
+ * 高さは height / minHeight、幅は width / minWidth の数値のうち大きい方を見た目の寸法とみなす
+ * （RN は minHeight が height を押し上げるため）。呼び出し側は既定の minHeight を解決済みで渡す。
  * 数値で指定されていない寸法（内容なりの幅・%）は見積もれないので補わない。
  */
 export function resolveGlassHitSlop(
   outer: ViewStyle,
   minTarget: number,
 ): { top: number; bottom: number; left: number; right: number } | undefined {
-  const slop = (size: unknown) => (typeof size === "number" && size < minTarget ? Math.ceil((minTarget - size) / 2) : 0)
-  const vertical = slop(outer.height)
-  const horizontal = slop(outer.width)
+  const slop = (...sizes: unknown[]) => {
+    const numeric = sizes.filter((v): v is number => typeof v === "number")
+    if (numeric.length === 0) return 0
+    const size = Math.max(...numeric)
+    return size < minTarget ? Math.ceil((minTarget - size) / 2) : 0
+  }
+  const vertical = slop(outer.height, outer.minHeight)
+  const horizontal = slop(outer.width, outer.minWidth)
   if (vertical === 0 && horizontal === 0) return undefined
   return { top: vertical, bottom: vertical, left: horizontal, right: horizontal }
+}
+
+/**
+ * 内側のぼかし面を外側いっぱいに広げる（flexGrow: 1）必要があるか。外側の寸法を containerStyle が
+ * 決めている（height / flex / flexGrow / alignSelf: stretch）ときだけ true。それ以外は従来どおり
+ * 内側が内容と minHeight で決まり、横並び + stretch の親でも行の高さまで伸びない。
+ */
+export function glassInnerNeedsGrow(outer: ViewStyle): boolean {
+  return (
+    outer.height !== undefined ||
+    outer.flex !== undefined ||
+    outer.flexGrow !== undefined ||
+    outer.alignSelf === "stretch"
+  )
 }

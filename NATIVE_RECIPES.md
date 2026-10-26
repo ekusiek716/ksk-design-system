@@ -299,7 +299,7 @@ import { IconButton } from "ksk-design-system/native/ui"
 
 ### 写真・地図の上の丸い glass 補助ボタン
 
-`IconButton` に glass の種類はありません。シートや写真の上で Liquid Glass の丸いアイコンボタン（ブックマーク・報告など）を置くときは、`Button variant="glass"` に `containerStyle` で寸法と角丸を渡します。padding 系は内側のぼかし面、width / height / margin は外側、`borderRadius` は両方に反映されるので、丸くしてもぼかしが四角くはみ出しません。`height` だけ渡すと既定の最小高さ 44 は外れ、44 未満の数値の width / height には `hitSlop` が自動で足されて実タップ領域は 44 以上に保たれます。
+`IconButton` に glass の種類はありません。シートや写真の上で Liquid Glass の丸いアイコンボタン（ブックマーク・報告など）を置くときは、`Button variant="glass"` に `containerStyle` で寸法と角丸を渡します。padding 系は内側のぼかし面、width / height / margin は外側、`borderRadius` は両方に反映されるので、丸くしてもぼかしが四角くはみ出しません。`height` だけ渡すと既定の最小高さ 44 は外れ、44 未満の数値の width / height / minWidth / minHeight には `hitSlop` が自動で足されて実タップ領域は 44 以上に保たれます（`minHeight: 32` なら上下に 6 ずつ）。余白を消すときは `padding: 0` だけでは既定の左右余白 20 が残るので、`paddingHorizontal` も指定します。
 
 ```tsx
 <Button

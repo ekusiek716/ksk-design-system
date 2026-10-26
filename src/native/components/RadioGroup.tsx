@@ -79,8 +79,7 @@ export function RadioGroup({
               opacity: itemDisabled ? 0.5 : 1,
             }}
             accessibilityRole="radio"
-            // radio は checked が選択状態の正本（Radio / ChipSelector と同じ）。TalkBack は checked を読む
-            accessibilityState={{ selected, checked: selected, disabled: itemDisabled }}
+            accessibilityState={{ selected, disabled: itemDisabled }}
             // react-native-web 0.21 は accessibilityState を aria-* に変換しないため、
             // RN 0.71+ の aria-* props を併記する（peerDependency は react-native >=0.74.0）
             aria-checked={selected}

@@ -13,7 +13,7 @@ import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { resolveRaisedElevationStyle } from "../button-elevation"
 import { GlassView } from "./GlassView"
-import { resolveGlassHitSlop, splitGlassContainerStyle } from "../button-glass-style"
+import { glassInnerNeedsGrow, resolveGlassHitSlop, splitGlassContainerStyle } from "../button-glass-style"
 
 /**
  * - `ghost-neutral`: 背景も枠も無い灰色（text.medium-emphasis）の文字ボタン。スキップ・あとで・
@@ -51,7 +51,9 @@ export interface ButtonProps extends Omit<PressableProps, "children" | "style"> 
    * （issue #754）: padding 系は内側の余白、それ以外（width / height / minHeight / margin 等）は外側、
    * borderRadius は両方。`height` だけ渡したときは既定の最小高さ 44 を外すので、丸く小さい補助ボタンは
    * `{ width: 40, height: 40, paddingHorizontal: 0, borderRadius: 20 }` で作れる。見た目が 44 未満の
-   * 数値 width / height には、実タップ領域が 44 以上になるよう `hitSlop` を自動で足す（`hitSlop` を渡せばそちらが優先）。
+   * 数値 width / height / minWidth / minHeight には、実タップ領域が 44 以上になるよう `hitSlop` を自動で足す
+   * （`hitSlop` を渡せばそちらが優先）。
+   * 注意: `padding: 0` だけでは既定の左右余白（paddingHorizontal: 20）は消えない。消すなら `paddingHorizontal` も指定する。
    */
   containerStyle?: StyleProp<ViewStyle>
   /** 押下時の style を上書きするポイント（glass では containerStyle と同じ振り分け・押下中かつ非 disabled のとき） */
@@ -172,7 +174,7 @@ export function Button({
       return { outer, inner, minHeight, radius }
     }
     const resting = resolveGlassStyles(false)
-    const hitSlop = resolveGlassHitSlop(resting.outer, minTarget)
+    const hitSlop = resolveGlassHitSlop({ ...resting.outer, minHeight: resting.minHeight }, minTarget)
     return (
       <Pressable
         disabled={effectiveDisabled}
@@ -203,8 +205,9 @@ export function Button({
                 alignItems: "center",
                 flexDirection: "row",
                 gap: scales.spacing.scale[2],
-                // 外側が height / width で決まっているときに内側のぼかし面も埋める
-                flexGrow: 1,
+                // 外側の寸法を containerStyle が決めているときだけ、内側のぼかし面も埋める
+                // （常に付けると、横並び + stretch の親で既定の glass が行の高さまで伸びる）
+                ...(glassInnerNeedsGrow(r.outer) ? { flexGrow: 1 } : null),
                 ...r.inner,
                 transform: [{ scale: pressed ? 0.96 : 1 }],
               }}
