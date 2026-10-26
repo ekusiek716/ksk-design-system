@@ -3,7 +3,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Calendar } from "./calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
-import { useKskLabels, type ResolvedKskLabels } from "./ksk-labels"
+import { useKskLabels, useKskLocale, type KskLocale, type ResolvedKskLabels } from "./ksk-labels"
 import { longWeekdays, shortWeekdays } from "@/lib/calendar-labels"
 
 /**
@@ -14,7 +14,8 @@ import { longWeekdays, shortWeekdays } from "@/lib/calendar-labels"
 function formatDate(
   date: Date,
   fmt: string,
-  labels: Pick<ResolvedKskLabels, "calendarWeekdaysShort" | "calendarWeekdaysLong">
+  labels: Pick<ResolvedKskLabels, "calendarWeekdaysShort" | "calendarWeekdaysLong">,
+  locale: KskLocale
 ): string {
   const y = date.getFullYear()
   const month = date.getMonth() + 1
@@ -26,8 +27,8 @@ function formatDate(
     M: String(month),
     dd: String(day).padStart(2, "0"),
     d: String(day),
-    EEEE: longWeekdays(labels)[weekday],
-    EEE: shortWeekdays(labels)[weekday],
+    EEEE: longWeekdays(labels, locale)[weekday],
+    EEE: shortWeekdays(labels, locale)[weekday],
   }
   return fmt.replace(/yyyy|EEEE|EEE|MM|M|dd|d/g, (token) => values[token])
 }
@@ -113,8 +114,9 @@ function DatePicker({
 }: DatePickerProps) {
   const defaultLabels = useKskLabels()
   const placeholder = placeholderProp ?? defaultLabels.datePickerPlaceholder
+  const locale = useKskLocale() ?? "ja"
   const [open, setOpen] = React.useState(false)
-  const formatted = value ? formatDate(value, dateFormat, defaultLabels) : null
+  const formatted = value ? formatDate(value, dateFormat, defaultLabels, locale) : null
   // ポインタ（マウス/タップ）で日付を選んで閉じたかの記録。
   // その場合 Radix のフォーカス返却でトリガーの focus-visible リングが一瞬点灯し、
   // open 中リングの消灯と重なって明滅（ちらつき）して見えるため、返却を抑止する。
@@ -224,11 +226,12 @@ function DateRangePicker({
 }: DateRangePickerProps) {
   const defaultLabels = useKskLabels()
   const placeholder = placeholderProp ?? defaultLabels.dateRangePickerPlaceholder
+  const locale = useKskLocale() ?? "ja"
   const [open, setOpen] = React.useState(false)
   const formatted = value?.from
     ? value.to
-      ? `${formatDate(value.from, dateFormat, defaultLabels)}${defaultLabels.dateRangePickerSeparator}${formatDate(value.to, dateFormat, defaultLabels)}`
-      : formatDate(value.from, dateFormat, defaultLabels)
+      ? `${formatDate(value.from, dateFormat, defaultLabels, locale)}${defaultLabels.dateRangePickerSeparator}${formatDate(value.to, dateFormat, defaultLabels, locale)}`
+      : formatDate(value.from, dateFormat, defaultLabels, locale)
     : null
 
   return (

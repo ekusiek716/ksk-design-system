@@ -1,6 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { useKskLabelsFor } from "../ui/ksk-labels"
+import { useKskLabelsFor, useKskLocaleFor } from "../ui/ksk-labels"
 import { formatCalendarDay, shortWeekdays } from "@/lib/calendar-labels"
 import type { MonthCalendarEvent } from "./month-calendar"
 import { ACCENT_DOT, CHIP_TONE, parseKey, resolveEventAccent, resolveTodayKey } from "./_internal/calendar-shared"
@@ -75,7 +75,8 @@ function AgendaList({
 }: AgendaListProps) {
   // 文言は prop > locale prop が Provider と違うときはその言語の既定 > Provider の labels > 日本語（issue #723）
   const labels = useKskLabelsFor(localeProp)
-  const weekdays = shortWeekdays(labels)
+  const locale = useKskLocaleFor(localeProp)
+  const weekdays = shortWeekdays(labels, locale)
   const Heading = `h${headingLevel}` as "h2" | "h3" | "h4" | "h5" | "h6"
   const todayKey = resolveTodayKey(today)
   const eventsByDate = React.useMemo(() => {
@@ -108,7 +109,7 @@ function AgendaList({
           const dayEvents = eventsByDate.get(key) ?? []
           const isToday = key === todayKey
           const isSelected = key === selectedDate
-          const headingLabel = `${formatCalendarDay(d, labels)}${isToday ? labels.calendarDayToday : ""}`
+          const headingLabel = `${formatCalendarDay(d, labels, locale)}${isToday ? labels.calendarDayToday : ""}`
           return (
             <li
               key={key}

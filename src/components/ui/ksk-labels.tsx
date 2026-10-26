@@ -408,18 +408,26 @@ interface KskLabels {
   countdownSpokenSeparator?: string
   /**
    * MonthCalendar / MonthCalendarHeader / AgendaList / DatePicker の曜日名（短い形）。**7 個を半角カンマで区切る**（日曜始まり）。
-   * MonthCalendar の曜日の列見出し・AgendaList の日付列・DatePicker の `EEE` に出る。個数が 7 でないときは日本語の既定で補う
+   * MonthCalendar の曜日の列見出し・AgendaList の日付列・DatePicker の入力欄の `EEE` に出る。各項目の前後の空白は取り除く（"Sun, Mon, …" でよい）。
+   * 個数が 7 でないときは、そのときの locale（部品の locale prop → Provider の locale → ja）の既定で補い、開発ビルドだけ一度 warn する。
+   *
+   * 注意: DatePicker / DateRangePicker のポップオーバーの中の Calendar（react-day-picker）の曜日見出し・月名は
+   * この一覧を読まない（Provider の locale の ja / en だけに従う）。変わるのは入力欄の表示（`EEE` / `EEEE`）だけ
    */
   calendarWeekdaysShort?: string
-  /** 曜日名（長い形）。7 個を半角カンマで区切る（日曜始まり）。DatePicker の `EEEE` に出る */
+  /** 曜日名（長い形）。7 個を半角カンマで区切る（日曜始まり）。DatePicker の入力欄の `EEEE` に出る（ポップオーバーの Calendar には出ない。補い方は calendarWeekdaysShort と同じ） */
   calendarWeekdaysLong?: string
-  /** 月名（長い形）。12 個を半角カンマで区切る（1 月始まり）。`calendarMonthTitle` の `{monthName}` に入る */
+  /** 月名（長い形）。12 個を半角カンマで区切る（1 月始まり。補い方は calendarWeekdaysShort と同じ）。`calendarMonthTitle` の `{monthName}` に入る */
   calendarMonthsLong?: string
-  /** 月名（短い形）。12 個を半角カンマで区切る（1 月始まり）。`calendarDayLabel` の `{monthShort}` に入る */
+  /** 月名（短い形）。12 個を半角カンマで区切る（1 月始まり。補い方は calendarWeekdaysShort と同じ）。`calendarDayLabel` の `{monthShort}` に入る */
   calendarMonthsShort?: string
   /**
    * 日の読み上げ名（MonthCalendar のセル・AgendaList の日ごとの見出し）。
    * 差し込み口: `{year}` `{month}`（数字）`{monthName}`（calendarMonthsLong）`{monthShort}`（calendarMonthsShort）`{day}` `{weekday}`（calendarWeekdaysShort）
+   *
+   * 注意（calendar 系のキー全部に共通）: `labels` だけの Provider（`locale` 未指定）は ja 扱い。MonthCalendar / MonthCalendarHeader（月の見出し）/
+   * AgendaList に `locale="en"` を渡すと Provider の labels は無視されて英語の既定になる。英語の差し替え文言を効かせたいときは
+   * Provider にも `locale="en"` を指定する（部品の `locale` は省略するか、Provider と同じにする）
    */
   calendarDayLabel?: string
   /** 月の見出し・MonthCalendar の grid の読み上げ名。差し込み口は `calendarDayLabel` と同じ（`{day}` `{weekday}` は使えない） */
@@ -992,6 +1000,8 @@ function useKskLocale(): KskLocale | undefined {
  * 2. それ以外（`localeProp` 未指定、または Provider の locale と同じ）: Provider の labels（上書き）→ Provider の locale の既定 → 日本語
  *
  * Provider が無い（または labels だけで locale を指定していない）ときの Provider の locale は "ja" とみなす。
+ * したがって `<KskLabelsProvider labels={英語の文言}>`（locale 未指定）の配下で部品に `locale="en"` を渡すと、labels は無視される。
+ * 英語の差し替え文言を効かせたいときは Provider にも `locale="en"` を指定する。
  */
 function useKskLabelsFor(localeProp?: KskLocale): ResolvedKskLabels {
   const { locale, labels } = React.useContext(KskLabelsContext)
@@ -999,5 +1009,11 @@ function useKskLabelsFor(localeProp?: KskLocale): ResolvedKskLabels {
   return labels
 }
 
-export { KskLabelsProvider, useKskLabels, useKskLabelsFor, useKskLocale, KSK_DEFAULT_LABELS, formatKskLabel, formatKskLabelNodes }
+/** `useKskLabelsFor` が文言を解決するときの locale（部品の locale prop → Provider の locale → "ja"）。一覧の補い先の言語に使う。 */
+function useKskLocaleFor(localeProp?: KskLocale): KskLocale {
+  const { locale } = React.useContext(KskLabelsContext)
+  return localeProp ?? locale ?? "ja"
+}
+
+export { KskLabelsProvider, useKskLabels, useKskLabelsFor, useKskLocaleFor, useKskLocale, KSK_DEFAULT_LABELS, formatKskLabel, formatKskLabelNodes }
 export type { KskLabels, KskLabelsProviderProps, KskLocale, ResolvedKskLabels }

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { ArrowDown2, ArrowLeft2, ArrowRight2 } from "iconsax-reactjs"
-import { formatKskLabel, useKskLabels, useKskLabelsFor } from "../ui/ksk-labels"
+import { formatKskLabel, useKskLabels, useKskLabelsFor, useKskLocaleFor } from "../ui/ksk-labels"
 import { formatCalendarDay, formatCalendarMonth, shortWeekdays } from "@/lib/calendar-labels"
 import { Button, type ButtonProps } from "../ui/button"
 import {
@@ -168,6 +168,7 @@ function MonthCalendar({
 }: MonthCalendarProps) {
   // 文言は prop > locale prop が Provider と違うときはその言語の既定 > Provider の labels > 日本語（issue #723）
   const labels = useKskLabelsFor(localeProp)
+  const locale = useKskLocaleFor(localeProp)
   const monthStart = toMonthStart(month)
   const monthKey = `${monthStart.getFullYear()}-${pad(monthStart.getMonth() + 1)}`
   const weeks = buildMonthWeeks(monthStart, weekStartsOn)
@@ -237,13 +238,13 @@ function MonthCalendar({
     }
   }
 
-  const weekdays = shortWeekdays(labels)
+  const weekdays = shortWeekdays(labels, locale)
   const weekdayLabels = Array.from({ length: 7 }, (_, i) => weekdays[(i + weekStartsOn) % 7])
   const more = moreLabel ?? ((n: number) => formatKskLabel(labels.calendarMore, { count: n }))
-  const gridLabel = ariaLabel ?? formatCalendarMonth(displayedMonthStart, labels)
+  const gridLabel = ariaLabel ?? formatCalendarMonth(displayedMonthStart, labels, locale)
 
   const dayLabel = (key: string, dayEvents: MonthCalendarEvent[]) => {
-    const base = formatCalendarDay(parseKey(key), labels)
+    const base = formatCalendarDay(parseKey(key), labels, locale)
     const todayPart = key === todayKey ? labels.calendarDayToday : ""
     const eventsPart = dayEvents.length
       ? formatKskLabel(labels.calendarDayEvents, {
@@ -554,9 +555,10 @@ function MonthCalendarHeader({
   const labels = useKskLabels()
   // 月の見出しの語順だけ locale prop に従う（ボタンの文言は従来どおり Provider の labels。locale prop は title の既定にだけ効く）
   const titleLabels = useKskLabelsFor(localeProp)
+  const titleLocale = useKskLocaleFor(localeProp)
   const start = toMonthStart(month)
   const hasTrailing = trailing != null && trailing !== false
-  const defaultTitle = formatCalendarMonth(start, titleLabels)
+  const defaultTitle = formatCalendarMonth(start, titleLabels, titleLocale)
   return (
     <div
       data-slot="month-calendar-header"

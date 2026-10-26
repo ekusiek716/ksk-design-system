@@ -9,13 +9,14 @@
  */
 import * as React from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { KSK_DEFAULT_LABELS, KskLabelsProvider, useKskLabelsFor, type KskLabels } from "../src/components/ui/ksk-labels"
 import { AgendaList } from "../src/components/patterns/agenda-list"
 import { MonthCalendar, MonthCalendarHeader } from "../src/components/patterns/month-calendar"
 import { DateRangePicker, DatePicker } from "../src/components/ui/date-picker"
 import { longWeekdays, shortWeekdays } from "../src/lib/calendar-labels"
+import { resetDevWarnings } from "../src/lib/dev-warn"
 
 const R = (el: React.ReactElement) => renderToStaticMarkup(el)
 const OCT = new Date(2026, 9, 1)
@@ -45,8 +46,8 @@ describe("曜日・月名の既定が Intl と同じ（labels に移しても表
   for (const locale of ["ja", "en"] as const) {
     it(`${locale}: 曜日（短・長）と月名（短・長）が Intl の出力と一致する`, () => {
       const labels = KSK_DEFAULT_LABELS[locale]
-      const short = shortWeekdays(labels)
-      const long = longWeekdays(labels)
+      const short = shortWeekdays(labels, locale)
+      const long = longWeekdays(labels, locale)
       for (let i = 0; i < 7; i++) {
         const d = new Date(2026, 9, 4 + i) // 2026-10-04 は日曜
         expect(d.getDay()).toBe(i)
@@ -215,8 +216,67 @@ describe("DatePicker: 曜日名（EEE / EEEE）を labels で差し替える", (
   })
 })
 
-describe("一覧の個数が合わない labels は日本語の既定で補う（壊れた表示を出さない）", () => {
-  it("曜日が 6 個・月名が 11 個のとき", () => {
+describe("一覧の書き方: 空白は取り除き、個数が合わないときは解決している locale の既定で補う", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    resetDevWarnings()
+  })
+
+  it("各項目の前後の空白は取り除く（\"Sun, Mon, …\" でよい）", () => {
+    const html = R(
+      <KskLabelsProvider
+        locale="en"
+        labels={{
+          calendarWeekdaysShort: "Su, Mo, Tu, We, Th, Fr, Sa",
+          calendarMonthsLong: " Jan , Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct ,Nov,Dec",
+        }}
+      >
+        <MonthCalendarHeader month={OCT} />
+        <AgendaList events={events} today="2026-10-26" />
+      </KskLabelsProvider>
+    )
+    expect(html).toContain(">Oct 2026<")
+    expect(html).toContain(">Mo<")
+    expect(html).not.toContain("> Mo<")
+    expect(html).not.toContain(" Mo,")
+  })
+
+  it("en の Provider の下で個数が足りない（\"Su,Mo\"）と英語の既定で補い、開発ビルドで一度だけ warn する", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const el = (
+      <KskLabelsProvider locale="en" labels={{ calendarWeekdaysShort: "Su,Mo", calendarMonthsLong: "x" }}>
+        <MonthCalendarHeader month={OCT} />
+        <AgendaList events={events} today="2026-10-26" />
+        <AgendaList events={events} today="2026-10-26" />
+      </KskLabelsProvider>
+    )
+    const html = R(el)
+    expect(html).toContain(">October 2026<")
+    expect(html).toContain(">Mon<")
+    expect(html).toContain("Mon, Oct 26, today")
+    expect(html).not.toContain("undefined")
+    expect(html).not.toContain("月")
+    const messages = warn.mock.calls.map((c) => String(c[0]))
+    expect(messages.filter((m) => m.includes("calendarWeekdaysShort"))).toHaveLength(1)
+    expect(messages.filter((m) => m.includes("calendarMonthsLong"))).toHaveLength(1)
+  })
+
+  it("空の一覧も補う。locale prop があればその言語の既定（ja の Provider でも部品が en なら英語）", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    const html = R(
+      <KskLabelsProvider locale="ja" labels={{ calendarWeekdaysShort: "" }}>
+        <AgendaList events={events} today="2026-10-26" locale="en" />
+        <AgendaList events={events} today="2026-10-26" />
+        <DatePicker value={new Date(2026, 9, 26)} dateFormat="EEE" />
+      </KskLabelsProvider>
+    )
+    // locale="en" の部品は labels を使わず英語の既定、locale 無しの部品と DatePicker は ja の既定で補う
+    expect(html).toContain(">Mon<")
+    expect(html).toContain(">月<")
+  })
+
+  it("Provider 無し・locale 未指定で個数が合わないときは日本語の既定で補う", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {})
     const html = R(
       <KskLabelsProvider labels={{ calendarWeekdaysShort: "a,b,c,d,e,f", calendarMonthsLong: "x" }}>
         <MonthCalendarHeader month={OCT} />
