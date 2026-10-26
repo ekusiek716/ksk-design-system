@@ -10,6 +10,8 @@
  *       `xxxLabel = (n) => \`…日本語…\``
  *    B. Label 名の const  `const defaultXxxLabel = "日本語"`（モジュール直下も関数本体も）
  *    C. 本体内のフォールバック  `x ?? "日本語"`（次の行に折り返した三項演算子の中も）
+ *    E. 日本語を含む文字列リテラル全般（オブジェクトのプロパティ値・三項演算子・配列・テンプレート）と JSX の文章
+ *       （開発者向けの console.warn / warnOnceInDev / throw new Error の中は除く）。A〜D で拾えない形の保険
  *    D. JSX 属性の直書き  `placeholder="日本語"` / `aria-label="日本語"` / `title="日本語"` / `alt="日本語"`（`xxx={…}` の式は A / C で見る）
  *
  * 2 は ratchet 方式。まだ Provider に乗っていない箇所は UNMIGRATED に理由付きで残してあり、
@@ -97,7 +99,23 @@ import { DatePicker, DateRangePicker } from "../src/components/ui/date-picker"
 import { TimePicker } from "../src/components/ui/time-picker"
 import { DateTimePicker } from "../src/components/ui/date-time-picker"
 import { BreadcrumbEllipsis } from "../src/components/ui/breadcrumb"
-import { Toaster } from "../src/components/ui/toast"
+import { Toaster, configureToast, toast } from "../src/components/ui/toast"
+import { Slider } from "../src/components/ui/slider"
+import { SocialLoginButton } from "../src/components/ui/social-login-button"
+import { CheckboxGroup } from "../src/components/ui/checkbox-group"
+import { ProgressSteps } from "../src/components/patterns/progress-steps"
+import { DocumentPage } from "../src/components/patterns/document-page"
+import { RatingDisplay } from "../src/components/patterns/commerce/rating-display"
+import { PriceDisplay } from "../src/components/patterns/commerce/price-display"
+import { ReviewSummary } from "../src/components/patterns/commerce/review-summary"
+import { ReviewCard } from "../src/components/patterns/commerce/review-card"
+import { NotificationList } from "../src/components/patterns/admin/notification-list"
+import { SearchPanel } from "../src/components/patterns/admin/search-panel"
+import { ChartControls } from "../src/components/patterns/admin/chart-controls"
+import { ActionTile } from "../src/components/patterns/quick-action-grid"
+import { CategoryScroll } from "../src/components/patterns/category-scroll"
+import { MenuDrawer } from "../src/components/patterns/menu-drawer"
+import { formatKskLabelNodes } from "../src/components/ui/ksk-labels"
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 // Radix（Popover / Tooltip / Dialog）が jsdom に無い ResizeObserver を使う
@@ -200,7 +218,7 @@ describe("KskLabelsProvider の網羅: Provider 無しは日本語 / en で英�
   it("CountdownTimer / CountdownHero（label の空文字は「非表示」のまま）", () => {
     const day = <CountdownTimer targetDate={FUTURE_DAYS} granularity="day" />
     expect(ja(day)).toContain("残り 5日")
-    expect(en(day)).toContain("Time left 5d")
+    expect(en(day)).toContain("Time left 5 day(s)")
     expect(ja(<CountdownTimer targetDate={PAST} granularity="day" />)).toContain("受付終了")
     expect(en(<CountdownTimer targetDate={PAST} granularity="day" />)).toContain("Closed")
     expect(ja(<CountdownTimer targetDate={PAST} />)).toContain("受付終了")
@@ -340,6 +358,8 @@ describe("KskLabelsProvider の網羅: Provider 無しは日本語 / en で英�
 
   it("新しいキーは ja / en の両方に値がある", () => {
     for (const key of Object.keys(KSK_DEFAULT_LABELS.ja) as (keyof typeof KSK_DEFAULT_LABELS.ja)[]) {
+      // 読み上げの区切り（countdownSpokenSeparator）は ja が意図して空文字
+      if (key === "countdownSpokenSeparator") continue
       expect(KSK_DEFAULT_LABELS.ja[key], `ja.${key}`).toBeTruthy()
       expect(KSK_DEFAULT_LABELS.en[key], `en.${key}`).toBeTruthy()
     }
@@ -577,6 +597,60 @@ const STATIC_CASES: readonly Case[] = [
     [" / 全 ", " 件<", "0 件", " ページ<"],
     [" of ", " items<", "0 items", "Page "],
   ],
+  [
+    "Slider（範囲のつまみ）/ SocialLoginButton / CheckboxGroup の必須",
+    <div>
+      <Slider defaultValue={[20, 80]} />
+      <SocialLoginButton provider="line" />
+      <SocialLoginButton provider="google" />
+      <SocialLoginButton provider="apple" />
+      <SocialLoginButton provider="amazon" />
+      <CheckboxGroup label="L" required>
+        x
+      </CheckboxGroup>
+    </div>,
+    ['aria-label="スライダー（開始）"', 'aria-label="スライダー（終了）"', "LINEでログイン", "Googleでログイン", "Appleでログイン", "Amazonでログイン", ">必須<"],
+    ['aria-label="Slider (Start)"', 'aria-label="Slider (End)"', "Log in with LINE", "Log in with Google", "Log in with Apple", "Log in with Amazon", ">Required<"],
+  ],
+  [
+    "ProgressSteps / DocumentPage / CategoryScroll / ActionTile(loading)",
+    <div>
+      <ProgressSteps steps={["a", "b"]} currentStep={0} />
+      <DocumentPage title="T" lastUpdated="2026年1月1日">
+        x
+      </DocumentPage>
+      <CategoryScroll title="C" moreHref="/m" items={[]} />
+      <ActionTile label="x" loading />
+    </div>,
+    ['aria-label="ステップ 1 / 2: a"', "最終更新日：2026年1月1日", "もっと見る", 'aria-label="処理中"'],
+    ['aria-label="Step 1 of 2: a"', "Last updated: 2026年1月1日", "See more", 'aria-label="Processing"'],
+  ],
+  [
+    "RatingDisplay / PriceDisplay / ReviewSummary / ReviewCard",
+    <div>
+      <RatingDisplay rating={4.5} reviewCount={12} />
+      <PriceDisplay price={1000} />
+      <ReviewSummary averageRating={4.2} totalCount={1234} distribution={[1, 2, 3, 4, 5]} />
+      <ReviewCard reviewer="R" rating={4} body="b" date="d" helpfulCount={3} onHelpful={() => {}} />
+    </div>,
+    ['aria-label="評価 4.5 / 5 (12件)"', 'aria-label="¥1,000 税込"', ">税込<", "1,234件の口コミ", 'aria-label="4点 / 5点"', "参考になった (3)"],
+    ['aria-label="Rated 4.5 out of 5 (12 reviews)"', 'aria-label="¥1,000 Tax incl."', ">Tax incl.<", "1,234 reviews", 'aria-label="4 out of 5"', "Helpful (3)"],
+  ],
+  [
+    "NotificationList（空）/ SearchPanel",
+    <div>
+      <NotificationList notifications={[]} />
+      <SearchPanel onReset={() => {}} onSearch={() => {}} />
+    </div>,
+    ["新着のお知らせはありません", "リセット", "検索"],
+    ["No new notifications", "Reset", "Search"],
+  ],
+  [
+    "ChartControls",
+    <ChartControls onGranularityChange={() => {}} onPeriodChange={() => {}} onComparisonChange={() => {}} />,
+    [">粒度<", ">期間<", ">比較<", ">時間<", ">7日<", ">カスタム<", "前期比を表示"],
+    [">Granularity<", ">Period<", ">Compare<", ">Hour<", ">7 days<", ">Custom<", "Show vs. previous period"],
+  ],
 ]
 
 describe('残りの部品: Provider 無し=従来の日本語 / locale="en" で英語', () => {
@@ -627,6 +701,57 @@ describe('残りの部品: Provider 無し=従来の日本語 / locale="en" で�
     expect(en(<DateRangePicker value={{ from: d, to: e }} />)).toContain("2026/10/26 – 2026/10/28")
     expect(ja(<DateTimePicker value={d} />)).toContain("10月26日（月）")
     expect(en(<DateTimePicker value={d} />)).toContain("Mon, 10/26")
+  })
+
+  it("CountdownTimer の読み上げは単語で読む（表示の単位は変えない）。ja は従来どおり", () => {
+    const sec = <CountdownTimer targetDate={new Date(Date.now() + (3600 + 5 * 60 + 30) * 1000 + 500)} granularity="second" />
+    const aria = (html: string) => /aria-label="([^"]*)"/.exec(html)?.[1]
+    expect(aria(ja(sec))).toMatch(/^残り 1時間5分(29|30)秒$/)
+    expect(aria(en(sec))).toMatch(/^Time left 1 hour\(s\) 5 minute\(s\) (29|30) second\(s\)$/)
+    // 表示の単位（d / h / m / s）はそのまま
+    expect(en(sec)).toContain(">h<")
+    // 単位 prop を渡したら読み上げにもそれを使う（単複は呼び出し側で）
+    const custom = (
+      <CountdownTimer targetDate={new Date(Date.now() + 3 * 3600 * 1000 + 500)} hourUnit=" hours" minuteUnit=" min" secondUnit=" s" />
+    )
+    expect(aria(en(custom))).toMatch(/^Time left 2 hours 59 min \d+ s$|^Time left 3 hours 0 min 0 s$/)
+    expect(aria(en(<CountdownTimer targetDate={FUTURE_DAYS} granularity="day" dayUnit=" days" />))).toBe("Time left 5 days")
+  })
+
+  it("formatKskLabelNodes: 差し込み口が無い・複数ある・値が無いときも壊れない", () => {
+    const html = (n: React.ReactNode) => renderToStaticMarkup(<>{n}</>)
+    expect(html(formatKskLabelNodes("a {count} b", { count: <b>1</b> }))).toBe("a <b>1</b> b")
+    expect(html(formatKskLabelNodes("no slot", { count: <b>1</b> }))).toBe("no slot")
+    expect(html(formatKskLabelNodes("{count}+{count}", { count: "x" }))).toBe("x+x")
+    expect(html(formatKskLabelNodes("{missing} / {toString}", {}))).toBe("{missing} / {toString}")
+    // FilterBar の件数は、{count} の無い訳でも壊れない
+    const e = renderToStaticMarkup(
+      <KskLabelsProvider locale="en" labels={{ filterBarResultCount: "No placeholder" }}>
+        <FilterBar filters={[]} resultCount={5} />
+      </KskLabelsProvider>
+    )
+    expect(e).toContain("No placeholder")
+  })
+
+  it("configureToast({ messages }) でプリセット通知の文言を差し替えられる（未指定は従来の日本語）", async () => {
+    const el = document.createElement("div")
+    document.body.appendChild(el)
+    const root = createRoot(el)
+    await act(async () => {
+      root.render(<Toaster />)
+    })
+    await act(async () => {
+      toast.saveComplete()
+    })
+    expect(document.body.textContent).toContain("保存しました")
+    configureToast({ messages: { saveComplete: "Saved!" } })
+    await act(async () => {
+      toast.saveComplete()
+    })
+    expect(document.body.textContent).toContain("Saved!")
+    configureToast({ messages: { saveComplete: "保存しました" } })
+    await act(async () => root.unmount())
+    el.remove()
   })
 
   it("FileUpload（ドラッグ文言・上限）", () => {
@@ -698,6 +823,16 @@ describe('残りの部品: Provider 無し=従来の日本語 / locale="en" で�
     expect(text()).toContain("Pass")
     expect(html()).toContain('aria-label="Tour"')
     await cmProp.done()
+
+    // MenuDrawer のシート見出し
+    const md = <MenuDrawer open onClose={() => {}} sections={[]} />
+    const mdJa = await mount(md)
+    expect(text()).toContain("メニュー")
+    await mdJa.done()
+    const mdEn = await mount(md, "en")
+    expect(text()).toContain("Menu")
+    expect(text()).not.toContain("メニュー")
+    await mdEn.done()
 
     // Toaster（通知 viewport）
     const tj = await mount(<Toaster />)
@@ -782,11 +917,47 @@ function scanSource(source: string): string[] {
   return [...found].sort()
 }
 
+/** 開発者向けメッセージの呼び出し（console.warn( … ) / warnOnceInDev( … ) / throw new Error( … )）を空白に潰す。 */
+function blankDevMessages(src: string): string {
+  const starts = /(?:console\.(?:warn|error|info)|warnOnceInDev|throw\s+new\s+Error|new\s+Error)\s*\(/g
+  let out = src
+  for (const m of [...src.matchAll(starts)].reverse()) {
+    const from = m.index ?? 0
+    let i = from + m[0].length
+    let depth = 1
+    while (i < src.length && depth > 0) {
+      if (src[i] === "(") depth++
+      else if (src[i] === ")") depth--
+      i++
+    }
+    out = out.slice(0, from) + out.slice(from, i).replace(/[^\n]/g, " ") + out.slice(i)
+  }
+  return out
+}
+
+/** E: 日本語を含む文字列リテラル（`str:`）と JSX の文章（`jsx:`）。id は先頭 20 文字。 */
+function scanLiterals(source: string): string[] {
+  const found = new Set<string>()
+  const lines = blankDevMessages(stripComments(source)).split("\n")
+  const STR = new RegExp(`"[^"\\n]*${JP}[^"\\n]*"|'[^'\\n]*${JP}[^'\\n]*'|\`[^\`\\n]*${JP}[^\`\\n]*\``, "g")
+  const ANY_STR = /"[^"\n]*"|'[^'\n]*'|`[^`\n]*`/g
+  for (const line of lines) {
+    for (const m of line.matchAll(STR)) found.add(`str:${m[0].slice(1, -1).slice(0, 20)}`)
+    // 文字列を除いても日本語が残る行 = JSX の文章
+    const rest = line.replace(ANY_STR, " ").trim()
+    if (new RegExp(JP).test(rest)) found.add(`jsx:${rest.slice(0, 20)}`)
+  }
+  return [...found].sort()
+}
+
 function findHardcoded(): Record<string, string[]> {
   const out: Record<string, string[]> = {}
   for (const file of walk(COMPONENTS)) {
     const rel = path.relative(ROOT, file).split(path.sep).join("/")
-    const ids = scanSource(fs.readFileSync(file, "utf8"))
+    // ksk-labels.tsx は辞書そのもの（日本語の正本）
+    if (rel === "src/components/ui/ksk-labels.tsx") continue
+    const text = fs.readFileSync(file, "utf8")
+    const ids = [...new Set([...scanSource(text), ...scanLiterals(text)])].sort()
     if (ids.length) out[rel] = ids
   }
   return out
@@ -808,9 +979,37 @@ const R_LOCALE =
   "コンポーネント自身の `locale` prop（ja / en。既定は Provider の locale）で、日付・曜日の語順（「10月26日（月）」/ \"Mon, Oct 26\"）と" +
   "件数の文（「予定2件」/ \"2 events\"）を組み立てている。Provider の locale=\"en\" なら既に英語になる。" +
   "ラベルのキーに移すと、`locale` prop だけ渡す使い方（Provider 無し）で日本語に戻ってしまうため、locale 駆動のまま残す"
+const R_FORMAT =
+  "日付の書式トークン（EEE / EEEE）の曜日名で、文言ではなく書式。Provider の locale=\"en\" なら Intl の英語名になる（日本語は Provider 無しの従来表記）"
+const R_TOAST =
+  "`toast.saveComplete()` などのプリセット通知は React の外（module 関数）で出すので Provider が届かない。" +
+  "英語化は `configureToast({ messages })`、または `toast.success(t(...))` で文言を渡す（未指定は従来の日本語）"
 const UNMIGRATED: readonly Unmigrated[] = [
-  ["src/components/patterns/agenda-list.tsx", ["??:emptyDayLabel", "const:headingLabel", "const:noEventsLabel"], R_LOCALE],
-  ["src/components/patterns/month-calendar.tsx", ["??:ariaLabel", "??:moreLabel", "const:gridLabel"], R_LOCALE],
+  [
+    "src/components/patterns/agenda-list.tsx",
+    ["??:emptyDayLabel", "const:headingLabel", "const:noEventsLabel", "str:${formatDayLabel(key", "str:予定なし"],
+    R_LOCALE,
+  ],
+  [
+    "src/components/patterns/month-calendar.tsx",
+    [
+      "??:ariaLabel",
+      "??:moreLabel",
+      "const:gridLabel",
+      "str:${displayedMonthStar",
+      "str:${start.getFullYear(",
+      "str:+${n}件",
+      "str:、予定${dayEvents.lengt",
+      "str:、今日",
+    ],
+    R_LOCALE,
+  ],
+  ["src/components/ui/date-picker.tsx", ["str:${JA_WEEKDAYS[weekda", "str:日月火水木金土"], R_FORMAT],
+  [
+    "src/components/ui/toast.tsx",
+    ["??:connectionRestored", "??:retryFailed", "??:retryStarted", "??:saveComplete", "str:保存しました", "str:再試行できませんでした", "str:再試行を開始しました", "str:接続が復旧しました"],
+    R_TOAST,
+  ],
 ]
 
 // 同じファイルに複数の理由があるので、ファイル単位に畳む
@@ -870,6 +1069,14 @@ describe("日本語の直書きの既定値（ratchet）", () => {
     expect(scanSource('  <button aria-label="閉じる" title="閉じる">')).toEqual(["attr:aria-label", "attr:title"])
     expect(scanSource('  <input placeholder={placeholder ?? labels.x} />')).toEqual([])
     expect(scanSource('  dayUnit = "d",')).toEqual([])
+    // E: 文字列リテラル全般・JSX の文章（開発者向けメッセージは対象外）
+    expect(scanLiterals('  const x = cond ? "はい" : "いいえ"')).toEqual(["str:いいえ", "str:はい"])
+    expect(scanLiterals("  return { label: `${n}件` }")).toEqual(["str:${n}件"])
+    expect(scanLiterals("  <p>最終更新日：{date}</p>")).toEqual(["jsx:<p>最終更新日：{date}</p>"])
+    expect(scanLiterals('  console.warn(\n    "開発者向け"\n  )')).toEqual([])
+    expect(scanLiterals('  warnOnceInDev("k", "開発者向け")')).toEqual([])
+    expect(scanLiterals('  throw new Error("開発者向け")')).toEqual([])
+    expect(scanLiterals('  const y = "English only"')).toEqual([])
     // 日本語の無い既定・Provider 経由・文字列の外の日本語は対象外
     expect(scanSource("  const x = labelProp ?? defaultLabels.close")).toEqual([])
     expect(scanSource("  const label = \"Close\"")).toEqual([])

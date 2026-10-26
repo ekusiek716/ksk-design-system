@@ -5,7 +5,7 @@
     "metric": "gzip（zlib level 9）。各 JS ファイルを個別に圧縮した合計。raw と brotli（quality 11）は baselineRawBytes / baselineBrotliBytes に参考値として記録する。",
     "budgetPolicy": "budgetBytes = 実測 gzip × 1.10 を 100 バイト単位で切り上げ。+10% は、依存ライブラリ（vite / zlib）の更新による数 % 規模の揺れを吸収しつつ、コンポーネント 1〜2 個ぶんの意図しない増加は検出できる幅として選んだ。小さい成果物（class-names など）でも 0 バイト差の予算にならないよう 100 バイト単位で切り上げる。実測が予算の 80% 以下になったら『予算を締め直せる』と注意を出す（失敗にはしない）。",
     "externalPolicy": "tree-shaking ケースは vite（rolldown）で dist をバンドルし minify して測る。bare specifier（react / react-dom / radix-ui / iconsax-reactjs / clsx / tailwind-merge / class-variance-authority / react-native 等の dependencies・peerDependencies）はすべて external にして『DS 自身のコード』だけを測る。ksk-design-system と ksk-design-system/<subpath> だけは package.json exports が指す dist ファイルへ解決する。",
-    "lastUpdateReason": "2026-10-26 v2.22 予定: KskLabels の ja/en 辞書（約99キー）と、それを参照する約55部品の追加コードで、tree-shaking の各ケースが gzip +約3.2KB（辞書 約2.2KB + 参照コード 約1KB。Calendar の enUS import は react-day-picker 本体が元から同梱するため増加なし）。多言語対応のための意図した増加。"
+    "lastUpdateReason": "2026-10-26 v2.22 予定: baseline は #770/#772/#773 の以前の更新漏れ分を含む（class-names +169B と native 系 +1B は #772/#773 由来）。KskLabels の拡張（ja/en 辞書 約140キーと、それを参照する約70部品の追加コード）で、tree-shaking の各ケースは gzip +約2.6KB（Provider を使わない import からは en の辞書が落ちる構成に分割済み）、index 全体は +約5.2KB（#772/#773 分を含む）。多言語対応のための意図した増加。Calendar の enUS import は react-day-picker 本体が元から同梱するため増加なし。"
   },
   "entries": [
     {
@@ -13,10 +13,10 @@
       "specifier": "ksk-design-system",
       "file": "dist/index.js",
       "description": "Web 全コンポーネント。dist/index.js + 静的 import で辿れるチャンク（server-variants / prompt-coordinator）の合計。",
-      "baselineBytes": 234913,
-      "budgetBytes": 258500,
-      "baselineRawBytes": 966870,
-      "baselineBrotliBytes": 183801
+      "baselineBytes": 235923,
+      "budgetBytes": 259600,
+      "baselineRawBytes": 970973,
+      "baselineBrotliBytes": 184764
     },
     {
       "id": "class-names",
@@ -62,10 +62,10 @@
           ]
         }
       ],
-      "baselineBytes": 23243,
-      "budgetBytes": 25600,
-      "baselineRawBytes": 82668,
-      "baselineBrotliBytes": 20000
+      "baselineBytes": 22661,
+      "budgetBytes": 25000,
+      "baselineRawBytes": 79270,
+      "baselineBrotliBytes": 19548
     },
     {
       "id": "card-only",
@@ -79,10 +79,10 @@
           ]
         }
       ],
-      "baselineBytes": 23526,
-      "budgetBytes": 25900,
-      "baselineRawBytes": 83461,
-      "baselineBrotliBytes": 20223
+      "baselineBytes": 22947,
+      "budgetBytes": 25300,
+      "baselineRawBytes": 80064,
+      "baselineBrotliBytes": 19738
     },
     {
       "id": "dialog-only",
@@ -96,10 +96,10 @@
           ]
         }
       ],
-      "baselineBytes": 22628,
-      "budgetBytes": 24900,
-      "baselineRawBytes": 80893,
-      "baselineBrotliBytes": 19443
+      "baselineBytes": 22045,
+      "budgetBytes": 24300,
+      "baselineRawBytes": 77496,
+      "baselineBrotliBytes": 19025
     },
     {
       "id": "cn-only",
@@ -113,10 +113,10 @@
           ]
         }
       ],
-      "baselineBytes": 22569,
-      "budgetBytes": 24900,
-      "baselineRawBytes": 80755,
-      "baselineBrotliBytes": 19358
+      "baselineBytes": 21988,
+      "budgetBytes": 24200,
+      "baselineRawBytes": 77356,
+      "baselineBrotliBytes": 18909
     },
     {
       "id": "class-names-button-variants",

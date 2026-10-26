@@ -90,12 +90,6 @@
 
 ## Pattern Components（src/components/patterns/）
 
-### patterns/_internal/
-
-| Component | Import | Variants | Stories |
-|-----------|--------|----------|---------|
-| CarouselControls | `@/components/patterns/_internal/carousel-primitives` | — | — |
-
 ### patterns/（汎用）
 
 | Component | Import | Variants | Stories |
