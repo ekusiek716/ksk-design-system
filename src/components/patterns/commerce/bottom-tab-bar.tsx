@@ -2,6 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
 import { useSoftKeyboardFocus } from "@/lib/use-soft-keyboard-focus"
+import { OVERLAY_FOCUS_RING_COVER, OVERLAY_FOCUS_RING_INSET } from "@/lib/server-variants/overlay-focus-ring"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -644,7 +645,12 @@ function NavItem({
         "relative flex min-h-[max(2.75rem,var(--Nav-Item-Min-Height))] flex-col items-center justify-center gap-[var(--Nav-Item-Gap)] rounded-full",
         // iOS 26 のガラスは押下で沈む（ゲル感）。opacity だけでなく scale も入れる
         "transition-[transform,opacity] duration-[var(--Motion-Duration-Fast)] active:scale-95 active:opacity-80",
-        "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
+        // pill（.glass-specular は overflow:hidden）の中なので外側リングは切られる。
+        // 内側の二重リング（白 + 濃色。下地がガラス・プラッター・写真のどれでも溶けない）にする
+        // 非選択のタブは opacity-60 / 75 で薄く、リングも要素ごと薄くなる（実測: 白い下地で
+        // Gray-900 の帯が rgb(150) まで落ち、下地との比が約 1.2:1）。フォーカス中は不透明に戻す
+        OVERLAY_FOCUS_RING_INSET,
+        "focus-visible:opacity-100",
         // prominent（ラベル表示）のタブの高さは公開契約 --Nav-Item-Height（issue #699）。
         // 未宣言なら従来の h-full（100%）と同じ値。下限 44px は上の min-h が守る。
         compact
@@ -738,7 +744,10 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
         // src/styles/bottom-nav.css 側で上書きされる（issue #471）。
         "glass-accent glass-specular text-[var(--Text-on-Inverse)]",
         "typo-label-sm transition-transform duration-[var(--Motion-Duration-Fast)] active:scale-[0.96]",
-        "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+        // フォーカスリングは子の覆い span（OVERLAY_FOCUS_RING_COVER）に描く。pill（overflow:hidden）の中なので
+        // 外側リングは切られ、要素自身の inset 影は .glass-specular の ::before に覆われて薄くなるため。
+        // glass.css が :focus-visible で入れる外側リングは bottom-nav.css が止めている。
+        "group focus-visible:outline-hidden"
       )}
       aria-label={item.ariaLabel ?? item.label}
       {...tagProps}
@@ -755,6 +764,9 @@ function CenterActionItem({ item }: { item: BottomTabBarAction }) {
           {item.label}
         </span>
       )}
+      {/* フォーカスリングの覆い（装飾）。要素自身の inset 影は .glass-specular の ::before に覆われて
+          Gray-900 の帯が持ち上がるため、::after より前面の独立要素に描く（OVERLAY_FOCUS_RING_COVER） */}
+      <span aria-hidden="true" data-slot="bottom-nav-center-action-focus-ring" className={OVERLAY_FOCUS_RING_COVER} />
     </Tag>
   )
 }

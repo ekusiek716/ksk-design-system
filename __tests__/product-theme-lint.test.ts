@@ -59,6 +59,29 @@ describe("P049 の判定ロジック", () => {
     ])
   })
 
+  it("--glass-focus-ring / -inset は公開変数で、上書きしても違反にしない。他の --glass-* は引き続き違反", () => {
+    const css = `:root {
+      --glass-focus-ring: 0 0 0 3px #123456;
+      --glass-focus-ring-inset: inset 0 0 0 3px #123456;
+    }`
+    expect(inspectProductThemeOverrides(css, contract)).toEqual([])
+    // DS の CSS が読めない環境（接頭辞一致だけで判定）でも同じ
+    expect(inspectProductThemeOverrides(css, prefixOnlyContract)).toEqual([])
+    expect(
+      inspectProductThemeOverrides(
+        `:root { --glass-focus-ring: 0 0 #0000; --glass-blur: 2px; --glass-bg: red; --glass-shadow: none; }`,
+        contract,
+      ).map((f) => f.name),
+    ).toEqual(["--glass-blur", "--glass-bg", "--glass-shadow"])
+  })
+
+  it("CLI（node bin/init.js lint）でも、公開した --glass-focus-ring は P049 にならず --glass-blur はなる", () => {
+    const ok = runLint(`:root { --glass-focus-ring: 0 0 #0000; --glass-focus-ring-inset: inset 0 0 #0000; }`)
+    expect(`${ok.stdout}${ok.stderr}`).not.toContain("P049")
+    const ng = runLint(`:root { --glass-blur: blur(2px); }`)
+    expect(`${ng.stdout}${ng.stderr}`).toContain("P049")
+  })
+
   it("消費側アプリ自前の変数は対象外（DS の namespace に該当しない）", () => {
     const findings = inspectProductThemeOverrides(
       `:root { --my-app-header-height: 64px; --primary: #fff; }`,

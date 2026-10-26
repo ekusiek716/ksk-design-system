@@ -4,7 +4,10 @@
  *
  * - 既定は透明。hover で Surface-Secondary の面を出して「押せば編集できる」ことを示す
  * - focus-visible は他の入力欄と同じ Focus リング（outline-hidden + ring。forced-colors では OS の枠）
- * - aria-invalid は Caution のリング
+ * - aria-invalid は Caution のリング（不透明な Border-Caution の 2px。エラー中にフォーカスしても
+ *   aria-invalid 側が勝ち、Focus の 3px には戻らない。Surface-Primary / Surface-Secondary に対し
+ *   ライト 3.76 / 3.61・ダーク 6.40 / 5.38 で 3:1 を満たす。scripts/check-contrast.mjs が検査し、
+ *   __tests__/browser/inline-field-error-ring.test.tsx が実ブラウザの描画を固定する）
  *
  * このファイルは React に依存しない（server-variants の約束。unstyled.ts と同じ）。
  */

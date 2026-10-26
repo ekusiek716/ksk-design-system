@@ -87,6 +87,27 @@
                      0 10px 24px -10px rgba(0, 0, 0, 0.12),
                      0 1px 3px           rgba(0, 0, 0, 0.06);
 
+  /* Focus ring — ガラス面（写真・ブラー・任意色の上）に乗る操作子のフォーカスリング。
+     背景色に依存しない二重リング: 内側 2px 白 + 外側 2px 濃色（Gray-900 = #18181B）。
+     任意の背景 c について contrast(c, 白) と contrast(c, Gray-900) のどちらかは
+     必ず 4.2:1 以上（最悪は相対輝度 0.199 の中間グレーで 4.21:1。scripts/check-contrast.mjs が
+     sRGB 全域を走査して検査）になるので、
+     Focus-High-Emphasis（Brand-600）の単色リングのように写真の色次第で溶けない。
+     不透明で、半透明の面と混ざらない。ライト / ダークで値を変えない（背景が写真なのでモード非依存）。
+     glass.css は単体 import（`ksk-design-system/glass`）もされるため、Primitive 未定義でも
+     box-shadow 全体が無効化されないようフォールバックを持たせている。
+     --glass-focus-ring       : 要素の外側に描く（ほとんどの操作子）
+     --glass-focus-ring-inset : 要素の内側に描く（overflow:hidden の親に収まる操作子。
+                                BottomTabBar の pill の中のタブ・中央アクション等）
+     この 2 変数は --glass-* の中で唯一の公開変数（contracts/product-theme-overrides.json の
+     allowedVariables.glassFocus。上書きしても lint P049 にならない。他の --glass-* は内部変数で上書き禁止）。
+     値は box-shadow の層リスト（カンマ区切り）。消したいときは `0 0 #0000`。`none` や空値は不可:
+     box-shadow の層リストの一部として展開されるため宣言全体が無効になり、ガラスの影まで消える。 */
+  --glass-focus-ring:       0 0 0 2px var(--Primitive-White, #FFFFFF),
+                            0 0 0 4px var(--Primitive-Gray-900, #18181B);
+  --glass-focus-ring-inset: inset 0 0 0 2px var(--Primitive-Gray-900, #18181B),
+                            inset 0 0 0 4px var(--Primitive-White, #FFFFFF);
+
   /* Overlay blur — モーダル背景の軽いすりガラス */
   --glass-overlay-bg:   rgba(0, 0, 0, 0.15);
   --glass-overlay-blur: blur(8px);
@@ -161,7 +182,7 @@
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   border: 0.5px solid var(--glass-border);
-  box-shadow: var(--glass-highlight), var(--glass-shadow);
+  box-shadow: var(--ksk-glass-focus-ring, 0 0 #0000), var(--glass-highlight), var(--glass-shadow);
 }
 
 /**
@@ -222,7 +243,7 @@
   -webkit-backdrop-filter: var(--glass-blur-sm);
   backdrop-filter: var(--glass-blur-sm);
   border: 0.5px solid rgba(255, 255, 255, 0.22);
-  box-shadow: var(--glass-shadow-sm);
+  box-shadow: var(--ksk-glass-focus-ring, 0 0 #0000), var(--glass-shadow-sm);
 }
 
 /**
@@ -234,7 +255,7 @@
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   border: 0.5px solid var(--glass-border);
-  box-shadow: var(--glass-highlight), var(--glass-shadow);
+  box-shadow: var(--ksk-glass-focus-ring, 0 0 #0000), var(--glass-highlight), var(--glass-shadow);
 }
 
 /**
@@ -246,7 +267,7 @@
   -webkit-backdrop-filter: var(--glass-blur-lg);
   backdrop-filter: var(--glass-blur-lg);
   border: 0.5px solid var(--glass-border);
-  box-shadow: var(--glass-highlight), var(--glass-shadow-lg);
+  box-shadow: var(--ksk-glass-focus-ring, 0 0 #0000), var(--glass-highlight), var(--glass-shadow-lg);
 }
 
 /**
@@ -261,7 +282,8 @@
   -webkit-backdrop-filter: var(--glass-blur-media-dark);
   backdrop-filter: var(--glass-blur-media-dark);
   border: 0.5px solid var(--glass-border-dark);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12),
+  box-shadow: var(--ksk-glass-focus-ring, 0 0 #0000),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12),
               0 8px 32px rgba(0, 0, 0, 0.28);
 }
 
@@ -278,7 +300,8 @@
   -webkit-backdrop-filter: blur(6px) saturate(1.6) brightness(1.05);
   backdrop-filter: blur(6px) saturate(1.6) brightness(1.05);
   border: 0.5px solid rgba(255, 255, 255, 0.35);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.30),
+  box-shadow: var(--ksk-glass-focus-ring, 0 0 #0000),
+              inset 0 1px 0 rgba(255, 255, 255, 0.30),
               var(--glass-shadow-sm);
 }
 
@@ -328,7 +351,7 @@
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   border: var(--ksk-glass-accent-border);
-  box-shadow: var(--ksk-glass-accent-shadow);
+  box-shadow: var(--ksk-glass-focus-ring, 0 0 #0000), var(--ksk-glass-accent-shadow);
 }
 
 .dark .glass-accent {
@@ -339,6 +362,44 @@
     inset 0 -10px 14px -10px rgba(0, 0, 0, 0.55),
     inset 0 0 20px 0 color-mix(in srgb, var(--Brand-Primary) 55%, transparent),
     var(--glass-shadow);
+}
+
+/* ─── フォーカスリング ───
+   素材クラスは非レイヤー CSS で box-shadow を宣言するため、レイヤー内の
+   Tailwind の `focus-visible:ring-*`（box-shadow で描く）に詳細度と無関係に勝ち、
+   .glass 系の操作子（Button の glass / glass-inverse / glass-accent など）は
+   キーボードフォーカスしてもリングが一切出なかった（実機で確認）。
+
+   そこで素材クラスの box-shadow の先頭に --ksk-glass-focus-ring を置き、ガラスの影を
+   消さずにリングを重ねる。--ksk-glass-focus-ring は内部変数（公開契約ではない）で、
+   既定は影なし。操作子（button / a / role=button 等）が :focus-visible になったときだけ
+   --glass-focus-ring（二重リング）が入る。素材クラスを付けただけの非操作要素
+   （シートの面・ヘッダー等）は対象外なので、プログラムでフォーカスされても枠は出ない。
+
+   ⚠️ セレクタは :where() で詳細度を (0,1,0) に抑えている。BottomTabBar の中央アクション
+   （bottom-nav.css）のように「overflow:hidden の pill の中なので内側リングへ切り替える」
+   上書きが、読み込み順に関係なく 1 クラス指定で勝てるようにするため。
+   消費側がリングを変えたいときは --glass-focus-ring を上書きする（公開変数。消すなら `0 0 #0000`。
+   `none` は不可でガラスの影も消える。上のトークン定義のコメント参照）。
+   リングを足す素材クラスを増やすときは、box-shadow の先頭に同じ変数を置き、下の一覧にも追加すること。
+
+   forced-colors（強制配色）では box-shadow が描かれないが、Button は
+   `focus-visible:outline-hidden` を持ち、そちらが outline で枠を残す（#620）。 */
+@property --ksk-glass-focus-ring {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+:where(
+    .glass,
+    .glass-subtle,
+    .glass-medium,
+    .glass-strong,
+    .glass-dark,
+    .glass-clear,
+    .glass-accent
+  ):where(button, a, [role="button"], [role="tab"], [role="link"], summary):focus-visible {
+  --ksk-glass-focus-ring: var(--glass-focus-ring);
 }
 
 /* ─── Specular + rim layer (::before / ::after) ─── */

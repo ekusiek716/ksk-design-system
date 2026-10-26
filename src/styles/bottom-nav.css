@@ -92,7 +92,20 @@
 [data-slot="bottom-nav-center-action"] {
   background: var(--Nav-Center-Action-Surface, var(--ksk-glass-accent-bg));
   border: var(--Nav-Center-Action-Border, var(--ksk-glass-accent-border));
-  box-shadow: var(--Nav-Center-Action-Shadow, var(--ksk-glass-accent-shadow));
+  /* 先頭の --ksk-glass-focus-ring は glass.css が :focus-visible のときだけ値を入れるフォーカスリング。
+     この宣言が .glass-accent の box-shadow を置き換えるため、同じ変数を先頭に置き直している
+     （消費側の --Nav-Center-Action-Shadow を宣言していてもフォーカスリングは消えない）。 */
+  box-shadow: var(--ksk-glass-focus-ring, 0 0 #0000), var(--Nav-Center-Action-Shadow, var(--ksk-glass-accent-shadow));
+}
+
+/* 中央アクションは overflow:hidden の pill の中にあり、glass.css が :focus-visible で入れる外側リングは
+   pill の縁で切られる。要素自身の inset リングも .glass-specular の ::before（白 最大 0.36）に覆われて
+   Gray-900 の帯が持ち上がる（実測 約 rgb(118)）ため使えない。リングは子の覆い span
+   （data-slot="bottom-nav-center-action-focus-ring"。bottom-tab-bar.tsx の OVERLAY_FOCUS_RING_COVER）に描き、
+   要素自身の外側リングは止める。glass.css 側のセレクタは :where() で詳細度 (0,1,0) のため、
+   この (0,2,0) が読み込み順に関係なく勝つ。 */
+[data-slot="bottom-nav-center-action"]:focus-visible {
+  --ksk-glass-focus-ring: 0 0 #0000;
 }
 
 /* ─── 選択プラッター（水滴カプセル）の面 ───

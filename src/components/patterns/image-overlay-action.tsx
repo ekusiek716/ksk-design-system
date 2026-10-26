@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { OVERLAY_FOCUS_RING } from "@/lib/server-variants/overlay-focus-ring"
 
 /** オーバーレイの配置。`none` は自分で配置する場合（Flex 内に並べる等）。 */
 type ImageOverlayActionPlacement =
@@ -125,7 +126,9 @@ function ImageOverlayAction({
       }}
       className={cn(
         "z-[var(--Z-Nav)] flex size-11 cursor-pointer items-center justify-center rounded-full",
-        "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
+        // 写真の上に乗る操作子。下地の色が分からないので、単色の Focus リングではなく
+        // 背景に依存しない二重リング（白 + 濃色）にする
+        OVERLAY_FOCUS_RING,
         "disabled:pointer-events-none disabled:opacity-50",
         PLACEMENT_CLASS[placement],
         className,

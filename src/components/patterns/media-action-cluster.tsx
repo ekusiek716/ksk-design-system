@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { OVERLAY_FOCUS_RING } from "@/lib/server-variants/overlay-focus-ring"
 
 type MediaActionClusterOrientation = "vertical" | "horizontal" | "auto"
 type MediaActionClusterAnchor =
@@ -202,7 +203,9 @@ function MediaActionClusterButton({
         className={cn(
           "relative flex size-12 shrink-0 items-center justify-center rounded-full glass glass-specular glass-inverse",
           "transition-transform active:scale-[0.94]",
-          item.active && "ring-2 ring-[var(--Border-Accent-Primary)]",
+          // active は Border-Accent-Primary の 2px リング。.glass の非レイヤー box-shadow は Tailwind の ring を打ち消すため、
+          // glass.css が box-shadow の先頭に置く --ksk-glass-focus-ring（内部変数）へ値を入れて合成する
+          item.active && "[--ksk-glass-focus-ring:0_0_0_2px_var(--Border-Accent-Primary)]",
           item.disabled && "opacity-50",
         )}
         aria-hidden="true"
@@ -222,7 +225,9 @@ function MediaActionClusterButton({
 
   const className = cn(
     "group inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full",
-    "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
+    // 写真・動画の上に乗る操作子なので、背景に依存しない二重リング（白 + 濃色）にする。
+    // 内側の glass 円は aria-hidden の装飾で、フォーカスを受けるのはこの外側の a / button
+    OVERLAY_FOCUS_RING,
     "disabled:pointer-events-none disabled:opacity-50",
     itemDirection,
   )

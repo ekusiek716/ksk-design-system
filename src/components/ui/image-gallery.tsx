@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { OVERLAY_FOCUS_RING, OVERLAY_FOCUS_RING_INSET } from "@/lib/server-variants/overlay-focus-ring"
 import { formatKskLabel, useKskLabels } from "./ksk-labels"
 
 interface GalleryImage {
@@ -101,7 +102,7 @@ function ImageGallery({
         {onImageClick && (
           <button
             type="button"
-            className="absolute inset-0 z-0 h-full w-full cursor-pointer appearance-none"
+            className={cn("absolute inset-0 z-0 h-full w-full cursor-pointer appearance-none", OVERLAY_FOCUS_RING_INSET)}
             aria-label={imageLabel(active)}
             onClick={() => onImageClick(active)}
           />
@@ -121,7 +122,7 @@ function ImageGallery({
               onClick={(e) => { e.stopPropagation(); handlePrev() }}
               disabled={active === 0}
               aria-label={prevLabel}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[var(--Overlay-Light)] text-[var(--Text-on-Media)] flex items-center justify-center disabled:opacity-0 transition-opacity hover:bg-[var(--Overlay-Medium)]"
+              className={cn("absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[var(--Overlay-Light)] text-[var(--Text-on-Media)] flex items-center justify-center disabled:opacity-0 transition-opacity hover:bg-[var(--Overlay-Medium)]", OVERLAY_FOCUS_RING)}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -131,7 +132,7 @@ function ImageGallery({
               onClick={(e) => { e.stopPropagation(); handleNext() }}
               disabled={active === images.length - 1}
               aria-label={nextLabel}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[var(--Overlay-Light)] text-[var(--Text-on-Media)] flex items-center justify-center disabled:opacity-0 transition-opacity hover:bg-[var(--Overlay-Medium)]"
+              className={cn("absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[var(--Overlay-Light)] text-[var(--Text-on-Media)] flex items-center justify-center disabled:opacity-0 transition-opacity hover:bg-[var(--Overlay-Medium)]", OVERLAY_FOCUS_RING)}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

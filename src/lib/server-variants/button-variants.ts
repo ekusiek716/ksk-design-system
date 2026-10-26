@@ -75,7 +75,9 @@ const TOUCH_TARGET_VARIANTS = [
  * - inverse: 面が Surface-Primary（白）なので、白のすき間は面が広がって見えるだけで効果が無い。
  * - glass 系: 面が半透明のガラスで、不透明なすき間がガラス表現を壊す。また .glass は非レイヤー CSS で
  *   box-shadow を宣言しており（glass.css）、レイヤー内の ring 系ユーティリティより優先されるため、
- *   ring-offset を足しても意図どおりには効かない。
+ *   下の base の `focus-visible:ring-*` は glass 系では描かれない（死んだクラス）。glass 系のフォーカス
+ *   リングは glass.css が :focus-visible のときに box-shadow の先頭へ重ねる二重リング
+ *   （--glass-focus-ring。写真・ブラー面の上でも溶けない白 + 濃色）が担う。
  */
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-[var(--Control-Gap)] whitespace-nowrap typo-label-md transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50 aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 cursor-pointer",
