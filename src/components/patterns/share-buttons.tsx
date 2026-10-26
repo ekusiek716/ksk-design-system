@@ -128,7 +128,8 @@ const PROVIDER_META: Record<
     inlineClass: "border-[var(--Categorical-9)] text-[var(--Categorical-9-Bold)] hover:bg-[var(--Categorical-9-Subtle)]",
   },
   email: {
-    label: "メール",
+    // 実際の表示は KskLabelsProvider の `shareEmail`（defaultProviderLabel）。ここは使われない型上の既定
+    label: "Email",
     buildUrl: (url, title, message) =>
       `mailto:?subject=${encodeURIComponent(title ?? "")}&body=${encodeURIComponent(message ? messageText(url, message) : shareText(url, title))}`,
     icon: (
@@ -168,7 +169,8 @@ const PROVIDER_META: Record<
     inlineClass: "border-[var(--Categorical-2)] text-[var(--Categorical-2-Bold)] hover:bg-[var(--Categorical-2-Subtle)]",
   },
   copy: {
-    label: "リンク",
+    // 実際の表示は KskLabelsProvider の `shareLink`（defaultProviderLabel）。ここは使われない型上の既定
+    label: "Link",
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <path d="M8.5 11.5a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1.7 1.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

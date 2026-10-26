@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../../ui/ksk-labels"
 
 interface NotificationItem {
   id: string
@@ -12,10 +13,13 @@ interface NotificationItem {
 interface NotificationListProps extends React.ComponentProps<"div"> {
   notifications: NotificationItem[]
   variant?: "vertical" | "horizontal"
+  /** 通知が 0 件のときの文言。省略時は KskLabelsProvider の `notificationListEmpty`（Provider 無しは "新着のお知らせはありません"。locale="en" で "No new notifications"） */
   emptyMessage?: string
 }
 
-function NotificationList({ notifications, variant = "vertical", emptyMessage = "新着のお知らせはありません", className, ...props }: NotificationListProps) {
+function NotificationList({ notifications, variant = "vertical", emptyMessage: emptyMessageProp, className, ...props }: NotificationListProps) {
+  const defaultLabels = useKskLabels()
+  const emptyMessage = emptyMessageProp ?? defaultLabels.notificationListEmpty
   /* 通知が空の場合の表示 */
   if (notifications.length === 0) {
     return (

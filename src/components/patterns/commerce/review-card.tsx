@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../../ui/ksk-labels"
 
 interface ReviewCardProps {
   reviewer: string
@@ -17,9 +18,10 @@ interface ReviewCardProps {
 }
 
 function StarRow({ rating, size = 14 }: { rating: number; size?: number }) {
+  const defaultLabels = useKskLabels()
   return (
     // role="img" が無いと div への aria-label は axe: aria-prohibited-attr。
-    <div className="flex gap-0.5" role="img" aria-label={`${rating}点 / 5点`}>
+    <div className="flex gap-0.5" role="img" aria-label={formatKskLabel(defaultLabels.reviewStarRating, { rating })}>
       {[1, 2, 3, 4, 5].map((i) => (
         <svg key={i} width={size} height={size} viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path
@@ -45,6 +47,7 @@ function ReviewCard({
   helpful = false,
   className,
 }: ReviewCardProps) {
+  const defaultLabels = useKskLabels()
   const initials = avatarChar ?? reviewer.slice(0, 1)
 
   return (
@@ -92,7 +95,7 @@ function ReviewCard({
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path d="M2 8V5.5L5 2l.5 2H10l-.5 5H3.5L2 8z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
           </svg>
-          参考になった {helpfulCount > 0 && `(${helpfulCount})`}
+          {defaultLabels.reviewCardHelpful} {helpfulCount > 0 && `(${helpfulCount})`}
         </button>
       )}
     </div>

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { StarRow } from "./review-card"
+import { formatKskLabel, useKskLabels } from "../../ui/ksk-labels"
 
 interface ReviewSummaryProps {
   /** 平均評価 (0-5) */
@@ -17,6 +18,7 @@ function ReviewSummary({
   distribution,
   className,
 }: ReviewSummaryProps) {
+  const defaultLabels = useKskLabels()
   const max = Math.max(...distribution, 1)
 
   return (
@@ -35,7 +37,7 @@ function ReviewSummary({
         <div className="pb-0.5">
           <StarRow rating={Math.round(averageRating)} size={16} />
           <p className="typo-body-xs text-[var(--Text-Low-Emphasis)] mt-0.5">
-            {totalCount.toLocaleString()}件の口コミ
+            {formatKskLabel(defaultLabels.reviewSummaryCount, { count: totalCount.toLocaleString() })}
           </p>
         </div>
       </div>

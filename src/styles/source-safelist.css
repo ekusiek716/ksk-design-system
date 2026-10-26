@@ -875,6 +875,7 @@
 @source inline("min-h-full");
 @source inline("min-h-screen");
 @source inline("min-w-0");
+@source inline("min-w-10");
 @source inline("min-w-11");
 @source inline("min-w-20");
 @source inline("min-w-24");

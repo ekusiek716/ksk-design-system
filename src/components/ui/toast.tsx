@@ -115,10 +115,16 @@ const toastStore: ToastStore = {
  * region / close は `configureToast()` で指定したときだけ値を持ち、未指定なら KskLabelsProvider の
  * `toastRegion` / `close`（Provider 無しは現行の日本語 "通知" / "閉じる"。後方互換）を使う。
  */
-const toastLabels: { region: string | undefined; close: string | undefined; position: ToastViewportPosition } = {
+const toastLabels: {
+  region: string | undefined
+  close: string | undefined
+  position: ToastViewportPosition
+  messages: ToastPresetMessages
+} = {
   region: undefined,
   close: undefined,
   position: "bottom-end",
+  messages: {},
 }
 
 /**
@@ -132,10 +138,22 @@ type ToastViewportPosition = "bottom-end" | "bottom-center"
  * fire-and-forget API（auto-mount viewport）用のラベル設定。
  * `<Toaster>` を使う場合は props で渡せばよく、これを呼ぶ必要はない。
  */
-function configureToast(options: { regionLabel?: string; closeLabel?: string; position?: ToastViewportPosition }): void {
+/**
+ * `toast.connectionRestored()` などプリセット通知の文言。React の外（module 関数）で出すので
+ * KskLabelsProvider は届かない。英語化は `configureToast({ messages })` で渡す（未指定は日本語）。
+ */
+interface ToastPresetMessages {
+  connectionRestored?: string
+  saveComplete?: string
+  retryStarted?: string
+  retryFailed?: string
+}
+
+function configureToast(options: { regionLabel?: string; closeLabel?: string; position?: ToastViewportPosition; messages?: ToastPresetMessages }): void {
   if (options.regionLabel !== undefined) toastLabels.region = options.regionLabel
   if (options.closeLabel !== undefined) toastLabels.close = options.closeLabel
   if (options.position !== undefined) toastLabels.position = options.position
+  if (options.messages !== undefined) toastLabels.messages = { ...toastLabels.messages, ...options.messages }
 }
 
 /**
@@ -432,14 +450,14 @@ toast.info = (title, options) => showToast(title, options, "info")
 toast.warning = (title, options) => showToast(title, options, "warning")
 toast.caution = (title, options) => showToast(title, options, "caution")
 toast.connectionRestored = (options) =>
-  showToast("接続が復旧しました", options, "success")
+  showToast(toastLabels.messages.connectionRestored ?? "接続が復旧しました", options, "success")
 toast.saveComplete = (options) =>
-  showToast("保存しました", options, "success")
+  showToast(toastLabels.messages.saveComplete ?? "保存しました", options, "success")
 toast.retryStarted = (options) =>
-  showToast("再試行を開始しました", options, "info")
+  showToast(toastLabels.messages.retryStarted ?? "再試行を開始しました", options, "info")
 toast.retryFailed = (options) =>
-  showToast("再試行できませんでした", options, "caution")
+  showToast(toastLabels.messages.retryFailed ?? "再試行できませんでした", options, "caution")
 toast.dismiss = (id: string) => toastStore.dismiss(id)
 
 export { Toaster, useToast, toast, toastVariants, configureToast }
-export type { Toast, ToastVariant, ToastOptions, ToastFn, ToastAction, ToastViewportPosition, ToasterProps }
+export type { ToastPresetMessages, Toast, ToastVariant, ToastOptions, ToastFn, ToastAction, ToastViewportPosition, ToasterProps }

@@ -1,10 +1,11 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../ui/ksk-labels"
 
 export interface DocumentPageProps extends React.ComponentProps<"main"> {
   /** 画面タイトル（例: "プライバシーポリシー"）。typo-heading-2xl で描画する。 */
   title: string
-  /** 最終更新日（例: "2026年7月7日"）。指定時のみ表示する。 */
+  /** 最終更新日（例: "2026年7月7日"）。指定時のみ表示する。前置きの文言は KskLabelsProvider の `documentPageLastUpdated`（Provider 無しは "最終更新日：…"） */
   lastUpdated?: string
   /** 本文（通常は `<Prose sections={...} />`）。末尾の同意文等も含めて自由に渡せる。 */
   children: React.ReactNode
@@ -29,6 +30,7 @@ export interface DocumentPageProps extends React.ComponentProps<"main"> {
  * </DocumentPage>
  */
 function DocumentPage({ title, lastUpdated, children, className, ...props }: DocumentPageProps) {
+  const defaultLabels = useKskLabels()
   return (
     <main
       data-slot="document-page"
@@ -38,7 +40,7 @@ function DocumentPage({ title, lastUpdated, children, className, ...props }: Doc
       <div className="flex flex-col gap-1">
         <h1 className="typo-heading-2xl text-[var(--Text-High-Emphasis)]">{title}</h1>
         {lastUpdated && (
-          <p className="typo-label-sm text-[var(--Text-Low-Emphasis)]">最終更新日：{lastUpdated}</p>
+          <p className="typo-label-sm text-[var(--Text-Low-Emphasis)]">{formatKskLabel(defaultLabels.documentPageLastUpdated, { date: lastUpdated })}</p>
         )}
       </div>
       <div className="mt-6">{children}</div>

@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Slider as SliderPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "./ksk-labels"
 
 type SliderProps = Omit<
   React.ComponentProps<typeof SliderPrimitive.Root>,
@@ -55,6 +56,7 @@ function Slider({
   disabled,
   ...props
 }: SliderProps) {
+  const defaultLabels = useKskLabels()
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
@@ -138,7 +140,7 @@ function Slider({
       </SliderPrimitive.Track>
       {Array.from({ length: _values.length }, (_, index) => {
         const isRange = _values.length > 1
-        const suffix = index === 0 ? "開始" : "終了"
+        const suffix = index === 0 ? defaultLabels.sliderStart : defaultLabels.sliderEnd
 
         // aria-labelledby が配列なら thumb ごとの id を割り当てる。
         // 単一 string の場合、range（2ハンドル）に同じ id を両方へ付けると
@@ -158,13 +160,13 @@ function Slider({
         // aria-label は labelledby 未解決時のフォールバックとして機能する）。
         const thumbLabel = ariaLabel
           ? isRange
-            ? `${ariaLabel}（${suffix}）`
+            ? formatKskLabel(defaultLabels.sliderThumbPosition, { label: ariaLabel, position: suffix })
             : ariaLabel
           : thumbLabelledby
             ? undefined
             : isRange
-              ? `スライダー（${suffix}）`
-              : "スライダー"
+              ? formatKskLabel(defaultLabels.sliderThumbPosition, { label: defaultLabels.sliderThumb, position: suffix })
+              : defaultLabels.sliderThumb
 
         return (
           <SliderPrimitive.Thumb

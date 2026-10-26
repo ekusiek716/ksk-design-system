@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../../ui/ksk-labels"
 
 /** 価格表示バリアント定義 */
 const priceVariants = cva("inline-flex items-baseline gap-0.5 text-[var(--Text-High-Emphasis)]", {
@@ -35,6 +36,7 @@ const strikeSize = { sm: "typo-body-xs", md: "typo-body-sm", lg: "typo-body-md",
 const taxSize = { sm: "typo-body-xs", md: "typo-body-xs", lg: "typo-body-sm", xl: "typo-body-lg" } as const
 
 function PriceDisplay({ className, price, maxPrice, originalPrice, showTaxLabel = true, currency = "¥", size = "md", ...props }: PriceDisplayProps) {
+  const defaultLabels = useKskLabels()
   /** 数値を日本語ロケールでフォーマット */
   const fmt = (n: number) => n.toLocaleString("ja-JP")
   /** セール価格かどうか */
@@ -44,7 +46,7 @@ function PriceDisplay({ className, price, maxPrice, originalPrice, showTaxLabel 
   const s = size ?? "md"
 
   return (
-    <div data-slot="price-display" className={cn("flex flex-col", className)} role="group" aria-label={`${currency}${fmt(price)} 税込`} {...props}>
+    <div data-slot="price-display" className={cn("flex flex-col", className)} role="group" aria-label={`${currency}${fmt(price)} ${defaultLabels.priceDisplayTax}`} {...props}>
       {/* セール時の元価格（打ち消し線） */}
       {isSale && (
         <span aria-hidden className={cn("text-[var(--Text-Low-Emphasis)] line-through", strikeSize[s])}>
@@ -54,7 +56,7 @@ function PriceDisplay({ className, price, maxPrice, originalPrice, showTaxLabel 
       {/* メイン価格表示 */}
       <span aria-hidden className={cn(priceVariants({ size }), isSale && "text-[var(--Text-Caution)]")}>
         {isRange ? <>{currency}{fmt(price)}〜{currency}{fmt(maxPrice)}</> : <>{currency}{fmt(price)}</>}
-        {showTaxLabel && <span className={cn("ml-0.5 text-[var(--Text-Low-Emphasis)]", taxSize[s])}>税込</span>}
+        {showTaxLabel && <span className={cn("ml-0.5 text-[var(--Text-Low-Emphasis)]", taxSize[s])}>{defaultLabels.priceDisplayTax}</span>}
       </span>
     </div>
   )

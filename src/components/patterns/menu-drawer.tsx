@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../ui/ksk-labels"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
 interface MenuDrawerItem {
@@ -37,6 +38,7 @@ function MenuDrawer({
   width = 280,
   className,
 }: MenuDrawerProps) {
+  const defaultLabels = useKskLabels()
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent
@@ -45,7 +47,7 @@ function MenuDrawer({
         style={{ width }}
       >
         <SheetHeader className="sr-only">
-          <SheetTitle>メニュー</SheetTitle>
+          <SheetTitle>{defaultLabels.menuDrawerTitle}</SheetTitle>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto">
