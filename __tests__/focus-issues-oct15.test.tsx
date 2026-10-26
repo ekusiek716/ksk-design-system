@@ -150,7 +150,7 @@ describe("focus corrections (#652, #653, #657, #658, #659)", () => {
     const panel = container.querySelector<HTMLElement>('[role="tabpanel"]')!
     expect(panel.tabIndex).toBe(0)
     expect(panel.className).toContain("focus-visible:ring-[3px]")
-    expect(panel.className).toContain("focus-visible:ring-[var(--Focus-High-Emphasis)]/50")
+    expect(panel.className).toContain("focus-visible:ring-[var(--Focus-High-Emphasis)]")
     expect(panel.className).toContain("focus-visible:outline-hidden")
   })
 })

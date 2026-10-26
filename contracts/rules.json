@@ -2,7 +2,7 @@
   "meta": {
     "name": "KSK Design System — Rules Contracts",
     "version": "1.2.0",
-    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン53件・AIアンチパターン10件。"
+    "description": "禁止パターン・アクセシビリティ要件・ライティングルールの構造化定義。lint-scratch.sh と check-drift.sh で自動検証。禁止パターン54件・AIアンチパターン10件。"
   },
   "prohibited": [
     {
@@ -261,7 +261,7 @@
       "excludePaths": [".stories."],
       "excludeDsPaths": ["components/ui/", "components/patterns/"],
       "message": "outline-none 禁止（フォーカスリング削除はアクセシビリティ違反。強制配色モードでは outline-hidden でないと枠が消える）",
-      "fix": "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+      "fix": "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
       "note": "issue #620。Tailwind v4 で outline-none は常に outline-style: none（強制配色モードでも非表示のまま）。outline-hidden は通常時 none だが forced-colors 時だけ outline: 2px solid transparent になり OS 色へ置換されるため、box-shadow の ring が描画されない強制配色モードでも枠が残る。以前は excludeLines: [\"focus-visible\"] で `focus-visible:outline-none` を含む行を丸ごと素通りさせていたため、まさに forced-colors で問題になるパターン（outline-none + ring の組み合わせ）を検出できていなかった（レビュー指摘）。前置バリアント（`md:` / `data-[...]:` / `group-focus-visible:` / `!` 等）付きでも `outline-none` 部分文字列があれば検出する。DS コンポーネント本体（components/ui・components/patterns）はこのルールの対象外で、__tests__/focus-ring-outline-pairing.test.ts が outline-hidden 必須を機械検証する"
     },
     {
@@ -604,6 +604,17 @@
       "message": "@layer の外でタグ / role / 汎用属性セレクタに寸法・余白・角丸・文字サイズ・outline を当てている（DS 部品の className では打ち消せない）",
       "fix": "アプリ共通の既定は @layer base { … } の中に書く（DS / Tailwind のユーティリティが後から勝つ）。layer 外に残す必要があるなら :not([data-slot]) で DS 部品を外すか、DS の公開 data-slot を明示的に狙う",
       "note": "CSS の仕様上、layer 外の宣言は @layer の中の宣言（Tailwind / DS のユーティリティは @layer utilities）に詳細度と無関係に勝つ。belle-todo（2026-10-01）で、layer 外の [role=\"radio\"] { min-height } が DS Chip を 32px → 44〜52px に膨らませ、:focus-visible { border-radius } が pill のボタンをフォーカス中だけ角ばらせ、DS 部品のフォーカス枠を二重にし、nav { padding-bottom: safe-area } が浮いたタブバーに safe-area を二重に足していた。@layer / @theme の中、クラスで始まるセレクタ（消費側の独自クラス）、html / body / :root / *、keyframes、data-slot を含むセレクタは対象外。DS 自身 / ベンダリングされた DS の CSS は P049 と同じく lint 側で対象外"
+    },
+    {
+      "id": "P054",
+      "severity": "warning",
+      "category": "accessibility",
+      "appliesTo": ["tailwind"],
+      "pattern": "\\bring-(?:\\[var\\(--Focus-High-Emphasis[^)]*\\)\\]|\\(--Focus-High-Emphasis[^)]*\\)|ring|sidebar-ring)/(?:\\d+|\\[[^\\]]*\\])",
+      "excludeLines": [],
+      "message": "フォーカスリングを半透明（ring-[var(--Focus-High-Emphasis)]/50・ring-ring/50・ring-(--Focus-High-Emphasis)/50 等）にしている（実効コントラストが WCAG 1.4.11 の 3:1 を割る）",
+      "fix": "focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]（不透明。/数字 を付けない）",
+      "note": "2026-10 の実測で、ライトの Focus-High-Emphasis（旧 Brand-400）を /50 で重ねたリングは白の上で 1.34〜1.67:1、ダークでも Gray-900 の上で 2.43〜3.44:1 しか取れず、全テーマで WCAG 1.4.11（非テキスト 3:1）未達だった。DS はトークンをライト Brand-600 / ダーク Brand-400 に直し、リングを不透明で使う形に揃えた（不透明なら Surface-Primary の上でライト 5.0〜7.1 / ダーク 6.0〜10.2:1）。consumer が旧 fix 文字列（/50 付き）をコピーした箇所は、トークンが新しくなっても半透明のままコントラストが足りないので、この警告で拾って /数字 を外す。塗りつぶしの面（Brand-Primary 等）の上で使うときは focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)] で面から離す。shadcn 既定の ring-ring/50・ring-sidebar-ring/50（--ring / --sidebar-ring は Focus-High-Emphasis を指す）、Tailwind v4 の省略記法 ring-(--Focus-High-Emphasis)/50、フォールバック付き ring-[var(--Focus-High-Emphasis,#3B82F6)]/50 も同じく検出する。別トークン（Object-Accent-Primary 等）の半透明リングは対象外"
     }
   ],
   "aiPatterns": {
@@ -699,7 +710,7 @@
       { "id": "A002", "rule": "大テキスト（18px+ bold）のコントラスト比 3:1 以上", "machineVerified": true, "verifiedBy": "axe(color-contrast) 有効化（npm run test:a11y）+ scripts/check-contrast.mjs" },
       { "id": "A003", "rule": "UI 要素・アイコンのコントラスト比 3:1 以上", "machineVerified": false, "verifiedBy": "manual review（axe(color-contrast) はテキストのみ対象で、非テキスト 1.4.11 は検査しない。scripts/check-contrast.mjs もテキスト用ペアのみが対象）" },
       { "id": "A004", "rule": "タッチターゲット最小 44×44px（WCAG 2.5.5 AAA）", "machineVerified": false, "verifiedBy": "manual review（axe の target-size は既定無効・実測が必要なため未採用）" },
-      { "id": "A005", "rule": "フォーカスリング必須: focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50", "machineVerified": false, "verifiedBy": "manual review（フォーカスリングの視覚的な確認は axe では検出できない）" },
+      { "id": "A005", "rule": "フォーカスリング必須: focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]", "machineVerified": false, "verifiedBy": "manual review（フォーカスリングの視覚的な確認は axe では検出できない）" },
       { "id": "A006", "rule": "アイコンボタンに aria-label 必須", "machineVerified": "partial", "verifiedBy": "axe(button-name、Storybookで描画されるケース) + eslint(ksk-a11y/icon-button-aria-label、明示された非空の aria-label / aria-labelledby を静的検査)。動的値が実行時に空になるケースと未導入consumerはmanual review" },
       { "id": "A007", "rule": "フォーム入力に <Label> 必須（placeholder のみ禁止）", "machineVerified": "partial", "verifiedBy": "axe(label) は accessible name の有無を検証するが、<Label> 要素の使用や placeholder-only 禁止までは保証しないためmanual reviewを併用" },
       { "id": "A008", "rule": "エラー表示は 色 + アイコン + テキスト の3点セット必須（色のみ禁止）", "machineVerified": false, "verifiedBy": "manual review（意味的な組み合わせの判断は axe では不可）" },

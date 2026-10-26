@@ -9,7 +9,7 @@
  * このファイルは React に依存しない（server-variants の約束。unstyled.ts と同じ）。
  */
 const INLINE_FIELD_BASE =
-  "w-full min-w-0 rounded-sm border-0 bg-transparent px-1 py-0.5 text-[var(--Text-High-Emphasis)] transition-colors placeholder:text-[var(--Text-Low-Emphasis)] hover:bg-[var(--Surface-Secondary)] focus-visible:bg-transparent focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent aria-invalid:ring-2 aria-invalid:ring-[var(--Border-Caution)]"
+  "w-full min-w-0 rounded-sm border-0 bg-transparent px-1 py-0.5 text-[var(--Text-High-Emphasis)] transition-colors placeholder:text-[var(--Text-Low-Emphasis)] hover:bg-[var(--Surface-Secondary)] focus-visible:bg-transparent focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent aria-invalid:ring-2 aria-invalid:ring-[var(--Border-Caution)]"
 
 /** 入力欄の見た目の種類。default は従来の枠付き */
 type FieldVariant = "default" | "inline" | "inline-title"

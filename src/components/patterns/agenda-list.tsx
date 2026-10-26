@@ -177,7 +177,7 @@ function AgendaList({
                               className={cn(
                                 rowClass,
                                 "cursor-pointer transition-opacity duration-[var(--Motion-Duration-Fast)] active:opacity-70",
-                                "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+                                "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]"
                               )}
                             >
                               {content}

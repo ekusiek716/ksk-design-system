@@ -41,7 +41,7 @@ function SkipLink({
         // 固定の -translate-y-24（96px）だと、ラベルが 3 行に折り返す幅 390px の画面で
         // 下端が画面の上端から 1px 覗き、影も帯のように見えていた。表示時（focus）は変わらない。
         "fixed left-4 top-4 z-[var(--Z-SkipLink)] flex min-h-11 -translate-y-[calc(100%_+_4rem)] items-center rounded-lg border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)] px-4 py-2 typo-label-md text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-lg)] transition-transform",
-        "focus:translate-y-0 focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        "focus:translate-y-0 focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
         className,
       )}
     >

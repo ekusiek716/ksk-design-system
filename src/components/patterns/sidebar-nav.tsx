@@ -140,10 +140,12 @@ function SidebarNavRow({ item, collapsed, tone }: { item: SidebarNavItem; collap
       "relative flex min-h-11 items-center rounded-lg typo-label-md",
       "transition-colors duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)]",
       "focus-visible:outline-hidden focus-visible:ring-[3px]",
-      // inverse の面では Focus-High-Emphasis/50 が 3:1 を割る（check-contrast.mjs）ため、Object-on-Inverse の不透明リング
+      // inverse の面（暗い Surface-Inverse）では、不透明にしても Focus-High-Emphasis が 3:1 を割るテーマがある
+      // （ライトの cobalt 2.57 / violet 2.49、ダークは面が白で green 1.74 など）ため、Object-on-Inverse の不透明リング
+      // （対 Surface-Inverse 17.72:1。check-contrast.mjs が検査。Button inverse / ghost-inverse も同じ）
       tone === "inverse"
         ? "focus-visible:ring-[var(--Object-on-Inverse)]"
-        : "focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+        : "focus-visible:ring-[var(--Focus-High-Emphasis)]",
       collapsed ? "size-11 justify-center" : "w-full gap-3 px-3 text-left",
       tone === "inverse"
         ? item.isActive

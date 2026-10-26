@@ -33,4 +33,4 @@ export const PILL_ITEM_HIT_AREA =
 
 /** フォーカスリングと無効時 */
 export const SEGMENT_ITEM_FOCUS_DISABLED =
-  "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50 disabled:pointer-events-none disabled:opacity-50"
+  "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)] disabled:pointer-events-none disabled:opacity-50"

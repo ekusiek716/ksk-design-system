@@ -17,7 +17,7 @@ describe("MobileAppShell viewport=fixed（#715 レビュー）", () => {
   it("fixed の main は Tab で止まるスクロール領域（focus リング付き）、flow では従来どおり", () => {
     const fixed = renderToStaticMarkup(<MobileAppShell viewport="fixed">x</MobileAppShell>)
     expect(fixed).toMatch(/<main[^>]*tabindex="0"/)
-    expect(fixed).toContain("focus-visible:ring-[var(--Focus-High-Emphasis)]/50")
+    expect(fixed).toContain("focus-visible:ring-[var(--Focus-High-Emphasis)]")
     const flow = renderToStaticMarkup(<MobileAppShell>x</MobileAppShell>)
     expect(flow).not.toContain("tabindex")
   })

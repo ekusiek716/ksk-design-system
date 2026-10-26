@@ -24,7 +24,7 @@ colors:
   textMedium: "#3F3F46"       # var(--Text-Medium-Emphasis)
   textLow: "#52525B"          # var(--Text-Low-Emphasis)
   border: "#E4E4E7"           # var(--Border-Low-Emphasis)
-  focus: "#60A5FA"            # var(--Focus-High-Emphasis)
+  focus: "#2563EB"            # var(--Focus-High-Emphasis)（ライト。ダークは Brand-400）
   # --- Semantic（status） ---
   success: "#15803D"
   warning: "#C2410C"

@@ -96,7 +96,8 @@ function CheckboxCardItem({
         expandedContent ? "flex-col items-stretch" : "items-center",
         "hover:border-[var(--Text-High-Emphasis)] hover:bg-[var(--Surface-Secondary)]",
         "data-[state=checked]:border-[var(--Object-Accent-Primary)] data-[state=checked]:bg-[var(--Surface-Primary)]",
-        "focus-visible:border-[var(--Object-Accent-Primary)] focus-visible:ring-2 focus-visible:ring-[var(--Object-Accent-Primary)]/20",
+        // 選択中は枠が Object-Accent-Primary で、Focus リング（Brand-600）と同系色になるため 2px 離す。リングは不透明（WCAG 1.4.11）
+        "focus-visible:border-[var(--Object-Accent-Primary)] focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
         "aria-invalid:border-[var(--Border-Caution)]",
         "disabled:cursor-not-allowed disabled:border-[var(--Border-Control,var(--Border-Medium-Emphasis))] disabled:bg-[var(--Surface-Secondary)]",
         "disabled:hover:border-[var(--Border-Control,var(--Border-Medium-Emphasis))] disabled:hover:bg-[var(--Surface-Secondary)]",

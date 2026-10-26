@@ -290,7 +290,7 @@ function ShareButtons({
               type="button"
               onClick={() => void handleClick(p)}
               aria-label={label}
-              className="flex min-h-11 shrink-0 flex-col items-center gap-2 rounded-lg cursor-pointer focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+              className="flex min-h-11 shrink-0 flex-col items-center gap-2 rounded-lg cursor-pointer focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]"
             >
               <span className={cn(
                 "size-12 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 active:scale-95",
@@ -342,7 +342,7 @@ function ShareButtons({
               className={cn(
                 "inline-flex h-[var(--Control-Height-Lg)] w-full cursor-pointer items-center justify-center gap-2 rounded-[var(--Control-Radius)] px-[var(--Control-Padding-X-Lg)] typo-label-lg",
                 "transition-colors duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)] active:scale-[0.98]",
-                "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+                "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
                 meta.blockClass ?? cn("border border-[var(--Border-Medium-Emphasis)] bg-[var(--Surface-Primary)]", meta.inlineClass)
               )}
             >
@@ -387,7 +387,7 @@ function ShareButtons({
             onClick={() => void handleClick(p)}
             aria-label={label}
             className={cn(
-              "inline-flex min-h-11 items-center gap-2 px-3 py-2 rounded-full border border-[var(--Border-Medium-Emphasis)] typo-label-xs transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+              "inline-flex min-h-11 items-center gap-2 px-3 py-2 rounded-full border border-[var(--Border-Medium-Emphasis)] typo-label-xs transition-colors focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
               meta.inlineClass
             )}
           >

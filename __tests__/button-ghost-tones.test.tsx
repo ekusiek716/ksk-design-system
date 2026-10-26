@@ -25,7 +25,7 @@ describe("Button の文字だけの弱い variant（#664 / #671）", () => {
     expect(cls.some((c) => c.startsWith("bg-"))).toBe(false)
     expect(cls).not.toContain("border")
     // focus ring と disabled は base と共通
-    expect(cls).toContain("focus-visible:ring-[var(--Focus-High-Emphasis)]/50")
+    expect(cls).toContain("focus-visible:ring-[var(--Focus-High-Emphasis)]")
     expect(cls).toContain("disabled:opacity-50")
     expect(cls.join(" ")).not.toMatch(/#[0-9a-f]{3,8}\b|Object-Caution/i)
   })

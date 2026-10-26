@@ -138,7 +138,9 @@ function FilterPill({
                 ? "text-[var(--Text-on-Inverse)]"
                 : "text-[var(--Text-Medium-Emphasis)]",
               showClear ? "pr-1.5" : "pr-4",
-              "cursor-pointer focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+              "cursor-pointer focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
+              // 選択中はピルの面が Brand-Primary でリング（Brand-600）と同色になるため 2px 離す
+              isActive && "focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
               "disabled:cursor-not-allowed disabled:pointer-events-none",
             )}
           >
@@ -173,7 +175,9 @@ function FilterPill({
             "mr-1 flex size-7 shrink-0 items-center justify-center rounded-full text-[var(--Text-on-Inverse)]",
             "cursor-pointer transition-colors duration-[var(--Motion-Duration-Fast)]",
             "hover:bg-[var(--Text-on-Inverse)]/20",
-            "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50",
+            "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]",
+            // ピルの面（Brand-Primary）の上に乗るため、面と同色のリングが溶けないよう 2px 離す
+            "focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
             "disabled:cursor-not-allowed disabled:pointer-events-none",
           )}
         >

@@ -360,6 +360,26 @@ a:not([data-slot]) { min-height: 44px; }
 DS 自身 / ベンダリングされた DS の CSS も P049 と同じく対象外。例外は
 `/* ksk-ds-lint-ignore P053 -- 理由 */` で外します。
 
+#### P054: フォーカスリングを半透明にしない
+
+`ring-[var(--Focus-High-Emphasis)]/50` のようにフォーカスリングの色へ不透明度を付けると、実効コントラストが
+WCAG 1.4.11（非テキスト 3:1）を割ります（旧実装は白の上で 1.34〜1.67:1、Gray-900 の上でも
+2.43〜3.44:1）。DS はトークンをライト Brand-600 / ダーク Brand-400 に直し、リングを不透明で使う形に
+揃えました。旧い書き方をコピーした consumer のクラスを P054（warning）が検出します。
+
+```tsx
+/* ❌ 半透明 */
+className="focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+
+/* ✅ 不透明 */
+className="focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]"
+
+/* ✅ Brand 塗りの面の上では、面と同色にならないよう 2px 離す */
+className="bg-[var(--Brand-Primary)] focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]"
+```
+
+`/数字` と `/[任意値]` の両方を検出します。shadcn 既定の `ring-ring/50`・`ring-sidebar-ring/50`（`--ring` / `--sidebar-ring` は `Focus-High-Emphasis` を指す）、Tailwind v4 の省略記法 `ring-(--Focus-High-Emphasis)/50`、フォールバック付きの `ring-[var(--Focus-High-Emphasis,#3B82F6)]/50` も同じです。別トークン（`ring-[var(--Caution-Base)]/20` 等）は対象外です。
+
 #### ルールごとの除外（rules.json の excludes 系）
 
 `contracts/rules.json` の除外指定は、当てる対象ごとに 3 つに分かれています。

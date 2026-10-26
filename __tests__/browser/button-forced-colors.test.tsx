@@ -77,7 +77,7 @@ describe("forced-colors モードでのフォーカス表示 (issue #620)", () =
     })
 
     await mount(
-      <button className="focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50">
+      <button className="focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]">
         比較用
       </button>,
     )

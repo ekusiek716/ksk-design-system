@@ -177,6 +177,9 @@ const FALLBACK_CONTEXT = {
   lightOnInverse: "#FFFFFF",
   darkSurface: "#18181B",
   darkOnInverse: "#18181B",
+  // Focus-High-Emphasis が指す Brand の段（semantic.css の割当）
+  lightFocusShade: 600,
+  darkFocusShade: 400,
 }
 
 function statOrNull(path) {
@@ -198,6 +201,11 @@ function readIfExists(path) {
 function primitiveHex(primitiveCss, name) {
   const m = primitiveCss.match(new RegExp(`--Primitive-${name}:\\s*(#[0-9A-Fa-f]{6})`))
   return m ? normalizeHex(m[1]) : null
+}
+
+function focusShade(block, fallback) {
+  const m = block.match(/--Focus-High-Emphasis:\s*var\(--Primitive-Brand-(\d+)\)/)
+  return m ? Number(m[1]) : fallback
 }
 
 function semanticValue(block, token, primitiveCss) {
@@ -222,7 +230,12 @@ export function loadThemeContext(pkgRoot) {
     darkOnInverse: semanticValue(dark, "Text-on-Inverse", primitiveCss),
   }
   if (Object.values(ctx).some((v) => !v)) return { ...FALLBACK_CONTEXT, source: "fallback" }
-  return { ...ctx, source: "semantic.css" }
+  return {
+    ...ctx,
+    lightFocusShade: focusShade(light, FALLBACK_CONTEXT.lightFocusShade),
+    darkFocusShade: focusShade(dark, FALLBACK_CONTEXT.darkFocusShade),
+    source: "semantic.css",
+  }
 }
 
 // ─── 検査ペア ────────────────────────────────────────────────
@@ -241,15 +254,16 @@ export function loadThemeContext(pkgRoot) {
  * - 600 の文字 / 50: Text-Accent-Primary を Surface-Accent-Primary-Light(=50)・
  *   Hover-Secondary-Button(=50) に載せる（淡いブランド面の上のリンク・ラベル）
  * - 白文字 / 700, 800: Hover-Primary-Button(=700) / Active-Primary-Button(=800)
- * - 400 / 白（フォーカスリング 3:1）: Focus-High-Emphasis(=400)。非テキスト基準 1.4.11。
- *   advisory: 500 が明るい色（OKLCH 明度 ≳ 0.67）では、400 が 500 より明るい限り
- *   白に対して 3:1 を取れない（例: #0EA5E9 は 500 自体が 2.77:1）。既存の全テーマも
- *   未達（default の Blue でも 2.54:1）なので、落とすと生成できる色がほぼ無くなる。
- *   実際のリングは 400 の 50% 透過（button-variants.ts の ring-[...]/50）でさらに薄い。
+ * - 600 / 白（フォーカスリング 3:1）: Focus-High-Emphasis(=600)。非テキスト基準 1.4.11（error）。
+ *   ライトのフォーカスリングは Brand-600 の不透明リング（semantic.css）。600 は上の
+ *   「600 の文字 / 白」で 4.5:1 以上に補正されるため、通常は必ず通る。段の割当は semantic.css の
+ *   `--Focus-High-Emphasis`（:root / .dark）から読むので、割当を変えれば検査対象の段も追従する。
  *
  * ダーク（.dark）
  * - 400 の文字 / ダーク背景: Text-Accent-Primary / Brand-Primary(=400) を
  *   Surface-Primary(Gray-900) に載せる（error）
+ * - 400 / ダーク背景（フォーカスリング 3:1）: Focus-High-Emphasis(=400)。非テキスト基準 1.4.11（error）。
+ *   上の文字 4.5:1 を満たせば必ず通るが、リングの根拠として別に出す
  * - ダーク文字 / 400（ボタン面）: Brand-Primary(=400) の面に Text-on-Inverse(Gray-900)。
  *   Surface-Primary と Text-on-Inverse が同じ Gray-900 なので数値は上と同じ（error）
  * - ダーク文字 / 500, 600（hover・active の面）: Hover-Primary-Button(=500) /
@@ -274,17 +288,11 @@ export function evaluateChecks(ramp, ctx) {
   add("light-text-600-on-50", "light", "Brand-600 の文字 / Brand-50（淡いブランド面）", ramp[600], ramp[50], 4.5)
   add("light-on-700", "light", "白文字 / Brand-700（hover）", onInverse, ramp[700], 4.5)
   add("light-on-800", "light", "白文字 / Brand-800（active）", onInverse, ramp[800], 4.5)
-  add(
-    "light-focus-400",
-    "light",
-    "フォーカスリング Brand-400 / 白背景（非テキスト）",
-    ramp[400],
-    ctx.lightSurface,
-    3,
-    "advisory",
-    "400 が薄いと取れない。500 が明るい色では 400 を暗くできず両立しない。既存テーマも全て未達",
-  )
+  const lightFocus = ctx.lightFocusShade ?? FALLBACK_CONTEXT.lightFocusShade
+  const darkFocus = ctx.darkFocusShade ?? FALLBACK_CONTEXT.darkFocusShade
+  add("light-focus", "light", `フォーカスリング Brand-${lightFocus} / 白背景（非テキスト）`, ramp[lightFocus], ctx.lightSurface, 3)
   add("dark-text-400", "dark", "Brand-400 の文字 / ダーク背景", ramp[400], ctx.darkSurface, 4.5)
+  add("dark-focus", "dark", `フォーカスリング Brand-${darkFocus} / ダーク背景（非テキスト）`, ramp[darkFocus], ctx.darkSurface, 3)
   add("dark-on-400", "dark", "ダーク文字 / Brand-400（ボタン面）", ctx.darkOnInverse, ramp[400], 4.5)
   add(
     "dark-on-500",
@@ -429,12 +437,12 @@ export function generateTheme(inputHex, options = {}) {
   const warnings = []
   const corrections = []
 
-  // 400: ダークの文字/面（4.5・必須）とフォーカスリング（3.0・できれば）を両立する明度を探す。
+  // 400: ダークの文字/面（4.5・必須。フォーカスリング 3:1 もこれで満たす）を通す明度を探す。
+  // ライトのフォーカスリングは 600（下の 600 の補正で白に 4.5:1 以上）なので、400 は白の上の条件を持たない。
   {
     const target = lightness[400]
     const minL = hexToOklch(ramp[500]).l + MIN_STEP_DESIGN
     const dark = (hex) => contrastRatio(hex, ctx.darkSurface) >= 4.5 && contrastRatio(ctx.darkOnInverse, hex) >= 4.5
-    const focus = (hex) => contrastRatio(hex, ctx.lightSurface) >= 3
     const search = (accept) => {
       for (let d = 0; d <= 0.6; d += L_STEP) {
         for (const l of d === 0 ? [target] : [target - d, target + d]) {
@@ -446,14 +454,11 @@ export function generateTheme(inputHex, options = {}) {
       return null
     }
     const current = ramp[400]
-    const found = (dark(current) && focus(current) ? { l: target, hex: current } : null) ?? search((hex) => dark(hex) && focus(hex)) ?? search(dark)
+    const found = (dark(current) ? { l: target, hex: current } : null) ?? search(dark)
     if (found && found.hex !== current) {
-      const bothOk = focus(found.hex)
-      corrections.push({ shade: 400, from: current, to: found.hex, reason: bothOk ? "dark-and-focus" : "dark" })
+      corrections.push({ shade: 400, from: current, to: found.hex, reason: "dark" })
       warnings.push(
-        bothOk
-          ? `Brand-400 を ${current} → ${found.hex} に補正しました（ダーク背景での文字 4.5:1 とフォーカスリング 3:1 を両立する明度 L=${fmtL(found.l)}）。`
-          : `Brand-400 を ${current} → ${found.hex} に補正しました（ダーク背景での文字 4.5:1 を満たすため明るくした。フォーカスリング 3:1 は 500 が明るく両立不可）。`,
+        `Brand-400 を ${current} → ${found.hex} に補正しました（ダーク背景での文字・フォーカスリング 4.5:1 / 3:1 を満たす明度 L=${fmtL(found.l)}）。`,
       )
       ramp[400] = found.hex
     }
@@ -632,7 +637,7 @@ const HELP = `ksk-ds theme — ブランド色 1 色から Brand ランプ（50�
 段差: 隣接段の明度差（OKLCH L）が 0.015 未満（明度が下がらない・hover/active がボタン面と同色）は
       必須エラー。生成側は段を押し広げて確保し、それでも足りない色（ほぼ黒・ほぼ白）は exit 1。
 
-補正: 600 が AA 未達なら 600〜900 を暗くし、400 はダークとフォーカスを両立する明度へ寄せる。
+補正: 600 が AA 未達なら 600〜900 を暗くし、400 はダークの文字・フォーカスリングが通る明度へ寄せる。
       補正した場合は警告を出す（500 は指定値のまま）。
 
 終了コード: 0 = 通過 / 1 = 必須ペアが未達 / 2 = 使い方の誤り・入力エラー

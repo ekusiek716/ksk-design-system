@@ -132,7 +132,7 @@ function DetailSheetHeader({
           // data-slot は SheetTitle / DialogTitle と同じにし、autoFocus="title" の対象にする
           <DialogPrimitive.Title
             data-slot={overlaySlot === "sheet" ? "sheet-title" : "dialog-title"}
-            className="typo-heading-lg text-[var(--Text-High-Emphasis)] break-words focus:outline-hidden focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]/50"
+            className="typo-heading-lg text-[var(--Text-High-Emphasis)] break-words focus:outline-hidden focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]"
           >
             {titleContent}
           </DialogPrimitive.Title>
