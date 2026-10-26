@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
 import { useSoftKeyboardFocus } from "@/lib/use-soft-keyboard-focus"
 import { OVERLAY_FOCUS_RING_COVER, OVERLAY_FOCUS_RING_INSET } from "@/lib/server-variants/overlay-focus-ring"
+import { useKskLabels } from "../../ui/ksk-labels"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -98,7 +99,7 @@ interface BottomTabBarProps extends React.ComponentProps<"nav"> {
    * コンテンツがバーの下を通過するレイアウト（全画面リスト等）で指定する。
    */
   scrollEdge?: boolean
-  /** nav 要素の aria-label。@default "メインナビゲーション" */
+  /** nav 要素の aria-label。省略時は KskLabelsProvider の `bottomTabBarNav`（Provider 無しは "メインナビゲーション"。locale="en" で "Main navigation"） */
   navLabel?: string
   /**
    * デスクトップ幅（`lg` = 1024px 以上）でもナビを表示するか（issue #486）。
@@ -243,7 +244,7 @@ function useBottomTabBarKeyboardState(keyboardBehavior: BottomTabBarKeyboardBeha
  *
  * ## a11y の既定
  *
- * - `nav` に `aria-label`（`navLabel`。既定「メインナビゲーション」）
+ * - `nav` に `aria-label`（`navLabel`。省略時は KskLabelsProvider の `bottomTabBarNav`。Provider 無しは「メインナビゲーション」）
  * - アクティブなタブに `aria-current="page"`
  * - タブには表示形態（ラベル表示/非表示）に関わらず `aria-label` を組み立てる:
  *   `ariaLabel ?? label` + 件数バッジ（`badgeCount > 0` のとき「（N）」、100 以上は
@@ -267,10 +268,12 @@ function BottomTabBar({
   keyboardBehavior = "stay",
   hideOnInputFocus = true,
   scrollEdge = false,
-  navLabel = "メインナビゲーション",
+  navLabel: navLabelProp,
   showOnDesktop = false,
   ...props
 }: BottomTabBarProps) {
+  const defaultLabels = useKskLabels()
+  const navLabel = navLabelProp ?? defaultLabels.bottomTabBarNav
   const keyboardState = useBottomTabBarKeyboardState(keyboardBehavior, hideOnInputFocus)
 
   if (variant === "pill") {
@@ -312,7 +315,7 @@ function BottomTabBarDefault({
   keyboardState,
   bottomOffsetExtra,
   style,
-  navLabel = "メインナビゲーション",
+  navLabel,
   showOnDesktop = false,
   ...props
 }: Omit<BottomTabBarProps, "variant" | "keyboardBehavior"> & { keyboardState: BottomTabBarKeyboardState }) {
@@ -400,7 +403,7 @@ function BottomTabBarPill({
   keyboardState,
   bottomOffsetExtra,
   style,
-  navLabel = "メインナビゲーション",
+  navLabel,
   showOnDesktop = false,
   ...props
 }: Omit<BottomTabBarProps, "variant" | "keyboardBehavior"> & { keyboardState: BottomTabBarKeyboardState }) {

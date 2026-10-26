@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../../ui/ksk-labels"
 
 interface QuantitySelectorProps extends Omit<React.ComponentProps<"div">, "onChange"> {
   /** 現在の数量 */
@@ -18,13 +19,13 @@ interface QuantitySelectorProps extends Omit<React.ComponentProps<"div">, "onCha
   showTrash?: boolean
   /** 削除時のコールバック */
   onDelete?: () => void
-  /** 全体を囲む role="group" の aria-label。@default "数量選択" */
+  /** 全体を囲む role="group" の aria-label。省略時は KskLabelsProvider の `quantitySelectorGroup`（Provider 無しは "数量選択"。locale="en" で "Quantity"） */
   groupLabel?: string
-  /** 減少ボタンの aria-label（trash 状態でない場合）。@default "数量を減らす" */
+  /** 減少ボタンの aria-label（trash 状態でない場合）。省略時は KskLabelsProvider の `quantitySelectorDecrease`（Provider 無しは "数量を減らす"。locale="en" で "Decrease quantity"） */
   decreaseLabel?: string
-  /** 増加ボタンの aria-label。@default "数量を増やす" */
+  /** 増加ボタンの aria-label。省略時は KskLabelsProvider の `quantitySelectorIncrease`（Provider 無しは "数量を増やす"。locale="en" で "Increase quantity"） */
   increaseLabel?: string
-  /** 減少ボタンが削除操作を兼ねる（trash 状態）ときの aria-label。@default "削除" */
+  /** 減少ボタンが削除操作を兼ねる（trash 状態）ときの aria-label。省略時は KskLabelsProvider の `quantitySelectorDelete`（Provider 無しは "削除"。locale="en" で "Remove"） */
   deleteLabel?: string
 }
 
@@ -43,7 +44,12 @@ function TrashIcon({ size = 14 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3a1 1 0 011-1h2a1 1 0 011 1v1M5 4v8a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
 }
 
-function QuantitySelector({ className, value, min = 1, max = 99, onChange, disabled = false, size = "md", showTrash = false, onDelete, groupLabel = "数量選択", decreaseLabel = "数量を減らす", increaseLabel = "数量を増やす", deleteLabel = "削除", ...props }: QuantitySelectorProps) {
+function QuantitySelector({ className, value, min = 1, max = 99, onChange, disabled = false, size = "md", showTrash = false, onDelete, groupLabel: groupLabelProp, decreaseLabel: decreaseLabelProp, increaseLabel: increaseLabelProp, deleteLabel: deleteLabelProp, ...props }: QuantitySelectorProps) {
+  const defaultLabels = useKskLabels()
+  const groupLabel = groupLabelProp ?? defaultLabels.quantitySelectorGroup
+  const decreaseLabel = decreaseLabelProp ?? defaultLabels.quantitySelectorDecrease
+  const increaseLabel = increaseLabelProp ?? defaultLabels.quantitySelectorIncrease
+  const deleteLabel = deleteLabelProp ?? defaultLabels.quantitySelectorDelete
   /** ゴミ箱表示条件：showTrashが有効かつ最小値以下 */
   const isTrash = showTrash && value <= min
   /** 減少可能かどうか */

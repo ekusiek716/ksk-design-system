@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { formatKskLabel, useKskLabels } from "../ui/ksk-labels"
 
 /** ピルの高さ。行内に並べる密度に合わせて選ぶ。 */
 type FilterPillSize = "sm" | "md"
@@ -25,7 +26,7 @@ interface FilterPillProps {
    * 押しても Popover は開かない。
    */
   onClear?: () => void
-  /** クリアボタンの aria-label。既定は `{label}をクリア`。 */
+  /** クリアボタンの aria-label。省略時は KskLabelsProvider の `filterPillClear`（`{label}` をラベルに置換。Provider 無しは `{label}をクリア`、locale="en" で `Clear {label}`）。 */
   clearLabel?: string
   /**
    * Popover の中身。フィルタ UI は自由スロット（チェックリスト・スライダー・
@@ -42,7 +43,7 @@ interface FilterPillProps {
   defaultOpen?: boolean
   /**
    * Popover パネル（role="dialog"）の accessible name。
-   * 既定は `{label}のフィルタ`。パネル内に見出しがある場合はそれと揃える。
+   * 省略時は KskLabelsProvider の `filterPillPanel`（`{label}` をラベルに置換。Provider 無しは `{label}のフィルタ`、locale="en" で `{label} filter`）。パネル内に見出しがある場合はそれと揃える。
    */
   panelLabel?: string
   /** Popover の寄せ。既定は `start`（トリガーの左端揃え）。 */
@@ -108,6 +109,7 @@ function FilterPill({
   disabled = false,
   className,
 }: FilterPillProps) {
+  const defaultLabels = useKskLabels()
   const isActive = value != null && value !== ""
   const showClear = isActive && Boolean(onClear)
 
@@ -155,7 +157,7 @@ function FilterPill({
         </PopoverTrigger>
         <PopoverContent
           align={align}
-          aria-label={panelLabel ?? `${label}のフィルタ`}
+          aria-label={panelLabel ?? formatKskLabel(defaultLabels.filterPillPanel, { label })}
           className={cn("w-72", contentClassName)}
         >
           {children}
@@ -165,7 +167,7 @@ function FilterPill({
         <button
           type="button"
           disabled={disabled}
-          aria-label={clearLabel ?? `${label}をクリア`}
+          aria-label={clearLabel ?? formatKskLabel(defaultLabels.filterPillClear, { label })}
           onClick={(event) => {
             event.stopPropagation()
             onClear?.()

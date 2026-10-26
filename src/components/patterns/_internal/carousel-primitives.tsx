@@ -1,6 +1,7 @@
 import * as React from "react"
 import { ArrowLeft2, ArrowRight2 } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../../ui/ksk-labels"
 
 interface UseCarouselControllerOptions {
   total: number
@@ -69,13 +70,13 @@ interface CarouselControlsProps {
   onPrevious: () => void
   onNext: () => void
   onGoTo: (index: number) => void
-  /** 「前へ」ボタンの aria-label。@default "前へ" */
+  /** 「前へ」ボタンの aria-label。省略時は KskLabelsProvider の `carouselPrevious`（Provider 無しは "前へ"。locale="en" で "Previous"） */
   previousLabel?: string
-  /** 「次へ」ボタンの aria-label。@default "次へ" */
+  /** 「次へ」ボタンの aria-label。省略時は KskLabelsProvider の `carouselNext`（Provider 無しは "次へ"。locale="en" で "Next"） */
   nextLabel?: string
 }
 
-function carouselControls({
+function CarouselControls({
   active,
   total,
   showArrows,
@@ -83,9 +84,12 @@ function carouselControls({
   onPrevious,
   onNext,
   onGoTo,
-  previousLabel = "前へ",
-  nextLabel = "次へ",
+  previousLabel: previousLabelProp,
+  nextLabel: nextLabelProp,
 }: CarouselControlsProps) {
+  const defaultLabels = useKskLabels()
+  const previousLabel = previousLabelProp ?? defaultLabels.carouselPrevious
+  const nextLabel = nextLabelProp ?? defaultLabels.carouselNext
   return (
     <>
       {showArrows && total > 1 && (
@@ -115,7 +119,7 @@ function carouselControls({
               key={index}
               type="button"
               onClick={() => onGoTo(index)}
-              aria-label={`スライド ${index + 1}`}
+              aria-label={formatKskLabel(defaultLabels.carouselSlide, { index: index + 1 })}
               aria-current={index === active ? "true" : undefined}
               className="flex size-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)]"
             >
@@ -136,4 +140,4 @@ function carouselControls({
   )
 }
 
-export { carouselControls, useCarouselController }
+export { CarouselControls, useCarouselController }

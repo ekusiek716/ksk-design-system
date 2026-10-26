@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../ui/ksk-labels"
 
 const chipVariants = cva(
   // #725: 色のアニメーションはマウス操作の端末（hover:hover かつ pointer:fine）だけ。Android の一部端末は
@@ -134,10 +135,11 @@ function Chip({
   const disabled = isSoldOut || disabledProp
   const actualSize = size ?? "md"
   const actualShape = shape ?? "pill"
+  const defaultLabels = useKskLabels()
   const removeLabel =
     typeof children === "string" || typeof children === "number"
-      ? `削除: ${children}`
-      : "削除"
+      ? formatKskLabel(defaultLabels.chipRemoveNamed, { name: children })
+      : defaultLabels.chipRemove
 
   const countBadge = count !== undefined && (
     <span

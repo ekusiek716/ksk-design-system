@@ -1,7 +1,8 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../../ui/ksk-labels"
 import {
-  carouselControls as CarouselControls,
+  CarouselControls,
   useCarouselController,
 } from "@/components/patterns/_internal/carousel-primitives"
 
@@ -12,11 +13,11 @@ interface ImageCarouselProps extends React.ComponentProps<"div"> {
   showDots?: boolean
   showArrows?: boolean
   autoPlay?: number
-  /** スクロール領域 (role="region") の aria-label。@default "画像カルーセル" */
+  /** スクロール領域 (role="region") の aria-label。省略時は KskLabelsProvider の `imageCarouselRegion`（Provider 無しは "画像カルーセル"。locale="en" で "Image carousel"） */
   regionLabel?: string
-  /** 「前へ」ボタンの aria-label。@default "前へ" */
+  /** 「前へ」ボタンの aria-label。省略時は KskLabelsProvider の `carouselPrevious`（Provider 無しは "前へ"） */
   previousLabel?: string
-  /** 「次へ」ボタンの aria-label。@default "次へ" */
+  /** 「次へ」ボタンの aria-label。省略時は KskLabelsProvider の `carouselNext`（Provider 無しは "次へ"） */
   nextLabel?: string
 }
 
@@ -27,12 +28,14 @@ function ImageCarousel({
   showDots = true,
   showArrows = true,
   autoPlay = 0,
-  regionLabel = "画像カルーセル",
-  previousLabel = "前へ",
-  nextLabel = "次へ",
+  regionLabel: regionLabelProp,
+  previousLabel,
+  nextLabel,
   className,
   ...props
 }: ImageCarouselProps) {
+  const defaultLabels = useKskLabels()
+  const regionLabel = regionLabelProp ?? defaultLabels.imageCarouselRegion
   const total = images.length
   const { active, goTo, next, previous, scrollRef } = useCarouselController({
     total,

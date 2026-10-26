@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useKskLabels } from "../ui/ksk-labels"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -73,7 +74,7 @@ interface SidebarNavProps extends React.ComponentProps<"nav"> {
    * @default false
    */
   collapsed?: boolean
-  /** nav 要素の aria-label。@default "サイドナビゲーション" */
+  /** nav 要素の aria-label。省略時は KskLabelsProvider の `sidebarNav`（Provider 無しは "サイドナビゲーション"。locale="en" で "Sidebar navigation"） */
   navLabel?: string
   /**
    * 置く面の明暗（issue #680）。
@@ -197,11 +198,13 @@ function SidebarNavRow({ item, collapsed, tone }: { item: SidebarNavItem; collap
 function SidebarNav({
   items,
   collapsed = false,
-  navLabel = "サイドナビゲーション",
+  navLabel: navLabelProp,
   tone = "default",
   className,
   ...props
 }: SidebarNavProps) {
+  const defaultLabels = useKskLabels()
+  const navLabel = navLabelProp ?? defaultLabels.sidebarNav
   return (
     <nav
       data-slot="sidebar-nav"
