@@ -61,6 +61,41 @@ describe("native Radio", () => {
   })
 })
 
+describe("native RadioGroup のグループ名と役割（#765）", () => {
+  const options = [{ value: "a", label: "A" }, { value: "b", label: "B", disabled: true }]
+  const group = () => hosts.records.find(r => r.props.accessibilityRole === "radiogroup")!
+
+  it("外側は radiogroup で、accessibilityLabel / accessibilityLabelledBy をそのまま渡す", () => {
+    render(<RadioGroup accessibilityLabel="通知時刻" accessibilityLabelledBy="heading" value="a" options={options} />)
+    expect(hosts.records.filter(r => r.props.accessibilityRole === "radiogroup")).toHaveLength(1)
+    expect(group().host).toBe("View")
+    expect(group().props.accessibilityLabel).toBe("通知時刻")
+    expect(group().props.accessibilityLabelledBy).toBe("heading")
+  })
+
+  it("各行は radio ロールで、accessibilityState は main と同一（selected / disabled のみ）", () => {
+    render(<RadioGroup accessibilityLabel="通知時刻" value="a" options={options} />)
+    const radios = hosts.records.filter(r => r.props.accessibilityRole === "radio")
+    expect(radios.map(r => r.props.accessibilityState)).toEqual([
+      { selected: true, disabled: undefined },
+      { selected: false, disabled: true },
+    ])
+    expect(radios.map(r => r.props["aria-checked"])).toEqual([true, false])
+  })
+
+  it("名前が無いと開発ビルドで警告し、名前があれば警告しない", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    render(<RadioGroup options={options} />)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(String(warn.mock.calls[0][0])).toContain("RadioGroup")
+    warn.mockClear()
+    render(<RadioGroup accessibilityLabel="x" options={options} />)
+    render(<RadioGroup accessibilityLabelledBy="h" options={options} />)
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+})
+
 describe("native ListItem", () => {
   for (const name of themeNames) for (const mode of ["light", "dark"] as const) {
     it(`${name}/${mode}: string tones keep typography and resolve semantic colors`, () => {

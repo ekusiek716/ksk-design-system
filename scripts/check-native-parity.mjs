@@ -106,6 +106,13 @@ const R_INDEPENDENT =
   "Web and Native implementations were designed independently for this component (pre-dates this check); prop vocabulary diverges by design and is tracked here as the established baseline, not a new regression"
 
 const INTENTIONAL_PROP_GAPS = new Map([
+  // Web の RadioGroup は Radix Root の props をそのまま受ける（RadioGroupProps を持たないので own props を抽出できず、
+  // この行は diff の検査対象外＝対応の記録として docs/native-support.md に出るだけ。issue #765）
+  ["RadioGroup", {
+    webOnly: [],
+    nativeOnly: ["accessibilityLabel", "accessibilityLabelledBy"],
+    reason: "グループの読み上げ名（issue #765）。Web は Radix Root へ `...props` を渡すので aria-label / aria-labelledby、Native は accessibilityLabel / accessibilityLabelledBy が各プラットフォームの idiomatic な同じ機能（ChipSelector の単一選択と同じ名前）。Web 側の props は継承で own props に出ないためこの行は記録のみ",
+  }],
   ["Button", {
     webOnly: ["asChild", "haptic", "unstyled"],
     nativeOnly: ["variant", "elevation", "containerStyle", "pressedContainerStyle", "textStyle", "leadingIcon", "trailingIcon", "spinnerColor", "children"],

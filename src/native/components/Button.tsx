@@ -13,6 +13,7 @@ import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { resolveRaisedElevationStyle } from "../button-elevation"
 import { GlassView } from "./GlassView"
+import { glassInnerNeedsGrow, resolveGlassHitSlop, splitGlassContainerStyle } from "../button-glass-style"
 
 /**
  * - `ghost-neutral`: 背景も枠も無い灰色（text.medium-emphasis）の文字ボタン。スキップ・あとで・
@@ -43,9 +44,19 @@ export interface ButtonProps extends Omit<PressableProps, "children" | "style"> 
   variant?: ButtonVariant
   /** 立体感。default 'flat'。トークン scales.elevation で量を管理 */
   elevation?: ButtonElevation
-  /** コンテナの style を上書きするポイント（DS の標準を保持しつつ微調整したい時） */
+  /**
+   * コンテナの style を上書きするポイント（DS の標準を保持しつつ微調整したい時）。
+   *
+   * `variant="glass"` では外側（押せる範囲・角丸のクリップ）と内側（ぼかし面）に振り分けて反映する
+   * （issue #754）: padding 系は内側の余白、それ以外（width / height / minHeight / margin 等）は外側、
+   * borderRadius は両方。`height` だけ渡したときは既定の最小高さ 44 を外すので、丸く小さい補助ボタンは
+   * `{ width: 40, height: 40, paddingHorizontal: 0, borderRadius: 20 }` で作れる。見た目が 44 未満の
+   * 数値 width / height / minWidth / minHeight には、実タップ領域が 44 以上になるよう `hitSlop` を自動で足す
+   * （`hitSlop` を渡せばそちらが優先）。
+   * 注意: `padding: 0` だけでは既定の左右余白（paddingHorizontal: 20）は消えない。消すなら `paddingHorizontal` も指定する。
+   */
   containerStyle?: StyleProp<ViewStyle>
-  /** 押下時の style を上書きするポイント */
+  /** 押下時の style を上書きするポイント（glass では containerStyle と同じ振り分け・押下中かつ非 disabled のとき） */
   pressedContainerStyle?: StyleProp<ViewStyle>
   /** 内部 Text の style を上書きするポイント */
   textStyle?: StyleProp<TextStyle>
@@ -148,46 +159,74 @@ export function Button({
   // iOS 26 Liquid Glass を消費する装飾系ボタン。背景が暗い画像/ヒーロー上で使う想定。
   if (variant === "glass") {
     const fg = mode === "dark" ? theme.text["high-emphasis"] : theme.text["high-emphasis"]
+    const minTarget = scales.touchTargets.buttonCTA.min
+    // containerStyle / pressedContainerStyle は外側 Pressable と内側 GlassView に振り分ける（issue #754・
+    // 振り分けの規則は button-glass-style.ts）。非 glass と同じく pressed 側は押下中かつ非 disabled のときだけ当てる。
+    const resolveGlassStyles = (pressed: boolean) => {
+      const base = splitGlassContainerStyle(containerStyle)
+      const press = pressed && !effectiveDisabled ? splitGlassContainerStyle(pressedContainerStyle) : { outer: {}, inner: {} }
+      const outer: ViewStyle = { ...base.outer, ...press.outer }
+      const inner: ViewStyle = { ...base.inner, ...press.inner }
+      // height だけ渡された（例: 40×40 の丸）ときに既定 minHeight 44 が height を押し上げないよう、
+      // minHeight は consumer が minHeight か height を指定したときだけ既定を外す
+      const minHeight = outer.minHeight ?? (outer.height === undefined ? minTarget : undefined)
+      const radius = typeof outer.borderRadius === "number" ? outer.borderRadius : scales.borderRadius.full
+      return { outer, inner, minHeight, radius }
+    }
+    const resting = resolveGlassStyles(false)
+    const hitSlop = resolveGlassHitSlop({ ...resting.outer, minHeight: resting.minHeight }, minTarget)
     return (
       <Pressable
         disabled={effectiveDisabled}
         accessibilityState={{ ...accessibilityState, disabled: effectiveDisabled, busy: loading || undefined }}
-        style={{
-          minHeight: scales.touchTargets.buttonCTA.min,
-          borderRadius: scales.borderRadius.full,
-          overflow: "hidden",
-          opacity: effectiveDisabled ? 0.56 : 1,
+        hitSlop={hitSlop}
+        style={({ pressed }) => {
+          const r = resolveGlassStyles(pressed)
+          return {
+            borderRadius: scales.borderRadius.full,
+            overflow: "hidden",
+            opacity: effectiveDisabled ? 0.56 : 1,
+            ...r.outer,
+            minHeight: r.minHeight,
+          }
         }}
         {...rest}
       >
-        {({ pressed }) => (
-          <GlassView
-            intensity="regular"
-            borderRadius={scales.borderRadius.full}
-            style={{
-              minHeight: scales.touchTargets.buttonCTA.min,
-              paddingHorizontal: scales.spacing.scale[5],
-              justifyContent: "center",
-              alignItems: "center",
-              flexDirection: "row",
-              gap: scales.spacing.scale[2],
-              transform: [{ scale: pressed ? 0.96 : 1 }],
-            }}
-          >
-            <ButtonContent
-              color={fg}
-              textStyle={textStyle}
-              loading={loading}
-              loadingLabel={loadingLabel}
-              spinnerColor={spinnerColor}
-              leadingIcon={leadingIcon}
-              trailingIcon={trailingIcon}
-              gap={scales.spacing.scale[2]}
+        {({ pressed }) => {
+          const r = resolveGlassStyles(pressed)
+          return (
+            <GlassView
+              intensity="regular"
+              borderRadius={r.radius}
+              style={{
+                minHeight: r.minHeight,
+                paddingHorizontal: scales.spacing.scale[5],
+                justifyContent: "center",
+                alignItems: "center",
+                flexDirection: "row",
+                gap: scales.spacing.scale[2],
+                // 外側の寸法を containerStyle が決めているときだけ、内側のぼかし面も埋める
+                // （常に付けると、横並び + stretch の親で既定の glass が行の高さまで伸びる）
+                ...(glassInnerNeedsGrow(r.outer) ? { flexGrow: 1 } : null),
+                ...r.inner,
+                transform: [{ scale: pressed ? 0.96 : 1 }],
+              }}
             >
-              {children}
-            </ButtonContent>
-          </GlassView>
-        )}
+              <ButtonContent
+                color={fg}
+                textStyle={textStyle}
+                loading={loading}
+                loadingLabel={loadingLabel}
+                spinnerColor={spinnerColor}
+                leadingIcon={leadingIcon}
+                trailingIcon={trailingIcon}
+                gap={scales.spacing.scale[2]}
+              >
+                {children}
+              </ButtonContent>
+            </GlassView>
+          )
+        }}
       </Pressable>
     )
   }
