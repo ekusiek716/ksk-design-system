@@ -54,12 +54,15 @@ describe("CoachMark のボタン文言 prop（#477）", () => {
 })
 
 describe("CoachMarkOverlay の labels prop（#477）", () => {
-  it("labels の未指定キーは既定値で埋める", () => {
-    expect(overlaySource).toContain("const DEFAULT_LABELS = {")
-    expect(overlaySource).toContain('next: "次へ →"')
-    expect(overlaySource).toContain('skip: "スキップ"')
-    expect(overlaySource).toContain('ariaLabel: "Onboarding coach mark"')
-    expect(overlaySource).toContain("const resolvedLabels = { ...DEFAULT_LABELS, ...labels }")
+  it("labels の未指定キーは KskLabelsProvider の既定で埋める（Provider 無しは従来の文言）", () => {
+    expect(overlaySource).not.toContain("const DEFAULT_LABELS = {")
+    expect(overlaySource).toContain("next: labels?.next ?? defaultLabels.coachMarkNext")
+    expect(overlaySource).toContain("skip: labels?.skip ?? defaultLabels.coachMarkSkip")
+    expect(overlaySource).toContain("ariaLabel: labels?.ariaLabel ?? defaultLabels.coachMarkOverlayLabel")
+    // Provider 無しの文言は変えない（aria-label は従来どおり英語の "Onboarding coach mark"）
+    expect(kskLabelsSource).toContain('coachMarkNext: "次へ →"')
+    expect(kskLabelsSource).toContain('coachMarkSkip: "スキップ"')
+    expect(kskLabelsSource).toContain('coachMarkOverlayLabel: "Onboarding coach mark"')
   })
 
   it("最終ステップは done（未指定なら next）を使う", () => {

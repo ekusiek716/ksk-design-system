@@ -275,20 +275,40 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
     { prop: "copyLabel", reason: KSK_LABELS_WEB },
     { prop: "copiedLabel", reason: KSK_LABELS_WEB },
   ]],
+  ["Combobox", [
+    { prop: "placeholder", reason: KSK_LABELS_WEB },
+    { prop: "searchPlaceholder", reason: KSK_LABELS_WEB },
+  ]],
+  // Web CompactFilePicker の loadingLabel（"処理中"。issue #539）は KskLabelsProvider の `compactFilePickerLoading` に移ったため、
+  // destructure 既定が無くなり Native（Button の spinner のみ・既定文言なし）と構文上の差は消えた。
+  // 「Web はボタン文言を差し替える / Native は spinner だけ」という挙動差自体は従来どおり意図的（Web は Button の loading 移植前の実装）。
   ["CompactFilePicker", [
-    { prop: "loadingLabel", reason: "Web's default \"処理中\" (issue #539) is required because the Web CompactFilePicker does not use Button's `loading` spinner (it predates the Web Button loading port) — CompactFilePicker swaps the trigger's own text for `loadingLabel` while loading, so an unset default would render a blank-looking button. Native instead forwards loading/loadingLabel straight into Native Button's own `loading` prop, whose ButtonContent renders an ActivityIndicator and only appends a text node when `loadingLabel` is explicitly passed (src/native/components/Button.tsx) — the spinner alone already signals busy state there, so no default caption is needed. Each platform's own Button loading API decides whether a default is required, not a missed port." },
+    { prop: "label", reason: KSK_LABELS_WEB },
+    { prop: "triggerLabel", reason: KSK_LABELS_WEB },
   ]],
   ["CountdownHero", [
     { prop: "label", reason: KSK_LABELS_WEB },
     { prop: "todayLabel", reason: KSK_LABELS_WEB },
     { prop: "pastLabel", reason: KSK_LABELS_WEB },
   ]],
+  ["DatePicker", [
+    { prop: "placeholder", reason: KSK_LABELS_WEB },
+  ]],
   ["ErrorState", [
     { prop: "title", reason: `Web has no destructure default but falls back to the *same* text ("エラーが発生しました") via \`title ?? (notFound ? … : "エラーが発生しました")\` inside the function body. ${RD_BLIND_SPOT} — verified identical effective text, not just a shape artifact.` },
     { prop: "description", reason: `Web has no destructure default but falls back (non-notFound case) to \`description ?? "しばらくしてからもう一度お試しください"\` inside the function body; Native's destructure default was aligned to the identical text (2026-08-10, previously "時間をおいて再度お試しください。"). ${RD_BLIND_SPOT} — verified identical effective text after alignment.` },
   ]],
+  ["FeatureComparisonTable", [
+    { prop: "featureLabel", reason: KSK_LABELS_WEB },
+    { prop: "availableLabel", reason: KSK_LABELS_WEB },
+    { prop: "unavailableLabel", reason: KSK_LABELS_WEB },
+  ]],
   ["FilterBar", [
     { prop: "sortLabel", reason: `Web has no destructure default but falls back to "並べ替え" via \`sortLabel ?? "並べ替え"\` at each render site (it also gates whether the result-count/sort row renders at all, so it deliberately can't become a Web destructure default without changing that visibility check); Native's destructure default was aligned to the identical "並べ替え" text (2026-08-10, previously "並び替え"). ${RD_BLIND_SPOT} — verified identical effective text after alignment.` },
+  ]],
+  ["MultiSelect", [
+    { prop: "placeholder", reason: KSK_LABELS_WEB },
+    { prop: "searchPlaceholder", reason: KSK_LABELS_WEB },
   ]],
   ["NotificationBadge", [
     { prop: "count", reason: `Web declares \`count: number\` as required (no default — callers must always pass a value); Native declares \`count?: number\` optional with a \`0\` fallback for looser call sites. ${RD_API_SHAPE}` },
@@ -315,6 +335,12 @@ const INTENTIONAL_DEFAULT_GAPS = new Map([
   ]],
   ["Spinner", [
     { prop: "label", reason: KSK_LABELS_WEB },
+  ]],
+  ["TagInput", [
+    { prop: "placeholder", reason: KSK_LABELS_WEB },
+  ]],
+  ["TimePicker", [
+    { prop: "placeholder", reason: KSK_LABELS_WEB },
   ]],
   ["StarRating", [
     { prop: "size", reason: `Web's "md" token is Tailwind's \`size-5\` = 20px (1.25rem); Native's own default is the literal 20 (px). ${RD_EQUIVALENT_UNIT} — verified same 20px value.` },
