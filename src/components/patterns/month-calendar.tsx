@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { ArrowDown2, ArrowLeft2, ArrowRight2 } from "iconsax-reactjs"
-import { formatKskLabel, useKskLabels, useKskLabelsFor, useKskLocaleFor } from "../ui/ksk-labels"
+import { formatKskLabel, useKskLabelsFor, useKskLocaleFor } from "../ui/ksk-labels"
 import { formatCalendarDay, formatCalendarMonth, shortWeekdays } from "@/lib/calendar-labels"
 import { Button, type ButtonProps } from "../ui/button"
 import {
@@ -503,12 +503,13 @@ interface MonthCalendarHeaderProps extends Omit<React.ComponentProps<"div">, "ti
   /** 見出しの要素。既定 "h2"。置き場所の見出し階層に合わせる */
   headingLevel?: "h2" | "h3"
   /**
-   * 表示言語（title の既定の語順）。既定は KskLabelsProvider の locale（無ければ "ja"）。
-   * title の既定は KskLabelsProvider の `calendarMonthTitle` で差し替えられる（Provider の locale と異なる locale を指定したときは
-   * Provider の labels を使わず、指定した言語の既定）。ボタンの文言は `locale` では変わらず、Provider の labels に従う
+   * 表示言語（title の既定の語順と、「今日へ」・前後の月ボタンの既定の文言）。既定は KskLabelsProvider の locale（無ければ "ja"）。
+   * これらの既定は KskLabelsProvider の labels（`calendarMonthTitle` / `calendarToday` / `calendarPrevMonth` / `calendarNextMonth`）で差し替えられる。
+   * Provider の locale と異なる locale を指定したときは Provider の labels を使わず、指定した言語の既定になる。
+   * `todayLabel` / `prevLabel` / `nextLabel` / `title` を渡したときはそれが最優先
    */
   locale?: "ja" | "en"
-  /** 「今日へ」の文言。既定は KskLabelsProvider の calendarToday（無ければ「今日へ」） */
+  /** 「今日へ」の文言。既定は KskLabelsProvider の calendarToday（無ければ `locale` の既定。日本語は「今日へ」） */
   todayLabel?: string
   /** 前の月ボタンの読み上げ名。既定は KskLabelsProvider の calendarPrevMonth（無ければ「前の月」） */
   prevLabel?: string
@@ -552,13 +553,12 @@ function MonthCalendarHeader({
   className,
   ...props
 }: MonthCalendarHeaderProps) {
-  const labels = useKskLabels()
-  // 月の見出しの語順だけ locale prop に従う（ボタンの文言は従来どおり Provider の labels。locale prop は title の既定にだけ効く）
-  const titleLabels = useKskLabelsFor(localeProp)
-  const titleLocale = useKskLocaleFor(localeProp)
+  // 見出しの語順もボタンの文言も同じ解決: prop > locale prop が Provider と違うときはその言語の既定 > Provider の labels > 日本語
+  const labels = useKskLabelsFor(localeProp)
+  const locale = useKskLocaleFor(localeProp)
   const start = toMonthStart(month)
   const hasTrailing = trailing != null && trailing !== false
-  const defaultTitle = formatCalendarMonth(start, titleLabels, titleLocale)
+  const defaultTitle = formatCalendarMonth(start, labels, locale)
   return (
     <div
       data-slot="month-calendar-header"
@@ -627,9 +627,14 @@ interface MonthCalendarExpandToggleProps extends Omit<ButtonProps, "children" | 
   onExpandedChange: (expanded: boolean) => void
   /**
    * 読み上げ名。開閉で変えない（状態は aria-expanded が伝える）。
-   * 既定は KskLabelsProvider の calendarExpand（無ければ「月全体を表示」）
+   * 既定は KskLabelsProvider の calendarExpand（無ければ `locale` の既定。日本語は「月全体を表示」）
    */
   label?: string
+  /**
+   * 表示言語（`label` の既定）。既定は KskLabelsProvider の locale（無ければ "ja"）。MonthCalendar / MonthCalendarHeader の `locale` と同じ規則
+   * （Provider の locale と異なる locale を指定したときは Provider の labels を使わず、指定した言語の既定。`label` を渡したときはそれが最優先）
+   */
+  locale?: "ja" | "en"
 }
 
 /**
@@ -643,10 +648,11 @@ function MonthCalendarExpandToggle({
   expanded,
   onExpandedChange,
   label,
+  locale: localeProp,
   className,
   ...props
 }: MonthCalendarExpandToggleProps) {
-  const labels = useKskLabels()
+  const labels = useKskLabelsFor(localeProp)
   return (
     <Button
       type="button"
