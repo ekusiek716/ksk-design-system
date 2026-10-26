@@ -1,10 +1,11 @@
 {
   "_doc": "配布物サイズの予算の正本。検査は scripts/check-bundle-size.mjs（npm run build:lib && npm run lint:bundle-size）、純関数は scripts/lib/bundle-size.mjs。baselineBytes は最後に実測した gzip バイト数、budgetBytes は超えると CI が落ちる上限。数値は node scripts/check-bundle-size.mjs --update で実測から書き換える（ローカル専用。意図したサイズ増のときだけ使い、PR に理由を書く）。",
   "meta": {
-    "updatedAt": "2026-10-25",
+    "updatedAt": "2026-10-26",
     "metric": "gzip（zlib level 9）。各 JS ファイルを個別に圧縮した合計。raw と brotli（quality 11）は baselineRawBytes / baselineBrotliBytes に参考値として記録する。",
     "budgetPolicy": "budgetBytes = 実測 gzip × 1.10 を 100 バイト単位で切り上げ。+10% は、依存ライブラリ（vite / zlib）の更新による数 % 規模の揺れを吸収しつつ、コンポーネント 1〜2 個ぶんの意図しない増加は検出できる幅として選んだ。小さい成果物（class-names など）でも 0 バイト差の予算にならないよう 100 バイト単位で切り上げる。実測が予算の 80% 以下になったら『予算を締め直せる』と注意を出す（失敗にはしない）。",
-    "externalPolicy": "tree-shaking ケースは vite（rolldown）で dist をバンドルし minify して測る。bare specifier（react / react-dom / radix-ui / iconsax-reactjs / clsx / tailwind-merge / class-variance-authority / react-native 等の dependencies・peerDependencies）はすべて external にして『DS 自身のコード』だけを測る。ksk-design-system と ksk-design-system/<subpath> だけは package.json exports が指す dist ファイルへ解決する。"
+    "externalPolicy": "tree-shaking ケースは vite（rolldown）で dist をバンドルし minify して測る。bare specifier（react / react-dom / radix-ui / iconsax-reactjs / clsx / tailwind-merge / class-variance-authority / react-native 等の dependencies・peerDependencies）はすべて external にして『DS 自身のコード』だけを測る。ksk-design-system と ksk-design-system/<subpath> だけは package.json exports が指す dist ファイルへ解決する。",
+    "lastUpdateReason": "2026-10-26 v2.22 予定: KskLabels の ja/en 辞書（約99キー）と、それを参照する約55部品の追加コードで、tree-shaking の各ケースが gzip +約3.2KB（辞書 約2.2KB + 参照コード 約1KB。Calendar の enUS import は react-day-picker 本体が元から同梱するため増加なし）。多言語対応のための意図した増加。"
   },
   "entries": [
     {
@@ -12,40 +13,40 @@
       "specifier": "ksk-design-system",
       "file": "dist/index.js",
       "description": "Web 全コンポーネント。dist/index.js + 静的 import で辿れるチャンク（server-variants / prompt-coordinator）の合計。",
-      "baselineBytes": 230692,
-      "budgetBytes": 253800,
-      "baselineRawBytes": 950723,
-      "baselineBrotliBytes": 180511
+      "baselineBytes": 234913,
+      "budgetBytes": 258500,
+      "baselineRawBytes": 966870,
+      "baselineBrotliBytes": 183801
     },
     {
       "id": "class-names",
       "specifier": "ksk-design-system/class-names",
       "file": "dist/class-names.js",
       "description": "Server Component から使う cva variants 集。dist/class-names.js + server-variants チャンク。",
-      "baselineBytes": 1610,
-      "budgetBytes": 1800,
-      "baselineRawBytes": 6666,
-      "baselineBrotliBytes": 1408
+      "baselineBytes": 1779,
+      "budgetBytes": 2000,
+      "baselineRawBytes": 8011,
+      "baselineBrotliBytes": 1546
     },
     {
       "id": "native",
       "specifier": "ksk-design-system/native",
       "file": "dist/native.js",
       "description": "RN/Expo 向け解決済みトークン（React 非依存の純データ）。dist/native.js + native チャンク。",
-      "baselineBytes": 5345,
+      "baselineBytes": 5346,
       "budgetBytes": 5900,
       "baselineRawBytes": 50142,
-      "baselineBrotliBytes": 4006
+      "baselineBrotliBytes": 4010
     },
     {
       "id": "native/ui",
       "specifier": "ksk-design-system/native/ui",
       "file": "dist/native/ui.js",
       "description": "RN コンポーネント + ThemeProvider。dist/native/ui.js + native / prompt-coordinator チャンク。",
-      "baselineBytes": 63290,
+      "baselineBytes": 63291,
       "budgetBytes": 69700,
       "baselineRawBytes": 312702,
-      "baselineBrotliBytes": 50213
+      "baselineBrotliBytes": 50162
     }
   ],
   "treeShaking": [
@@ -61,10 +62,10 @@
           ]
         }
       ],
-      "baselineBytes": 20067,
-      "budgetBytes": 22100,
-      "baselineRawBytes": 72269,
-      "baselineBrotliBytes": 17414
+      "baselineBytes": 23243,
+      "budgetBytes": 25600,
+      "baselineRawBytes": 82668,
+      "baselineBrotliBytes": 20000
     },
     {
       "id": "card-only",
@@ -78,10 +79,10 @@
           ]
         }
       ],
-      "baselineBytes": 20418,
-      "budgetBytes": 22500,
-      "baselineRawBytes": 73062,
-      "baselineBrotliBytes": 17662
+      "baselineBytes": 23526,
+      "budgetBytes": 25900,
+      "baselineRawBytes": 83461,
+      "baselineBrotliBytes": 20223
     },
     {
       "id": "dialog-only",
@@ -95,10 +96,10 @@
           ]
         }
       ],
-      "baselineBytes": 19442,
-      "budgetBytes": 21400,
-      "baselineRawBytes": 70491,
-      "baselineBrotliBytes": 16841
+      "baselineBytes": 22628,
+      "budgetBytes": 24900,
+      "baselineRawBytes": 80893,
+      "baselineBrotliBytes": 19443
     },
     {
       "id": "cn-only",
@@ -112,10 +113,10 @@
           ]
         }
       ],
-      "baselineBytes": 19395,
-      "budgetBytes": 21400,
-      "baselineRawBytes": 70352,
-      "baselineBrotliBytes": 16806
+      "baselineBytes": 22569,
+      "budgetBytes": 24900,
+      "baselineRawBytes": 80755,
+      "baselineBrotliBytes": 19358
     },
     {
       "id": "class-names-button-variants",
@@ -129,10 +130,10 @@
           ]
         }
       ],
-      "baselineBytes": 1296,
+      "baselineBytes": 1325,
       "budgetBytes": 1500,
-      "baselineRawBytes": 5503,
-      "baselineBrotliBytes": 1115
+      "baselineRawBytes": 6066,
+      "baselineBrotliBytes": 1144
     },
     {
       "id": "native-get-theme",
@@ -146,10 +147,10 @@
           ]
         }
       ],
-      "baselineBytes": 2258,
+      "baselineBytes": 2259,
       "budgetBytes": 2500,
       "baselineRawBytes": 31862,
-      "baselineBrotliBytes": 1669
+      "baselineBrotliBytes": 1672
     },
     {
       "id": "native-ui-button",
@@ -163,10 +164,10 @@
           ]
         }
       ],
-      "baselineBytes": 7883,
+      "baselineBytes": 7884,
       "budgetBytes": 8700,
       "baselineRawBytes": 48691,
-      "baselineBrotliBytes": 6404
+      "baselineBrotliBytes": 6410
     }
   ]
 }
