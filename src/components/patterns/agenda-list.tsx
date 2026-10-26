@@ -1,8 +1,9 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { useKskLocale } from "../ui/ksk-labels"
+import { useKskLabelsFor } from "../ui/ksk-labels"
+import { formatCalendarDay, shortWeekdays } from "@/lib/calendar-labels"
 import type { MonthCalendarEvent } from "./month-calendar"
-import { ACCENT_DOT, CHIP_TONE, WEEKDAYS, formatDayLabel, parseKey, resolveEventAccent, resolveTodayKey } from "./_internal/calendar-shared"
+import { ACCENT_DOT, CHIP_TONE, parseKey, resolveEventAccent, resolveTodayKey } from "./_internal/calendar-shared"
 
 interface AgendaListProps extends Omit<React.ComponentProps<"div">, "onSelect"> {
   /** 予定（MonthCalendar と同じ形。date は "YYYY-MM-DD"） */
@@ -16,7 +17,12 @@ interface AgendaListProps extends Omit<React.ComponentProps<"div">, "onSelect"> 
   selectedDate?: string
   /** 「今日」の基準日。省略時は現在日 */
   today?: Date | string
-  /** 表示言語（日付の読み上げ・曜日）。既定は KskLabelsProvider の locale（無ければ "ja"） */
+  /**
+   * 表示言語（日付の読み上げ・曜日・「予定なし」・「今日」）。既定は KskLabelsProvider の locale（無ければ "ja"）。
+   * 文言は KskLabelsProvider の `calendarDayLabel` / `calendarWeekdaysShort` / `calendarDayToday` / `agendaEmptyDay` で差し替えられる。
+   * Provider の locale と**異なる** locale を指定したときは、Provider の labels は使わず指定した言語の既定文言になる
+   * （日本語の差し替え文言が英語の一覧に混ざらないように）
+   */
   locale?: "ja" | "en"
   /** 日曜を Text-Caution、土曜を Text-Accent-Primary にする（MonthCalendar と同じ）。既定 true */
   weekendTone?: boolean
@@ -26,7 +32,7 @@ interface AgendaListProps extends Omit<React.ComponentProps<"div">, "onSelect"> 
   renderEvent?: (event: MonthCalendarEvent) => React.ReactNode
   /** 並べる日が 1 日も無いときに出すもの（EmptyState 等） */
   empty?: React.ReactNode
-  /** `dates` で渡した予定の無い日の文言。既定 ja「予定なし」/ en「No events」 */
+  /** `dates` で渡した予定の無い日の文言。既定は KskLabelsProvider の `agendaEmptyDay`（無ければ ja「予定なし」/ en「No events」） */
   emptyDayLabel?: string
   /**
    * 日の行の id（スクロール連動・「今日へ」のジャンプ先）。例: `(d) => \`agenda-${d}\``。
@@ -67,9 +73,9 @@ function AgendaList({
   className,
   ...props
 }: AgendaListProps) {
-  // 既定は KskLabelsProvider の locale（無ければ "ja"。issue #723）
-  const providerLocale = useKskLocale()
-  const locale = localeProp ?? providerLocale ?? "ja"
+  // 文言は prop > locale prop が Provider と違うときはその言語の既定 > Provider の labels > 日本語（issue #723）
+  const labels = useKskLabelsFor(localeProp)
+  const weekdays = shortWeekdays(labels)
   const Heading = `h${headingLevel}` as "h2" | "h3" | "h4" | "h5" | "h6"
   const todayKey = resolveTodayKey(today)
   const eventsByDate = React.useMemo(() => {
@@ -83,7 +89,7 @@ function AgendaList({
   }, [events])
   // dates の重複は 1 行にまとめる（同じ日の行・key・id が二重にならないように）
   const days = dates ? [...new Set(dates)] : [...eventsByDate.keys()].sort()
-  const noEventsLabel = emptyDayLabel ?? (locale === "ja" ? "予定なし" : "No events")
+  const noEventsLabel = emptyDayLabel ?? labels.agendaEmptyDay
 
   if (days.length === 0) {
     return (
@@ -102,7 +108,7 @@ function AgendaList({
           const dayEvents = eventsByDate.get(key) ?? []
           const isToday = key === todayKey
           const isSelected = key === selectedDate
-          const headingLabel = `${formatDayLabel(key, locale)}${isToday ? (locale === "ja" ? "、今日" : ", today") : ""}`
+          const headingLabel = `${formatCalendarDay(d, labels)}${isToday ? labels.calendarDayToday : ""}`
           return (
             <li
               key={key}
@@ -137,7 +143,7 @@ function AgendaList({
                         : "text-[var(--Text-Medium-Emphasis)]"
                   )}
                 >
-                  {WEEKDAYS[locale][weekday]}
+                  {weekdays[weekday]}
                 </span>
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">

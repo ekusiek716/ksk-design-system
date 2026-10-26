@@ -309,6 +309,17 @@ describe("KskLabelsProvider", () => {
       countdownSpokenMinute: "{count}分",
       countdownSpokenSecond: "{count}秒",
       countdownSpokenSeparator: "",
+      calendarWeekdaysShort: "日,月,火,水,木,金,土",
+      calendarWeekdaysLong: "日曜日,月曜日,火曜日,水曜日,木曜日,金曜日,土曜日",
+      calendarMonthsLong: "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月",
+      calendarMonthsShort: "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月",
+      calendarDayLabel: "{month}月{day}日（{weekday}）",
+      calendarMonthTitle: "{year}年{month}月",
+      calendarDayToday: "、今日",
+      calendarDayEvents: "、予定{count}件: {events}",
+      calendarEventsSeparator: "、",
+      calendarMore: "+{count}件",
+      agendaEmptyDay: "予定なし",
     })
   })
 
@@ -509,6 +520,17 @@ describe("KskLabelsProvider", () => {
       countdownSpokenMinute: "{count} minute(s)",
       countdownSpokenSecond: "{count} second(s)",
       countdownSpokenSeparator: " ",
+      calendarWeekdaysShort: "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+      calendarWeekdaysLong: "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday",
+      calendarMonthsLong: "January,February,March,April,May,June,July,August,September,October,November,December",
+      calendarMonthsShort: "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+      calendarDayLabel: "{weekday}, {monthShort} {day}",
+      calendarMonthTitle: "{monthName} {year}",
+      calendarDayToday: ", today",
+      calendarDayEvents: ", {count} events: {events}",
+      calendarEventsSeparator: ", ",
+      calendarMore: "+{count} more",
+      agendaEmptyDay: "No events",
     })
   })
 

@@ -3,12 +3,19 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Calendar } from "./calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "./popover"
-import { useKskLabels, useKskLocale } from "./ksk-labels"
+import { useKskLabels, type ResolvedKskLabels } from "./ksk-labels"
+import { longWeekdays, shortWeekdays } from "@/lib/calendar-labels"
 
-/** 曜日名（EEE / EEEE トークン用）。日付の書式であって文言ではないので locale で出し分ける（Provider の locale="en" は Intl） */
-const JA_WEEKDAYS = "日月火水木金土"
-
-function formatDate(date: Date, fmt: string, locale: "ja" | "en" = "ja"): string {
+/**
+ * 書式トークン（yyyy / MM / M / dd / d / EEE / EEEE）で日付を文字にする。
+ * 曜日名（EEE=短い形・EEEE=長い形）は KskLabelsProvider の `calendarWeekdaysShort` / `calendarWeekdaysLong`
+ * （Provider の locale="en" で "Sun" / "Sunday"。Provider 無しは「日」/「日曜日」。labels で差し替え可）。
+ */
+function formatDate(
+  date: Date,
+  fmt: string,
+  labels: Pick<ResolvedKskLabels, "calendarWeekdaysShort" | "calendarWeekdaysLong">
+): string {
   const y = date.getFullYear()
   const month = date.getMonth() + 1
   const day = date.getDate()
@@ -19,14 +26,8 @@ function formatDate(date: Date, fmt: string, locale: "ja" | "en" = "ja"): string
     M: String(month),
     dd: String(day).padStart(2, "0"),
     d: String(day),
-    EEEE:
-      locale === "en"
-        ? date.toLocaleDateString("en", { weekday: "long" })
-        : `${JA_WEEKDAYS[weekday]}曜日`,
-    EEE:
-      locale === "en"
-        ? date.toLocaleDateString("en", { weekday: "short" })
-        : JA_WEEKDAYS[weekday],
+    EEEE: longWeekdays(labels)[weekday],
+    EEE: shortWeekdays(labels)[weekday],
   }
   return fmt.replace(/yyyy|EEEE|EEE|MM|M|dd|d/g, (token) => values[token])
 }
@@ -70,6 +71,10 @@ interface DatePickerProps {
   placeholder?: string
   disabled?: boolean
   className?: string
+  /**
+   * 表示の書式。トークン: yyyy / MM / M / dd / d / EEE（曜日・短）/ EEEE（曜日・長）。既定 "yyyy/MM/dd"。
+   * 曜日名は KskLabelsProvider の `calendarWeekdaysShort` / `calendarWeekdaysLong`（Provider 無しは「日」「日曜日」）
+   */
   dateFormat?: string
   /**
    * トリガーボタンのアクセシビリティラベル。
@@ -108,9 +113,8 @@ function DatePicker({
 }: DatePickerProps) {
   const defaultLabels = useKskLabels()
   const placeholder = placeholderProp ?? defaultLabels.datePickerPlaceholder
-  const locale = useKskLocale() ?? "ja"
   const [open, setOpen] = React.useState(false)
-  const formatted = value ? formatDate(value, dateFormat, locale) : null
+  const formatted = value ? formatDate(value, dateFormat, defaultLabels) : null
   // ポインタ（マウス/タップ）で日付を選んで閉じたかの記録。
   // その場合 Radix のフォーカス返却でトリガーの focus-visible リングが一瞬点灯し、
   // open 中リングの消灯と重なって明滅（ちらつき）して見えるため、返却を抑止する。
@@ -193,6 +197,10 @@ interface DateRangePickerProps {
   toPlaceholder?: string
   disabled?: boolean
   className?: string
+  /**
+   * 表示の書式。トークン: yyyy / MM / M / dd / d / EEE（曜日・短）/ EEEE（曜日・長）。既定 "yyyy/MM/dd"。
+   * 曜日名は KskLabelsProvider の `calendarWeekdaysShort` / `calendarWeekdaysLong`（Provider 無しは「日」「日曜日」）
+   */
   dateFormat?: string
   /** アクセシビリティラベル */
   triggerLabel?: string
@@ -216,12 +224,11 @@ function DateRangePicker({
 }: DateRangePickerProps) {
   const defaultLabels = useKskLabels()
   const placeholder = placeholderProp ?? defaultLabels.dateRangePickerPlaceholder
-  const locale = useKskLocale() ?? "ja"
   const [open, setOpen] = React.useState(false)
   const formatted = value?.from
     ? value.to
-      ? `${formatDate(value.from, dateFormat, locale)}${defaultLabels.dateRangePickerSeparator}${formatDate(value.to, dateFormat, locale)}`
-      : formatDate(value.from, dateFormat, locale)
+      ? `${formatDate(value.from, dateFormat, defaultLabels)}${defaultLabels.dateRangePickerSeparator}${formatDate(value.to, dateFormat, defaultLabels)}`
+      : formatDate(value.from, dateFormat, defaultLabels)
     : null
 
   return (

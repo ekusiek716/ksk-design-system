@@ -406,6 +406,37 @@ interface KskLabels {
   countdownSpokenSecond?: string
   /** CountdownTimer の読み上げで、時間・分・秒をつなぐ区切り（ja は空、en は半角スペース） */
   countdownSpokenSeparator?: string
+  /**
+   * MonthCalendar / MonthCalendarHeader / AgendaList / DatePicker の曜日名（短い形）。**7 個を半角カンマで区切る**（日曜始まり）。
+   * MonthCalendar の曜日の列見出し・AgendaList の日付列・DatePicker の `EEE` に出る。個数が 7 でないときは日本語の既定で補う
+   */
+  calendarWeekdaysShort?: string
+  /** 曜日名（長い形）。7 個を半角カンマで区切る（日曜始まり）。DatePicker の `EEEE` に出る */
+  calendarWeekdaysLong?: string
+  /** 月名（長い形）。12 個を半角カンマで区切る（1 月始まり）。`calendarMonthTitle` の `{monthName}` に入る */
+  calendarMonthsLong?: string
+  /** 月名（短い形）。12 個を半角カンマで区切る（1 月始まり）。`calendarDayLabel` の `{monthShort}` に入る */
+  calendarMonthsShort?: string
+  /**
+   * 日の読み上げ名（MonthCalendar のセル・AgendaList の日ごとの見出し）。
+   * 差し込み口: `{year}` `{month}`（数字）`{monthName}`（calendarMonthsLong）`{monthShort}`（calendarMonthsShort）`{day}` `{weekday}`（calendarWeekdaysShort）
+   */
+  calendarDayLabel?: string
+  /** 月の見出し・MonthCalendar の grid の読み上げ名。差し込み口は `calendarDayLabel` と同じ（`{day}` `{weekday}` は使えない） */
+  calendarMonthTitle?: string
+  /** 今日の日の読み上げ名に足す語（`calendarDayLabel` の直後に付く。区切りの読点・カンマも含める） */
+  calendarDayToday?: string
+  /**
+   * 予定のある日の読み上げ名に足す文。`{count}` を件数、`{events}` を予定名（calendarEventsSeparator でつなぐ）に置き換える。
+   * 英語の単複（1 event）は文言では出し分けられない
+   */
+  calendarDayEvents?: string
+  /** 予定名をつなぐ区切り（`calendarDayEvents` の `{events}`。ja は読点、en は「, 」） */
+  calendarEventsSeparator?: string
+  /** MonthCalendar の「+n件」（md 以上のセルのあふれ）。`{count}` を件数に置き換える。英語の単複は関数 prop（moreLabel）で */
+  calendarMore?: string
+  /** AgendaList の予定の無い日（`dates` で渡した日）の文言（emptyDayLabel prop が優先） */
+  agendaEmptyDay?: string
 }
 
 /** 全キーを解決済みの文言（部品の中・既定値で使う）。 */
@@ -608,6 +639,17 @@ const JA_LABELS: ResolvedKskLabels = {
   countdownSpokenMinute: "{count}分",
   countdownSpokenSecond: "{count}秒",
   countdownSpokenSeparator: "",
+  calendarWeekdaysShort: "日,月,火,水,木,金,土",
+  calendarWeekdaysLong: "日曜日,月曜日,火曜日,水曜日,木曜日,金曜日,土曜日",
+  calendarMonthsLong: "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月",
+  calendarMonthsShort: "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月",
+  calendarDayLabel: "{month}月{day}日（{weekday}）",
+  calendarMonthTitle: "{year}年{month}月",
+  calendarDayToday: "、今日",
+  calendarDayEvents: "、予定{count}件: {events}",
+  calendarEventsSeparator: "、",
+  calendarMore: "+{count}件",
+  agendaEmptyDay: "予定なし",
 }
 
 /** en の既定文言（KskLabelsProvider locale="en"） */
@@ -807,6 +849,17 @@ const EN_LABELS: ResolvedKskLabels = {
   countdownSpokenMinute: "{count} minute(s)",
   countdownSpokenSecond: "{count} second(s)",
   countdownSpokenSeparator: " ",
+  calendarWeekdaysShort: "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+  calendarWeekdaysLong: "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday",
+  calendarMonthsLong: "January,February,March,April,May,June,July,August,September,October,November,December",
+  calendarMonthsShort: "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+  calendarDayLabel: "{weekday}, {monthShort} {day}",
+  calendarMonthTitle: "{monthName} {year}",
+  calendarDayToday: ", today",
+  calendarDayEvents: ", {count} events: {events}",
+  calendarEventsSeparator: ", ",
+  calendarMore: "+{count} more",
+  agendaEmptyDay: "No events",
 }
 
 const KSK_DEFAULT_LABELS: Record<KskLocale, ResolvedKskLabels> = { ja: JA_LABELS, en: EN_LABELS }
@@ -930,5 +983,21 @@ function useKskLocale(): KskLocale | undefined {
   return React.useContext(KskLabelsContext).locale
 }
 
-export { KskLabelsProvider, useKskLabels, useKskLocale, KSK_DEFAULT_LABELS, formatKskLabel, formatKskLabelNodes }
+/**
+ * 部品が自身の `locale` prop（ja / en）を持つときの既定文言（MonthCalendar / MonthCalendarHeader の月見出し / AgendaList）。
+ *
+ * 優先順位（`localeProp` を見る部分。部品に直接渡した文言 prop・関数 prop はこの外で常に最優先）:
+ * 1. `localeProp` が指定されていて、Provider の locale と**異なる**とき: Provider の labels は使わず、
+ *    `KSK_DEFAULT_LABELS[localeProp]` の既定を返す（日本語の差し替え文言が、英語を指定した部品に混ざるのを防ぐ）
+ * 2. それ以外（`localeProp` 未指定、または Provider の locale と同じ）: Provider の labels（上書き）→ Provider の locale の既定 → 日本語
+ *
+ * Provider が無い（または labels だけで locale を指定していない）ときの Provider の locale は "ja" とみなす。
+ */
+function useKskLabelsFor(localeProp?: KskLocale): ResolvedKskLabels {
+  const { locale, labels } = React.useContext(KskLabelsContext)
+  if (localeProp !== undefined && localeProp !== (locale ?? "ja")) return KSK_DEFAULT_LABELS[localeProp]
+  return labels
+}
+
+export { KskLabelsProvider, useKskLabels, useKskLabelsFor, useKskLocale, KSK_DEFAULT_LABELS, formatKskLabel, formatKskLabelNodes }
 export type { KskLabels, KskLabelsProviderProps, KskLocale, ResolvedKskLabels }

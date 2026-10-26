@@ -1,5 +1,6 @@
 /**
  * MonthCalendar / AgendaList が共有する日付ヘルパーと予定の色（issue #704）。
+ * 曜日名・「10月3日（土）」の語順は文言キー経由（`src/lib/calendar-labels.ts`。issue #723）。
  * 公開 API ではない（src/index.ts からは出さない）。
  */
 
@@ -16,19 +17,6 @@ export function parseKey(key: string): Date {
 /** today 指定（"YYYY-MM-DD" / Date / 省略 = 現在日）を "YYYY-MM-DD" にする */
 export const resolveTodayKey = (today: Date | string | undefined) =>
   today === undefined ? toKey(new Date()) : typeof today === "string" ? today : toKey(today)
-
-export const WEEKDAYS = {
-  ja: ["日", "月", "火", "水", "木", "金", "土"],
-  en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-}
-
-/** 「10月3日（土）」/ "Sat, Oct 3" */
-export function formatDayLabel(key: string, locale: "ja" | "en"): string {
-  const d = parseKey(key)
-  return locale === "ja"
-    ? `${d.getMonth() + 1}月${d.getDate()}日（${WEEKDAYS.ja[d.getDay()]}）`
-    : d.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" })
-}
 
 /** 予定チップ・行の面と文字 */
 export const CHIP_TONE: Record<CalendarEventTone, string> = {
