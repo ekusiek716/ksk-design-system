@@ -3,9 +3,9 @@
 メジャーバージョン間の移行ガイド。
 patch / minor は原則破壊変更なし、自動アップグレード可（例外: **v1.34.0 で npm パッケージ名を変更**。import の置換が必要。下記参照）。
 
-## 未リリース（次回の minor）の導入注意
+## v2.22.0 の導入注意
 
-以下は次回リリースに含まれる変更の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
+以下はv2.22.0の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
 
 - **見た目の変更: フォーカスリングを不透明なブランド色にした（WCAG 1.4.11 対応）**: 旧実装はフォーカスリングが全テーマで非テキストコントラスト 3:1 を割っていました（ライトで白の上 1.34〜1.67:1、ダークで Gray-900 の上 2.43〜3.44:1）。トークン `--Focus-High-Emphasis` をライトは Brand-400 から Brand-600 に変え（ダークは Brand-400 のまま）、DS 内部のリングの `/50`（半透明）をすべて外しました。不透明なら Surface-Primary の上でライト 5.0〜7.1:1・ダーク 6.0〜10.2:1 です。あわせて、リングが面と同色になる塗りつぶし（Button の default / destructive / info / warning / success / accent、Checkbox・Switch・RadioGroup・選択中の Chip・FilterPill・Calendar の選択日）には、面から 2px 離す `focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]` を足しました。リングの太さは変えていません。**導入時の作業は不要ですが、フォーカス表示の見た目が変わります**（ライトはリングが濃く、塗りのボタンはリングとの間に白いすき間が入ります）。`--Focus-High-Emphasis` を product theme で上書きしている consumer は、新しい割当（ライト 600 / ダーク 400）でも 3:1 を満たすか確認してください。consumer が自前のクラスに `ring-[var(--Focus-High-Emphasis)]/50` と書いている箇所は、新しい lint ルール **P054**（警告）が検出します。`/数字` を外してください（`npx ksk-ds lint src` で一覧できます）。`ksk-ds theme` のフォーカス検査も、ライト Brand-600 / 白・ダーク Brand-400 / Gray-900 の 3:1 を必須（error）にしました。トークン・生成物（`tokens.json` / `src/tokens/native/` / `contracts/token-hex-cache.json`）も同じ値になります。
 - **見た目の変更（フォーカスリングの追加対応）**: エラー中（`aria-invalid`）の入力欄（Input / Textarea / Select / DatePicker / TimePicker / Combobox / MultiSelect）にフォーカスすると、これまでの薄い赤（20%、白の上 1.37:1）ではなく不透明な Caution-Base のリング（ライト 4.83:1 / ダーク 6.40:1）になります。Slider のつまみと CheckboxCard のフォーカスも不透明な Focus リングに変わりました（CheckboxCard・Slider は Surface-Primary のすき間つき）。`Button` の `variant="inverse"` / `"ghost-inverse"` は暗い面に置く前提で、フォーカスリングが Focus-High-Emphasis から `Object-on-Inverse`（SidebarNav inverse と同じ。対 Surface-Inverse 17.72:1）に変わります。明るい面や写真の上に置いている場合は、リングの見え方を確認してください。lint P054 は shadcn 既定の `ring-ring/50`・`ring-sidebar-ring/50`、v4 省略記法 `ring-(--Focus-High-Emphasis)/50`、フォールバック付き `ring-[var(--Focus-High-Emphasis,#…)]/50` も警告します。

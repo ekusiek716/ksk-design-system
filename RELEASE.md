@@ -2,6 +2,17 @@
 
 `ksk-design-system` のリリーススケジュール・運用ルール。
 
+## v2.22.0（2026-10-27）
+
+2.21.0以降に、フォーカスリングを全テーマでWCAG 1.4.11（非テキスト3:1）以上にし、KskLabelsProvider の対象をほぼ全部品に広げたminorリリース。次の点は既定の見た目・読み上げが変わります。
+
+- フォーカスリングをライトは不透明な Brand-600 にしました（旧: Brand-400 の半透明）。塗りつぶしのボタン等には面から2pxのすき間が入り、エラー中の入力欄は不透明な Caution のリングになります。写真・ガラスの上の操作子は白と濃色の二重リングになり、glass 系 Button で出ていなかったリングが出るようになります（#772 / #773）。consumer の半透明のフォーカスリングは新しい lint P054 が警告します。
+- `KskLabelsProvider locale="en"` の配下で、約80部品の既定文言・読み上げ名が英語になります。Provider を置いていないアプリ、`locale="ja"` のアプリの文言は変わりません（#770 / #775 / #778 / #779）。
+- native の RadioGroup がグループとして読まれ、各行は `checked` で状態を伝えます。native の glass Button が `containerStyle` / `pressedContainerStyle` を読むようになります（#774 / #777）。
+- 追加のみ: `npx ksk-ds theme`（ブランド色からテーマを生成）、`npx ksk-ds report-ignores`（consumer の lint 回避理由の横断集計）、DS 側 CI の配布物サイズ予算（#767 / #768 / #769）。
+
+導入時は [2.22.0の注意](./MIGRATION.md#v2220-の導入注意) を確認してください。npm公開・タグ・GitHub Releaseはversion変更のmainマージ後に `publish.yml` が実行します。
+
 ## v2.21.0（2026-10-19）
 
 2.20.0以降に、SettingsListRow の右側に選択肢の並び（ChipSelector・PillToggle など）を置く行を、追加の指定なしで項目名どおりに読ませるminorリリース。追加のみですが、`{...control}` と別名の `aria-label` を併用していた行は読み上げ名が変わります。
