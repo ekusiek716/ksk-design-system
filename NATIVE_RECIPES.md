@@ -297,6 +297,22 @@ import { IconButton } from "ksk-design-system/native/ui"
 
 `variant` は `ghost`（既定・背景なし）/ `tertiary`（薄いサーフェス背景）/ `outline`（境界線）/ `primary`（ブランド色の塗り）で、名前は `Button` の variant 語彙に揃えています。`tone` は `neutral` / `accent` / `caution`（`primary` では無視）、`shape` は `circle`（既定）/ `square` です。
 
+### 写真・地図の上の丸い glass 補助ボタン
+
+`IconButton` に glass の種類はありません。シートや写真の上で Liquid Glass の丸いアイコンボタン（ブックマーク・報告など）を置くときは、`Button variant="glass"` に `containerStyle` で寸法と角丸を渡します。padding 系は内側のぼかし面、width / height / margin は外側、`borderRadius` は両方に反映されるので、丸くしてもぼかしが四角くはみ出しません。`height` だけ渡すと既定の最小高さ 44 は外れ、44 未満の数値の width / height には `hitSlop` が自動で足されて実タップ領域は 44 以上に保たれます。
+
+```tsx
+<Button
+  variant="glass"
+  accessibilityLabel="ブックマーク"
+  containerStyle={{ width: 40, height: 40, paddingHorizontal: 0, borderRadius: 20 }}
+  onPress={toggleBookmark}
+  leadingIcon={<BookmarkIcon size={20} />}
+/>
+```
+
+文字つきの小さい補助ボタンは `containerStyle={{ minHeight: 32, paddingHorizontal: 12, borderRadius: 999 }}` で作れます（押下中の見た目は `pressedContainerStyle`）。
+
 ## Controlled disclosure (Collapsible / Accordion)
 
 `Collapsible` と `Accordion` は制御・非制御の両対応です。外部 state（他セクションとの排他、解答表示との連動、アナリティクス送信）と同期したいときは `open` / `openKeys` を渡します。渡している間は内部 state を無視するため、二重管理になりません。

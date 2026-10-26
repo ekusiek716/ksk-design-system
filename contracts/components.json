@@ -92,6 +92,7 @@
         "variant=ghost-destructive / ghost-success は文字だけの弱い赤（Text-Caution）/ 緑（Text-Success）ボタン（issue #671）。確認を挟む削除の 1 段目・取り消しは ghost-destructive、確認側の最終ボタンは destructive。ghost に className で Text-Caution / Object-Caution / Text-Success を被せない。native Button にも同名 variant",
         "variant=info / warning / success は状態色で種類や意味を伝えるボタン（issue #598）。背景色を className で上書きせず variant を使う。不可逆操作には warning ではなく destructive を使う",
         "variant=glass は背景がグラデーション/写真の場合のみ使用",
+        "Native Button variant=glass も containerStyle / pressedContainerStyle を読む（issue #754）。padding 系は内側のぼかし面の余白、width / height / minHeight / margin 等は外側の Pressable、borderRadius は両方へ振り分けるので、丸く小さい補助ボタンは containerStyle={{ width: 40, height: 40, paddingHorizontal: 0, borderRadius: 20 }} で作れる（ブラーは角丸でクリップされ四角くはみ出さない）。height だけ渡すと既定の minHeight 44 は外れ、見た目 44 未満の数値 width / height には hitSlop を自動で足して実タップ領域を 44 以上に保つ（利用側の hitSlop が優先）",
         "variant=glass-inverse は暗い写真・動画・濃色面上の Liquid Glass CTA 専用",
         "variant=inverse / ghost-inverse は暗背景・ヒーローセクション専用",
         "size=hero は hero / final-CTA 専用（ピル型 56px）",
