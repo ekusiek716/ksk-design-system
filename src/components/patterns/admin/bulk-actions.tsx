@@ -1,14 +1,15 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { formatKskLabel, useKskLabels } from "../../ui/ksk-labels"
 
 interface BulkActionsProps extends React.ComponentProps<"div"> {
   /** 選択件数 */
   selectedCount: number
-  /** 選択件数の表示と既定 aria-label。省略時は日本語。 */
+  /** 選択件数の表示と既定 aria-label。省略時は KskLabelsProvider の `bulkActionsCount`（`{count}` を件数に置換。Provider 無しは "N件を選択中"。英語の単複は関数 prop で） */
   countLabel?: (selectedCount: number) => string
   /** 選択解除ボタンクリック時 */
   onClear?: () => void
-  /** 選択解除ボタンの aria-label。@default "選択を解除" */
+  /** 選択解除ボタンの aria-label。省略時は KskLabelsProvider の `bulkActionsClear`（Provider 無しは "選択を解除"。locale="en" で "Clear selection"） */
   clearLabel?: string
 }
 
@@ -19,8 +20,11 @@ interface BulkActionsProps extends React.ComponentProps<"div"> {
  * 選択件数 + アクションボタン群を横並びで表示。
  * selectedCount が 0 のとき自動で非表示になる。
  */
-function BulkActions({ selectedCount, onClear, children, className, clearLabel = "選択を解除", countLabel = (n) => `${n}件を選択中`, ...props }: BulkActionsProps) {
+function BulkActions({ selectedCount, onClear, children, className, clearLabel: clearLabelProp, countLabel: countLabelProp, ...props }: BulkActionsProps) {
+  const defaultLabels = useKskLabels()
   if (selectedCount === 0) return null
+  const clearLabel = clearLabelProp ?? defaultLabels.bulkActionsClear
+  const countLabel = countLabelProp ?? ((n: number) => formatKskLabel(defaultLabels.bulkActionsCount, { count: n }))
   const selectionLabel = countLabel(selectedCount)
 
   return (
