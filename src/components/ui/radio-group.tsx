@@ -72,7 +72,9 @@ function RadioGroupItem({
         </span>
         <span aria-hidden="true" className="flex size-5 shrink-0 items-center justify-center rounded-full border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] text-[var(--Brand-Primary)] group-data-[state=checked]:border-[var(--Brand-Primary)]">
           <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-            <span className="size-2 rounded-full bg-[var(--Brand-Primary)]" />
+            <svg width="8" height="8" viewBox="0 0 10 10">
+              <circle cx="5" cy="5" r="5" fill="currentColor" />
+            </svg>
           </RadioGroupPrimitive.Indicator>
         </span>
       </RadioGroupPrimitive.Item>
