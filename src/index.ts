@@ -96,7 +96,7 @@ export { KskLabelsProvider, useKskLabels, useKskLocale, KSK_DEFAULT_LABELS } fro
 export type { KskLabels, KskLabelsProviderProps, KskLocale, ResolvedKskLabels } from "./components/ui/ksk-labels"
 export { Progress } from "./components/ui/progress"
 export type { ProgressAutoColorConfig, ProgressDuration, ProgressProps, ProgressVariant } from "./components/ui/progress"
-export { RadioGroup, RadioGroupItem } from "./components/ui/radio-group"
+export { RadioGroup, RadioGroupItem, type RadioGroupVariant } from "./components/ui/radio-group"
 export { ScrollArea, ScrollBar } from "./components/ui/scroll-area"
 export { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "./components/ui/select"
 export { Separator } from "./components/ui/separator"

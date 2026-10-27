@@ -287,6 +287,7 @@
 @source inline("border-[var(--Surface-Accent-Primary-Subtle)]");
 @source inline("border-[var(--Surface-Inverse)]");
 @source inline("border-[var(--Surface-Primary)]");
+@source inline("border-[var(--Surface-Secondary)]");
 @source inline("border-[var(--Text-Disable)]");
 @source inline("border-b");
 @source inline("border-b-0");
@@ -536,6 +537,7 @@
 @source inline("group-data-[size=sm]/alert-dialog-content:grid-cols-2");
 @source inline("group-data-[state=checked]:bg-transparent");
 @source inline("group-data-[state=checked]:block");
+@source inline("group-data-[state=checked]:border-[var(--Brand-Primary)]");
 @source inline("group-data-[state=checked]:border-transparent");
 @source inline("group-focus-visible:shadow-[inset_0_0_0_2px_var(--Primitive-Gray-900),inset_0_0_0_4px_var(--Primitive-White)]");
 @source inline("group-focus-within:opacity-100");
@@ -868,6 +870,7 @@
 @source inline("min-h-[inherit]");
 @source inline("min-h-[max(2.75rem,var(--Nav-Item-Min-Height))]");
 @source inline("min-h-[max(2.75rem,var(--Settings-Row-Min-Height))]");
+@source inline("min-h-[max(44px,var(--Control-Height-Lg))]");
 @source inline("min-h-[var(--Control-Height-Xl)]");
 @source inline("min-h-[var(--Field-Min-Height)]");
 @source inline("min-h-[var(--Nav-Pill-Min-Height)]");

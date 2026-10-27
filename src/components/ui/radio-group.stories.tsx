@@ -3,7 +3,7 @@
  * @description ラジオボタングループコンポーネント。3つの選択肢を表示
  */
 import type { Meta, StoryObj } from "@storybook/react"
-import { expect, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import { RadioGroup, RadioGroupItem } from "./radio-group"
 import { Label } from "./label"
 
@@ -128,6 +128,38 @@ export const HitTarget: Story = {
       const cy = rect.top + rect.height / 2
       const hit = document.elementFromPoint(cx, cy - 18)
       await expect(radio.contains(hit)).toBe(true)
+    }
+  },
+}
+
+
+/** 行全体が選択対象。説明・長いラベル・無効状態でも丸印は右端に保つ。 */
+export const CardRows: Story = {
+  tags: ["interaction", "vrt"],
+  render: () => (
+    <RadioGroup variant="card" defaultValue="three" aria-label="学習を続ける目標">
+      <RadioGroupItem value="three">3日</RadioGroupItem>
+      <RadioGroupItem value="seven" description="少しずつ習慣にしたい方へ">7日</RadioGroupItem>
+      <RadioGroupItem value="fourteen">毎日の予定に合わせて、無理なく14日間続ける</RadioGroupItem>
+      <RadioGroupItem value="disabled" disabled>選択できない目標</RadioGroupItem>
+    </RadioGroup>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const three = canvas.getByRole("radio", { name: "3日" })
+    const seven = canvas.getByRole("radio", { name: "7日" })
+    const disabled = canvas.getByRole("radio", { name: "選択できない目標" })
+    await expect(three).toHaveAttribute("aria-checked", "true")
+    await userEvent.click(seven)
+    await expect(seven).toHaveAttribute("aria-checked", "true")
+    await expect(three).toHaveAttribute("aria-checked", "false")
+    await expect(disabled).toBeDisabled()
+    await expect(seven).toHaveFocus()
+    await userEvent.keyboard("{ArrowDown>}")
+    await waitFor(() => expect(canvas.getByRole("radio", { name: "毎日の予定に合わせて、無理なく14日間続ける" })).toHaveAttribute("aria-checked", "true"))
+    await userEvent.keyboard("{/ArrowDown}")
+    for (const radio of canvas.getAllByRole("radio")) {
+      await expect(radio.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     }
   },
 }

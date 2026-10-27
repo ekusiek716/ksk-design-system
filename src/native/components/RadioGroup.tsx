@@ -20,7 +20,11 @@ function isDev() {
   return Boolean(proc) && proc!.env?.NODE_ENV !== "production"
 }
 
+export type RadioGroupVariant = "default" | "card"
+
 export interface RadioGroupProps {
+  /** card: 淡い面の行全体が押せて、ラベル左・装飾の丸印右。既定は従来の左側ラジオ。 */
+  variant?: RadioGroupVariant
   options: RadioOption[]
   value?: string
   onChange?: (value: string) => void
@@ -37,6 +41,7 @@ export interface RadioGroupProps {
 
 export function RadioGroup({
   options,
+  variant = "default",
   value,
   onChange,
   disabled = false,
@@ -44,6 +49,7 @@ export function RadioGroup({
   accessibilityLabelledBy,
 }: RadioGroupProps) {
   const { theme, scales } = useTheme()
+  const card = variant === "card"
   if (isDev() && !accessibilityLabel && !accessibilityLabelledBy) {
     // issue #765: radiogroup は名前が必須。何を選ぶ欄か読み上げで分からなくなる
     console.warn(
@@ -57,7 +63,7 @@ export function RadioGroup({
       accessibilityRole="radiogroup"
       accessibilityLabel={accessibilityLabel}
       accessibilityLabelledBy={accessibilityLabelledBy}
-      style={{ gap: scales.spacing.scale[1] }}
+      style={{ gap: scales.spacing.scale[card ? 2 : 1] }}
     >
       {options.map((o) => {
         const selected = value === o.value
@@ -72,7 +78,15 @@ export function RadioGroup({
               gap: scales.spacing.scale[2],
               // description があるときは丸を1行目に頭揃えする。無いときは行が minHeight（44）まで
               // 伸びるので、上寄せだと文字の下に空白が残り間延びして見える（issue #315）
-              alignItems: o.description ? "flex-start" : "center",
+              alignItems: !card && o.description ? "flex-start" : "center",
+              ...(card ? {
+                backgroundColor: theme.surface.secondary,
+                borderRadius: scales.borderRadius.xl,
+                borderWidth: 1,
+                borderColor: selected ? theme.brand.primary : theme.surface.secondary,
+                paddingHorizontal: scales.spacing.scale[4],
+                paddingVertical: scales.spacing.scale[3],
+              } : null),
               // CheckboxField と揃えてタップ最小寸法を行が自前で満たす。
               // これが無いと 1 行ラベルの行が約 24.5pt しかなく 44pt を割る（issue #315 の副次修正）
               minHeight: scales.touchTargets.buttonCTA.min,
@@ -88,10 +102,10 @@ export function RadioGroup({
             aria-checked={selected}
             aria-disabled={itemDisabled || undefined}
           >
-            <View style={{ marginTop: o.description ? 2 : 0 }}>
+            {!card && <View style={{ marginTop: o.description ? 2 : 0 }}>
               <Radio selected={selected} decorative />
-            </View>
-            <View style={{ flex: 1, gap: 2 }}>
+            </View>}
+            <View style={{ flex: 1, ...(card ? { minWidth: 0 } : null), gap: 2 }}>
               <RNText style={[resolveTypo("body.md"), { color: theme.text["high-emphasis"] }]}>
                 {o.label}
               </RNText>
@@ -101,6 +115,7 @@ export function RadioGroup({
                 </RNText>
               )}
             </View>
+            {card && <Radio selected={selected} decorative />}
           </Pressable>
         )
       })}

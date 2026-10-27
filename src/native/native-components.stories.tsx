@@ -391,3 +391,25 @@ export const ListItemTonesAndDividers: Story = {
     </View>
   ),
 }
+
+
+/** card variant: 行全体を選ぶ、右端ラジオ付きの選択行。 */
+export const RadioCardRows: Story = {
+  render: function Render() {
+    const [value, setValue] = React.useState("three")
+    return (
+      <RadioGroup
+        variant="card"
+        accessibilityLabel="学習を続ける目標"
+        value={value}
+        onChange={setValue}
+        options={[
+          { value: "three", label: "3日" },
+          { value: "seven", label: "7日", description: "少しずつ習慣にしたい方へ" },
+          { value: "fourteen", label: "毎日の予定に合わせて、無理なく14日間続ける" },
+          { value: "disabled", label: "選択できない目標", disabled: true },
+        ]}
+      />
+    )
+  },
+}

@@ -3,8 +3,20 @@ import { RadioGroup as RadioGroupPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
-function RadioGroup({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {
-  return <RadioGroupPrimitive.Root data-slot="radio-group" className={cn("grid gap-3", className)} {...props} />
+export type RadioGroupVariant = "default" | "card"
+const RadioGroupVariantContext = React.createContext<RadioGroupVariant>("default")
+
+/** card はラベルを左、装飾の丸印を右に置いた、行全体を押せる単一選択。 */
+function RadioGroup({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<typeof RadioGroupPrimitive.Root> & { variant?: RadioGroupVariant }) {
+  return (
+    <RadioGroupVariantContext.Provider value={variant}>
+      <RadioGroupPrimitive.Root data-slot="radio-group" data-variant={variant} className={cn("grid", variant === "card" ? "gap-2" : "gap-3", className)} {...props} />
+    </RadioGroupVariantContext.Provider>
+  )
 }
 
 /**
@@ -33,6 +45,41 @@ function RadioGroupItem({
 }) {
   const generatedId = React.useId()
   const itemId = id ?? generatedId
+  const variant = React.useContext(RadioGroupVariantContext)
+
+  // 既存の丸だけの用法は card 親でも維持する。card 行には children のラベルを渡す。
+  if (variant === "card" && children != null) {
+    const labelId = `${itemId}-label`
+    const descriptionId = description != null ? `${itemId}-description` : undefined
+    return (
+      <RadioGroupPrimitive.Item
+        id={itemId}
+        data-slot="radio-group-card"
+        {...props}
+        aria-labelledby={props["aria-labelledby"] ?? (props["aria-label"] == null ? labelId : undefined)}
+        aria-describedby={props["aria-describedby"] ?? descriptionId}
+        className={cn(
+          "group flex w-full min-h-[max(44px,var(--Control-Height-Lg))] items-center gap-[var(--Control-Gap)] rounded-[var(--Radius-Surface)] border border-[var(--Surface-Secondary)] bg-[var(--Surface-Secondary)] px-[var(--Control-Padding-X-Md)] py-3 text-left text-[var(--Text-High-Emphasis)]",
+          "cursor-pointer transition-colors duration-[var(--Motion-Duration-Fast)] ease-[var(--Motion-Easing-Standard)] hover:bg-[var(--Surface-Tertiary)]",
+          "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-[var(--Focus-High-Emphasis)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--Surface-Primary)]",
+          "data-[state=checked]:border-[var(--Brand-Primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[var(--Surface-Secondary)]",
+          className,
+        )}
+      >
+        <span className="flex min-w-0 flex-1 flex-col gap-1">
+          <span id={labelId} className="typo-body-md text-[var(--Text-High-Emphasis)]">{children}</span>
+          {description != null && <span id={descriptionId} className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">{description}</span>}
+        </span>
+        <span aria-hidden="true" className="flex size-5 shrink-0 items-center justify-center rounded-full border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] text-[var(--Brand-Primary)] group-data-[state=checked]:border-[var(--Brand-Primary)]">
+          <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
+            <svg width="8" height="8" viewBox="0 0 10 10">
+              <circle cx="5" cy="5" r="5" fill="currentColor" />
+            </svg>
+          </RadioGroupPrimitive.Indicator>
+        </span>
+      </RadioGroupPrimitive.Item>
+    )
+  }
 
   const control = (
     <RadioGroupPrimitive.Item
