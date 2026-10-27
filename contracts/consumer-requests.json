@@ -55,6 +55,11 @@
       "dsIssue": 753,
       "consumerIssue": "https://github.com/ekusiek716/exam-kit/issues/1539",
       "fixPr": 756
+    },
+    {
+      "dsIssue": 781,
+      "consumerIssue": "https://github.com/ekusiek716/exam-kit/issues/1640",
+      "fixPr": null
     }
   ]
 }

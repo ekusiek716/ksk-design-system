@@ -96,6 +96,44 @@ describe("native RadioGroup のグループ名と役割（#765）", () => {
   })
 })
 
+describe("native RadioGroup card rows", () => {
+  for (const name of themeNames) for (const mode of ["light", "dark"] as const) {
+    it(`${name}/${mode}: card rows use the theme surface, right-hand decorative radios and one checked item`, () => {
+      const change = vi.fn()
+      render(<RadioGroup variant="card" accessibilityLabel="目標" value="a" onChange={change} options={[
+        { value: "a", label: "長いラベルも途中で省略せずに読める目標", description: "補足" },
+        { value: "b", label: "選択できない目標", disabled: true },
+      ]} />, name, mode)
+      const rows = hosts.records.filter(r => r.host === "Pressable")
+      expect(rows).toHaveLength(2)
+      expect(rows.map(r => r.props["aria-checked"])).toEqual([true, false])
+      const theme = getTheme(name, mode)
+      expect(rows[0].style).toMatchObject({ backgroundColor: theme.surface.secondary, borderColor: theme.brand.primary })
+      expect(rows.every(r => Number(r.style.minHeight) >= 44)).toBe(true)
+      for (const row of rows) {
+        const children = React.Children.toArray(row.children as React.ReactNode)
+        const last = children.at(-1)
+        expect(React.isValidElement(last) && last.type).toBe(Radio)
+      }
+      rows[0].props.onPress?.()
+      rows[1].props.onPress?.()
+      expect(change).toHaveBeenCalledTimes(1)
+      expect(change).toHaveBeenCalledWith("a")
+      expect(hosts.records.filter(r => r.props.accessibilityRole === "radio")).toHaveLength(2)
+      expect(hosts.records.filter(r => r.host === "Text").every(r => r.props.numberOfLines === undefined)).toBe(true)
+    })
+  }
+  it("default keeps the existing unfilled leading-radio layout", () => {
+    render(<RadioGroup accessibilityLabel="目標" options={[{ value: "a", label: "A" }]} />)
+    const row = hosts.records.find(r => r.host === "Pressable")!
+    expect(row.style.backgroundColor).toBeUndefined()
+    expect(row.style.paddingHorizontal).toBeUndefined()
+    const children = React.Children.toArray(row.children as React.ReactNode)
+    const first = children[0] as React.ReactElement<{ children?: React.ReactNode }>
+    expect(React.isValidElement(first.props.children) && first.props.children.type).toBe(Radio)
+  })
+})
+
 describe("native ListItem", () => {
   for (const name of themeNames) for (const mode of ["light", "dark"] as const) {
     it(`${name}/${mode}: string tones keep typography and resolve semantic colors`, () => {

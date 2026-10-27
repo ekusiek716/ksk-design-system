@@ -17,6 +17,32 @@ RN 側の公開 export 一覧は `src/native/COMPONENT_LOOKUP.md` で確認で�
 import { Button, Screen, PhotoHero } from "ksk-design-system/native/ui"
 ```
 
+## 行全体を押せる単一選択（RadioGroup card）
+
+`RadioGroup` の `variant="card"` は、淡い面・左のラベル・右端の丸印を持つ選択行です。
+複数行ラベルも自然に折り返し、行全体が44pt以上の操作領域になります。
+既定の `variant="default"` は従来の左側ラジオのままです。
+
+```tsx
+import { RadioGroup } from "ksk-design-system/native/ui"
+
+<RadioGroup
+  variant="card"
+  accessibilityLabel="学習を続ける目標"
+  value={goal}
+  onChange={setGoal}
+  options={[
+    { value: "3", label: "3日" },
+    { value: "7", label: "7日", description: "少しずつ習慣に" },
+    { value: "14", label: "14日", disabled: true },
+  ]}
+/>
+```
+
+Webも `<RadioGroup variant="card" aria-label="...">` で使い、各 `RadioGroupItem` の
+childrenをラベルにします。選択肢の内側に別のボタンやリンクは入れません。
+これは見た目の追加で、保存・確定・画面遷移は呼び出し側が管理します。
+
 ## OS のモーション設定
 
 ```tsx

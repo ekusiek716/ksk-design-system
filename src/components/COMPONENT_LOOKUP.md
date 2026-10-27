@@ -59,7 +59,7 @@
 | PortalContainerProvider | `@/components/ui/portal-container` | — | Dialog がスコープ内テーマを継承する, DropdownMenu がスコープ内テーマを継承する, Select がスコープ内テーマを継承する, Provider 無しでは document.body へ描画する（後方互換） |
 | ProgressRing | `@/components/ui/progress-ring` | — | Default, Empty, Full, AllSizes, CustomLabel, Animated, 任意サイズ・ストローク, 配色のカスタマイズ, 過大なストロークの丸め, トーン（意味名の色指定）, 線端 |
 | Progress | `@/components/ui/progress` | — | Default, Empty, Half, Full, ColorVariants, DurationVariants, AutoColor, AllStates |
-| RadioGroup, RadioGroupItem | `@/components/ui/radio-group` | — | ThreeOptions, WithDisabled, WithDescription, HoverState, HitTarget |
+| RadioGroup, RadioGroupItem | `@/components/ui/radio-group` | — | ThreeOptions, WithDisabled, WithDescription, HoverState, HitTarget, CardRows |
 | ResponsiveDialog, ResponsiveDialogTrigger, ResponsiveDialogContent, ResponsiveDialogHeader, ResponsiveDialogTitle, ResponsiveDialogDescription, ResponsiveDialogFooter, ResponsiveDialogClose, RESPONSIVE_OVERLAY_BREAKPOINT_VAR | `@/components/ui/responsive-dialog` | — | Default |
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | SectionNav | `@/components/ui/section-nav` | — | Vertical, Horizontal, StickyGuide |

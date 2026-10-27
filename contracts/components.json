@@ -309,14 +309,15 @@
       "name": "RadioGroup",
       "formBinding": "controller",
       "path": "src/components/ui/radio-group.tsx",
-      "description": "ラジオボタングループ。単一選択に使用。各RadioGroupItemにLabelが必要。",
-      "variants": [],
+      "description": "ラジオボタングループ。単一選択に使用。defaultは円とラベル、cardは淡い面の行全体が押せて右端に丸印を置く。",
+      "variants": ["default", "card"],
       "accessibility": [
-        "Must pair with <Label> for each item",
+        "default の丸だけの用法は各項目を <Label> と関連付ける。card は各 RadioGroupItem の children が内包ラベルになる（aria-labelledby を自動設定）。明示 aria-label / aria-labelledby は呼び出し側を優先する。",
         "RadioGroupItem は見た目 20px の円のまま ::before で 44x44px の当たり判定を内蔵する。消費側で [role=\"radio\"] のグローバル寸法上書きを追加しない（issue #470）",
         "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
+        "Web/nativeともRadioGroupのvariant=cardでカード行。Webの各RadioGroupItemにはchildrenでラベルを渡す。カード内に別の操作要素を入れない。44px以上の行と自然な折返しを保つ。既定のdefaultは従来の左側ラジオ。",
         "Native RadioGroup は常に単一選択なので外側が accessibilityRole=\"radiogroup\"。グループの読み上げ名は accessibilityLabel / accessibilityLabelledBy（Web の aria-label / aria-labelledby と対・ChipSelector の単一選択と同じ名前）で渡す。radiogroup は名前が必須のため、どちらも無いと開発ビルドで console.warn する（issue #765）。各行は accessibilityRole=\"radio\" + accessibilityState の checked / disabled（selected は付けない。Radio・ChipSelector の単一選択と同じ形）",
         "Native は単体 Radio（ksk-design-system/native/ui）を共用。selected/onChange/size/disabled/decorative を持つ。decorative は親 radio の操作と読み上げに委ねる。単体使用では accessibilityLabel を指定し、onChange は常に true（排他制御は親）。"
       ]
