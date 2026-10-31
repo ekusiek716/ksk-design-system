@@ -1082,7 +1082,7 @@
 @source inline("right-4");
 @source inline("right-9");
 @source inline("right-[calc(env(safe-area-inset-right)_+_1rem)]");
-@source inline("right-[calc(var(--Field-Padding-X-Md)_+_1.25rem)]");
+@source inline("right-[calc(var(--Field-Padding-X-Md)_+_1.625rem)]");
 @source inline("right-[max(1rem,env(safe-area-inset-right))]");
 @source inline("right-[var(--Toast-Viewport-Offset-X)]");
 @source inline("ring");

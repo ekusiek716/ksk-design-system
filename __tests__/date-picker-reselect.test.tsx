@@ -264,14 +264,14 @@ describe("クリアボタンの位置と当たり判定（#803）", () => {
     const spy = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
       const rect = (x: number, y: number, w: number, h: number) =>
         ({ left: x, top: y, width: w, height: h, right: x + w, bottom: y + h, x, y, toJSON() {} }) as DOMRect
-      if (this.getAttribute("aria-hidden") === "true" && this.closest('[data-slot="date-picker-trigger"]')) return rect(150, 14, 24, 24)
+      if (this.getAttribute("aria-hidden") === "true" && this.closest('[data-slot="date-picker-trigger"]')) return rect(150, 14, 44, 24)
       if (this.firstElementChild?.getAttribute("data-slot") === "date-picker-trigger") return rect(10, 10, 200, 32)
       return rect(0, 0, 0, 0)
     })
     try {
       render(<DatePicker value={new Date(2026, 9, 15)} onChange={() => {}} clearable className="px-2" />)
       const clear = document.querySelector<HTMLElement>('[data-slot="date-picker-clear"]')!
-      expect(clear.style.left).toBe("140px")
+      expect(clear.style.left).toBe("150px")
       expect(clear.style.top).toBe("4px")
       // 測れたら既定 padding 前提の位置クラスは外す
       expect(clear.className).not.toContain("top-1/2")
@@ -285,5 +285,13 @@ describe("クリアボタンの位置と当たり判定（#803）", () => {
     const clear = document.querySelector('[data-slot="date-picker-clear"]')!
     expect(clear.className).toContain("size-6")
     expect(clear.className).toContain("before:-inset-2.5")
+  })
+
+  it("トリガー内の空き場所は当たり判定と同じ 44px 幅で、広げた判定がカレンダーアイコンに掛からない", () => {
+    render(<DatePicker value={new Date(2026, 9, 15)} onChange={() => {}} clearable />)
+    const spacer = document.querySelector('[data-slot="date-picker-trigger"] span[aria-hidden="true"]')!
+    expect(spacer.className).toContain("w-11")
+    // spacer の直後がカレンダーアイコン（間に余白を挟まず、判定の端 = spacer の端）
+    expect(spacer.nextElementSibling?.tagName.toLowerCase()).toBe("svg")
   })
 })

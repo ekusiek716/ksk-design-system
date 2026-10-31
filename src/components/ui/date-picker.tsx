@@ -146,7 +146,8 @@ function useClearButtonPosition(
       const r = spacer.getBoundingClientRect()
       // 寸法が取れない環境（jsdom 等）では既定位置のままにする
       if (r.width === 0 && r.height === 0) return
-      const next = { left: r.left - w.left, top: r.top - w.top }
+      // ボタン（24px）を spacer（44px 幅）の中央に置く。当たり判定（44px）が spacer にぴったり重なる
+      const next = { left: r.left - w.left + (r.width - 24) / 2, top: r.top - w.top + (r.height - 24) / 2 }
       setPos((prev) => (prev && prev.left === next.left && prev.top === next.top ? prev : next))
     }
     measure()
@@ -214,8 +215,9 @@ function DatePicker({
         className={triggerClass(open, !!formatted, className)}
       >
         <span>{formatted ?? placeholder}</span>
-        {/* クリアボタン（トリガーの兄弟として重ねる）の分だけ文字の右側を空ける */}
-        {showClear && <span ref={spacerRef} aria-hidden className="ml-auto mr-1 size-6 shrink-0" />}
+        {/* クリアボタン（トリガーの兄弟として重ねる）の当たり判定 44px の分だけ文字の右側を空ける。
+            幅を当たり判定と同じにして、広げた判定がカレンダーアイコンや文字に掛からないようにする */}
+        {showClear && <span ref={spacerRef} aria-hidden className="ml-auto h-6 w-11 shrink-0" />}
         {calendarIcon}
       </button>
     </PopoverTrigger>
@@ -244,7 +246,7 @@ function DatePicker({
                 "absolute z-[1] flex size-6 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] transition-colors hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Object-High-Emphasis)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
                 // 見た目は 24px のまま、当たり判定だけ 44px に広げる（タップ領域 44pt の基準）
                 "before:absolute before:-inset-2.5 before:content-['']",
-                !clearPos && "right-[calc(var(--Field-Padding-X-Md)_+_1.25rem)] top-1/2 -translate-y-1/2"
+                !clearPos && "right-[calc(var(--Field-Padding-X-Md)_+_1.625rem)] top-1/2 -translate-y-1/2"
               )}
             >
               {clearIcon}
