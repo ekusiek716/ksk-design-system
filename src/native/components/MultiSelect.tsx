@@ -102,6 +102,13 @@ export function MultiSelect({
                       d.includes(item.value) ? d.filter((v) => v !== item.value) : [...d, item.value],
                     )
                   }}
+                  // 行全体を 1 つの checkbox として読ませる（issue #799）
+                  accessible
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked }}
+                  accessibilityLabel={item.label}
+                  // react-native-web 0.21 は accessibilityState を aria-* に変換しないため併記する
+                  aria-checked={checked}
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
@@ -109,7 +116,20 @@ export function MultiSelect({
                     paddingVertical: scales.spacing.scale[3],
                   }}
                 >
-                  <Checkbox checked={checked} />
+                  {/*
+                    チェック枠は見た目だけの装飾にする（issue #799）。Checkbox 自身が Pressable のため、
+                    そのまま入れ子にすると枠付近のタップを内側が取り、行の onPress が呼ばれなかった。
+                    CheckboxField と同じく、タッチと支援技術の両方から外した包みに入れる。
+                  */}
+                  <View
+                    pointerEvents="none"
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
+                    // react-native-web は上記2つを尊重しないため、web でも効く aria-hidden を併記する
+                    aria-hidden
+                  >
+                    <Checkbox checked={checked} decorative />
+                  </View>
                   <RNText style={[resolveTypo("body.md"), { color: theme.text["high-emphasis"], flex: 1 }]}>
                     {item.label}
                   </RNText>
