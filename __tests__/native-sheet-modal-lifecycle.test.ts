@@ -63,6 +63,17 @@ describe("native Sheet plain mode の入場完了後の固定 transform (#588)",
     expect(revealOpened).toContain("setRevealed(true)")
   })
 
+  it("dismissible を受け取り、背景 Pressable の onPress を分岐する (#823)", () => {
+    expect(plainSource).toMatch(/dismissible = true,/)
+    expect(plainSource).toContain("onPress={dismissible ? onClose : () => {}}")
+  })
+
+  it("side=bottom だけ iOS 限定の KeyboardAvoidingView で包む (#791)", () => {
+    expect(plainSource).toMatch(/side === "bottom" \?\s*\(\s*<KeyboardAvoidingView/)
+    expect(plainSource).toContain('behavior={Platform.OS === "ios" ? "padding" : undefined}')
+    expect(plainSource).toContain('enabled={Platform.OS === "ios"}')
+  })
+
   it("open が変わるたびに入場前（animated transform）へ戻す", () => {
     expect(plainSource).toMatch(
       /if \(prevOpen !== open\) \{\s*setPrevOpen\(open\)\s*setRevealed\(false\)/,

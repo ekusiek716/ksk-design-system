@@ -15,11 +15,15 @@ export interface CategoryNavProps {
   onChange?: (key: string) => void
 }
 
-/** 横並び・固定で表示するカテゴリナビ。スクロール可能。 */
+/**
+ * 横並び・固定で表示するカテゴリナビ。スクロール可能。
+ * コンテナは `tablist`、各項目は `tab` で現在の項目に `selected` を既定で持つ（issue #800）。
+ */
 export function CategoryNav({ items, value, onChange }: CategoryNavProps) {
   const { theme, scales } = useTheme()
   return (
     <ScrollView
+      accessibilityRole="tablist"
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{
@@ -33,6 +37,9 @@ export function CategoryNav({ items, value, onChange }: CategoryNavProps) {
         return (
           <Pressable
             key={it.key}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={it.label}
             onPress={() => onChange?.(it.key)}
             style={{ alignItems: "center", gap: scales.spacing.scale[1], width: 64 }}
           >

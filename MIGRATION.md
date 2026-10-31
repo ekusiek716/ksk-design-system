@@ -5,7 +5,12 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 
 ## 未リリース（次回の minor）の導入注意
 
+以下は次回リリースに含まれる変更の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
+
 - **不具合修正（操作の変化）: DataTable の行クリックとセルのキーボード操作（#793 / #814）**: rows/columns API と `DataTableRow` の `onRowClick` が、セル内の Select の選択肢（Enter・タップ）、DatePicker などの Portal 先の操作、編集できるセル（`editCell` または `edit.trigger` が `manual` 以外の列。`createDataTableDateColumn` / `createDataTableChipColumn` / `createDataTableSelectColumn` を含む）のクリックでは**呼ばれなくなりました**。表示専用の `cell` 列と行の余白では従来どおり呼ばれます。編集できるセルの `td` は Tab 順に入り（`tabIndex=0`、フォーカスリング付き）、Enter で編集を始め、確定・Escape の後は同じ `td` にフォーカスが戻ります。セル内の `<button>` / `<a href>` は Enter で押せるようになりました。**`editCell` も `edit` も指定していない `cell` 列は、ダブルクリック・Enter で `isEditing` が true にならなくなりました**（これまでも既定の doubleClick で編集状態だけが変わっていた。`cell` の中で `isEditing` を見て編集 UI を出している列は、`edit: { trigger: "doubleClick" }` を明示してください）。編集できるセルを押して行の詳細を開く挙動に頼っていた画面は、行の余白・表示専用の列から開くか、`edit.trigger: "manual"` にしてセル内のボタンから `startEdit` を呼んでください。
+- **見た目の変更: Select の一覧の高さが画面の使える高さまでに縮む（#826）**: `SelectContent`（既定の `position="popper"`）の高さの上限を、固定の 384px から「384px と画面の使える高さの小さいほう」にしました。広い画面の見た目は変わりません。横向きのスマホや画面中ほどの Select では一覧が低くなり、中でスクロールして全項目に届きます。`position="item-aligned"` は従来どおりです。導入時の作業は不要です。
+- **見た目の変更: `OrderSummary` の `fixed` で、下余白に safe-area を足した（#832）**: 画面下に固定したとき、中身の下余白を `StickyActionBar` と同じ `max(0.75rem, env(safe-area-inset-bottom))` にしました。`viewport-fit=cover` の iPhone では注文ボタンがホームインジケータより上に出ます。inline（`fixed` なし）は変わりません。**`className` で下余白を足して safe-area を自前で避けていた場合は二重になるので外してください**。
+- **不具合修正: MonthCalendar（`view="week"`）で日を選んだ後も、外から `month` を変えると週の帯が新しい月の中へ移る（#806）**: これまでは選択日があると、前後の月ボタンを押しても帯が選んだ週に固まり、見出しの月と日付が食い違っていました。新しい月の中の選択日 → 今日 → 1 日の週へ移ります。選択日そのものは変えません。導入時の作業は不要です。
 
 ## v2.22.0 の導入注意
 
@@ -32,7 +37,8 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 - **下側Sheetの入力時高さ（#706）**: `safeArea={true}`（既定）の通常bottom Sheetは、キーボード表示時に上端のsafe-areaも差し引き、ステータスバー・ノッチへの侵入を避けます。独自の全画面配置でこの補正が不要なら `safeArea={false}` を指定してください。snap Sheetは今回の高さ変更の対象外です。
 - **画面・分類・配置編集（#701–#703）**: Screenへ上端safe-area、svh/fill、768px以上の中央カード、landmark省略を追加します。fillの中央カードは親の高さを尊重します。KanbanColumnの分類色指定と、選択・ドラッグ・矢印移動用SelectableTileも追加します。これらの追加APIは任意指定です。
 - **予定のモバイル表示（#704）**: MonthCalendarへ週表示、予定一覧AgendaListを追加します。週表示は選択日を優先し、月外の初期選択日や内部の月またぎ移動でも表示週・月見出しを揃えます。既定の月表示は維持します。
-- **管理画面のモバイルナビ（#705）**: AdminShellへ任意のモバイルドロワーを追加します。リンク選択時の自動closeは `closeMobileDrawerOnNavigate={true}` の明示指定で有効にし、既定falseでは既存の挙動を維持します。
+- **管理画面のモバイルナビ（#705）**: AdminShellへ任意のモバイルドロワーを追加します。リンク選択時の自動closeは `closeMobileDrawerOnNavigate={true}` の明示指定で有効にし、既定falseでは既存の挙動を維持します。（#795 以降）自動closeは next/link・React Router のリンク部品のようにクリックで `preventDefault` する SPA リンクでも働きます。修飾キー付きのクリック・`target="_blank"` のリンクでは閉じません。
+  - **挙動の変更**: これまでは項目の onClick で `preventDefault` するとドロワーが閉じませんでしたが、#795 以降は閉じます。`<a href="#">` をボタン代わりにしている項目や、未保存の変更があるとき遷移を取り消すナビゲーションガードでドロワーを開いたままにしたい場合は、その項目（または囲む要素）に `data-keep-mobile-drawer` 属性を付けてください。遷移を取り消したときだけ開いたままにしたい場合は、`closeMobileDrawerOnNavigate` を使わず `mobileDrawerOpen` / `onMobileDrawerOpenChange` で開閉を制御してください。
 
 ## v2.14.0 の導入注意
 

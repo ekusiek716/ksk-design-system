@@ -49,9 +49,15 @@ export const CustomResultCountLabel: Story = {
   ),
 }
 
+/**
+ * sticky（issue #807）: バー全体（チップ行と件数）がスクロール枠の上端に貼り付く。
+ * 貼り付く範囲は呼び出し側の親ブロック（ここではスクロール枠）なので、バーは一覧と同じ親に置く。
+ * v2.22.0 までは子のチップ行に sticky が付いていて、件数行ぶん（約 24px）だけ貼り付いて流れていた。
+ */
 export const Sticky: Story = {
+  tags: ["interaction"],
   render: () => (
-    <div className="max-w-md h-64 overflow-y-auto border border-[var(--Border-Low-Emphasis)]">
+    <div data-testid="scroller" className="max-w-md h-64 overflow-y-auto border border-[var(--Border-Low-Emphasis)]">
       <div className="h-24 bg-[var(--Surface-Secondary)] flex items-center justify-center typo-label-sm text-[var(--Text-Medium-Emphasis)]">
         ヘッダー相当（この下にチップ行が sticky で貼り付く）
       </div>
@@ -65,13 +71,46 @@ export const Sticky: Story = {
       </div>
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const scroller = canvasElement.querySelector<HTMLElement>('[data-testid="scroller"]')!
+    const bar = canvasElement.querySelector<HTMLElement>('[data-slot="chip-filter-bar"]')!
+    // ヘッダー（96px）を越えて十分スクロールしても、バーは枠の上端に残る
+    scroller.scrollTop = 200
+    await new Promise((r) => requestAnimationFrame(() => r(null)))
+    const frameTop = scroller.getBoundingClientRect().top + scroller.clientTop
+    await expect(Math.round(bar.getBoundingClientRect().top - frameTop)).toBe(0)
+  },
+}
+
+/** resultCount を渡さない sticky も貼り付く（issue #807。以前は貼り付く距離が 0px だった）。 */
+export const StickyWithoutResultCount: Story = {
+  tags: ["interaction"],
+  render: () => (
+    <div data-testid="scroller" className="max-w-md h-64 overflow-y-auto border border-[var(--Border-Low-Emphasis)]">
+      <div className="h-24 bg-[var(--Surface-Secondary)]" />
+      <ChipFilterBar sticky>
+        {["すべて", "未着手", "進行中", "完了"].map((label) => (
+          <Chip key={label}>{label}</Chip>
+        ))}
+      </ChipFilterBar>
+      <div className="h-96 px-4 py-2 typo-body-md text-[var(--Text-High-Emphasis)]">一覧</div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const scroller = canvasElement.querySelector<HTMLElement>('[data-testid="scroller"]')!
+    const bar = canvasElement.querySelector<HTMLElement>('[data-slot="chip-filter-bar"]')!
+    scroller.scrollTop = 200
+    await new Promise((r) => requestAnimationFrame(() => r(null)))
+    const frameTop = scroller.getBoundingClientRect().top + scroller.clientTop
+    await expect(Math.round(bar.getBoundingClientRect().top - frameTop)).toBe(0)
+  },
 }
 
 /**
  * sticky + 内側余白（issue #667）。`gutter` は Container と同じ語彙（tight = 16px / default = 24px）。
- * 背景は全幅のまま、チップと件数だけが余白の内側に収まるので、スクロールしたリストが左右の
- * 隙間から透けない。語彙に無い余白は `contentClassName`（例: `px-[var(--page-px)]`）で渡す。
- * 外側の `className` に `px-*` を付けると背景まで狭まるので使わない。
+ * 背景（sticky の根 = バー全体が持つ。issue #807）は全幅のまま、チップと件数だけが余白の内側に
+ * 収まるので、スクロールしたリストが左右の隙間から透けない。語彙に無い余白は `contentClassName`
+ * （例: `px-[var(--page-px)]`）で渡す。外側の `className` に `px-*` を付けると背景まで狭まるので使わない。
  */
 export const StickyWithGutter: Story = {
   tags: ["interaction"],
@@ -91,7 +130,8 @@ export const StickyWithGutter: Story = {
     const bar = canvasElement.querySelector<HTMLElement>('[data-slot="chip-filter-bar"]')!
     const row = bar.firstElementChild as HTMLElement
     const content = row.querySelector<HTMLElement>('[data-slot="chip-filter-bar-content"]')!
-    // 背景を持つ行は外側と同じ幅（全幅）で、余白は内側ラッパーの padding
+    // 背景はバー（全幅）が持ち、横スクロールの行も同じ幅。余白は内側ラッパーの padding
+    await expect(getComputedStyle(bar).position).toBe("sticky")
     await expect(row.getBoundingClientRect().width).toBe(bar.getBoundingClientRect().width)
     await expect(getComputedStyle(content).paddingLeft).toBe("16px")
     await expect(getComputedStyle(bar.querySelector("p")!).paddingLeft).toBe("16px")

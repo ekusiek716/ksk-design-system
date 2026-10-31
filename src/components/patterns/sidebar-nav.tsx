@@ -38,6 +38,9 @@ type SidebarNavItemRender = (props: {
  * `href` と `onClick` を両方持つ項目では、SidebarNav はリンク遷移に加えて
  * `onClick` も呼ぶ（計測・ドロワーを閉じる等のため）。SPA ルーターで遷移を
  * 自前で行う場合は `onClick` 側で `preventDefault` するか `href` を渡さない。
+ * `preventDefault` しても、AdminShell の `closeMobileDrawerOnNavigate` によるドロワーの
+ * 自動 close は止まらない（SPA 遷移でも閉じる。issue #795）。閉じたくない項目は
+ * 親要素に `data-keep-mobile-drawer` 属性を付ける。
  */
 interface SidebarNavItem {
   /** 行の可視ラベル。`collapsed` 時はアクセシブルネームと tooltip（title）になる。 */

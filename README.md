@@ -88,6 +88,10 @@ DS のルールが適用されません。既存ファイルはスキップさ�
 
 独自ブランドのテーマを使う場合は、この後にテーマCSSをimportしてください。
 
+メニュー・Popover・Tooltip・Select・Dialog の開閉アニメと Accordion の高さアニメに使う
+`tw-animate-css` は preset（`preset-core`）が読み込みます。DS の dependencies に入っているため、
+consumer 側で別途インストールや `@import "tw-animate-css";` をする必要はありません（issue #827）。
+
 `preset` を使わずトークン CSS を個別 subpath で import する構成では、角丸トークン
 （`--Radius-Surface` / `--Radius-Modal` / `--Radius-Sheet`）は
 `ksk-design-system/tokens/product-theme` に含まれます（issue #553）。
@@ -221,6 +225,13 @@ npx ksk-ds lint src --max-warnings=0    # warning が N 件を超えたら exit 
 `warning` ルールも CI で締めたい場合は `--strict` か `--max-warnings N` を使ってください。
 **未知のオプションはエラー終了**します（黙って捨てないので、CI に書いたフラグが
 無言で効かないことはありません）。
+`--changed` は origin/main との差分・未コミットの変更・未追跡（未 add）の新規ファイルを対象にし、
+指定したパス（省略時は実行ディレクトリ）の配下に絞ります。origin/main が取れないときは警告を出し、
+未コミット分と未追跡だけを検査します。対象が 0 件のときは「違反なし」ではなく 0 件と表示します。
+`--format json` では 0 件の告知を stderr に出し（stdout の JSON は汚さない）、`summary.scannedFiles` に
+実際に検査したファイル数を入れます（`summary.files` は従来どおり違反のあったファイル数）。
+**存在しないパスを指定すると** stderr に `検査対象が見つかりません` を出します。指定したパスが
+すべて存在しないときは exit 1、一部だけ存在しないときは警告のみ（`--strict` 付きなら exit 1）です。
 
 ルールはファイルごとに **capability（そのファイルがどの記法を持ちうるか）** を判定して
 出し分けます（`contracts/rules.json` の `appliesTo`）。
@@ -400,6 +411,15 @@ consumer が shadcn 既定の `src/components/ui/` に部品を置いても中�
 `shadow-[var(--shadow-md)]` と一致せず除外が一度も効きません（issue #463）。
 `scripts/check-rules-contract.mjs`（`npm run check` に組み込み済み）が `excludeLines` /
 `excludePaths` / `excludeDsPaths` 内のバックスラッシュ混入を検出します。
+
+#### タグ単位のルール（`"scope": "tag"`、issue #805）
+
+`<Button[^>]*aria-pressed` のようにタグの属性を見るルール（P002 / P025 / P033 / P034 / P036 / P039 /
+P042 / P043 / P044）には `"scope": "tag"` が付いています。これらはファイル全体で照合するため、
+Prettier が長いタグを複数行に折り返しても 1 行で書いたときと同じ判定になります。`excludeLines` と
+行スコープの `ksk-ds-lint-ignore` は、タグの開始行から閉じる `>` の行までのどこに書いても効きます。
+v2.22.0 までは 1 行ずつ照合していたため、複数行のタグで P033 / P044 等を見逃し、alt が次の行にある
+`<img>` を P025 と誤検知していました。修正後は、これまで見逃していた箇所が新たに error になることがあります。
 
 #### P029: テンプレートリテラル className の許容範囲（issue #464）
 
@@ -593,6 +613,13 @@ const suppressMotion = !resolved || reduceMotion
 実行中の演出は停止して元の表示へ戻してください。設定変更は即時反映され、
 遅れて届いた初回取得結果では上書きしません。アンマウント時には購読を解除します。
 この hook は `native/ui` の公開 API です。トークン専用の `native` エントリには含みません。
+
+DS の部品自身もこの約束に従います（#802）。`Celebration` / `CelebrationDialog` は
+`suppressMotion` の間は紙吹雪を出さず、カードを弾ませず最終状態で表示します。
+`Skeleton`（`SkeletonText` を含む）は明滅を始めず、設定オンと分かった時点で固定の
+不透明度にします。取得前（`!resolved`）も止める側に倒すため、初回表示の一瞬は演出が
+出ないことがあります（取得は通常すぐ終わり、設定オフと分かりしだい始まります）。
+これらの部品のために consumer 側で設定を読んで回避する必要はありません。
 
 `ksk-design-system/native/ui` から直接 RN 用コンポーネント export（134 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
 

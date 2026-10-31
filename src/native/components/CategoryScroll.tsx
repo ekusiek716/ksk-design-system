@@ -15,11 +15,15 @@ export interface CategoryScrollProps {
   onChange?: (key: string) => void
 }
 
-/** Pill 形のカテゴリ横スクロール。CategoryNav と違い見た目はテキストチップ。 */
+/**
+ * Pill 形のカテゴリ横スクロール。CategoryNav と違い見た目はテキストチップ。
+ * コンテナは `tablist`、各項目は `tab` で現在の項目に `selected` を既定で持つ（issue #800）。
+ */
 export function CategoryScroll({ items, value, onChange }: CategoryScrollProps) {
   const { theme, scales } = useTheme()
   return (
     <ScrollView
+      accessibilityRole="tablist"
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{
@@ -33,6 +37,8 @@ export function CategoryScroll({ items, value, onChange }: CategoryScrollProps) 
         return (
           <Pressable
             key={it.key}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
             onPress={() => onChange?.(it.key)}
             style={({ pressed }) => ({
               flexDirection: "row",

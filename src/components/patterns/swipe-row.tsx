@@ -23,6 +23,8 @@ interface SwipeRowProps {
 }
 
 const ACTION_WIDTH = 72 // px per action
+/** この距離（px）を超えて横に動いたら初めてスワイプとみなす（issue #794） */
+const DRAG_THRESHOLD = 8
 
 function SwipeRow({ children, actions = [], side = "right", className, actionsLabel: actionsLabelProp }: SwipeRowProps) {
   const defaultLabels = useKskLabels()
@@ -40,16 +42,20 @@ function SwipeRow({ children, actions = [], side = "right", className, actionsLa
     setOffset(target)
   }, [])
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    startX.current = e.clientX
-    startOffset.current = offset
-    setIsDragging(true)
-    containerRef.current?.setPointerCapture(e.pointerId)
-  }
+  // issue #794: pointerdown の時点ではポインタを握らない。握ると children の
+  // ボタン・リンクへの click が行本体に横取りされる（pointerup の付け替え先が行本体になり、
+  // click は共通祖先＝行本体へ投げられる）。pointerdown では開始位置を記録するだけにし、
+  // 横移動が DRAG_THRESHOLD を超えて横方向が優勢になった時点で初めてドラッグを確定し、
+  // setPointerCapture する（Sheet のマウス経路と同じ方式）。縦方向が優勢なら記録を
+  // 破棄して縦スクロール（touch-pan-y）に譲る。
+  const pendingPointerId = React.useRef<number | null>(null)
+  const startY = React.useRef(0)
+  const draggingRef = React.useRef(false)
+  // ドラッグ確定後に飛んでくる click を 1 回だけ握りつぶす（スワイプ直後の子の誤発火防止）
+  const suppressClick = React.useRef(false)
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return
-    const delta = e.clientX - startX.current
+  const updateOffset = (clientX: number) => {
+    const delta = clientX - startX.current
     const raw = startOffset.current + delta
     // side="right": 左方向(負)に開く → [-maxOffset, 0] にクランプ
     // side="left" : 右方向(正)に開く → [0, maxOffset] にクランプ
@@ -60,11 +66,71 @@ function SwipeRow({ children, actions = [], side = "right", className, actionsLa
     setOffset(clamped)
   }
 
-  const handlePointerUp = () => {
-    if (!isDragging) return
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // マウスの右クリック・中クリックではドラッグ状態に入らない
+    if (e.pointerType === "mouse" && e.button !== 0) return
+    // 2 本目以降の指（isPrimary=false）・ドラッグ中の別ポインタは無視する。上書きすると
+    // 1 本目の pointerup が id 不一致で捨てられ、行がスナップせず止まる。
+    if (e.isPrimary === false || draggingRef.current) return
+    pendingPointerId.current = e.pointerId
+    draggingRef.current = false
+    startX.current = e.clientX
+    startY.current = e.clientY
+    startOffset.current = offset
+  }
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (pendingPointerId.current !== e.pointerId) return
+    if (!draggingRef.current) {
+      // ドラッグ確定前はポインタを握っていないため、行の外で離した pointerup は届かない。
+      // ボタンが押されていないマウスの move は「既に離した」とみなし記録を破棄する
+      // （残すと、後でボタンを押さずに行へ戻ったときに行がカーソルに付いて動く）。
+      if (e.pointerType === "mouse" && (e.buttons & 1) === 0) {
+        pendingPointerId.current = null
+        return
+      }
+      const dx = e.clientX - startX.current
+      const dy = e.clientY - startY.current
+      if (Math.abs(dx) <= DRAG_THRESHOLD && Math.abs(dy) <= DRAG_THRESHOLD) return
+      if (Math.abs(dx) <= Math.abs(dy)) {
+        // 縦方向が優勢: スワイプではなくスクロール。以後このポインタは追わない
+        pendingPointerId.current = null
+        return
+      }
+      draggingRef.current = true
+      setIsDragging(true)
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId)
+      } catch {
+        // setPointerCapture は未対応環境・既に解放済みのポインタで例外を投げるため無視
+      }
+    }
+    updateOffset(e.clientX)
+  }
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (pendingPointerId.current !== e.pointerId) return
+    pendingPointerId.current = null
+    if (!draggingRef.current) return
+    draggingRef.current = false
     setIsDragging(false)
+    if (e.type === "pointerup") {
+      suppressClick.current = true
+      // click は pointerup と同じ入力処理の中で続けて届く。届かなかった場合に
+      // 次のクリックまで握りつぶさないよう、次の tick で解除する。
+      window.setTimeout(() => {
+        suppressClick.current = false
+      }, 0)
+    }
     const sign = side === "right" ? -1 : 1
     snapTo(isOpen ? sign * maxOffset : 0)
+  }
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (!suppressClick.current) return
+    suppressClick.current = false
+    e.preventDefault()
+    e.stopPropagation()
   }
 
   const close = () => snapTo(0)
@@ -130,6 +196,7 @@ function SwipeRow({ children, actions = [], side = "right", className, actionsLa
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onClickCapture={handleClickCapture}
       >
         {children}
       </div>

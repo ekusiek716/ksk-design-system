@@ -74,8 +74,8 @@ ${npmRewrites ? `node -e 'const fs=require("fs");const p=JSON.parse(fs.readFileS
   return { root, consumer, capture, bin };
 }
 
-function run(env) {
-  return spawnSync('bash', ['--noprofile', '--norc', script, '2.9.0', env.consumer], {
+function run(env, args = [env.consumer], extraEnv = {}) {
+  return spawnSync('bash', ['--noprofile', '--norc', script, '2.9.0', ...args], {
     encoding: 'utf8',
     env: gitEnv({
       PATH: `${env.bin}:${process.env.PATH}`,
@@ -86,9 +86,96 @@ function run(env) {
       CAPTURE: env.capture,
       FAKE_DS_VERSION: '2.9.0',
       KSK_UPDATE_CONSUMERS_LOCK: join(env.root, 'run.lock'),
+      ...extraEnv,
     }),
   });
 }
+
+// 既定の配布先の実配置（issue #785）。DEFAULT_REPOS がここからずれると、
+// 下の「全件解決」テストの事前チェックで落ちる。配置を変えたら両方を直す。
+const DEFAULT_LAYOUT = [
+  'todo-apps/belle-todo',
+  'todo-apps/trip-todo',
+  'todo-apps/ninshin-todo',
+  'todo-apps/okuno-todo-suite',
+  'apps/yokoku-app',
+  'apps/pawly',
+  'apps/camera-app',
+  'apps/aikoibito',
+];
+
+// 一時ディレクトリの下に擬似的な配置（KSK_CONSUMER_ROOT）を作り、各パスへ origin を clone する。
+function setupLayout(paths) {
+  const env = setup();
+  const consumerRoot = join(env.root, 'LocalDev');
+  for (const rel of paths) {
+    mkdirSync(dirname(join(consumerRoot, rel)), { recursive: true });
+    git(env.root, 'clone', '-q', join(env.root, 'origin.git'), join(consumerRoot, rel));
+  }
+  return { ...env, consumerRoot };
+}
+
+test('引数なし: 既定の配布先 8 件が todo-apps/・apps/ 配下で全件解決される (#785)', () => {
+  const env = setupLayout(DEFAULT_LAYOUT);
+  try {
+    const r = run(env, [], { KSK_CONSUMER_ROOT: env.consumerRoot });
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    assert.doesNotMatch(r.stdout, /missing dir|FAIL/);
+    for (const rel of DEFAULT_LAYOUT) {
+      assert.ok(r.stdout.includes(`   ${join(env.consumerRoot, rel)}\n`), `${rel} が処理されていない\n${r.stdout}`);
+    }
+    assert.equal(r.stdout.match(/DRY_RUN \(commit のみ・push なし\)/g)?.length, DEFAULT_LAYOUT.length);
+  } finally {
+    rmSync(env.root, { recursive: true, force: true });
+  }
+});
+
+test('名前指定: belle-todo pawly がカテゴリ配下から解決され、名前違いの複製は拾わない (#785)', () => {
+  // aikoibito_codex のような複製が隣にあっても、名前の完全一致だけを拾う
+  const env = setupLayout(['todo-apps/belle-todo', 'apps/pawly', 'apps/aikoibito_codex', 'Examination/some-exam-app']);
+  try {
+    const r = run(env, ['belle-todo', 'pawly', 'some-exam-app'], { KSK_CONSUMER_ROOT: env.consumerRoot });
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    assert.ok(r.stdout.includes(`   ${join(env.consumerRoot, 'todo-apps/belle-todo')}\n`), r.stdout);
+    assert.ok(r.stdout.includes(`   ${join(env.consumerRoot, 'apps/pawly')}\n`), r.stdout);
+    // DEFAULT_REPOS に無い名前は 1 階層下のカテゴリ（Examination/ 等）から探す
+    assert.ok(r.stdout.includes(`   ${join(env.consumerRoot, 'Examination/some-exam-app')}\n`), r.stdout);
+    assert.doesNotMatch(r.stdout, /aikoibito_codex|not found/);
+
+    const missing = run(env, ['aikoibito'], { KSK_CONSUMER_ROOT: env.consumerRoot });
+    assert.equal(missing.status, 1, missing.stdout + missing.stderr);
+    assert.match(missing.stdout, /'aikoibito' が見つからない/);
+    assert.doesNotMatch(missing.stdout, /aikoibito_codex/);
+  } finally {
+    rmSync(env.root, { recursive: true, force: true });
+  }
+});
+
+test('名前指定: 同名が複数カテゴリにあれば曖昧として FAIL する (#785)', () => {
+  const env = setupLayout(['todo-apps/foo-app', 'apps/foo-app']);
+  try {
+    const r = run(env, ['foo-app'], { KSK_CONSUMER_ROOT: env.consumerRoot });
+    assert.equal(r.status, 1, r.stdout + r.stderr);
+    assert.match(r.stdout, /'foo-app' が複数見つかった/);
+    assert.doesNotMatch(r.stdout, /=== foo-app ===/);
+  } finally {
+    rmSync(env.root, { recursive: true, force: true });
+  }
+});
+
+test('引数なし: 既定の配布先が 1 件でも欠けていたら、処理前に一覧付きで止まる (#785)', () => {
+  const env = setupLayout(DEFAULT_LAYOUT.filter((rel) => rel !== 'apps/pawly'));
+  try {
+    const r = run(env, [], { KSK_CONSUMER_ROOT: env.consumerRoot });
+    assert.equal(r.status, 1, r.stdout + r.stderr);
+    assert.match(r.stdout, /既定の配布先のうち 1 件が git リポとして見つかりません/);
+    assert.ok(r.stdout.includes(`  - ${join(env.consumerRoot, 'apps/pawly')}\n`), r.stdout);
+    // 1 件も処理していない（他の 7 件の bump にも進まない）
+    assert.doesNotMatch(r.stdout, /===|DRY_RUN \(commit/);
+  } finally {
+    rmSync(env.root, { recursive: true, force: true });
+  }
+});
 
 function depOf(capture, rel) {
   const pkg = JSON.parse(readFileSync(join(capture, rel), 'utf8'));

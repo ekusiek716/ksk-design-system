@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { OVERLAY_FOCUS_RING } from "@/lib/server-variants/overlay-focus-ring"
+import { useLatestRef } from "@/lib/use-latest-ref"
 import { useKskLabels } from "../ui/ksk-labels"
 
 type MediaActionClusterOrientation = "vertical" | "horizontal" | "auto"
@@ -34,6 +35,10 @@ interface MediaActionClusterProps extends Omit<React.HTMLAttributes<HTMLDivEleme
   labelPosition?: MediaActionClusterLabelPosition
   autoHideMs?: number | null
   defaultVisible?: boolean
+  /**
+   * 自動非表示・再表示で表示状態が変わったときに呼ばれる。その場の関数で渡してよい
+   * （参照が変わっても autoHideMs のタイマーは巻き戻らない。#812）
+   */
   onVisibleChange?: (visible: boolean) => void
   /** クラスタ全体（role="group"）の aria-label。省略時は KskLabelsProvider の `mediaActionCluster`（Provider 無しは "メディアアクション"。locale="en" で "Media actions"） */
   "aria-label"?: string
@@ -103,15 +108,26 @@ function MediaActionCluster({
     }
   }, [])
 
+  // onVisibleChange は ref 越しに呼び、タイマー・購読の依存から外す。依存に入れると、その場の
+  // 関数で渡されたとき親の再描画のたびに自動非表示のタイマーが巻き戻る（#812）。
+  // 通知は updater の外で、現在の表示状態（visibleRef）と比べて変わったときだけ行う
+  // （updater 内の副作用は StrictMode で二重に呼ばれうるため）。
+  const onVisibleChangeRef = useLatestRef(onVisibleChange)
+  const visibleRef = useLatestRef(visible)
+
   const setVisibleState = React.useCallback(
     (nextVisible: boolean) => {
-      setVisibility((current) => {
-        const currentVisible = current.autoHideEnabled ? current.value : true
-        if (currentVisible !== nextVisible) onVisibleChange?.(nextVisible)
-        return { autoHideEnabled, value: nextVisible }
-      })
+      setVisibility((current) =>
+        current.autoHideEnabled === autoHideEnabled && current.value === nextVisible
+          ? current
+          : { autoHideEnabled, value: nextVisible },
+      )
+      if (visibleRef.current === nextVisible) return
+      // 次の描画より前に続けて呼ばれても二重に通知しないよう、先に進めておく
+      visibleRef.current = nextVisible
+      onVisibleChangeRef.current?.(nextVisible)
     },
-    [autoHideEnabled, onVisibleChange],
+    [autoHideEnabled, onVisibleChangeRef, visibleRef],
   )
 
   const scheduleHide = React.useCallback(() => {

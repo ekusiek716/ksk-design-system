@@ -64,6 +64,38 @@ for (const importSpecifier of imports) {
 }
 
 const errors = []
+
+// ─── dependencies / peerDependencies の同梱検出（issue #828） ──────────
+// 上の検査は dist に残った静的 import しか見ないため、external に入れ忘れて
+// 丸ごと同梱された依存は「import が無い = 問題なし」として素通りしていた。
+// react-hook-form を同梱すると Context（FormProvider / useFormContext）が consumer の
+// react-hook-form と別インスタンスになり、混在した使い方で null 参照になる
+// （radix-ui/internal の #504 と同型）。同梱すると元パッケージの sideEffects: false も
+// 失われ、使わない consumer にも日付ライブラリが届く。dist の全 JS で、宣言済みの依存が
+// rolldown の `//#region node_modules/<dep>/` として残っていたら失敗させる。
+const distDir = new URL("../dist/", import.meta.url)
+const distJsFiles = (dir) =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = new URL(entry.isDirectory() ? `${entry.name}/` : entry.name, dir)
+    if (entry.isDirectory()) return entry.name === "types" ? [] : distJsFiles(full)
+    return entry.name.endsWith(".js") ? [full] : []
+  })
+const declaredDependencies = [
+  ...Object.keys(packageJson.dependencies ?? {}),
+  ...Object.keys(packageJson.peerDependencies ?? {}),
+]
+for (const file of distJsFiles(distDir)) {
+  const source = file.href === webBundlePath.href ? webBundle : readFileSync(file, "utf8")
+  const relativePath = fileURLToPath(file).slice(rootDir.length)
+  for (const dependency of declaredDependencies) {
+    if (source.includes(`//#region node_modules/${dependency}/`)) {
+      errors.push(
+        `${dependency}: ${relativePath} に同梱されています（vite.config.lib.ts の external に追加し、bare import として残してください）`,
+      )
+    }
+  }
+}
+
 for (const dependency of [...staticImports].sort()) {
   if (packageJson.dependencies?.[dependency]) continue
 

@@ -5,21 +5,27 @@
 # 使い方: bash scripts/update-consumers.sh <version> [repo...]
 #   例:   bash scripts/update-consumers.sh 1.46.0
 #         bash scripts/update-consumers.sh 1.46.0 belle-todo
-#         bash scripts/update-consumers.sh 1.46.0 "$HOME/LocalDev/pawly"
+#         bash scripts/update-consumers.sh 1.46.0 "$HOME/LocalDev/apps/pawly"
 #         DRY_RUN=1 bash scripts/update-consumers.sh 1.46.0 belle-todo
 #         KSK_GH_ACCOUNT=other-account bash scripts/update-consumers.sh 1.46.0
+#         KSK_CONSUMER_ROOT=/path/to/root bash scripts/update-consumers.sh 1.46.0
 #
 # 前提: ksk-design-system@<version> が npm registry に publish 済み
 #
 # 対象リポ（既定）:
-#   引数を省略すると下の DEFAULT_REPOS（フルパス8箇所。ExamKit 系は除く）が対象。
+#   引数を省略すると下の DEFAULT_REPOS（8箇所。ExamKit 系は除く）が対象。
+#   DEFAULT_REPOS はルート（KSK_CONSUMER_ROOT・既定 $HOME/LocalDev）からの相対パスで持つ。
 #   単体リポと monorepo が混在する。ディレクトリ名が日本語でも、PR は各リポ内で
 #   `gh pr create` するため GitHub remote から英語リポ名が自動解決される。
+#   引数なし実行では、処理を始める前に既定の全件が git リポとして実在するかを確かめ、
+#   1 件でも欠けていれば一覧を出して何もせず終了コード 1 で止まる（issue #785）。
 #
 # 引数で repo を渡した場合の解決:
 #   - "/" を含む or 実在ディレクトリ → そのままパスとして扱う
-#   - それ以外 → $HOME/LocalDev/<name>、次に $HOME/LocalDev/Examination/<name>
-#     の順で探索。見つからなければ FAIL 記録して次へ。
+#   - DEFAULT_REPOS の末尾名（例: belle-todo）と一致 → その既定パス
+#   - それ以外 → <ルート>/<name> と <ルート>/*/<name>（1 階層下のカテゴリ。
+#     todo-apps/・apps/・Examination/ 等）を名前の完全一致で同じ候補に集める（直下を優先しない）。
+#     1 件ならそれを使い、複数なら曖昧として、0 件なら not found として FAIL 記録して次へ。
 #
 # 処理方式（stash 方式は廃止・origin/main の一時 worktree 方式）:
 #   ローカルの作業ツリー（dirty 状態）には一切触れない。各リポで
@@ -65,15 +71,19 @@ if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; th
 fi
 NOTICE_RUNTIME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/templates/consumer-release-notices/check-ds-release.mjs"
 
-# ── 既定対象リポ（フルパス8箇所）──
+# ── 既定対象リポ（ルートからの相対パス8箇所）──
 # 正本の考え方: 「package.json に ksk-design-system 依存を持つ全リポ」のうち、
 # ExamKit 系（ExamKit 本体と資格アプリ）を除いたもの。一覧の検算は
 #   grep -l '"ksk-design-system"' ~/LocalDev/*/package.json ~/LocalDev/*/*/package.json ~/LocalDev/*/*/*/package.json
 # で行う（node_modules と ksk-design-system 自身を除く。monorepo は apps/* まで見る）。
 #
-# 2026-10-02: ローカルの配置が ~/LocalDev 直下のフラット構成に戻っており、
-# 旧パス（~/localdev/apps/・todo-apps/・exam-app/）が全件「ディレクトリが存在しない」で
-# FAIL する状態だった（2.8.0 の配布で発覚）。実在パスへ更新。
+# 配置の履歴: カテゴリ別（todo-apps/・apps/）→ 2026-10-02 にフラット構成 → 再びカテゴリ別、
+# と変わるたびに全件 FAIL (missing dir) になった（#403・#785）。今は
+#   ~/LocalDev/todo-apps/{belle-todo,trip-todo,ninshin-todo,okuno-todo-suite}
+#   ~/LocalDev/apps/{yokoku-app,pawly,camera-app,aikoibito}
+# にある（macOS は大文字小文字を区別しないので LocalDev / Localdev は同じ）。
+# 配置がまた変わっても黙って漏れないよう、引数なし実行では処理前に全件の実在を確かめて止まる。
+# ルートだけ違う環境（別マシン・テスト）は KSK_CONSUMER_ROOT で差し替える。
 #
 # ExamKit 系はここに入れない（2026-10-02）: ExamKit 本体は DS を完全固定
 # （--save-exact）し、資格アプリは kit:rollout が ExamKit の package-lock.json と同じ版へ
@@ -81,16 +91,22 @@ NOTICE_RUNTIME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/templates/consu
 # ExamKit と版がずれる。資格アプリへは
 #   ExamKit で npm i ksk-design-system@<v> --save-exact → kit:bump → kit:rollout
 # の順で届ける。誤って渡されても下の ExamKit ガードが SKIP する。
-DEFAULT_REPOS=(
-  "$HOME/LocalDev/belle-todo"
-  "$HOME/LocalDev/trip_todo"
-  "$HOME/LocalDev/ninshin-todo"
-  "$HOME/LocalDev/okuno-todo-suite"
-  "$HOME/LocalDev/yokoku-app"
-  "$HOME/LocalDev/pawly"
-  "$HOME/LocalDev/camera-app"
-  "$HOME/LocalDev/aikoibito"
+CONSUMER_ROOT="${KSK_CONSUMER_ROOT:-$HOME/LocalDev}"
+CONSUMER_ROOT="${CONSUMER_ROOT%/}"
+DEFAULT_REPO_PATHS=(
+  "todo-apps/belle-todo"
+  "todo-apps/trip-todo"
+  "todo-apps/ninshin-todo"
+  "todo-apps/okuno-todo-suite"
+  "apps/yokoku-app"
+  "apps/pawly"
+  "apps/camera-app"
+  "apps/aikoibito"
 )
+DEFAULT_REPOS=()
+for rel in "${DEFAULT_REPO_PATHS[@]}"; do
+  DEFAULT_REPOS+=("$CONSUMER_ROOT/$rel")
+done
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
 RESULTS=()
@@ -146,38 +162,66 @@ resolve_repo() {
     printf '%s' "$arg"
     return 0
   fi
-  # 探索先は DEFAULT_REPOS の親ディレクトリから導出する。
-  # 以前は "$HOME/localdev/exam-kit-apps" 等をここに直書きしていたが、
-  # ローカルの配置換え（exam-kit-apps → exam-app、apps/ の新設）に追随できず、
-  # DEFAULT_REPOS だけ直した状態でリポ名を渡すと FAIL (not found) になっていた
-  # （2.1.1 の配布で yokoku-app / pawly / aikoibito が実際に落ちた）。
-  # 正本を DEFAULT_REPOS 1 箇所に集約し、次の配置換えでここを直し忘れても効くようにする。
-  local base
-  for base in $(printf '%s\n' "${DEFAULT_REPOS[@]}" | xargs -n1 dirname | sort -u); do
-    if [ -d "$base/$arg" ]; then
-      printf '%s' "$base/$arg"
+  # 1) DEFAULT_REPOS の末尾名と一致すれば既定パスを使う（正本は DEFAULT_REPOS 1 箇所）。
+  #    以前は探索先を別に直書きしていて、配置換えのたびに名前指定だけ FAIL (not found)
+  #    になっていた（2.1.1 の配布、#785）。
+  local repo
+  for repo in "${DEFAULT_REPOS[@]}"; do
+    if [ "$(basename "$repo")" = "$arg" ] && [ -d "$repo" ]; then
+      printf '%s' "$repo"
       return 0
     fi
   done
-  # DEFAULT_REPOS に無いリポを名前で渡された場合の保険（カテゴリ直下を一段だけ見る）
-  for base in "$HOME/LocalDev" "$HOME/LocalDev/Examination"; do
-    if [ -d "$base/$arg" ]; then
-      printf '%s' "$base/$arg"
-      return 0
-    fi
+  # 2) DEFAULT_REPOS に無いリポ（ExamKit 系を誤って渡した場合等）の保険。
+  #    ルート直下と 1 階層下のカテゴリ（todo-apps/・apps/・Examination/ 等）を
+  #    名前の完全一致で探す。aikoibito_codex のような複製は名前が違うので拾わない。
+  #    同名が複数カテゴリにあれば、どちらを上げるべきか決められないので曖昧として止める。
+  local found=() base
+  [ -d "$CONSUMER_ROOT/$arg" ] && found+=("$CONSUMER_ROOT/$arg")
+  for base in "$CONSUMER_ROOT"/*/; do
+    base="${base%/}"
+    [ -d "$base/$arg" ] && found+=("$base/$arg")
   done
+  if [ ${#found[@]} -eq 1 ]; then
+    printf '%s' "${found[0]}"
+    return 0
+  fi
+  if [ ${#found[@]} -gt 1 ]; then
+    printf '%s\n' "${found[@]}" >&2
+    return 2
+  fi
   return 1
 }
 
 REPOS=()
 if [ ${#ARGS[@]} -eq 0 ]; then
+  # 既定の配布先が 1 件でも欠けていたら、何も処理せずに止める（#785）。
+  # 欠けたまま流すと残りだけ bump PR と公開通知が進み、欠けた分の通知漏れを
+  # 終了コード 1 の要約の中で見落としやすい。配置がずれたときは全件まとめて直してから流す。
+  MISSING=()
+  for repo in "${DEFAULT_REPOS[@]}"; do
+    [ -e "$repo/.git" ] || MISSING+=("$repo")
+  done
+  if [ ${#MISSING[@]} -gt 0 ]; then
+    echo -e "${RED}FAIL: 既定の配布先のうち ${#MISSING[@]} 件が git リポとして見つかりません（何も処理していません）${NC}"
+    printf '  - %s\n' "${MISSING[@]}"
+    echo "  ルート: $CONSUMER_ROOT（KSK_CONSUMER_ROOT で変更可）"
+    echo "  配置が変わった場合は scripts/update-consumers.sh の DEFAULT_REPO_PATHS と PUBLISHING.md の前提を直すか、"
+    echo "  欠けたリポを clone してから再実行してください"
+    exit 1
+  fi
   REPOS=("${DEFAULT_REPOS[@]}")
 else
   for arg in "${ARGS[@]}"; do
-    if path="$(resolve_repo "$arg")"; then
+    path="$(resolve_repo "$arg")"
+    rc=$?
+    if [ "$rc" -eq 0 ]; then
       REPOS+=("$path")
+    elif [ "$rc" -eq 2 ]; then
+      echo -e "${RED}FAIL: '$arg' が複数見つかった（フルパスで指定してください）${NC}"
+      RESULTS+=("$arg: FAIL (ambiguous)")
     else
-      echo -e "${RED}FAIL: '$arg' が見つからない（DEFAULT_REPOS の親ディレクトリ配下に無い）${NC}"
+      echo -e "${RED}FAIL: '$arg' が見つからない（DEFAULT_REPOS・$CONSUMER_ROOT 直下と 1 階層下に無い）${NC}"
       RESULTS+=("$arg: FAIL (not found)")
     fi
   done

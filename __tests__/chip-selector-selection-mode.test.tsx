@@ -290,3 +290,76 @@ describe("同一ページに複数の ChipSelector", () => {
     expect(all.slice(3).every((c) => !c.hasAttribute("tabindex"))).toBe(true)
   })
 })
+
+// issue #810: 複数選択では選択中だけ removable（根が <span>）、未選択は根が <button> なので、
+// トグルのたびに要素が作り直され、キーボード操作中のフォーカスが body へ落ちていた。
+// トグル後に押したチップの本体ボタンへフォーカスを戻す。
+describe("複数選択: トグルしてもフォーカスが押したチップに残る (#810)", () => {
+  /** options の i 番目のチップの本体ボタン（removable なら span 内の × でない方） */
+  function bodyButton(i: number): HTMLButtonElement {
+    const root = group().children[i] as HTMLElement
+    return root.tagName === "BUTTON"
+      ? (root as HTMLButtonElement)
+      : root.querySelector<HTMLButtonElement>('button:not([data-slot="chip-remove"])')!
+  }
+
+  function MultiDemo({ mode }: { mode?: "multiple" }) {
+    const [value, setValue] = React.useState<string[]>([])
+    return (
+      <ChipSelector options={OPTIONS} value={value} onChange={setValue} selectionMode={mode} aria-label="カテゴリ" />
+    )
+  }
+
+  for (const mode of [undefined, "multiple"] as const) {
+    it(`選択 → 解除 → 再選択のたびに本体ボタンへフォーカスが残る（selectionMode=${mode ?? "未指定"}）`, () => {
+      mount(<MultiDemo mode={mode} />)
+
+      // 選択
+      act(() => bodyButton(1).focus())
+      act(() => bodyButton(1).click())
+      let el = bodyButton(1)
+      expect(el.getAttribute("aria-pressed")).toBe("true")
+      expect(el.parentElement?.querySelector('[data-slot="chip-remove"]')).not.toBeNull()
+      expect(document.activeElement).toBe(el)
+      expect((document.activeElement as HTMLElement).isConnected).toBe(true)
+
+      // 解除
+      act(() => el.click())
+      el = bodyButton(1)
+      expect(el.getAttribute("aria-pressed")).toBe("false")
+      expect(group().querySelectorAll('[data-slot="chip-remove"]').length).toBe(0)
+      expect(document.activeElement).toBe(el)
+      expect((document.activeElement as HTMLElement).isConnected).toBe(true)
+
+      // 再選択
+      act(() => el.click())
+      el = bodyButton(1)
+      expect(el.getAttribute("aria-pressed")).toBe("true")
+      expect(document.activeElement).toBe(el)
+      expect((document.activeElement as HTMLElement).isConnected).toBe(true)
+    })
+  }
+
+  it("× で外したときは、そのチップの本体ボタンへフォーカスを戻す", () => {
+    mount(<MultiDemo />)
+    act(() => bodyButton(0).focus())
+    act(() => bodyButton(0).click())
+    const remove = group().children[0].querySelector<HTMLButtonElement>('[data-slot="chip-remove"]')!
+    act(() => remove.focus())
+    act(() => remove.click())
+    const el = bodyButton(0)
+    expect(el.getAttribute("aria-pressed")).toBe("false")
+    expect(document.activeElement).toBe(el)
+  })
+
+  it("フォーカスがチップに無いまま押された（Safari のマウスクリック等）ときはフォーカスを動かさない", () => {
+    mount(<MultiDemo />)
+    const outside = document.createElement("button")
+    document.body.appendChild(outside)
+    act(() => outside.focus())
+    act(() => bodyButton(2).click())
+    expect(bodyButton(2).getAttribute("aria-pressed")).toBe("true")
+    expect(document.activeElement).toBe(outside)
+    outside.remove()
+  })
+})

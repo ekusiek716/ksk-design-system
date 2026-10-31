@@ -14,7 +14,8 @@ export interface TextareaProps extends Omit<TextInputProps, "style" | "multiline
 }
 
 export const Textarea = React.forwardRef<TextInput, TextareaProps>(function Textarea(
-  { variant = "default", invalid, disabled, minHeight, ...rest },
+  // onFocus / onBlur / editable は rest から取り出して内部処理と合成する（issue #819）
+  { variant = "default", invalid, disabled, minHeight, onFocus, onBlur, editable, ...rest },
   ref,
 ) {
   const { theme, scales } = useTheme()
@@ -29,17 +30,8 @@ export const Textarea = React.forwardRef<TextInput, TextareaProps>(function Text
   return (
     <TextInput
       ref={ref}
-      editable={!disabled}
       multiline
       textAlignVertical="top"
-      onFocus={(e) => {
-        setFocused(true)
-        rest.onFocus?.(e)
-      }}
-      onBlur={(e) => {
-        setFocused(false)
-        rest.onBlur?.(e)
-      }}
       placeholderTextColor={theme.text["low-emphasis"]}
       style={[
         resolveTypo(variant === "inline-title" ? "heading.xl" : "body.md"),
@@ -67,6 +59,17 @@ export const Textarea = React.forwardRef<TextInput, TextareaProps>(function Text
         WEB_INPUT_RESET as TextInputProps["style"],
       ]}
       {...rest}
+      // rest の後ろに置き、consumer の指定より内部処理を優先させる（issue #819）。
+      // disabled は editable より優先する。
+      editable={disabled ? false : editable ?? true}
+      onFocus={(e) => {
+        setFocused(true)
+        onFocus?.(e)
+      }}
+      onBlur={(e) => {
+        setFocused(false)
+        onBlur?.(e)
+      }}
     />
   )
 })

@@ -22,3 +22,26 @@ export const Default: Story = {
 export const Simple: Story = {
   render: () => <OrderSummary totalValue="¥3,980" ctaLabel="カートに進む" />,
 }
+
+/**
+ * 画面下に固定する例（issue #832）。fixed のときは中身の下余白が
+ * `max(0.75rem, env(safe-area-inset-bottom))` になり、注文ボタンがホームインジケータより上に出る
+ * （StickyActionBar と同じ）。`env(safe-area-inset-bottom)` は Storybook では 0 なので、ここでの
+ * 下余白は 0.75rem。safe-area の効き方は `viewport-fit=cover` の iOS Safari / Capacitor で確認する。
+ * 親の `transform` は、fixed をこの枠の中に閉じ込めるためだけのもの。
+ */
+export const FixedSafeArea: Story = {
+  render: () => (
+    <div className="relative h-[320px] bg-[var(--Surface-Secondary)]" style={{ transform: "translateZ(0)" }}>
+      <OrderSummary
+        fixed
+        lineItems={[
+          { label: "商品合計（1点）", value: "¥3,980" },
+          { label: "送料", value: "無料" },
+        ]}
+        totalValue="¥3,980"
+        ctaLabel="注文を確定する"
+      />
+    </div>
+  ),
+}

@@ -24,7 +24,12 @@ interface OrderSummaryProps extends React.ComponentProps<"div"> {
   onCTAClick?: () => void
   /** CTAボタンの無効状態 */
   ctaDisabled?: boolean
-  /** 画面下部に固定表示するか */
+  /**
+   * 画面下部に固定表示するか。
+   * true のときは中身の下余白が `max(0.75rem, env(safe-area-inset-bottom))` になり、
+   * iOS のホームインジケータを避ける（StickyActionBar と同じ。#832）。
+   * className で下余白を足していると safe-area と二重になるので外すこと。
+   */
   fixed?: boolean
 }
 
@@ -32,7 +37,10 @@ function OrderSummary({ className, lineItems, totalLabel: totalLabelProp, totalV
   const defaultLabels = useKskLabels()
   const totalLabel = totalLabelProp ?? defaultLabels.orderSummaryTotal
   const content = (
-    <div className="space-y-3 px-4 py-3">
+    // fixed のときは下端に貼り付くので、注文ボタンが iPhone のホームインジケータに
+    // 重ならないよう下余白を StickyActionBar と同じ max(0.75rem, safe-area) にする（#832）。
+    // inline は従来どおり py-3。
+    <div className={fixed ? "space-y-3 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" : "space-y-3 px-4 py-3"}>
       {/* 明細行 */}
       {lineItems?.map((item) => (
         <div key={item.label} className="flex items-center justify-between typo-body-md">
