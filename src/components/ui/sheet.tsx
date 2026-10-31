@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { usePortalContainer } from "./portal-container"
 import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
 import { useComposedRef } from "@/lib/compose-ref"
+import { SheetKeyboardLiftedContext } from "@/lib/sheet-keyboard-lifted"
 import {
   ModalStackRegistrar,
   ModalityProvider,
@@ -1050,6 +1051,9 @@ function SheetContent({
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
         data-slot="sheet-content"
+        // #788: キーボードの上へ持ち上げている間だけ出す（配下のフッターが
+        // 補正を重ねないための目印。context と同じ条件）。
+        data-keyboard-lifted={keyboardStyle ? "" : undefined}
         style={{
           ...props.style,
           ...keyboardStyle,
@@ -1067,7 +1071,9 @@ function SheetContent({
             {description}
           </DialogPrimitive.Description>
         )}
-        {scopedChildren}
+        <SheetKeyboardLiftedContext.Provider value={keyboardStyle != null}>
+          {scopedChildren}
+        </SheetKeyboardLiftedContext.Provider>
       </DialogPrimitive.Content>
     </SheetPortal>
   )
@@ -1202,6 +1208,9 @@ function SwipeToCloseBottomSheet({
   // Keep the sheet inside the region above the on-screen keyboard so its top
   // edge (title / drag handle) never scrolls off the top of the viewport.
   const { keyboardInset, visibleHeight } = useVisualViewportInset()
+  // While the keyboard is open, lift the sheet above it (bottom) and cap its
+  // height to the visible region (maxHeight). undefined when no keyboard.
+  const keyboardStyle = resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false, safeArea)
   const handleOpenAutoFocus = (event: Event) => {
     captureRestoreFocus(restoreFocusRef)
     props.onOpenAutoFocus?.(event)
@@ -1430,7 +1439,7 @@ function SwipeToCloseBottomSheet({
           // cap its height to the visible region (maxHeight). These inline
           // values override the variant's `bottom-0` / `max-h-[90dvh]`. When no
           // keyboard is present both are inert and the CSS defaults apply.
-          ...resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false, safeArea),
+          ...keyboardStyle,
           transform: `translate3d(0, ${dragY}px, 0)`,
           transition: dragging || !everDragged
             ? "none"
@@ -1447,6 +1456,8 @@ function SwipeToCloseBottomSheet({
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
         data-slot="sheet-content"
+        // #788: キーボードの上へ持ち上げている間だけ出す。
+        data-keyboard-lifted={keyboardStyle ? "" : undefined}
         // Full-surface swipe-to-close: handlers live on the content root so a
         // downward swipe anywhere can dismiss. onPointerMove gates on scroll
         // position so it never steals the content's own scroll gesture.
@@ -1483,7 +1494,9 @@ function SwipeToCloseBottomSheet({
         >
           <SheetDragIndicator />
         </div>
-        {children}
+        <SheetKeyboardLiftedContext.Provider value={keyboardStyle != null}>
+          {children}
+        </SheetKeyboardLiftedContext.Provider>
       </DialogPrimitive.Content>
     </SheetPortal>
   )
@@ -1785,7 +1798,14 @@ function SwipeToCloseSideDrawer({
             {description}
           </DialogPrimitive.Description>
         )}
-        {children}
+        {/*
+          #788: ドロワーは持ち上げない。context は Portal を越えて伝わるため、
+          持ち上がったシートの中から開いたドロワーにも true が漏れないよう
+          明示的に false で切る。
+        */}
+        <SheetKeyboardLiftedContext.Provider value={false}>
+          {children}
+        </SheetKeyboardLiftedContext.Provider>
       </DialogPrimitive.Content>
     </SheetPortal>
   )
@@ -1989,6 +2009,8 @@ function SnapBottomSheetContent({
   }, [snapRatios, fadeFromIndex, activeRatio, maxSnap])
 
   const transform = `translate3d(0, ${baseTranslatePct}%, 0)`
+  // #811: キーボード表示中の持ち上げ（bottom のみ）。undefined ならキーボード無し。
+  const snapKeyboardStyle = resolveBottomSheetKeyboardStyle(keyboardInset, null, true)
 
   // Optional ↑/↓ keyboard navigation between snaps when the sheet has focus
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -2035,7 +2057,7 @@ function SnapBottomSheetContent({
           // （resolveBottomSheetKeyboardStyle の snapActive 分岐）。bottom と
           // translateY は独立に効くので、スナップ位置・ドラッグ計算はずれない。
           // 最大段で上端が画面外へ出うるのは CSS フォールバック（#150）と同じ設計。
-          ...resolveBottomSheetKeyboardStyle(keyboardInset, null, true),
+          ...snapKeyboardStyle,
           height: `${maxSnap * 100}svh`,
           transform,
           transition: dragging
@@ -2054,6 +2076,8 @@ function SnapBottomSheetContent({
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
         data-slot="sheet-content"
+        // #788: キーボードの上へ持ち上げている間だけ出す。
+        data-keyboard-lifted={snapKeyboardStyle ? "" : undefined}
         {...(!hasInternalDesc && { "aria-describedby": ariaDescribedBy })}
         onOpenAutoFocus={handleOpenAutoFocus}
         onCloseAutoFocus={handleCloseAutoFocus}
@@ -2094,7 +2118,9 @@ function SnapBottomSheetContent({
               : "max-height var(--Motion-Duration-Sheet-Enter) var(--Motion-Easing-Emphasized)",
           }}
         >
-          {children}
+          <SheetKeyboardLiftedContext.Provider value={snapKeyboardStyle != null}>
+            {children}
+          </SheetKeyboardLiftedContext.Provider>
         </div>
       </DialogPrimitive.Content>
     </SheetPortal>

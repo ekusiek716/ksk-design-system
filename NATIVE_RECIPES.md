@@ -248,6 +248,8 @@ Web では `CompactFilePicker` / `ImageAttachmentPicker` が hidden file input�
 </Sheet>
 ```
 
+キーボード表示中はシート自身がキーボードの上へ持ち上がり（`data-keyboard-lifted`）、その中の `KeyboardAwareSheetFooter` は補正を重ねません（#788）。実機では「フッターの下端がシートの下端（キーボードのすぐ上）に付いたままで、本文や見出しの上へ浮かない」ことを確認します。シートの外（全画面ページの下端固定など）で使うフッターは従来どおりキーボード高さ分持ち上がります。
+
 ## Caption / attribution text
 
 出典・著作権表示など、控えめな注釈は `Text` の `variant="caption-strong"` を使います（11px・font-semibold 相当）。`text-[11px] font-semibold leading-4 text-hint` のようなマジックナンバーをローカルに書きません。色は未指定なら自動で hint 相当（`text.low-emphasis`）になります。
