@@ -60,6 +60,8 @@ export interface SheetProps {
   /**
    * scrim タップや下方向スワイプで閉じれるか。default true。
    * false の場合、スワイプダウンは最小 snap まで戻る（rubber-band）。
+   * 通常版（snapPoints なし）・snap 版のどちらでも scrim タップに効く（#823）。
+   * Android の戻るボタン（Modal の onRequestClose）は対象外で、常に onClose を呼ぶ。
    */
   dismissible?: boolean
   /**
@@ -107,6 +109,7 @@ function PlainSheet({
   side = "bottom",
   title,
   children,
+  dismissible = true,
   safeArea = true,
   surfaceColor,
 }: SheetProps) {
@@ -195,8 +198,9 @@ function PlainSheet({
       onShow={handleModalShow}
       onRequestClose={onClose}
     >
+      {/* dismissible={false} のときは scrim タップで閉じない（snap 版と同じ。#823） */}
       <Pressable
-        onPress={onClose}
+        onPress={dismissible ? onClose : () => {}}
         style={{ flex: 1, backgroundColor: theme.overlay.dark, ...align[side] }}
       >
         <Animated.View
