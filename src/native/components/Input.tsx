@@ -44,7 +44,21 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
 }
 
 export const Input = React.forwardRef<TextInput, InputProps>(function Input(
-  { variant = "default", invalid, disabled, leading, trailing, style, inputStyle, ...rest },
+  {
+    variant = "default",
+    invalid,
+    disabled,
+    leading,
+    trailing,
+    style,
+    inputStyle,
+    // onFocus / onBlur / editable は rest から取り出して内部処理と合成する。rest に残すと
+    // 後ろの {...rest} が内部の focused 切り替えや disabled を上書きしていた（issue #819）。
+    onFocus,
+    onBlur,
+    editable,
+    ...rest
+  },
   ref,
 ) {
   const { theme, scales } = useTheme()
@@ -94,15 +108,6 @@ export const Input = React.forwardRef<TextInput, InputProps>(function Input(
       {leading}
       <TextInput
         ref={ref}
-        editable={!disabled}
-        onFocus={(e) => {
-          setFocused(true)
-          rest.onFocus?.(e)
-        }}
-        onBlur={(e) => {
-          setFocused(false)
-          rest.onBlur?.(e)
-        }}
         placeholderTextColor={theme.text["low-emphasis"]}
         style={[
           typography,
@@ -111,6 +116,17 @@ export const Input = React.forwardRef<TextInput, InputProps>(function Input(
           inputStyle,
         ]}
         {...rest}
+        // rest の後ろに置き、consumer の指定より内部処理を優先させる（issue #819）。
+        // disabled は editable より優先する。
+        editable={disabled ? false : editable ?? true}
+        onFocus={(e) => {
+          setFocused(true)
+          onFocus?.(e)
+        }}
+        onBlur={(e) => {
+          setFocused(false)
+          onBlur?.(e)
+        }}
       />
       {trailing}
     </View>

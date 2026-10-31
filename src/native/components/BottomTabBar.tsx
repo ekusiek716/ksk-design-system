@@ -22,6 +22,13 @@ export interface BottomTabBarProps {
   onChange?: (key: string) => void
   keyboardBehavior?: BottomTabBarKeyboardBehavior
   keyboardLiftOffset?: number
+  /**
+   * 下端の safe-area を避けるか。既定 true（issue #804）。そのまま NavigationBar の `safeArea` に渡る。
+   * `SafeAreaInsetsProvider` で下端 inset が供給されていれば下余白をその inset にし、未供給なら従来値。
+   * `SafeAreaView` の `edges` に `bottom` を含めている画面や、自前で下余白を足している画面は
+   * 二重取りになるので `false` にする（inset を無視して従来値）。
+   */
+  safeArea?: boolean
 }
 
 // @react-navigation/bottom-tabs の実際の型をそのまま使う（旧: 自前の

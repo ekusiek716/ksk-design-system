@@ -64,7 +64,7 @@
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | SectionNav | `@/components/ui/section-nav` | — | Vertical, Horizontal, StickyGuide |
 | Section | `@/components/ui/section` | **spacing**: `sm`, `md`, `lg`, `xl`<br>**background**: `none`, `subtle`, `accent-subtle` | FullBleedBandWithContainedContent |
-| Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard, InvalidInFormField, KeepsOwnDescribedByInFormField |
+| Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard, FitsShortViewport, KeepsMaxHeightOnTallScreen, InvalidInFormField, KeepsOwnDescribedByInFormField |
 | SEMANTIC_ICONS, SemanticIcon | `@/components/ui/semantic-icon` | — | — |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
 | Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass`<br>**size**: `sm`, `md`, `lg` | BottomSheet, FloatSheet, TopSheet, FloatSheetTallContent, RightSheet, Sizes, A11yOptions, TitleAutoFocusAppearance, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, Float — 仮想キーボード追従, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158), OpensAndIsImmediatelyInteractive, ChildDescriptionIsLinked, ChildDescriptionIsLinkedWithSwipeToClose, NoDescriptionLeavesNoDescribedBy, ChildDescriptionIsLinkedWithSnapPoints, ChildDescriptionIsLinkedWithSwipeSideDrawer, DescriptionPropIsLinked, ExplicitDescribedByWins, SwipeToCloseKeepsTextareaDrag, SwipeToCloseKeepsSliderDrag |
@@ -105,8 +105,8 @@
 | CategoryScroll | `@/components/patterns/category-scroll` | — | Default, CircleShape, GridLayout |
 | CelebrationDialog | `@/components/patterns/celebration-dialog` | — | Basic, Bounce Emoji / Auto Dismiss, Iconsax Badge（emoji の代わり）, Custom Confetti Colors |
 | Celebration | `@/components/patterns/celebration` | — | Confetti, InlineEmoji, Actions Slot / Interactive, Custom Duration / Colors / DriftRange, Emoji Animation: Bounce, Effect: Burst（クラッカー演出）, Cardless / Tap Dismiss |
-| ChipFilterBar | `@/components/patterns/chip-filter-bar` | — | Default, CustomResultCountLabel, Sticky, StickyWithGutter, FluidGutterAlignsWithContainer, Bare, TouchTargetNotClipped |
-| ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, SelectionModeSingle, SelectionModeMultiple, SelectionModeUnspecified, LabelledByHeading, SingleSelectScalar, WithMax, WrappedRowsDoNotOverlap |
+| ChipFilterBar | `@/components/patterns/chip-filter-bar` | — | Default, CustomResultCountLabel, Sticky, StickyWithoutResultCount, StickyWithGutter, FluidGutterAlignsWithContainer, Bare, TouchTargetNotClipped |
+| ChipSelector | `@/components/patterns/chip-selector` | — | MultiSelect, SingleSelect, SelectionModeSingle, SelectionModeMultiple, MultipleKeepsFocusOnToggle, SelectionModeUnspecified, LabelledByHeading, SingleSelectScalar, WithMax, WrappedRowsDoNotOverlap |
 | Chip | `@/components/patterns/chip` | **variant**: `filled`, `accent`, `outline`<br>**size**: `xs`, `sm`, `md`, `lg`, `tile`<br>**shape**: `pill`, `rounded`, `square` | Filled, Accent, Outline, AllVariants, AllSizes, Selected, Removable, SquareShape, WithCount, TileAndSoldOut, AsLink, Real UI — Filters & Status, Touch selection stable, TileTouchTargetNotShrunk, ExtraSmall, RoundedShape |
 | CoachMarkOverlay | `@/components/patterns/coach-mark-overlay` | — | MultiStepTour, Localized labels (EN), BrandVariant, MissingTarget, FocusTrap |
 | CodeDisplay | `@/components/patterns/code-display` | — | Default, Large, Accent, LongCode, WithoutCopy |
@@ -185,7 +185,7 @@
 | FilterBar | `@/components/patterns/commerce/filter-bar` | — | Default, Interactive |
 | ImageCarousel | `@/components/patterns/commerce/image-carousel` | — | Banner, Square, Video, AutoPlay |
 | MobileTabBar | `@/components/patterns/commerce/mobile-tab-bar` | — | Default, With addAction (center CTA), floatingPosition=, ProductCustomization, WithBottomOffsetExtra, FixedItemHeight, HideWhileTyping |
-| OrderSummary | `@/components/patterns/commerce/order-summary` | — | Default, Simple |
+| OrderSummary | `@/components/patterns/commerce/order-summary` | — | Default, Simple, FixedSafeArea |
 | PriceDisplay | `@/components/patterns/commerce/price-display` | **size**: `sm`, `md`, `lg`, `xl` | Default, Sale, Range, AllSizes |
 | ProductCard | `@/components/patterns/commerce/product-card` | — | Vertical, VerticalWithDiscount, VerticalWithCart, VerticalWithRanking, Horizontal, Grid |
 | ProductCarousel | `@/components/patterns/commerce/product-carousel` | — | Default, WithRanking, WithCartButton, LargeCards |

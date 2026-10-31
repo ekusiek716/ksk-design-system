@@ -207,6 +207,15 @@ export const HeaderAndExpandToggle: Story = {
     await expect(heading.textContent).toBe("2026年10月")
     const grid = canvasElement.querySelector<HTMLElement>('[data-slot="month-calendar"]')!
     await expect(grid.getAttribute("data-view")).toBe("week")
+    // 日を選んだ後に「次の月」を押しても、週の帯が新しい月の中へ移る（issue #806）
+    await expect(grid.querySelector('[role="gridcell"][tabindex="0"]')!.getAttribute("data-date")).toBe("2026-10-16")
+    await userEvent.click(canvasElement.querySelector<HTMLElement>('[aria-label="次の月"]')!)
+    await expect(heading.textContent).toBe("2026年11月")
+    await expect(grid.querySelector('[role="gridcell"][tabindex="0"]')!.getAttribute("data-date")).toBe("2026-11-01")
+    await expect(grid.querySelectorAll('[role="gridcell"]:not([data-outside-month])').length).toBeGreaterThan(0)
+    await userEvent.click(canvasElement.querySelector<HTMLElement>('[aria-label="前の月"]')!)
+    await expect(heading.textContent).toBe("2026年10月")
+    await expect(grid.querySelector('[role="gridcell"][tabindex="0"]')!.getAttribute("data-date")).toBe("2026-10-16")
     const toggle = canvasElement.querySelector<HTMLElement>('[data-slot="month-calendar-expand-toggle"]')!
     await expect(toggle.getAttribute("aria-expanded")).toBe("false")
     await expect(toggle.getAttribute("aria-label")).toBe("月全体を表示")

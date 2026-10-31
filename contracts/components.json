@@ -124,7 +124,8 @@
         "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（showCount / adornment / IME 追従は維持される）",
         "Native Input supports style (outer container View) and inputStyle (inner TextInput) as RN-idiomatic style overrides, merged after DS defaults (issue #447)",
         "その場で編集する欄（詳細シートのタイトル・メモ等）は variant=\"inline\"（本文 typo-body-md）/ \"inline-title\"（見出し typo-heading-xl）。枠・背景なし、hover で Surface-Secondary、focus-visible で Focus リング、aria-invalid で Caution のリング。unstyled + typo・余白・フォーカス下線の手書きで作らない（issue #675）",
-        "CommitInput / CommitTextarea / AutoGrowTextarea / CommitAutoGrowTextarea にも同じ variant を渡せる。native Input / Textarea / AutoGrowTextarea も同名（フォーカス・invalid は下線）"
+        "CommitInput / CommitTextarea / AutoGrowTextarea / CommitAutoGrowTextarea にも同じ variant を渡せる。native Input / Textarea / AutoGrowTextarea も同名（フォーカス・invalid は下線）",
+        "native Input / Textarea / AutoGrowTextarea: consumer の onFocus / onBlur（AutoGrowTextarea は onContentSizeChange も）は内部処理（フォーカス枠の切り替え・高さの自動調整）と合成して両方呼ぶ。disabled は editable より優先する（issue #819）"
       ]
     },
     {
@@ -393,6 +394,7 @@
         "rounded-full only",
         "Use DiceBear shapes for placeholder, not pravatar.cc",
         "native (src/native/components/Avatar.tsx): size はプリセット(sm/md/lg/xl)に加えて pt の数値も可。shape=\"circle\"(既定)|\"rounded\"、rounded の角丸は radius(lg/xl/2xl・既定 xl)。fallback は文字列に加えて ReactNode を受け、独自のフォールバック表示（決定論グラデ+絵文字等）を差し込める。source はリモート URL 文字列も受け取り {uri} に正規化する（issue #449）",
+        "native Avatar: 画像の読み込みに失敗したとき、または source の uri が空・未定義のときは fallback を表示する（Web の AvatarFallback と同じ）。source を差し替えると再び画像を試す。require(...) の数値 ID は対象外で常に画像を描画する（issue #825）",
         "寸法は size で指定する。className の size-* / w-* h-* で上書きしない（AvatarFallback の文字サイズが追随しなくなる）。native は xs=24 も持つ（issue #688）"
       ],
       "variants": [
@@ -675,6 +677,10 @@
       "rules": [
         "数値は px、文字列は CSS 値として渡る",
         "rounded: none/sm/md/lg/xl/2xl/full プリセット"
+      ],
+      "accessibility": [
+        "prefers-reduced-motion で明滅を止める（motion-reduce:animate-none）",
+        "native 版も OS の「視差効果を減らす」に従う: オンの間は明滅せず固定の不透明度で表示し、設定の取得前（!resolved）は明滅を始めない（#802）"
       ],
       "subcomponents": [
         "SkeletonText"
@@ -1222,7 +1228,7 @@
       "rules": [
         "useForm() の戻り値を Form に展開して渡す",
         "FormControl でラップしたコンポーネントに自動的に aria-* が付与される",
-        "react-hook-form 必須 (peer dependency)"
+        "react-hook-form は DS の dependencies で自動インストールされ、dist では external（consumer の react-hook-form と同一インスタンス・同一 Context を共有するため、consumer の useFormContext / FormProvider と混在させてよい。issue #828）"
       ]
     },
     {
@@ -1744,7 +1750,8 @@
       ],
       "rules": [
         "FormRoot は送信とフォーム全体の gap、FormActions は末尾アクション行を担う",
-        "短いフォームは FormSection、3 セクション以上または legend / group semantics が必要なフォームは FieldSet を使う"
+        "短いフォームは FormSection、3 セクション以上または legend / group semantics が必要なフォームは FieldSet を使う",
+        "FormSection も title を fieldset の名前として公開する（title は fieldset 直下の最初の legend。description は legend の後ろの p で aria-describedby に結ぶ）。title 無しは名前なし (issue #792)"
       ]
     },
     {
@@ -1776,6 +1783,7 @@
       ],
       "rules": [
         "Use for multi-value text input (tags, emails, keywords)",
+        "フォーカスが外れると入力中の文字がタグになる（Enter を押さずに保存ボタンへ移っても失われない）。Enter で確定した直後の blur だけは二重追加を防ぐため何もしない (issue #790)",
         "FormField と使うときは id を渡して htmlFor で結ぶ。inputLabel を label の代わりに使わない（lint P026 の例外が要らなくなる）"
       ],
       "accessibility": [
@@ -1851,7 +1859,8 @@
       "accessibility": [
         "role=status",
         "aria-live=polite",
-        "prefers-reduced-motion で confetti を抑制（emojiAnimation=bounce も含む。effect=burst も同様にスキップ）"
+        "prefers-reduced-motion で confetti を抑制（emojiAnimation=bounce も含む。effect=burst も同様にスキップ）",
+        "native 版も OS の「視差効果を減らす」に従う: オンの間と設定の取得前（!resolved）は confetti（fall / burst）を出さず、カードは弾ませず最終状態で表示する。表示中にオンになったら止めて最終状態へ戻す（#802）"
       ],
       "rules": [
         "一時的な達成演出に使用",
@@ -2001,6 +2010,7 @@
         "単一選択(selectionMode=\"single\")の value/onChange はスカラー(T | null)。配列形は v1.61 以前との後方互換でのみ受け付け、開発ビルドで console.warn する(issue #418)。",
         "単一選択ではグループが role=\"radiogroup\"、チップが role=\"radio\" + aria-checked になり、矢印キー移動と roving tabindex が有効になる(native は accessibilityRole radiogroup / radio + accessibilityState.checked)。",
         "単一選択で選択中の値が 2 つ以上あると開発ビルドで console.warn する(issue #39 の footgun 検出)",
+        "複数選択は選択中だけ × 付き（removable）で、トグルのたびにチップの要素が作り直される。フォーカスがグループ内にあったときは、トグル・× の後に押したチップの本体ボタンへフォーカスを戻す(issue #810)",
         "Use selectionMode=\"single\" for single-select (multiple=false は非推奨). Use max to limit selection count.",
         "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior.",
         "PillToggle は 2〜4 択の segmented control 専用。5択以上・折り返しが要る単一選択はこの selectionMode=\"single\" を使う(issue #418)。",
@@ -2044,6 +2054,7 @@
       "rules": [
         "commerce/FilterBar（filters/sortOptions 統合型）とは別コンポーネント。children に任意の Chip 群を渡すシンプルなラッパー。",
         "sticky 時の top オフセットは stickyOffset prop で指定する（固定ヘッダー高さの相殺用）。",
+        "sticky は根の要素（data-slot=\"chip-filter-bar\"）に付き、チップ行と件数をまとめて固定する。貼り付く範囲は呼び出し側の親ブロックなので、その親が一覧全体を含む高さを持つこと（issue #807）",
         "resultCountLabel 未指定時は \"{n}件\" を表示。i18n が必要な場合は関数 props で差し替える。",
         "bare=true 時は overflow/padding ラッパーを付けない。外側スクロールコンテナと共有する場合に使う。",
         "チップ列と件数の左右余白は gutter（none | tight=16px | default=24px・Container と同じ語彙）か contentClassName で付ける(issue #667)。sticky の背景は全幅のまま。外側 className に px-* を付けたり [&>div]: 等の子孫セレクタで DS 内部の DOM に依存したりしない。native も gutter を持つ",
@@ -2066,7 +2077,8 @@
       ],
       "accessibility": [
         "DS Dialog（Radix）ベースのため Esc / overlay クリックで閉じる",
-        "prefers-reduced-motion で confetti・emoji bounce を抑制"
+        "prefers-reduced-motion で confetti・emoji bounce を抑制",
+        "native 版も OS の「視差効果を減らす」に従う: 背面の confetti は内部の Celebration 経由で、オンの間と設定の取得前は出さない（#802）"
       ],
       "rules": [
         "MILESTONES 定義・アップセル文言・分析トラッキングは呼び出し側で actions スロットに組み込む。コンポーネント内部に業務ロジックを持たせない。",
@@ -2469,7 +2481,7 @@
       "sizes": [],
       "accessibility": [],
       "rules": [
-        "isActive 切替時に key を変えて Chip を強制再マウント (selected キャッシュ残り防止)"
+        "key を isActive に紐付けない。isActive を切り替えても同一の button を保ち、フォーカスと aria-pressed の変化を維持する (issue #784)"
       ]
     },
     {

@@ -58,6 +58,13 @@ const suppressMotion = !resolved || reduceMotion
 遅れて届いた初回取得結果では上書きしません。アンマウント時には購読を解除します。
 この hook は `native/ui` の公開 API です。トークン専用の `native` エントリには含みません。
 
+DS の部品自身もこの約束に従います（#802）。`Celebration` / `CelebrationDialog` は
+`suppressMotion` の間は紙吹雪を出さず、カードを弾ませず最終状態で表示します。
+`Skeleton`（`SkeletonText` を含む）は明滅を始めず、設定オンと分かった時点で固定の
+不透明度にします。取得前（`!resolved`）も止める側に倒すため、初回表示の一瞬は演出が
+出ないことがあります（取得は通常すぐ終わり、設定オフと分かりしだい始まります）。
+これらの部品のために consumer 側で設定を読んで回避する必要はありません。
+
 ## Expo Router / React Navigation bottom tabs
 
 Expo Router の `<Tabs>` では `createExpoRouterTabBar` を渡します。アイコンは各 screen の `tabBarIcon` をそのまま使えるため、consumer 側で floating tab bar を組み直す必要はありません。
@@ -158,6 +165,31 @@ import {
 
 Web/PWA consumer は `ksk-design-system` の `MobileAppShell` と `BottomTabBar variant="pill"` / `MobileFloatingActionButton` を組み合わせます。`bottomNavMode="fixed"` では shell が fixed wrapper と safe-area padding を持ちます。既に fixed な nav を渡す場合は `bottomNavMode="external"` を指定します。
 
+### 下端に固定するバーの safe-area（StickyActionBar / NavigationBar / BottomTabBar）
+
+`StickyActionBar` と `NavigationBar`（`BottomTabBar` 経由を含む）は、`SafeAreaInsetsProvider` で下端 inset が渡されていれば、それを下余白に足します（issue #804）。Android の画面いっぱい表示（Expo SDK 53 以降の既定）では、渡さないとボタンやタブがシステムのナビゲーションバーに重なります。アプリのルートで実測値を流し込んでください。
+
+```tsx
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context"
+import { SafeAreaInsetsProvider, StickyActionBar, Button } from "ksk-design-system/native/ui"
+
+function DsInsets({ children }: { children: React.ReactNode }) {
+  const insets = useSafeAreaInsets()
+  return <SafeAreaInsetsProvider insets={insets}>{children}</SafeAreaInsetsProvider>
+}
+
+// 画面の最下部
+<StickyActionBar>
+  <Button>購入する</Button>
+</StickyActionBar>
+```
+
+- 下余白は、inset が渡されていれば `StickyActionBar` が「16 + inset」、`NavigationBar` が「inset」です。渡されていなければ従来の決め打ち（`StickyActionBar` は iOS 32 / Android 16、`NavigationBar` は iOS 24 / Android 0）のままです。
+- iOS で inset を渡すと、Face ID 機では従来より余白が大きくなります（例: `StickyActionBar` は 32 → 50）。
+- 逆に、inset が 0 の端末（ホームボタンのある iPhone など）では従来より余白が小さくなります（`StickyActionBar` は 32 → 16、`NavigationBar` は 24 → 0）。
+- 余白が変わるのは inset を流し込んだ画面だけではありません。ほかの部品（`AppHeader` など）のために `SafeAreaInsetsProvider` を既にルートで流しているアプリは、このバージョンに上げただけで上の 2 点のとおり見た目が変わります。上げたら下端のバーを実機で確認し、従来値に戻したい画面は `safeArea={false}` を渡してください。
+- `SafeAreaView` の `edges` に `bottom` を含めている画面や、自前で下余白を足している画面では二重になります。どちらか片方に寄せ、バー側を使わないときは `safeArea={false}` を渡します（inset を無視して従来値）。
+
 ### Liquid Glass の FAB
 
 写真・地図・リストの上に FAB を浮かせるときは `variant="glass"` を使います。`GlassView` にブランド色をほぼ不透明（light 95%）で敷いた Liquid Glass で、web の `Button variant="glass-accent"` と同じ質感です。塗り・縁・上辺ハイライトの色は `src/native/glass-accent-fill.ts` の純関数がテーマの `brand.primary` から導出するので、テーマを差し替えれば自動で追従します。
@@ -219,6 +251,28 @@ import { Button, PhotoHero, Screen } from "ksk-design-system/native/ui"
 </SettingsSection>
 ```
 
+### 数値の入力欄（NumberInput / QuantitySelector）と保存ボタン
+
+`NumberInput` / `QuantitySelector` のキーボード入力は、欄からフォーカスが外れたときに
+はじめて `onChange` で確定します（入力中は下書き。issue #786）。± ボタンは押すたびに確定します。
+
+iOS の `number-pad` キーボードには送信キーが無く、`Screen`（`keyboardShouldPersistTaps="handled"`）の
+中では「保存」ボタンやヘッダーの戻るボタンを押しても欄のフォーカスが外れません。
+そのまま押すと、`onPress` の時点では打ちかけの値がまだ `onChange` に届いておらず、古い値で保存されます。
+押し始め（`onPressIn`）で `Keyboard.dismiss()` を呼び、指を離す（`onPress`）までに確定させます。
+
+```tsx
+import { Keyboard } from "react-native"
+
+<NumberInput value={minutes} onChange={setMinutes} min={1} max={60} />
+<Button onPressIn={() => Keyboard.dismiss()} onPress={() => save(minutes)}>
+  保存
+</Button>
+```
+
+確定前に部品が外れた（画面を閉じた）ときは、外れる時点で打ちかけの値を確定して `onChange` を呼びます。
+確定前に親が `value` を変えた（リセット等）ときは打ちかけの値を捨て、新しい `value` を表示します。
+
 ## Attachments
 
 Web では `CompactFilePicker` / `ImageAttachmentPicker` が hidden file input、trigger、preview、remove affordance を持ちます。Native では DocumentPicker / ImagePicker の起動だけ consumer が渡し、trigger と preview は DS が持ちます。
@@ -249,6 +303,15 @@ Web では `CompactFilePicker` / `ImageAttachmentPicker` が hidden file input�
 ```
 
 キーボード表示中はシート自身がキーボードの上へ持ち上がり（`data-keyboard-lifted`）、その中の `KeyboardAwareSheetFooter` は補正を重ねません（#788）。実機では「フッターの下端がシートの下端（キーボードのすぐ上）に付いたままで、本文や見出しの上へ浮かない」ことを確認します。シートの外（全画面ページの下端固定など）で使うフッターは従来どおりキーボード高さ分持ち上がります。
+
+## Search field + candidate list
+
+検索欄の下に候補の一覧を置く部品（`Combobox` / `MultiSelect` と同じ形）を作るときは、一覧の `FlatList` / `ScrollView` に `keyboardShouldPersistTaps="handled"` を付けます。未指定だと、ソフトキーボード表示中の最初のタップはキーボードを閉じるだけに使われ、候補が 2 回押さないと選べません（issue #815）。
+
+```tsx
+<Input value={query} onChangeText={setQuery} />
+<FlatList data={filtered} keyboardShouldPersistTaps="handled" renderItem={renderCandidate} />
+```
 
 ## Caption / attribution text
 

@@ -88,6 +88,9 @@ export function Combobox({
             <FlatList
               data={filtered}
               keyExtractor={(it) => it.value}
+              // 検索中（キーボード表示中）の 1 回目のタップを、キーボードを閉じるだけに
+              // 使わず候補へ届ける（issue #815）。選択後は setOpen(false) でキーボードも閉じる。
+              keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => (
                 <Pressable
                   onPress={() => {
