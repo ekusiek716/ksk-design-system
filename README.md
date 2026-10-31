@@ -224,6 +224,8 @@ npx ksk-ds lint src --max-warnings=0    # warning が N 件を超えたら exit 
 `--changed` は origin/main との差分・未コミットの変更・未追跡（未 add）の新規ファイルを対象にし、
 指定したパス（省略時は実行ディレクトリ）の配下に絞ります。origin/main が取れないときは警告を出し、
 未コミット分と未追跡だけを検査します。対象が 0 件のときは「違反なし」ではなく 0 件と表示します。
+`--format json` では 0 件の告知を stderr に出し（stdout の JSON は汚さない）、`summary.scannedFiles` に
+実際に検査したファイル数を入れます（`summary.files` は従来どおり違反のあったファイル数）。
 **存在しないパスを指定すると** stderr に `検査対象が見つかりません` を出します。指定したパスが
 すべて存在しないときは exit 1、一部だけ存在しないときは警告のみ（`--strict` 付きなら exit 1）です。
 

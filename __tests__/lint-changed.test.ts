@@ -124,6 +124,27 @@ describe("ksk-ds lint --changed（issue #831）", () => {
     expect(result.status).toBe(0)
   })
 
+  it("--format json でも対象 0 件を区別できる（stderr に 1 行・summary.scannedFiles が 0）", () => {
+    const root = makeRepo({ dirty: false })
+    const result = lint(root, ["--changed", "--format", "json"])
+    expect(result.stderr).toContain("検査対象の変更ファイルが 0 件")
+    // stdout は JSON のまま（stderr の告知が混ざらない）
+    const json = JSON.parse(result.stdout)
+    expect(json.results).toEqual([])
+    expect(json.summary.scannedFiles).toBe(0)
+    expect(result.status).toBe(0)
+  })
+
+  it("--format json の summary.scannedFiles は実際に検査したファイル数（違反なしでも 0 にならない）", () => {
+    const root = makeRepo({ dirty: false })
+    write(root, "apps/web/src/a.tsx", `${CLEAN}// changed\n`)
+    const result = lint(root, ["--changed", "--format", "json"])
+    const json = JSON.parse(result.stdout)
+    expect(json.results).toEqual([])
+    expect(json.summary.scannedFiles).toBe(1)
+    expect(result.stderr).not.toContain("検査対象の変更ファイルが 0 件")
+  })
+
   it("Git リポジトリの外では警告して 0 件として扱う", () => {
     const dir = mkdtempSync(join(tmpdir(), "ksk-ds-lint-changed-nogit-"))
     write(dir, "a.tsx", VIOLATION)

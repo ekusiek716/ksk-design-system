@@ -257,6 +257,51 @@ describe("issue #805 — 他の [^>]* ルール（P034 / P036 / P042 / P043）",
     expect(idsOf(only(results, ["P042"]))).toEqual(["P042"])
   })
 
+  it("P042: import の SheetContent から後続の別タグの rounded-t まで跨いで誤検知しない", async () => {
+    const { results } = await lint(`import { SheetContent } from "@/components/ui/sheet"
+
+export default function Page() {
+  return <div className="rounded-t-xl p-4">hello</div>
+}
+`)
+    expect(idsOf(only(results, ["P042"]))).toEqual([])
+  })
+
+  it("P042: <SheetContentFoo のような別名には当たらない", async () => {
+    const { results } = await lint(wrap(`<SheetContentFoo className="rounded-t-2xl">a</SheetContentFoo>`))
+    expect(idsOf(only(results, ["P042"]))).toEqual([])
+  })
+
+  it("P042: max-h-[90dvh] から後ろの行の SheetContent まで跨いで誤検知しない", async () => {
+    const { results } = await lint(`const cls = \`max-h-[90dvh] overflow-y-auto\`
+export function Page() {
+  return <SheetContent className={cls}>a</SheetContent>
+}
+`)
+    expect(idsOf(only(results, ["P042"]))).toEqual([])
+  })
+
+  it("P033: props 型の aria-pressed から後ろの別の <Button まで跨いで誤検知しない", async () => {
+    const { results } = await lint(`type Props = {
+  "aria-pressed"?: boolean
+  label: string
+}
+export function F(props: Props) {
+  return <Button variant="primary">{props.label}</Button>
+}
+`)
+    expect(idsOf(only(results, ["P033"]))).toEqual([])
+  })
+
+  it('P039: type="file" の後ろの行の <input まで跨いで P039 にしない', async () => {
+    const { results } = await lint(`const hint = 'use type="file" for uploads'
+export function F() {
+  return <input type="text" data-slot="x" />
+}
+`)
+    expect(idsOf(only(results, ["P039"]))).toEqual([])
+  })
+
   it("P043: tabBar の引数まで折り返しても検出する", async () => {
     const { results } = await lint(
       wrap(`<Tabs

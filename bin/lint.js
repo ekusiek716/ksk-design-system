@@ -450,8 +450,20 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
 
   const summary = summarize(findings)
   if (options.format === "json") {
+    // summary.files は「違反のあったファイル数」なので、0 件検査と「違反なし」を
+    // JSON で区別できるよう実際に検査したファイル数を scannedFiles に足す（issue #831）。
+    // 既存キーの意味は変えない（後方互換）。
+    const scannedFiles = files.length - generatedSkipped.length - missingSkipped.length
+    if (options.changed && files.length === 0) {
+      // stdout の JSON を汚さないよう stderr に出す
+      console.error("[ksk-ds lint] 検査対象の変更ファイルが 0 件のため検査していません")
+    }
     console.log(
-      JSON.stringify({ results: findings, summary, generatedSkipped, missingSkipped, missingTargets }, null, 2),
+      JSON.stringify(
+        { results: findings, summary: { ...summary, scannedFiles }, generatedSkipped, missingSkipped, missingTargets },
+        null,
+        2,
+      ),
     )
   } else if (allTargetsMissing) {
     // 走査 0 件で「違反は見つかりませんでした」と出すと検査したように読めるため出さない
@@ -913,6 +925,10 @@ function lintFile(file, cwd, rules, options = {}) {
     // 一致するので、ファイル全体モードで照合すれば Prettier が折り返した複数行の
     // タグでも 1 行と同じ判定になる。行単位だと P033 / P044 を見逃し、alt が
     // 次の行にある <img> を P025 と誤検知していた。
+    // scope: "tag" のパターンを書くときの約束（PR #842 のレビュー指摘）: ファイル全体に
+    // 照合するため、`<Tag\b` で始まらない分岐は `[^>\n]*` のように改行で止めること。
+    // 止めないと import 行や props 型の語から後ろの無関係なタグまでを 1 マッチにする
+    // （P042 の `SheetContent[^>]*` / P033 の `aria-pressed[^>]*<Button` で実際に起きた）。
     const isTagScope = rule.scope === "tag"
     const isFullFileRule = isTagScope || rule.pattern.includes("[\\s\\S]")
     let regex
