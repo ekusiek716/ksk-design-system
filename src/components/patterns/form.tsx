@@ -29,18 +29,51 @@ interface FormSectionProps extends React.ComponentProps<"fieldset"> {
   description?: string
 }
 
-function FormSection({ className, title, description, children, ...props }: FormSectionProps) {
+/**
+ * 関連する入力を fieldset で束ねる簡易 API。
+ *
+ * `title` は fieldset の直下の最初の `<legend>` として描き、fieldset の名前（accessible name）になる。
+ * `<div>` で包むと legend が fieldset の名前にならず、読み上げで見出しがグループ名として
+ * 伝わらなかった（issue #792）。title が無いときは legend を描かず、名前なしになる（想定内）。
+ * `description` は legend の後ろの兄弟 `<p>` として描き、fieldset の `aria-describedby` に結ぶ
+ * （利用者が渡した `aria-describedby` は後ろに連結して残す）。
+ *
+ * legend は fieldset の枠側に描かれ flex の並びに入らないため、旧 `<div>` の gap と同じ間隔を
+ * legend の margin-bottom で付ける（description あり=4px、無し=16px）。
+ */
+function FormSection({
+  className,
+  title,
+  description,
+  children,
+  "aria-describedby": ariaDescribedby,
+  ...props
+}: FormSectionProps) {
+  const descriptionId = React.useId()
+  const describedBy = [description ? descriptionId : undefined, ariaDescribedby]
+    .filter(Boolean)
+    .join(" ")
   return (
     <fieldset
       data-slot="form-section"
-      className={cn("flex flex-col gap-4", className)}
+      className={cn("flex min-w-0 flex-col gap-4", className)}
+      aria-describedby={describedBy || undefined}
       {...props}
     >
-      {(title || description) && (
-        <div className="flex flex-col gap-1">
-          {title && <legend className="typo-heading-md text-[var(--Text-High-Emphasis)]">{title}</legend>}
-          {description && <p className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">{description}</p>}
-        </div>
+      {title && (
+        <legend
+          className={cn(
+            "typo-heading-md text-[var(--Text-High-Emphasis)]",
+            description ? "mb-1" : "mb-4"
+          )}
+        >
+          {title}
+        </legend>
+      )}
+      {description && (
+        <p id={descriptionId} className="typo-body-sm text-[var(--Text-Medium-Emphasis)]">
+          {description}
+        </p>
       )}
       {children}
     </fieldset>

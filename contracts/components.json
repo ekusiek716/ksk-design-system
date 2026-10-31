@@ -1743,7 +1743,8 @@
       ],
       "rules": [
         "FormRoot は送信とフォーム全体の gap、FormActions は末尾アクション行を担う",
-        "短いフォームは FormSection、3 セクション以上または legend / group semantics が必要なフォームは FieldSet を使う"
+        "短いフォームは FormSection、3 セクション以上または legend / group semantics が必要なフォームは FieldSet を使う",
+        "FormSection も title を fieldset の名前として公開する（title は fieldset 直下の最初の legend。description は legend の後ろの p で aria-describedby に結ぶ）。title 無しは名前なし (issue #792)"
       ]
     },
     {
