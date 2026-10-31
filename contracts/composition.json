@@ -51,7 +51,7 @@
       ],
       "rules": [
         "main の p-6（24px）がページ外周の既定余白。ページ側で二重に外周 padding を足さない",
-        "sidebar は lg 未満で hidden になる。lg 未満でナビへ辿れるようにするときは mobileDrawer（開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange、ナビ項目で閉じるのは closeMobileDrawerOnNavigate）。ハンバーガーと Sheet side=\"left\" を呼び出し側で自作しない（issue #705）",
+        "sidebar は lg 未満で hidden になる。lg 未満でナビへ辿れるようにするときは mobileDrawer（開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange、ナビ項目で閉じるのは closeMobileDrawerOnNavigate。next/link 等の SPA リンクでも閉じ、閉じたくない項目は data-keep-mobile-drawer で外す。issue #795）。ハンバーガーと Sheet side=\"left\" を呼び出し側で自作しない（issue #705）",
         "暗色サイドバーは sidebarTone=\"inverse\"。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする。aside に bg を className で上書きしない（issue #680）",
         "アプリ内で全画面に重ねて出す管理画面は safeAreaTop + className=\"h-full\"。外枠は fixed と重ね順だけにし、safe-area の余白と背景を外枠に書かない（issue #724）",
         "sidebarWidth を変える場合、hidden lg:flex は維持し幅クラスのみ差し替える",

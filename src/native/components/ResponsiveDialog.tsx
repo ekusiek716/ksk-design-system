@@ -15,13 +15,20 @@ export interface ResponsiveDialogProps extends DialogProps {
  * Sheet 側でも Dialog と同じく description を表示し、本文とフッターの間に
  * scale[3]、フッター内の要素間に scale[2] の余白を取る（issue #604）。
  * スマホ幅ではフッターのボタンは縦積み（全幅）になる。
+ * `dismissOnBackdrop` は Sheet 側でも `dismissible` として効く（既定 true。#823）。
  */
 export function ResponsiveDialog({ breakpoint = 600, ...props }: ResponsiveDialogProps) {
   const { theme, scales } = useTheme()
   const { width } = Dimensions.get("window")
   if (width <= breakpoint) {
     return (
-      <Sheet open={props.open} onClose={props.onClose} side="bottom" title={props.title}>
+      <Sheet
+        open={props.open}
+        onClose={props.onClose}
+        side="bottom"
+        title={props.title}
+        dismissible={props.dismissOnBackdrop ?? true}
+      >
         <View style={{ gap: scales.spacing.scale[3] }}>
           {props.description ? (
             <RNText style={[resolveTypo("body.md"), { color: theme.text["medium-emphasis"] }]}>

@@ -18,8 +18,16 @@ vi.mock("react-native", () => ({
   Text: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
 }))
 vi.mock("../src/native/components/Sheet", () => ({
-  Sheet: ({ title, children }: { title?: string; children: React.ReactNode }) => (
-    <section data-sheet>
+  Sheet: ({
+    title,
+    children,
+    dismissible,
+  }: {
+    title?: string
+    children: React.ReactNode
+    dismissible?: boolean
+  }) => (
+    <section data-sheet data-dismissible={String(dismissible)}>
       <h2>{title}</h2>
       {children}
     </section>
@@ -74,6 +82,22 @@ describe("native ResponsiveDialog — Sheet 分岐 (#604)", () => {
     )
     expect(html).toContain(`<div data-gap="${scales.spacing.scale[3]}"><p>本文</p></div>`)
     expect(html).not.toContain("<span>")
+  })
+
+  it("dismissOnBackdrop={false} を Sheet の dismissible={false} として渡す (#823)", () => {
+    const html = renderToStaticMarkup(
+      <ThemeProvider>
+        <ResponsiveDialog open onClose={() => {}} title="t" dismissOnBackdrop={false}>
+          <p>本文</p>
+        </ResponsiveDialog>
+      </ThemeProvider>,
+    )
+    expect(html).toContain('data-dismissible="false"')
+  })
+
+  it("dismissOnBackdrop 未指定なら Sheet は背景タップで閉じる (#823)", () => {
+    const html = render()
+    expect(html).toContain('data-dismissible="true"')
   })
 
   it("breakpoint を超える幅では Dialog を使う", () => {

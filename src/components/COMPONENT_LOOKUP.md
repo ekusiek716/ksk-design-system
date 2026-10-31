@@ -159,7 +159,7 @@
 | SimplePagination | `@/components/patterns/simple-pagination` | — | アイテム数指定 (items), ページ数指定 (pages), compact (モバイル省略表示), 境界での disabled, 0 件 |
 | StatCard | `@/components/patterns/stat-card` | — | TrendUp, TrendDown, NoTrend, Variants, Interactive, MultipleCards, ElevationNone |
 | StickyActionBar | `@/components/patterns/sticky-action-bar` | — | Default, TwoButtons, NoBorder |
-| SwipeRow | `@/components/patterns/swipe-row` | — | Default, SingleAction, KeyboardAccessible |
+| SwipeRow | `@/components/patterns/swipe-row` | — | Default, SingleAction, PressableChildren, KeyboardAccessible |
 | TagInput | `@/components/patterns/tag-input` | — | Default, WithInitialTags, WithMax, Disabled, WithFormField |
 | Tag | `@/components/patterns/tag` | **variant**: `default`, `brand`, `caution`, `success`, `warning`, `info` | Default, Brand, Caution, Success, Warning, Info, AllVariants, Categorical, CategoricalWithDot, CategoricalHelpers |
 | ThumbnailCard | `@/components/patterns/thumbnail-card` | — | Vertical, Horizontal, WithSecondaryAction, Strip, WholeCardClickableWithSecondaryAction |
