@@ -165,6 +165,31 @@ import {
 
 Web/PWA consumer は `ksk-design-system` の `MobileAppShell` と `BottomTabBar variant="pill"` / `MobileFloatingActionButton` を組み合わせます。`bottomNavMode="fixed"` では shell が fixed wrapper と safe-area padding を持ちます。既に fixed な nav を渡す場合は `bottomNavMode="external"` を指定します。
 
+### 下端に固定するバーの safe-area（StickyActionBar / NavigationBar / BottomTabBar）
+
+`StickyActionBar` と `NavigationBar`（`BottomTabBar` 経由を含む）は、`SafeAreaInsetsProvider` で下端 inset が渡されていれば、それを下余白に足します（issue #804）。Android の画面いっぱい表示（Expo SDK 53 以降の既定）では、渡さないとボタンやタブがシステムのナビゲーションバーに重なります。アプリのルートで実測値を流し込んでください。
+
+```tsx
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context"
+import { SafeAreaInsetsProvider, StickyActionBar, Button } from "ksk-design-system/native/ui"
+
+function DsInsets({ children }: { children: React.ReactNode }) {
+  const insets = useSafeAreaInsets()
+  return <SafeAreaInsetsProvider insets={insets}>{children}</SafeAreaInsetsProvider>
+}
+
+// 画面の最下部
+<StickyActionBar>
+  <Button>購入する</Button>
+</StickyActionBar>
+```
+
+- 下余白は、inset が渡されていれば `StickyActionBar` が「16 + inset」、`NavigationBar` が「inset」です。渡されていなければ従来の決め打ち（`StickyActionBar` は iOS 32 / Android 16、`NavigationBar` は iOS 24 / Android 0）のままです。
+- iOS で inset を渡すと、Face ID 機では従来より余白が大きくなります（例: `StickyActionBar` は 32 → 50）。
+- 逆に、inset が 0 の端末（ホームボタンのある iPhone など）では従来より余白が小さくなります（`StickyActionBar` は 32 → 16、`NavigationBar` は 24 → 0）。
+- 余白が変わるのは inset を流し込んだ画面だけではありません。ほかの部品（`AppHeader` など）のために `SafeAreaInsetsProvider` を既にルートで流しているアプリは、このバージョンに上げただけで上の 2 点のとおり見た目が変わります。上げたら下端のバーを実機で確認し、従来値に戻したい画面は `safeArea={false}` を渡してください。
+- `SafeAreaView` の `edges` に `bottom` を含めている画面や、自前で下余白を足している画面では二重になります。どちらか片方に寄せ、バー側を使わないときは `safeArea={false}` を渡します（inset を無視して従来値）。
+
 ### Liquid Glass の FAB
 
 写真・地図・リストの上に FAB を浮かせるときは `variant="glass"` を使います。`GlassView` にブランド色をほぼ不透明（light 95%）で敷いた Liquid Glass で、web の `Button variant="glass-accent"` と同じ質感です。塗り・縁・上辺ハイライトの色は `src/native/glass-accent-fill.ts` の純関数がテーマの `brand.primary` から導出するので、テーマを差し替えれば自動で追従します。
