@@ -372,7 +372,7 @@
       "id": "P033",
       "severity": "error",
       "category": "component-adoption",
-      "pattern": "<Button[^>]*aria-pressed|aria-pressed[^>\\n]*<Button",
+      "pattern": "<Button\\b[^>]*aria-pressed|aria-pressed[^>\\n]*<Button\\b",
       "scope": "tag",
       "excludePaths": [".stories."],
       "excludeLines": ["ksk-ds-allow-custom-ui"],

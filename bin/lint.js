@@ -1093,16 +1093,34 @@ function lineForIndex(source, index) {
 const TAG_SCAN_LIMIT = 4000
 
 /**
+ * マッチが属するタグの開き `<` の位置を返す。マッチが `<` で始まればその位置、
+ * そうでなければマッチの終端から TAG_SCAN_LIMIT 文字まで手前へ遡った最も近い `<` + 英字。
+ * 見つからなければ -1。
+ */
+function tagOpenIndex(source, matchStart, matchEnd) {
+  if (source[matchStart] === "<") return matchStart
+  const stop = Math.max(0, matchEnd - TAG_SCAN_LIMIT)
+  for (let i = matchEnd - 1; i >= stop; i--) {
+    if (source[i] === "<" && /[A-Za-z]/.test(source[i + 1] ?? "")) return i
+  }
+  return -1
+}
+
+/**
  * scope: "tag" のマッチについて、タグの行範囲の終端（文字インデックス）を返す（issue #805）。
  *
- * マッチが `<Tag` で始まるならその直後から、そうでなければ（`aria-pressed[^>]*<Button`
- * のような逆向きの分岐）マッチの終端から、タグを閉じる `>` を探す。`{...}` の中の
- * `>`（アロー関数の `=>` や属性に渡した JSX）と文字列の中身は飛ばす。見つからない
- * ときはマッチの終端までを範囲にする。どちらの場合もマッチ自体より短くはしない。
+ * 走査はタグの開き `<` の直後から始め、タグを閉じる `>` を探す。マッチが `<Tag` で
+ * 始まらない逆向きの分岐（`aria-pressed[^>\n]*<Button` 等）は、マッチの終端から手前へ
+ * 遡って最も近い `<` + 英字を開きとみなす。マッチの終端から走査すると、終端が属性値の
+ * 引用符の中にあるとき閉じ引用符を開きと取り違え、範囲が縮んだり後ろの別タグまで
+ * 伸びたりする（PR #842 のレビュー指摘）。`{...}` の中の `>`（アロー関数の `=>` や
+ * 属性に渡した JSX）と文字列の中身は飛ばす。見つからないときはマッチの終端までを
+ * 範囲にする。どちらの場合もマッチ自体より短くはしない。
  */
 function tagRangeEnd(source, matchStart, matchEnd) {
   const matchLast = Math.max(matchStart, matchEnd - 1)
-  const from = source[matchStart] === "<" ? matchStart + 1 : matchEnd
+  const from = tagOpenIndex(source, matchStart, matchEnd) + 1
+  if (from <= 0) return matchLast
   const limit = Math.min(source.length, from + TAG_SCAN_LIMIT)
   let depth = 0
   for (let i = from; i < limit; i++) {

@@ -293,6 +293,25 @@ export function F(props: Props) {
     expect(idsOf(only(results, ["P033"]))).toEqual([])
   })
 
+  it("P042: 後ろのタグに置いた ignore が、前の別の SheetContent まで消さない（属性値の > も含む）", async () => {
+    const { results } = await lint(wrap(`      <SheetContent className="rounded-t-2xl" />
+      {/* ksk-ds-lint-ignore P042 -- 検証用に意図して残すテストケースです */}
+      <SheetContent title=">" className="rounded-t-2xl" />`))
+    expect(only(results, ["P042"]).map((f) => f.line)).toEqual([4])
+  })
+
+  it("P033: 複数行に折り返した Pick<ButtonProps, \"aria-pressed\"> を <Button と取り違えない", async () => {
+    const { results } = await lint(`import type { ButtonProps } from "ksk-design-system"
+type P = Pick<ButtonProps,
+  "aria-pressed">
+type Q = Pick<
+  ButtonProps,
+  "aria-pressed"
+>
+`)
+    expect(idsOf(only(results, ["P033"]))).toEqual([])
+  })
+
   it('P039: type="file" の後ろの行の <input まで跨いで P039 にしない', async () => {
     const { results } = await lint(`const hint = 'use type="file" for uploads'
 export function F() {
