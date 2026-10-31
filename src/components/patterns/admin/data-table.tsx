@@ -1669,6 +1669,13 @@ interface DataTableDateCellProps
   dateFormat?: string
   triggerLabel?: string
   pickerClassName?: string
+  /**
+   * 値があるとき日付のクリアボタンを出し、押すと `onValueChange(undefined)` を呼ぶ。既定 false。
+   * 選択中の日の再押下では値が外れないので、任意の日付を消せるセルはこれを付ける（issue #803）。
+   */
+  clearable?: boolean
+  /** クリアボタンの aria-label。省略時は DatePicker の既定（KskLabelsProvider の `datePickerClear`）。 */
+  clearLabel?: string
 }
 
 function DataTableDateCell({
@@ -1680,6 +1687,8 @@ function DataTableDateCell({
   dateFormat,
   triggerLabel,
   pickerClassName,
+  clearable,
+  clearLabel,
   width,
   sticky,
   stickyOffset,
@@ -1706,6 +1715,8 @@ function DataTableDateCell({
         disabled={disabled}
         dateFormat={dateFormat}
         triggerLabel={triggerLabel}
+        clearable={clearable}
+        clearLabel={clearLabel}
         className={cn("h-8 min-w-[150px] px-2 typo-body-md", width === "flex" && "w-full", pickerClassName)}
       />
     </td>
@@ -2013,6 +2024,11 @@ interface DataTableDateColumnConfig<TRow>
   /** 値が無いときの表示。省略時は KskLabelsProvider の `dataTableEmptyValue`（Provider 無しは "未設定"。locale="en" で "Not set"） */
   emptyLabel?: string
   format?: (value: Date, row: TRow, index: number) => React.ReactNode
+  /**
+   * 編集時の DatePicker にクリアボタンを出し、押すと `undefined` で確定する。既定 false。
+   * 選択中の日の再押下では値が外れないので、任意の日付の列はこれを付ける（issue #803）。
+   */
+  clearable?: boolean
 }
 
 type DataTableChipColumnValue<TValue extends string = string> =
@@ -2079,6 +2095,7 @@ function createDataTableDateColumn<TRow>({
   placeholder,
   emptyLabel,
   format,
+  clearable,
   ...column
 }: DataTableDateColumnConfig<TRow>): DataTableColumn<TRow, Date | undefined> {
   return {
@@ -2102,6 +2119,7 @@ function createDataTableDateColumn<TRow>({
         value={cellValue}
         onChange={commitValue}
         placeholder={placeholder}
+        clearable={clearable}
         className="h-9 min-w-[150px]"
       />
     ),

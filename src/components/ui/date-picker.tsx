@@ -93,9 +93,106 @@ interface DatePickerProps {
   min?: Date
   /** 選択可能な最大日時。Calendar では日単位で判定する。 */
   max?: Date
+  /**
+   * 値があるとき、トリガーの右側（カレンダーアイコンの左）に日付のクリアボタンを出す。
+   * 押すと `onChange(undefined)` を呼ぶ。既定 false。
+   *
+   * カレンダーで選択中の日をもう一度押しても値は外れない（ポップオーバーを閉じるだけ）。
+   * 任意項目などで利用者に値を消させたい画面はこの prop でクリア手段を明示する（issue #803。
+   * 以前は react-day-picker の既定動作で再押下が選択解除になり、確かめるつもりで同じ日を
+   * 押しただけで値が消えていた）。disabled のときは出さない。
+   *
+   * クリアボタンは見た目 24px・当たり判定 44px。トリガー内に空けた場所の実位置を測って重ねるので、
+   * `className` で幅・横 padding を変えても追従する。`clearable` のときはトリガーを幅いっぱいの枠
+   * （`relative w-full`）で包むため、flex 行で幅を決めるときは親要素側で決める。
+   */
+  clearable?: boolean
+  /**
+   * クリアボタンの aria-label。
+   * 省略時は KskLabelsProvider の `datePickerClear`（Provider 無しは "日付をクリア"。locale="en" で "Clear date"）。
+   */
+  clearLabel?: string
   "aria-describedby"?: string
   "aria-invalid"?: React.AriaAttributes["aria-invalid"]
 }
+
+function isSameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  )
+}
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
+
+/**
+ * クリアボタンを、トリガー内に空けた場所（spacer）へ重ねる位置を測る（issue #803）。
+ * className でトリガーの幅・余白・横 padding が変わっても（DataTableDateCell の `px-2` 等）
+ * spacer の実位置に合わせて追従する。測る前（SSR・初回描画）は null で、既定 padding 前提の位置を使う。
+ * 位置は transform を含まないレイアウト座標（offsetLeft / offsetTop）で測る。
+ */
+/**
+ * el の、ancestor の padding 端からのレイアウト上の位置（transform を含まない）。
+ * getBoundingClientRect は祖先の transform（Dialog の入場アニメの scale 等）を含むため、
+ * それをそのまま CSS の left / top に使うと、アニメ中に測った位置がずれたまま残る（PR #847 のレビュー指摘）。
+ * offsetParent をたどって ancestor に届かなければ null。
+ */
+function layoutOffsetWithin(el: HTMLElement, ancestor: HTMLElement): { left: number; top: number } | null {
+  let left = 0
+  let top = 0
+  let node: HTMLElement | null = el
+  while (node && node !== ancestor) {
+    left += node.offsetLeft
+    top += node.offsetTop
+    const parent = node.offsetParent as HTMLElement | null
+    // 途中の offsetParent の枠線の分（offsetLeft は親の padding 端が基準）
+    if (parent && parent !== ancestor) {
+      left += parent.clientLeft
+      top += parent.clientTop
+    }
+    node = parent
+  }
+  return node === ancestor ? { left, top } : null
+}
+
+function useClearButtonPosition(
+  enabled: boolean,
+  wrapperRef: React.RefObject<HTMLDivElement | null>,
+  spacerRef: React.RefObject<HTMLSpanElement | null>
+) {
+  const [pos, setPos] = React.useState<{ left: number; top: number } | null>(null)
+  useIsomorphicLayoutEffect(() => {
+    const wrapper = wrapperRef.current
+    const spacer = spacerRef.current
+    if (!enabled || !wrapper || !spacer) return
+    const measure = () => {
+      // 寸法が取れない環境（jsdom 等）では既定位置のままにする
+      if (spacer.offsetWidth === 0 && spacer.offsetHeight === 0) return
+      const offset = layoutOffsetWithin(spacer, wrapper)
+      if (!offset) return
+      // ボタン（24px）を spacer（44px 幅）の中央に置く。当たり判定（44px）が spacer にぴったり重なる
+      const next = {
+        left: offset.left + (spacer.offsetWidth - 24) / 2,
+        top: offset.top + (spacer.offsetHeight - 24) / 2,
+      }
+      setPos((prev) => (prev && prev.left === next.left && prev.top === next.top ? prev : next))
+    }
+    measure()
+    if (typeof ResizeObserver === "undefined") return
+    const observer = new ResizeObserver(measure)
+    observer.observe(wrapper)
+    observer.observe(spacer)
+    return () => observer.disconnect()
+  }, [enabled, wrapperRef, spacerRef])
+  return pos
+}
+
+const clearIcon = (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
+    <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+  </svg>
+)
 
 function DatePicker({
   id,
@@ -109,11 +206,14 @@ function DatePicker({
   defaultMonth,
   min,
   max,
+  clearable = false,
+  clearLabel: clearLabelProp,
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
 }: DatePickerProps) {
   const defaultLabels = useKskLabels()
   const placeholder = placeholderProp ?? defaultLabels.datePickerPlaceholder
+  const clearLabel = clearLabelProp ?? defaultLabels.datePickerClear
   const locale = useKskLocale() ?? "ja"
   const [open, setOpen] = React.useState(false)
   const formatted = value ? formatDate(value, dateFormat, defaultLabels, locale) : null
@@ -122,25 +222,68 @@ function DatePicker({
   // open 中リングの消灯と重なって明滅（ちらつき）して見えるため、返却を抑止する。
   // キーボード操作（Enter で選択）ではフォーカス返却を維持する（a11y）。
   const pointerSelectionRef = React.useRef(false)
+  const triggerRef = React.useRef<HTMLButtonElement>(null)
+  const showClear = clearable && !!value && !disabled
+  const wrapperRef = React.useRef<HTMLDivElement>(null)
+  const spacerRef = React.useRef<HTMLSpanElement>(null)
+  const clearPos = useClearButtonPosition(showClear, wrapperRef, spacerRef)
+
+  const trigger = (
+    <PopoverTrigger asChild>
+      <button
+        ref={triggerRef}
+        id={id}
+        type="button"
+        data-slot="date-picker-trigger"
+        disabled={disabled}
+        aria-expanded={open}
+        aria-label={triggerLabel ?? (formatted ? undefined : placeholder)}
+        aria-describedby={ariaDescribedBy}
+        aria-invalid={ariaInvalid}
+        className={triggerClass(open, !!formatted, className)}
+      >
+        <span>{formatted ?? placeholder}</span>
+        {/* クリアボタン（トリガーの兄弟として重ねる）の当たり判定 44px の分だけ文字の右側を空ける。
+            幅を当たり判定と同じにして、広げた判定がカレンダーアイコンや文字に掛からないようにする */}
+        {showClear && <span ref={spacerRef} aria-hidden className="ml-auto h-6 w-11 shrink-0" />}
+        {calendarIcon}
+      </button>
+    </PopoverTrigger>
+  )
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          id={id}
-          type="button"
-          data-slot="date-picker-trigger"
-          disabled={disabled}
-          aria-expanded={open}
-          aria-label={triggerLabel ?? (formatted ? undefined : placeholder)}
-          aria-describedby={ariaDescribedBy}
-          aria-invalid={ariaInvalid}
-          className={triggerClass(open, !!formatted, className)}
-        >
-          <span>{formatted ?? placeholder}</span>
-          {calendarIcon}
-        </button>
-      </PopoverTrigger>
+      {clearable ? (
+        // button の中に button は置けないので、クリアはトリガーの兄弟にして上に重ねる
+        // （MultiSelect / FilterPill と同じ構成）。clearable でない既定の DOM は変えない。
+        <div ref={wrapperRef} className="relative w-full">
+          {trigger}
+          {showClear && (
+            <button
+              type="button"
+              data-slot="date-picker-clear"
+              aria-label={clearLabel}
+              onClick={() => {
+                onChange?.(undefined)
+                // 値が空になるとクリアボタン自体が消えるので、フォーカスを body に落とさずトリガーへ戻す
+                triggerRef.current?.focus()
+              }}
+              // 位置はトリガー内の spacer を測って合わせる（測る前は既定 padding 前提の位置）
+              style={clearPos ? { left: clearPos.left, top: clearPos.top } : undefined}
+              className={cn(
+                "absolute z-[1] flex size-6 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] transition-colors hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Object-High-Emphasis)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
+                // 見た目は 24px のまま、当たり判定だけ 44px に広げる（タップ領域 44pt の基準）
+                "before:absolute before:-inset-2.5 before:content-['']",
+                !clearPos && "right-[calc(var(--Field-Padding-X-Md)_+_1.625rem)] top-1/2 -translate-y-1/2"
+              )}
+            >
+              {clearIcon}
+            </button>
+          )}
+        </div>
+      ) : (
+        trigger
+      )}
       <PopoverContent
         className="w-auto p-0"
         align="start"
@@ -160,6 +303,10 @@ function DatePicker({
       >
         <Calendar
           mode="single"
+          // required: 選択中の日の再押下で選択を外さない（issue #803）。react-day-picker は
+          // required が無いと再押下で onSelect(undefined) を呼び、値が消えていた。
+          // 値を消す手段は clearable のクリアボタンに分ける。
+          required
           selected={value}
           defaultMonth={defaultMonth ?? value ?? undefined}
           startMonth={min}
@@ -168,8 +315,11 @@ function DatePicker({
             ...(min ? [{ before: min }] : []),
             ...(max ? [{ after: max }] : []),
           ]}
-          onSelect={(date) => {
-            onChange?.(date)
+          onSelect={(date: Date | undefined) => {
+            // 選択中の日を押したときは値を変えずに閉じるだけにする。同じ日で onChange を
+            // 呼ぶと、onChange で即保存する画面が無駄に保存し、DateTimePicker では
+            // min/max の丸めで時刻が動きうる。
+            if (date && !(value && isSameDay(date, value))) onChange?.(date)
             setOpen(false)
           }}
           autoFocus

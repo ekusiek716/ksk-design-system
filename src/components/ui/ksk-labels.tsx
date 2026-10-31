@@ -68,6 +68,8 @@ interface KskLabels {
   multiSelectEmpty?: string
   /** MultiSelect の選択クリアボタンの読み上げ名 */
   multiSelectClear?: string
+  /** DatePicker / DateField / DateTimePicker（`clearable`）の日付クリアボタンの読み上げ名（issue #803） */
+  datePickerClear?: string
   /** NumberInput の減らすボタンの読み上げ名 */
   numberInputDecrement?: string
   /** NumberInput の増やすボタンの読み上げ名 */
@@ -480,6 +482,7 @@ const JA_LABELS: ResolvedKskLabels = {
   comboboxEmpty: "該当なし",
   multiSelectEmpty: "該当なし",
   multiSelectClear: "選択をクリア",
+  datePickerClear: "日付をクリア",
   numberInputDecrement: "減らす",
   numberInputIncrement: "増やす",
   imageGalleryImage: "画像 {index}",
@@ -690,6 +693,7 @@ const EN_LABELS: ResolvedKskLabels = {
   comboboxEmpty: "No results",
   multiSelectEmpty: "No results",
   multiSelectClear: "Clear selection",
+  datePickerClear: "Clear date",
   numberInputDecrement: "Decrease",
   numberInputIncrement: "Increase",
   imageGalleryImage: "Image {index}",
