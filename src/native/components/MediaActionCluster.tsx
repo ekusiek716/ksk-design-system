@@ -7,6 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native"
+import { useLatestRef } from "../../lib/use-latest-ref"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { GlassView } from "./GlassView"
@@ -44,6 +45,10 @@ export interface MediaActionClusterProps {
   labelPosition?: MediaActionClusterLabelPosition
   autoHideMs?: number | null
   defaultVisible?: boolean
+  /**
+   * 自動非表示・再表示で表示状態が変わったときに呼ばれる。その場の関数で渡してよい
+   * （参照が変わっても autoHideMs のタイマーは巻き戻らない。#812）
+   */
   onVisibleChange?: (visible: boolean) => void
   accessibilityLabel?: string
   style?: StyleProp<ViewStyle>
@@ -106,15 +111,26 @@ export function MediaActionCluster({
     timerRef.current = null
   }, [])
 
+  // onVisibleChange は ref 越しに呼び、タイマーの依存から外す。依存に入れると、その場の
+  // 関数で渡されたとき親の再描画のたびに自動非表示のタイマーが巻き戻る（#812）。
+  // 通知は updater の外で、現在の表示状態（visibleRef）と比べて変わったときだけ行う
+  // （updater 内の副作用は StrictMode で二重に呼ばれうるため）。Web 版と同じ形。
+  const onVisibleChangeRef = useLatestRef(onVisibleChange)
+  const visibleRef = useLatestRef(visible)
+
   const setVisibleState = React.useCallback(
     (next: boolean) => {
-      setVisibility((current) => {
-        const currentVisible = current.autoHideEnabled ? current.value : true
-        if (currentVisible !== next) onVisibleChange?.(next)
-        return { autoHideEnabled, value: next }
-      })
+      setVisibility((current) =>
+        current.autoHideEnabled === autoHideEnabled && current.value === next
+          ? current
+          : { autoHideEnabled, value: next },
+      )
+      if (visibleRef.current === next) return
+      // 次の描画より前に続けて呼ばれても二重に通知しないよう、先に進めておく
+      visibleRef.current = next
+      onVisibleChangeRef.current?.(next)
     },
-    [autoHideEnabled, onVisibleChange],
+    [autoHideEnabled, onVisibleChangeRef, visibleRef],
   )
 
   const scheduleHide = React.useCallback(() => {
