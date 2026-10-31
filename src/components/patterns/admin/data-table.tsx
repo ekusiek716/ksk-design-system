@@ -249,39 +249,73 @@ function getCellEditTriggerProps<TRow, TValue>(
   column: DataTableColumn<TRow, TValue>,
   context: DataTableCellContext<TRow, TValue>
 ): React.ComponentProps<"td"> {
+  // editCell も edit 指定も無い列は表示専用。編集トリガーを付けず、行クリックの当たり判定も
+  // そのまま残す（issue #793 / #814）。
+  if (!column.editCell && !column.edit) return {}
   const trigger = column.edit?.trigger ?? "doubleClick"
   if (trigger === "manual") return {}
 
-  const keyProps: React.ComponentProps<"td"> = {
+  // 編集を始める操作（クリック・ダブルクリック・フォーカス）は行クリックではない。
+  // 編集できるセル全体を行クリックの当たり判定から外す（issue #793）。
+  // doubleClick も 1 回目のクリックが行クリックになるため対象に含める。
+  //
+  // td は trigger を問わず Tab 順に入れ、Enter で編集を始められるようにする（issue #814）。
+  // 編集中は Tab 順から外し（-1）、editCell の中の操作要素だけを Tab で巡回させる。
+  // フォーカスの出し入れは DataTableEditableCell が受け持つ。
+  const keyProps: React.ComponentProps<"td"> & { "data-table-ignore-row-click": true } = {
+    "data-table-ignore-row-click": true,
+    tabIndex: context.isEditing ? -1 : 0,
     onKeyDown: (event) => {
       if (event.key === "Escape" && context.isEditing) {
         event.stopPropagation()
         context.cancelEdit()
       }
       if (event.key === "Enter" && !context.isEditing) {
+        // セル内のボタン・リンク・Portal 先から来た Enter は、それぞれの既定動作
+        // （ボタンの click・リンクの遷移）に任せる（issue #814）。
+        if (isFromNestedInteractive(event)) return
         event.preventDefault()
+        // 行の onKeyDown（onRowClick）へ同じ Enter を渡さない
+        event.stopPropagation()
         context.startEdit()
       }
     },
   }
 
+  // 編集中の Select / DatePicker のポップアップは body へ Portal されるが、React の合成
+  // イベントは Portal を越えて td まで届く。選択肢をタップすると、確定（closeEdit）の直後に
+  // その click が td の onClick に届いて startEdit が走り、セルが開き直っていた（issue #793）。
+  // td の DOM の外から来たイベントと、すでに編集中のときは編集開始を無視する。
+  const startEditFrom = (event: React.SyntheticEvent<HTMLTableCellElement>) => {
+    if (context.isEditing || isFromOutsideDom(event)) return
+    context.startEdit()
+  }
+
   if (trigger === "click") {
     return {
       ...keyProps,
-      onClick: () => context.startEdit(),
+      onClick: startEditFrom,
     }
   }
   if (trigger === "focus") {
     return {
       ...keyProps,
-      tabIndex: 0,
-      onFocus: () => context.startEdit(),
+      onFocus: startEditFrom,
     }
   }
   return {
     ...keyProps,
-    onDoubleClick: () => context.startEdit(),
+    onDoubleClick: startEditFrom,
   }
+}
+
+/**
+ * イベントが `currentTarget` の DOM の外（Portal 先）から React の合成イベントとして
+ * 届いたものかを判定する（issue #793）。
+ */
+function isFromOutsideDom(event: React.SyntheticEvent<HTMLElement>) {
+  const target = event.target
+  return target instanceof Node && !event.currentTarget.contains(target)
 }
 
 /** 開発ビルド判定（本番バンドルでは警告を出さない）。 */
@@ -300,16 +334,35 @@ const DATA_TABLE_INTERACTIVE_SELECTOR = [
   "[role='menuitem']",
   "[role='checkbox']",
   "[role='radio']",
+  "[role='option']",
+  "[role='listbox']",
+  "[role='dialog']",
   "[data-table-ignore-row-click]",
 ].join(",")
 
+/**
+ * 行（やセル）のクリック・Enter が、入れ子の操作要素から来たものかを判定する。
+ *
+ * Select・DatePicker・Popover・Sheet などの中身は body へ Portal されるため、DOM 上は
+ * 行の子孫ではないが、React の合成イベントは Portal を越えて行まで届く。`closest()` だけでは
+ * 判定できないので、`currentTarget` の DOM の外から来たイベントはすべて入れ子の操作として
+ * 扱う（issue #793）。
+ *
+ * `closest()` で見つかった要素は `currentTarget` の内側にあるものだけを数える。表ごと
+ * Dialog（`role="dialog"`）の中に置いたときに、外側の祖先に当たって行クリックが
+ * 全部止まるのを防ぐため。
+ */
 function isFromNestedInteractive(
   event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>
 ) {
   const target = event.target
+  const currentTarget = event.currentTarget
+  if (!(target instanceof Node)) return false
+  if (target === currentTarget) return false
+  if (!currentTarget.contains(target)) return true
   if (!(target instanceof Element)) return false
-  if (target === event.currentTarget) return false
-  return Boolean(target.closest(DATA_TABLE_INTERACTIVE_SELECTOR))
+  const interactive = target.closest(DATA_TABLE_INTERACTIVE_SELECTOR)
+  return Boolean(interactive && interactive !== currentTarget && currentTarget.contains(interactive))
 }
 
 function getColumnSortValue<TRow, TValue>(
@@ -775,9 +828,10 @@ function DataTable<TRow = unknown>({
                       if (column.cell || column.editCell) {
                         const editTriggerProps = getCellEditTriggerProps(column, context)
                         return (
-                          <DataTableCell
+                          <DataTableEditableCell
                             key={column.key}
                             {...editTriggerProps}
+                            isEditing={isEditing}
                             align={column.align}
                             width={column.width}
                             sticky={column.sticky}
@@ -787,7 +841,7 @@ function DataTable<TRow = unknown>({
                             {isEditing && column.editCell
                               ? column.editCell(context)
                               : getColumnValue(row, index, column, context)}
-                          </DataTableCell>
+                          </DataTableEditableCell>
                         )
                       }
                       if (column.editable) {
@@ -1180,6 +1234,82 @@ function DataTableCell({
     >
       {children}
     </td>
+  )
+}
+
+/** 編集開始時にフォーカスを移す、editCell の中の操作要素。 */
+const DATA_TABLE_EDIT_FOCUSABLE_SELECTOR = [
+  "button:not([disabled])",
+  "a[href]",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "[tabindex]:not([tabindex='-1'])",
+].join(",")
+
+interface DataTableEditableCellProps extends DataTableCellProps {
+  isEditing: boolean
+}
+
+/**
+ * rows/columns API の cell / editCell 列に使う内部の td（issue #814）。
+ *
+ * - キーボードで編集を始めたとき（td にフォーカスがある状態で編集に入ったとき）は、
+ *   editCell の最初の操作要素へフォーカスを移す
+ * - 確定・取り消しで editCell が消えてフォーカスが失われたら、同じ td へ戻す。
+ *   このとき trigger="focus" の onFocus は呼ばない（戻しただけで編集が再開しないように）
+ * - Tab 順に入る td（tabIndex を持つもの）にだけ focus-visible のリングを付ける
+ */
+function DataTableEditableCell({
+  isEditing,
+  onFocus,
+  className,
+  ...props
+}: DataTableEditableCellProps) {
+  const cellRef = React.useRef<HTMLTableCellElement>(null)
+  const previousEditingRef = React.useRef(isEditing)
+  const restoringFocusRef = React.useRef(false)
+
+  React.useEffect(() => {
+    const cell = cellRef.current
+    const wasEditing = previousEditingRef.current
+    previousEditingRef.current = isEditing
+    if (!cell || wasEditing === isEditing) return
+    const doc = cell.ownerDocument
+    const active = doc.activeElement
+    if (isEditing) {
+      if (active === cell) {
+        cell.querySelector<HTMLElement>(DATA_TABLE_EDIT_FOCUSABLE_SELECTOR)?.focus()
+      }
+      return
+    }
+    // editCell と一緒にフォーカス中の要素が消えた（body に落ちた）ときだけ戻す。
+    // 別のセルや表の外へ移ったフォーカスは奪わない。
+    if (active && active !== doc.body) return
+    restoringFocusRef.current = true
+    try {
+      cell.focus()
+    } finally {
+      restoringFocusRef.current = false
+    }
+  }, [isEditing])
+
+  const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (event) => {
+    if (restoringFocusRef.current) return
+    onFocus?.(event)
+  }
+
+  return (
+    <DataTableCell
+      ref={cellRef}
+      onFocus={handleFocus}
+      className={cn(
+        props.tabIndex != null &&
+          "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]",
+        className
+      )}
+      {...props}
+    />
   )
 }
 

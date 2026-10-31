@@ -6,6 +6,8 @@ import {
 } from "./sheet"
 import { Button } from "./button"
 import { Input } from "./input"
+import { Slider } from "./slider"
+import { Textarea } from "./textarea"
 import { FormField } from "../patterns/form-field"
 
 const meta: Meta<typeof Sheet> = {
@@ -985,5 +987,137 @@ export const ExplicitDescribedByWins: Story = {
     await waitFor(() =>
       expect(sheet).toHaveAttribute("aria-describedby", "external-sheet-desc-485")
     )
+  },
+}
+
+// ─────────────────────────────────────────────────────────────
+// swipeToClose が子要素の操作を奪わない回帰テスト（issue #787）
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * 要素の中心からマウスのボタンを押したまま (dx, dy) だけ動かして離す。
+ * pointer イベントを直接送る（シートのジェスチャは pointerType / buttons /
+ * timeStamp だけを見るため、実機のマウス操作と同じ経路を通る）。
+ */
+async function mouseDragFrom(el: HTMLElement, dx: number, dy: number) {
+  const rect = el.getBoundingClientRect()
+  const x = rect.left + rect.width / 2
+  const y = rect.top + rect.height / 2
+  const send = (type: string, cx: number, cy: number, buttons: number) =>
+    el.dispatchEvent(
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        clientX: cx,
+        clientY: cy,
+        button: 0,
+        buttons,
+        pointerId: 1,
+        pointerType: "mouse",
+        isPrimary: true,
+      })
+    )
+  const steps = 5
+  send("pointerdown", x, y, 1)
+  for (let i = 1; i <= steps; i++) {
+    await new Promise((r) => setTimeout(r, 16))
+    send("pointermove", x + (dx * i) / steps, y + (dy * i) / steps, 1)
+  }
+  send("pointerup", x + dx, y + dy, 0)
+}
+
+/**
+ * swipeToClose のボトムシートで、textarea や本文の文字の上からマウスで真下へ
+ * ドラッグしてもシートは動かず閉じない。ドラッグハンドルからは従来どおり
+ * 閉じられる（#787）。
+ */
+export const SwipeToCloseKeepsTextareaDrag: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </SheetTrigger>
+      <SheetContent side="bottom" swipeToClose>
+        <SheetHeader className="mb-4">
+          <SheetTitle>会議メモ</SheetTitle>
+        </SheetHeader>
+        <Textarea data-testid="memo" aria-label="メモ" rows={3} defaultValue="ここをなぞって文字を選びます" />
+        <p data-testid="body-text" className="typo-body-md text-[var(--Text-Medium-Emphasis)] mt-4">
+          決まったことは、この下の欄にまとめて残します。
+        </p>
+      </SheetContent>
+    </Sheet>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const sheet = await body.findByRole("dialog")
+
+    const rest = sheet.style.transform
+    await mouseDragFrom(within(sheet).getByTestId("memo"), 0, 250)
+    await expect(sheet).toHaveAttribute("data-state", "open")
+    await expect(sheet.style.transform).toBe(rest)
+
+    // 本文の文字の上からマウスで真下へなぞっても、文字選択として扱い動かない
+    await mouseDragFrom(within(sheet).getByTestId("body-text"), 0, 250)
+    await expect(sheet).toHaveAttribute("data-state", "open")
+    await expect(sheet.style.transform).toBe(rest)
+
+    // ハンドルからのスワイプ閉じは変わらない
+    const handle = sheet.querySelector<HTMLElement>("[data-sheet-drag-handle]")
+    await expect(handle).not.toBeNull()
+    await mouseDragFrom(handle!, 0, 400)
+    await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
+  },
+}
+
+/**
+ * swipeToClose の右ドロワーで、Slider のつまみを閉じる方向（右）へドラッグしても
+ * ドロワーは動かず閉じない。本文の文字の上からのマウスドラッグも文字選択として
+ * 扱う。文字の無い余白からのスワイプ閉じは変わらない（#787）。
+ */
+export const SwipeToCloseKeepsSliderDrag: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button data-testid="open">開く</Button>
+      </SheetTrigger>
+      <SheetContent side="right" swipeToClose>
+        <SheetHeader className="mb-4">
+          <SheetTitle>絞り込み</SheetTitle>
+        </SheetHeader>
+        <Slider aria-label="価格" defaultValue={[10]} />
+        <p data-testid="body-text" className="typo-body-md text-[var(--Text-Medium-Emphasis)] mt-6">
+          価格帯を選ぶと、条件に合う商品だけを表示します。
+        </p>
+        <div data-testid="blank" className="mt-6 h-24" />
+      </SheetContent>
+    </Sheet>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    await userEvent.click(canvas.getByTestId("open"))
+    const sheet = await body.findByRole("dialog")
+
+    const rest = sheet.style.transform
+    await mouseDragFrom(within(sheet).getByRole("slider"), 300, 0)
+    await expect(sheet).toHaveAttribute("data-state", "open")
+    await expect(sheet.style.transform).toBe(rest)
+
+    // 本文の文字の上からのマウスドラッグは文字選択として扱い、ドロワーは動かない
+    await mouseDragFrom(within(sheet).getByTestId("body-text"), 300, 0)
+    await expect(sheet).toHaveAttribute("data-state", "open")
+    await expect(sheet.style.transform).toBe(rest)
+
+    // 文字も除外対象も無い余白からのスワイプ閉じは変わらない
+    await mouseDragFrom(within(sheet).getByTestId("blank"), 300, 0)
+    await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
   },
 }

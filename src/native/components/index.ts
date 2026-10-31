@@ -38,6 +38,7 @@ export { Separator, type SeparatorProps } from "./Separator"
 export { Skeleton, SkeletonText, type SkeletonProps } from "./Skeleton"
 export {
   Progress,
+  type ProgressAccessibilityProps,
   type ProgressAutoColorConfig,
   type ProgressProps,
   type ProgressTone,

@@ -1,8 +1,10 @@
+import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
 import {
   CLOSE_DRAG_RATIO,
   RUBBER_MAX,
   resolveDragTranslateY,
+  resolveRejectedClose,
   resolveRelease,
   shouldCaptureDrag,
   shouldStartHandleDrag,
@@ -132,5 +134,40 @@ describe("dedicated handle capture", () => {
   it("does not interrupt animation or keyboard viewport", () => {
     expect(shouldStartHandleDrag(true, false)).toBe(false)
     expect(shouldStartHandleDrag(false, true)).toBe(false)
+  })
+})
+
+// #797: スワイプで閉じたのに親が open を false にしなかった（未保存の確認など）とき、
+// パネルが画面外に残り、透明な Modal が画面全体のタッチを吸い続けた。
+describe("resolveRejectedClose (#797)", () => {
+  it("onClose の後も open が true のままなら、ドラッグ開始時の snap へ戻す", () => {
+    expect(resolveRejectedClose(true, 0.55)).toBe(0.55)
+    expect(resolveRejectedClose(true, 0.92)).toBe(0.92)
+  })
+
+  it("親が open を false にしたら戻さない（通常の退場）", () => {
+    expect(resolveRejectedClose(false, 0.55)).toBeNull()
+  })
+})
+
+describe("native Sheet snap mode — 閉じ要求の拒否からの復帰 (#797)", () => {
+  const source = readFileSync("src/native/components/Sheet.tsx", "utf8")
+  const closeBranch = source.slice(
+    source.indexOf('if (action.kind === "close")'),
+    source.indexOf("moveTo(action.snap)"),
+  )
+
+  it("close 分岐は onClose の後に open を確かめ、残っていれば snap へ戻す", () => {
+    expect(closeBranch).toContain("config.onClose()")
+    expect(closeBranch).toContain("resolveRejectedClose(openRef.current, startActive)")
+    expect(closeBranch.indexOf("config.onClose()")).toBeLessThan(
+      closeBranch.indexOf("resolveRejectedClose("),
+    )
+    expect(closeBranch).toMatch(/if \(snap !== null\) moveTo\(snap\)/)
+  })
+
+  it("復帰 timer は open の変化と unmount で解除する", () => {
+    expect(source).toContain("clearTimeout(rejectedCloseTimerRef.current)")
+    expect(source.match(/clearTimeout\(rejectedCloseTimerRef\.current\)/g)?.length).toBeGreaterThanOrEqual(3)
   })
 })

@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useVisualViewportKeyboardInset } from "@/lib/use-visual-viewport-keyboard-inset"
+import { useSheetKeyboardLifted } from "@/lib/sheet-keyboard-lifted"
 import { sheetSurfaceClasses, type SheetSurface } from "./sheet-surface"
 
 type KeyboardAwareSheetFooterBehavior = "fixed" | "hide" | "scroll"
@@ -56,6 +57,11 @@ function KeyboardAwareSheetFooter({
   ...props
 }: KeyboardAwareSheetFooterProps) {
   const { keyboardInset, isKeyboardOpen } = useVisualViewportKeyboardInset()
+  // #788: 祖先のシートが自分でキーボードの上へ持ち上がっている間は、sticky の
+  // bottom に同じ高さを重ねない（重ねるとフッターがシート下端から浮き、本文や
+  // 見出しに被る）。シートの外では従来どおりキーボード高さを使う。
+  const sheetLifted = useSheetKeyboardLifted()
+  const stickyInset = sheetLifted ? 0 : keyboardInset
   const shouldHide = hideWhenInputFocused && isKeyboardOpen
 
   return (
@@ -76,7 +82,7 @@ function KeyboardAwareSheetFooter({
         className
       )}
       style={{
-        "--ksk-keyboard-inset": `${keyboardInset}px`,
+        "--ksk-keyboard-inset": `${stickyInset}px`,
         ...style,
       } as React.CSSProperties}
       {...props}

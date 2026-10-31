@@ -5,6 +5,8 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { usePortalContainer } from "./portal-container"
 import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
+import { useComposedRef } from "@/lib/compose-ref"
+import { SheetKeyboardLiftedContext } from "@/lib/sheet-keyboard-lifted"
 import {
   ModalStackRegistrar,
   ModalityProvider,
@@ -721,6 +723,24 @@ interface SheetContentProps
    * of the drawer width, or a fast flick). Vertical-dominant gestures stay with
    * the content's scroll. No drag indicator is rendered.
    *
+   * Gestures that belong to a child are never taken over (#787): a drag that
+   * starts inside `input` / `textarea` / `select` / `[contenteditable]` /
+   * `[role="slider"]` / `[data-no-swipe]`; a mouse drag that starts on
+   * selectable text (an element with its own text and no `user-select: none`
+   * ancestor; buttons and links are not text targets) or that starts selecting
+   * text inside the sheet; and — for side drawers — a drag inside a horizontal
+   * scroller that can still scroll in the close direction. Add `data-no-swipe`
+   * to opt out any other region (e.g. a custom gesture area), or
+   * `select-none` to let the mouse grab a text area. The drag handle
+   * (`[data-sheet-drag-handle]`) always remains a valid grab target.
+   *
+   * Behaviour change (#787): the form-field exclusion also applies to touch,
+   * so a touch swipe that starts on an input / textarea / select no longer
+   * closes the sheet (on phones that drag moves the caret or scrolls the
+   * field's own text). Swipes on the drag handle or the rest of the body still
+   * close it. Text outside form fields is checked for mouse only — touch text
+   * selection starts with a long press and does not compete with the swipe.
+   *
    * Ignored when the parent <Sheet> uses `snapPoints` (snap mode handles its
    * own drag).
    */
@@ -804,6 +824,7 @@ function SheetContent({
   zIndex,
   overlayClassName,
   safeArea = true,
+  ref,
   ...props
 }: SheetContentProps) {
   const isModal = useModality()
@@ -837,6 +858,13 @@ function SheetContent({
     "sheet-description",
     !hasInternalDesc && props["aria-describedby"] == null
   )
+  // #822: consumer の ref を内部の callback ref（setContentNode）と合成する。
+  // 素の spread に任せると consumer の ref が後勝ちで内部 ref を上書きし、
+  // autoFocus・子の SheetDescription の紐付け・スワイプが静かに死ぬ。
+  // 下の各分岐（snap / swipeToClose）へは ref を明示的に渡し、それぞれの
+  // コンポーネントで自分の内部 ref と合成する。hook 順を保つため早期 return
+  // より前で呼ぶ。
+  const composedContentRef = useComposedRef<HTMLDivElement>(setContentNode, ref)
   // #341: 素の Sheet は「全画面のページ」ではないので、配下の SheetTitle の
   // 既定を従来サイズに保つ文脈を明示的に流す（外側の全画面サーフェスの文脈を
   // 引き継いでネストしたシートのタイトルが大きくなるのを防ぐ）。全画面級の
@@ -907,7 +935,11 @@ function SheetContent({
         restoreFocusOnClose={restoreFocusOnClose}
         closeOnEsc={closeOnEsc}
         restoreFocusRef={restoreFocusRef}
+        // #811: snap シートもキーボードの上へ持ち上げる（高さは snap が持つ
+        // ので bottom だけ。visibleHeight は使わない）。
+        keyboardInset={keyboardInset}
         {...props}
+        ref={ref}
       >
         {scopedChildren}
       </SnapBottomSheetContent>
@@ -933,6 +965,7 @@ function SheetContent({
         closeOnEsc={closeOnEsc}
         restoreFocusRef={restoreFocusRef}
         {...props}
+        ref={ref}
       >
         {scopedChildren}
       </SwipeToCloseBottomSheet>
@@ -962,6 +995,7 @@ function SheetContent({
         closeOnEsc={closeOnEsc}
         restoreFocusRef={restoreFocusRef}
         {...props}
+        ref={ref}
       >
         {scopedChildren}
       </SwipeToCloseSideDrawer>
@@ -1017,7 +1051,6 @@ function SheetContent({
     <SheetPortal container={container}>
       <SheetOverlay glass={useGlassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
-        ref={setContentNode}
         data-side={side}
         data-safe-area={safeArea}
         className={cn(
@@ -1029,10 +1062,16 @@ function SheetContent({
         // #505: modal な層だけ aria-modal="true" を出す。
         aria-modal={isModal ? true : undefined}
         {...contentProps}
+        // #822: consumer の ref は composedContentRef に合成済み。spread より
+        // 後ろに置き、内部の callback ref が上書きされないようにする。
+        ref={composedContentRef}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
         data-slot="sheet-content"
+        // #788: キーボードの上へ持ち上げている間だけ出す（配下のフッターが
+        // 補正を重ねないための目印。context と同じ条件）。
+        data-keyboard-lifted={keyboardStyle ? "" : undefined}
         style={{
           ...props.style,
           ...keyboardStyle,
@@ -1050,7 +1089,9 @@ function SheetContent({
             {description}
           </DialogPrimitive.Description>
         )}
-        {scopedChildren}
+        <SheetKeyboardLiftedContext.Provider value={keyboardStyle != null}>
+          {scopedChildren}
+        </SheetKeyboardLiftedContext.Provider>
       </DialogPrimitive.Content>
     </SheetPortal>
   )
@@ -1089,6 +1130,159 @@ function findScrollableAncestor(
     node = node.parentElement
   }
   return null
+}
+
+// #787: 子要素が自分でドラッグ操作を持つ場所。ここから始めたジェスチャは、
+// シート / ドロワーの閉じドラッグにせず子要素へ渡す（入力欄の文字選択・
+// Slider のつまみ・consumer 独自のジェスチャ）。`data-no-swipe` は consumer
+// 向けの opt-out。DS の Slider はつまみ（role="slider"）だけでなくトラックを
+// 押してもドラッグが始まるため、Root の data-slot="slider" も含める。
+const SWIPE_EXCLUDED_SELECTOR =
+  'input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="slider"],[data-slot="slider"],[data-no-swipe]'
+
+/**
+ * #787: 押した要素が「子要素が操作を持つ場所」（SWIPE_EXCLUDED_SELECTOR）の中か。
+ * 判定は `boundary`（シート本体）の内側の祖先だけを見る。ドラッグハンドル
+ * （`[data-sheet-drag-handle]`）の中は常に false＝従来どおり掴める。
+ */
+function isSwipeExcludedTarget(
+  target: EventTarget | null,
+  boundary: HTMLElement | null
+): boolean {
+  if (!(target instanceof Element)) return false
+  if (target.closest("[data-sheet-drag-handle]") != null) return false
+  const hit = target.closest(SWIPE_EXCLUDED_SELECTOR)
+  if (hit == null) return false
+  // boundary の外（シートを包む祖先）に当たっただけなら対象外。
+  return boundary == null || boundary.contains(hit)
+}
+
+/**
+ * #787: 閉じる方向へドラッグしたとき、まだスクロールできる横スクロール祖先。
+ * 指を右へ動かすと中身は右へ動き、scrollLeft は減る。よって right ドロワー
+ * （右へ閉じる）は scrollLeft > 0、left ドロワー（左へ閉じる）は末尾まで
+ * 達していない（scrollLeft < 最大）ときに、そのドラッグを横スクロールへ渡す。
+ */
+function findHorizontalScrollableAncestor(
+  start: EventTarget | null,
+  root: HTMLElement | null,
+  side: "left" | "right"
+): HTMLElement | null {
+  // 押した場所が SVG（チップ内のアイコン等）でも祖先をたどれるよう Element から
+  // 始め、scrollLeft を読むのは HTMLElement だけにする。
+  let node: Element | null = start instanceof Element ? start : null
+  while (node) {
+    if (node instanceof HTMLElement) {
+      const overflowX = getComputedStyle(node).overflowX
+      const maxScroll = node.scrollWidth - node.clientWidth
+      if ((overflowX === "auto" || overflowX === "scroll") && maxScroll > 1) {
+        const canScroll =
+          side === "right" ? node.scrollLeft > 0 : node.scrollLeft < maxScroll - 1
+        if (canScroll) return node
+      }
+    }
+    if (node === root) break
+    node = node.parentElement
+  }
+  return null
+}
+
+// ボタン・リンクの上ではマウスを押しても文字選択は始まらない（リンクは
+// ブラウザのリンクドラッグになる）ので、文字選択の判定から外す。
+const NON_SELECTING_TARGET_SELECTOR = 'button,[role="button"],a[href]'
+
+/**
+ * #787: マウスで押した場所が「選択できる文字」か。押した要素が空白以外の
+ * テキストを直接持ち、シート内の祖先に `user-select: none` が無ければ true。
+ * マウスの選択はドラッグ量 6px のスロップを超えた時点ではまだ空のことが
+ * 多いため、`getSelection()` を見るだけでは本文の文字選択を守れない。押した
+ * 時点で判定して、その回のジェスチャを最初から文字選択に渡す。
+ * ドラッグハンドル（`[data-sheet-drag-handle]`）の中は常に false。
+ */
+function isSelectableTextTarget(
+  target: EventTarget | null,
+  boundary: HTMLElement | null
+): boolean {
+  if (!(target instanceof Element)) return false
+  if (boundary != null && !boundary.contains(target)) return false
+  if (target.closest("[data-sheet-drag-handle]") != null) return false
+  const nonSelecting = target.closest(NON_SELECTING_TARGET_SELECTOR)
+  if (nonSelecting != null && (boundary == null || boundary.contains(nonSelecting))) {
+    return false
+  }
+  const hasText = Array.from(target.childNodes).some(
+    (n) => n.nodeType === Node.TEXT_NODE && (n.textContent ?? "").trim() !== ""
+  )
+  if (!hasText) return false
+  let node: Element | null = target
+  while (node) {
+    const style = getComputedStyle(node)
+    if (
+      style.userSelect === "none" ||
+      style.getPropertyValue("-webkit-user-select") === "none"
+    ) {
+      return false
+    }
+    if (node === boundary) break
+    node = node.parentElement
+  }
+  return true
+}
+
+/** #787: ジェスチャ開始時点の選択範囲（開始前から残っている選択と区別する）。 */
+interface SelectionSnapshot {
+  anchorNode: Node | null
+  anchorOffset: number
+  focusNode: Node | null
+  focusOffset: number
+}
+
+function readSelection(): Selection | null {
+  if (typeof window === "undefined" || typeof window.getSelection !== "function") return null
+  return window.getSelection()
+}
+
+function snapshotSelection(): SelectionSnapshot | null {
+  const sel = readSelection()
+  if (!sel) return null
+  return {
+    anchorNode: sel.anchorNode,
+    anchorOffset: sel.anchorOffset,
+    focusNode: sel.focusNode,
+    focusOffset: sel.focusOffset,
+  }
+}
+
+/**
+ * #787: このジェスチャでマウスがシート内の文字を選び始めたか。
+ * ページ全体の選択ではなく `boundary`（シート本体）内の選択だけを見て、
+ * ジェスチャ開始時から変わっていない選択（前の操作の残り）は数えない。
+ * 押した場所の判定（isSelectableTextTarget）を補う保険で、文字の無い余白から
+ * 押して文字の上へなぞった場合を拾う。
+ */
+function hasNewTextSelectionWithin(
+  boundary: HTMLElement | null,
+  before: SelectionSnapshot | null
+): boolean {
+  const sel = readSelection()
+  if (!sel || sel.isCollapsed || sel.toString().length === 0) return false
+  if (
+    boundary != null &&
+    !(sel.anchorNode != null && boundary.contains(sel.anchorNode)) &&
+    !(sel.focusNode != null && boundary.contains(sel.focusNode))
+  ) {
+    return false
+  }
+  if (
+    before != null &&
+    before.anchorNode === sel.anchorNode &&
+    before.anchorOffset === sel.anchorOffset &&
+    before.focusNode === sel.focusNode &&
+    before.focusOffset === sel.focusOffset
+  ) {
+    return false
+  }
+  return true
 }
 
 interface SwipeToCloseBottomSheetProps
@@ -1134,6 +1328,7 @@ function SwipeToCloseBottomSheet({
   restoreFocusRef,
   children,
   style,
+  ref,
   ...props
 }: SwipeToCloseBottomSheetProps) {
   const isModal = useModality()
@@ -1167,6 +1362,10 @@ function SwipeToCloseBottomSheet({
   const samplesRef = React.useRef<DragSample[]>([])
   const scrollerRef = React.useRef<HTMLElement | null>(null)
   const onHandleRef = React.useRef(false)
+  // #787: この回のジェスチャがマウス由来か（文字選択の判定はマウスだけで行う）。
+  const fromMouseRef = React.useRef(false)
+  // #787: マウスで押した時点の選択範囲（前の操作の残りを文字選択と誤認しない）。
+  const selectionAtStartRef = React.useRef<SelectionSnapshot | null>(null)
   const sheetRef = React.useRef<HTMLDivElement>(null)
   const { applyDescribedBy } = useDescribedByLink(
     sheetRef,
@@ -1184,6 +1383,9 @@ function SwipeToCloseBottomSheet({
   // Keep the sheet inside the region above the on-screen keyboard so its top
   // edge (title / drag handle) never scrolls off the top of the viewport.
   const { keyboardInset, visibleHeight } = useVisualViewportInset()
+  // While the keyboard is open, lift the sheet above it (bottom) and cap its
+  // height to the visible region (maxHeight). undefined when no keyboard.
+  const keyboardStyle = resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false, safeArea)
   const handleOpenAutoFocus = (event: Event) => {
     captureRestoreFocus(restoreFocusRef)
     props.onOpenAutoFocus?.(event)
@@ -1226,18 +1428,36 @@ function SwipeToCloseBottomSheet({
   // a close-drag: that both blocks native scrolling and keeps touch events
   // flowing. Pointer handlers stay for mouse only (no cancellation problem).
   const beginGesture = React.useCallback(
-    (clientX: number, clientY: number, target: EventTarget | null, t: number) => {
+    (
+      clientX: number,
+      clientY: number,
+      target: EventTarget | null,
+      t: number,
+      fromMouse = false
+    ) => {
       startYRef.current = clientY
       startXRef.current = clientX
       decisionRef.current = null
       draggingRef.current = false
       samplesRef.current = [{ y: clientY, t }]
+      fromMouseRef.current = fromMouse
+      selectionAtStartRef.current = fromMouse ? snapshotSelection() : null
       // The drag indicator is always a valid grab target regardless of scroll
       // position; elsewhere the gesture must start at the top of the content.
       onHandleRef.current =
-        target instanceof HTMLElement &&
+        target instanceof Element &&
         target.closest("[data-sheet-drag-handle]") != null
       scrollerRef.current = findScrollableAncestor(target, sheetRef.current)
+      // #787: 入力欄・Slider・data-no-swipe から始めた操作と、マウスで選択
+      // できる文字の上から始めた操作（文字選択）は子要素のもの。この回は
+      // 最初から "scroll" にして、以後の判定も走らせない。タッチの文字選択は
+      // 長押しで始まりドラッグと競合しないため、文字の判定はマウスだけ。
+      if (
+        isSwipeExcludedTarget(target, sheetRef.current) ||
+        (fromMouse && isSelectableTextTarget(target, sheetRef.current))
+      ) {
+        decisionRef.current = "scroll"
+      }
     },
     []
   )
@@ -1257,8 +1477,19 @@ function SwipeToCloseBottomSheet({
           onHandleRef.current ||
           !scrollerRef.current ||
           scrollerRef.current.scrollTop <= 0
-        const decision = decideSwipeGesture(dy, dx, atTop)
+        let decision = decideSwipeGesture(dy, dx, atTop)
         if (decision === null) return false // below slop — keep waiting
+        // #787: 文字の無い余白から押して文字をなぞり始めた場合の保険。
+        // このジェスチャで始まったシート内の選択があれば文字選択として扱う。
+        // ハンドルからは従来どおり常に掴める。
+        if (
+          decision === "drag" &&
+          fromMouseRef.current &&
+          !onHandleRef.current &&
+          hasNewTextSelectionWithin(sheetRef.current, selectionAtStartRef.current)
+        ) {
+          decision = "scroll"
+        }
         decisionRef.current = decision
         if (decision === "drag") {
           draggingRef.current = true
@@ -1350,13 +1581,15 @@ function SwipeToCloseBottomSheet({
     },
     [beginGesture, moveGesture, endGesture, applyDescribedBy]
   )
+  // #822: consumer の ref と合成する（上書きされるとタッチリスナが付かない）。
+  const composedSheetRef = useComposedRef<HTMLDivElement>(attachTouchListeners, ref)
 
   // Pointer path: mouse only. Touch is handled by the non-passive listeners
   // above; double-handling here would re-introduce the cancellation race.
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
     if (e.button != null && e.button !== 0) return
-    beginGesture(e.clientX, e.clientY, e.target, e.timeStamp)
+    beginGesture(e.clientX, e.clientY, e.target, e.timeStamp, true)
   }
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -1384,7 +1617,6 @@ function SwipeToCloseBottomSheet({
     <SheetPortal container={container}>
       <SheetOverlay glass={glassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
-        ref={attachTouchListeners}
         data-side={side}
         // #706: CSS フォールバック（sheet-keyboard.css）が safe-area の控除を opt-out できるよう出す
         data-safe-area={safeArea}
@@ -1411,7 +1643,7 @@ function SwipeToCloseBottomSheet({
           // cap its height to the visible region (maxHeight). These inline
           // values override the variant's `bottom-0` / `max-h-[90dvh]`. When no
           // keyboard is present both are inert and the CSS defaults apply.
-          ...resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false, safeArea),
+          ...keyboardStyle,
           transform: `translate3d(0, ${dragY}px, 0)`,
           transition: dragging || !everDragged
             ? "none"
@@ -1422,10 +1654,14 @@ function SwipeToCloseBottomSheet({
         // #505: modal な層だけ aria-modal="true" を出す。
         aria-modal={isModal ? true : undefined}
         {...contentProps}
+        // #822: 合成済みの ref を spread より後ろに置く。
+        ref={composedSheetRef}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
         data-slot="sheet-content"
+        // #788: キーボードの上へ持ち上げている間だけ出す。
+        data-keyboard-lifted={keyboardStyle ? "" : undefined}
         // Full-surface swipe-to-close: handlers live on the content root so a
         // downward swipe anywhere can dismiss. onPointerMove gates on scroll
         // position so it never steals the content's own scroll gesture.
@@ -1462,7 +1698,9 @@ function SwipeToCloseBottomSheet({
         >
           <SheetDragIndicator />
         </div>
-        {children}
+        <SheetKeyboardLiftedContext.Provider value={keyboardStyle != null}>
+          {children}
+        </SheetKeyboardLiftedContext.Provider>
       </DialogPrimitive.Content>
     </SheetPortal>
   )
@@ -1477,8 +1715,10 @@ function SwipeToCloseBottomSheet({
 // drawer's "close axis" (projectCloseAxisDelta): a horizontal-dominant drag in
 // the close direction drives the dismiss, while a vertical-dominant gesture is
 // left to the content's own scroll. Simpler than the bottom path — no keyboard
-// inset, no drag-handle affordance, and no scroll-position gate (a horizontal
-// drag never conflicts with the body's vertical scroll).
+// inset, no drag-handle affordance, and no vertical scroll-position gate (a
+// horizontal drag never conflicts with the body's vertical scroll). Children
+// that own a horizontal drag (Slider, inputs, horizontal scrollers that can
+// still scroll in the close direction, `data-no-swipe`) keep it (#787).
 // ============================================================================
 
 interface SwipeToCloseSideDrawerProps
@@ -1524,6 +1764,7 @@ function SwipeToCloseSideDrawer({
   restoreFocusRef,
   children,
   style,
+  ref,
   ...props
 }: SwipeToCloseSideDrawerProps) {
   const isModal = useModality()
@@ -1550,6 +1791,10 @@ function SwipeToCloseSideDrawer({
   // `y` here holds the close-axis position (not vertical) so the shared
   // computeFlickVelocity measures close-axis velocity.
   const samplesRef = React.useRef<DragSample[]>([])
+  // #787: この回のジェスチャがマウス由来か（文字選択の判定はマウスだけで行う）。
+  const fromMouseRef = React.useRef(false)
+  // #787: マウスで押した時点の選択範囲（前の操作の残りを文字選択と誤認しない）。
+  const selectionAtStartRef = React.useRef<SelectionSnapshot | null>(null)
   const sheetRef = React.useRef<HTMLDivElement>(null)
   const { applyDescribedBy } = useDescribedByLink(
     sheetRef,
@@ -1594,14 +1839,32 @@ function SwipeToCloseSideDrawer({
   }, [])
 
   const beginGesture = React.useCallback(
-    (clientX: number, clientY: number, _target: EventTarget | null, t: number) => {
+    (
+      clientX: number,
+      clientY: number,
+      target: EventTarget | null,
+      t: number,
+      fromMouse = false
+    ) => {
       startXRef.current = clientX
       startYRef.current = clientY
       decisionRef.current = null
       draggingRef.current = false
       samplesRef.current = [{ y: 0, t }]
+      fromMouseRef.current = fromMouse
+      selectionAtStartRef.current = fromMouse ? snapshotSelection() : null
+      // #787: 入力欄・Slider・data-no-swipe から始めた操作、マウスで選択できる
+      // 文字の上から始めた操作（文字選択）、閉じる方向へまだスクロールできる
+      // 横スクロール領域の中から始めた操作は子要素のもの。
+      if (
+        isSwipeExcludedTarget(target, sheetRef.current) ||
+        (fromMouse && isSelectableTextTarget(target, sheetRef.current)) ||
+        findHorizontalScrollableAncestor(target, sheetRef.current, side) != null
+      ) {
+        decisionRef.current = "scroll"
+      }
     },
-    []
+    [side]
   )
 
   // Returns true once the gesture is claimed as a close-drag (caller should
@@ -1615,8 +1878,17 @@ function SwipeToCloseSideDrawer({
       if (decisionRef.current === null) {
         // atStart=true: a horizontal close-drag never competes with the body's
         // vertical scroll, so there is no scroll-position gate to apply.
-        const decision = decideSwipeGesture(primary, cross, true)
+        let decision = decideSwipeGesture(primary, cross, true)
         if (decision === null) return false // below slop — keep waiting
+        // #787: 文字の無い余白から押して文字をなぞり始めた場合の保険。
+        // このジェスチャで始まったドロワー内の選択があればドロワーを動かさない。
+        if (
+          decision === "drag" &&
+          fromMouseRef.current &&
+          hasNewTextSelectionWithin(sheetRef.current, selectionAtStartRef.current)
+        ) {
+          decision = "scroll"
+        }
         decisionRef.current = decision
         if (decision === "drag") {
           draggingRef.current = true
@@ -1689,11 +1961,13 @@ function SwipeToCloseSideDrawer({
     },
     [beginGesture, moveGesture, endGesture, applyDescribedBy]
   )
+  // #822: consumer の ref と合成する（上書きされるとタッチリスナが付かない）。
+  const composedSheetRef = useComposedRef<HTMLDivElement>(attachTouchListeners, ref)
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
     if (e.button != null && e.button !== 0) return
-    beginGesture(e.clientX, e.clientY, e.target, e.timeStamp)
+    beginGesture(e.clientX, e.clientY, e.target, e.timeStamp, true)
   }
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
@@ -1715,7 +1989,6 @@ function SwipeToCloseSideDrawer({
     <SheetPortal container={container}>
       <SheetOverlay glass={glassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
-        ref={attachTouchListeners}
         data-side={side}
         className={cn(
           sheetVariants({ side, size }),
@@ -1738,6 +2011,8 @@ function SwipeToCloseSideDrawer({
         // #505: modal な層だけ aria-modal="true" を出す。
         aria-modal={isModal ? true : undefined}
         {...contentProps}
+        // #822: 合成済みの ref を spread より後ろに置く。
+        ref={composedSheetRef}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
@@ -1760,7 +2035,14 @@ function SwipeToCloseSideDrawer({
             {description}
           </DialogPrimitive.Description>
         )}
-        {children}
+        {/*
+          #788: ドロワーは持ち上げない。context は Portal を越えて伝わるため、
+          持ち上がったシートの中から開いたドロワーにも true が漏れないよう
+          明示的に false で切る。
+        */}
+        <SheetKeyboardLiftedContext.Provider value={false}>
+          {children}
+        </SheetKeyboardLiftedContext.Provider>
       </DialogPrimitive.Content>
     </SheetPortal>
   )
@@ -1794,6 +2076,11 @@ interface SnapBottomSheetContentProps
   restoreFocusOnClose?: boolean
   closeOnEsc?: boolean
   restoreFocusRef?: React.RefObject<HTMLElement | null>
+  /**
+   * #811: キーボード高さ（px）。SheetContent の useVisualViewportInset の値。
+   * 0 のときは何もしない。
+   */
+  keyboardInset?: number
   children?: React.ReactNode
 }
 
@@ -1811,8 +2098,10 @@ function SnapBottomSheetContent({
   restoreFocusOnClose = true,
   closeOnEsc = true,
   restoreFocusRef,
+  keyboardInset = 0,
   children,
   style,
+  ref,
   ...props
 }: SnapBottomSheetContentProps) {
   const isModal = useModality()
@@ -1857,6 +2146,8 @@ function SnapBottomSheetContent({
     "sheet-description",
     !hasInternalDesc && ariaDescribedBy == null
   )
+  // #822: consumer の ref と合成する。
+  const composedSheetRef = useComposedRef<HTMLDivElement>(setContentNode, ref)
   const handleOpenAutoFocus = (event: Event) => {
     captureRestoreFocus(restoreFocusRef)
     props.onOpenAutoFocus?.(event)
@@ -1921,6 +2212,12 @@ function SnapBottomSheetContent({
 
     // Dismiss if dragged well below the lowest snap
     if (dismissible && newRatio < minSnap * 0.5) {
+      // #821: ドラッグ中は途中の比率（例 0.15）を setActiveSnapPoint へ流して
+      // いるため、そのまま閉じると制御版の親に snapPoints に無い値が残り、
+      // 次に開いたときシートがほぼ画面外に出る（↑/↓ キーも効かない）。
+      // 閉じる前に最下段（非制御版の既定と同じ）へ戻す。閉じるボタン・Esc の
+      // 経路（handleOpenChange）は変えない＝親が最後の段を覚える使い方は保つ。
+      setActiveSnapPoint(snapPoints[0])
       close()
       return
     }
@@ -1949,6 +2246,8 @@ function SnapBottomSheetContent({
   }, [snapRatios, fadeFromIndex, activeRatio, maxSnap])
 
   const transform = `translate3d(0, ${baseTranslatePct}%, 0)`
+  // #811: キーボード表示中の持ち上げ（bottom のみ）。undefined ならキーボード無し。
+  const snapKeyboardStyle = resolveBottomSheetKeyboardStyle(keyboardInset, null, true)
 
   // Optional ↑/↓ keyboard navigation between snaps when the sheet has focus
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -1976,7 +2275,6 @@ function SnapBottomSheetContent({
         />
       )}
       <DialogPrimitive.Content
-        ref={setContentNode}
         data-side="bottom"
         data-snap-active={activeSnapPoint ?? undefined}
         onKeyDown={onKeyDown}
@@ -1990,6 +2288,13 @@ function SnapBottomSheetContent({
         )}
         style={{
           ...style,
+          // #811: キーボード表示中はシート下端をキーボードの上へ持ち上げる
+          // （非 snap の bottom シートと同じく DS の値を consumer の style より
+          // 優先する）。snap は高さを自分で持つので maxHeight は付けない
+          // （resolveBottomSheetKeyboardStyle の snapActive 分岐）。bottom と
+          // translateY は独立に効くので、スナップ位置・ドラッグ計算はずれない。
+          // 最大段で上端が画面外へ出うるのは CSS フォールバック（#150）と同じ設計。
+          ...snapKeyboardStyle,
           height: `${maxSnap * 100}svh`,
           transform,
           transition: dragging
@@ -2002,10 +2307,14 @@ function SnapBottomSheetContent({
         // #505: modal な層だけ aria-modal="true" を出す。
         aria-modal={isModal ? true : undefined}
         {...contentProps}
+        // #822: 合成済みの ref を spread より後ろに置く。
+        ref={composedSheetRef}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
         data-slot="sheet-content"
+        // #788: キーボードの上へ持ち上げている間だけ出す。
+        data-keyboard-lifted={snapKeyboardStyle ? "" : undefined}
         {...(!hasInternalDesc && { "aria-describedby": ariaDescribedBy })}
         onOpenAutoFocus={handleOpenAutoFocus}
         onCloseAutoFocus={handleCloseAutoFocus}
@@ -2046,7 +2355,9 @@ function SnapBottomSheetContent({
               : "max-height var(--Motion-Duration-Sheet-Enter) var(--Motion-Easing-Emphasized)",
           }}
         >
-          {children}
+          <SheetKeyboardLiftedContext.Provider value={snapKeyboardStyle != null}>
+            {children}
+          </SheetKeyboardLiftedContext.Provider>
         </div>
       </DialogPrimitive.Content>
     </SheetPortal>
@@ -2138,5 +2449,7 @@ export {
   decideSwipeDismiss,
   projectCloseAxisDelta,
   closeAxisTranslate,
+  isSwipeExcludedTarget,
+  isSelectableTextTarget,
 }
 export type { SheetProps, SheetContentProps, SheetTitleProps, SnapPoint, VisualViewportInset }

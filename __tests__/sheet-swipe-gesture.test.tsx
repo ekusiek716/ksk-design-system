@@ -12,16 +12,31 @@
  * classifies intent via the pure `decideSwipeGesture` helper. Here we verify
  * that classification (DOM-independent, runs under the SSR test setup).
  *
+ * 後半は jsdom で実際にシートを描き、タッチ / マウスの経路を通しで確かめる
+ * （#822 の ref 合成、#787 の除外対象）。
+ *
  * 実行: npm run test
+ *
+ * @vitest-environment jsdom
  */
-import { describe, it, expect } from "vitest"
+import * as React from "react"
+import { act } from "react"
+import { createRoot, type Root } from "react-dom/client"
+import { afterEach, describe, it, expect, vi } from "vitest"
 import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
   decideSwipeGesture,
   computeFlickVelocity,
   decideSwipeDismiss,
   projectCloseAxisDelta,
   closeAxisTranslate,
+  isSwipeExcludedTarget,
+  isSelectableTextTarget,
 } from "../src/components/ui/sheet"
+
+;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
 describe("decideSwipeGesture — 全面スワイプ閉じ判定", () => {
   it("6px のスロップ未満は未確定（null）", () => {
@@ -165,5 +180,403 @@ describe("closeAxisTranslate — close 軸ドラッグ量の符号付き transla
     expect(closeAxisTranslate(30, "right")).toBe(30)
     expect(closeAxisTranslate(30, "left")).toBe(-30)
     expect(closeAxisTranslate(0, "right")).toBe(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// ここから jsdom で描画して確かめる
+// ---------------------------------------------------------------------------
+
+let container: HTMLDivElement | null = null
+let root: Root | null = null
+
+afterEach(() => {
+  if (root) act(() => root!.unmount())
+  root = null
+  container?.remove()
+  container = null
+  document.body.innerHTML = ""
+  window.getSelection()?.removeAllRanges()
+  vi.restoreAllMocks()
+})
+
+function mount(ui: React.ReactElement) {
+  container = document.createElement("div")
+  document.body.appendChild(container)
+  root = createRoot(container)
+  act(() => root!.render(ui))
+  return document.querySelector<HTMLElement>('[data-slot="sheet-content"]')!
+}
+
+/** jsdom には Touch のコンストラクタが無いので、touches を後付けした Event を投げる。 */
+function touch(target: Element, type: string, x: number, y: number) {
+  const ev = new Event(type, { bubbles: true, cancelable: true })
+  const point = { clientX: x, clientY: y, target }
+  Object.defineProperty(ev, "touches", {
+    value: type === "touchend" || type === "touchcancel" ? [] : [point],
+  })
+  act(() => {
+    target.dispatchEvent(ev)
+  })
+  return ev
+}
+
+/** マウスの pointer イベント（jsdom には PointerEvent が無いので MouseEvent で代用）。 */
+function mouse(target: Element, type: string, x: number, y: number, buttons = 1) {
+  const ev = new MouseEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    clientX: x,
+    clientY: y,
+    button: 0,
+    buttons,
+  })
+  Object.defineProperty(ev, "pointerType", { value: "mouse" })
+  Object.defineProperty(ev, "pointerId", { value: 1 })
+  act(() => {
+    target.dispatchEvent(ev)
+  })
+  return ev
+}
+
+function mouseSwipe(target: Element, from: [number, number], to: [number, number]) {
+  mouse(target, "pointerdown", from[0], from[1])
+  const steps = 5
+  for (let i = 1; i <= steps; i++) {
+    mouse(
+      target,
+      "pointermove",
+      from[0] + ((to[0] - from[0]) * i) / steps,
+      from[1] + ((to[1] - from[1]) * i) / steps
+    )
+  }
+  mouse(target, "pointerup", to[0], to[1], 0)
+}
+
+function touchSwipe(target: Element, from: [number, number], to: [number, number]) {
+  touch(target, "touchstart", from[0], from[1])
+  const steps = 5
+  for (let i = 1; i <= steps; i++) {
+    touch(
+      target,
+      "touchmove",
+      from[0] + ((to[0] - from[0]) * i) / steps,
+      from[1] + ((to[1] - from[1]) * i) / steps
+    )
+  }
+  touch(target, "touchend", to[0], to[1])
+}
+
+describe("swipeToClose に consumer の ref を渡してもタッチで閉じられる（Issue #822）", () => {
+  it.each([
+    ["bottom", [100, 100], [100, 350]],
+    ["right", [100, 100], [350, 100]],
+    ["left", [350, 100], [100, 100]],
+  ] as const)("%s: ref 付きでもタッチリスナが付き、スワイプで onOpenChange(false)", (side, from, to) => {
+    const onOpenChange = vi.fn()
+    const ref = React.createRef<HTMLDivElement>()
+    const content = mount(
+      <Sheet open onOpenChange={onOpenChange}>
+        <SheetContent side={side} swipeToClose ref={ref}>
+          <SheetTitle>t</SheetTitle>
+          <p data-testid="body">本文</p>
+        </SheetContent>
+      </Sheet>
+    )
+    expect(ref.current).toBe(content)
+    // jsdom は offsetHeight / offsetWidth が 0 なので、距離の閾値は 200px の既定。
+    touchSwipe(content.querySelector('[data-testid="body"]')!, from, to)
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// #787: 子要素が自分で操作を持つ場所から始めたジェスチャは閉じドラッグにしない
+// ---------------------------------------------------------------------------
+
+describe("isSwipeExcludedTarget — 子要素が操作を持つ場所の判定（Issue #787）", () => {
+  function build(html: string) {
+    const root = document.createElement("div")
+    root.innerHTML = html
+    document.body.appendChild(root)
+    return root
+  }
+
+  it("input / textarea / select / contenteditable / role=slider / data-no-swipe の中は除外", () => {
+    const root = build(`
+      <input id="i" /><textarea id="t"></textarea><select id="s"></select>
+      <div contenteditable="true"><span id="ce">x</span></div>
+      <div role="slider"><span id="thumb"></span></div>
+      <span data-slot="slider"><span id="track"></span></span>
+      <div data-no-swipe><p id="ns">x</p></div>
+    `)
+    for (const id of ["i", "t", "s", "ce", "thumb", "track", "ns"]) {
+      expect(isSwipeExcludedTarget(root.querySelector(`#${id}`), root)).toBe(true)
+    }
+  })
+
+  it("ふつうの本文・contenteditable=false・boundary の外の祖先は除外しない", () => {
+    const outer = build(`<div data-no-swipe><div id="boundary"><p id="p">x</p></div></div>`)
+    const boundary = outer.querySelector<HTMLElement>("#boundary")!
+    expect(isSwipeExcludedTarget(outer.querySelector("#p"), boundary)).toBe(false)
+    const root = build(`<div contenteditable="false"><span id="ro">x</span></div><p id="body">x</p>`)
+    expect(isSwipeExcludedTarget(root.querySelector("#ro"), root)).toBe(false)
+    expect(isSwipeExcludedTarget(root.querySelector("#body"), root)).toBe(false)
+    expect(isSwipeExcludedTarget(null, root)).toBe(false)
+  })
+
+  it("ドラッグハンドル（data-sheet-drag-handle）の中は常に掴める", () => {
+    const root = build(`<div data-no-swipe><div data-sheet-drag-handle><span id="h"></span></div></div>`)
+    expect(isSwipeExcludedTarget(root.querySelector("#h"), root)).toBe(false)
+  })
+})
+
+describe("isSelectableTextTarget — マウスで押した場所が選択できる文字か（Issue #787）", () => {
+  function build(html: string) {
+    const root = document.createElement("div")
+    root.innerHTML = html
+    document.body.appendChild(root)
+    return root
+  }
+
+  it("文字を直接持つ要素は true（段落・入れ子の強調）", () => {
+    const root = build(`<p id="p">本文 <strong id="b">強調</strong></p>`)
+    expect(isSelectableTextTarget(root.querySelector("#p"), root)).toBe(true)
+    expect(isSelectableTextTarget(root.querySelector("#b"), root)).toBe(true)
+  })
+
+  // -webkit-user-select は jsdom が解釈しないため、ここでは標準形だけを確かめる。
+  it("文字を持たない余白・SVG、user-select:none の中、ボタン・リンク、ハンドル、boundary の外は false", () => {
+    const outer = build(`<p id="outside">外</p><div id="boundary">
+      <div id="blank">  </div>
+      <svg id="svg"><path /></svg>
+      <div style="user-select: none"><p id="none">選べない</p></div>
+      <button id="btn">保存</button>
+      <span role="button"><span id="rb">閉じる</span></span>
+      <a href="#" id="a">リンク</a>
+      <div data-sheet-drag-handle><span id="h">つまみ</span></div>
+    </div>`)
+    const boundary = outer.querySelector<HTMLElement>("#boundary")!
+    for (const id of ["blank", "svg", "none", "btn", "rb", "a", "h", "outside"]) {
+      expect(isSelectableTextTarget(outer.querySelector(`#${id}`), boundary), id).toBe(false)
+    }
+    expect(isSelectableTextTarget(null, boundary)).toBe(false)
+  })
+})
+
+describe("swipeToClose（bottom）: 入力欄・文字選択・Slider から始めたドラッグでは閉じない（Issue #787）", () => {
+  function mountBottom(onOpenChange: (open: boolean) => void) {
+    return mount(
+      <Sheet open onOpenChange={onOpenChange}>
+        <SheetContent side="bottom" swipeToClose>
+          <SheetTitle>メモ</SheetTitle>
+          <textarea data-testid="textarea" defaultValue="会議メモ" />
+          <div role="slider" aria-valuenow={10} data-testid="slider" />
+          <div data-no-swipe data-testid="no-swipe">独自ジェスチャ</div>
+          <p data-testid="body">本文</p>
+          <p data-testid="no-select" style={{ userSelect: "none" }}>
+            選べない見出し
+          </p>
+          <div data-testid="blank" />
+        </SheetContent>
+      </Sheet>
+    )
+  }
+
+  it.each(["textarea", "slider", "no-swipe", "body"])(
+    "%s の上からマウスで真下へ 250px ドラッグしても閉じず、動かない",
+    (id) => {
+      const onOpenChange = vi.fn()
+      const content = mountBottom(onOpenChange)
+      mouseSwipe(content.querySelector(`[data-testid="${id}"]`)!, [100, 100], [100, 350])
+      expect(onOpenChange).not.toHaveBeenCalled()
+      expect(content.style.transform).toBe("translate3d(0, 0px, 0)")
+    }
+  )
+
+  it("タッチでも textarea の上から始めたドラッグでは閉じない", () => {
+    const onOpenChange = vi.fn()
+    const content = mountBottom(onOpenChange)
+    touchSwipe(content.querySelector('[data-testid="textarea"]')!, [100, 100], [100, 350])
+    expect(onOpenChange).not.toHaveBeenCalled()
+  })
+
+  it("文字の無い余白から押しても、そのジェスチャでシート内の文字を選び始めたら閉じない", () => {
+    const onOpenChange = vi.fn()
+    const content = mountBottom(onOpenChange)
+    const blank = content.querySelector('[data-testid="blank"]')!
+    mouse(blank, "pointerdown", 100, 100)
+    // ブラウザが pointerdown 後のなぞりで選択を広げた状態を再現する（モックではなく実選択）。
+    act(() => {
+      window.getSelection()!.selectAllChildren(content.querySelector('[data-testid="body"]')!)
+    })
+    for (let i = 1; i <= 5; i++) mouse(blank, "pointermove", 100, 100 + i * 50)
+    mouse(blank, "pointerup", 100, 350, 0)
+    expect(onOpenChange).not.toHaveBeenCalled()
+  })
+
+  it("押す前から残っている選択（シート内・外とも）では、余白からのマウスのスワイプ閉じを止めない", () => {
+    const outside = document.createElement("p")
+    outside.textContent = "ページ側の文字"
+    document.body.appendChild(outside)
+    for (const pick of ["inside", "outside"] as const) {
+      const onOpenChange = vi.fn()
+      const content = mountBottom(onOpenChange)
+      const target = pick === "inside" ? content.querySelector('[data-testid="body"]')! : outside
+      act(() => {
+        window.getSelection()!.selectAllChildren(target)
+      })
+      mouseSwipe(content.querySelector('[data-testid="blank"]')!, [100, 100], [100, 350])
+      expect(onOpenChange, pick).toHaveBeenCalledWith(false)
+      act(() => root!.unmount())
+      root = null
+      container?.remove()
+      container = null
+    }
+  })
+
+  it("文字の無い余白・user-select:none の文字からのマウスのスワイプ閉じと、本文からのタッチのスワイプ閉じは変わらない", () => {
+    for (const id of ["blank", "no-select"]) {
+      const onMouse = vi.fn()
+      const content = mountBottom(onMouse)
+      mouseSwipe(content.querySelector(`[data-testid="${id}"]`)!, [100, 100], [100, 350])
+      expect(onMouse, id).toHaveBeenCalledWith(false)
+      act(() => root!.unmount())
+      root = null
+      document.body.innerHTML = ""
+    }
+
+    const onTouch = vi.fn()
+    const content2 = mountBottom(onTouch)
+    touchSwipe(content2.querySelector('[data-testid="body"]')!, [100, 100], [100, 350])
+    expect(onTouch).toHaveBeenCalledWith(false)
+  })
+
+  it("ドラッグハンドルからは、シート内の文字が選択されていても常に閉じられる", () => {
+    const onOpenChange = vi.fn()
+    const content = mountBottom(onOpenChange)
+    const handle = content.querySelector("[data-sheet-drag-handle]")!
+    mouse(handle, "pointerdown", 100, 100)
+    act(() => {
+      window.getSelection()!.selectAllChildren(content.querySelector('[data-testid="body"]')!)
+    })
+    for (let i = 1; i <= 5; i++) mouse(handle, "pointermove", 100, 100 + i * 50)
+    mouse(handle, "pointerup", 100, 350, 0)
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+})
+
+describe("swipeToClose（side ドロワー）: Slider・横スクロール領域から始めたドラッグでは閉じない（Issue #787）", () => {
+  function mountDrawer(side: "left" | "right", onOpenChange: (open: boolean) => void, scrollLeft = 0) {
+    const content = mount(
+      <Sheet open onOpenChange={onOpenChange}>
+        <SheetContent side={side} swipeToClose>
+          <SheetTitle>絞り込み</SheetTitle>
+          <div role="slider" aria-valuenow={10} data-testid="slider" />
+          <div data-testid="scroller" style={{ overflowX: "auto" }}>
+            <span data-testid="chip">チップ</span>
+            <svg data-testid="chip-icon" aria-hidden>
+              <path data-testid="chip-icon-path" d="M0 0h1v1z" />
+            </svg>
+          </div>
+          <p data-testid="body">本文</p>
+          <div data-testid="blank" />
+        </SheetContent>
+      </Sheet>
+    )
+    // jsdom はレイアウトしないので、横にはみ出した状態を手で作る。
+    const scroller = content.querySelector<HTMLElement>('[data-testid="scroller"]')!
+    Object.defineProperty(scroller, "scrollWidth", { configurable: true, value: 600 })
+    Object.defineProperty(scroller, "clientWidth", { configurable: true, value: 200 })
+    Object.defineProperty(scroller, "scrollLeft", { configurable: true, writable: true, value: scrollLeft })
+    return content
+  }
+
+  it.each([
+    ["right", [100, 100], [350, 100]],
+    ["left", [350, 100], [100, 100]],
+  ] as const)("%s: Slider のつまみを閉じる方向へドラッグしても閉じない（タッチ・マウス）", (side, from, to) => {
+    const onOpenChange = vi.fn()
+    const content = mountDrawer(side, onOpenChange)
+    const slider = content.querySelector('[data-testid="slider"]')!
+    touchSwipe(slider, from, to)
+    mouseSwipe(slider, from, to)
+    expect(onOpenChange).not.toHaveBeenCalled()
+    expect(content.style.transform).toBe("translate3d(0px, 0, 0)")
+  })
+
+  it("right: 指の方向（右）へまだスクロールできる横スクロール領域の中では閉じない", () => {
+    const onOpenChange = vi.fn()
+    // scrollLeft > 0 → 右へドラッグすると先頭側へ戻れる
+    const content = mountDrawer("right", onOpenChange, 120)
+    touchSwipe(content.querySelector('[data-testid="chip"]')!, [100, 100], [350, 100])
+    expect(onOpenChange).not.toHaveBeenCalled()
+  })
+
+  it("right: 横スクロールが先頭（scrollLeft 0）なら、閉じる方向のドラッグはドロワーが受ける", () => {
+    const onOpenChange = vi.fn()
+    const content = mountDrawer("right", onOpenChange, 0)
+    touchSwipe(content.querySelector('[data-testid="chip"]')!, [100, 100], [350, 100])
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it("left: 指の方向（左）へまだスクロールできる横スクロール領域の中では閉じない", () => {
+    const onOpenChange = vi.fn()
+    const content = mountDrawer("left", onOpenChange, 0)
+    touchSwipe(content.querySelector('[data-testid="chip"]')!, [350, 100], [100, 100])
+    expect(onOpenChange).not.toHaveBeenCalled()
+  })
+
+  it("left: 横スクロールが末尾なら、閉じる方向のドラッグはドロワーが受ける", () => {
+    const onOpenChange = vi.fn()
+    const content = mountDrawer("left", onOpenChange, 400)
+    touchSwipe(content.querySelector('[data-testid="chip"]')!, [350, 100], [100, 100])
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it.each(["chip-icon", "chip-icon-path"])(
+    "right: 横スクロール領域の中の SVG（%s）から始めても、まだスクロールできるなら閉じない",
+    (id) => {
+      const onOpenChange = vi.fn()
+      const content = mountDrawer("right", onOpenChange, 120)
+      const target = content.querySelector(`[data-testid="${id}"]`)!
+      touchSwipe(target, [100, 100], [350, 100])
+      mouseSwipe(target, [100, 100], [350, 100])
+      expect(onOpenChange).not.toHaveBeenCalled()
+      expect(content.style.transform).toBe("translate3d(0px, 0, 0)")
+    }
+  )
+
+  it("本文の文字の上からのマウスドラッグは文字選択として扱い、ドロワーは動かない", () => {
+    const onOpenChange = vi.fn()
+    const content = mountDrawer("right", onOpenChange)
+    mouseSwipe(content.querySelector('[data-testid="body"]')!, [100, 100], [350, 100])
+    expect(onOpenChange).not.toHaveBeenCalled()
+    expect(content.style.transform).toBe("translate3d(0px, 0, 0)")
+  })
+
+  it("押す前から残っている選択では、余白からのマウスのスワイプ閉じを止めない", () => {
+    const onOpenChange = vi.fn()
+    const content = mountDrawer("right", onOpenChange)
+    act(() => {
+      window.getSelection()!.selectAllChildren(content.querySelector('[data-testid="body"]')!)
+    })
+    mouseSwipe(content.querySelector('[data-testid="blank"]')!, [100, 100], [350, 100])
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it("除外対象に当たらない本文からの従来のスワイプ閉じは変わらない（タッチ・マウスの余白）", () => {
+    const onTouch = vi.fn()
+    const content = mountDrawer("right", onTouch)
+    touchSwipe(content.querySelector('[data-testid="body"]')!, [100, 100], [350, 100])
+    expect(onTouch).toHaveBeenCalledWith(false)
+
+    act(() => root!.unmount())
+    root = null
+    document.body.innerHTML = ""
+    const onMouse = vi.fn()
+    const content2 = mountDrawer("right", onMouse)
+    mouseSwipe(content2.querySelector('[data-testid="blank"]')!, [100, 100], [350, 100])
+    expect(onMouse).toHaveBeenCalledWith(false)
   })
 })
