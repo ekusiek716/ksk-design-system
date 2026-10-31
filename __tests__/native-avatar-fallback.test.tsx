@@ -72,6 +72,24 @@ describe("native Avatar の fallback（#825）", () => {
     expect(lastImage().source).toEqual({ uri: "https://example.com/b.png" })
   })
 
+  it("A で失敗 → B → A と戻したら、A をもう一度読み込む", () => {
+    mount({ source: { uri: "https://example.invalid/a.png" }, fallback: "K" })
+    fail()
+    rerender({ source: { uri: "https://example.com/b.png" }, fallback: "K" })
+    rerender({ source: { uri: "https://example.invalid/a.png" }, fallback: "K" })
+    expect(showsImage()).toBe(true)
+    expect(lastImage().source).toEqual({ uri: "https://example.invalid/a.png" })
+  })
+
+  it("A で失敗 → 画像なし → A と戻しても、A をもう一度読み込む", () => {
+    mount({ source: { uri: "https://example.invalid/a.png" }, fallback: "K" })
+    fail()
+    rerender({ source: { uri: undefined }, fallback: "K" })
+    expect(showsImage()).toBe(false)
+    rerender({ source: { uri: "https://example.invalid/a.png" }, fallback: "K" })
+    expect(showsImage()).toBe(true)
+  })
+
   it("同じ uri を描画し直しても失敗の記録は保たれる", () => {
     mount({ source: { uri: "https://example.invalid/a.png" }, fallback: "K" })
     fail()

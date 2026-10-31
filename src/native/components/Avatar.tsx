@@ -90,8 +90,14 @@ export function Avatar({
   }
 
   // 画像が得られないとき（uri が空・読み込み失敗）は fallback へ回す（Web の Radix Avatar と同じ / issue #825）。
-  // 失敗は uri をキーに記録するので、source を差し替えると useEffect なしで自動的に再試行する。
+  // 失敗は今の uri についてだけ覚える。uri が変わったら描画中に失敗の記録を消し、
+  // A→B→A のように戻ったときも読み込みをやり直す（同じ uri のままの再描画では記録を保つ）。
   const uri = resolveUri(source)
+  const [activeUri, setActiveUri] = useState(uri)
+  if (uri !== activeUri) {
+    setActiveUri(uri)
+    if (failedUri !== null) setFailedUri(null)
+  }
   const hasUriField = uri !== NO_URI
   const canShowImage = !hasUriField || (!!uri && uri !== failedUri)
 
