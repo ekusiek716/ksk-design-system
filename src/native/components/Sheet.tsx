@@ -25,6 +25,7 @@ import { resolveSheetViewportLayout } from "../sheet-viewport-layout"
 import { createRevealLifecycle } from "../modal-reveal-lifecycle"
 import {
   resolveDragTranslateY,
+  resolveRejectedClose,
   resolveRelease,
   shouldCaptureDrag,
   shouldStartHandleDrag,
@@ -35,6 +36,12 @@ export type SheetSide = "bottom" | "top" | "left" | "right"
 
 export interface SheetProps {
   open: boolean
+  /**
+   * 閉じる要求（scrim タップ・Android の戻る・snap 版の下スワイプ）の通知。
+   * 閉じるかどうかは親が `open` で決める。snap 版を下スワイプで閉じたのに
+   * 親が `open` を false にしなかった場合（未保存の確認・送信中など）は、
+   * パネルはドラッグ開始時の snap へ戻る（#797）。
+   */
   onClose: () => void
   side?: SheetSide
   title?: string
@@ -389,6 +396,8 @@ function SnapBottomSheet({
   // snap アニメーション実行中フラグ。実行中は gesture を受け取らない。
   const animatingRef = useRef(false)
   const openRef = useRef(open)
+  // 下スワイプの close を親が拒否したときに snap へ戻す timer（#797）
+  const rejectedCloseTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const keyboardReducedViewportRef = useRef(false)
   useEffect(() => {
     keyboardReducedViewportRef.current = keyboardReducedViewport
@@ -486,6 +495,7 @@ function SnapBottomSheet({
   // onShow より先に走らせるため layout effect（#753。理由は createRevealLifecycle の注記）
   useLayoutEffect(() => {
     openRef.current = open
+    clearTimeout(rejectedCloseTimerRef.current)
     revealLifecycle.cancel()
     translateY.stopAnimation()
     animatingRef.current = false
@@ -499,6 +509,7 @@ function SnapBottomSheet({
   }, [open, revealLifecycle, translateY, setTranslateY])
 
   useEffect(() => () => revealLifecycle.cancel(), [revealLifecycle])
+  useEffect(() => () => clearTimeout(rejectedCloseTimerRef.current), [])
 
   const handleModalShow = () => {
     revealLifecycle.onModalShow(
@@ -546,12 +557,22 @@ function SnapBottomSheet({
           config,
         )
         if (action.kind === "close") {
+          const startActive = startActiveRef.current
           animateTo(config.panelH, SNAP_DUR, () => {
             // finished を条件にすると、アニメーション中断時（バックグラウンド化等）に
             // 閉じ通知が失われ、不可視 panel + 透明 Modal が残って操作不能になる。
             // 二重通知だけを防ぎたいので「まだ open のときだけ通知」で判定する。
             if (!openRef.current) return
             config.onClose()
+            // 親が閉じ要求を拒否した（open が true のまま）場合、パネルが画面外に
+            // 残ると同じ「不可視 panel + 透明 Modal」になる。親の state 更新と
+            // commit（layout effect で openRef を更新）を待ってから判定し、
+            // まだ open ならドラッグ開始時の snap へ戻す（#797）。
+            clearTimeout(rejectedCloseTimerRef.current)
+            rejectedCloseTimerRef.current = setTimeout(() => {
+              const snap = resolveRejectedClose(openRef.current, startActive)
+              if (snap !== null) moveTo(snap)
+            }, 0)
           })
           return
         }
