@@ -1,4 +1,5 @@
 import { captureOpener, restoreOpenerFocus, takeOpener } from "@/lib/focus-restore"
+import { guardEscapeDuringIme } from "@/lib/ime"
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
@@ -141,6 +142,7 @@ function AlertDialogContent({
   restoreFocusOnClose = true,
   onOpenAutoFocus,
   onCloseAutoFocus,
+  onEscapeKeyDown,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
   /** Restore the opener when closing, including controlled dialogs without a Trigger. */
@@ -179,6 +181,11 @@ function AlertDialogContent({
             return
           }
           restoreOpenerFocus(event, opener)
+        }}
+        onEscapeKeyDown={(event) => {
+          onEscapeKeyDown?.(event)
+          // #809: IME 変換中の Esc は変換の取り消しに使われるので閉じない。
+          guardEscapeDuringIme(event)
         }}
         style={{ ...style, zIndex: resolvedContentZ }}
         // #505: AlertDialog は Radix の仕様上つねに modal（`modal` prop が無い）。

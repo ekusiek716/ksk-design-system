@@ -479,8 +479,9 @@ export {
   getOpenModalCount,
   subscribeOpenModals,
 } from "./lib/modal-stack"
-// 消費側が独自の入力欄に同じ IME ガードを張れるように公開する（issue #301）
-export { isImeComposing } from "./lib/ime"
+// 消費側が独自の入力欄に同じ IME ガードを張れるように公開する（issue #301）。
+// guardEscapeDuringIme は独自レイヤーの onEscapeKeyDown 用（issue #809）
+export { isImeComposing, guardEscapeDuringIme } from "./lib/ime"
 export type { ImeComposableKeyEvent } from "./lib/ime"
 export {
   weddingCategories,

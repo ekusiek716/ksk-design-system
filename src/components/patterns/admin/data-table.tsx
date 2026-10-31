@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { isImeComposing } from "@/lib/ime"
 import { formatKskLabel, useKskLabels } from "../../ui/ksk-labels"
 import { Checkbox } from "../../ui/checkbox"
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar"
@@ -266,7 +267,8 @@ function getCellEditTriggerProps<TRow, TValue>(
     "data-table-ignore-row-click": true,
     tabIndex: context.isEditing ? -1 : 0,
     onKeyDown: (event) => {
-      if (event.key === "Escape" && context.isEditing) {
+      // #809: IME 変換中の Esc は変換の取り消しなので、編集全体は取り消さない。
+      if (event.key === "Escape" && context.isEditing && !isImeComposing(event)) {
         event.stopPropagation()
         context.cancelEdit()
       }

@@ -1,4 +1,5 @@
 import { captureOpener, restoreOpenerFocus, takeOpener } from "@/lib/focus-restore"
+import { guardEscapeDuringIme } from "@/lib/ime"
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -913,6 +914,8 @@ function SheetContent({
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
+    // #809: IME 変換中の Esc は変換の取り消しに使われるので閉じない。
+    guardEscapeDuringIme(event)
     if (!closeOnEsc) event.preventDefault()
   }
 
@@ -1408,6 +1411,8 @@ function SwipeToCloseBottomSheet({
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
+    // #809: IME 変換中の Esc は変換の取り消しに使われるので閉じない。
+    guardEscapeDuringIme(event)
     if (!closeOnEsc) event.preventDefault()
   }
 
@@ -1827,6 +1832,8 @@ function SwipeToCloseSideDrawer({
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
+    // #809: IME 変換中の Esc は変換の取り消しに使われるので閉じない。
+    guardEscapeDuringIme(event)
     if (!closeOnEsc) event.preventDefault()
   }
 
@@ -2168,6 +2175,8 @@ function SnapBottomSheetContent({
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
+    // #809: IME 変換中の Esc は変換の取り消しに使われるので閉じない。
+    guardEscapeDuringIme(event)
     if (!closeOnEsc) event.preventDefault()
   }
 
