@@ -304,6 +304,8 @@ Web では `CompactFilePicker` / `ImageAttachmentPicker` が hidden file input�
 </Sheet>
 ```
 
+キーボード表示中はシート自身がキーボードの上へ持ち上がり（`data-keyboard-lifted`）、その中の `KeyboardAwareSheetFooter` は補正を重ねません（#788）。実機では「フッターの下端がシートの下端（キーボードのすぐ上）に付いたままで、本文や見出しの上へ浮かない」ことを確認します。シートの外（全画面ページの下端固定など）で使うフッターは従来どおりキーボード高さ分持ち上がります。
+
 ### native の `Sheet` に入力欄を置く
 
 native の `Sheet`（`side="bottom"`）は、`snapPoints` の有無にかかわらず入力欄を置いてかまいません。iOS では Sheet 自身がキーボードを避けてパネルを持ち上げ、Android は Modal の adjustResize に任せます。`BottomSheetForm` / スマホ幅の `ResponsiveDialog` / `Combobox` もこの挙動を使います。キーボード分の余白は Sheet が一手に持つので、consumer 側で `KeyboardAvoidingView` や下余白を重ねないでください。キーボードでパネルが収まらないときはパネルが縮み、本文の `ScrollView`（`BottomSheetForm` の本文など）がスクロールして最後の項目とボタンに届きます。

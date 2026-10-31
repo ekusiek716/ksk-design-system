@@ -470,7 +470,8 @@
       ],
       "rules": [
         "Side panel, not modal",
-        "swipeToClose は side=bottom / bottom-glass のみ有効",
+        "swipeToClose は side=bottom / bottom-glass（下スワイプ）と side=left / right（side 方向へのスワイプ）で有効",
+        "swipeToClose は子要素の操作を奪わない(#787): input / textarea / select / contenteditable / role=slider / data-no-swipe の中から始めたドラッグ（タッチも同じ。入力欄からのタッチのスワイプでも閉じない）、マウスで選択できる文字（user-select:none でない・ボタンやリンクでない要素の文字）の上から始めたドラッグとそのジェスチャでシート内の文字を選び始めたドラッグ、閉じる方向へまだスクロールできる横スクロール領域（ドロワー）の中のドラッグでは閉じない。他の領域は data-no-swipe で除外でき、マウスで掴ませたい文字の領域は select-none にする。ドラッグハンドル(data-sheet-drag-handle)は常に掴める",
         "swipeToClose mode は max-h-[90dvh] を自動付与し、viewport 外にはみ出さない",
         "side=\"top\" は既定(safeArea=true)で env(safe-area-inset-top) を padding-top に確保",
         "side=\"float\"/\"float-glass\" は既定(safeArea=true)でキーボード非表示時も上端が抜けない max-height を確保",
