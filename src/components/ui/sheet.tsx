@@ -723,6 +723,14 @@ interface SheetContentProps
    * of the drawer width, or a fast flick). Vertical-dominant gestures stay with
    * the content's scroll. No drag indicator is rendered.
    *
+   * Gestures that belong to a child are never taken over (#787): a drag that
+   * starts inside `input` / `textarea` / `select` / `[contenteditable]` /
+   * `[role="slider"]` / `[data-no-swipe]`, a mouse drag that is selecting text,
+   * and — for side drawers — a drag inside a horizontal scroller that can still
+   * scroll in the close direction. Add `data-no-swipe` to opt out any other
+   * region (e.g. a custom gesture area). The drag handle
+   * (`[data-sheet-drag-handle]`) always remains a valid grab target.
+   *
    * Ignored when the parent <Sheet> uses `snapPoints` (snap mode handles its
    * own drag).
    */
@@ -1114,6 +1122,64 @@ function findScrollableAncestor(
   return null
 }
 
+// #787: 子要素が自分でドラッグ操作を持つ場所。ここから始めたジェスチャは、
+// シート / ドロワーの閉じドラッグにせず子要素へ渡す（入力欄の文字選択・
+// Slider のつまみ・consumer 独自のジェスチャ）。`data-no-swipe` は consumer
+// 向けの opt-out。DS の Slider はつまみ（role="slider"）だけでなくトラックを
+// 押してもドラッグが始まるため、Root の data-slot="slider" も含める。
+const SWIPE_EXCLUDED_SELECTOR =
+  'input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="slider"],[data-slot="slider"],[data-no-swipe]'
+
+/**
+ * #787: 押した要素が「子要素が操作を持つ場所」（SWIPE_EXCLUDED_SELECTOR）の中か。
+ * 判定は `boundary`（シート本体）の内側の祖先だけを見る。ドラッグハンドル
+ * （`[data-sheet-drag-handle]`）の中は常に false＝従来どおり掴める。
+ */
+function isSwipeExcludedTarget(
+  target: EventTarget | null,
+  boundary: HTMLElement | null
+): boolean {
+  if (!(target instanceof Element)) return false
+  if (target.closest("[data-sheet-drag-handle]") != null) return false
+  const hit = target.closest(SWIPE_EXCLUDED_SELECTOR)
+  if (hit == null) return false
+  // boundary の外（シートを包む祖先）に当たっただけなら対象外。
+  return boundary == null || boundary.contains(hit)
+}
+
+/**
+ * #787: 閉じる方向へドラッグしたとき、まだスクロールできる横スクロール祖先。
+ * 指を右へ動かすと中身は右へ動き、scrollLeft は減る。よって right ドロワー
+ * （右へ閉じる）は scrollLeft > 0、left ドロワー（左へ閉じる）は末尾まで
+ * 達していない（scrollLeft < 最大）ときに、そのドラッグを横スクロールへ渡す。
+ */
+function findHorizontalScrollableAncestor(
+  start: EventTarget | null,
+  root: HTMLElement | null,
+  side: "left" | "right"
+): HTMLElement | null {
+  let node = start instanceof HTMLElement ? start : null
+  while (node) {
+    const overflowX = getComputedStyle(node).overflowX
+    const maxScroll = node.scrollWidth - node.clientWidth
+    if ((overflowX === "auto" || overflowX === "scroll") && maxScroll > 1) {
+      const canScroll =
+        side === "right" ? node.scrollLeft > 0 : node.scrollLeft < maxScroll - 1
+      if (canScroll) return node
+    }
+    if (node === root) break
+    node = node.parentElement
+  }
+  return null
+}
+
+/** #787: マウスで文字を選択中か（選択ドラッグをシートのドラッグにしない）。 */
+function hasActiveTextSelection(): boolean {
+  if (typeof window === "undefined" || typeof window.getSelection !== "function") return false
+  const text = window.getSelection()?.toString() ?? ""
+  return text.length > 0
+}
+
 interface SwipeToCloseBottomSheetProps
   extends Omit<React.ComponentProps<typeof DialogPrimitive.Content>, "autoFocus"> {
   side: "bottom" | "bottom-glass"
@@ -1191,6 +1257,8 @@ function SwipeToCloseBottomSheet({
   const samplesRef = React.useRef<DragSample[]>([])
   const scrollerRef = React.useRef<HTMLElement | null>(null)
   const onHandleRef = React.useRef(false)
+  // #787: この回のジェスチャがマウス由来か（文字選択の判定はマウスだけで行う）。
+  const fromMouseRef = React.useRef(false)
   const sheetRef = React.useRef<HTMLDivElement>(null)
   const { applyDescribedBy } = useDescribedByLink(
     sheetRef,
@@ -1253,18 +1321,30 @@ function SwipeToCloseBottomSheet({
   // a close-drag: that both blocks native scrolling and keeps touch events
   // flowing. Pointer handlers stay for mouse only (no cancellation problem).
   const beginGesture = React.useCallback(
-    (clientX: number, clientY: number, target: EventTarget | null, t: number) => {
+    (
+      clientX: number,
+      clientY: number,
+      target: EventTarget | null,
+      t: number,
+      fromMouse = false
+    ) => {
       startYRef.current = clientY
       startXRef.current = clientX
       decisionRef.current = null
       draggingRef.current = false
       samplesRef.current = [{ y: clientY, t }]
+      fromMouseRef.current = fromMouse
       // The drag indicator is always a valid grab target regardless of scroll
       // position; elsewhere the gesture must start at the top of the content.
       onHandleRef.current =
         target instanceof HTMLElement &&
         target.closest("[data-sheet-drag-handle]") != null
       scrollerRef.current = findScrollableAncestor(target, sheetRef.current)
+      // #787: 入力欄・Slider・data-no-swipe から始めた操作は子要素のもの。
+      // この回は最初から "scroll" にして、以後の判定も走らせない。
+      if (isSwipeExcludedTarget(target, sheetRef.current)) {
+        decisionRef.current = "scroll"
+      }
     },
     []
   )
@@ -1284,8 +1364,18 @@ function SwipeToCloseBottomSheet({
           onHandleRef.current ||
           !scrollerRef.current ||
           scrollerRef.current.scrollTop <= 0
-        const decision = decideSwipeGesture(dy, dx, atTop)
+        let decision = decideSwipeGesture(dy, dx, atTop)
         if (decision === null) return false // below slop — keep waiting
+        // #787: マウスで文字をなぞって選んでいる最中のドラッグは文字選択のもの。
+        // ハンドルからは従来どおり常に掴める。
+        if (
+          decision === "drag" &&
+          fromMouseRef.current &&
+          !onHandleRef.current &&
+          hasActiveTextSelection()
+        ) {
+          decision = "scroll"
+        }
         decisionRef.current = decision
         if (decision === "drag") {
           draggingRef.current = true
@@ -1385,7 +1475,7 @@ function SwipeToCloseBottomSheet({
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
     if (e.button != null && e.button !== 0) return
-    beginGesture(e.clientX, e.clientY, e.target, e.timeStamp)
+    beginGesture(e.clientX, e.clientY, e.target, e.timeStamp, true)
   }
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -1511,8 +1601,10 @@ function SwipeToCloseBottomSheet({
 // drawer's "close axis" (projectCloseAxisDelta): a horizontal-dominant drag in
 // the close direction drives the dismiss, while a vertical-dominant gesture is
 // left to the content's own scroll. Simpler than the bottom path — no keyboard
-// inset, no drag-handle affordance, and no scroll-position gate (a horizontal
-// drag never conflicts with the body's vertical scroll).
+// inset, no drag-handle affordance, and no vertical scroll-position gate (a
+// horizontal drag never conflicts with the body's vertical scroll). Children
+// that own a horizontal drag (Slider, inputs, horizontal scrollers that can
+// still scroll in the close direction, `data-no-swipe`) keep it (#787).
 // ============================================================================
 
 interface SwipeToCloseSideDrawerProps
@@ -1585,6 +1677,8 @@ function SwipeToCloseSideDrawer({
   // `y` here holds the close-axis position (not vertical) so the shared
   // computeFlickVelocity measures close-axis velocity.
   const samplesRef = React.useRef<DragSample[]>([])
+  // #787: この回のジェスチャがマウス由来か（文字選択の判定はマウスだけで行う）。
+  const fromMouseRef = React.useRef(false)
   const sheetRef = React.useRef<HTMLDivElement>(null)
   const { applyDescribedBy } = useDescribedByLink(
     sheetRef,
@@ -1629,14 +1723,29 @@ function SwipeToCloseSideDrawer({
   }, [])
 
   const beginGesture = React.useCallback(
-    (clientX: number, clientY: number, _target: EventTarget | null, t: number) => {
+    (
+      clientX: number,
+      clientY: number,
+      target: EventTarget | null,
+      t: number,
+      fromMouse = false
+    ) => {
       startXRef.current = clientX
       startYRef.current = clientY
       decisionRef.current = null
       draggingRef.current = false
       samplesRef.current = [{ y: 0, t }]
+      fromMouseRef.current = fromMouse
+      // #787: 入力欄・Slider・data-no-swipe から始めた操作と、閉じる方向へ
+      // まだスクロールできる横スクロール領域の中から始めた操作は子要素のもの。
+      if (
+        isSwipeExcludedTarget(target, sheetRef.current) ||
+        findHorizontalScrollableAncestor(target, sheetRef.current, side) != null
+      ) {
+        decisionRef.current = "scroll"
+      }
     },
-    []
+    [side]
   )
 
   // Returns true once the gesture is claimed as a close-drag (caller should
@@ -1650,8 +1759,12 @@ function SwipeToCloseSideDrawer({
       if (decisionRef.current === null) {
         // atStart=true: a horizontal close-drag never competes with the body's
         // vertical scroll, so there is no scroll-position gate to apply.
-        const decision = decideSwipeGesture(primary, cross, true)
+        let decision = decideSwipeGesture(primary, cross, true)
         if (decision === null) return false // below slop — keep waiting
+        // #787: マウスで文字を選択しながらのドラッグはドロワーを動かさない。
+        if (decision === "drag" && fromMouseRef.current && hasActiveTextSelection()) {
+          decision = "scroll"
+        }
         decisionRef.current = decision
         if (decision === "drag") {
           draggingRef.current = true
@@ -1730,7 +1843,7 @@ function SwipeToCloseSideDrawer({
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
     if (e.button != null && e.button !== 0) return
-    beginGesture(e.clientX, e.clientY, e.target, e.timeStamp)
+    beginGesture(e.clientX, e.clientY, e.target, e.timeStamp, true)
   }
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
@@ -2212,5 +2325,6 @@ export {
   decideSwipeDismiss,
   projectCloseAxisDelta,
   closeAxisTranslate,
+  isSwipeExcludedTarget,
 }
 export type { SheetProps, SheetContentProps, SheetTitleProps, SnapPoint, VisualViewportInset }

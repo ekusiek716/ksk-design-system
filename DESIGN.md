@@ -362,7 +362,7 @@ Portal に載る要素（Dialog / Sheet / Popover / Toast 等）は DOM 上の�
 - **Card**: bg `{colors.surface}` ＋ 1px `{colors.border}` ＋ `{elevation.md}` ＋ `{rounded.surface}`。
 - **Dialog（中央モーダル）**= タスク面（フォーム/絞り込み）。`role="dialog"`、`{rounded.modal}`。
 - **AlertDialog / ConfirmDialog（割り込み確認）**= 削除等の"止める"操作。`role="alertdialog"`、背景タップで閉じない・中央表示。
-- **Sheet（端寄せ）**: `side="bottom"` でボトムシート。`swipeToClose` で全面下スワイプ閉じ。`{rounded.sheet}`。
+- **Sheet（端寄せ）**: `side="bottom"` でボトムシート。`swipeToClose` で全面下スワイプ閉じ（入力欄・文字選択・Slider・`data-no-swipe` の中から始めたドラッグは子要素の操作として扱い閉じない。ハンドルは常に掴める）。`{rounded.sheet}`。
 - **Input**: 1px `{colors.border}` ＋ `{rounded.surface}` ＋ 高さ 48px。
 
 ## Voice & Tone
