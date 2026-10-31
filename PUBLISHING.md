@@ -14,7 +14,13 @@
 ## 前提
 
 - main ブランチが clean (`git status` で何もない)、リモートと一致
-- 消費リポが `~/LocalDev/<name>` に clone 済みで、`gh` CLI が使えること（PR 自動作成に使用）
+- 消費リポが `DEFAULT_REPOS` の実配置（`~/LocalDev/todo-apps/{belle-todo,trip-todo,ninshin-todo,okuno-todo-suite}`・
+  `~/LocalDev/apps/{yokoku-app,pawly,camera-app,aikoibito}`）に clone 済みで、`gh` CLI が使えること（PR 自動作成に使用）
+  - ルートだけ違う環境では `KSK_CONSUMER_ROOT=<ルート>` で差し替える（既定 `~/LocalDev`）
+  - 引数なし実行は、処理前に既定の全件が実在するかを確かめ、1 件でも欠けていれば一覧を出して何もせず止まる。
+    配置を変えたら `scripts/update-consumers.sh` の `DEFAULT_REPO_PATHS` とこの節を一緒に直す（#403・#785）
+  - リポ名だけを渡したとき（例: `belle-todo pawly`）は、`DEFAULT_REPOS` の末尾名 → ルート直下 → ルートの 1 階層下
+    （`todo-apps/`・`apps/`・`Examination/` 等）の順に、名前の完全一致で探す。同名が複数あればフルパス指定を求めて止まる
 
 ## 最短手順（推奨）
 
@@ -42,10 +48,17 @@ gh run watch "$RUN_ID" --exit-status
 main への version 変更を `.github/workflows/publish.yml` が検知し、npm Trusted
 Publishing (OIDC) で以下を自動実行する:
 
-1. npm 上の最新版と `package.json` の version を比較
-2. `npm ci`
-3. `npm publish`（prepack で `dist/` を生成）
-4. `vX.Y.Z` tag と GitHub Release を作成
+1. npm 上の最新版と `package.json` の version を比較（build job）
+2. `npm ci --ignore-scripts` → `npm run build:lib` → `npm pack --ignore-scripts` で tarball を作り、artifact に上げる（build job）
+3. artifact の tarball を `npm publish <tgz> --ignore-scripts` で公開（publish job）
+4. `vX.Y.Z` tag と GitHub Release を作成（publish job）
+
+job を 2 つに分けているのは、公開権限（OIDC の `id-token: write`）と書き込み権限
+（`contents: write`）を持つ job で、依存のインストールやビルド（＝外部ライブラリのコード）を
+動かさないため（issue #801）。build job は読み取り権限だけで動き、publish job はリポジトリを
+checkout せず、build job の tarball を公開するだけにする。checkout は `persist-credentials: false`、
+`npm ci` は `--ignore-scripts`（`visual-baselines-update.yml` と同じ方針）。この形は
+`__tests__/publish-workflow-permissions.test.ts` が固定している。
 
 公開後、レジストリ反映を確認してから消費リポへ配布する:
 
@@ -124,8 +137,9 @@ npm pack --dry-run
 公開経路は `.github/workflows/publish.yml` の Trusted Publishing に一本化した
 （下記「npm 公開について」参照）。ローカルから `npm publish` を直接実行する
 経路は廃止した。ここでは `npm pack --dry-run` で公開物の中身だけ確認する。
-実際の publish は次の push で CI が行う。`prepack` フックで `npm run build:lib`
-が自動実行され、公開パッケージに入る `dist/` / `contracts/` / `tokens.json` /
+実際の publish は次の push で CI が行う。CI の build job が `npm run build:lib`
+を明示的に実行してから `npm pack` し（ローカルの `npm pack` では `prepack` フックが
+同じ `build:lib` を自動実行する）、公開パッケージに入る `dist/` / `contracts/` / `tokens.json` /
 docs の中身が更新される。
 
 中身を確認したい場合:
