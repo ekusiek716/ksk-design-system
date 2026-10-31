@@ -85,6 +85,42 @@ export function resolveAppHeaderPaddingTop({
   return isIOS ? APP_HEADER_IOS_FALLBACK_PADDING_TOP : fallbackSpacing
 }
 
+export interface BottomBarPaddingBottomInput {
+  insets: SafeAreaInsets | null | undefined
+  /** safeArea prop（既定 true）。false で inset を無視し従来値に戻す。 */
+  safeArea: boolean
+  /** Platform.OS === "ios" */
+  isIOS: boolean
+  /** 下端 inset が供給されたときに inset へ足す基準余白。 */
+  base: number
+  /** inset 未供給（または safeArea=false）の iOS で使ってきた決め打ち値。 */
+  iosFallback: number
+  /** inset 未供給（または safeArea=false）の iOS 以外で使ってきた値。 */
+  androidFallback: number
+}
+
+/**
+ * 画面下に固定するバー（StickyActionBar / NavigationBar）の paddingBottom（issue #804）。
+ * - `safeArea=false`: inset を無視して従来値（iOS / それ以外の決め打ち）
+ * - 下端 inset が供給されている: `base + inset`（inset 0 も供給扱いで base のみ）
+ * - 未供給・負値・非有限値: 従来値にフォールバック（既存 consumer の見た目を変えない）
+ *
+ * iOS で inset を供給すると、Face ID 機では従来の決め打ち（32 / 24）より大きくなりうる。
+ * SafeAreaView や自前の下余白で既に補っている画面は二重取りになるので、片方に寄せる。
+ */
+export function resolveBottomBarPaddingBottom({
+  insets,
+  safeArea,
+  isIOS,
+  base,
+  iosFallback,
+  androidFallback,
+}: BottomBarPaddingBottomInput): number {
+  const fallback = isIOS ? iosFallback : androidFallback
+  if (!safeArea || !hasInsetEdge(insets, "bottom")) return fallback
+  return base + resolveInsetEdge(insets, "bottom")
+}
+
 /**
  * `side="top"` の Sheet の paddingTop。基準余白に上端 inset を足す
  * （ステータスバー／ダイナミックアイランドにパネル内容が潜るのを防ぐ）。

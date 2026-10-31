@@ -6,7 +6,8 @@ import type { SafeAreaInsets } from "../safe-area"
  *
  * DS は `react-native-safe-area-context` に依存しない（peerDependency を増やすと
  * 消費側20リポ全部に影響するため）。代わりに消費側がアプリのルートで実測値を
- * 流し込み、Sheet / Dialog / AppHeader がそれを読む。
+ * 流し込み、Sheet / Dialog / AppHeader と、画面下に固定する StickyActionBar /
+ * NavigationBar（BottomTabBar 経由を含む・issue #804）がそれを読む。
  *
  * ```tsx
  * import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context"
