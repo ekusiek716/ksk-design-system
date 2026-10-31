@@ -2,7 +2,7 @@ import * as React from "react"
 import { createPortal } from "react-dom"
 import { CoachMark, type CoachMarkVariant } from "../ui/coach-mark"
 import { cn } from "@/lib/utils"
-import { FocusScope } from "radix-ui/internal"
+import { DismissableLayer, FocusScope } from "radix-ui/internal"
 import { PortalContainerProvider } from "../ui/portal-container"
 import { useKskLabels } from "../ui/ksk-labels"
 
@@ -283,7 +283,16 @@ export function CoachMarkOverlay({
       }
 
   return createPortal(
-    <div
+    // #829: ルートを Radix の DismissableLayer の branch にする。ツアーは下の
+    // Dialog / Sheet の React ツリーの外（兄弟）に置かれるので、そのままだと
+    // バルーンの「次へ」「スキップ」の押下が下のモーダルから見て「外側クリック」
+    // になり、onOpenChange(false) で下まで閉じていた。branch の中（バルーンは
+    // scopeNode = このルートの子孫へ Portal される）の押下・フォーカス移動は
+    // 下の層の onPointerDownOutside / onFocusOutside の対象外になる。
+    // 方針: ツアーの操作子を押しても下のモーダルは閉じない。暗転部分（spotlight の
+    // boxShadow とフォールバック scrim）は pointer-events を受けないので、そこを
+    // 押したときの扱いは従来どおり（その下にある要素がクリックを受ける）。
+    <DismissableLayer.Branch
       data-slot="coach-mark-overlay"
       data-step={idx + 1}
       data-total={steps.length}
@@ -362,7 +371,7 @@ export function CoachMarkOverlay({
         </CoachMark>
         </PortalContainerProvider>
       </FocusScope.FocusScope>
-    </div>,
+    </DismissableLayer.Branch>,
     document.body,
   )
 }

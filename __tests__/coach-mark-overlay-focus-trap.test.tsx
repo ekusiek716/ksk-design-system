@@ -19,6 +19,7 @@ import * as React from "react"
 
 import { CoachMarkOverlay } from "../src/components/patterns/coach-mark-overlay"
 import { Dialog, DialogContent, DialogTitle } from "../src/components/ui/dialog"
+import { Sheet, SheetContent, SheetTitle } from "../src/components/ui/sheet"
 
 // jsdom には ResizeObserver / DOMRect の実体が無い（Radix Tooltip が使う）。
 if (typeof globalThis.ResizeObserver === "undefined") {
@@ -294,4 +295,140 @@ describe("CoachMarkOverlay のフォーカストラップ（#504）", () => {
     pressTab()
     expect(coachOverlayRoot().contains(document.activeElement)).toBe(true)
   })
+})
+
+/**
+ * Dialog / Sheet の上に重ねたツアーの「次へ」「スキップ」で下のモーダルが閉じない（issue #829）。
+ *
+ * ツアーは Dialog / Sheet の React ツリーの外（兄弟）に置かれるため、Radix の
+ * DismissableLayer から見るとバルーンの押下は「外側クリック」になり、下の
+ * モーダルの onOpenChange(false) が呼ばれていた。左クリック / タップの経路
+ * （pointerdown → mousedown → pointerup → mouseup → click）を送り、
+ * 下が開いたまま残ることを固定する。ツアーが無いときの外側クリックで
+ * 閉じる（従来どおり）ことも合わせて見る。
+ */
+describe("CoachMarkOverlay を Dialog / Sheet に重ねたときの外側クリック（#829）", () => {
+  const PointerEventCtor: typeof MouseEvent =
+    (globalThis as { PointerEvent?: typeof MouseEvent }).PointerEvent ?? MouseEvent
+
+  function leftClick(el: Element) {
+    act(() => {
+      el.dispatchEvent(new PointerEventCtor("pointerdown", { bubbles: true, cancelable: true, button: 0 }))
+      el.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, button: 0 }))
+      el.dispatchEvent(new PointerEventCtor("pointerup", { bubbles: true, cancelable: true, button: 0 }))
+      el.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, button: 0 }))
+      el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }))
+    })
+    act(() => {
+      vi.advanceTimersByTime(50)
+    })
+  }
+
+  function coachButton(text: string): HTMLButtonElement {
+    const btn = coachButtons().find((b) => b.textContent?.includes(text))
+    expect(btn, `コーチマークの「${text}」が見つからない`).toBeDefined()
+    return btn!
+  }
+
+  const steps = [
+    { selector: "#in-modal", title: "1 つ目", desc: "説明 1" },
+    { selector: "#in-modal", title: "2 つ目", desc: "説明 2" },
+  ]
+
+  type Kind = "dialog" | "sheet"
+
+  function Underlay({ kind, onOpenChange }: { kind: Kind; onOpenChange: (open: boolean) => void }) {
+    const [open, setOpen] = React.useState(true)
+    const handle = (next: boolean) => {
+      onOpenChange(next)
+      setOpen(next)
+    }
+    const body = (
+      <button type="button" id="in-modal">
+        モーダル内のボタン
+      </button>
+    )
+    return kind === "dialog" ? (
+      <Dialog open={open} onOpenChange={handle}>
+        <DialogContent description="下地のダイアログ" data-testid="underlay">
+          <DialogTitle>下地</DialogTitle>
+          {body}
+        </DialogContent>
+      </Dialog>
+    ) : (
+      <Sheet open={open} onOpenChange={handle}>
+        <SheetContent side="bottom" description="下地のシート" data-testid="underlay">
+          <SheetTitle>下地</SheetTitle>
+          {body}
+        </SheetContent>
+      </Sheet>
+    )
+  }
+
+  function Scene({
+    kind,
+    tourOpen,
+    onOpenChange,
+    onComplete = () => {},
+    onSkip = () => {},
+  }: {
+    kind: Kind
+    tourOpen: boolean
+    onOpenChange: (open: boolean) => void
+    onComplete?: () => void
+    onSkip?: () => void
+  }) {
+    return (
+      <>
+        <button type="button" id="outside">
+          外側のボタン
+        </button>
+        <Underlay kind={kind} onOpenChange={onOpenChange} />
+        <CoachMarkOverlay open={tourOpen} steps={steps} onComplete={onComplete} onSkip={onSkip} />
+      </>
+    )
+  }
+
+  function underlay() {
+    return document.querySelector('[data-testid="underlay"]')
+  }
+
+  for (const kind of ["dialog", "sheet"] as const) {
+    it(`${kind}: 「次へ」で下が閉じず、ツアーだけが進む`, () => {
+      const onOpenChange = vi.fn()
+      mount(<Scene kind={kind} tourOpen={false} onOpenChange={onOpenChange} />)
+      rerender(<Scene kind={kind} tourOpen onOpenChange={onOpenChange} />)
+      expect(coachOverlayRoot().getAttribute("data-step")).toBe("1")
+
+      leftClick(coachButton("次へ"))
+
+      expect(onOpenChange).not.toHaveBeenCalled()
+      expect(underlay()).not.toBeNull()
+      expect(coachOverlayRoot().getAttribute("data-step")).toBe("2")
+    })
+
+    it(`${kind}: 「スキップ」で下が閉じず、ツアーだけが終わる`, () => {
+      const onOpenChange = vi.fn()
+      const onSkip = vi.fn()
+      mount(<Scene kind={kind} tourOpen={false} onOpenChange={onOpenChange} onSkip={onSkip} />)
+      rerender(<Scene kind={kind} tourOpen onOpenChange={onOpenChange} onSkip={onSkip} />)
+
+      leftClick(coachButton("スキップ"))
+
+      expect(onSkip).toHaveBeenCalledTimes(1)
+      expect(onOpenChange).not.toHaveBeenCalled()
+      expect(underlay()).not.toBeNull()
+    })
+
+    it(`${kind}: ツアーが無いときの外側クリックは従来どおり閉じる`, () => {
+      const onOpenChange = vi.fn()
+      mount(<Scene kind={kind} tourOpen={false} onOpenChange={onOpenChange} />)
+      expect(underlay()).not.toBeNull()
+
+      leftClick(document.getElementById("outside")!)
+
+      expect(onOpenChange.mock.calls).toEqual([[false]])
+      expect(underlay()).toBeNull()
+    })
+  }
 })
