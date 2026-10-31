@@ -2045,6 +2045,7 @@
       "rules": [
         "commerce/FilterBar（filters/sortOptions 統合型）とは別コンポーネント。children に任意の Chip 群を渡すシンプルなラッパー。",
         "sticky 時の top オフセットは stickyOffset prop で指定する（固定ヘッダー高さの相殺用）。",
+        "sticky は根の要素（data-slot=\"chip-filter-bar\"）に付き、チップ行と件数をまとめて固定する。貼り付く範囲は呼び出し側の親ブロックなので、その親が一覧全体を含む高さを持つこと（issue #807）",
         "resultCountLabel 未指定時は \"{n}件\" を表示。i18n が必要な場合は関数 props で差し替える。",
         "bare=true 時は overflow/padding ラッパーを付けない。外側スクロールコンテナと共有する場合に使う。",
         "チップ列と件数の左右余白は gutter（none | tight=16px | default=24px・Container と同じ語彙）か contentClassName で付ける(issue #667)。sticky の背景は全幅のまま。外側 className に px-* を付けたり [&>div]: 等の子孫セレクタで DS 内部の DOM に依存したりしない。native も gutter を持つ",
