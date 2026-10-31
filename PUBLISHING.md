@@ -14,7 +14,14 @@
 ## 前提
 
 - main ブランチが clean (`git status` で何もない)、リモートと一致
-- 消費リポが `~/LocalDev/<name>` に clone 済みで、`gh` CLI が使えること（PR 自動作成に使用）
+- 消費リポが `DEFAULT_REPOS` の実配置（`~/LocalDev/todo-apps/{belle-todo,trip-todo,ninshin-todo,okuno-todo-suite}`・
+  `~/LocalDev/apps/{yokoku-app,pawly,camera-app,aikoibito}`）に clone 済みで、`gh` CLI が使えること（PR 自動作成に使用）
+  - ルートだけ違う環境では `KSK_CONSUMER_ROOT=<ルート>` で差し替える（既定 `~/LocalDev`）
+  - 引数なし実行は、処理前に既定の全件が実在するかを確かめ、1 件でも欠けていれば一覧を出して何もせず止まる。
+    配置を変えたら `scripts/update-consumers.sh` の `DEFAULT_REPO_PATHS` とこの節を一緒に直す（#403・#785）
+  - リポ名だけを渡したとき（例: `belle-todo pawly`）は、まず `DEFAULT_REPOS` の末尾名と照合する。
+    無ければルート直下と 1 階層下（`todo-apps/`・`apps/`・`Examination/` 等）を名前の完全一致でまとめて集め、
+    1 件ならそれを使い、複数あれば（直下とカテゴリ配下の両方にある場合も）曖昧としてフルパス指定を求めて止まる
 
 ## 最短手順（推奨）
 
@@ -42,10 +49,23 @@ gh run watch "$RUN_ID" --exit-status
 main への version 変更を `.github/workflows/publish.yml` が検知し、npm Trusted
 Publishing (OIDC) で以下を自動実行する:
 
-1. npm 上の最新版と `package.json` の version を比較
-2. `npm ci`
-3. `npm publish`（prepack で `dist/` を生成）
-4. `vX.Y.Z` tag と GitHub Release を作成
+1. npm 上の最新版と `package.json` の version を比較（build job）
+2. `npm ci --ignore-scripts` → `npm run build:lib` → `npm pack --ignore-scripts` で tarball を作り、artifact に上げる（build job）
+3. artifact の tarball を `npm publish <tgz> --ignore-scripts` で公開（publish job）
+4. `vX.Y.Z` tag と GitHub Release を作成（publish job）
+
+job を 2 つに分けているのは、公開権限（OIDC の `id-token: write`）と書き込み権限
+（`contents: write`）を持つ job で、依存のインストールやビルド（＝外部ライブラリのコード）を
+動かさないため（issue #801）。依存のコードがこの 2 つのトークンに触れられないようにする。
+build job は読み取り権限だけで動き、publish job はリポジトリを checkout せず、build job の
+tarball を公開するだけにする。checkout は `persist-credentials: false`、
+`npm ci` は `--ignore-scripts`（`visual-baselines-update.yml` と同じ方針）。この形は
+`__tests__/publish-workflow-permissions.test.ts` が固定している。
+
+この分離が防ぐのは「依存のコードによるトークンの奪取・悪用」で、「不正な中身の公開」ではない。
+build job では依存のコードが引き続き動くため、build:lib や npm pack に細工できる乗っ取り依存は
+中身を改ざんした tarball を作れる（publish job は版の一致しか確かめない）。tarball の中身の
+完全性は lockfile の固定や dist 内容の検査など、別の防御の範囲になる。
 
 公開後、レジストリ反映を確認してから消費リポへ配布する:
 
@@ -124,8 +144,9 @@ npm pack --dry-run
 公開経路は `.github/workflows/publish.yml` の Trusted Publishing に一本化した
 （下記「npm 公開について」参照）。ローカルから `npm publish` を直接実行する
 経路は廃止した。ここでは `npm pack --dry-run` で公開物の中身だけ確認する。
-実際の publish は次の push で CI が行う。`prepack` フックで `npm run build:lib`
-が自動実行され、公開パッケージに入る `dist/` / `contracts/` / `tokens.json` /
+実際の publish は次の push で CI が行う。CI の build job が `npm run build:lib`
+を明示的に実行してから `npm pack` し（ローカルの `npm pack` では `prepack` フックが
+同じ `build:lib` を自動実行する）、公開パッケージに入る `dist/` / `contracts/` / `tokens.json` /
 docs の中身が更新される。
 
 中身を確認したい場合:
@@ -242,6 +263,13 @@ publish.yml が失敗・スタックした場合の実行可能な手順は次�
    （issue #269 レビュー指摘。旧ロジックは publish=false だとこのステップごと
    スキップされ、タグ/Release が永久に作られなかった）。
 2. 失敗の原因（OIDC 設定・npm 側障害等）を取り除いてから 1 を実行する。
+
+GitHub Actions の「Re-run failed jobs」で publish job だけを再実行しても復旧できる。
+このとき build job の判定（publish=true）は前回のものが再利用されるが、publish job の
+`Check registry` が npm 上の有無を改めて確かめ、公開済みなら `Download tarball` と
+`Publish tarball` を飛ばして Verify と Release 作成へ進む（artifact の保持期限 1 日を
+過ぎていても落ちない。issue #801 レビュー指摘）。迷ったら「Re-run all jobs」か
+workflow_dispatch（上の 1）を使えば、版の判定からやり直せる。
 
 それでも解消しない場合は、npm 側の障害か Trusted Publishing 設定（npmjs.com の
 Trusted Publisher 登録）を疑い、対応後に再度 workflow_dispatch で実行する。
