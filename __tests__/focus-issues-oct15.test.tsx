@@ -251,4 +251,25 @@ describe("shared Dialog / Sheet restore the opener of each open (#789)", () => {
     flush()
     expect(focus).toHaveBeenCalledWith({ preventScroll: true })
   })
+  // #789 レビュー指摘: SheetContent は side / swipeToClose / snapPoints の組み合わせで
+  // 別コンポーネントへ分岐する。開いたまま分岐が変わると古い側の FocusScope が破棄されて
+  // onCloseAutoFocus が発火するが、Sheet は閉じていないので opener の記録を失ってはいけない。
+  it.each([
+    ["swipe side → swipe bottom", { side: "right" as const }, { side: "bottom" as const }],
+    ["swipe bottom → plain right", { side: "bottom" as const }, { side: "right" as const, swipeToClose: false }],
+  ])("sheet: switching the content variant while open keeps the opener (%s)", (_label, before, after) => {
+    const { rowA } = setupRows()
+    const render = (open: boolean, variant: React.ComponentProps<typeof SheetContent>) =>
+      act(() => root!.render(<Sheet open={open}><SheetContent swipeToClose {...variant}><SheetTitle>編集</SheetTitle></SheetContent></Sheet>))
+    render(false, before)
+    rowA.focus()
+    render(true, before)
+    flush()
+    render(true, after)
+    flush()
+    expect(document.activeElement).not.toBe(rowA)
+    render(false, after)
+    flush()
+    expect(document.activeElement).toBe(rowA)
+  })
 })

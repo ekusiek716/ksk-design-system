@@ -91,8 +91,53 @@ const SheetSnapContext = React.createContext<SheetSnapContextValue | null>(null)
 // drag-dismiss and by non-snap `swipeToClose`.
 interface SheetRootContextValue {
   close: () => void
+  /**
+   * #789: Sheet が今開いているか（effect で同期する ref。再レンダーを起こさないため state にしない）。
+   * Content の変種の付け替えで発火した onCloseAutoFocus と、実際に閉じたときのものを見分ける。
+   */
+  openRef: React.RefObject<boolean>
 }
 const SheetRootContext = React.createContext<SheetRootContextValue | null>(null)
+
+/**
+ * #789（レビュー指摘）: Sheet 4 変種（通常 / snap / swipe 下 / swipe 横）共通の onCloseAutoFocus。
+ *
+ * SheetContent は snapPoints・swipeToClose・side の組み合わせで別コンポーネントへ分岐する。
+ * 開いたまま分岐が変わると古い側の FocusScope が破棄されて onCloseAutoFocus が発火するが、
+ * Sheet は閉じていない。そのときは opener の記録を消さず、フォーカスも動かさない
+ * （新しい側の FocusScope が既に中へフォーカスを入れており、Radix 既定のまま opener へ
+ * 戻すと開いているシートの外へフォーカスを持ち出してしまう）。記録を使い切るのは
+ * Sheet が実際に閉じたとき（open が false）だけ。
+ * Sheet の外（context なし）で使われた場合は従来どおり毎回使い切る。
+ */
+function handleSheetCloseAutoFocus(
+  event: Event,
+  {
+    restoreFocusRef,
+    sheetOpenRef,
+    restoreFocusOnClose,
+    onCloseAutoFocus,
+  }: {
+    restoreFocusRef: React.RefObject<HTMLElement | null> | undefined
+    sheetOpenRef: React.RefObject<boolean> | undefined
+    restoreFocusOnClose: boolean
+    onCloseAutoFocus: ((event: Event) => void) | undefined
+  }
+) {
+  if (sheetOpenRef?.current) {
+    onCloseAutoFocus?.(event)
+    if (!event.defaultPrevented) event.preventDefault()
+    return
+  }
+  const opener = takeOpener(restoreFocusRef)
+  onCloseAutoFocus?.(event)
+  if (event.defaultPrevented) return
+  if (!restoreFocusOnClose) {
+    event.preventDefault()
+    return
+  }
+  restoreOpenerFocus(event, opener)
+}
 
 // ============================================================================
 // Virtual keyboard handling (visualViewport)
@@ -457,8 +502,16 @@ function Sheet({
     handleOpenChange,
   ])
 
+  // #789: Content 側が「付け替え」と「実際に閉じた」を見分けるための開閉状態。
+  // Radix の FocusScope は破棄後に setTimeout で onCloseAutoFocus を発火するため、
+  // commit 後の effect で同期すれば発火時点には最新の値になっている。
+  const openRef = React.useRef(actualOpen)
+  React.useEffect(() => {
+    openRef.current = actualOpen
+  }, [actualOpen])
+
   const rootCtx = React.useMemo<SheetRootContextValue>(
-    () => ({ close: () => handleOpenChange(false) }),
+    () => ({ close: () => handleOpenChange(false), openRef }),
     [handleOpenChange]
   )
 
@@ -831,6 +884,7 @@ function SheetContent({
   const isModal = useModality()
   const contentRef = React.useRef<HTMLDivElement>(null)
   const restoreFocusRef = React.useRef<HTMLElement | null>(null)
+  const sheetOpenRef = React.useContext(SheetRootContext)?.openRef
   // body scroll lock は Radix (modal Dialog) の react-remove-scroll が
   // 「開いている間だけ」担うため、ここでは何もしない。bodyScrollLock prop は
   // API 互換のため残し、DOM へ流さないよう分割代入で受けるだけにしている。
@@ -903,14 +957,13 @@ function SheetContent({
   }
   const handleCloseAutoFocus = (event: Event) => {
     // #789: 記録は開閉ごとに使い切る（SheetContent は常時マウントのため ref が次回へ残る）。
-    const opener = takeOpener(restoreFocusRef)
-    props.onCloseAutoFocus?.(event)
-    if (event.defaultPrevented) return
-    if (!restoreFocusOnClose) {
-      event.preventDefault()
-      return
-    }
-    restoreOpenerFocus(event, opener)
+    // 変種の付け替え（開いたまま）では使い切らない。詳細は handleSheetCloseAutoFocus。
+    handleSheetCloseAutoFocus(event, {
+      restoreFocusRef,
+      sheetOpenRef,
+      restoreFocusOnClose,
+      onCloseAutoFocus: props.onCloseAutoFocus,
+    })
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
@@ -1340,6 +1393,7 @@ function SwipeToCloseBottomSheet({
     ...contentProps
   } = props
   const rootCtx = React.useContext(SheetRootContext)
+  const sheetRootOpenRef = rootCtx?.openRef
   const [dragY, setDragY] = React.useState(0)
   const [dragging, setDragging] = React.useState(false)
   // transform transition は「ドラッグのスプリングバック」専用。マウント直後は
@@ -1400,14 +1454,13 @@ function SwipeToCloseBottomSheet({
   }
   const handleCloseAutoFocus = (event: Event) => {
     // #789: 記録は開閉ごとに使い切る（ref は常時マウントの SheetContent が持つ）。
-    const opener = takeOpener(restoreFocusRef)
-    props.onCloseAutoFocus?.(event)
-    if (event.defaultPrevented) return
-    if (!restoreFocusOnClose) {
-      event.preventDefault()
-      return
-    }
-    restoreOpenerFocus(event, opener)
+    // 変種の付け替え（開いたまま）では使い切らない。詳細は handleSheetCloseAutoFocus。
+    handleSheetCloseAutoFocus(event, {
+      restoreFocusRef,
+      sheetOpenRef: sheetRootOpenRef,
+      restoreFocusOnClose,
+      onCloseAutoFocus: props.onCloseAutoFocus,
+    })
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
@@ -1777,6 +1830,7 @@ function SwipeToCloseSideDrawer({
     ...contentProps
   } = props
   const rootCtx = React.useContext(SheetRootContext)
+  const sheetRootOpenRef = rootCtx?.openRef
   const [dragDist, setDragDist] = React.useState(0)
   const [dragging, setDragging] = React.useState(false)
   // Enable the spring-back transform transition only after the first drag, so
@@ -1821,14 +1875,13 @@ function SwipeToCloseSideDrawer({
   }
   const handleCloseAutoFocus = (event: Event) => {
     // #789: 記録は開閉ごとに使い切る（ref は常時マウントの SheetContent が持つ）。
-    const opener = takeOpener(restoreFocusRef)
-    props.onCloseAutoFocus?.(event)
-    if (event.defaultPrevented) return
-    if (!restoreFocusOnClose) {
-      event.preventDefault()
-      return
-    }
-    restoreOpenerFocus(event, opener)
+    // 変種の付け替え（開いたまま）では使い切らない。詳細は handleSheetCloseAutoFocus。
+    handleSheetCloseAutoFocus(event, {
+      restoreFocusRef,
+      sheetOpenRef: sheetRootOpenRef,
+      restoreFocusOnClose,
+      onCloseAutoFocus: props.onCloseAutoFocus,
+    })
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
@@ -2109,6 +2162,7 @@ function SnapBottomSheetContent({
   ...props
 }: SnapBottomSheetContentProps) {
   const isModal = useModality()
+  const sheetRootOpenRef = React.useContext(SheetRootContext)?.openRef
   const hasInternalDesc = description != null && description !== false
   const {
     "aria-describedby": ariaDescribedBy,
@@ -2164,14 +2218,13 @@ function SnapBottomSheetContent({
   }
   const handleCloseAutoFocus = (event: Event) => {
     // #789: 記録は開閉ごとに使い切る（ref は常時マウントの SheetContent が持つ）。
-    const opener = takeOpener(restoreFocusRef)
-    props.onCloseAutoFocus?.(event)
-    if (event.defaultPrevented) return
-    if (!restoreFocusOnClose) {
-      event.preventDefault()
-      return
-    }
-    restoreOpenerFocus(event, opener)
+    // 変種の付け替え（開いたまま）では使い切らない。詳細は handleSheetCloseAutoFocus。
+    handleSheetCloseAutoFocus(event, {
+      restoreFocusRef,
+      sheetOpenRef: sheetRootOpenRef,
+      restoreFocusOnClose,
+      onCloseAutoFocus: props.onCloseAutoFocus,
+    })
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
