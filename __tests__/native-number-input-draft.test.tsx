@@ -179,6 +179,21 @@ describe("native NumberInput: 入力中は下書き、確定時に一度だけ�
     expect(onChange).toHaveBeenCalledOnce()
   })
 
+  it("境界の値から打ち直したら、確定前でも反対側の ± が押せる", () => {
+    const onChange = vi.fn()
+    render(<Controlled initial={1} min={1} max={12} onChange={onChange} />)
+    expect(buttons()[0].disabled).toBe(true)
+    call(input().onChangeText, "8")
+    expect(buttons()[0].disabled).toBe(false)
+    call(buttons()[0].onPress)
+    expect(onChange).toHaveBeenCalledExactlyOnceWith(7)
+
+    render(<Controlled key="at-max" initial={12} min={1} max={12} onChange={onChange} />)
+    expect(buttons()[1].disabled).toBe(true)
+    call(input().onChangeText, "3")
+    expect(buttons()[1].disabled).toBe(false)
+  })
+
   it("QuantitySelector（min=1）でも同じく打ち直せる", () => {
     const onChange = vi.fn()
     render(<Controlled as="quantity" initial={5} max={12} onChange={onChange} />)

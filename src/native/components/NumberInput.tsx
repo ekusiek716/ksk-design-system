@@ -69,6 +69,8 @@ export function NumberInput({
   }
   const inc = () => stepBy(step)
   const dec = () => stepBy(-step)
+  // ± の押せる・押せないも、打ちかけの値を基準に決める（境界の値から打ち直した直後に押せるように）。
+  const effective = parseDraft(draft) ?? value
 
   return (
     <View
@@ -86,7 +88,7 @@ export function NumberInput({
     >
       <Pressable
         onPress={dec}
-        disabled={disabled || value <= min}
+        disabled={disabled || effective <= min}
         style={({ pressed }) => ({
           width: 40,
           height: 44,
@@ -120,7 +122,7 @@ export function NumberInput({
       />
       <Pressable
         onPress={inc}
-        disabled={disabled || value >= max}
+        disabled={disabled || effective >= max}
         style={({ pressed }) => ({
           width: 40,
           height: 44,
