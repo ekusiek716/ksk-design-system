@@ -1221,7 +1221,7 @@
       "rules": [
         "useForm() の戻り値を Form に展開して渡す",
         "FormControl でラップしたコンポーネントに自動的に aria-* が付与される",
-        "react-hook-form 必須 (peer dependency)"
+        "react-hook-form は DS の dependencies で自動インストールされ、dist では external（consumer の react-hook-form と同一インスタンス・同一 Context を共有するため、consumer の useFormContext / FormProvider と混在させてよい。issue #828）"
       ]
     },
     {
