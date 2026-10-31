@@ -15,11 +15,15 @@ export interface SubNavProps {
   onChange?: (key: string) => void
 }
 
-/** Webの SubNav を RN の SegmentedTabs 風に意味変換。横スクロール可。 */
+/**
+ * Webの SubNav を RN の SegmentedTabs 風に意味変換。横スクロール可。
+ * コンテナは `tablist`、各項目は `tab` で現在の項目に `selected` を既定で持つ（issue #800）。
+ */
 export function SubNav({ items, value, onChange }: SubNavProps) {
   const { theme, scales } = useTheme()
   return (
     <ScrollView
+      accessibilityRole="tablist"
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ paddingHorizontal: scales.spacing.scale[3], gap: scales.spacing.scale[2] }}
@@ -34,6 +38,8 @@ export function SubNav({ items, value, onChange }: SubNavProps) {
         return (
           <Pressable
             key={it.key}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
             onPress={() => onChange?.(it.key)}
             style={{
               flexDirection: "row",

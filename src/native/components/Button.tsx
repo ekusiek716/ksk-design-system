@@ -91,6 +91,7 @@ export function Button({
   spinnerColor,
   children,
   disabled,
+  accessibilityRole,
   accessibilityState,
   ...rest
 }: ButtonProps) {
@@ -178,6 +179,8 @@ export function Button({
     return (
       <Pressable
         disabled={effectiveDisabled}
+        // 役割は部品が既定で持ち、呼び出し側の明示が優先（issue #800・IconButton / Chip と同じ）
+        accessibilityRole={accessibilityRole ?? "button"}
         accessibilityState={{ ...accessibilityState, disabled: effectiveDisabled, busy: loading || undefined }}
         hitSlop={hitSlop}
         style={({ pressed }) => {
@@ -237,6 +240,7 @@ export function Button({
   return (
     <Pressable
       disabled={effectiveDisabled}
+      accessibilityRole={accessibilityRole ?? "button"}
       accessibilityState={{ ...accessibilityState, disabled: effectiveDisabled, busy: loading || undefined }}
       style={({ pressed }) => [
         {

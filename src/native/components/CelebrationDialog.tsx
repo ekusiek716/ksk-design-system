@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { Animated, Modal, Pressable, Text as RNText, View } from "react-native"
+import { useLatestRef } from "../../lib/use-latest-ref"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { Celebration, type CelebrationProps } from "./Celebration"
@@ -20,6 +21,10 @@ export interface CelebrationDialogProps {
   title: string
   description?: string
   actions?: React.ReactNode
+  /**
+   * 指定時、この ms 経過後に自動で onOpenChange(false) を呼ぶ。onOpenChange はその場の関数で
+   * 渡してよい（参照が変わってもタイマーは巻き戻らない。#812）
+   */
   autoDismissMs?: number
   emojiAnimation?: CelebrationProps["emojiAnimation"]
   /**
@@ -60,11 +65,15 @@ export function CelebrationDialog({
   const reduceMotion = useReduceMotion()
   const emojiScale = useAnimatedValue(0)
 
+  const onOpenChangeRef = useLatestRef(onOpenChange)
+
   useEffect(() => {
+    // onOpenChange は ref 越しに呼び、依存から外す。その場の関数で渡されたとき、親の再描画の
+    // たびにタイマーが巻き戻って自動で閉じなくなるため（#812。Web 版と同じ形）
     if (!open || !autoDismissMs) return
-    const id = setTimeout(() => onOpenChange(false), autoDismissMs)
+    const id = setTimeout(() => onOpenChangeRef.current(false), autoDismissMs)
     return () => clearTimeout(id)
-  }, [open, autoDismissMs, onOpenChange])
+  }, [open, autoDismissMs, onOpenChangeRef])
 
   useEmojiBounce(emojiScale, {
     enabled: open && emojiAnimation === "bounce",

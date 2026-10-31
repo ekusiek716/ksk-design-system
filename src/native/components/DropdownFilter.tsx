@@ -1,6 +1,8 @@
 import React, { useState } from "react"
-import { Pressable, View, Text as RNText } from "react-native"
+import { Pressable, ScrollView, View, Text as RNText, useWindowDimensions } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { useSafeAreaInsets } from "../theme/SafeAreaInsetsProvider"
+import { resolveSheetListMaxHeight } from "../sheet-list-max-height"
 import { resolveTypo } from "../typography"
 import { Sheet } from "./Sheet"
 import { Separator } from "./Separator"
@@ -23,6 +25,8 @@ export function DropdownFilter({ label, options, value, onChange }: DropdownFilt
   const [open, setOpen] = useState(false)
   const selected = options.find((o) => o.value === value)
   const active = !!selected
+  const { height: windowHeight } = useWindowDimensions()
+  const listMaxHeight = resolveSheetListMaxHeight(windowHeight, useSafeAreaInsets())
 
   return (
     <>
@@ -63,7 +67,11 @@ export function DropdownFilter({ label, options, value, onChange }: DropdownFilt
         </RNText>
       </Pressable>
       <Sheet open={open} onClose={() => setOpen(false)} side="bottom" title={label}>
-        <View>
+        {/*
+          選択肢が多いとパネルが画面の上へはみ出し、見出しと「すべて」行を押せなかった（issue #816）。
+          「すべて」と全 options を同じスクロール領域に入れ、上限の高さを付ける。少ないときは内容の高さのまま。
+        */}
+        <ScrollView style={{ maxHeight: listMaxHeight }}>
           <Pressable
             onPress={() => {
               onChange?.(undefined)
@@ -112,7 +120,7 @@ export function DropdownFilter({ label, options, value, onChange }: DropdownFilt
               {i < options.length - 1 && <Separator />}
             </React.Fragment>
           ))}
-        </View>
+        </ScrollView>
       </Sheet>
     </>
   )

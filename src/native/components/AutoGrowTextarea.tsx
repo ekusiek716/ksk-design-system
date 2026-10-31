@@ -18,7 +18,21 @@ export interface AutoGrowTextareaProps extends Omit<TextInputProps, "style" | "m
 
 export const AutoGrowTextarea = React.forwardRef<TextInput, AutoGrowTextareaProps>(
   function AutoGrowTextarea(
-    { variant = "default", invalid, disabled, minHeight = 44, maxHeight = 200, density = "default", ...rest },
+    {
+      variant = "default",
+      invalid,
+      disabled,
+      minHeight = 44,
+      maxHeight = 200,
+      density = "default",
+      // onFocus / onBlur / onContentSizeChange / editable は rest から取り出して内部処理と合成する。
+      // rest に残すと後ろの {...rest} が focused 切り替え・高さ調整・disabled を上書きしていた（issue #819）。
+      onFocus,
+      onBlur,
+      onContentSizeChange,
+      editable,
+      ...rest
+    },
     ref,
   ) {
     const { theme, scales } = useTheme()
@@ -35,23 +49,14 @@ export const AutoGrowTextarea = React.forwardRef<TextInput, AutoGrowTextareaProp
       const extraHeight = density === "compact" ? 0 : 16
       const next = Math.min(maxHeight, Math.max(minHeight, e.nativeEvent.contentSize.height + extraHeight))
       setHeight(next)
+      onContentSizeChange?.(e)
     }
 
     return (
       <TextInput
         ref={ref}
-        editable={!disabled}
         multiline
         textAlignVertical="top"
-        onContentSizeChange={handleSize}
-        onFocus={(e) => {
-          setFocused(true)
-          rest.onFocus?.(e)
-        }}
-        onBlur={(e) => {
-          setFocused(false)
-          rest.onBlur?.(e)
-        }}
         placeholderTextColor={theme.text["low-emphasis"]}
         style={[
           resolveTypo(variant === "inline-title" ? "heading.xl" : "body.md"),
@@ -78,6 +83,18 @@ export const AutoGrowTextarea = React.forwardRef<TextInput, AutoGrowTextareaProp
           WEB_INPUT_RESET as TextInputProps["style"],
         ]}
         {...rest}
+        // rest の後ろに置き、consumer の指定より内部処理を優先させる（issue #819）。
+        // disabled は editable より優先する。
+        editable={disabled ? false : editable ?? true}
+        onContentSizeChange={handleSize}
+        onFocus={(e) => {
+          setFocused(true)
+          onFocus?.(e)
+        }}
+        onBlur={(e) => {
+          setFocused(false)
+          onBlur?.(e)
+        }}
       />
     )
   },

@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { useLatestRef } from "@/lib/use-latest-ref"
 import { Celebration, usePrefersReducedMotion } from "./celebration"
 import type { CelebrationProps } from "./celebration"
 
@@ -22,7 +23,10 @@ interface CelebrationDialogProps {
   description?: string
   /** CTA スロット。ボタン群などを渡す */
   actions?: React.ReactNode
-  /** 指定時、この ms 経過後に自動で onOpenChange(false) を呼ぶ */
+  /**
+   * 指定時、この ms 経過後に自動で onOpenChange(false) を呼ぶ。onOpenChange はその場の関数で
+   * 渡してよい（参照が変わってもタイマーは巻き戻らない。#812）
+   */
   autoDismissMs?: number
   /** Celebration の emoji 表示アニメーション（既定 "pop"） */
   emojiAnimation?: CelebrationProps["emojiAnimation"]
@@ -71,11 +75,15 @@ function CelebrationDialog({
 }: CelebrationDialogProps) {
   const reducedMotion = usePrefersReducedMotion()
 
+  const onOpenChangeRef = useLatestRef(onOpenChange)
+
   React.useEffect(() => {
+    // onOpenChange は ref 越しに呼び、依存から外す。その場の関数で渡されたとき、親の再描画の
+    // たびにタイマーが巻き戻って自動で閉じなくなるため（#812）
     if (!open || !autoDismissMs) return
-    const id = window.setTimeout(() => onOpenChange(false), autoDismissMs)
+    const id = window.setTimeout(() => onOpenChangeRef.current(false), autoDismissMs)
     return () => window.clearTimeout(id)
-  }, [open, autoDismissMs, onOpenChange])
+  }, [open, autoDismissMs, onOpenChangeRef])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

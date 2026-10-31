@@ -6,6 +6,7 @@ import {
   APP_HEADER_IOS_FALLBACK_PADDING_TOP,
   hasInsetEdge,
   resolveAppHeaderPaddingTop,
+  resolveBottomBarPaddingBottom,
   resolveBottomSheetTopInset,
   resolveFullscreenDialogPadding,
   resolveInsetEdge,
@@ -81,6 +82,48 @@ describe("resolveAppHeaderPaddingTop", () => {
     expect(
       resolveAppHeaderPaddingTop({ insets: { top: 59 }, safeArea: false, isIOS: true, fallbackSpacing }),
     ).toBe(fallbackSpacing)
+  })
+})
+
+describe("resolveBottomBarPaddingBottom（StickyActionBar / NavigationBar・issue #804）", () => {
+  // StickyActionBar: base 16・従来値 iOS 32 / Android 16
+  const sticky = { base: 16, iosFallback: 32, androidFallback: 16 }
+  // NavigationBar: base 0・従来値 iOS 24 / Android 0
+  const nav = { base: 0, iosFallback: 24, androidFallback: 0 }
+
+  it("下端 inset が供給されていれば base + inset（iOS / Android とも）", () => {
+    expect(resolveBottomBarPaddingBottom({ ...sticky, insets: { bottom: 34 }, safeArea: true, isIOS: true })).toBe(50)
+    expect(resolveBottomBarPaddingBottom({ ...sticky, insets: { bottom: 48 }, safeArea: true, isIOS: false })).toBe(64)
+    expect(resolveBottomBarPaddingBottom({ ...nav, insets: { bottom: 34 }, safeArea: true, isIOS: true })).toBe(34)
+    expect(resolveBottomBarPaddingBottom({ ...nav, insets: { bottom: 24 }, safeArea: true, isIOS: false })).toBe(24)
+  })
+
+  it("inset 0 も供給扱いで base だけになる（ホームボタン機など）", () => {
+    expect(resolveBottomBarPaddingBottom({ ...sticky, insets: { bottom: 0 }, safeArea: true, isIOS: true })).toBe(16)
+    expect(resolveBottomBarPaddingBottom({ ...nav, insets: { bottom: 0 }, safeArea: true, isIOS: true })).toBe(0)
+  })
+
+  it("【後方互換】未供給は従来値（iOS 32 / 24、Android 16 / 0）", () => {
+    for (const insets of [null, undefined, {}, { top: 47 }]) {
+      expect(resolveBottomBarPaddingBottom({ ...sticky, insets, safeArea: true, isIOS: true })).toBe(32)
+      expect(resolveBottomBarPaddingBottom({ ...sticky, insets, safeArea: true, isIOS: false })).toBe(16)
+      expect(resolveBottomBarPaddingBottom({ ...nav, insets, safeArea: true, isIOS: true })).toBe(24)
+      expect(resolveBottomBarPaddingBottom({ ...nav, insets, safeArea: true, isIOS: false })).toBe(0)
+    }
+  })
+
+  it("負値・NaN・Infinity は未供給扱いで従来値", () => {
+    for (const bottom of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(resolveBottomBarPaddingBottom({ ...sticky, insets: { bottom }, safeArea: true, isIOS: true })).toBe(32)
+      expect(resolveBottomBarPaddingBottom({ ...nav, insets: { bottom }, safeArea: true, isIOS: false })).toBe(0)
+    }
+  })
+
+  it("safeArea=false は inset を無視して従来値", () => {
+    expect(resolveBottomBarPaddingBottom({ ...sticky, insets: { bottom: 34 }, safeArea: false, isIOS: true })).toBe(32)
+    expect(resolveBottomBarPaddingBottom({ ...sticky, insets: { bottom: 48 }, safeArea: false, isIOS: false })).toBe(16)
+    expect(resolveBottomBarPaddingBottom({ ...nav, insets: { bottom: 34 }, safeArea: false, isIOS: true })).toBe(24)
+    expect(resolveBottomBarPaddingBottom({ ...nav, insets: { bottom: 48 }, safeArea: false, isIOS: false })).toBe(0)
   })
 })
 

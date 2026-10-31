@@ -101,13 +101,17 @@ function SelectContent({ className, children, position = "popper", ...props }: R
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
-          "relative z-[var(--Z-Popover)] max-h-96 min-w-[8rem] overflow-hidden rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-lg)]",
+          "relative z-[var(--Z-Popover)] min-w-[8rem] overflow-hidden rounded-lg border border-[var(--Border-Low-Emphasis)] bg-[var(--Surface-Primary)] text-[var(--Text-High-Emphasis)] shadow-[var(--shadow-lg)]",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
           // 画面内に使える幅まで。長い選択肢があると一覧が 1 行の長さまで伸び、
           // 幅 390px の画面で 641px になって右へはみ出していた（収まる一覧には効かない）。
           position === "popper" && "max-w-(--radix-select-content-available-width)",
+          // 高さも画面内に使える高さまで（issue #826）。384px 固定だと、横向きのスマホや画面中ほどの
+          // Select で上下どちらの余白も足りず一覧が画面外へはみ出し、端の項目を選べなかった。
+          // 広い画面での上限 384px（24rem）は min() で保つ。item-aligned は Radix が高さを決めるので従来どおり
+          position === "popper" ? "max-h-[min(24rem,var(--radix-select-content-available-height))]" : "max-h-96",
           className
         )}
         position={position}

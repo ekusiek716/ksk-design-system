@@ -3,7 +3,8 @@
    ============================================================= */
 
 @import "tailwindcss";
-@import "tw-animate-css";
+/* tw-animate-css は preset-core.css が読み込む（issue #827）。consumer と同じ
+   CSS で描くため、ここに consumer が読まない @import を足さないこと。 */
 @import "./preset.css";
 
 /* ─── iconsax React 19 互換 ─── */

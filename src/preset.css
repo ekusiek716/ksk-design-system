@@ -3,6 +3,8 @@
 
    外部プロジェクト向けプリセット。
    1行の @import で全トークン + shadcn互換 + アニメーションが有効になる。
+   開閉アニメの tw-animate-css も preset-core.css が読み込む（dependencies に同梱。
+   consumer 側で別途インストール・@import する必要はない / issue #827）。
 
    使い方:
    @import "ksk-design-system/preset";

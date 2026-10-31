@@ -104,6 +104,38 @@ export const SelectionModeMultiple: Story = {
 }
 
 /**
+ * 複数選択のキーボード操作（issue #810）。選択中だけ × が付くためチップの要素は作り直されるが、
+ * Space / Enter で選択・解除したあともフォーカスは押したチップの本体ボタンに残る。
+ */
+export const MultipleKeepsFocusOnToggle: Story = {
+  tags: ["interaction"],
+  render: () => {
+    const [v, setV] = React.useState<string[]>([])
+    return (
+      <div className="p-4">
+        <ChipSelector options={CATEGORIES} value={v} onChange={setV} selectionMode="multiple" aria-label="カテゴリ" />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const group = canvasElement.querySelector<HTMLElement>('[data-slot="chip-selector"]')!
+    const bodyButton = (i: number) => {
+      const root = group.children[i] as HTMLElement
+      return root.tagName === "BUTTON"
+        ? (root as HTMLButtonElement)
+        : root.querySelector<HTMLButtonElement>('button:not([data-slot="chip-remove"])')!
+    }
+    bodyButton(1).focus()
+    // 選択 → 解除 → 再選択
+    for (const expected of ["true", "false", "true"]) {
+      await userEvent.keyboard(" ")
+      await waitFor(() => expect(bodyButton(1).getAttribute("aria-pressed")).toBe(expected))
+      await expect(document.activeElement).toBe(bodyButton(1))
+    }
+  },
+}
+
+/**
  * `selectionMode` 未指定（既定）。従来どおり `multiple`（既定 `true`）から導出され、
  * `role="group"` + `aria-pressed` のまま変わらない（非破壊）。
  */
