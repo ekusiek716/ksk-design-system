@@ -11,13 +11,24 @@ name: Publish
 # 権限の分け方（issue #801）:
 #   公開権限（id-token: write）と書き込み権限（contents: write）を持つ job では、
 #   依存のインストールやビルド（= 外部ライブラリのコード）を一切動かさない。
-#   依存が 1 つ乗っ取られただけで、正規の経路（provenance 付き）から不正な版を
-#   公開されるのを防ぐため。
+#   依存のコードが OIDC トークンや contents: write のトークンに触れられないようにする
+#   （トークンを盗んで任意の版を公開する・タグや Release を書き換える経路を断つ）ため。
 #   - build job（読み取りだけ）: 版の判定 → npm ci --ignore-scripts → build:lib → npm pack
 #     → tarball を artifact に上げる
 #   - publish job（公開・書き込み）: リポジトリを checkout せず、artifact の tarball を
 #     `npm publish <tgz> --ignore-scripts` で公開し、検証とタグ/Release 作成だけを行う
 #   この分け方は __tests__/publish-workflow-permissions.test.ts が固定している。
+#
+#   範囲外: build job では依存のコードが引き続き動くので、build:lib や npm pack に細工できる
+#   乗っ取り依存は、中身を改ざんした tarball を作れる（publish job は版の一致しか見ない）。
+#   tarball の中身の完全性は lockfile の固定や dist 内容の検査など別の防御が担う。
+#
+# 再実行（issue #801 レビュー指摘）:
+#   GitHub の「Re-run failed jobs」で publish job だけを再実行すると、build job の出力
+#   （publish=true）は前回のものが再利用される。そこで publish job は自分でも npm 上の有無を
+#   確かめ、公開済みなら Download / Publish を飛ばして Verify と Release 作成へ進む
+#   （#269 / v2.5.0 で直した「publish は成功・タグ/Release だけ未作成」からの復旧を、
+#   artifact の保持期限 1 日を過ぎた再実行でも効かせるため）。
 
 on:
   push:
@@ -134,15 +145,33 @@ jobs:
           node-version: 24 # npm >= 11.5.1 が Trusted Publishing に必須
           registry-url: https://registry.npmjs.org
 
-      - name: Download tarball
+      # 「Re-run failed jobs」では build job の publish=true が再利用されるので、ここで
+      # npm 上の有無を改めて確かめる。公開済みなら Download / Publish を飛ばす
+      # （公開済みの版の再 publish で落ちて Release 作成に届かない・artifact の期限切れで
+      # Download が落ちる、を防ぐ）。npm view が失敗したときは未公開として扱い、
+      # 本当に公開済みなら npm publish 側が拒否して止まる（安全側）。
+      - name: Check registry
+        id: registry
         if: needs.build.outputs.publish == 'true'
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          if [ "$(npm view "ksk-design-system@$VERSION" version 2>/dev/null || true)" = "$VERSION" ]; then
+            echo "ksk-design-system@$VERSION is already on npm; skipping download and publish"
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download tarball
+        if: needs.build.outputs.publish == 'true' && steps.registry.outputs.published != 'true'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: package-tarball
           path: ${{ runner.temp }}/package
 
       - name: Publish tarball
-        if: needs.build.outputs.publish == 'true'
+        if: needs.build.outputs.publish == 'true' && steps.registry.outputs.published != 'true'
         env:
           VERSION: ${{ needs.build.outputs.version }}
         run: |

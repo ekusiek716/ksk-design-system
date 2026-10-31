@@ -7,11 +7,15 @@ import { describe, expect, it } from "vitest"
  *
  * 公開権限（id-token: write = npm Trusted Publishing の OIDC）とリポジトリへの
  * 書き込み権限（contents: write）を持つ job で、依存のインストールやビルド
- * （= 外部ライブラリのコード）を動かさない。依存が 1 つ乗っ取られただけで
- * 正規の経路から不正な版を公開されるのを防ぐため。
+ * （= 外部ライブラリのコード）を動かさない。依存のコードが OIDC トークンや
+ * contents: write のトークンに触れられないようにするため。tarball の中身の完全性
+ * （build job で動く依存による dist の改ざん）はこの分離の範囲外。
  *
  * - install / build / pack は読み取り権限だけの build job で行い、tarball を artifact に上げる
  * - 権限を持つ publish job は、その tarball を `npm publish <tgz> --ignore-scripts` で公開するだけ
+ *   （checkout せず、リポジトリ内のスクリプトも動かさない）
+ * - 「Re-run failed jobs」で publish job だけ再実行されても、公開済みなら Download / Publish を
+ *   飛ばして Verify と Release 作成へ進む（#269 の復旧経路を保つ）
  * - checkout は認証情報を .git/config に残さない（persist-credentials: false）
  * - npm ci は install スクリプトを動かさない（--ignore-scripts）
  *
@@ -89,8 +93,31 @@ function checkoutSteps(body: string[]): string[][] {
   return steps
 }
 
+/** job の steps（6 スペースインデントの `- ` で始まる塊）を行の配列で返す */
+function steps(body: string[]): string[][] {
+  const result: string[][] = []
+  for (const line of body) {
+    if (/^ {6}- /.test(line)) result.push([line])
+    else if (result.length > 0) result[result.length - 1].push(line)
+  }
+  return result
+}
+
+/** `- name: <name>` の step を返す */
+function stepNamed(body: string[], name: string): string[] | undefined {
+  return steps(body).find((step) => step.some((line) => line.trim() === `- name: ${name}` || line.trim() === `name: ${name}`))
+}
+
+/** step の `if:` 条件（無ければ空文字） */
+function stepIf(step: string[]): string {
+  const line = step.find((l) => /^ {8}if:/.test(l))
+  return line ? line.replace(/^ {8}if:\s*/, "").trim() : ""
+}
+
 const PRIVILEGED = /^(id-token|contents):\s*write\b/
 const RUNS_DEPENDENCY_CODE = /\bnpm (ci|install|i|run|exec|rebuild)\b|\bnpx\b|\bnpm pack(?![^\n]*ksk-design-system@)/
+/** リポジトリ内のスクリプト（scripts/・bin/・./ 始まり）の実行。checkout しない job では本来ありえない */
+const RUNS_REPO_CODE = /\b(node|bash|sh|zsh|bun|deno)\s+(\.\/)?(scripts|bin)\/|(^|[\s;&|(])\.\/[\w.-]/
 
 describe("publish.yml の権限分離（issue #801）", () => {
   const allJobs = jobs()
@@ -116,6 +143,48 @@ describe("publish.yml の権限分離（issue #801）", () => {
     expect(privileged.map(([name]) => name)).toEqual(["publish"])
     for (const [name, body] of privileged) {
       expect(code(body).filter((line) => RUNS_DEPENDENCY_CODE.test(line)), `${name} が依存のコードを動かしている`).toEqual([])
+      expect(code(body).filter((line) => RUNS_REPO_CODE.test(line)), `${name} がリポジトリ内のスクリプトを動かしている`).toEqual([])
+    }
+  })
+
+  it("公開権限を持つ job はリポジトリを checkout しない", () => {
+    const privileged = [...allJobs].filter(([, body]) => jobPermissions(body).some((line) => PRIVILEGED.test(line)))
+    expect(privileged.length).toBeGreaterThan(0)
+    for (const [name, body] of privileged) {
+      expect(code(body).filter((line) => /uses:\s*actions\/checkout@/.test(line)), `${name} が checkout している`).toEqual([])
+    }
+  })
+
+  it("リポジトリ内スクリプトの検出が効く（検出式の自己テスト）", () => {
+    for (const sample of ["node scripts/foo.mjs", "bash scripts/x.sh", "sh ./scripts/x.sh", "./bin/run", "node bin/init.js"]) {
+      expect(RUNS_REPO_CODE.test(sample), sample).toBe(true)
+    }
+    for (const sample of [`node -e 'console.log(1)'`, `tar -tzf "$TARBALL"`, `npm view "ksk-design-system@$VERSION" version`]) {
+      expect(RUNS_REPO_CODE.test(sample), sample).toBe(false)
+    }
+  })
+
+  it("Re-run failed jobs で publish job だけ再実行しても、公開済みなら Download / Publish を飛ばす（#269 の復旧を保つ）", () => {
+    const publish = allJobs.get("publish") ?? []
+    const registry = stepNamed(publish, "Check registry")
+    expect(registry, "publish job に npm 上の有無を確かめる step がある").toBeDefined()
+    expect(registry!.some((line) => /^ {8}id:\s*registry\s*$/.test(line))).toBe(true)
+    expect(code(registry!).some((line) => /\bnpm view "?ksk-design-system@\$VERSION"?/.test(line))).toBe(true)
+
+    const order = steps(publish).map((step) => step.find((line) => /name:/.test(line))?.replace(/^.*name:\s*/, "").trim())
+    const download = stepNamed(publish, "Download tarball")
+    const tarball = stepNamed(publish, "Publish tarball")
+    for (const [label, step] of [["Download tarball", download], ["Publish tarball", tarball]] as const) {
+      expect(step, label).toBeDefined()
+      expect(order.indexOf("Check registry"), `${label} より前に Check registry`).toBeLessThan(order.indexOf(label))
+      expect(stepIf(step!), `${label} は公開済みなら飛ばす`).toMatch(/steps\.registry\.outputs\.published != 'true'/)
+    }
+
+    // Verify と Release 作成は、公開済みで飛ばした再実行でも走る
+    for (const label of ["Verify registry metadata and tarball", "Create git tag + GitHub Release"]) {
+      const step = stepNamed(publish, label)
+      expect(step, label).toBeDefined()
+      expect(stepIf(step!), label).not.toMatch(/steps\.registry/)
     }
   })
 
