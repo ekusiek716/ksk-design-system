@@ -1775,6 +1775,7 @@
       ],
       "rules": [
         "Use for multi-value text input (tags, emails, keywords)",
+        "フォーカスが外れると入力中の文字がタグになる（Enter を押さずに保存ボタンへ移っても失われない）。Enter で確定した直後の blur だけは二重追加を防ぐため何もしない (issue #790)",
         "FormField と使うときは id を渡して htmlFor で結ぶ。inputLabel を label の代わりに使わない（lint P026 の例外が要らなくなる）"
       ],
       "accessibility": [

@@ -95,6 +95,9 @@ function TagInput({
     inputLabel ?? (ariaLabelledby || (id && !labelMissing) ? undefined : defaultLabels.tagInputLabel)
   const [input, setInput] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
+  // Enter で確定した「直後の」blur だけを飛ばすフラグ（二重追加防止。ede96b6）。
+  // 入力が変わった時点で下ろす。下ろさないと、Enter の後に打った文字が次の最初の
+  // blur でタグ化されず黙って失われる（issue #790）。
   const skipBlurRef = React.useRef(false)
 
   const addTag = React.useCallback(
@@ -178,7 +181,10 @@ function TagInput({
         id={id}
         name={name}
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={(e) => {
+          skipBlurRef.current = false
+          setInput(e.target.value)
+        }}
         onKeyDown={handleKeyDown}
         onBlur={() => {
           if (skipBlurRef.current) { skipBlurRef.current = false; return }
