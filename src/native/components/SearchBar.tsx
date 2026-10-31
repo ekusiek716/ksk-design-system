@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, TextInput, View, Text as RNText, type AccessibilityProps } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 /**
@@ -56,6 +57,8 @@ export function SearchBar({
         accessibilityHint={accessibilityHint}
         accessibilityRole={accessibilityRole}
         accessibilityState={accessibilityState}
+        // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+        {...webAriaFromState(accessibilityRole, accessibilityState)}
         {...accessibilityProps}
         style={[
           resolveTypo("body.md"),

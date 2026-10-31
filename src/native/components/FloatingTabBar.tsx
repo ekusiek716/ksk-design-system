@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, View, Text as RNText, type StyleProp, type TextStyle, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { themes } from "../../tokens/native"
 import { resolveTypo } from "../typography"
 
@@ -82,6 +83,8 @@ export function FloatingTabBar({
             key={item.key}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
+            // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+            {...webAriaFromState("tab", { selected: active })}
             accessibilityLabel={item.label}
             onPress={() => onSelect(item.key)}
             style={({ pressed }) => ({

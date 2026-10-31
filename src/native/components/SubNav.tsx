@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, View, Text as RNText, ScrollView } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 export interface SubNavItem {
@@ -40,6 +41,8 @@ export function SubNav({ items, value, onChange }: SubNavProps) {
             key={it.key}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
+            // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+            {...webAriaFromState("tab", { selected: active })}
             onPress={() => onChange?.(it.key)}
             style={{
               flexDirection: "row",

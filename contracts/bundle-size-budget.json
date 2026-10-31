@@ -164,8 +164,8 @@
           ]
         }
       ],
-      "baselineBytes": 7884,
-      "budgetBytes": 8700,
+      "baselineBytes": 8706,
+      "budgetBytes": 9600,
       "baselineRawBytes": 48691,
       "baselineBrotliBytes": 6410
     }

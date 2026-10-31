@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from "react"
 import { Pressable, View, Text as RNText, ScrollView } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 interface TabsContextValue {
@@ -78,6 +79,8 @@ export function TabsTrigger({ value, children, disabled, accessibilityLabel }: T
       disabled={disabled}
       accessibilityRole="tab"
       accessibilityState={{ selected: active, disabled: Boolean(disabled) }}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+      {...webAriaFromState("tab", { selected: active, disabled: Boolean(disabled) })}
       accessibilityLabel={accessibilityLabel ?? (typeof children === "string" ? children : undefined)}
       style={{
         paddingVertical: scales.spacing.scale[2],

@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, View } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 
 export interface SwitchProps {
   value?: boolean
@@ -40,6 +41,8 @@ export function Switch({
       disabled={disabled}
       accessibilityRole="switch"
       accessibilityState={{ checked: value, disabled }}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+      {...webAriaFromState("switch", { checked: value, disabled })}
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       hitSlop={{ top: 7, bottom: 7, left: 0, right: 0 }}

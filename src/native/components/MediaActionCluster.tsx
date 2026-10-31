@@ -9,6 +9,7 @@ import {
 } from "react-native"
 import { useLatestRef } from "../../lib/use-latest-ref"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 import { GlassView } from "./GlassView"
 
@@ -211,6 +212,9 @@ function MediaActionClusterButton({
       accessibilityRole="button"
       accessibilityLabel={item.accessibilityLabel ?? item.ariaLabel ?? item.label}
       accessibilityState={{ disabled: item.disabled, selected: item.active }}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）。
+      // Web の MediaActionCluster と同じく active は aria-pressed。
+      {...webAriaFromState("button", { disabled: item.disabled, selected: item.active })}
       style={({ pressed }) => ({
         minWidth: scales.touchTargets.iconButton.min,
         minHeight: scales.touchTargets.iconButton.min,

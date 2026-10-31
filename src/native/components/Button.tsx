@@ -10,6 +10,7 @@ import {
   type ViewStyle,
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 import { resolveRaisedElevationStyle } from "../button-elevation"
 import { GlassView } from "./GlassView"
@@ -97,6 +98,7 @@ export function Button({
 }: ButtonProps) {
   const { theme, scales, mode } = useTheme()
   const effectiveDisabled = disabled || loading
+  const a11yState = { ...accessibilityState, disabled: effectiveDisabled, busy: loading || undefined }
 
   const palette: Record<
     Exclude<ButtonVariant, "glass">,
@@ -181,7 +183,9 @@ export function Button({
         disabled={effectiveDisabled}
         // 役割は部品が既定で持ち、呼び出し側の明示が優先（issue #800・IconButton / Chip と同じ）
         accessibilityRole={accessibilityRole ?? "button"}
-        accessibilityState={{ ...accessibilityState, disabled: effectiveDisabled, busy: loading || undefined }}
+        accessibilityState={a11yState}
+        // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+        {...webAriaFromState(accessibilityRole ?? "button", a11yState)}
         hitSlop={hitSlop}
         style={({ pressed }) => {
           const r = resolveGlassStyles(pressed)
@@ -241,7 +245,9 @@ export function Button({
     <Pressable
       disabled={effectiveDisabled}
       accessibilityRole={accessibilityRole ?? "button"}
-      accessibilityState={{ ...accessibilityState, disabled: effectiveDisabled, busy: loading || undefined }}
+      accessibilityState={a11yState}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+      {...webAriaFromState(accessibilityRole ?? "button", a11yState)}
       style={({ pressed }) => [
         {
           minHeight: scales.touchTargets.buttonCTA.min,

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react"
 import { Pressable, View, Text as RNText, type StyleProp, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 import { IconButton } from "./IconButton"
 import {
@@ -218,6 +219,9 @@ export function Calendar({
                   dayAccessibilityLabel?.(info) ?? defaultDayAccessibilityLabel(info, locale)
                 }
                 accessibilityState={{ disabled: info.disabled, selected: info.selected }}
+                // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）。
+                // 日付セルは role=button なので選択中は aria-pressed（button に aria-selected は不可）。
+                {...webAriaFromState("button", { disabled: info.disabled, selected: info.selected })}
                 style={[
                   {
                     flex: 1,

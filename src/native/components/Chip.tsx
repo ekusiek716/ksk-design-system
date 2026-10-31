@@ -2,6 +2,7 @@ import React from "react"
 import { Pressable, View, Text as RNText, type PressableProps } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
+import { webAriaFromState } from "../web-aria"
 
 export type ChipVariant = "filled" | "accent" | "outline"
 export type ChipSize = "sm" | "md" | "lg"
@@ -11,6 +12,12 @@ export interface ChipProps extends Omit<PressableProps, "children" | "style"> {
   variant?: ChipVariant
   size?: ChipSize
   shape?: ChipShape
+  /**
+   * 選択中。未指定は見た目・native の accessibilityState とも「未選択」と同じ。
+   * Web ビルド（react-native-web）では、渡したときだけ aria-pressed を出す（issue #808）。
+   * 選択に使わないチップ（削除ボタン付きタグ・単なる操作）は渡さないこと。false を渡すと
+   * 「押されていないトグルボタン」と読み上げられる。Web 版 Chip と同じ挙動。
+   */
   selected?: boolean
   disabled?: boolean
   count?: number
@@ -26,7 +33,7 @@ export function Chip({
   variant = "filled",
   size = "md",
   shape = "pill",
-  selected = false,
+  selected: selectedProp,
   disabled = false,
   count,
   removable = false,
@@ -54,6 +61,21 @@ export function Chip({
       ? `削除: ${children}`
       : "削除"
 
+  // 支援技術への既定値（issue #311）。role が無いとスクリーンリーダーが
+  // ただのテキストとして扱い、selected も読み上げられない。呼び出し側の
+  // 明示値が常に優先される（後方互換）。
+  const role = accessibilityRole ?? "button"
+  // 見た目と native の accessibilityState は従来どおり「未指定 = 未選択」で扱う（後方互換）。
+  const selected = selectedProp ?? false
+  const state = { selected, disabled, ...accessibilityState }
+  // Web の aria-pressed は、選択状態を制御しているチップ（selected を渡したとき）だけに出す
+  // （issue #808）。削除ボタン付きタグや単なる操作チップに aria-pressed="false" が付くと、
+  // 支援技術に「押されていないトグルボタン」と読まれ、押しても状態が変わらない部品が
+  // 切り替えボタンに見えるため。Web 版 Chip（src/components/patterns/chip.tsx）と同じ挙動。
+  // 呼び出し側が accessibilityState.selected を明示したときはそれを使う。
+  const webState =
+    selectedProp === undefined ? { ...state, selected: accessibilityState?.selected } : state
+
   const bg = selected ? theme.brand.primary : palette.bg
   const fg = selected ? theme.text["on-inverse"] : disabled ? theme.text.disable : palette.fg
   const border = selected ? theme.brand.primary : palette.border
@@ -62,11 +84,13 @@ export function Chip({
     <View style={{ flexDirection: "row", alignSelf: "flex-start" }}>
       <Pressable
         disabled={disabled}
-        // 支援技術への既定値（issue #311）。role が無いとスクリーンリーダーが
-        // ただのテキストとして扱い、selected も読み上げられない。呼び出し側の
-        // 明示値が常に優先される（後方互換）。
-        accessibilityRole={accessibilityRole ?? "button"}
-        accessibilityState={{ selected, disabled, ...accessibilityState }}
+        accessibilityRole={role}
+        accessibilityState={state}
+        // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）。
+        // role が radio / checkbox / switch なら aria-checked、button なら aria-pressed になる
+        // （ChipSelector の単一選択・CollapsibleChipField の展開中は radio で渡ってくる）。
+        // 呼び出し側の明示 aria-* は後ろの {...rest} が優先する。
+        {...webAriaFromState(role, webState)}
         style={({ pressed }) => [
           {
             height: heightMap[size],
@@ -116,6 +140,7 @@ export function Chip({
           accessibilityRole="button"
           accessibilityLabel={removeLabel}
           accessibilityState={{ disabled }}
+          {...webAriaFromState("button", { disabled })}
           style={({ pressed }) => ({
             height: heightMap[size],
             paddingHorizontal: 10,

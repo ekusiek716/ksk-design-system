@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, Text as RNText, View, type StyleProp, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 export type SettingsSectionVariant = "group" | "card" | "danger"
@@ -200,6 +201,8 @@ export function SettingsListRow({
         onPress={onPress}
         accessibilityRole="button"
         accessibilityState={{ disabled }}
+        // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+        {...webAriaFromState("button", { disabled })}
       >
         {({ pressed }) => row(pressed)}
       </Pressable>
