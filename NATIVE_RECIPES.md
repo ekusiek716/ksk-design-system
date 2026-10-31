@@ -156,6 +156,8 @@ import {
 </MobileAppShell>
 ```
 
+native の下余白（`fab` / `bottomNav` から決まる `bottomPadding`）と `contentStyle` の padding は、本文の `ScrollView` の `contentContainerStyle` に入ります。最後の行は FAB や浮いたタブバーの上までスクロールできます。広告バナー分などの追加余白も `contentStyle={{ paddingBottom }}` で渡せます。
+
 Web/PWA consumer は `ksk-design-system` の `MobileAppShell` と `BottomTabBar variant="pill"` / `MobileFloatingActionButton` を組み合わせます。`bottomNavMode="fixed"` では shell が fixed wrapper と safe-area padding を持ちます。既に fixed な nav を渡す場合は `bottomNavMode="external"` を指定します。
 
 ### Liquid Glass の FAB
