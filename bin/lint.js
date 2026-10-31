@@ -813,7 +813,12 @@ function lintFile(file, cwd, rules, options = {}) {
       }
       continue
     }
-    const isFullFileRule = rule.pattern.includes("[\\s\\S]")
+    // scope: "tag" は「タグ内の属性を見る」ルール（issue #805）。`[^>]*` は改行にも
+    // 一致するので、ファイル全体モードで照合すれば Prettier が折り返した複数行の
+    // タグでも 1 行と同じ判定になる。行単位だと P033 / P044 を見逃し、alt が
+    // 次の行にある <img> を P025 と誤検知していた。
+    const isTagScope = rule.scope === "tag"
+    const isFullFileRule = isTagScope || rule.pattern.includes("[\\s\\S]")
     let regex
     try {
       // 全ファイル横断ルールは matchAll で複数件拾うため g フラグを必須にする
@@ -829,11 +834,22 @@ function lintFile(file, cwd, rules, options = {}) {
       for (const match of maskedSource.matchAll(regex)) {
         if (match.index == null) continue
         const lineNumber = lineForIndex(maskedSource, match.index)
+        // scope: "tag" はマッチしたタグの行範囲（開始行〜タグを閉じる > の行）を
+        // 判定の単位にする（issue #805）。P002 の excludeLines `type="file"` が
+        // <input の次の行にあっても効き、行スコープ ignore はタグの直上にも
+        // 属性の直上（タグの途中）にも置ける。それ以外のルールは従来どおり開始行だけ。
+        const endLine = isTagScope
+          ? lineForIndex(maskedSource, tagRangeEnd(maskedSource, match.index, match.index + match[0].length))
+          : lineNumber
         // excludes（ksk-ds-allow-* 等）はコメントに書かれることが多いため、
         // 判定は常にマスク前の生の行に対して行う。
-        const rawLine = lines[lineNumber - 1] ?? ""
-        if (matchesRuleExclude(rule, { file: rel, line: rawLine, isDsFile })) continue
-        if (ignores.suppresses(rule.id ?? "UNKNOWN", lineNumber)) continue
+        const rangeLines = lines.slice(lineNumber - 1, Math.max(endLine, lineNumber))
+        if (rangeLines.some((rawLine) => matchesRuleExclude(rule, { file: rel, line: rawLine, isDsFile }))) continue
+        let suppressed = false
+        for (let line = lineNumber; line <= endLine && !suppressed; line++) {
+          suppressed = ignores.suppresses(rule.id ?? "UNKNOWN", line)
+        }
+        if (suppressed) continue
         findings.push(toFinding(rule, rel, lineNumber, platform))
       }
       continue
@@ -959,6 +975,37 @@ function collectRuleIgnores(source, file) {
 
 function lineForIndex(source, index) {
   return source.slice(0, index).split(/\r?\n/).length
+}
+
+/** タグを閉じる > を探す上限（壊れたソースで末尾まで走査し続けないため） */
+const TAG_SCAN_LIMIT = 4000
+
+/**
+ * scope: "tag" のマッチについて、タグの行範囲の終端（文字インデックス）を返す（issue #805）。
+ *
+ * マッチが `<Tag` で始まるならその直後から、そうでなければ（`aria-pressed[^>]*<Button`
+ * のような逆向きの分岐）マッチの終端から、タグを閉じる `>` を探す。`{...}` の中の
+ * `>`（アロー関数の `=>` や属性に渡した JSX）と文字列の中身は飛ばす。見つからない
+ * ときはマッチの終端までを範囲にする。どちらの場合もマッチ自体より短くはしない。
+ */
+function tagRangeEnd(source, matchStart, matchEnd) {
+  const matchLast = Math.max(matchStart, matchEnd - 1)
+  const from = source[matchStart] === "<" ? matchStart + 1 : matchEnd
+  const limit = Math.min(source.length, from + TAG_SCAN_LIMIT)
+  let depth = 0
+  for (let i = from; i < limit; i++) {
+    const ch = source[i]
+    if (ch === '"' || ch === "'" || ch === "`") {
+      const close = source.indexOf(ch, i + 1)
+      if (close === -1 || close >= limit) return matchLast
+      i = close
+      continue
+    }
+    if (ch === "{") depth += 1
+    else if (ch === "}") depth = Math.max(0, depth - 1)
+    else if (ch === ">" && depth === 0 && source[i - 1] !== "=") return Math.max(matchLast, i)
+  }
+  return matchLast
 }
 
 // ソース全体を1文字ずつ走査し、コメント本文だけを同じ文字数の空白に

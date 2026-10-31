@@ -401,6 +401,15 @@ consumer が shadcn 既定の `src/components/ui/` に部品を置いても中�
 `scripts/check-rules-contract.mjs`（`npm run check` に組み込み済み）が `excludeLines` /
 `excludePaths` / `excludeDsPaths` 内のバックスラッシュ混入を検出します。
 
+#### タグ単位のルール（`"scope": "tag"`、issue #805）
+
+`<Button[^>]*aria-pressed` のようにタグの属性を見るルール（P002 / P025 / P033 / P034 / P036 / P039 /
+P042 / P043 / P044）には `"scope": "tag"` が付いています。これらはファイル全体で照合するため、
+Prettier が長いタグを複数行に折り返しても 1 行で書いたときと同じ判定になります。`excludeLines` と
+行スコープの `ksk-ds-lint-ignore` は、タグの開始行から閉じる `>` の行までのどこに書いても効きます。
+v2.22.0 までは 1 行ずつ照合していたため、複数行のタグで P033 / P044 等を見逃し、alt が次の行にある
+`<img>` を P025 と誤検知していました。修正後は、これまで見逃していた箇所が新たに error になることがあります。
+
 #### P029: テンプレートリテラル className の許容範囲（issue #464）
 
 `className={\`...\${...}...\`}` の補間部（`${...}`）が**文字列リテラルのみで構成される式**
