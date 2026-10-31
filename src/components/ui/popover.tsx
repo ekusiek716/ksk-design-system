@@ -3,6 +3,7 @@ import { Popover as PopoverPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { usePortalContainer } from "./portal-container"
 import { subscribeToAlertDialogOpening } from "@/lib/layer-coordination"
+import { guardEscapeDuringIme } from "@/lib/ime"
 
 function Popover({
   open,
@@ -44,7 +45,7 @@ function PopoverTrigger({ ...props }: React.ComponentProps<typeof PopoverPrimiti
   return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
 }
 
-function PopoverContent({ className, align = "center", sideOffset = 4, ...props }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+function PopoverContent({ className, align = "center", sideOffset = 4, onEscapeKeyDown, ...props }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
   // PortalContainerProvider があればそのスコープ内へ、無ければ document.body（#360）
   const container = usePortalContainer()
   return (
@@ -53,6 +54,11 @@ function PopoverContent({ className, align = "center", sideOffset = 4, ...props 
         data-slot="popover-content"
         align={align}
         sideOffset={sideOffset}
+        onEscapeKeyDown={(event) => {
+          onEscapeKeyDown?.(event)
+          // #809: IME 変換中の Esc（変換の取り消し）では閉じない。Combobox の検索欄も同じ。
+          guardEscapeDuringIme(event)
+        }}
         className={cn(
           // max-w は画面内に使える幅まで。className で w-[480px] などを渡しても、
           // 幅 390px の画面で右へはみ出さない（既定の w-72 = 288px には効かない）。

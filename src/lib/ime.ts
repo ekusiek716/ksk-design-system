@@ -28,3 +28,18 @@ export function isImeComposing(event: ImeComposableKeyEvent): boolean {
   const source = event.nativeEvent ?? event
   return source.isComposing === true || source.keyCode === 229
 }
+
+/**
+ * レイヤー（Dialog / Sheet / AlertDialog / Popover）の `onEscapeKeyDown` で使う。
+ * IME 変換中の Escape（変換の取り消し）なら `preventDefault()` して true を返す。
+ *
+ * Radix の DismissableLayer は `key === "Escape"` だけを見て閉じるため、変換を取り消す
+ * つもりの Esc で入力中のダイアログやシートごと閉じ、入力内容が消えていた（issue #809）。
+ * preventDefault すると Radix は閉じない。変換していないときの次の Esc で従来どおり閉じる。
+ * consumer の `onEscapeKeyDown` を先に呼んでから、このガードを呼ぶこと。
+ */
+export function guardEscapeDuringIme(event: Pick<Event, "preventDefault"> & ImeComposableKeyEvent): boolean {
+  if (!isImeComposing(event)) return false
+  event.preventDefault()
+  return true
+}

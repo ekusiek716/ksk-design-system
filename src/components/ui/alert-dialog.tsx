@@ -1,4 +1,5 @@
-import { getActiveElement } from "@/lib/active-element"
+import { captureOpener, restoreOpenerFocus, takeOpener } from "@/lib/focus-restore"
+import { guardEscapeDuringIme } from "@/lib/ime"
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
@@ -141,6 +142,7 @@ function AlertDialogContent({
   restoreFocusOnClose = true,
   onOpenAutoFocus,
   onCloseAutoFocus,
+  onEscapeKeyDown,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
   /** Restore the opener when closing, including controlled dialogs without a Trigger. */
@@ -165,23 +167,25 @@ function AlertDialogContent({
         data-slot="alert-dialog-content"
         data-size={size}
         onOpenAutoFocus={(event) => {
-          openerRef.current = getActiveElement() as HTMLElement | null
+          captureOpener(openerRef)
           onOpenAutoFocus?.(event)
           // Leave Radix's safe default (Cancel) intact unless the caller overrides it.
         }}
         onCloseAutoFocus={(event) => {
-          const opener = openerRef.current
-          openerRef.current = null
+          // #657 の復帰処理。#789 で Dialog / Sheet と共通の lib/focus-restore へ寄せた。
+          const opener = takeOpener(openerRef)
           onCloseAutoFocus?.(event)
           if (event.defaultPrevented) return
           if (!restoreFocusOnClose) {
             event.preventDefault()
             return
           }
-          if (opener?.isConnected && !opener.matches(":disabled, [inert], [inert] *")) {
-            event.preventDefault()
-            opener.focus({ preventScroll: true })
-          }
+          restoreOpenerFocus(event, opener)
+        }}
+        onEscapeKeyDown={(event) => {
+          onEscapeKeyDown?.(event)
+          // #809: IME 変換中の Esc は変換の取り消しに使われるので閉じない。
+          guardEscapeDuringIme(event)
         }}
         style={{ ...style, zIndex: resolvedContentZ }}
         // #505: AlertDialog は Radix の仕様上つねに modal（`modal` prop が無い）。

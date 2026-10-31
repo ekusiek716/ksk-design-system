@@ -154,3 +154,146 @@ describe("focus corrections (#652, #653, #657, #658, #659)", () => {
     expect(panel.className).toContain("focus-visible:outline-hidden")
   })
 })
+
+// #789: 常時マウントの DialogContent / SheetContent（全変種）を、一覧の行ごとの
+// opener から開き直すケース。2 回目以降も「その回の opener」へ戻ること、
+// 戻り先が消えていたら強制復帰しないこと、preventScroll で戻すことを固定する。
+type SharedOverlayKind = "dialog" | "sheet" | "sheet-snap" | "sheet-swipe-bottom" | "sheet-swipe-side"
+const sharedOverlayKinds: SharedOverlayKind[] = ["dialog", "sheet", "sheet-snap", "sheet-swipe-bottom", "sheet-swipe-side"]
+function sharedOverlay(kind: SharedOverlayKind, open: boolean) {
+  switch (kind) {
+    case "dialog":
+      return <Dialog open={open}><DialogContent><DialogTitle>編集</DialogTitle></DialogContent></Dialog>
+    case "sheet":
+      return <Sheet open={open}><SheetContent><SheetTitle>編集</SheetTitle></SheetContent></Sheet>
+    case "sheet-snap":
+      return <Sheet open={open} snapPoints={[0.5, 1]}><SheetContent side="bottom"><SheetTitle>編集</SheetTitle></SheetContent></Sheet>
+    case "sheet-swipe-bottom":
+      return <Sheet open={open}><SheetContent side="bottom" swipeToClose><SheetTitle>編集</SheetTitle></SheetContent></Sheet>
+    case "sheet-swipe-side":
+      return <Sheet open={open}><SheetContent side="right" swipeToClose><SheetTitle>編集</SheetTitle></SheetContent></Sheet>
+  }
+}
+function setupRows() {
+  const rowA = document.createElement("button")
+  rowA.textContent = "行 A"
+  const rowB = document.createElement("button")
+  rowB.textContent = "行 B"
+  document.body.append(rowA, rowB)
+  const container = document.createElement("div")
+  document.body.append(container)
+  root = createRoot(container)
+  return { rowA, rowB }
+}
+function openAndClose(kind: SharedOverlayKind) {
+  act(() => root!.render(sharedOverlay(kind, true)))
+  flush()
+  act(() => root!.render(sharedOverlay(kind, false)))
+  flush()
+}
+
+describe("shared Dialog / Sheet restore the opener of each open (#789)", () => {
+  beforeEach(() => {
+    window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener() {}, removeEventListener() {} })
+  })
+  it.each(sharedOverlayKinds)("%s: reopening from row B returns focus to row B", (kind) => {
+    const { rowA, rowB } = setupRows()
+    act(() => root!.render(sharedOverlay(kind, false)))
+    rowA.focus()
+    openAndClose(kind)
+    expect(document.activeElement).toBe(rowA)
+    rowB.focus()
+    openAndClose(kind)
+    expect(document.activeElement).toBe(rowB)
+  })
+  it.each(sharedOverlayKinds)("%s: a removed earlier opener does not drop focus to body", (kind) => {
+    const { rowA, rowB } = setupRows()
+    act(() => root!.render(sharedOverlay(kind, false)))
+    rowA.focus()
+    openAndClose(kind)
+    rowA.remove()
+    rowB.focus()
+    openAndClose(kind)
+    expect(document.activeElement).toBe(rowB)
+  })
+  it.each(sharedOverlayKinds)("%s: does not force focus onto a disconnected opener", (kind) => {
+    const { rowA } = setupRows()
+    act(() => root!.render(sharedOverlay(kind, false)))
+    rowA.focus()
+    act(() => root!.render(sharedOverlay(kind, true)))
+    flush()
+    rowA.remove()
+    const focus = vi.spyOn(rowA, "focus")
+    act(() => root!.render(sharedOverlay(kind, false)))
+    flush()
+    expect(focus).not.toHaveBeenCalled()
+  })
+  it.each(sharedOverlayKinds)("%s: does not force focus onto an opener disabled while open", (kind) => {
+    const { rowA } = setupRows()
+    act(() => root!.render(sharedOverlay(kind, false)))
+    rowA.focus()
+    act(() => root!.render(sharedOverlay(kind, true)))
+    flush()
+    rowA.disabled = true
+    const focus = vi.spyOn(rowA, "focus")
+    act(() => root!.render(sharedOverlay(kind, false)))
+    flush()
+    expect(focus).not.toHaveBeenCalled()
+  })
+  it.each(sharedOverlayKinds)("%s: restores with preventScroll so the list does not jump", (kind) => {
+    const { rowA } = setupRows()
+    act(() => root!.render(sharedOverlay(kind, false)))
+    rowA.focus()
+    act(() => root!.render(sharedOverlay(kind, true)))
+    flush()
+    const focus = vi.spyOn(rowA, "focus")
+    act(() => root!.render(sharedOverlay(kind, false)))
+    flush()
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true })
+  })
+  // #789 レビュー指摘: SheetContent は side / swipeToClose / snapPoints の組み合わせで
+  // 別コンポーネントへ分岐する。開いたまま分岐が変わると古い側の FocusScope が破棄されて
+  // onCloseAutoFocus が発火するが、Sheet は閉じていないので opener の記録を失ってはいけない。
+  it.each([
+    ["swipe side → swipe bottom", { side: "right" as const }, { side: "bottom" as const }],
+    ["swipe bottom → plain right", { side: "bottom" as const }, { side: "right" as const, swipeToClose: false }],
+  ])("sheet: switching the content variant while open keeps the opener (%s)", (_label, before, after) => {
+    const { rowA } = setupRows()
+    const render = (open: boolean, variant: React.ComponentProps<typeof SheetContent>) =>
+      act(() => root!.render(<Sheet open={open}><SheetContent swipeToClose {...variant}><SheetTitle>編集</SheetTitle></SheetContent></Sheet>))
+    render(false, before)
+    rowA.focus()
+    render(true, before)
+    flush()
+    render(true, after)
+    flush()
+    expect(document.activeElement).not.toBe(rowA)
+    render(false, after)
+    flush()
+    expect(document.activeElement).toBe(rowA)
+  })
+  // #789 レビュー指摘: open のまま Sheet ごと / Content だけ外されたのは付け替えではない。
+  // 閉じたときと同じく opener へ戻す（付け替えと誤認すると body に取り残される）。
+  it("sheet: unmounting the whole Sheet while open returns focus to the opener", () => {
+    const { rowA } = setupRows()
+    act(() => root!.render(sharedOverlay("sheet", false)))
+    rowA.focus()
+    act(() => root!.render(sharedOverlay("sheet", true)))
+    flush()
+    expect(document.activeElement).not.toBe(rowA)
+    act(() => root!.render(<div />))
+    flush()
+    expect(document.activeElement).toBe(rowA)
+  })
+  it("sheet: removing only SheetContent while open returns focus to the opener", () => {
+    const { rowA } = setupRows()
+    act(() => root!.render(sharedOverlay("sheet", false)))
+    rowA.focus()
+    act(() => root!.render(sharedOverlay("sheet", true)))
+    flush()
+    expect(document.activeElement).not.toBe(rowA)
+    act(() => root!.render(<Sheet open />))
+    flush()
+    expect(document.activeElement).toBe(rowA)
+  })
+})
