@@ -101,6 +101,11 @@ interface DatePickerProps {
    * 任意項目などで利用者に値を消させたい画面はこの prop でクリア手段を明示する（issue #803。
    * 以前は react-day-picker の既定動作で再押下が選択解除になり、確かめるつもりで同じ日を
    * 押しただけで値が消えていた）。disabled のときは出さない。
+   *
+   * 制約: クリアボタンはトリガーを包む幅いっぱいの枠の右端を基準に、既定の横 padding
+   * （`--Field-Padding-X-Md`）を前提に重ねる。`clearable` のときは `className` で幅・外側の余白・
+   * 横 padding を変えず、幅や配置は親要素で決める（`className` はトリガーにだけ効くため、
+   * 変えるとクリアボタンがトリガーの右端からずれる）。
    */
   clearable?: boolean
   /**

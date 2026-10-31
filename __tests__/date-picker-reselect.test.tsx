@@ -121,6 +121,14 @@ describe("DatePicker: 選択中の日の再押下（#803）", () => {
     expect(document.querySelector('[data-slot="date-picker-clear"]')).toBeNull()
   })
 
+  it("クリアボタンを押したらフォーカスをトリガーへ戻す（body に落とさない）", () => {
+    render(<DatePicker value={new Date(2026, 9, 15)} onChange={() => {}} clearable />)
+    const clear = document.querySelector<HTMLButtonElement>('[data-slot="date-picker-clear"]')!
+    act(() => clear.focus())
+    click(clear)
+    expect(document.activeElement).toBe(document.querySelector('[data-slot="date-picker-trigger"]'))
+  })
+
   it("clearable でも disabled のときはクリアボタンを出さない", () => {
     render(<DatePicker value={new Date(2026, 9, 15)} onChange={() => {}} clearable disabled />)
     expect(document.querySelector('[data-slot="date-picker-clear"]')).toBeNull()
