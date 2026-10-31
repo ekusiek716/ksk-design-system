@@ -725,11 +725,21 @@ interface SheetContentProps
    *
    * Gestures that belong to a child are never taken over (#787): a drag that
    * starts inside `input` / `textarea` / `select` / `[contenteditable]` /
-   * `[role="slider"]` / `[data-no-swipe]`, a mouse drag that is selecting text,
-   * and — for side drawers — a drag inside a horizontal scroller that can still
-   * scroll in the close direction. Add `data-no-swipe` to opt out any other
-   * region (e.g. a custom gesture area). The drag handle
+   * `[role="slider"]` / `[data-no-swipe]`; a mouse drag that starts on
+   * selectable text (an element with its own text and no `user-select: none`
+   * ancestor; buttons and links are not text targets) or that starts selecting
+   * text inside the sheet; and — for side drawers — a drag inside a horizontal
+   * scroller that can still scroll in the close direction. Add `data-no-swipe`
+   * to opt out any other region (e.g. a custom gesture area), or
+   * `select-none` to let the mouse grab a text area. The drag handle
    * (`[data-sheet-drag-handle]`) always remains a valid grab target.
+   *
+   * Behaviour change (#787): the form-field exclusion also applies to touch,
+   * so a touch swipe that starts on an input / textarea / select no longer
+   * closes the sheet (on phones that drag moves the caret or scrolls the
+   * field's own text). Swipes on the drag handle or the rest of the body still
+   * close it. Text outside form fields is checked for mouse only — touch text
+   * selection starts with a long press and does not compete with the swipe.
    *
    * Ignored when the parent <Sheet> uses `snapPoints` (snap mode handles its
    * own drag).
@@ -1158,14 +1168,18 @@ function findHorizontalScrollableAncestor(
   root: HTMLElement | null,
   side: "left" | "right"
 ): HTMLElement | null {
-  let node = start instanceof HTMLElement ? start : null
+  // 押した場所が SVG（チップ内のアイコン等）でも祖先をたどれるよう Element から
+  // 始め、scrollLeft を読むのは HTMLElement だけにする。
+  let node: Element | null = start instanceof Element ? start : null
   while (node) {
-    const overflowX = getComputedStyle(node).overflowX
-    const maxScroll = node.scrollWidth - node.clientWidth
-    if ((overflowX === "auto" || overflowX === "scroll") && maxScroll > 1) {
-      const canScroll =
-        side === "right" ? node.scrollLeft > 0 : node.scrollLeft < maxScroll - 1
-      if (canScroll) return node
+    if (node instanceof HTMLElement) {
+      const overflowX = getComputedStyle(node).overflowX
+      const maxScroll = node.scrollWidth - node.clientWidth
+      if ((overflowX === "auto" || overflowX === "scroll") && maxScroll > 1) {
+        const canScroll =
+          side === "right" ? node.scrollLeft > 0 : node.scrollLeft < maxScroll - 1
+        if (canScroll) return node
+      }
     }
     if (node === root) break
     node = node.parentElement
@@ -1173,11 +1187,102 @@ function findHorizontalScrollableAncestor(
   return null
 }
 
-/** #787: マウスで文字を選択中か（選択ドラッグをシートのドラッグにしない）。 */
-function hasActiveTextSelection(): boolean {
-  if (typeof window === "undefined" || typeof window.getSelection !== "function") return false
-  const text = window.getSelection()?.toString() ?? ""
-  return text.length > 0
+// ボタン・リンクの上ではマウスを押しても文字選択は始まらない（リンクは
+// ブラウザのリンクドラッグになる）ので、文字選択の判定から外す。
+const NON_SELECTING_TARGET_SELECTOR = 'button,[role="button"],a[href]'
+
+/**
+ * #787: マウスで押した場所が「選択できる文字」か。押した要素が空白以外の
+ * テキストを直接持ち、シート内の祖先に `user-select: none` が無ければ true。
+ * マウスの選択はドラッグ量 6px のスロップを超えた時点ではまだ空のことが
+ * 多いため、`getSelection()` を見るだけでは本文の文字選択を守れない。押した
+ * 時点で判定して、その回のジェスチャを最初から文字選択に渡す。
+ * ドラッグハンドル（`[data-sheet-drag-handle]`）の中は常に false。
+ */
+function isSelectableTextTarget(
+  target: EventTarget | null,
+  boundary: HTMLElement | null
+): boolean {
+  if (!(target instanceof Element)) return false
+  if (boundary != null && !boundary.contains(target)) return false
+  if (target.closest("[data-sheet-drag-handle]") != null) return false
+  const nonSelecting = target.closest(NON_SELECTING_TARGET_SELECTOR)
+  if (nonSelecting != null && (boundary == null || boundary.contains(nonSelecting))) {
+    return false
+  }
+  const hasText = Array.from(target.childNodes).some(
+    (n) => n.nodeType === Node.TEXT_NODE && (n.textContent ?? "").trim() !== ""
+  )
+  if (!hasText) return false
+  let node: Element | null = target
+  while (node) {
+    const style = getComputedStyle(node)
+    if (
+      style.userSelect === "none" ||
+      style.getPropertyValue("-webkit-user-select") === "none"
+    ) {
+      return false
+    }
+    if (node === boundary) break
+    node = node.parentElement
+  }
+  return true
+}
+
+/** #787: ジェスチャ開始時点の選択範囲（開始前から残っている選択と区別する）。 */
+interface SelectionSnapshot {
+  anchorNode: Node | null
+  anchorOffset: number
+  focusNode: Node | null
+  focusOffset: number
+}
+
+function readSelection(): Selection | null {
+  if (typeof window === "undefined" || typeof window.getSelection !== "function") return null
+  return window.getSelection()
+}
+
+function snapshotSelection(): SelectionSnapshot | null {
+  const sel = readSelection()
+  if (!sel) return null
+  return {
+    anchorNode: sel.anchorNode,
+    anchorOffset: sel.anchorOffset,
+    focusNode: sel.focusNode,
+    focusOffset: sel.focusOffset,
+  }
+}
+
+/**
+ * #787: このジェスチャでマウスがシート内の文字を選び始めたか。
+ * ページ全体の選択ではなく `boundary`（シート本体）内の選択だけを見て、
+ * ジェスチャ開始時から変わっていない選択（前の操作の残り）は数えない。
+ * 押した場所の判定（isSelectableTextTarget）を補う保険で、文字の無い余白から
+ * 押して文字の上へなぞった場合を拾う。
+ */
+function hasNewTextSelectionWithin(
+  boundary: HTMLElement | null,
+  before: SelectionSnapshot | null
+): boolean {
+  const sel = readSelection()
+  if (!sel || sel.isCollapsed || sel.toString().length === 0) return false
+  if (
+    boundary != null &&
+    !(sel.anchorNode != null && boundary.contains(sel.anchorNode)) &&
+    !(sel.focusNode != null && boundary.contains(sel.focusNode))
+  ) {
+    return false
+  }
+  if (
+    before != null &&
+    before.anchorNode === sel.anchorNode &&
+    before.anchorOffset === sel.anchorOffset &&
+    before.focusNode === sel.focusNode &&
+    before.focusOffset === sel.focusOffset
+  ) {
+    return false
+  }
+  return true
 }
 
 interface SwipeToCloseBottomSheetProps
@@ -1259,6 +1364,8 @@ function SwipeToCloseBottomSheet({
   const onHandleRef = React.useRef(false)
   // #787: この回のジェスチャがマウス由来か（文字選択の判定はマウスだけで行う）。
   const fromMouseRef = React.useRef(false)
+  // #787: マウスで押した時点の選択範囲（前の操作の残りを文字選択と誤認しない）。
+  const selectionAtStartRef = React.useRef<SelectionSnapshot | null>(null)
   const sheetRef = React.useRef<HTMLDivElement>(null)
   const { applyDescribedBy } = useDescribedByLink(
     sheetRef,
@@ -1334,15 +1441,21 @@ function SwipeToCloseBottomSheet({
       draggingRef.current = false
       samplesRef.current = [{ y: clientY, t }]
       fromMouseRef.current = fromMouse
+      selectionAtStartRef.current = fromMouse ? snapshotSelection() : null
       // The drag indicator is always a valid grab target regardless of scroll
       // position; elsewhere the gesture must start at the top of the content.
       onHandleRef.current =
-        target instanceof HTMLElement &&
+        target instanceof Element &&
         target.closest("[data-sheet-drag-handle]") != null
       scrollerRef.current = findScrollableAncestor(target, sheetRef.current)
-      // #787: 入力欄・Slider・data-no-swipe から始めた操作は子要素のもの。
-      // この回は最初から "scroll" にして、以後の判定も走らせない。
-      if (isSwipeExcludedTarget(target, sheetRef.current)) {
+      // #787: 入力欄・Slider・data-no-swipe から始めた操作と、マウスで選択
+      // できる文字の上から始めた操作（文字選択）は子要素のもの。この回は
+      // 最初から "scroll" にして、以後の判定も走らせない。タッチの文字選択は
+      // 長押しで始まりドラッグと競合しないため、文字の判定はマウスだけ。
+      if (
+        isSwipeExcludedTarget(target, sheetRef.current) ||
+        (fromMouse && isSelectableTextTarget(target, sheetRef.current))
+      ) {
         decisionRef.current = "scroll"
       }
     },
@@ -1366,13 +1479,14 @@ function SwipeToCloseBottomSheet({
           scrollerRef.current.scrollTop <= 0
         let decision = decideSwipeGesture(dy, dx, atTop)
         if (decision === null) return false // below slop — keep waiting
-        // #787: マウスで文字をなぞって選んでいる最中のドラッグは文字選択のもの。
+        // #787: 文字の無い余白から押して文字をなぞり始めた場合の保険。
+        // このジェスチャで始まったシート内の選択があれば文字選択として扱う。
         // ハンドルからは従来どおり常に掴める。
         if (
           decision === "drag" &&
           fromMouseRef.current &&
           !onHandleRef.current &&
-          hasActiveTextSelection()
+          hasNewTextSelectionWithin(sheetRef.current, selectionAtStartRef.current)
         ) {
           decision = "scroll"
         }
@@ -1679,6 +1793,8 @@ function SwipeToCloseSideDrawer({
   const samplesRef = React.useRef<DragSample[]>([])
   // #787: この回のジェスチャがマウス由来か（文字選択の判定はマウスだけで行う）。
   const fromMouseRef = React.useRef(false)
+  // #787: マウスで押した時点の選択範囲（前の操作の残りを文字選択と誤認しない）。
+  const selectionAtStartRef = React.useRef<SelectionSnapshot | null>(null)
   const sheetRef = React.useRef<HTMLDivElement>(null)
   const { applyDescribedBy } = useDescribedByLink(
     sheetRef,
@@ -1736,10 +1852,13 @@ function SwipeToCloseSideDrawer({
       draggingRef.current = false
       samplesRef.current = [{ y: 0, t }]
       fromMouseRef.current = fromMouse
-      // #787: 入力欄・Slider・data-no-swipe から始めた操作と、閉じる方向へ
-      // まだスクロールできる横スクロール領域の中から始めた操作は子要素のもの。
+      selectionAtStartRef.current = fromMouse ? snapshotSelection() : null
+      // #787: 入力欄・Slider・data-no-swipe から始めた操作、マウスで選択できる
+      // 文字の上から始めた操作（文字選択）、閉じる方向へまだスクロールできる
+      // 横スクロール領域の中から始めた操作は子要素のもの。
       if (
         isSwipeExcludedTarget(target, sheetRef.current) ||
+        (fromMouse && isSelectableTextTarget(target, sheetRef.current)) ||
         findHorizontalScrollableAncestor(target, sheetRef.current, side) != null
       ) {
         decisionRef.current = "scroll"
@@ -1761,8 +1880,13 @@ function SwipeToCloseSideDrawer({
         // vertical scroll, so there is no scroll-position gate to apply.
         let decision = decideSwipeGesture(primary, cross, true)
         if (decision === null) return false // below slop — keep waiting
-        // #787: マウスで文字を選択しながらのドラッグはドロワーを動かさない。
-        if (decision === "drag" && fromMouseRef.current && hasActiveTextSelection()) {
+        // #787: 文字の無い余白から押して文字をなぞり始めた場合の保険。
+        // このジェスチャで始まったドロワー内の選択があればドロワーを動かさない。
+        if (
+          decision === "drag" &&
+          fromMouseRef.current &&
+          hasNewTextSelectionWithin(sheetRef.current, selectionAtStartRef.current)
+        ) {
           decision = "scroll"
         }
         decisionRef.current = decision
@@ -2326,5 +2450,6 @@ export {
   projectCloseAxisDelta,
   closeAxisTranslate,
   isSwipeExcludedTarget,
+  isSelectableTextTarget,
 }
 export type { SheetProps, SheetContentProps, SheetTitleProps, SnapPoint, VisualViewportInset }

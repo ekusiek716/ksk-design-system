@@ -1028,8 +1028,9 @@ async function mouseDragFrom(el: HTMLElement, dx: number, dy: number) {
 }
 
 /**
- * swipeToClose のボトムシートで、textarea の上からマウスで真下へドラッグしても
- * シートは動かず閉じない。ドラッグハンドルからは従来どおり閉じられる（#787）。
+ * swipeToClose のボトムシートで、textarea や本文の文字の上からマウスで真下へ
+ * ドラッグしてもシートは動かず閉じない。ドラッグハンドルからは従来どおり
+ * 閉じられる（#787）。
  */
 export const SwipeToCloseKeepsTextareaDrag: Story = {
   tags: ["interaction", "!autodocs"],
@@ -1043,6 +1044,9 @@ export const SwipeToCloseKeepsTextareaDrag: Story = {
           <SheetTitle>会議メモ</SheetTitle>
         </SheetHeader>
         <Textarea data-testid="memo" aria-label="メモ" rows={3} defaultValue="ここをなぞって文字を選びます" />
+        <p data-testid="body-text" className="typo-body-md text-[var(--Text-Medium-Emphasis)] mt-4">
+          決まったことは、この下の欄にまとめて残します。
+        </p>
       </SheetContent>
     </Sheet>
   ),
@@ -1058,6 +1062,11 @@ export const SwipeToCloseKeepsTextareaDrag: Story = {
     await expect(sheet).toHaveAttribute("data-state", "open")
     await expect(sheet.style.transform).toBe(rest)
 
+    // 本文の文字の上からマウスで真下へなぞっても、文字選択として扱い動かない
+    await mouseDragFrom(within(sheet).getByTestId("body-text"), 0, 250)
+    await expect(sheet).toHaveAttribute("data-state", "open")
+    await expect(sheet.style.transform).toBe(rest)
+
     // ハンドルからのスワイプ閉じは変わらない
     const handle = sheet.querySelector<HTMLElement>("[data-sheet-drag-handle]")
     await expect(handle).not.toBeNull()
@@ -1068,7 +1077,8 @@ export const SwipeToCloseKeepsTextareaDrag: Story = {
 
 /**
  * swipeToClose の右ドロワーで、Slider のつまみを閉じる方向（右）へドラッグしても
- * ドロワーは動かず閉じない（#787）。本文からのスワイプ閉じは変わらない。
+ * ドロワーは動かず閉じない。本文の文字の上からのマウスドラッグも文字選択として
+ * 扱う。文字の無い余白からのスワイプ閉じは変わらない（#787）。
  */
 export const SwipeToCloseKeepsSliderDrag: Story = {
   tags: ["interaction", "!autodocs"],
@@ -1082,9 +1092,10 @@ export const SwipeToCloseKeepsSliderDrag: Story = {
           <SheetTitle>絞り込み</SheetTitle>
         </SheetHeader>
         <Slider aria-label="価格" defaultValue={[10]} />
-        <p data-testid="body" className="typo-body-md text-[var(--Text-Medium-Emphasis)] mt-6 py-6">
-          本文
+        <p data-testid="body-text" className="typo-body-md text-[var(--Text-Medium-Emphasis)] mt-6">
+          価格帯を選ぶと、条件に合う商品だけを表示します。
         </p>
+        <div data-testid="blank" className="mt-6 h-24" />
       </SheetContent>
     </Sheet>
   ),
@@ -1100,8 +1111,13 @@ export const SwipeToCloseKeepsSliderDrag: Story = {
     await expect(sheet).toHaveAttribute("data-state", "open")
     await expect(sheet.style.transform).toBe(rest)
 
-    // 除外対象に当たらない本文からのスワイプ閉じは変わらない
-    await mouseDragFrom(within(sheet).getByTestId("body"), 300, 0)
+    // 本文の文字の上からのマウスドラッグは文字選択として扱い、ドロワーは動かない
+    await mouseDragFrom(within(sheet).getByTestId("body-text"), 300, 0)
+    await expect(sheet).toHaveAttribute("data-state", "open")
+    await expect(sheet.style.transform).toBe(rest)
+
+    // 文字も除外対象も無い余白からのスワイプ閉じは変わらない
+    await mouseDragFrom(within(sheet).getByTestId("blank"), 300, 0)
     await waitFor(() => expect(body.queryByRole("dialog")).toBeNull())
   },
 }
