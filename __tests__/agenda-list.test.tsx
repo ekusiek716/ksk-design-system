@@ -196,3 +196,83 @@ describe("MonthCalendar view=\"week\"（#704）", () => {
     container.remove()
   })
 })
+
+// issue #806: 日を選んだ後に外から month を変えても、週の帯が選んだ週に固まらず新しい月の中へ移る
+describe("MonthCalendar view=\"week\" 選択日ありで外から月を変える（#806）", () => {
+  const dates = (container: HTMLElement) =>
+    [...container.querySelectorAll<HTMLElement>('[role="gridcell"]')].map((c) => c.dataset.date)
+  const tabStop = (container: HTMLElement) =>
+    container.querySelector('[role="gridcell"][tabindex="0"]')!.getAttribute("data-date")
+
+  for (const withOnMonthChange of [true, false]) {
+    it(`選択日が新しい月の外なら、その月の 1 日の週へ移る（onMonthChange ${withOnMonthChange ? "あり" : "なし"}）`, () => {
+      const container = document.createElement("div")
+      document.body.appendChild(container)
+      const root = createRoot(container)
+      const onMonthChange = withOnMonthChange ? vi.fn() : undefined
+      const render = (month: string) =>
+        act(() =>
+          root.render(
+            <MonthCalendar month={month} today="2026-10-16" selectedDate="2026-10-16" view="week" onMonthChange={onMonthChange} />
+          )
+        )
+      render("2026-10")
+      expect(tabStop(container)).toBe("2026-10-16")
+
+      render("2026-11")
+      expect(tabStop(container)).toBe("2026-11-01")
+      expect(dates(container)).toEqual([
+        "2026-11-01", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07",
+      ])
+      expect(container.querySelector('[role="grid"]')!.getAttribute("aria-label")).toBe("2026年11月")
+      // 7 日すべてが月外として薄く出る状態にならない
+      expect(container.querySelector('[data-date="2026-11-01"]')!.hasAttribute("data-outside-month")).toBe(false)
+
+      render("2026-12")
+      expect(tabStop(container)).toBe("2026-12-01")
+      expect(dates(container)).toEqual([
+        "2026-11-29", "2026-11-30", "2026-12-01", "2026-12-02", "2026-12-03", "2026-12-04", "2026-12-05",
+      ])
+      expect(container.querySelector('[role="grid"]')!.getAttribute("aria-label")).toBe("2026年12月")
+      expect(container.querySelector('[data-date="2026-12-01"]')!.hasAttribute("data-outside-month")).toBe(false)
+
+      // 選択日のある月へ戻ると、選択日の週に戻る
+      render("2026-10")
+      expect(tabStop(container)).toBe("2026-10-16")
+      // 選択日そのものは変えない（月外のときも onMonthChange を呼ばない）
+      if (onMonthChange) expect(onMonthChange).not.toHaveBeenCalled()
+      act(() => root.unmount())
+      container.remove()
+    })
+  }
+
+  it("新しい月が今日を含むなら今日の週へ移る", () => {
+    const container = document.createElement("div")
+    document.body.appendChild(container)
+    const root = createRoot(container)
+    const render = (month: string) =>
+      act(() =>
+        root.render(<MonthCalendar month={month} today="2026-11-18" selectedDate="2026-10-16" view="week" onMonthChange={vi.fn()} />)
+      )
+    render("2026-10")
+    render("2026-11")
+    expect(tabStop(container)).toBe("2026-11-18")
+    act(() => root.unmount())
+    container.remove()
+  })
+
+  it("月と選択日が同時に変わったら、選択日を優先する（「今日へ」等）", () => {
+    const container = document.createElement("div")
+    document.body.appendChild(container)
+    const root = createRoot(container)
+    act(() =>
+      root.render(<MonthCalendar month="2026-10" today="2026-12-09" selectedDate="2026-10-16" view="week" onMonthChange={vi.fn()} />)
+    )
+    act(() =>
+      root.render(<MonthCalendar month="2026-12" today="2026-12-09" selectedDate="2026-12-09" view="week" onMonthChange={vi.fn()} />)
+    )
+    expect(tabStop(container)).toBe("2026-12-09")
+    act(() => root.unmount())
+    container.remove()
+  })
+})
