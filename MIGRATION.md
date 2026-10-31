@@ -28,7 +28,8 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 - **下側Sheetの入力時高さ（#706）**: `safeArea={true}`（既定）の通常bottom Sheetは、キーボード表示時に上端のsafe-areaも差し引き、ステータスバー・ノッチへの侵入を避けます。独自の全画面配置でこの補正が不要なら `safeArea={false}` を指定してください。snap Sheetは今回の高さ変更の対象外です。
 - **画面・分類・配置編集（#701–#703）**: Screenへ上端safe-area、svh/fill、768px以上の中央カード、landmark省略を追加します。fillの中央カードは親の高さを尊重します。KanbanColumnの分類色指定と、選択・ドラッグ・矢印移動用SelectableTileも追加します。これらの追加APIは任意指定です。
 - **予定のモバイル表示（#704）**: MonthCalendarへ週表示、予定一覧AgendaListを追加します。週表示は選択日を優先し、月外の初期選択日や内部の月またぎ移動でも表示週・月見出しを揃えます。既定の月表示は維持します。
-- **管理画面のモバイルナビ（#705）**: AdminShellへ任意のモバイルドロワーを追加します。リンク選択時の自動closeは `closeMobileDrawerOnNavigate={true}` の明示指定で有効にし、既定falseでは既存の挙動を維持します。（#795 以降）自動closeは next/link・React Router のリンク部品のようにクリックで `preventDefault` する SPA リンクでも働きます。`preventDefault` は閉じるのを止める口になりません。閉じたくない項目には `data-keep-mobile-drawer` 属性を付けてください。修飾キー付きのクリック・`target="_blank"` のリンクでは閉じません。
+- **管理画面のモバイルナビ（#705）**: AdminShellへ任意のモバイルドロワーを追加します。リンク選択時の自動closeは `closeMobileDrawerOnNavigate={true}` の明示指定で有効にし、既定falseでは既存の挙動を維持します。（#795 以降）自動closeは next/link・React Router のリンク部品のようにクリックで `preventDefault` する SPA リンクでも働きます。修飾キー付きのクリック・`target="_blank"` のリンクでは閉じません。
+  - **挙動の変更**: これまでは項目の onClick で `preventDefault` するとドロワーが閉じませんでしたが、#795 以降は閉じます。`<a href="#">` をボタン代わりにしている項目や、未保存の変更があるとき遷移を取り消すナビゲーションガードでドロワーを開いたままにしたい場合は、その項目（または囲む要素）に `data-keep-mobile-drawer` 属性を付けてください。遷移を取り消したときだけ開いたままにしたい場合は、`closeMobileDrawerOnNavigate` を使わず `mobileDrawerOpen` / `onMobileDrawerOpenChange` で開閉を制御してください。
 
 ## v2.14.0 の導入注意
 

@@ -44,12 +44,31 @@ afterEach(() => {
 const toasts = () => document.querySelectorAll<HTMLElement>('[data-slot="toast"]')
 const firstToast = () => toasts()[0]
 const advance = (ms: number) => act(() => { vi.advanceTimersByTime(ms) })
-const hover = (el: Element) => act(() => {
-  el.dispatchEvent(new MouseEvent("mouseover", { bubbles: true, relatedTarget: document.body }))
+// jsdom は PointerEvent を持たないため、MouseEvent に pointerType を足して pointerover/out を送る
+// （React の onPointerEnter / onPointerLeave は pointerover / pointerout から合成される）
+function pointer(type: "pointerover" | "pointerout", pointerType: string) {
+  const e = new MouseEvent(type, { bubbles: true, relatedTarget: document.body })
+  Object.defineProperty(e, "pointerType", { value: pointerType })
+  return e
+}
+const hover = (el: Element, pointerType = "mouse") => act(() => {
+  el.dispatchEvent(pointer("pointerover", pointerType))
 })
-const unhover = (el: Element) => act(() => {
-  el.dispatchEvent(new MouseEvent("mouseout", { bubbles: true, relatedTarget: document.body }))
+const unhover = (el: Element, pointerType = "mouse") => act(() => {
+  el.dispatchEvent(pointer("pointerout", pointerType))
 })
+
+/**
+ * jsdom の :focus-visible は focus 中なら常に真のため、マウス・タップで押した
+ * （:focus-visible にならない）フォーカスを再現する。実ブラウザでの確認は
+ * `__tests__/browser/toast-pause.test.tsx`。
+ */
+function mockPointerFocus() {
+  const original = Element.prototype.matches
+  return vi.spyOn(Element.prototype, "matches").mockImplementation(function (this: Element, s: string) {
+    return s === ":focus-visible" ? false : original.call(this, s)
+  })
+}
 
 function showUndoToast(duration = 4000) {
   const onClick = vi.fn()
@@ -116,6 +135,51 @@ describe("Toast の自動消去の一時停止（#798）", () => {
     act(() => action.blur())
     advance(4000)
     expect(toasts()).toHaveLength(0)
+  })
+
+  it("タッチの pointerenter では止めない（タップ後に別の場所を触るまで消えない、を防ぐ）", () => {
+    showUndoToast(4000)
+    hover(firstToast(), "touch")
+    advance(4000)
+    expect(toasts()).toHaveLength(0)
+  })
+
+  it("マウス・タップでの action フォーカス（:focus-visible でない）では止めない", () => {
+    const onClick = showUndoToast(4000)
+    const action = firstToast().querySelector<HTMLButtonElement>('[data-slot="toast-action"]')!
+    const matches = mockPointerFocus()
+    try {
+      hover(firstToast())
+      act(() => action.focus())
+      act(() => action.click())
+      expect(onClick).toHaveBeenCalledTimes(1)
+      advance(10_000)
+      expect(toasts()).toHaveLength(1)
+      // ポインタが離れたら、action にフォーカスが残っていても残り時間で消える
+      unhover(firstToast())
+      expect(document.activeElement).toBe(action)
+      advance(4000)
+      expect(toasts()).toHaveLength(0)
+    } finally {
+      matches.mockRestore()
+    }
+  })
+
+  it("キーボードフォーカス中にポインタでトースト内の別ボタンへ移ったら、フォーカスでは止めない", () => {
+    showUndoToast(4000)
+    const action = firstToast().querySelector<HTMLButtonElement>('[data-slot="toast-action"]')!
+    const close = firstToast().querySelector<HTMLButtonElement>('[data-slot="button"]')!
+    act(() => close.focus())
+    advance(10_000)
+    expect(toasts()).toHaveLength(1)
+    const matches = mockPointerFocus()
+    try {
+      act(() => action.focus())
+      advance(4000)
+      expect(toasts()).toHaveLength(0)
+    } finally {
+      matches.mockRestore()
+    }
   })
 
   it("duration: 0 は従来どおり自動で消えない（hover の出入りでもタイマーを張らない）", () => {

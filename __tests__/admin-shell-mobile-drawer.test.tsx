@@ -209,6 +209,27 @@ describe("AdminShell mobileDrawer（#705）", () => {
       click(drawer()!.querySelector('a[href="#keep"]')!)
       expect(drawer()).not.toBeNull()
     })
+
+    it("data-keep-mobile-drawer を項目自身（a[href]）に付けても閉じない", () => {
+      const keep = (
+        <div>
+          <a href="#self-keep" data-keep-mobile-drawer="" onClick={(e) => e.preventDefault()}>
+            <span>残す</span>
+          </a>
+          <a href="#close" onClick={(e) => e.preventDefault()}>閉じる</a>
+        </div>
+      )
+      act(() => root.render(<AdminShell sidebar={keep} mobileDrawer closeMobileDrawerOnNavigate>本文</AdminShell>))
+      act(() => menuButton().click())
+      click(drawer()!.querySelector('a[href="#self-keep"]')!)
+      expect(drawer()).not.toBeNull()
+      // 中の子要素を押しても同じ
+      click(drawer()!.querySelector('a[href="#self-keep"] span')!)
+      expect(drawer()).not.toBeNull()
+      // 付けていない項目は従来どおり閉じる
+      click(drawer()!.querySelector('a[href="#close"]')!)
+      expect(drawer()).toBeNull()
+    })
   })
 
   describe("開いたまま lg 以上になったら閉じる", () => {

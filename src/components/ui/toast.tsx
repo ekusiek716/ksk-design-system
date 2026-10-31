@@ -44,8 +44,9 @@ interface ToastOptions {
   variant?: ToastVariant
   /**
    * 自動で消えるまでの時間（ms）。既定 5000。0 は自動で消えない。
-   * ポインタがトースト上にある間・トースト内にフォーカスがある間は止まり、
-   * 両方が外れると残り時間から再開する（issue #798。WCAG 2.2.1）。
+   * ポインタ（マウス・ペン）がトースト上にある間・トースト内にキーボードフォーカス
+   * （:focus-visible）がある間は止まり、両方が外れると残り時間から再開する
+   * （issue #798。WCAG 2.2.1）。タップ・クリックで action を押しただけでは止まらない。
    */
   duration?: number
   /**
@@ -98,6 +99,20 @@ let toastIdCounter = 0
 function nextToastId(): string {
   toastIdCounter += 1
   return `t${Date.now().toString(36)}-${toastIdCounter.toString(36)}`
+}
+
+/**
+ * フォーカスがキーボード由来か（issue #798）。`:focus-visible` はマウス・タップで
+ * ボタンを押したときは偽、Tab 移動やキーボード操作後の focus() では真になる。
+ * セレクタ未対応の環境では、止める側（従来の挙動）に倒す。
+ */
+function isKeyboardFocus(target: EventTarget): boolean {
+  if (!(target instanceof Element)) return true
+  try {
+    return target.matches(":focus-visible")
+  } catch {
+    return true
+  }
 }
 
 function startToastTimer(id: string, timer: ToastTimer) {
@@ -337,11 +352,21 @@ function ToastViewport({ regionLabel, closeLabel, container, position }: { regio
           // caution は割り込みで即時通知
           role={t.variant === "caution" ? "alert" : undefined}
           className={cn(toastVariants({ variant: t.variant }))}
-          // ポインタが乗っている間・中にフォーカスがある間は自動消去を止め、
+          // ポインタが乗っている間・中にキーボードフォーカスがある間は自動消去を止め、
           // 離れたら残り時間から再開する（issue #798。WCAG 2.2.1）。
-          onMouseEnter={() => toastStore.hold(t.id, "hover")}
-          onMouseLeave={() => toastStore.release(t.id, "hover")}
-          onFocus={() => toastStore.hold(t.id, "focus")}
+          // タッチは対象外: タップでも pointerenter は届くが、pointerleave は別の場所を
+          // 触るまで来ないため、止めると押した後に消えなくなる。
+          onPointerEnter={(e) => {
+            if (e.pointerType !== "touch") toastStore.hold(t.id, "hover")
+          }}
+          onPointerLeave={() => toastStore.release(t.id, "hover")}
+          // フォーカスはキーボード由来（:focus-visible）のときだけ止める。マウス・タップで
+          // action を押すとブラウザがボタンへフォーカスを移すが、押した後はポインタが離れれば
+          // 消えてほしい（フォーカスで止めると、別の場所を押すまで残り続ける）。
+          onFocus={(e) => {
+            if (isKeyboardFocus(e.target)) toastStore.hold(t.id, "focus")
+            else toastStore.release(t.id, "focus")
+          }}
           onBlur={(e) => {
             // トースト内の移動（action → 閉じるボタン等）では再開しない
             if (e.currentTarget.contains(e.relatedTarget as Node | null)) return

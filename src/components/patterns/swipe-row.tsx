@@ -69,6 +69,9 @@ function SwipeRow({ children, actions = [], side = "right", className, actionsLa
   const handlePointerDown = (e: React.PointerEvent) => {
     // マウスの右クリック・中クリックではドラッグ状態に入らない
     if (e.pointerType === "mouse" && e.button !== 0) return
+    // 2 本目以降の指（isPrimary=false）・ドラッグ中の別ポインタは無視する。上書きすると
+    // 1 本目の pointerup が id 不一致で捨てられ、行がスナップせず止まる。
+    if (e.isPrimary === false || draggingRef.current) return
     pendingPointerId.current = e.pointerId
     draggingRef.current = false
     startX.current = e.clientX
@@ -79,6 +82,13 @@ function SwipeRow({ children, actions = [], side = "right", className, actionsLa
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (pendingPointerId.current !== e.pointerId) return
     if (!draggingRef.current) {
+      // ドラッグ確定前はポインタを握っていないため、行の外で離した pointerup は届かない。
+      // ボタンが押されていないマウスの move は「既に離した」とみなし記録を破棄する
+      // （残すと、後でボタンを押さずに行へ戻ったときに行がカーソルに付いて動く）。
+      if (e.pointerType === "mouse" && (e.buttons & 1) === 0) {
+        pendingPointerId.current = null
+        return
+      }
       const dx = e.clientX - startX.current
       const dy = e.clientY - startY.current
       if (Math.abs(dx) <= DRAG_THRESHOLD && Math.abs(dy) <= DRAG_THRESHOLD) return

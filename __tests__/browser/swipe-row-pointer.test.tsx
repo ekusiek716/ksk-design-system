@@ -119,6 +119,51 @@ it("横ドラッグで行が開き、直後に children の onClick は呼ばれ
   expect(onClick).toHaveBeenCalledTimes(1)
 })
 
+it("行の外で離した後、ボタンを押さずに行へ戻っても行は動かない", async () => {
+  const onClick = vi.fn()
+  const { child, main } = mount(onClick)
+  const r = child.getBoundingClientRect()
+  const x = r.left + r.width / 2
+  const y = r.top + r.height / 2
+  await mouse("mouseMoved", x, y, "none")
+  await mouse("mousePressed", x, y, "left")
+  // 行の中で閾値を超える前に行の外（下）へ出て、そこで離す（行は pointerup を受け取れない）
+  await mouse("mouseMoved", x, y + 200, "left")
+  await mouse("mouseReleased", x, y + 200, "left")
+  // ボタンを押さずに行へ戻り、横へ動かす
+  for (const dx of [-20, -60, -100]) {
+    await mouse("mouseMoved", x + dx, y, "none")
+  }
+  await new Promise((r) => setTimeout(r, 50))
+  expect(translateX(main)).toBe("translateX(0px)")
+  expect(onClick).not.toHaveBeenCalled()
+})
+
+it("2 本目の指が触れても、1 本目を離せば行はスナップする", async () => {
+  const { child, main } = mount(vi.fn())
+  const r = child.getBoundingClientRect()
+  const x = r.left + r.width / 2
+  const y = r.top + r.height / 2
+  const fire = (type: string, pointerId: number, isPrimary: boolean, clientX: number) =>
+    act(() => {
+      child.dispatchEvent(
+        new PointerEvent(type, { bubbles: true, cancelable: true, pointerId, isPrimary, pointerType: "touch", clientX, clientY: y, button: 0, buttons: type === "pointerup" ? 0 : 1 }),
+      )
+    })
+  fire("pointerdown", 11, true, x)
+  fire("pointermove", 11, true, x - 30)
+  fire("pointermove", 11, true, x - 60)
+  expect(translateX(main)).toBe("translateX(-60px)")
+  // 2 本目の指（isPrimary=false）が触れる
+  fire("pointerdown", 12, false, x + 40)
+  // 1 本目を離すと、開いた側（-72px）へスナップし、ドラッグ状態も解ける
+  fire("pointerup", 11, true, x - 60)
+  expect(translateX(main)).toBe("translateX(-72px)")
+  expect(main.className).toContain("transition-transform")
+  fire("pointerup", 12, false, x + 40)
+  expect(translateX(main)).toBe("translateX(-72px)")
+})
+
 it("右ボタンのドラッグでは行が開かない", async () => {
   const onClick = vi.fn()
   const { child, main } = mount(onClick)
