@@ -916,6 +916,9 @@ function SheetContent({
         restoreFocusOnClose={restoreFocusOnClose}
         closeOnEsc={closeOnEsc}
         restoreFocusRef={restoreFocusRef}
+        // #811: snap シートもキーボードの上へ持ち上げる（高さは snap が持つ
+        // ので bottom だけ。visibleHeight は使わない）。
+        keyboardInset={keyboardInset}
         {...props}
         ref={ref}
       >
@@ -1816,6 +1819,11 @@ interface SnapBottomSheetContentProps
   restoreFocusOnClose?: boolean
   closeOnEsc?: boolean
   restoreFocusRef?: React.RefObject<HTMLElement | null>
+  /**
+   * #811: キーボード高さ（px）。SheetContent の useVisualViewportInset の値。
+   * 0 のときは何もしない。
+   */
+  keyboardInset?: number
   children?: React.ReactNode
 }
 
@@ -1833,6 +1841,7 @@ function SnapBottomSheetContent({
   restoreFocusOnClose = true,
   closeOnEsc = true,
   restoreFocusRef,
+  keyboardInset = 0,
   children,
   style,
   ref,
@@ -2020,6 +2029,13 @@ function SnapBottomSheetContent({
         )}
         style={{
           ...style,
+          // #811: キーボード表示中はシート下端をキーボードの上へ持ち上げる
+          // （非 snap の bottom シートと同じく DS の値を consumer の style より
+          // 優先する）。snap は高さを自分で持つので maxHeight は付けない
+          // （resolveBottomSheetKeyboardStyle の snapActive 分岐）。bottom と
+          // translateY は独立に効くので、スナップ位置・ドラッグ計算はずれない。
+          // 最大段で上端が画面外へ出うるのは CSS フォールバック（#150）と同じ設計。
+          ...resolveBottomSheetKeyboardStyle(keyboardInset, null, true),
           height: `${maxSnap * 100}svh`,
           transform,
           transition: dragging
