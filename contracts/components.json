@@ -2468,7 +2468,7 @@
       "sizes": [],
       "accessibility": [],
       "rules": [
-        "isActive 切替時に key を変えて Chip を強制再マウント (selected キャッシュ残り防止)"
+        "key を isActive に紐付けない。isActive を切り替えても同一の button を保ち、フォーカスと aria-pressed の変化を維持する (issue #784)"
       ]
     },
     {
