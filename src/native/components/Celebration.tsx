@@ -11,7 +11,7 @@ import {
 import { useLatestRef } from "../../lib/use-latest-ref"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
-import { useReduceMotion } from "./use-reduce-motion"
+import { useReduceMotionState } from "./use-reduce-motion"
 import { useEmojiBounce } from "./use-emoji-bounce"
 import { createRevealLifecycle } from "../modal-reveal-lifecycle"
 
@@ -136,12 +136,15 @@ function Celebration({
   testID,
 }: CelebrationProps) {
   const { theme, scales } = useTheme()
-  const reduceMotion = useReduceMotion()
+  // OS の「視差効果を減らす」。オンの間と、取得前（!resolved）の間は紙吹雪もカードの弾みも
+  // 始めない（use-reduce-motion の約束。Web 版の prefers-reduced-motion と同じ扱い。#802）
+  const { reduceMotion, resolved } = useReduceMotionState()
+  const suppressMotion = !resolved || reduceMotion
   const resolvedDurationMs = autoDismissMs ?? durationMs
   const isBurst = effect === "burst"
   const particleDurationBase = duration ?? (isBurst ? BURST_DURATION_MS : resolvedDurationMs)
   const palette = colors && colors.length > 0 ? colors : CONFETTI_COLORS
-  const showConfetti = trigger === "confetti" || trigger === "both"
+  const showConfetti = !suppressMotion && (trigger === "confetti" || trigger === "both")
   const showMessage = !cardless && (trigger === "confetti" || trigger === "emoji" || trigger === "both")
   const canTapDismiss = Boolean(onTapDismiss || interactive)
   const overlay = placement === "overlay"
@@ -194,6 +197,11 @@ function Celebration({
   )
 
   const activeRef = useRef(active)
+  const reduceMotionRef = useLatestRef(reduceMotion)
+  // overlay の Modal が表示を終えたか（onShow 済みか）。開くたびに戻す
+  const modalShownRef = useRef(false)
+  // この表示でカードの入場を始めたか。onShow と OS 設定の取得のどちらが後に来ても 1 回だけ始める
+  const entranceRequestedRef = useRef(false)
   const [revealLifecycle] = useState(() =>
     createRevealLifecycle({
       animationFallbackDelay: CARD_REVEAL_ANIMATION_FALLBACK_DELAY,
@@ -211,6 +219,13 @@ function Celebration({
 
   const startCardEntrance = useCallback(
     (complete: (finished: boolean) => void) => {
+      if (reduceMotionRef.current) {
+        // 「視差効果を減らす」がオン: 弾ませず最終状態で静止表示する（#802。Web 版と同じ）
+        opacity.setValue(1)
+        pop.setValue(1)
+        complete(true)
+        return
+      }
       pop.setValue(0.94)
       opacity.setValue(0)
       Animated.parallel([
@@ -228,30 +243,49 @@ function Celebration({
         }),
       ]).start(({ finished }) => complete(finished))
     },
-    [opacity, pop],
+    [opacity, pop, reduceMotionRef],
   )
+
+  const beginCardEntrance = useCallback(() => {
+    if (entranceRequestedRef.current) return
+    entranceRequestedRef.current = true
+    revealLifecycle.onModalShow(startCardEntrance, revealCard)
+  }, [revealCard, revealLifecycle, startCardEntrance])
 
   // onShow より先に走らせるため layout effect（#753。理由は createRevealLifecycle の注記）
   useLayoutEffect(() => {
     activeRef.current = active
+    modalShownRef.current = false
+    entranceRequestedRef.current = false
     revealLifecycle.cancel()
-    if (!active || !overlay) return
-    // overlay は Modal 表示完了（onShow）を待つ。待つ間は不可視なので保険を張る。
+    if (!active) return
+    // overlay は Modal 表示完了（onShow）を、inline・overlay とも OS のモーション設定の取得を
+    // 待ってから入場を始める（#802）。待つ間は不可視なので、どちらかが届かなくても最終状態で
+    // 出す保険を張る。
     pop.setValue(0.94)
     opacity.setValue(0)
     revealLifecycle.onOpen(revealCard)
   }, [active, overlay, opacity, pop, revealCard, revealLifecycle])
 
   useEffect(() => {
-    // inline は Modal を挟まないのでそのまま開始できる。onShow との順序の問題が無いので、
-    // 開始の時機は従来どおり useEffect のまま（native の挙動を変えない。#753）
-    if (active && !overlay) startCardEntrance(() => {})
-  }, [active, overlay, startCardEntrance])
+    // 「視差効果を減らす」の取得前（!resolved）は入場を始めない（use-reduce-motion の約束。#802）。
+    // inline は Modal を挟まないので取得しだい始める。overlay は onShow 済みのときだけここで始め、
+    // 取得が onShow より先なら handleModalShow が始める。開始の時機は従来どおり useEffect（#753）
+    if (!active || !resolved) return
+    if (overlay && !modalShownRef.current) return
+    beginCardEntrance()
+  }, [active, overlay, resolved, beginCardEntrance])
+
+  useEffect(() => {
+    // 表示中に設定がオンになったら、入場中の動きを止めて最終状態で静止させる（#802）
+    if (active && reduceMotion) revealCard()
+  }, [active, reduceMotion, revealCard])
 
   useEffect(() => () => revealLifecycle.cancel(), [revealLifecycle])
 
   const handleModalShow = () => {
-    revealLifecycle.onModalShow(startCardEntrance, revealCard)
+    modalShownRef.current = true
+    if (resolved) beginCardEntrance()
   }
 
   useEmojiBounce(emojiScale, {
