@@ -594,6 +594,13 @@ const suppressMotion = !resolved || reduceMotion
 遅れて届いた初回取得結果では上書きしません。アンマウント時には購読を解除します。
 この hook は `native/ui` の公開 API です。トークン専用の `native` エントリには含みません。
 
+DS の部品自身もこの約束に従います（#802）。`Celebration` / `CelebrationDialog` は
+`suppressMotion` の間は紙吹雪を出さず、カードを弾ませず最終状態で表示します。
+`Skeleton`（`SkeletonText` を含む）は明滅を始めず、設定オンと分かった時点で固定の
+不透明度にします。取得前（`!resolved`）も止める側に倒すため、初回表示の一瞬は演出が
+出ないことがあります（取得は通常すぐ終わり、設定オフと分かりしだい始まります）。
+これらの部品のために consumer 側で設定を読んで回避する必要はありません。
+
 `ksk-design-system/native/ui` から直接 RN 用コンポーネント export（134 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
 
 ```tsx
