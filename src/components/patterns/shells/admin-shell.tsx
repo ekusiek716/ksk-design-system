@@ -40,6 +40,13 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
    * ドロワーの中のリンク（`a[href]`）や SidebarNav の項目を押したら閉じる。
    * 既定 false。画面遷移時の開閉は consumer が制御し、自動で閉じたい場合だけ true にする。
    * サイドバー内の開閉トグル等、それ以外のボタンでは閉じない。
+   *
+   * next/link・React Router の `Link` のようにクリックで `preventDefault` する SPA リンクでも閉じる
+   * （`event.defaultPrevented` は見ない。issue #795）。次の場合は閉じない:
+   * - 修飾キー（Ctrl / Cmd / Shift / Alt）付きのクリック・左以外のボタン（新しいタブ等で開く操作）
+   * - `target` が `_self` 以外のリンク（`target="_blank"` 等）
+   * - `aria-expanded` を持つ親項目（子の開閉用）
+   * - `data-keep-mobile-drawer` 属性を持つ要素とその中（閉じたくない項目の除外口）
    * @default false
    */
   closeMobileDrawerOnNavigate?: boolean
@@ -65,6 +72,9 @@ interface AdminShellProps extends React.ComponentProps<"div"> {
 /** ドロワーを閉じる対象（ナビゲーションとみなす要素） */
 const NAVIGATE_SELECTOR = 'a[href], [data-slot="sidebar-nav-item"]'
 
+/** この属性を持つ要素（とその中）を押してもドロワーを閉じない（issue #795） */
+const KEEP_DRAWER_SELECTOR = "[data-keep-mobile-drawer]"
+
 /** lg（1024px）以上。ここではドロワーを出さない（desktop の aside が出る） */
 const DESKTOP_QUERY = "(min-width: 1024px)"
 
@@ -76,6 +86,11 @@ function isNavigationTarget(target: Element | null): boolean {
   const item = target?.closest(NAVIGATE_SELECTOR)
   if (!item) return false
   if (item.hasAttribute("aria-expanded")) return false
+  // 新しいタブ・ウィンドウで開くリンクは、今の画面が移らないので閉じない（issue #795）
+  const linkTarget = item.getAttribute("target")
+  if (item.tagName === "A" && linkTarget && linkTarget !== "_self") return false
+  // consumer が「この項目では閉じたくない」ときの除外口（issue #795）
+  if (target?.closest(KEEP_DRAWER_SELECTOR)) return false
   return true
 }
 
@@ -146,7 +161,12 @@ function AdminShell({
     [mobileDrawerOpen, onMobileDrawerOpenChange]
   )
   const handleDrawerClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!closeMobileDrawerOnNavigate || event.defaultPrevented) return
+    if (!closeMobileDrawerOnNavigate) return
+    // defaultPrevented は見ない（issue #795）。next/link・React Router の Link は
+    // クライアント遷移のために必ず preventDefault するため、見ると SPA 遷移で閉じなくなる。
+    // 新しいタブ等で開く操作（修飾キー・左以外のボタン）では今の画面が移らないので閉じない。
+    if (event.button !== 0) return
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
     if (isNavigationTarget(event.target as Element | null)) setDrawerOpen(false)
   }
 

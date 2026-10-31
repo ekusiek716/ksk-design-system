@@ -619,6 +619,14 @@
         "transition-duration",
         "auto-color-thresholds"
       ],
+      "props": {
+        "accessible / accessibilityLabel / accessibilityRole / accessibilityValue": "（Native のみ）ルート View へ渡す読み上げ系 props。既定は accessible=true / accessibilityRole=\"progressbar\" / accessibilityValue={ min: 0, max, now: 0〜max にクランプした value }（masked 時は { min: 0, max: 100 } で now なし）/ accessibilityLabel=\"進捗\" で、Web の role=\"progressbar\" と対称（issue #796）。指定した値は必ず優先される。周りのカードが説明文を持つ場合は accessible={false} を渡すと役割・値・名前の既定ごと外れる"
+      },
+      "accessibility": [
+        "Web: role=\"progressbar\" に 0〜100 へクランプした値を aria-valuenow として付け、data-state は loading（100 で complete）。範囲外の値でも Radix の console.error は出ない。aria-label 未指定時は KskLabels の progress（既定「進捗」）（issue #796）",
+        "masked 時は Web / Native とも実値を読み上げに出さない（Web は aria-valuenow なし・data-state=indeterminate、Native は accessibilityValue に now を含めない。#147 の逆算防止）。Web で value 未指定・null のときも aria-valuenow を付けない",
+        "Native: 既定で accessibilityRole=\"progressbar\" + accessibilityValue を持つ（ProgressRing #564 と同じ方式）。accessible={false} で外せる（issue #796）"
+      ],
       "rules": [
         "値に応じた色切替は autoColor を使い、consumer 側で個別に if 文と className を重ねない",
         "autoColor=true の既定閾値は 80% 以上 warning、100% 以上 caution",
@@ -717,6 +725,7 @@
         "Fire-and-forget: `import { toast } from \"ksk-design-system\"` → `toast.success(\"保存しました\")`。<Toaster> 設置不要",
         "両 API は内部で同じ singleton store を共有するため、<Toaster> がある場合はそれを優先し auto-mounted viewport は描画しない",
         "新規 action prop で右側に CTA ボタン (元に戻す / 再試行 等) を表示できる",
+        "自動消去（duration、既定 5000ms）は、ポインタがトースト上にある間・トースト内にフォーカスがある間は止まり、両方が外れると残り時間から再開する（WCAG 2.2.1。<Toaster> 経由と fire-and-forget 経由で同じ）。duration: 0 は従来どおり自動消去しない。dismiss でタイマーも消える。native の Toast（ToastProvider）は hover・フォーカスが通常無いため対象外で、従来どおり時間で消える（issue #798）",
         "保存完了・接続復旧・同期開始など一時的な操作結果は Banner ではなく toast.* helper を使う",
         "connectionRestored / saveComplete / retryStarted / retryFailed helper を提供",
         "viewport の下端 offset は product theme の公開変数 --Toast-Viewport-Offset-Bottom（既定 1rem = 従来の bottom-4）で調整する。下部タブバー / FAB と重なるプロダクトは :root で持ち上げる。[data-slot=\"toast-viewport\"] を消費側 CSS から直接狙わない（issue #503）",
@@ -1798,7 +1807,8 @@
         "native: rightActions から accessibilityActions / onAccessibilityAction を既定で自動生成"
       ],
       "rules": [
-        "Mobile list items with swipe actions (delete, archive, etc.)"
+        "Mobile list items with swipe actions (delete, archive, etc.)",
+        "children に押せる要素（ボタン・リンク・チェックボックス）を置いてよい。行は pointerdown ではポインタを握らず、横移動が 8px を超えて横方向が優勢になった時点で初めてドラッグを確定し setPointerCapture する。縦方向が優勢なら縦スクロールに譲る。ドラッグ確定後に届く click は 1 回だけ握りつぶし、スワイプ直後の子の onClick 誤発火を防ぐ。マウスの右・中ボタンではドラッグしない（issue #794）"
       ]
     },
     {
@@ -3348,6 +3358,7 @@
         "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）",
         "lg 未満でナビへ辿れるようにするときは mobileDrawer（issue #705）。ヘッダー左端のメニューボタン（44px・aria-expanded・aria-label 既定「メニューを開く」）から左の Sheet に同じ sidebar を開く。ハンバーガーと Sheet side=\"left\" を consumer で自作しない",
         "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 false、明示 true で有効）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange",
+        "closeMobileDrawerOnNavigate は next/link・React Router の Link のようにクリックで preventDefault する SPA リンクでも閉じる（defaultPrevented は閉じるのを止める口ではない）。修飾キー付き・左以外のボタン・target が _self 以外のリンク・aria-expanded を持つ親項目では閉じない。閉じたくない項目は data-keep-mobile-drawer 属性を持つ要素の中に置く（issue #795）",
         "上端の safe-area は safeAreaTop（ヘッダーは下線込み 64px + 安全領域、lg 以上のサイドバーと mobileDrawer のドロワーも上に足す。header が無いときは本文の列）。アプリ内で全画面に重ねるときは className=\"h-full\" と組み、外枠に pt-[var(--Safe-Area-Inset-Top)] や背景を書かない（外枠は fixed と重ね順だけ。issue #724）",
         "アプリ内で全画面に重ねるときは overlay（fixed inset-0 z-[var(--Z-Overlay)] h-full を DS が持つ。Sheet / Dialog の overlay と同じ層で、後に開いたものが上に出る）。背景の inert は重ねる側が付ける。className で fixed / z-index を書かない（issue #737）"
       ]

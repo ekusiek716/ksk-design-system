@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
 import { expect, userEvent, within } from "storybook/test"
 import { SwipeRow } from "./swipe-row"
+import { Button } from "../ui/button"
+import { Checkbox } from "../ui/checkbox"
 
 const meta: Meta<typeof SwipeRow> = {
   title: "Components/SwipeRow",
@@ -76,6 +78,37 @@ export const SingleAction: Story = {
     <div className="w-80 rounded-xl border border-[var(--Border-Low-Emphasis)] overflow-hidden">
       <SwipeRow actions={[{ label: "削除", icon: <TrashIcon />, onClick: () => {}, variant: "destructive" }]}>
         <TodoItem title="左にスワイプして削除" desc="スワイプまたはドラッグで操作できます" />
+      </SwipeRow>
+    </div>
+  ),
+}
+
+/**
+ * 行の中に押せる要素を置く例（issue #794）。
+ * 単純なクリック・タップは children のボタン・チェックボックスにそのまま届き、
+ * 横にドラッグしたときだけ行が開く（ドラッグ直後に子の onClick は呼ばれない）。
+ */
+function PressableRow() {
+  const [done, setDone] = React.useState(false)
+  const [opened, setOpened] = React.useState(0)
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 bg-[var(--Surface-Primary)]">
+      <Checkbox checked={done} onCheckedChange={(v) => setDone(v === true)} aria-label="完了にする" />
+      <p className="flex-1 min-w-0 typo-label-md truncate text-[var(--Text-High-Emphasis)]">
+        詳細を開いた回数: {opened}
+      </p>
+      <Button size="sm" variant="secondary" onClick={() => setOpened((n) => n + 1)}>
+        詳細
+      </Button>
+    </div>
+  )
+}
+
+export const PressableChildren: Story = {
+  render: () => (
+    <div className="w-80 rounded-xl border border-[var(--Border-Low-Emphasis)] overflow-hidden">
+      <SwipeRow actions={[{ label: "削除", icon: <TrashIcon />, onClick: () => {}, variant: "destructive" }]}>
+        <PressableRow />
       </SwipeRow>
     </div>
   ),
