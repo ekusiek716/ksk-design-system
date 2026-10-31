@@ -26,7 +26,9 @@ describe("Chip の a11y 既定値（#311）", () => {
     expect(chipSource).toContain("const state = { selected, disabled, ...accessibilityState }")
     expect(chipSource).toContain("accessibilityState={state}")
     // Web（react-native-web）にも同じ state から aria-* を出す（issue #808）
-    expect(chipSource).toContain("{...webAriaFromState(role, state)}")
+    // ただし selected 未指定のチップには aria-pressed を出さない（Web 版 Chip と同じ）
+    expect(chipSource).toContain("const selected = selectedProp ?? false")
+    expect(chipSource).toContain("{...webAriaFromState(role, webState)}")
   })
 
   it("removable の×ボタンは role とラベルを既定で持つ（×だけでは読み上げで意味が取れない）", () => {

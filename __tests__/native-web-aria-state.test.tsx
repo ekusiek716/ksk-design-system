@@ -109,12 +109,28 @@ describe("Chip / ChipSelector / PillToggle（#808）", () => {
     render(
       <>
         <Chip selected>選択中</Chip>
-        <Chip>未選択</Chip>
+        <Chip selected={false}>未選択</Chip>
       </>,
     )
     expect(byText("button", "選択中").getAttribute("aria-pressed")).toBe("true")
     expect(byText("button", "未選択").getAttribute("aria-pressed")).toBe("false")
     expect(byText("button", "選択中").hasAttribute("aria-checked")).toBe(false)
+  })
+
+  it("Chip: selected 未指定（選択に使わないチップ）は aria-pressed を持たない", () => {
+    render(
+      <>
+        <Chip>操作チップ</Chip>
+        <Chip removable onRemove={() => {}}>
+          タグ
+        </Chip>
+        <Chip accessibilityState={{ selected: true }}>明示</Chip>
+      </>,
+    )
+    expect(byText("button", "操作チップ").hasAttribute("aria-pressed")).toBe(false)
+    expect(byText("button", "タグ").hasAttribute("aria-pressed")).toBe(false)
+    // 呼び出し側が accessibilityState.selected を明示したときはそれを出す
+    expect(byText("button", "明示").getAttribute("aria-pressed")).toBe("true")
   })
 
   it("Chip: 呼び出し側の accessibilityState が aria-* にも反映される", () => {
@@ -246,6 +262,17 @@ describe("棚卸しで見つかった同じ型の部品（#808）", () => {
       </Card>,
     )
     expect(one('[role="button"]').getAttribute("aria-pressed")).toBe("true")
+  })
+
+  it("Card: 呼び出し側が role / state を上書きしたら aria-* もそれに合わせる", () => {
+    render(
+      <Card onPress={() => {}} selected accessibilityRole="radio" accessibilityState={{ checked: true }}>
+        {null}
+      </Card>,
+    )
+    const radio = one('[role="radio"]')
+    expect(radio.getAttribute("aria-checked")).toBe("true")
+    expect(radio.hasAttribute("aria-pressed")).toBe(false)
   })
 
   it("MediaActionCluster の active は aria-pressed", () => {
