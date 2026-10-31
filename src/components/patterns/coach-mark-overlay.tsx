@@ -117,6 +117,11 @@ const COACH_VERSION_DEFAULT = "v1"
  *   ...
  * />
  * ```
+ *
+ * Dialog / Sheet の上に重ねたとき: バルーンの「次へ」「スキップ」を押しても下のモーダルは
+ * 閉じない（#829）。暗転部分はクリックを受けずに下へ通すので、モーダルの外側を押せば
+ * 従来どおり下のモーダルが閉じる（ツアーは開いたまま残る）。ツアー中に下を閉じさせたくない
+ * 画面は、ツアーを出している間だけ下の `onPointerDownOutside` で `preventDefault()` する。
  */
 export function CoachMarkOverlay({
   steps,
