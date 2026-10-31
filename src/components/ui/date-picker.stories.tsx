@@ -4,7 +4,7 @@
  */
 import type { Meta, StoryObj } from "@storybook/react"
 import * as React from "react"
-import { expect, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 import { FormField } from "../patterns/form-field"
 import { DatePicker, DateRangePicker } from "./date-picker"
 import { Calendar } from "./calendar"
@@ -78,6 +78,29 @@ export const WithDefaultMonth: Story = {
         <DatePicker value={date} onChange={setDate} defaultMonth={new Date(2030, 0, 1)} />
       </div>
     )
+  },
+}
+
+/**
+ * clearable を付けると、値があるときトリガーの右側に日付のクリアボタンが出る（issue #803）。
+ * カレンダーで選択中の日をもう一度押しても値は外れないので、任意項目で値を消させたい画面はこれを使う。
+ */
+export const Clearable: Story = {
+  render: () => {
+    const [date, setDate] = React.useState<Date | undefined>(new Date(2026, 9, 15))
+    return (
+      <div className="w-72">
+        <DatePicker value={date} onChange={setDate} clearable />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const clear = canvas.getByRole("button", { name: "日付をクリア" })
+    await expect(clear).toBeVisible()
+    await userEvent.click(clear)
+    await waitFor(() => expect(canvas.queryByRole("button", { name: "日付をクリア" })).toBeNull())
+    await expect(canvas.getByText("日付を選択")).toBeVisible()
   },
 }
 
