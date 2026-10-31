@@ -64,7 +64,7 @@
 | ScrollArea, ScrollBar | `@/components/ui/scroll-area` | — | VerticalScroll, LongText |
 | SectionNav | `@/components/ui/section-nav` | — | Vertical, Horizontal, StickyGuide |
 | Section | `@/components/ui/section` | **spacing**: `sm`, `md`, `lg`, `xl`<br>**background**: `none`, `subtle`, `accent-subtle` | FullBleedBandWithContainedContent |
-| Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard, InvalidInFormField, KeepsOwnDescribedByInFormField |
+| Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue | `@/components/ui/select` | **size**: `sm`, `default`, `lg` | WithPlaceholder, WithGroups, WithDisabledItem, DisabledSelect, OpensAndSelectsOption, SelectsWithKeyboard, FitsShortViewport, KeepsMaxHeightOnTallScreen, InvalidInFormField, KeepsOwnDescribedByInFormField |
 | SEMANTIC_ICONS, SemanticIcon | `@/components/ui/semantic-icon` | — | — |
 | Separator | `@/components/ui/separator` | — | Horizontal, Vertical |
 | Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription, SheetDragIndicator | `@/components/ui/sheet` | **side**: `top`, `bottom`, `left`, `right`, `float`, `float-glass`, `bottom-glass`<br>**size**: `sm`, `md`, `lg` | BottomSheet, FloatSheet, TopSheet, FloatSheetTallContent, RightSheet, Sizes, A11yOptions, TitleAutoFocusAppearance, Float Glass (Liquid Glass), Bottom Glass (Liquid Glass), BottomSheet — swipeToClose, Float — 仮想キーボード追従, BottomSheet — swipeToClose (full height / scrollable), BottomSheet — Snap 0.4/0.9, BottomSheet — Snap (push-up layout), BottomSheet — nested (#158), OpensAndIsImmediatelyInteractive, ChildDescriptionIsLinked, ChildDescriptionIsLinkedWithSwipeToClose, NoDescriptionLeavesNoDescribedBy, ChildDescriptionIsLinkedWithSnapPoints, ChildDescriptionIsLinkedWithSwipeSideDrawer, DescriptionPropIsLinked, ExplicitDescribedByWins |
@@ -185,7 +185,7 @@
 | FilterBar | `@/components/patterns/commerce/filter-bar` | — | Default, Interactive |
 | ImageCarousel | `@/components/patterns/commerce/image-carousel` | — | Banner, Square, Video, AutoPlay |
 | MobileTabBar | `@/components/patterns/commerce/mobile-tab-bar` | — | Default, With addAction (center CTA), floatingPosition=, ProductCustomization, WithBottomOffsetExtra, FixedItemHeight, HideWhileTyping |
-| OrderSummary | `@/components/patterns/commerce/order-summary` | — | Default, Simple |
+| OrderSummary | `@/components/patterns/commerce/order-summary` | — | Default, Simple, FixedSafeArea |
 | PriceDisplay | `@/components/patterns/commerce/price-display` | **size**: `sm`, `md`, `lg`, `xl` | Default, Sale, Range, AllSizes |
 | ProductCard | `@/components/patterns/commerce/product-card` | — | Vertical, VerticalWithDiscount, VerticalWithCart, VerticalWithRanking, Horizontal, Grid |
 | ProductCarousel | `@/components/patterns/commerce/product-carousel` | — | Default, WithRanking, WithCartButton, LargeCards |
