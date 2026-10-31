@@ -59,6 +59,22 @@ try {
   assert.equal(rendered.stderr, "", "Node SSR must not emit warnings")
   const html = rendered.stdout
   assert.ok(html.includes('id="fixture"'), "Node SSR must produce the fixture")
+  // #828: consumer の react-hook-form と DS の Form 部品が同じ Context を共有すること。
+  assert.ok(existsSync(join(temp, "node_modules/react-hook-form/package.json")), "react-hook-form must be installed with ksk-design-system (#828)")
+  copyFileSync(join(root, "scripts/fixtures/consumer-react-hook-form.mjs"), join(temp, "src/consumer-react-hook-form.mjs"))
+  write("render-rhf.mjs", `import { renderReactHookFormCases } from './src/consumer-react-hook-form.mjs';\nprocess.stdout.write(JSON.stringify(renderReactHookFormCases()));\n`)
+  const rhf = spawnSync(process.execPath, ["render-rhf.mjs"], { cwd: temp, encoding: "utf8" })
+  assert.equal(rhf.status, 0, `react-hook-form consumer SSR failed (#828): ${rhf.error ?? rhf.stderr}`)
+  assert.equal(rhf.stderr, "", "react-hook-form consumer SSR must not emit warnings (#828)")
+  const rhfCases = JSON.parse(rhf.stdout)
+  assert.match(rhfCases.dsForm, /data-consumer-context="shared"[^>]*>山田</, "consumer useFormContext() must see the DS <Form> (#828)")
+  assert.match(rhfCases.consumerProvider, /data-slot="form-label"/, "DS FormLabel must render under consumer <FormProvider> (#828)")
+  assert.match(rhfCases.consumerProvider, /value="佐藤"/, "DS RhfFormField must read the consumer form (#828)")
+  const bundledDistJs = readFileSync(join(temp, "node_modules/ksk-design-system/dist/index.js"), "utf8")
+  for (const dependency of ["react-hook-form", "react-day-picker"]) {
+    assert.ok(!bundledDistJs.includes(`//#region node_modules/${dependency}/`), `${dependency} must not be bundled into dist (#828)`)
+    assert.match(bundledDistJs, new RegExp(`from\\s*["']${dependency}["']`), `${dependency} must stay a bare import (#828)`)
+  }
   write("index.html", `<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="icon" href="data:,"></head><body><div id="root">${html}</div><script type="module" src="/src/consumer-hydration-client.mjs"></script></body></html>`)
   await build(viteOptions())
   // Prove the real consumer compiler/build detects the failures this gate claims to catch.
