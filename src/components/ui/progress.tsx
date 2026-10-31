@@ -113,6 +113,10 @@ export interface ProgressProps extends React.ComponentProps<typeof ProgressPrimi
  * - variant: 色バリアント (default/success/warning/caution)
  * - transitionDuration: アニメ速度 (none/sm/md/lg)
  *
+ * 読み上げ（issue #796）: `role="progressbar"` に 0〜100 へクランプした値を `aria-valuenow` として付け、
+ * `data-state` は `loading`（100 で `complete`）になる。`masked` と value 未指定・null のときは
+ * `aria-valuenow` を付けず、`data-state` は `indeterminate`。
+ *
  * @example
  * <Progress value={42} />
  * <Progress value={120} variant="caution" />              // 予算超過
@@ -134,8 +138,14 @@ function Progress({
   // masked 時は autoColor による色分岐も value に依存するため使わない（バー幅だけでなく色からの逆算も防ぐ）。
   const resolvedVariant = masked ? variant : getAutoProgressVariant(value, variant, autoColor)
   const displayValue = resolveProgressDisplayValue(value, masked)
+  // 読み上げ用の値（issue #796）。以前は value を Root に渡しておらず、aria-valuenow が付かず
+  // data-state も常に indeterminate だった。範囲外の値は Radix が console.error を出すので
+  // クランプ後の displayValue を渡す。masked 時は実値を出さない（#147 の逆算防止）。
+  // value 未指定・null（と NaN 等の非有限値）は従来どおり不確定（null）のまま。
+  const a11yValue = masked || value == null || !Number.isFinite(value) ? null : displayValue
   return (
     <ProgressPrimitive.Root
+      value={a11yValue}
       data-slot="progress"
       data-variant={resolvedVariant}
       data-auto-color={autoColor ? "" : undefined}
