@@ -93,6 +93,9 @@ export function MultiSelect({
           <FlatList
             data={filtered}
             keyExtractor={(it) => it.value}
+            // 検索中（キーボード表示中）の 1 回目のタップを、キーボードを閉じるだけに
+            // 使わず行へ届ける（issue #815）。複数選択中はキーボードを残してよい。
+            keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => {
               const checked = draft.includes(item.value)
               return (

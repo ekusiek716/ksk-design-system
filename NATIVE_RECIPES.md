@@ -248,6 +248,15 @@ Web では `CompactFilePicker` / `ImageAttachmentPicker` が hidden file input�
 </Sheet>
 ```
 
+## Search field + candidate list
+
+検索欄の下に候補の一覧を置く部品（`Combobox` / `MultiSelect` と同じ形）を作るときは、一覧の `FlatList` / `ScrollView` に `keyboardShouldPersistTaps="handled"` を付けます。未指定だと、ソフトキーボード表示中の最初のタップはキーボードを閉じるだけに使われ、候補が 2 回押さないと選べません（issue #815）。
+
+```tsx
+<Input value={query} onChangeText={setQuery} />
+<FlatList data={filtered} keyboardShouldPersistTaps="handled" renderItem={renderCandidate} />
+```
+
 ## Caption / attribution text
 
 出典・著作権表示など、控えめな注釈は `Text` の `variant="caption-strong"` を使います（11px・font-semibold 相当）。`text-[11px] font-semibold leading-4 text-hint` のようなマジックナンバーをローカルに書きません。色は未指定なら自動で hint 相当（`text.low-emphasis`）になります。
