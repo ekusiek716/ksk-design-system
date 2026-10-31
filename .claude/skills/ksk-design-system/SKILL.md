@@ -102,7 +102,7 @@ DS 全体でアイコンの線幅・スタイルを統一するため。
 
 ```bash
 npx ksk-ds lint src                      # DS-first ルール違反（rules.json）を検査。毎回
-npx ksk-ds lint --changed                # 差分だけ検査（編集の都度はこちらが速い）
+npx ksk-ds lint --changed                # 差分だけ検査（編集の都度はこちらが速い。未 add の新規ファイルも対象。src --changed で src 配下に絞る）
 npx ksk-ds check-duplicates src --strict # DS と同名のローカル実装を検査（CI 向け。検出時 exit 1）
 npx ksk-ds check-migration ./src         # 非推奨 API の残存を検査（read-only）
 ```

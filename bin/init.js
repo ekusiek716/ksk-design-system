@@ -68,7 +68,7 @@ if (cmd === "help" || cmd === "--help" || cmd === "-h") {
                                       dir 省略時は ./ksk-ds-demo
   npx ksk-ds lint src                 DS-first ルール違反を検査
   npx ksk-ds lint src --format json   CI 向け JSON 出力
-  npx ksk-ds lint --changed           Git 差分のみ検査
+  npx ksk-ds lint --changed           Git 差分のみ検査（未追跡も対象。path 指定でその配下に絞る）
   npx ksk-ds check-migration ./src    非推奨 API の残存を検査（read-only）
   npx ksk-ds check-migration ./src --format=json  CI 向け JSON 出力
   npx ksk-ds check-duplicates [DIR]    DS と同名のローカル実装を検査

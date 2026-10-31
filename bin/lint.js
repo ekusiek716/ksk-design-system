@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
-import { basename, extname, isAbsolute, join, relative, resolve } from "node:path"
+import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from "node:fs"
+import { basename, extname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { spawnSync } from "node:child_process"
 import {
   inspectParallelPaletteCandidates,
@@ -393,7 +393,7 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
   }
 
   const { files, missing: missingTargets } = options.changed
-    ? { files: getChangedFiles(cwd, options), missing: [] }
+    ? getChangedFiles(cwd, options.targets, options)
     : collectTargetFiles(cwd, options.targets, options)
   // 存在しない検査対象は stderr に 1 件ずつ出す（issue #833）。--format json でも
   // stdout の JSON を汚さないよう stderr だけに書く。
@@ -456,6 +456,9 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
   } else if (allTargetsMissing) {
     // 走査 0 件で「違反は見つかりませんでした」と出すと検査したように読めるため出さない
     console.log("ksk-ds lint: 検査対象が 1 件も見つからないため検査していません")
+  } else if (options.changed && files.length === 0) {
+    // --changed で 0 件のときも「違反なし」と区別する（issue #831）。exit 0 は維持
+    console.log("ksk-ds lint: 検査対象の変更ファイルが 0 件のため検査していません")
   } else {
     printText(findings, summary)
     if (generatedSkipped.length > 0) {
@@ -495,7 +498,10 @@ const USAGE = `ksk-ds lint
   ksk-ds lint src --strict
 
 オプション:
-  --changed          Git の変更ファイルのみ検査
+  --changed          Git の変更ファイルのみ検査。origin/main との差分・未コミット・
+                     未追跡（未 add の新規ファイル）が対象で、path（既定は実行
+                     ディレクトリ）の配下に絞る。origin/main が無いときは警告して
+                     未コミット分と未追跡だけを検査する
   --format json      JSON 出力
   --exclude TEXT     パスに TEXT を含むファイルを除外
   --platform P       web / native を強制（既定はファイルごとに自動判定）
@@ -687,24 +693,87 @@ function collect(abs, cwd, options, out) {
   if (stat.isFile() && isLintableFile(abs)) out.push(abs)
 }
 
-function getChangedFiles(cwd, options) {
+/**
+ * --changed の検査対象（issue #831）。
+ *
+ * - git の出力はリポジトリ直下基準なので、`git rev-parse --show-toplevel` を基準に解決する
+ *   （実行ディレクトリ基準だとサブディレクトリ実行で全件が消えていた）。
+ * - `-z` と `core.quotePath=false` で、日本語名が引用符付き 8 進エスケープにならないようにする。
+ * - 未追跡ファイル（`git ls-files --others --exclude-standard`）も含める。新規ファイルは未 add が普通。
+ * - targets（既定は `.`）の配下に絞る。`lint src --changed` の `src` を無視しない。
+ * - git が失敗したときは黙って捨てず stderr に警告する（origin/main の無い浅い clone 等）。
+ *
+ * 返すパスは実行ディレクトリ基準の絶対パス（出力の file が cwd 相対になるように）。
+ */
+function getChangedFiles(cwd, targets, options) {
+  const git = (args, gitCwd) =>
+    spawnSync("git", ["-c", "core.quotePath=false", ...args], { cwd: gitCwd, encoding: "utf8" })
+  const files = []
+  const missing = []
+
+  const top = git(["rev-parse", "--show-toplevel"], cwd)
+  if (top.status !== 0) {
+    console.error("[ksk-ds lint] Git リポジトリではないため、--changed で検査できるファイルがありません")
+    return { files, missing }
+  }
+  const root = top.stdout.trim()
+
   const names = new Set()
-  for (const args of [
-    ["diff", "--name-only", "--diff-filter=ACMR", "origin/main...HEAD"],
-    ["diff", "--name-only", "--diff-filter=ACMR"],
-    ["diff", "--name-only", "--diff-filter=ACMR", "--cached"],
-  ]) {
-    const result = spawnSync("git", args, { cwd, encoding: "utf8" })
-    if (result.status !== 0) continue
-    for (const line of result.stdout.split(/\r?\n/)) {
-      if (line.trim()) names.add(line.trim())
+  const addNames = (stdout) => {
+    for (const name of stdout.split("\0")) {
+      if (name) names.add(name)
     }
   }
-  return [...names]
-    .map((name) => resolve(cwd, name))
-    .filter((abs) => existsSync(abs))
-    .filter((abs) => !shouldIgnorePath(normalize(relative(cwd, abs)), options))
-    .filter((abs) => isLintableFile(abs))
+  const base = git(["diff", "--name-only", "-z", "--diff-filter=ACMR", "origin/main...HEAD"], root)
+  if (base.status === 0) {
+    addNames(base.stdout)
+  } else {
+    console.error(
+      "[ksk-ds lint] ベース ref（origin/main）が取れないため、作業ツリー・ステージの差分と未追跡ファイルだけを検査します",
+    )
+  }
+  for (const args of [
+    ["diff", "--name-only", "-z", "--diff-filter=ACMR"],
+    ["diff", "--name-only", "-z", "--diff-filter=ACMR", "--cached"],
+    ["ls-files", "--others", "--exclude-standard", "-z"],
+  ]) {
+    const result = git(args, root)
+    if (result.status !== 0) {
+      const reason = String(result.stderr ?? "").trim().split(/\r?\n/)[0] ?? ""
+      console.error(`[ksk-ds lint] git ${args[0]} に失敗したため一部の変更を検査できません: ${reason}`)
+      continue
+    }
+    addNames(result.stdout)
+  }
+
+  // macOS の /var → /private/var のようなシンボリックリンク差を吸収するため、
+  // 比較は実体パスで行い、返すパスは cwd 基準へ戻す。
+  const realCwd = realpathSync(cwd)
+  const scopes = []
+  for (const target of targets) {
+    const abs = resolve(cwd, target)
+    if (!existsSync(abs)) {
+      missing.push(target)
+      continue
+    }
+    scopes.push(realpathSync(abs))
+  }
+  const isInside = (scope, absReal) => {
+    const rel = relative(scope, absReal)
+    return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
+  }
+
+  for (const name of names) {
+    const absReal = resolve(root, name)
+    if (!scopes.some((scope) => isInside(scope, absReal))) continue
+    const abs = resolve(cwd, relative(realCwd, absReal))
+    if (!existsSync(abs)) continue
+    if (shouldIgnorePath(normalize(relative(cwd, abs)), options)) continue
+    if (!isLintableFile(abs)) continue
+    files.push(abs)
+  }
+  files.sort()
+  return { files, missing }
 }
 
 function isLintableFile(abs) {
