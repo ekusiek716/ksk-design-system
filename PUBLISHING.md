@@ -14,7 +14,13 @@
 ## 前提
 
 - main ブランチが clean (`git status` で何もない)、リモートと一致
-- 消費リポが `~/LocalDev/<name>` に clone 済みで、`gh` CLI が使えること（PR 自動作成に使用）
+- 消費リポが `DEFAULT_REPOS` の実配置（`~/LocalDev/todo-apps/{belle-todo,trip-todo,ninshin-todo,okuno-todo-suite}`・
+  `~/LocalDev/apps/{yokoku-app,pawly,camera-app,aikoibito}`）に clone 済みで、`gh` CLI が使えること（PR 自動作成に使用）
+  - ルートだけ違う環境では `KSK_CONSUMER_ROOT=<ルート>` で差し替える（既定 `~/LocalDev`）
+  - 引数なし実行は、処理前に既定の全件が実在するかを確かめ、1 件でも欠けていれば一覧を出して何もせず止まる。
+    配置を変えたら `scripts/update-consumers.sh` の `DEFAULT_REPO_PATHS` とこの節を一緒に直す（#403・#785）
+  - リポ名だけを渡したとき（例: `belle-todo pawly`）は、`DEFAULT_REPOS` の末尾名 → ルート直下 → ルートの 1 階層下
+    （`todo-apps/`・`apps/`・`Examination/` 等）の順に、名前の完全一致で探す。同名が複数あればフルパス指定を求めて止まる
 
 ## 最短手順（推奨）
 
