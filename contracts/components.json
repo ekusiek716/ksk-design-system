@@ -394,6 +394,7 @@
         "rounded-full only",
         "Use DiceBear shapes for placeholder, not pravatar.cc",
         "native (src/native/components/Avatar.tsx): size はプリセット(sm/md/lg/xl)に加えて pt の数値も可。shape=\"circle\"(既定)|\"rounded\"、rounded の角丸は radius(lg/xl/2xl・既定 xl)。fallback は文字列に加えて ReactNode を受け、独自のフォールバック表示（決定論グラデ+絵文字等）を差し込める。source はリモート URL 文字列も受け取り {uri} に正規化する（issue #449）",
+        "native Avatar: 画像の読み込みに失敗したとき、または source の uri が空・未定義のときは fallback を表示する（Web の AvatarFallback と同じ）。source を差し替えると再び画像を試す。require(...) の数値 ID は対象外で常に画像を描画する（issue #825）",
         "寸法は size で指定する。className の size-* / w-* h-* で上書きしない（AvatarFallback の文字サイズが追随しなくなる）。native は xs=24 も持つ（issue #688）"
       ],
       "variants": [
