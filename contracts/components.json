@@ -1798,7 +1798,8 @@
         "native: rightActions から accessibilityActions / onAccessibilityAction を既定で自動生成"
       ],
       "rules": [
-        "Mobile list items with swipe actions (delete, archive, etc.)"
+        "Mobile list items with swipe actions (delete, archive, etc.)",
+        "children に押せる要素（ボタン・リンク・チェックボックス）を置いてよい。行は pointerdown ではポインタを握らず、横移動が 8px を超えて横方向が優勢になった時点で初めてドラッグを確定し setPointerCapture する。縦方向が優勢なら縦スクロールに譲る。ドラッグ確定後に届く click は 1 回だけ握りつぶし、スワイプ直後の子の onClick 誤発火を防ぐ。マウスの右・中ボタンではドラッグしない（issue #794）"
       ]
     },
     {
