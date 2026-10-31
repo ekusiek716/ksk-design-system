@@ -9,6 +9,7 @@ patch / minor は原則破壊変更なし、自動アップグレード可（例
 
 - **見た目の変更: Select の一覧の高さが画面の使える高さまでに縮む（#826）**: `SelectContent`（既定の `position="popper"`）の高さの上限を、固定の 384px から「384px と画面の使える高さの小さいほう」にしました。広い画面の見た目は変わりません。横向きのスマホや画面中ほどの Select では一覧が低くなり、中でスクロールして全項目に届きます。`position="item-aligned"` は従来どおりです。導入時の作業は不要です。
 - **見た目の変更: `OrderSummary` の `fixed` で、下余白に safe-area を足した（#832）**: 画面下に固定したとき、中身の下余白を `StickyActionBar` と同じ `max(0.75rem, env(safe-area-inset-bottom))` にしました。`viewport-fit=cover` の iPhone では注文ボタンがホームインジケータより上に出ます。inline（`fixed` なし）は変わりません。**`className` で下余白を足して safe-area を自前で避けていた場合は二重になるので外してください**。
+- **挙動の変更: DatePicker / DateField / DateTimePicker で、選択中の日をもう一度押しても値が消えなくなった（#803）**: これまではカレンダーで塗られている日を押すと選択が外れ、`onChange(undefined)`（DateField は `onChange("")`、DateTimePicker は日付と時刻がまとめて消える）が呼ばれていました。今後は `onChange` を呼ばずにポップオーバーを閉じるだけです。表のセル編集の `DataTableDateCell` も同じです。値を消す手段が要る画面（任意項目など）は、新しい `clearable` を付けるとトリガーの右側にクリアボタンが出ます（読み上げ名は `clearLabel`、既定は KskLabelsProvider の `datePickerClear`＝「日付をクリア」）。**再押下を空にする操作として使っていた画面は `clearable` を付けてください**。DateRangePicker は従来から再押下で範囲を外さないので変わりません。
 - **不具合修正: MonthCalendar（`view="week"`）で日を選んだ後も、外から `month` を変えると週の帯が新しい月の中へ移る（#806）**: これまでは選択日があると、前後の月ボタンを押しても帯が選んだ週に固まり、見出しの月と日付が食い違っていました。新しい月の中の選択日 → 今日 → 1 日の週へ移ります。選択日そのものは変えません。導入時の作業は不要です。
 
 ## v2.22.0 の導入注意

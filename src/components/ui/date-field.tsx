@@ -42,6 +42,14 @@ interface DateFieldProps {
    * `<Label htmlFor>` と対応させる場合は id 連携でも可（P026 は id / aria-label のいずれでも解消）。
    */
   triggerLabel?: string
+  /**
+   * 値があるとき日付のクリアボタンを出す（DatePicker に素通し）。押すと `onChange("")`。既定 false。
+   * カレンダーで選択中の日をもう一度押しても値は外れないので、任意項目で利用者に値を消させたい
+   * 画面はこれを付ける（issue #803）。
+   */
+  clearable?: boolean
+  /** クリアボタンの aria-label。省略時は KskLabelsProvider の `datePickerClear`（Provider 無しは "日付をクリア"） */
+  clearLabel?: string
 }
 
 /**
@@ -52,7 +60,17 @@ interface DateFieldProps {
  * strToDate/dateToStr は `new Date(y, m-1, d)` のローカルタイム方式で
  * UTC 変換を経由しないため、日付が前後にずれない。
  */
-function DateField({ value, onChange, placeholder, disabled, className, dateFormat, triggerLabel }: DateFieldProps) {
+function DateField({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  className,
+  dateFormat,
+  triggerLabel,
+  clearable,
+  clearLabel,
+}: DateFieldProps) {
   // 毎レンダーで新しい Date インスタンスを作ると、選択直後の閉じアニメーション中に
   // Calendar が identity 変化で再レンダーされ、ちらつきの一因になる。value 基準で固定する。
   const date = React.useMemo(() => strToDate(value), [value])
@@ -76,6 +94,8 @@ function DateField({ value, onChange, placeholder, disabled, className, dateForm
         disabled={disabled}
         dateFormat={dateFormat}
         triggerLabel={triggerLabel}
+        clearable={clearable}
+        clearLabel={clearLabel}
       />
     </div>
   )

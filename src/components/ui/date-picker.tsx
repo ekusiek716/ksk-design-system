@@ -93,9 +93,38 @@ interface DatePickerProps {
   min?: Date
   /** 選択可能な最大日時。Calendar では日単位で判定する。 */
   max?: Date
+  /**
+   * 値があるとき、トリガーの右側（カレンダーアイコンの左）に日付のクリアボタンを出す。
+   * 押すと `onChange(undefined)` を呼ぶ。既定 false。
+   *
+   * カレンダーで選択中の日をもう一度押しても値は外れない（ポップオーバーを閉じるだけ）。
+   * 任意項目などで利用者に値を消させたい画面はこの prop でクリア手段を明示する（issue #803。
+   * 以前は react-day-picker の既定動作で再押下が選択解除になり、確かめるつもりで同じ日を
+   * 押しただけで値が消えていた）。disabled のときは出さない。
+   */
+  clearable?: boolean
+  /**
+   * クリアボタンの aria-label。
+   * 省略時は KskLabelsProvider の `datePickerClear`（Provider 無しは "日付をクリア"。locale="en" で "Clear date"）。
+   */
+  clearLabel?: string
   "aria-describedby"?: string
   "aria-invalid"?: React.AriaAttributes["aria-invalid"]
 }
+
+function isSameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  )
+}
+
+const clearIcon = (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
+    <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+  </svg>
+)
 
 function DatePicker({
   id,
@@ -109,11 +138,14 @@ function DatePicker({
   defaultMonth,
   min,
   max,
+  clearable = false,
+  clearLabel: clearLabelProp,
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
 }: DatePickerProps) {
   const defaultLabels = useKskLabels()
   const placeholder = placeholderProp ?? defaultLabels.datePickerPlaceholder
+  const clearLabel = clearLabelProp ?? defaultLabels.datePickerClear
   const locale = useKskLocale() ?? "ja"
   const [open, setOpen] = React.useState(false)
   const formatted = value ? formatDate(value, dateFormat, defaultLabels, locale) : null
@@ -122,25 +154,57 @@ function DatePicker({
   // open 中リングの消灯と重なって明滅（ちらつき）して見えるため、返却を抑止する。
   // キーボード操作（Enter で選択）ではフォーカス返却を維持する（a11y）。
   const pointerSelectionRef = React.useRef(false)
+  const triggerRef = React.useRef<HTMLButtonElement>(null)
+  const showClear = clearable && !!value && !disabled
+
+  const trigger = (
+    <PopoverTrigger asChild>
+      <button
+        ref={triggerRef}
+        id={id}
+        type="button"
+        data-slot="date-picker-trigger"
+        disabled={disabled}
+        aria-expanded={open}
+        aria-label={triggerLabel ?? (formatted ? undefined : placeholder)}
+        aria-describedby={ariaDescribedBy}
+        aria-invalid={ariaInvalid}
+        className={triggerClass(open, !!formatted, className)}
+      >
+        <span>{formatted ?? placeholder}</span>
+        {/* クリアボタン（トリガーの兄弟として重ねる）の分だけ文字の右側を空ける */}
+        {showClear && <span aria-hidden className="ml-auto mr-1 size-6 shrink-0" />}
+        {calendarIcon}
+      </button>
+    </PopoverTrigger>
+  )
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          id={id}
-          type="button"
-          data-slot="date-picker-trigger"
-          disabled={disabled}
-          aria-expanded={open}
-          aria-label={triggerLabel ?? (formatted ? undefined : placeholder)}
-          aria-describedby={ariaDescribedBy}
-          aria-invalid={ariaInvalid}
-          className={triggerClass(open, !!formatted, className)}
-        >
-          <span>{formatted ?? placeholder}</span>
-          {calendarIcon}
-        </button>
-      </PopoverTrigger>
+      {clearable ? (
+        // button の中に button は置けないので、クリアはトリガーの兄弟にして上に重ねる
+        // （MultiSelect / FilterPill と同じ構成）。clearable でない既定の DOM は変えない。
+        <div className="relative w-full">
+          {trigger}
+          {showClear && (
+            <button
+              type="button"
+              data-slot="date-picker-clear"
+              aria-label={clearLabel}
+              onClick={() => {
+                onChange?.(undefined)
+                // 値が空になるとクリアボタン自体が消えるので、フォーカスを body に落とさずトリガーへ戻す
+                triggerRef.current?.focus()
+              }}
+              className="absolute right-[calc(var(--Field-Padding-X-Md)_+_1.25rem)] top-1/2 z-[1] flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] transition-colors hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Object-High-Emphasis)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
+            >
+              {clearIcon}
+            </button>
+          )}
+        </div>
+      ) : (
+        trigger
+      )}
       <PopoverContent
         className="w-auto p-0"
         align="start"
@@ -160,6 +224,10 @@ function DatePicker({
       >
         <Calendar
           mode="single"
+          // required: 選択中の日の再押下で選択を外さない（issue #803）。react-day-picker は
+          // required が無いと再押下で onSelect(undefined) を呼び、値が消えていた。
+          // 値を消す手段は clearable のクリアボタンに分ける。
+          required
           selected={value}
           defaultMonth={defaultMonth ?? value ?? undefined}
           startMonth={min}
@@ -168,8 +236,11 @@ function DatePicker({
             ...(min ? [{ before: min }] : []),
             ...(max ? [{ after: max }] : []),
           ]}
-          onSelect={(date) => {
-            onChange?.(date)
+          onSelect={(date: Date | undefined) => {
+            // 選択中の日を押したときは値を変えずに閉じるだけにする。同じ日で onChange を
+            // 呼ぶと、onChange で即保存する画面が無駄に保存し、DateTimePicker では
+            // min/max の丸めで時刻が動きうる。
+            if (date && !(value && isSameDay(date, value))) onChange?.(date)
             setOpen(false)
           }}
           autoFocus
