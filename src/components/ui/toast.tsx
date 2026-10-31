@@ -42,6 +42,11 @@ interface Toast {
 interface ToastOptions {
   description?: string
   variant?: ToastVariant
+  /**
+   * 自動で消えるまでの時間（ms）。既定 5000。0 は自動で消えない。
+   * ポインタがトースト上にある間・トースト内にフォーカスがある間は止まり、
+   * 両方が外れると残り時間から再開する（issue #798。WCAG 2.2.1）。
+   */
   duration?: number
   /**
    * オプショナルなアクションボタン。指定時は toast 右側に表示。
@@ -63,11 +68,29 @@ interface ToastOptions {
 //   は自分で何も描画しない（hasMountedToaster フラグで切り替え）。
 // =============================================================
 
+/** 自動消去を止めている理由（issue #798）。両方が外れるまで再開しない */
+type ToastHoldReason = "hover" | "focus"
+
+/** 自動消去タイマーの状態（issue #798）。duration: 0 のトーストは登録しない */
+interface ToastTimer {
+  timeoutId: number | undefined
+  /** 残り時間（ms）。一時停止のたびに経過分を差し引く */
+  remaining: number
+  /** 現在のタイマーを張った時刻 */
+  startedAt: number
+  holds: Set<ToastHoldReason>
+}
+
 interface ToastStore {
   toasts: Toast[]
   listeners: Set<() => void>
+  timers: Map<string, ToastTimer>
   add: (props: Omit<Toast, "id">) => string
   dismiss: (id: string) => void
+  /** 自動消去を一時停止する（ポインタが乗った・フォーカスが入った）。issue #798 */
+  hold: (id: string, reason: ToastHoldReason) => void
+  /** 一時停止を解く。理由がすべて外れたら残り時間から再開する。issue #798 */
+  release: (id: string, reason: ToastHoldReason) => void
   subscribe: (listener: () => void) => () => void
 }
 
@@ -77,9 +100,15 @@ function nextToastId(): string {
   return `t${Date.now().toString(36)}-${toastIdCounter.toString(36)}`
 }
 
+function startToastTimer(id: string, timer: ToastTimer) {
+  timer.startedAt = Date.now()
+  timer.timeoutId = window.setTimeout(() => toastStore.dismiss(id), timer.remaining)
+}
+
 const toastStore: ToastStore = {
   toasts: [],
   listeners: new Set(),
+  timers: new Map(),
   add(props) {
     const id = nextToastId()
     const next: Toast = { id, ...props }
@@ -87,11 +116,33 @@ const toastStore: ToastStore = {
     toastStore.listeners.forEach((l) => l())
     const duration = props.duration ?? 5000
     if (duration > 0 && typeof window !== "undefined") {
-      window.setTimeout(() => toastStore.dismiss(id), duration)
+      const timer: ToastTimer = { timeoutId: undefined, remaining: duration, startedAt: 0, holds: new Set() }
+      toastStore.timers.set(id, timer)
+      startToastTimer(id, timer)
     }
     return id
   },
+  hold(id, reason) {
+    const timer = toastStore.timers.get(id)
+    if (!timer) return
+    const wasRunning = timer.holds.size === 0
+    timer.holds.add(reason)
+    if (!wasRunning) return
+    window.clearTimeout(timer.timeoutId)
+    timer.timeoutId = undefined
+    timer.remaining = Math.max(0, timer.remaining - (Date.now() - timer.startedAt))
+  },
+  release(id, reason) {
+    const timer = toastStore.timers.get(id)
+    if (!timer || !timer.holds.delete(reason) || timer.holds.size > 0) return
+    startToastTimer(id, timer)
+  },
   dismiss(id) {
+    const timer = toastStore.timers.get(id)
+    if (timer) {
+      window.clearTimeout(timer.timeoutId)
+      toastStore.timers.delete(id)
+    }
     const before = toastStore.toasts.length
     toastStore.toasts = toastStore.toasts.filter((t) => t.id !== id)
     if (toastStore.toasts.length !== before) {
@@ -286,6 +337,16 @@ function ToastViewport({ regionLabel, closeLabel, container, position }: { regio
           // caution は割り込みで即時通知
           role={t.variant === "caution" ? "alert" : undefined}
           className={cn(toastVariants({ variant: t.variant }))}
+          // ポインタが乗っている間・中にフォーカスがある間は自動消去を止め、
+          // 離れたら残り時間から再開する（issue #798。WCAG 2.2.1）。
+          onMouseEnter={() => toastStore.hold(t.id, "hover")}
+          onMouseLeave={() => toastStore.release(t.id, "hover")}
+          onFocus={() => toastStore.hold(t.id, "focus")}
+          onBlur={(e) => {
+            // トースト内の移動（action → 閉じるボタン等）では再開しない
+            if (e.currentTarget.contains(e.relatedTarget as Node | null)) return
+            toastStore.release(t.id, "focus")
+          }}
         >
           <div className="flex-1 min-w-0">
             <p className="typo-label-md">{t.title}</p>
