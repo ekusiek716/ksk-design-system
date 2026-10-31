@@ -595,8 +595,10 @@ function ResponsiveOverlayFrame(allProps: ResponsiveOverlayFrameProps) {
   )
 
   // consumer の ref を握り潰さない（#487 の Codex レビュー指摘）。
-  // モバイル（Sheet）分岐では素通しなのに、デスクトップ分岐だけ計測用の
-  // ref で上書きすると、境界を跨いだ瞬間に consumer の ref が空になる。
+  // モバイル（Sheet）分岐では consumer の ref を `{...props}` で SheetContent へ
+  // 渡し、SheetContent 側が内部の callback ref と合成する（#822）。デスクトップ
+  // 分岐だけ計測用の ref で上書きすると、境界を跨いだ瞬間に consumer の ref が
+  // 空になるので、こちらも計測用の ref と合成する。
   const consumerRef = (allProps as { ref?: React.Ref<HTMLDivElement> }).ref
   // consumerRef は「ref の値」を合成 ref へ引き渡しているだけで、`.current` を
   // render 中に読んではいない。react-hooks/refs は cast 経由で取り出した
