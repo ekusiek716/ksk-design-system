@@ -10,6 +10,52 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const NATIVE_OPTIONAL_PEERS = ["react-native-svg", "expo-blur", "expo-glass-effect"]
 
 /**
+ * サブパス（`react-day-picker/locale` 等）ごと external にする dependencies（issue #828）。
+ *
+ * - react-hook-form: Context（FormProvider / useFormContext）を持つ。同梱すると consumer の
+ *   react-hook-form と別インスタンスになり、DS の <Form> 配下で consumer の
+ *   useFormContext() が null を返す・consumer の <FormProvider> 配下で DS の FormLabel 等が
+ *   TypeError で落ちる（radix-ui/internal を external にした #504 と同じ理由）。
+ * - react-day-picker: 同梱すると元パッケージの sideEffects: false が失われ、Calendar を
+ *   使わない consumer にも date-fns・ロケールが届く。配下の date-fns / @date-fns/tz は
+ *   react-day-picker 経由で consumer 側に解決させる。
+ *
+ * どちらも dependencies のままなので consumer の install 手順は変わらない。
+ * 同梱の再発は scripts/check-published-deps.mjs が `//#region node_modules/<dep>/` で検出する。
+ */
+const EXTERNAL_DEPENDENCIES_WITH_SUBPATHS = ["react-hook-form", "react-day-picker"]
+
+const EXTERNAL_IDS = new Set([
+  "react",
+  "react-dom",
+  "react-dom/client",
+  "react/jsx-runtime",
+  "react-native",
+  "iconsax-reactjs",
+  "lucide-react",
+  "class-variance-authority",
+  "clsx",
+  "tailwind-merge",
+  "radix-ui",
+  // FocusScope（radix-ui/internal）は Radix のフォーカススコープ・スタックを
+  // 共有する必要があるため必ず external に置く。バンドルすると DS 側と
+  // Dialog 側で別インスタンスになり、入れ子時の pause/resume が壊れる（#504）。
+  "radix-ui/internal",
+  "@radix-ui/react-slot",
+  // native の optional peer は external に置く。external に無いと Vite が
+  // 「必ず例外を投げるスタブ」へ差し替えてしまい、利用側が実際に
+  // インストールしていても require が失敗する（#540/#559 の SVG 描画が
+  // どの consumer でも動かず、常にフォールバック描画になっていた）。
+  ...NATIVE_OPTIONAL_PEERS,
+])
+
+/** lib ビルドで bundle せず bare import として残すモジュールか */
+export function isLibExternal(id: string): boolean {
+  if (EXTERNAL_IDS.has(id)) return true
+  return EXTERNAL_DEPENDENCIES_WITH_SUBPATHS.some((dep) => id === dep || id.startsWith(`${dep}/`))
+}
+
+/**
  * ESM 出力では bundler が require("x") を独自の補助関数 n("x") へ書き換える。
  * Metro は素の require 呼び出ししか依存として拾わないため、書き換え後は
  * 利用側に peer が入っていても bundle に含まれず、実行時に unknown module で
@@ -63,29 +109,8 @@ export default defineConfig({
       // のみで、これは webpack の静的解析が radix-ui の `export * as Slot`
       // 名前空間 re-export を辿れない既知問題を回避するため direct import
       // を維持している（src/components/ui/form.tsx）。
-      external: [
-        "react",
-        "react-dom",
-        "react-dom/client",
-        "react/jsx-runtime",
-        "react-native",
-        "iconsax-reactjs",
-        "lucide-react",
-        "class-variance-authority",
-        "clsx",
-        "tailwind-merge",
-        "radix-ui",
-        // FocusScope（radix-ui/internal）は Radix のフォーカススコープ・スタックを
-        // 共有する必要があるため必ず external に置く。バンドルすると DS 側と
-        // Dialog 側で別インスタンスになり、入れ子時の pause/resume が壊れる（#504）。
-        "radix-ui/internal",
-        "@radix-ui/react-slot",
-        // native の optional peer は external に置く。external に無いと Vite が
-        // 「必ず例外を投げるスタブ」へ差し替えてしまい、利用側が実際に
-        // インストールしていても require が失敗する（#540/#559 の SVG 描画が
-        // どの consumer でも動かず、常にフォールバック描画になっていた）。
-        ...NATIVE_OPTIONAL_PEERS,
-      ],
+      // 一覧と理由は上の EXTERNAL_IDS / EXTERNAL_DEPENDENCIES_WITH_SUBPATHS（#504 / #828）。
+      external: isLibExternal,
       output: {
         // src/lib/server-variants/* に置いた pure cva 定義を独立チャンクに
         // 切り出す。class-names エントリと index エントリの両方から参照される

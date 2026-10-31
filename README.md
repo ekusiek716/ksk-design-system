@@ -88,6 +88,10 @@ DS のルールが適用されません。既存ファイルはスキップさ�
 
 独自ブランドのテーマを使う場合は、この後にテーマCSSをimportしてください。
 
+メニュー・Popover・Tooltip・Select・Dialog の開閉アニメと Accordion の高さアニメに使う
+`tw-animate-css` は preset（`preset-core`）が読み込みます。DS の dependencies に入っているため、
+consumer 側で別途インストールや `@import "tw-animate-css";` をする必要はありません（issue #827）。
+
 `preset` を使わずトークン CSS を個別 subpath で import する構成では、角丸トークン
 （`--Radius-Surface` / `--Radius-Modal` / `--Radius-Sheet`）は
 `ksk-design-system/tokens/product-theme` に含まれます（issue #553）。
@@ -593,6 +597,13 @@ const suppressMotion = !resolved || reduceMotion
 実行中の演出は停止して元の表示へ戻してください。設定変更は即時反映され、
 遅れて届いた初回取得結果では上書きしません。アンマウント時には購読を解除します。
 この hook は `native/ui` の公開 API です。トークン専用の `native` エントリには含みません。
+
+DS の部品自身もこの約束に従います（#802）。`Celebration` / `CelebrationDialog` は
+`suppressMotion` の間は紙吹雪を出さず、カードを弾ませず最終状態で表示します。
+`Skeleton`（`SkeletonText` を含む）は明滅を始めず、設定オンと分かった時点で固定の
+不透明度にします。取得前（`!resolved`）も止める側に倒すため、初回表示の一瞬は演出が
+出ないことがあります（取得は通常すぐ終わり、設定オフと分かりしだい始まります）。
+これらの部品のために consumer 側で設定を読んで回避する必要はありません。
 
 `ksk-design-system/native/ui` から直接 RN 用コンポーネント export（134 個）を import できます。iOS 26 の **Liquid Glass** にも対応:
 

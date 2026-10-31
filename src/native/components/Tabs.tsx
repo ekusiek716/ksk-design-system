@@ -35,6 +35,8 @@ export function TabsList({ scrollable = false, children }: TabsListProps) {
   const { theme, scales } = useTheme()
   const inner = (
     <View
+      // タブ群であることを支援技術へ伝える（issue #800・FloatingTabBar と同じ tablist / tab）
+      accessibilityRole="tablist"
       style={{
         flexDirection: "row",
         borderBottomWidth: 1,
@@ -55,9 +57,18 @@ export interface TabsTriggerProps {
   value: string
   children: React.ReactNode
   disabled?: boolean
+  /**
+   * 読み上げ名。省略時は children が文字列ならそれを使う（issue #800）。
+   * 件数などを足したいとき、children が文字列以外（アイコン付き等）のときに渡す。
+   */
+  accessibilityLabel?: string
 }
 
-export function TabsTrigger({ value, children, disabled }: TabsTriggerProps) {
+/**
+ * 役割 `tab` と、選択中・無効の `accessibilityState` を既定で持つ（issue #800）。
+ * 親の `TabsList` は `tablist`。
+ */
+export function TabsTrigger({ value, children, disabled, accessibilityLabel }: TabsTriggerProps) {
   const { theme, scales } = useTheme()
   const ctx = useTabs()
   const active = ctx.value === value
@@ -65,6 +76,9 @@ export function TabsTrigger({ value, children, disabled }: TabsTriggerProps) {
     <Pressable
       onPress={() => !disabled && ctx.onChange(value)}
       disabled={disabled}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active, disabled: Boolean(disabled) }}
+      accessibilityLabel={accessibilityLabel ?? (typeof children === "string" ? children : undefined)}
       style={{
         paddingVertical: scales.spacing.scale[2],
         paddingHorizontal: scales.spacing.scale[3],

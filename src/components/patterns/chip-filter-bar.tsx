@@ -12,8 +12,15 @@ interface ChipFilterBarProps {
    */
   resultCountLabel?: (n: number) => string
   /**
-   * true でチップ行をスクロール時に上部固定する。背景を敷いて下のリストの
+   * true でバー全体（チップ行と件数テキスト）をスクロール時に上部固定する。背景を敷いて下のリストの
    * 透けを防ぐ。固定位置は `stickyOffset` で調整する。
+   *
+   * `position: sticky` は根の要素（`data-slot="chip-filter-bar"`）に付く（issue #807。v2.22.0 までは
+   * 子のチップ行に付いていたため、件数行ぶんしか貼り付かず流れていた）。貼り付く範囲は
+   * **呼び出し側の親ブロック**の内側なので、その親が下の一覧全体を含む高さを持つこと
+   * （スクロール枠の直下や、一覧と同じ親の中に置く）。
+   * sticky 時は外側の `className` が背景を持つ要素に付くため、`px-*` を渡すと背景が狭まる。
+   * 左右余白は `gutter` / `contentClassName` で付ける。
    */
   sticky?: boolean
   /**
@@ -82,7 +89,14 @@ function ChipFilterBar({
   const innerClassName = cn(GUTTER_CLASS[gutter], contentClassName)
 
   return (
-    <div data-slot="chip-filter-bar" className={className}>
+    <div
+      data-slot="chip-filter-bar"
+      // sticky は根（この div）に付ける（issue #807）。子のチップ行に付けると、貼り付く範囲が
+      // この div（件数行ぶんの高さしか無い）に限られ、少しスクロールすると一緒に流れてしまう。
+      // 背景・上下余白も根に持たせ、件数行も背景の内側に収める。
+      className={cn(sticky && "sticky z-[var(--Z-Sticky)] bg-[var(--Surface-Primary)] py-2", className)}
+      style={sticky ? { top: stickyOffset } : undefined}
+    >
       <div
         className={cn(
           // min-h-11 + items-center は Chip の 44px 当たり判定を守るために必須。
@@ -92,10 +106,8 @@ function ChipFilterBar({
           // チップの実高のままだと擬似要素の上下がクリップされて当たり判定が戻ってしまう。
           // 行自体を 44px 確保し、チップは中央寄せにして見た目を変えずに収める。
           // items-center を外すと flex の stretch でチップ自体が 44px に伸びるので注意。
-          "flex min-h-11 items-center gap-2 overflow-x-auto scrollbar-hide",
-          sticky && "sticky z-[var(--Z-Sticky)] bg-[var(--Surface-Primary)] py-2"
+          "flex min-h-11 items-center gap-2 overflow-x-auto scrollbar-hide"
         )}
-        style={sticky ? { top: stickyOffset } : undefined}
       >
         {innerClassName ? (
           // 余白は背景を持つ行（スクロールコンテナ）ではなく、その内側のラッパーに付ける（issue #667）。

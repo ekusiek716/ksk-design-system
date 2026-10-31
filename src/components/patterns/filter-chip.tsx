@@ -24,13 +24,14 @@ export interface FilterChipProps {
  * @example
  * <FilterChip label="エリア" value="渋谷" isActive onClick={clearAreaFilter} />
  *
- * 内部で key を active 状態に紐付けて強制再マウントするため、
- * isActive=false に戻したときに Chip の selected キャッシュが残らない。
+ * isActive を切り替えても同じ `<button>` を保つ（key を isActive に紐付けない）。
+ * そのためキーボードで押した直後もフォーカスが残り、aria-pressed の変化が
+ * そのまま支援技術に伝わる。Chip は selected を props から毎回描くだけで
+ * 状態を持たないので、作り直さなくても見た目は正しく切り替わる（issue #784）。
  */
 export function FilterChip({ label, value, isActive, onClick, className }: FilterChipProps) {
   return (
     <Chip
-      key={isActive ? "on" : "off"}
       size="lg"
       selected={!!isActive}
       variant={isActive ? "filled" : "outline"}

@@ -1,6 +1,8 @@
 import React, { useState } from "react"
-import { Pressable, Text as RNText, View } from "react-native"
+import { Pressable, ScrollView, Text as RNText, useWindowDimensions } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { useSafeAreaInsets } from "../theme/SafeAreaInsetsProvider"
+import { resolveSheetListMaxHeight } from "../sheet-list-max-height"
 import { resolveTypo } from "../typography"
 import { Sheet } from "./Sheet"
 import { Separator } from "./Separator"
@@ -31,6 +33,8 @@ export function Select({
   const { theme, scales } = useTheme()
   const [open, setOpen] = useState(false)
   const selected = options.find((o) => o.value === value)
+  const { height: windowHeight } = useWindowDimensions()
+  const listMaxHeight = resolveSheetListMaxHeight(windowHeight, useSafeAreaInsets())
 
   return (
     <>
@@ -61,7 +65,11 @@ export function Select({
         <RNText style={[resolveTypo("label.sm"), { color: theme.text["low-emphasis"] }]}>▾</RNText>
       </Pressable>
       <Sheet open={open} onClose={() => setOpen(false)} side="bottom" title={title}>
-        <View>
+        {/*
+          選択肢が多いとパネルが画面の上へはみ出し、見出しと先頭の選択肢を押せなかった（issue #816）。
+          一覧に上限の高さを付けてパネル内でスクロールさせる。少ないときは内容の高さのまま。
+        */}
+        <ScrollView style={{ maxHeight: listMaxHeight }}>
           {options.map((o, i) => (
             <React.Fragment key={o.value}>
               <Pressable
@@ -93,7 +101,7 @@ export function Select({
               {i < options.length - 1 && <Separator />}
             </React.Fragment>
           ))}
-        </View>
+        </ScrollView>
       </Sheet>
     </>
   )
