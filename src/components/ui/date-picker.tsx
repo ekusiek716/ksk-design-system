@@ -130,7 +130,32 @@ const useIsomorphicLayoutEffect = typeof window !== "undefined" ? React.useLayou
  * クリアボタンを、トリガー内に空けた場所（spacer）へ重ねる位置を測る（issue #803）。
  * className でトリガーの幅・余白・横 padding が変わっても（DataTableDateCell の `px-2` 等）
  * spacer の実位置に合わせて追従する。測る前（SSR・初回描画）は null で、既定 padding 前提の位置を使う。
+ * 位置は transform を含まないレイアウト座標（offsetLeft / offsetTop）で測る。
  */
+/**
+ * el の、ancestor の padding 端からのレイアウト上の位置（transform を含まない）。
+ * getBoundingClientRect は祖先の transform（Dialog の入場アニメの scale 等）を含むため、
+ * それをそのまま CSS の left / top に使うと、アニメ中に測った位置がずれたまま残る（PR #847 のレビュー指摘）。
+ * offsetParent をたどって ancestor に届かなければ null。
+ */
+function layoutOffsetWithin(el: HTMLElement, ancestor: HTMLElement): { left: number; top: number } | null {
+  let left = 0
+  let top = 0
+  let node: HTMLElement | null = el
+  while (node && node !== ancestor) {
+    left += node.offsetLeft
+    top += node.offsetTop
+    const parent = node.offsetParent as HTMLElement | null
+    // 途中の offsetParent の枠線の分（offsetLeft は親の padding 端が基準）
+    if (parent && parent !== ancestor) {
+      left += parent.clientLeft
+      top += parent.clientTop
+    }
+    node = parent
+  }
+  return node === ancestor ? { left, top } : null
+}
+
 function useClearButtonPosition(
   enabled: boolean,
   wrapperRef: React.RefObject<HTMLDivElement | null>,
@@ -142,12 +167,15 @@ function useClearButtonPosition(
     const spacer = spacerRef.current
     if (!enabled || !wrapper || !spacer) return
     const measure = () => {
-      const w = wrapper.getBoundingClientRect()
-      const r = spacer.getBoundingClientRect()
       // 寸法が取れない環境（jsdom 等）では既定位置のままにする
-      if (r.width === 0 && r.height === 0) return
+      if (spacer.offsetWidth === 0 && spacer.offsetHeight === 0) return
+      const offset = layoutOffsetWithin(spacer, wrapper)
+      if (!offset) return
       // ボタン（24px）を spacer（44px 幅）の中央に置く。当たり判定（44px）が spacer にぴったり重なる
-      const next = { left: r.left - w.left + (r.width - 24) / 2, top: r.top - w.top + (r.height - 24) / 2 }
+      const next = {
+        left: offset.left + (spacer.offsetWidth - 24) / 2,
+        top: offset.top + (spacer.offsetHeight - 24) / 2,
+      }
       setPos((prev) => (prev && prev.left === next.left && prev.top === next.top ? prev : next))
     }
     measure()

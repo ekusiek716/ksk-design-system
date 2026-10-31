@@ -18,9 +18,10 @@ afterEach(() => {
   document.body.replaceChildren()
 })
 
-async function mount(className?: string) {
+async function mount(className?: string, transform?: string) {
   const host = document.createElement("div")
   host.style.width = "320px"
+  if (transform) host.style.transform = transform
   document.body.append(host)
   root = createRoot(host)
   act(() => root!.render(<DatePicker value={new Date(2026, 9, 15)} onChange={() => {}} clearable className={className} />))
@@ -48,4 +49,18 @@ it.each([
   // トリガーの右端（padding の内側）にあり、外にはみ出さない
   expect(clear.left).toBeGreaterThan(trigger.left)
   expect(Math.abs(clear.top + clear.height / 2 - (trigger.top + trigger.height / 2))).toBeLessThanOrEqual(1)
+})
+
+it("祖先の transform（Dialog の入場アニメの scale 等）の最中に測っても、終わった後にずれない", async () => {
+  // 入場アニメの途中を模して縮めた状態で描画し、測らせてから transform を外す
+  await mount(undefined, "scale(0.95)")
+  const host = document.body.firstElementChild as HTMLElement
+  host.style.transform = ""
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+  const clear = document.querySelector<HTMLElement>('[data-slot="date-picker-clear"]')!.getBoundingClientRect()
+  const spacer = document
+    .querySelector<HTMLElement>('[data-slot="date-picker-trigger"] span[aria-hidden="true"]')!
+    .getBoundingClientRect()
+  expect(Math.abs(clear.left + clear.width / 2 - (spacer.left + spacer.width / 2))).toBeLessThanOrEqual(1)
+  expect(Math.abs(clear.top + clear.height / 2 - (spacer.top + spacer.height / 2))).toBeLessThanOrEqual(1)
 })

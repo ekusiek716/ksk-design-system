@@ -260,23 +260,30 @@ describe("DataTableDateCell / createDataTableDateColumn（#803）", () => {
 })
 
 describe("クリアボタンの位置と当たり判定（#803）", () => {
-  it("トリガー内の空き場所を測って重ね、className で padding が変わっても追従する", () => {
-    const spy = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
-      const rect = (x: number, y: number, w: number, h: number) =>
-        ({ left: x, top: y, width: w, height: h, right: x + w, bottom: y + h, x, y, toJSON() {} }) as DOMRect
-      if (this.getAttribute("aria-hidden") === "true" && this.closest('[data-slot="date-picker-trigger"]')) return rect(150, 14, 44, 24)
-      if (this.firstElementChild?.getAttribute("data-slot") === "date-picker-trigger") return rect(10, 10, 200, 32)
-      return rect(0, 0, 0, 0)
-    })
+  it("トリガー内の空き場所をレイアウト座標で測って重ね、className で padding が変わっても追従する", () => {
+    // jsdom はレイアウトを持たないので offset* を差し替える（spacer は wrapper の (140, 4) にある 44×24）
+    const isSpacer = (el: HTMLElement) =>
+      el.getAttribute("aria-hidden") === "true" && el.closest('[data-slot="date-picker-trigger"]') !== null
+    const proto = HTMLElement.prototype
+    const spies = [
+      vi.spyOn(proto, "offsetLeft", "get").mockImplementation(function (this: HTMLElement) { return isSpacer(this) ? 140 : 0 }),
+      vi.spyOn(proto, "offsetTop", "get").mockImplementation(function (this: HTMLElement) { return isSpacer(this) ? 4 : 0 }),
+      vi.spyOn(proto, "offsetWidth", "get").mockImplementation(function (this: HTMLElement) { return isSpacer(this) ? 44 : 0 }),
+      vi.spyOn(proto, "offsetHeight", "get").mockImplementation(function (this: HTMLElement) { return isSpacer(this) ? 24 : 0 }),
+      vi.spyOn(proto, "offsetParent", "get").mockImplementation(function (this: HTMLElement) {
+        return isSpacer(this) ? this.closest('[data-slot="date-picker-trigger"]')!.parentElement : null
+      }),
+    ]
     try {
       render(<DatePicker value={new Date(2026, 9, 15)} onChange={() => {}} clearable className="px-2" />)
       const clear = document.querySelector<HTMLElement>('[data-slot="date-picker-clear"]')!
+      // 24px のボタンを 44px の空き場所の中央へ: 140 + (44 - 24) / 2
       expect(clear.style.left).toBe("150px")
       expect(clear.style.top).toBe("4px")
       // 測れたら既定 padding 前提の位置クラスは外す
       expect(clear.className).not.toContain("top-1/2")
     } finally {
-      spy.mockRestore()
+      spies.forEach((s) => s.mockRestore())
     }
   })
 
