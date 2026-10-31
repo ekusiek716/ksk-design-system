@@ -285,6 +285,22 @@ describe("shared Dialog / Sheet restore the opener of each open (#789)", () => {
     flush()
     expect(document.activeElement).toBe(rowA)
   })
+  // 開いたまま consumer が SheetContent の key を変えて作り直しても、opener の記録は Sheet 側に残る。
+  it("sheet: remounting SheetContent (key change) while open still restores the opener on close", () => {
+    const { rowA } = setupRows()
+    const render = (open: boolean, key: string) =>
+      act(() => root!.render(<Sheet open={open}><SheetContent key={key}><SheetTitle>編集</SheetTitle></SheetContent></Sheet>))
+    render(false, "1")
+    rowA.focus()
+    render(true, "1")
+    flush()
+    render(true, "2")
+    flush()
+    expect(document.activeElement).not.toBe(rowA)
+    render(false, "2")
+    flush()
+    expect(document.activeElement).toBe(rowA)
+  })
   it("sheet: removing only SheetContent while open returns focus to the opener", () => {
     const { rowA } = setupRows()
     act(() => root!.render(sharedOverlay("sheet", false)))

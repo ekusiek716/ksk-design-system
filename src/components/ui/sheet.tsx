@@ -102,6 +102,12 @@ interface SheetRootContextValue {
    * 0 なら SheetContent ごと外された（Sheet ごとの破棄を含む）ので、閉じたときと同じく opener へ戻す。
    */
   contentCountRef: React.RefObject<number>
+  /**
+   * 開く直前にフォーカスがあった要素（opener）の記録。SheetContent ごとに持つと、開いたまま
+   * consumer が SheetContent の key を変えて作り直したとき、新しい側に記録が無く閉じても戻せない。
+   * 開閉の単位である Sheet 側に置いて、作り直しをまたいで引き継ぐ。
+   */
+  restoreFocusRef: React.RefObject<HTMLElement | null>
 }
 const SheetRootContext = React.createContext<SheetRootContextValue | null>(null)
 
@@ -532,12 +538,13 @@ function Sheet({
   // openRef を戻さなくても閉じた扱いになる。
   const openRef = React.useRef(actualOpen)
   const contentCountRef = React.useRef(0)
+  const restoreFocusRef = React.useRef<HTMLElement | null>(null)
   React.useEffect(() => {
     openRef.current = actualOpen
   }, [actualOpen])
 
   const rootCtx = React.useMemo<SheetRootContextValue>(
-    () => ({ close: () => handleOpenChange(false), openRef, contentCountRef }),
+    () => ({ close: () => handleOpenChange(false), openRef, contentCountRef, restoreFocusRef }),
     [handleOpenChange]
   )
 
@@ -909,8 +916,10 @@ function SheetContent({
 }: SheetContentProps) {
   const isModal = useModality()
   const contentRef = React.useRef<HTMLDivElement>(null)
-  const restoreFocusRef = React.useRef<HTMLElement | null>(null)
+  const localRestoreFocusRef = React.useRef<HTMLElement | null>(null)
   const sheetRoot = React.useContext(SheetRootContext)
+  // Sheet の外で使われたときだけ、自前の記録を使う。
+  const restoreFocusRef = sheetRoot?.restoreFocusRef ?? localRestoreFocusRef
   useSheetContentPresence(sheetRoot?.contentCountRef)
   // body scroll lock は Radix (modal Dialog) の react-remove-scroll が
   // 「開いている間だけ」担うため、ここでは何もしない。bodyScrollLock prop は
