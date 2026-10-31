@@ -46,6 +46,10 @@ interface ConfirmDialogProps {
  * 閉じない**（明示的に確認/キャンセルを選ばせる）。PC/SP とも中央表示の
  * アラート（iOS/Android の確認アラート慣習に準拠）。
  *
+ * 処理中（非同期 `onConfirm` の実行中、または `loading={true}`）はキャンセルボタンを
+ * 無効にし、Esc でも閉じない（`onOpenChange(false)` を呼ばない。issue #818）。
+ * 処理が完了すると `onOpenChange(false)` を 1 回だけ呼んで閉じる。
+ *
  * タスク用の中央モーダル（絞り込み等）が要るときは `Dialog` / `Sheet` /
  * `ResponsiveDialog` を使う。
  */
@@ -79,8 +83,20 @@ function ConfirmDialog({
     }
   }, [onConfirm, onOpenChange])
 
+  // 処理中（pending || loading）は Esc など Radix 経由の「閉じる」要求を握りつぶす（issue #818）。
+  // キャンセルボタンを disabled にしても Esc が抜け道になり、裏で onConfirm が続くまま
+  // ダイアログだけ消えて「取り消せた」と誤解させていた。完了後の自動クローズは
+  // handleConfirm が包む前の onOpenChange を直接呼ぶので、ここでは塞がれない。
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      if (!next && isLoading) return
+      onOpenChange(next)
+    },
+    [isLoading, onOpenChange]
+  )
+
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent onCloseAutoFocus={onCloseAutoFocus}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
@@ -89,7 +105,8 @@ function ConfirmDialog({
           )}
         </AlertDialogHeader>
         <AlertDialogFooter>
-          {/* Cancel は Radix 管理（Esc → キャンセル / 自動クローズ）。見た目は従来踏襲で secondary。 */}
+          {/* Cancel は Radix 管理（Esc → キャンセル / 自動クローズ）。見た目は従来踏襲で secondary。
+              処理中（pending || loading）はボタンも Esc も効かない（Esc は handleOpenChange で塞ぐ。#818）。 */}
           <AlertDialogCancel variant="secondary" disabled={isLoading}>
             {cancelLabel}
           </AlertDialogCancel>
