@@ -188,20 +188,25 @@ function MonthCalendar({
   const isWeek = view === "week"
   const defaultFocus = selectedDate && (isWeek || inMonth(selectedDate)) ? selectedDate : inMonth(todayKey) ? todayKey : `${monthKey}-01`
   const [focusKey, setFocusKey] = React.useState(defaultFocus)
+  // effect ではなく前回値との比較で render 中に揃える（React の推奨パターン・余分な描画なし）。
+  // week: 表示月が外から変わったら（前後の月ボタン等）、その月の中へ移す。
+  // 自分で月をまたいで onMonthChange を呼んだときはフォーカス先が新しい月の中なので動かさない。
+  // 移動先は初回 mount 用の defaultFocus（week は月外の選択日を優先する）とは分け、新しい月の中の
+  // 選択日 → 今日 → 1 日 の順にする。defaultFocus を使うと、日を選んだ後は月外の選択日へ戻るだけで
+  // 週の帯が動かず、見出しの月と日付が食い違っていた（issue #806）。選択日そのものは変えない
+  const [prevMonthKey, setPrevMonthKey] = React.useState(monthKey)
+  if (monthKey !== prevMonthKey) {
+    setPrevMonthKey(monthKey)
+    const monthFocus = selectedDate && inMonth(selectedDate) ? selectedDate : inMonth(todayKey) ? todayKey : `${monthKey}-01`
+    if (isWeek && !inMonth(focusKey)) setFocusKey(monthFocus)
+  }
   // 選択日が外から変わったら（「今日へ」ボタン等）タブストップと week 表示の週もそこへ移す。
-  // effect ではなく前回値との比較で render 中に揃える（React の推奨パターン・余分な描画なし）
+  // 月と同時に変わったときは選択日を優先するため、月の判定より後に置く（後の setState が勝つ）
   const [prevSelectedDate, setPrevSelectedDate] = React.useState(selectedDate)
   if (selectedDate !== prevSelectedDate) {
     setPrevSelectedDate(selectedDate)
     // week は月外の日も表示できるので、月をまたいだ選択日にも追従する
     if (selectedDate && (isWeek || inMonth(selectedDate))) setFocusKey(selectedDate)
-  }
-  // week: 表示月が外から変わったら（前後の月ボタン等）、その月の中へ移す。
-  // 自分で月をまたいで onMonthChange を呼んだときはフォーカス先が新しい月の中なので動かさない
-  const [prevMonthKey, setPrevMonthKey] = React.useState(monthKey)
-  if (monthKey !== prevMonthKey) {
-    setPrevMonthKey(monthKey)
-    if (isWeek && !inMonth(focusKey)) setFocusKey(defaultFocus)
   }
   // month: 月が変わったら、その月の中のセルへ移す（月外の日を覚えたままだとタブストップが消える）。
   // week: 月外の日（月をまたぐ週）にもフォーカスできる（issue #704 レビュー）
