@@ -3,6 +3,10 @@
 メジャーバージョン間の移行ガイド。
 patch / minor は原則破壊変更なし、自動アップグレード可（例外: **v1.34.0 で npm パッケージ名を変更**。import の置換が必要。下記参照）。
 
+## 未リリース（次回の minor）の導入注意
+
+- **不具合修正（操作の変化）: DataTable の行クリックとセルのキーボード操作（#793 / #814）**: rows/columns API と `DataTableRow` の `onRowClick` が、セル内の Select の選択肢（Enter・タップ）、DatePicker などの Portal 先の操作、編集できるセル（`editCell` または `edit.trigger` が `manual` 以外の列。`createDataTableDateColumn` / `createDataTableChipColumn` / `createDataTableSelectColumn` を含む）のクリックでは**呼ばれなくなりました**。表示専用の `cell` 列と行の余白では従来どおり呼ばれます。編集できるセルの `td` は Tab 順に入り（`tabIndex=0`、フォーカスリング付き）、Enter で編集を始め、確定・Escape の後は同じ `td` にフォーカスが戻ります。セル内の `<button>` / `<a href>` は Enter で押せるようになりました。**`editCell` も `edit` も指定していない `cell` 列は、ダブルクリック・Enter で `isEditing` が true にならなくなりました**（これまでも既定の doubleClick で編集状態だけが変わっていた。`cell` の中で `isEditing` を見て編集 UI を出している列は、`edit: { trigger: "doubleClick" }` を明示してください）。編集できるセルを押して行の詳細を開く挙動に頼っていた画面は、行の余白・表示専用の列から開くか、`edit.trigger: "manual"` にしてセル内のボタンから `startEdit` を呼んでください。
+
 ## v2.22.0 の導入注意
 
 以下はv2.22.0の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。

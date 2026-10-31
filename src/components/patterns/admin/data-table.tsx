@@ -258,15 +258,25 @@ function getCellEditTriggerProps<TRow, TValue>(
   // 編集を始める操作（クリック・ダブルクリック・フォーカス）は行クリックではない。
   // 編集できるセル全体を行クリックの当たり判定から外す（issue #793）。
   // doubleClick も 1 回目のクリックが行クリックになるため対象に含める。
+  //
+  // td は trigger を問わず Tab 順に入れ、Enter で編集を始められるようにする（issue #814）。
+  // 編集中は Tab 順から外し（-1）、editCell の中の操作要素だけを Tab で巡回させる。
+  // フォーカスの出し入れは DataTableEditableCell が受け持つ。
   const keyProps: React.ComponentProps<"td"> & { "data-table-ignore-row-click": true } = {
     "data-table-ignore-row-click": true,
+    tabIndex: context.isEditing ? -1 : 0,
     onKeyDown: (event) => {
       if (event.key === "Escape" && context.isEditing) {
         event.stopPropagation()
         context.cancelEdit()
       }
       if (event.key === "Enter" && !context.isEditing) {
+        // セル内のボタン・リンク・Portal 先から来た Enter は、それぞれの既定動作
+        // （ボタンの click・リンクの遷移）に任せる（issue #814）。
+        if (isFromNestedInteractive(event)) return
         event.preventDefault()
+        // 行の onKeyDown（onRowClick）へ同じ Enter を渡さない
+        event.stopPropagation()
         context.startEdit()
       }
     },
@@ -281,7 +291,6 @@ function getCellEditTriggerProps<TRow, TValue>(
   if (trigger === "focus") {
     return {
       ...keyProps,
-      tabIndex: 0,
       onFocus: () => context.startEdit(),
     }
   }
@@ -801,9 +810,10 @@ function DataTable<TRow = unknown>({
                       if (column.cell || column.editCell) {
                         const editTriggerProps = getCellEditTriggerProps(column, context)
                         return (
-                          <DataTableCell
+                          <DataTableEditableCell
                             key={column.key}
                             {...editTriggerProps}
+                            isEditing={isEditing}
                             align={column.align}
                             width={column.width}
                             sticky={column.sticky}
@@ -813,7 +823,7 @@ function DataTable<TRow = unknown>({
                             {isEditing && column.editCell
                               ? column.editCell(context)
                               : getColumnValue(row, index, column, context)}
-                          </DataTableCell>
+                          </DataTableEditableCell>
                         )
                       }
                       if (column.editable) {
@@ -1206,6 +1216,82 @@ function DataTableCell({
     >
       {children}
     </td>
+  )
+}
+
+/** 編集開始時にフォーカスを移す、editCell の中の操作要素。 */
+const DATA_TABLE_EDIT_FOCUSABLE_SELECTOR = [
+  "button:not([disabled])",
+  "a[href]",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "[tabindex]:not([tabindex='-1'])",
+].join(",")
+
+interface DataTableEditableCellProps extends DataTableCellProps {
+  isEditing: boolean
+}
+
+/**
+ * rows/columns API の cell / editCell 列に使う内部の td（issue #814）。
+ *
+ * - キーボードで編集を始めたとき（td にフォーカスがある状態で編集に入ったとき）は、
+ *   editCell の最初の操作要素へフォーカスを移す
+ * - 確定・取り消しで editCell が消えてフォーカスが失われたら、同じ td へ戻す。
+ *   このとき trigger="focus" の onFocus は呼ばない（戻しただけで編集が再開しないように）
+ * - Tab 順に入る td（tabIndex を持つもの）にだけ focus-visible のリングを付ける
+ */
+function DataTableEditableCell({
+  isEditing,
+  onFocus,
+  className,
+  ...props
+}: DataTableEditableCellProps) {
+  const cellRef = React.useRef<HTMLTableCellElement>(null)
+  const previousEditingRef = React.useRef(isEditing)
+  const restoringFocusRef = React.useRef(false)
+
+  React.useEffect(() => {
+    const cell = cellRef.current
+    const wasEditing = previousEditingRef.current
+    previousEditingRef.current = isEditing
+    if (!cell || wasEditing === isEditing) return
+    const doc = cell.ownerDocument
+    const active = doc.activeElement
+    if (isEditing) {
+      if (active === cell) {
+        cell.querySelector<HTMLElement>(DATA_TABLE_EDIT_FOCUSABLE_SELECTOR)?.focus()
+      }
+      return
+    }
+    // editCell と一緒にフォーカス中の要素が消えた（body に落ちた）ときだけ戻す。
+    // 別のセルや表の外へ移ったフォーカスは奪わない。
+    if (active && active !== doc.body) return
+    restoringFocusRef.current = true
+    try {
+      cell.focus()
+    } finally {
+      restoringFocusRef.current = false
+    }
+  }, [isEditing])
+
+  const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (event) => {
+    if (restoringFocusRef.current) return
+    onFocus?.(event)
+  }
+
+  return (
+    <DataTableCell
+      ref={cellRef}
+      onFocus={handleFocus}
+      className={cn(
+        props.tabIndex != null &&
+          "focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-[var(--Focus-High-Emphasis)]",
+        className
+      )}
+      {...props}
+    />
   )
 }
 
