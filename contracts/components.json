@@ -1838,7 +1838,7 @@
     {
       "name": "ConfirmDialog",
       "path": "src/components/patterns/confirm-dialog.tsx",
-      "description": "確認ダイアログ。AlertDialog(role=alertdialog)基盤の割り込み確認。削除・送信等の重要操作前に PC/SP とも中央アラートで確認。外クリックでは閉じない・非同期onConfirm対応・ローディング状態あり。多段 Sheet / Dialog の上に開いても常に最前面（AlertDialog の open 順スタックに準拠）。",
+      "description": "確認ダイアログ。AlertDialog(role=alertdialog)基盤の割り込み確認。削除・送信等の重要操作前に PC/SP とも中央アラートで確認。外クリックでは閉じない・非同期onConfirm対応・ローディング状態あり。処理中（非同期 onConfirm の実行中または loading=true）はキャンセルボタンだけでなく Esc でも閉じず、完了後に onOpenChange(false) を 1 回だけ呼ぶ（issue #818）。多段 Sheet / Dialog の上に開いても常に最前面（AlertDialog の open 順スタックに準拠）。",
       "variants": [
         "default",
         "destructive"
@@ -2422,7 +2422,8 @@
         "ボタン文言・aria-label の i18n は labels prop で渡す（未指定は既定文言のまま・後方互換）",
         "autoFocus / restoreFocusOnClose / closeOnEsc は Dialog / Sheet と同じ prop 名・既定 true。Escape は onSkip（未指定なら onComplete）を呼ぶ",
         "aria-modal=\"true\" を名乗るため、Tab/Shift+Tab を面の中に閉じ込める。トラップは Radix の FocusScope（trapped + loop）に載せる＝下に開いている Dialog / Sheet のスコープを pause できる。自前の document リスナーだとフォーカスの取り合いになり、下のモーダルへ引き戻される（issue #504）",
-        "バルーン（CoachMark の Content）は PortalContainerProvider で FocusScope の中へ描画する。スコープ外に出るとトラップの対象から外れる（issue #504）"
+        "バルーン（CoachMark の Content）は PortalContainerProvider で FocusScope の中へ描画する。スコープ外に出るとトラップの対象から外れる（issue #504）",
+        "ルートは Radix の DismissableLayer.Branch。Dialog / Sheet の上に重ねても、ツアーの「次へ」「スキップ」の押下は下のモーダルの外側クリック扱いにならず、下は閉じない（issue #829）"
       ],
       "props": {
         "labels": "{ next?, done?, skip?, ariaLabel? } — ボタン文言と overlay の aria-label。i18n はアプリ側で解決して渡す。done 未指定なら next にフォールバック（issue #477）",
