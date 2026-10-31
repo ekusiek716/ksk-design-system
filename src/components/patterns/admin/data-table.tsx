@@ -282,22 +282,40 @@ function getCellEditTriggerProps<TRow, TValue>(
     },
   }
 
+  // 編集中の Select / DatePicker のポップアップは body へ Portal されるが、React の合成
+  // イベントは Portal を越えて td まで届く。選択肢をタップすると、確定（closeEdit）の直後に
+  // その click が td の onClick に届いて startEdit が走り、セルが開き直っていた（issue #793）。
+  // td の DOM の外から来たイベントと、すでに編集中のときは編集開始を無視する。
+  const startEditFrom = (event: React.SyntheticEvent<HTMLTableCellElement>) => {
+    if (context.isEditing || isFromOutsideDom(event)) return
+    context.startEdit()
+  }
+
   if (trigger === "click") {
     return {
       ...keyProps,
-      onClick: () => context.startEdit(),
+      onClick: startEditFrom,
     }
   }
   if (trigger === "focus") {
     return {
       ...keyProps,
-      onFocus: () => context.startEdit(),
+      onFocus: startEditFrom,
     }
   }
   return {
     ...keyProps,
-    onDoubleClick: () => context.startEdit(),
+    onDoubleClick: startEditFrom,
   }
+}
+
+/**
+ * イベントが `currentTarget` の DOM の外（Portal 先）から React の合成イベントとして
+ * 届いたものかを判定する（issue #793）。
+ */
+function isFromOutsideDom(event: React.SyntheticEvent<HTMLElement>) {
+  const target = event.target
+  return target instanceof Node && !event.currentTarget.contains(target)
 }
 
 /** 開発ビルド判定（本番バンドルでは警告を出さない）。 */

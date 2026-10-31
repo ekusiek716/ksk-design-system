@@ -293,6 +293,30 @@ describe("DataTable: クリック編集のセルを行クリックにしない (
     expect(onRowClick).not.toHaveBeenCalled()
   })
 
+  it("createDataTableSelectColumn の選択肢をタッチ相当で選ぶと、編集が閉じて onRowClick も呼ばれない", () => {
+    // 選択肢の click は Portal を越えて td まで届く。td の onClick（trigger="click"）が
+    // それを拾うと、確定した直後に編集を始め直してセルが開いたままになっていた。
+    const onRowClick = vi.fn()
+    const onStatusCommit = vi.fn()
+    render(<TaskTable onRowClick={onRowClick} onStatusCommit={onStatusCommit} />)
+
+    fire(() => {
+      fireEvent.click(cellOf(2).querySelector("span") ?? cellOf(2))
+    })
+    expect(cellOf(2).querySelector('[role="combobox"]')).not.toBeNull()
+
+    const option = openSelect2Option()
+    fire(() => {
+      fireEvent.pointerDown(option, { pointerType: "touch" })
+      fireEvent.pointerUp(option, { pointerType: "touch" })
+      fireEvent.click(option)
+    })
+
+    expect(onStatusCommit).toHaveBeenCalledWith("done")
+    expect(cellOf(2).querySelector('[role="combobox"]')).toBeNull()
+    expect(onRowClick).not.toHaveBeenCalled()
+  })
+
   it("createDataTableDateColumn のセル（td 自体）を押しても onRowClick は呼ばれない", () => {
     const onRowClick = vi.fn()
     render(<TaskTable onRowClick={onRowClick} />)
@@ -315,7 +339,7 @@ describe("DataTable: クリック編集のセルを行クリックにしない (
   })
 })
 
-function openSelect2() {
+function openSelect2Option() {
   const trigger = container.querySelector<HTMLElement>('[role="combobox"]')!
   fire(() => {
     trigger.focus()
@@ -325,8 +349,13 @@ function openSelect2() {
     (el) => el.textContent === "完了"
   )
   expect(option).toBeDefined()
+  return option!
+}
+
+function openSelect2() {
+  const option = openSelect2Option()
   fire(() => {
-    option!.focus()
-    fireEvent.keyDown(option!, { key: "Enter" })
+    option.focus()
+    fireEvent.keyDown(option, { key: "Enter" })
   })
 }
