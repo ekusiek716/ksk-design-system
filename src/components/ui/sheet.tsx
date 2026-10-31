@@ -5,6 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { usePortalContainer } from "./portal-container"
 import { DescribedByLinker, useDescribedByLink } from "@/lib/described-by"
+import { useComposedRef } from "@/lib/compose-ref"
 import {
   ModalStackRegistrar,
   ModalityProvider,
@@ -804,6 +805,7 @@ function SheetContent({
   zIndex,
   overlayClassName,
   safeArea = true,
+  ref,
   ...props
 }: SheetContentProps) {
   const isModal = useModality()
@@ -837,6 +839,13 @@ function SheetContent({
     "sheet-description",
     !hasInternalDesc && props["aria-describedby"] == null
   )
+  // #822: consumer の ref を内部の callback ref（setContentNode）と合成する。
+  // 素の spread に任せると consumer の ref が後勝ちで内部 ref を上書きし、
+  // autoFocus・子の SheetDescription の紐付け・スワイプが静かに死ぬ。
+  // 下の各分岐（snap / swipeToClose）へは ref を明示的に渡し、それぞれの
+  // コンポーネントで自分の内部 ref と合成する。hook 順を保つため早期 return
+  // より前で呼ぶ。
+  const composedContentRef = useComposedRef<HTMLDivElement>(setContentNode, ref)
   // #341: 素の Sheet は「全画面のページ」ではないので、配下の SheetTitle の
   // 既定を従来サイズに保つ文脈を明示的に流す（外側の全画面サーフェスの文脈を
   // 引き継いでネストしたシートのタイトルが大きくなるのを防ぐ）。全画面級の
@@ -908,6 +917,7 @@ function SheetContent({
         closeOnEsc={closeOnEsc}
         restoreFocusRef={restoreFocusRef}
         {...props}
+        ref={ref}
       >
         {scopedChildren}
       </SnapBottomSheetContent>
@@ -933,6 +943,7 @@ function SheetContent({
         closeOnEsc={closeOnEsc}
         restoreFocusRef={restoreFocusRef}
         {...props}
+        ref={ref}
       >
         {scopedChildren}
       </SwipeToCloseBottomSheet>
@@ -962,6 +973,7 @@ function SheetContent({
         closeOnEsc={closeOnEsc}
         restoreFocusRef={restoreFocusRef}
         {...props}
+        ref={ref}
       >
         {scopedChildren}
       </SwipeToCloseSideDrawer>
@@ -1017,7 +1029,6 @@ function SheetContent({
     <SheetPortal container={container}>
       <SheetOverlay glass={useGlassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
-        ref={setContentNode}
         data-side={side}
         data-safe-area={safeArea}
         className={cn(
@@ -1029,6 +1040,9 @@ function SheetContent({
         // #505: modal な層だけ aria-modal="true" を出す。
         aria-modal={isModal ? true : undefined}
         {...contentProps}
+        // #822: consumer の ref は composedContentRef に合成済み。spread より
+        // 後ろに置き、内部の callback ref が上書きされないようにする。
+        ref={composedContentRef}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
@@ -1134,6 +1148,7 @@ function SwipeToCloseBottomSheet({
   restoreFocusRef,
   children,
   style,
+  ref,
   ...props
 }: SwipeToCloseBottomSheetProps) {
   const isModal = useModality()
@@ -1350,6 +1365,8 @@ function SwipeToCloseBottomSheet({
     },
     [beginGesture, moveGesture, endGesture, applyDescribedBy]
   )
+  // #822: consumer の ref と合成する（上書きされるとタッチリスナが付かない）。
+  const composedSheetRef = useComposedRef<HTMLDivElement>(attachTouchListeners, ref)
 
   // Pointer path: mouse only. Touch is handled by the non-passive listeners
   // above; double-handling here would re-introduce the cancellation race.
@@ -1384,7 +1401,6 @@ function SwipeToCloseBottomSheet({
     <SheetPortal container={container}>
       <SheetOverlay glass={glassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
-        ref={attachTouchListeners}
         data-side={side}
         // #706: CSS フォールバック（sheet-keyboard.css）が safe-area の控除を opt-out できるよう出す
         data-safe-area={safeArea}
@@ -1422,6 +1438,8 @@ function SwipeToCloseBottomSheet({
         // #505: modal な層だけ aria-modal="true" を出す。
         aria-modal={isModal ? true : undefined}
         {...contentProps}
+        // #822: 合成済みの ref を spread より後ろに置く。
+        ref={composedSheetRef}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
@@ -1524,6 +1542,7 @@ function SwipeToCloseSideDrawer({
   restoreFocusRef,
   children,
   style,
+  ref,
   ...props
 }: SwipeToCloseSideDrawerProps) {
   const isModal = useModality()
@@ -1689,6 +1708,8 @@ function SwipeToCloseSideDrawer({
     },
     [beginGesture, moveGesture, endGesture, applyDescribedBy]
   )
+  // #822: consumer の ref と合成する（上書きされるとタッチリスナが付かない）。
+  const composedSheetRef = useComposedRef<HTMLDivElement>(attachTouchListeners, ref)
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "touch") return
@@ -1715,7 +1736,6 @@ function SwipeToCloseSideDrawer({
     <SheetPortal container={container}>
       <SheetOverlay glass={glassOverlay} className={overlayClassName} stackLevel={stackLevel} />
       <DialogPrimitive.Content
-        ref={attachTouchListeners}
         data-side={side}
         className={cn(
           sheetVariants({ side, size }),
@@ -1738,6 +1758,8 @@ function SwipeToCloseSideDrawer({
         // #505: modal な層だけ aria-modal="true" を出す。
         aria-modal={isModal ? true : undefined}
         {...contentProps}
+        // #822: 合成済みの ref を spread より後ろに置く。
+        ref={composedSheetRef}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。
@@ -1813,6 +1835,7 @@ function SnapBottomSheetContent({
   restoreFocusRef,
   children,
   style,
+  ref,
   ...props
 }: SnapBottomSheetContentProps) {
   const isModal = useModality()
@@ -1857,6 +1880,8 @@ function SnapBottomSheetContent({
     "sheet-description",
     !hasInternalDesc && ariaDescribedBy == null
   )
+  // #822: consumer の ref と合成する。
+  const composedSheetRef = useComposedRef<HTMLDivElement>(setContentNode, ref)
   const handleOpenAutoFocus = (event: Event) => {
     captureRestoreFocus(restoreFocusRef)
     props.onOpenAutoFocus?.(event)
@@ -1976,7 +2001,6 @@ function SnapBottomSheetContent({
         />
       )}
       <DialogPrimitive.Content
-        ref={setContentNode}
         data-side="bottom"
         data-snap-active={activeSnapPoint ?? undefined}
         onKeyDown={onKeyDown}
@@ -2002,6 +2026,8 @@ function SnapBottomSheetContent({
         // #505: modal な層だけ aria-modal="true" を出す。
         aria-modal={isModal ? true : undefined}
         {...contentProps}
+        // #822: 合成済みの ref を spread より後ろに置く。
+        ref={composedSheetRef}
         // data-slot は spread より後ろに置く（#339）。前に置くと consumer が
         // data-slot を渡したときに上書きでき、styles/sheet-keyboard.css の
         // `[data-slot="sheet-content"]` 系のルールが丸ごと外れる。

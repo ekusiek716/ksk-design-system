@@ -12,16 +12,29 @@
  * classifies intent via the pure `decideSwipeGesture` helper. Here we verify
  * that classification (DOM-independent, runs under the SSR test setup).
  *
+ * 後半は jsdom で実際にシートを描き、タッチ / マウスの経路を通しで確かめる
+ * （#822 の ref 合成、#787 の除外対象）。
+ *
  * 実行: npm run test
+ *
+ * @vitest-environment jsdom
  */
-import { describe, it, expect } from "vitest"
+import * as React from "react"
+import { act } from "react"
+import { createRoot, type Root } from "react-dom/client"
+import { afterEach, describe, it, expect, vi } from "vitest"
 import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
   decideSwipeGesture,
   computeFlickVelocity,
   decideSwipeDismiss,
   projectCloseAxisDelta,
   closeAxisTranslate,
 } from "../src/components/ui/sheet"
+
+;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
 describe("decideSwipeGesture — 全面スワイプ閉じ判定", () => {
   it("6px のスロップ未満は未確定（null）", () => {
@@ -165,5 +178,79 @@ describe("closeAxisTranslate — close 軸ドラッグ量の符号付き transla
     expect(closeAxisTranslate(30, "right")).toBe(30)
     expect(closeAxisTranslate(30, "left")).toBe(-30)
     expect(closeAxisTranslate(0, "right")).toBe(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// ここから jsdom で描画して確かめる
+// ---------------------------------------------------------------------------
+
+let container: HTMLDivElement | null = null
+let root: Root | null = null
+
+afterEach(() => {
+  if (root) act(() => root!.unmount())
+  root = null
+  container?.remove()
+  container = null
+  document.body.innerHTML = ""
+  vi.restoreAllMocks()
+})
+
+function mount(ui: React.ReactElement) {
+  container = document.createElement("div")
+  document.body.appendChild(container)
+  root = createRoot(container)
+  act(() => root!.render(ui))
+  return document.querySelector<HTMLElement>('[data-slot="sheet-content"]')!
+}
+
+/** jsdom には Touch のコンストラクタが無いので、touches を後付けした Event を投げる。 */
+function touch(target: Element, type: string, x: number, y: number) {
+  const ev = new Event(type, { bubbles: true, cancelable: true })
+  const point = { clientX: x, clientY: y, target }
+  Object.defineProperty(ev, "touches", {
+    value: type === "touchend" || type === "touchcancel" ? [] : [point],
+  })
+  act(() => {
+    target.dispatchEvent(ev)
+  })
+  return ev
+}
+
+function touchSwipe(target: Element, from: [number, number], to: [number, number]) {
+  touch(target, "touchstart", from[0], from[1])
+  const steps = 5
+  for (let i = 1; i <= steps; i++) {
+    touch(
+      target,
+      "touchmove",
+      from[0] + ((to[0] - from[0]) * i) / steps,
+      from[1] + ((to[1] - from[1]) * i) / steps
+    )
+  }
+  touch(target, "touchend", to[0], to[1])
+}
+
+describe("swipeToClose に consumer の ref を渡してもタッチで閉じられる（Issue #822）", () => {
+  it.each([
+    ["bottom", [100, 100], [100, 350]],
+    ["right", [100, 100], [350, 100]],
+    ["left", [350, 100], [100, 100]],
+  ] as const)("%s: ref 付きでもタッチリスナが付き、スワイプで onOpenChange(false)", (side, from, to) => {
+    const onOpenChange = vi.fn()
+    const ref = React.createRef<HTMLDivElement>()
+    const content = mount(
+      <Sheet open onOpenChange={onOpenChange}>
+        <SheetContent side={side} swipeToClose ref={ref}>
+          <SheetTitle>t</SheetTitle>
+          <p data-testid="body">本文</p>
+        </SheetContent>
+      </Sheet>
+    )
+    expect(ref.current).toBe(content)
+    // jsdom は offsetHeight / offsetWidth が 0 なので、距離の閾値は 200px の既定。
+    touchSwipe(content.querySelector('[data-testid="body"]')!, from, to)
+    expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 })

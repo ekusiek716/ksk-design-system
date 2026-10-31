@@ -23,7 +23,12 @@ import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { ResponsiveDialog } from "../src/components/ui/responsive-dialog"
+import {
+  ResponsiveDialog,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogTitle,
+} from "../src/components/ui/responsive-dialog"
 import {
   ResponsiveOverlayFrame,
   resolveDesktopOverlayKeyboardStyle,
@@ -534,6 +539,67 @@ describe("ResponsiveOverlayFrame — iPad 横向き（1024px + キーボード�
       ref: (node: HTMLDivElement | null) => seen.push(node),
     } as Partial<FrameProps>)
     expect(seen).toContain(el2)
+  })
+
+  // #822: モバイル幅（Sheet 分岐）では consumer の ref が SheetContent へ
+  // 素通しされ、SheetContent 内部の callback ref を上書きしていた。
+  // 合成後は ref に面が渡り、autoFocus と説明の紐付けも保たれる。
+  it.each([
+    [{ preset: "mobile-form" }, "BottomSheetFrame 経由"],
+    [{ preset: "plain" }, "plain"],
+    [{ side: "float" }, "float"],
+  ])("モバイル幅でも consumer の ref に面が渡り、autoFocus が保たれる (%#: %s)", (props) => {
+    stubViewport(375)
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      cb(0)
+      return 0
+    })
+    const objectRef = React.createRef<HTMLDivElement>()
+    act(() =>
+      root.render(
+        <ResponsiveDialog open onOpenChange={() => {}} breakpoint="lg">
+          <ResponsiveOverlayFrame
+            description="テスト"
+            autoFocus="first-input"
+            {...(props as FrameProps)}
+            ref={objectRef}
+          >
+            <input data-testid="field" />
+          </ResponsiveOverlayFrame>
+        </ResponsiveDialog>
+      )
+    )
+    const el = document.querySelector<HTMLElement>('[data-slot="sheet-content"]')
+    expect(el).not.toBeNull()
+    expect(objectRef.current).toBe(el)
+    expect(document.activeElement).toBe(el!.querySelector('[data-testid="field"]'))
+    expect(el!.getAttribute("aria-describedby")).toBeTruthy()
+  })
+
+  it("モバイル幅の ResponsiveDialogContent でも consumer の ref と子の説明の紐付けが両立する", () => {
+    stubViewport(375)
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      cb(0)
+      return 0
+    })
+    const objectRef = React.createRef<HTMLDivElement>()
+    act(() =>
+      root.render(
+        <ResponsiveDialog open onOpenChange={() => {}} breakpoint="lg">
+          <ResponsiveDialogContent ref={objectRef} autoFocus="first-input" swipeToClose>
+            <ResponsiveDialogTitle>t</ResponsiveDialogTitle>
+            <ResponsiveDialogDescription>説明</ResponsiveDialogDescription>
+            <input data-testid="field" />
+          </ResponsiveDialogContent>
+        </ResponsiveDialog>
+      )
+    )
+    const el = document.querySelector<HTMLElement>('[data-slot="sheet-content"]')
+    expect(objectRef.current).toBe(el)
+    expect(document.activeElement).toBe(el!.querySelector('[data-testid="field"]'))
+    const describedBy = el!.getAttribute("aria-describedby")
+    expect(describedBy).toBeTruthy()
+    expect(document.getElementById(describedBy!)?.textContent).toBe("説明")
   })
 
   // 合成 ref（useComposedRef）は常に cleanup を返すので、React は detach 時に
