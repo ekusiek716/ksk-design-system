@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, View, Text as RNText, type AccessibilityProps, type StyleProp, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 /**
@@ -213,6 +214,9 @@ export function ListItem({
         accessibilityLabel={accessibilityLabel}
         accessibilityHint={accessibilityHint}
         accessibilityState={{ disabled: Boolean(disabled), ...accessibilityState }}
+        // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）。
+        // 呼び出し側の明示 aria-* は後ろの {...accessibilityProps} が優先する。
+        {...webAriaFromState(accessibilityRole ?? "button", { disabled: Boolean(disabled), ...accessibilityState })}
         {...accessibilityProps}
       >
         {({ pressed }) => inner(pressed)}
@@ -241,6 +245,8 @@ export function ListItem({
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       accessibilityState={accessibilityState}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+      {...webAriaFromState(accessibilityRole, accessibilityState)}
       {...accessibilityProps}
     >
       {inner(false)}

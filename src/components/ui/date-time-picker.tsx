@@ -20,6 +20,14 @@ interface DateTimePickerProps
   timePlaceholder?: string
   dateTriggerLabel?: string
   timeTriggerLabel?: string
+  /**
+   * 値があるとき日付側にクリアボタンを出す（DatePicker に素通し）。既定 false。
+   * 押すと `onChange(undefined)` で、**日付と時刻がまとめて消える**（時刻だけを残す値は持てないため）。
+   * カレンダーで選択中の日をもう一度押しても値は外れないので、利用者に値を消させたい画面はこれを付ける（issue #803）。
+   */
+  clearable?: boolean
+  /** クリアボタンの aria-label。省略時は KskLabelsProvider の `datePickerClear`（Provider 無しは "日付をクリア"） */
+  clearLabel?: string
 }
 
 function clampDate(value: Date, min?: Date, max?: Date): Date {
@@ -80,6 +88,8 @@ function DateTimePicker({
   timePlaceholder,
   dateTriggerLabel,
   timeTriggerLabel,
+  clearable,
+  clearLabel,
   className,
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
@@ -110,6 +120,8 @@ function DateTimePicker({
         min={min}
         max={max}
         disabled={disabled}
+        clearable={clearable}
+        clearLabel={clearLabel}
         aria-describedby={ariaDescribedBy}
         aria-invalid={ariaInvalid}
       />

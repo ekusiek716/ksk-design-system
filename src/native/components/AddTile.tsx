@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, Text as RNText, View, type StyleProp, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 /** Web AddTile と同じ語彙（issue #678）: sm=44pt / md=64pt */
@@ -31,6 +32,8 @@ export function AddTile({ label, icon, size = "md", fullWidth = true, onPress, d
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+      {...webAriaFromState("button", { disabled })}
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => {

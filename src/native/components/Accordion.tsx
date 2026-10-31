@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react"
 import { Pressable, View, Text as RNText, type StyleProp, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 import { nextAccordionKeys, normalizeAccordionKeys, type AccordionType } from "../disclosure-state"
 
@@ -89,6 +90,8 @@ export function Accordion({
               accessibilityRole="button"
               accessibilityLabel={it.accessibilityLabel ?? it.title}
               accessibilityState={{ expanded: open }}
+              // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+              {...webAriaFromState("button", { expanded: open })}
               style={({ pressed }) => ({
                 flexDirection: "row",
                 alignItems: "center",

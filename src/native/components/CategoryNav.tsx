@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, ScrollView, View, Text as RNText } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 export interface CategoryNavItem {
@@ -39,6 +40,8 @@ export function CategoryNav({ items, value, onChange }: CategoryNavProps) {
             key={it.key}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
+            // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+            {...webAriaFromState("tab", { selected: active })}
             accessibilityLabel={it.label}
             onPress={() => onChange?.(it.key)}
             style={{ alignItems: "center", gap: scales.spacing.scale[1], width: 64 }}

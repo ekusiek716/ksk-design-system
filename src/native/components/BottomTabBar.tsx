@@ -12,6 +12,7 @@ import type { BottomTabBarProps as RNBottomTabBarProps } from "@react-navigation
 import { NavigationBar, type NavigationBarItem } from "./NavigationBar"
 import { GlassView, type GlassIntensity, type GlassTint } from "./GlassView"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 export type BottomTabBarKeyboardBehavior = "hide" | "lift" | "stay"
@@ -186,6 +187,9 @@ export function LiquidBottomTabBar({
             key={route.key}
             accessibilityRole="button"
             accessibilityState={{ selected: focused }}
+            // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）。
+            // Web の BottomTabBar と同じく、表示中のタブは aria-current="page"。
+            {...webAriaFromState("button", { selected: focused }, { selectedAs: "current" })}
             accessibilityLabel={options.tabBarAccessibilityLabel ?? resolveTabLabel(route, options)}
             testID={options.tabBarButtonTestID}
             onPress={() => {

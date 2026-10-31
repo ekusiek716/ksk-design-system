@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, View } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 
 export interface CheckboxProps {
   checked?: boolean
@@ -36,6 +37,8 @@ export function Checkbox({
       hitSlop={8}
       accessibilityRole={decorative ? undefined : "checkbox"}
       accessibilityState={decorative ? undefined : { checked, disabled }}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+      {...(decorative ? null : webAriaFromState("checkbox", { checked, disabled }))}
       // decorative 時は web のタブ順から外す（aria-hidden の親と組み合わせて完全に無視させる）
       tabIndex={decorative ? -1 : undefined}
       style={{

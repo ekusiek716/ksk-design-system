@@ -202,8 +202,13 @@
       "rules": [
         "Use DatePicker not <input type='date'>",
         "Use DateRangePicker for date range selection",
-        "min / max で選択可能日を制限し、FormField の htmlFor と id を一致させられる"
-      ]
+        "min / max で選択可能日を制限し、FormField の htmlFor と id を一致させられる",
+        "カレンダーで選択中の日をもう一度押しても選択は外れない（onChange を呼ばずに閉じる）。値を消させたい画面は clearable でクリアボタンを出す（issue #803）"
+      ],
+      "props": {
+        "clearable": "boolean (既定 false) — 値があるとき日付のクリアボタンを出し、押すと onChange(undefined)。disabled 中は出さない（issue #803）",
+        "clearLabel": "string (既定 \"日付をクリア\"、KskLabelsProvider の datePickerClear) — クリアボタンの aria-label"
+      }
     },
     {
       "name": "DateTimePicker",
@@ -218,8 +223,13 @@
         "日時入力は DatePicker と TimePicker を consumer で手組みせず DateTimePicker を使う",
         "minuteStep の既定値は 5 分",
         "日付変更時は時刻を、時刻変更時は日付を保持する",
-        "Date はローカル時刻として扱い、UTC/TZ 変換は consumer の保存境界で行う"
-      ]
+        "Date はローカル時刻として扱い、UTC/TZ 変換は consumer の保存境界で行う",
+        "カレンダーで選択中の日をもう一度押しても日付・時刻は消えない。値を消させたい画面は clearable を使う（クリアで日付と時刻がまとめて undefined になる。issue #803）"
+      ],
+      "props": {
+        "clearable": "boolean (既定 false) — 日付側にクリアボタンを出す。押すと onChange(undefined) で日付と時刻がまとめて消える（issue #803）",
+        "clearLabel": "string (既定 \"日付をクリア\"、KskLabelsProvider の datePickerClear) — クリアボタンの aria-label"
+      }
     },
     {
       "name": "DateField",
@@ -233,9 +243,12 @@
       ],
       "rules": [
         "value/onChange は常に \"YYYY-MM-DD\" 文字列。Date オブジェクトを直接渡さない",
-        "strToDate/dateToStr は new Date(y, m-1, d) のローカルタイム方式（TZ ずれ回避）"
+        "strToDate/dateToStr は new Date(y, m-1, d) のローカルタイム方式（TZ ずれ回避）",
+        "カレンダーで選択中の日をもう一度押しても onChange(\"\") にはならない。値を消させたい画面は clearable を使う（issue #803）"
       ],
       "props": {
+        "clearable": "boolean (既定 false) — 値があるとき日付のクリアボタンを出し、押すと onChange(\"\")（issue #803）",
+        "clearLabel": "string (既定 \"日付をクリア\"、KskLabelsProvider の datePickerClear) — クリアボタンの aria-label",
         "triggerLabel": "string — trigger のスクリーンリーダー向けラベル。未指定時は選択済みの日付/placeholder が読み上げられる（issue #426。React Native 版は accessibilityLabel）"
       }
     },
@@ -299,6 +312,7 @@
       "accessibility": [
         "Must pair with <Label>",
         "native (src/native/components/CheckboxField.tsx, RadioGroup.tsx): accessibilityState に加え aria-checked / aria-disabled を既定で併記する（react-native-web 0.21 は accessibilityState を aria-* へ変換しないため。RN peerDependency >=0.78.0 の aria-* props を直接渡す）。行内の装飾用インナー Checkbox/丸印は aria-hidden も併記して二重の role=checkbox/radio を防ぐ",
+        "native の Checkbox（decorative でないとき）も accessibilityState と同じ値の aria-checked / aria-disabled を出す。native 部品全般で accessibilityState を渡す箇所は src/native/web-aria.ts の webAriaFromState で Web 用の aria-* を併記する（checkbox/radio/switch → aria-checked、button の選択 → aria-pressed、tab → aria-selected、ページ送り・下タブの現在位置 → aria-current=\"page\"、expanded / busy / disabled もそのまま）。併記漏れは __tests__/native-aria-parity.test.ts が検出する（issue #808）",
         "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
@@ -331,7 +345,8 @@
       "variants": [],
       "accessibility": [
         "Must pair with <Label>",
-        "オフの地は var(--Surface-Switch-Off, var(--Surface-Quaternary))、hoverは var(--Surface-Switch-Off-Hover, var(--Object-Disable))。通常 light/dark から3:1以上。非操作面の色は変更しない（issue #636）"
+        "オフの地は var(--Surface-Switch-Off, var(--Surface-Quaternary))、hoverは var(--Surface-Switch-Off-Hover, var(--Object-Disable))。通常 light/dark から3:1以上。非操作面の色は変更しない（issue #636）",
+        "native Switch は accessibilityRole=\"switch\" + accessibilityState.checked に加え、react-native-web 用に aria-checked / aria-disabled を併記する（react-native-web 0.21 は accessibilityState を aria-* へ変換しない。issue #808）"
       ]
     },
     {
@@ -2018,7 +2033,7 @@
         "disabled（issue #763）ですべてのチップを押せなくする。SettingsListRow の関数 rightSlot に置くときは {...control} で行の disabled も渡る",
         "selectionMode=\"single\" / \"multiple\" で選択意味論を指定する(issue #352。QuickActionGrid / ActionTile と同じ語彙)。multiple は @deprecated だが後方互換のため残っており、selectionMode 未指定時のみ従来どおり multiple(既定 true)から導出する。",
         "単一選択(selectionMode=\"single\")の value/onChange はスカラー(T | null)。配列形は v1.61 以前との後方互換でのみ受け付け、開発ビルドで console.warn する(issue #418)。",
-        "単一選択ではグループが role=\"radiogroup\"、チップが role=\"radio\" + aria-checked になり、矢印キー移動と roving tabindex が有効になる(native は accessibilityRole radiogroup / radio + accessibilityState.checked)。",
+        "単一選択ではグループが role=\"radiogroup\"、チップが role=\"radio\" + aria-checked になり、矢印キー移動と roving tabindex が有効になる(native は accessibilityRole radiogroup / radio + accessibilityState.checked。react-native-web では Chip がその state から aria-checked も出す。複数選択の native チップは role=button + aria-pressed。issue #808)。",
         "単一選択で選択中の値が 2 つ以上あると開発ビルドで console.warn する(issue #39 の footgun 検出)",
         "複数選択は選択中だけ × 付き（removable）で、トグルのたびにチップの要素が作り直される。フォーカスがグループ内にあったときは、トグル・× の後に押したチップの本体ボタンへフォーカスを戻す(issue #810)",
         "Use selectionMode=\"single\" for single-select (multiple=false は非推奨). Use max to limit selection count.",

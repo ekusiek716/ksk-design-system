@@ -8,6 +8,7 @@ import {
   type ViewStyle,
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 import { isControlledOpen, resolveOpenState } from "../disclosure-state"
 
@@ -69,6 +70,9 @@ export function Collapsible({
         accessibilityRole={accessibilityRole ?? "button"}
         accessibilityLabel={accessibilityLabel ?? title}
         accessibilityState={{ expanded: open, ...accessibilityState }}
+        // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）。
+        // 呼び出し側の明示 aria-* は後ろの {...accessibilityProps} が優先する。
+        {...webAriaFromState(accessibilityRole ?? "button", { expanded: open, ...accessibilityState })}
         // レイアウトを変えずに実タップ領域を広げる（minHeight を足すと
         // 既存 consumer の縦リズムが黙って変わるため hitSlop で補う）。
         hitSlop={8}

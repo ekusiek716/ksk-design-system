@@ -10,6 +10,7 @@ import {
   type ViewStyle,
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 /** 1 文字として受け付ける文字種（issue #669・Web と同じ語彙）。 */
@@ -130,6 +131,8 @@ export function CodeInput({
     onBlur: () => setFocused(false),
     accessibilityLabel,
     accessibilityState: { disabled },
+    // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+    ...webAriaFromState(undefined, { disabled }),
     accessibilityValue: { text: `${value.length} / ${length} 桁${value ? `: ${value}` : ""}` },
     testID,
   }
