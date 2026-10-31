@@ -1823,7 +1823,7 @@
     {
       "name": "ConfirmDialog",
       "path": "src/components/patterns/confirm-dialog.tsx",
-      "description": "確認ダイアログ。AlertDialog(role=alertdialog)基盤の割り込み確認。削除・送信等の重要操作前に PC/SP とも中央アラートで確認。外クリックでは閉じない・非同期onConfirm対応・ローディング状態あり。多段 Sheet / Dialog の上に開いても常に最前面（AlertDialog の open 順スタックに準拠）。",
+      "description": "確認ダイアログ。AlertDialog(role=alertdialog)基盤の割り込み確認。削除・送信等の重要操作前に PC/SP とも中央アラートで確認。外クリックでは閉じない・非同期onConfirm対応・ローディング状態あり。処理中（非同期 onConfirm の実行中または loading=true）はキャンセルボタンだけでなく Esc でも閉じず、完了後に onOpenChange(false) を 1 回だけ呼ぶ（issue #818）。多段 Sheet / Dialog の上に開いても常に最前面（AlertDialog の open 順スタックに準拠）。",
       "variants": [
         "default",
         "destructive"
