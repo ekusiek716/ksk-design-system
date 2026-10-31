@@ -392,9 +392,18 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
     }
   }
 
-  const files = options.changed
-    ? getChangedFiles(cwd, options)
+  const { files, missing: missingTargets } = options.changed
+    ? { files: getChangedFiles(cwd, options), missing: [] }
     : collectTargetFiles(cwd, options.targets, options)
+  // 存在しない検査対象は stderr に 1 件ずつ出す（issue #833）。--format json でも
+  // stdout の JSON を汚さないよう stderr だけに書く。
+  for (const target of missingTargets) {
+    console.error(`[ksk-ds lint] 検査対象が見つかりません: ${target}`)
+  }
+  // 指定した target がすべて存在しないなら、1 ファイルも検査していないので
+  // 「違反なし」にせず失敗にする（--strict の有無に関係なく）。既定 target の `.` は
+  // 常に存在するので、この分岐に入るのは対象パスを明示したときだけ。
+  const allTargetsMissing = missingTargets.length > 0 && missingTargets.length === options.targets.length
   const findings = []
   // 自動生成ヘッダで skip したファイルは無言にせず件数を報告する（issue #408。
   // 手書きファイルにマーカーを書けば lint を丸ごと回避できる構造のため、
@@ -441,7 +450,12 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
 
   const summary = summarize(findings)
   if (options.format === "json") {
-    console.log(JSON.stringify({ results: findings, summary, generatedSkipped, missingSkipped }, null, 2))
+    console.log(
+      JSON.stringify({ results: findings, summary, generatedSkipped, missingSkipped, missingTargets }, null, 2),
+    )
+  } else if (allTargetsMissing) {
+    // 走査 0 件で「違反は見つかりませんでした」と出すと検査したように読めるため出さない
+    console.log("ksk-ds lint: 検査対象が 1 件も見つからないため検査していません")
   } else {
     printText(findings, summary)
     if (generatedSkipped.length > 0) {
@@ -460,7 +474,11 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
     }
   }
 
+  if (allTargetsMissing) return 1
   if (summary.errors > 0) return 1
+  // 一部の target だけ存在しないときは警告のみ（「あれば検査」の使い方を壊さない）。
+  // CI で締めたい --strict のときは失敗にする（issue #833）。
+  if (options.strict && missingTargets.length > 0) return 1
   // warning は既定では exit code に影響しない。CI で締めたい場合は
   // --strict / --max-warnings=N を使う（issue #406）。
   if (options.strict && summary.warnings > 0) return 1
@@ -628,14 +646,23 @@ function warnUnknownAppliesTo(rules) {
   }
 }
 
+/**
+ * targets 配下の検査対象ファイルを集める。存在しない target は黙って捨てず
+ * missing に積んで返す（issue #833。打ち間違い・改名で検査が丸ごと抜けたまま
+ * 「違反なし」exit 0 になるのを防ぐ。警告と終了コードは runLintCli が決める）。
+ */
 function collectTargetFiles(cwd, targets, options) {
   const files = []
+  const missing = []
   for (const target of targets) {
     const abs = resolve(cwd, target)
-    if (!existsSync(abs)) continue
+    if (!existsSync(abs)) {
+      missing.push(target)
+      continue
+    }
     collect(abs, cwd, options, files)
   }
-  return files
+  return { files, missing }
 }
 
 function collect(abs, cwd, options, out) {

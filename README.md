@@ -221,6 +221,8 @@ npx ksk-ds lint src --max-warnings=0    # warning が N 件を超えたら exit 
 `warning` ルールも CI で締めたい場合は `--strict` か `--max-warnings N` を使ってください。
 **未知のオプションはエラー終了**します（黙って捨てないので、CI に書いたフラグが
 無言で効かないことはありません）。
+**存在しないパスを指定すると** stderr に `検査対象が見つかりません` を出します。指定したパスが
+すべて存在しないときは exit 1、一部だけ存在しないときは警告のみ（`--strict` 付きなら exit 1）です。
 
 ルールはファイルごとに **capability（そのファイルがどの記法を持ちうるか）** を判定して
 出し分けます（`contracts/rules.json` の `appliesTo`）。

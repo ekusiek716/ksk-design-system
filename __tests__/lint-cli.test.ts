@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { mkdtempSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { spawnSync } from "node:child_process"
@@ -143,5 +143,76 @@ describe("ksk-ds lint", () => {
     `)
     expect(result.status).toBe(0)
     expect(result.stdout).not.toContain("P051")
+  })
+})
+
+/**
+ * 存在しない検査対象の扱い（issue #833）。
+ * 打ち間違い・改名で対象が消えても「違反なし」exit 0 にしない。
+ * - 全 target が不在: stderr に警告し exit 1（--strict の有無に関係なく）
+ * - 存在と不在の混在: 警告だけ（exit は従来どおり）。--strict のときは exit 1
+ * - --format json でも同じ警告（stderr）と終了コード。stdout の JSON に missingTargets
+ */
+describe("ksk-ds lint — 存在しないパス（issue #833）", () => {
+  const CLEAN = `export function Example() {\n  return null\n}\n`
+
+  function runLintIn(args: string[]) {
+    const dir = mkdtempSync(join(tmpdir(), "ksk-ds-lint-missing-"))
+    mkdirSync(join(dir, "src"))
+    writeFileSync(join(dir, "src", "Example.tsx"), CLEAN)
+    return spawnSync("node", [join(process.cwd(), "bin/init.js"), "lint", ...args], {
+      cwd: dir,
+      encoding: "utf8",
+    })
+  }
+
+  it("存在しないパスを 1 つだけ指定すると stderr に警告して exit 1", () => {
+    const result = runLintIn(["srcc"])
+    expect(result.stderr).toContain("[ksk-ds lint] 検査対象が見つかりません: srcc")
+    expect(result.stdout).not.toContain("違反は見つかりませんでした")
+    expect(result.status).toBe(1)
+  })
+
+  it("存在しないパスだけなら --strict 付きでも exit 1", () => {
+    const result = runLintIn(["srcc", "--strict"])
+    expect(result.stderr).toContain("検査対象が見つかりません: srcc")
+    expect(result.status).toBe(1)
+  })
+
+  it("存在するパスと混在すると警告は出るが exit 0（従来どおり検査は行う）", () => {
+    const result = runLintIn(["src", "libb"])
+    expect(result.stderr).toContain("[ksk-ds lint] 検査対象が見つかりません: libb")
+    expect(result.stderr).not.toContain("見つかりません: src\n")
+    expect(result.stdout).toContain("違反は見つかりませんでした")
+    expect(result.status).toBe(0)
+  })
+
+  it("混在でも --strict なら exit 1", () => {
+    const result = runLintIn(["src", "libb", "--strict"])
+    expect(result.stderr).toContain("検査対象が見つかりません: libb")
+    expect(result.status).toBe(1)
+  })
+
+  it("--format json でも警告は stderr、終了コードは同じ、JSON に missingTargets が入る", () => {
+    const all = runLintIn(["srcc", "--format", "json"])
+    expect(all.stderr).toContain("検査対象が見つかりません: srcc")
+    expect(all.status).toBe(1)
+    expect(JSON.parse(all.stdout).missingTargets).toEqual(["srcc"])
+
+    const mixed = runLintIn(["src", "libb", "--format", "json"])
+    expect(mixed.stderr).toContain("検査対象が見つかりません: libb")
+    expect(mixed.status).toBe(0)
+    const parsed = JSON.parse(mixed.stdout)
+    expect(parsed.missingTargets).toEqual(["libb"])
+    expect(parsed.summary.errors).toBe(0)
+  })
+
+  it("存在するパスだけ・既定 target（.）は従来どおり exit 0 で警告なし", () => {
+    for (const args of [["src"], [], ["src", "--strict"]]) {
+      const result = runLintIn(args)
+      expect(result.stderr).not.toContain("検査対象が見つかりません")
+      expect(result.stdout).toContain("違反は見つかりませんでした")
+      expect(result.status).toBe(0)
+    }
   })
 })
