@@ -194,6 +194,54 @@ describe("native NumberInput: 入力中は下書き、確定時に一度だけ�
     expect(buttons()[1].disabled).toBe(false)
   })
 
+  it("確定前に部品が外れても、打ちかけの値を補正して 1 回だけ通知する", () => {
+    const onChange = vi.fn()
+    render(<Controlled initial={5} min={1} max={12} onChange={onChange} />)
+    call(input().onChangeText, "18")
+    expect(onChange).not.toHaveBeenCalled()
+    act(() => root.render(<ThemeProvider>{null}</ThemeProvider>))
+    expect(onChange).toHaveBeenCalledExactlyOnceWith(12)
+  })
+
+  it("外れる前に確定済みなら、外れたときに二重に通知しない", () => {
+    const onChange = vi.fn()
+    render(<Controlled initial={5} min={1} max={12} onChange={onChange} />)
+    call(input().onChangeText, "8")
+    call(input().onBlur)
+    act(() => root.render(<ThemeProvider>{null}</ThemeProvider>))
+    expect(onChange).toHaveBeenCalledExactlyOnceWith(8)
+  })
+
+  it("空欄のまま外れても通知しない", () => {
+    const onChange = vi.fn()
+    render(<Controlled initial={5} min={1} max={12} onChange={onChange} />)
+    call(input().onChangeText, "")
+    act(() => root.render(<ThemeProvider>{null}</ThemeProvider>))
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it("確定前に親が value を変えたら下書きを捨て、次のフォーカス外しで上書きしない", () => {
+    const onChange = vi.fn()
+    render(<NumberInput value={5} min={1} max={12} onChange={onChange} />)
+    call(input().onChangeText, "9")
+    expect(input().value).toBe("9")
+    render(<NumberInput value={1} min={1} max={12} onChange={onChange} />)
+    expect(input().value).toBe("1")
+    call(input().onBlur)
+    expect(onChange).not.toHaveBeenCalled()
+    expect(input().value).toBe("1")
+  })
+
+  it("親が同じ value のまま描き直しても下書きは残る", () => {
+    const onChange = vi.fn()
+    render(<NumberInput value={5} min={1} max={12} onChange={onChange} />)
+    call(input().onChangeText, "9")
+    render(<NumberInput value={5} min={1} max={12} onChange={onChange} />)
+    expect(input().value).toBe("9")
+    call(input().onBlur)
+    expect(onChange).toHaveBeenCalledExactlyOnceWith(9)
+  })
+
   it("QuantitySelector（min=1）でも同じく打ち直せる", () => {
     const onChange = vi.fn()
     render(<Controlled as="quantity" initial={5} max={12} onChange={onChange} />)

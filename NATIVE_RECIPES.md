@@ -219,6 +219,28 @@ import { Button, PhotoHero, Screen } from "ksk-design-system/native/ui"
 </SettingsSection>
 ```
 
+### 数値の入力欄（NumberInput / QuantitySelector）と保存ボタン
+
+`NumberInput` / `QuantitySelector` のキーボード入力は、欄からフォーカスが外れたときに
+はじめて `onChange` で確定します（入力中は下書き。issue #786）。± ボタンは押すたびに確定します。
+
+iOS の `number-pad` キーボードには送信キーが無く、`Screen`（`keyboardShouldPersistTaps="handled"`）の
+中では「保存」ボタンやヘッダーの戻るボタンを押しても欄のフォーカスが外れません。
+そのまま押すと、`onPress` の時点では打ちかけの値がまだ `onChange` に届いておらず、古い値で保存されます。
+押し始め（`onPressIn`）で `Keyboard.dismiss()` を呼び、指を離す（`onPress`）までに確定させます。
+
+```tsx
+import { Keyboard } from "react-native"
+
+<NumberInput value={minutes} onChange={setMinutes} min={1} max={60} />
+<Button onPressIn={() => Keyboard.dismiss()} onPress={() => save(minutes)}>
+  保存
+</Button>
+```
+
+確定前に部品が外れた（画面を閉じた）ときは、外れる時点で打ちかけの値を確定して `onChange` を呼びます。
+確定前に親が `value` を変えた（リセット等）ときは打ちかけの値を捨て、新しい `value` を表示します。
+
 ## Attachments
 
 Web では `CompactFilePicker` / `ImageAttachmentPicker` が hidden file input、trigger、preview、remove affordance を持ちます。Native では DocumentPicker / ImagePicker の起動だけ consumer が渡し、trigger と preview は DS が持ちます。
