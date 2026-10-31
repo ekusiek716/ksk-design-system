@@ -1,10 +1,10 @@
 import React from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import { resolve, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 import { readFileSync } from "node:fs"
 import { chromium } from "playwright"
 import { compile } from "tailwindcss"
+import { consumerLoadStylesheet } from "../scripts/lib/consumer-css.mjs"
 import { Scanner } from "@tailwindcss/oxide"
 import { describe, expect, it } from "vitest"
 import { DataTableRow } from "../src/components/patterns/admin/data-table"
@@ -18,10 +18,8 @@ async function withPage(html: string, test: (page: import("playwright").Page) =>
   const root = fileURLToPath(new URL("../", import.meta.url))
   const css = (await compile('@import "tailwindcss"; @import "./src/preset-core.css";', {
     base: root,
-    loadStylesheet: async (id, base) => {
-      const file = id === "tailwindcss" ? resolve(root, "node_modules/tailwindcss/index.css") : resolve(base, id)
-      return { content: readFileSync(file, "utf8"), base: dirname(file) }
-    },
+    // preset-core が bare import する tw-animate-css（#827）も consumer と同じ規則で解決する
+    loadStylesheet: consumerLoadStylesheet(),
   })).build(candidates)
   const browser = await chromium.launch({ headless: true })
   try {

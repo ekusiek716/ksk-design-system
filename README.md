@@ -88,6 +88,10 @@ DS のルールが適用されません。既存ファイルはスキップさ�
 
 独自ブランドのテーマを使う場合は、この後にテーマCSSをimportしてください。
 
+メニュー・Popover・Tooltip・Select・Dialog の開閉アニメと Accordion の高さアニメに使う
+`tw-animate-css` は preset（`preset-core`）が読み込みます。DS の dependencies に入っているため、
+consumer 側で別途インストールや `@import "tw-animate-css";` をする必要はありません（issue #827）。
+
 `preset` を使わずトークン CSS を個別 subpath で import する構成では、角丸トークン
 （`--Radius-Surface` / `--Radius-Modal` / `--Radius-Sheet`）は
 `ksk-design-system/tokens/product-theme` に含まれます（issue #553）。
