@@ -124,7 +124,8 @@
         "既存の手書き CSS を持つ画面の段階移行では unstyled を使う（showCount / adornment / IME 追従は維持される）",
         "Native Input supports style (outer container View) and inputStyle (inner TextInput) as RN-idiomatic style overrides, merged after DS defaults (issue #447)",
         "その場で編集する欄（詳細シートのタイトル・メモ等）は variant=\"inline\"（本文 typo-body-md）/ \"inline-title\"（見出し typo-heading-xl）。枠・背景なし、hover で Surface-Secondary、focus-visible で Focus リング、aria-invalid で Caution のリング。unstyled + typo・余白・フォーカス下線の手書きで作らない（issue #675）",
-        "CommitInput / CommitTextarea / AutoGrowTextarea / CommitAutoGrowTextarea にも同じ variant を渡せる。native Input / Textarea / AutoGrowTextarea も同名（フォーカス・invalid は下線）"
+        "CommitInput / CommitTextarea / AutoGrowTextarea / CommitAutoGrowTextarea にも同じ variant を渡せる。native Input / Textarea / AutoGrowTextarea も同名（フォーカス・invalid は下線）",
+        "native Input / Textarea / AutoGrowTextarea: consumer の onFocus / onBlur（AutoGrowTextarea は onContentSizeChange も）は内部処理（フォーカス枠の切り替え・高さの自動調整）と合成して両方呼ぶ。disabled は editable より優先する（issue #819）"
       ]
     },
     {
