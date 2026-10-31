@@ -221,7 +221,7 @@ props は直接宣言分のみ。継承props・型・複合部品の子propsは�
 | NotificationList | あり | なし | 抽出不可 | 抽出不可 | admin notification list is Web-only | 未検証 |
 | NumberInput | あり | あり | format, placeholder, size, className, decrementLabel, incrementLabel |  | Native NumberInput hasn't grown Web's i18n label/format API yet — tracked as a real follow-up, not urgent | 未検証 |
 | OrderSummary | あり | あり | lineItems, totalLabel, totalValue, ctaLabel, onCTAClick, ctaDisabled, fixed | lines, currency | lineItems vs lines naming diverged independently; Web adds a sticky CTA footer not yet ported to Native | 未検証 |
-| Pagination | あり | あり | navLabel | page, total, onChange, windowSize | Web wraps the DOM nav/ul/li composition (navLabel, issue #428, is the nav's aria-label); Native declares its own controlled page/total/onChange/windowSize props directly, a different composition model entirely | 未検証 |
+| Pagination | あり | あり | navLabel | page, total, onChange, windowSize, previousLabel, nextLabel, ellipsisLabel | Web wraps the DOM nav/ul/li composition (navLabel, issue #428, is the nav's aria-label); Native declares its own controlled page/total/onChange/windowSize props directly, a different composition model entirely | 未検証 |
 | PaginationContent | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | PaginationEllipsis | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |
 | PaginationItem | あり | なし | 抽出不可 | 抽出不可 |  | 未検証 |

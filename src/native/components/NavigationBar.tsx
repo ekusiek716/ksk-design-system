@@ -18,14 +18,27 @@ export interface NavigationBarProps {
 }
 
 /**
+ * 読み上げ名。ラベルに件数バッジを「（N）」で足す（100 以上は 99+）。
+ * Web の BottomTabBar の accessibleName と同じ組み立て（issue #800）。
+ */
+function navItemAccessibilityLabel(item: NavigationBarItem): string {
+  if (item.badge === undefined || item.badge <= 0) return item.label
+  return `${item.label}（${item.badge > 99 ? "99+" : item.badge}）`
+}
+
+/**
  * Webの「ヘッダ型ナビゲーション」をRNで意味変換した BottomTabs風 ナビ。
  * 画面下部に固定して使う想定。
+ *
+ * 外枠は `tablist`、各項目は `tab` で、現在の項目に `selected` を既定で持つ（issue #800。
+ * FloatingTabBar と同じ）。読み上げ名はラベル + 件数バッジ。
  */
 export function NavigationBar({ items, value, onChange }: NavigationBarProps) {
   const { theme, scales } = useTheme()
 
   return (
     <View
+      accessibilityRole="tablist"
       style={{
         flexDirection: "row",
         backgroundColor: theme.surface.primary,
@@ -39,6 +52,9 @@ export function NavigationBar({ items, value, onChange }: NavigationBarProps) {
         return (
           <Pressable
             key={it.key}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={navItemAccessibilityLabel(it)}
             onPress={() => {
               it.onPress?.()
               onChange?.(it.key)

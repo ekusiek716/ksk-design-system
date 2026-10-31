@@ -8,6 +8,12 @@ export interface PaginationProps {
   total: number
   onChange?: (page: number) => void
   windowSize?: number
+  /** 「‹」ボタンの読み上げ名。既定「前のページ」（issue #800） */
+  previousLabel?: string
+  /** 「›」ボタンの読み上げ名。既定「次のページ」（issue #800） */
+  nextLabel?: string
+  /** 省略記号「…」の読み上げ名。既定「その他のページ」（issue #800） */
+  ellipsisLabel?: string
 }
 
 function range(from: number, to: number) {
@@ -16,7 +22,20 @@ function range(from: number, to: number) {
   return r
 }
 
-export function Pagination({ page, total, onChange, windowSize = 5 }: PaginationProps) {
+/**
+ * ページ送り。各ボタンは役割 `button` を既定で持ち、現在ページに `selected`、
+ * 押せないボタン（先頭での「‹」・末尾での「›」・「…」）に `disabled` を立てる。
+ * 読み上げ名はページ番号、前後と「…」は `previousLabel` / `nextLabel` / `ellipsisLabel`（issue #800）。
+ */
+export function Pagination({
+  page,
+  total,
+  onChange,
+  windowSize = 5,
+  previousLabel = "前のページ",
+  nextLabel = "次のページ",
+  ellipsisLabel = "その他のページ",
+}: PaginationProps) {
   const { theme, scales } = useTheme()
   const half = Math.floor(windowSize / 2)
   let start = Math.max(1, page - half)
@@ -31,11 +50,15 @@ export function Pagination({ page, total, onChange, windowSize = 5 }: Pagination
     pageTarget: number | null,
     disabled = false,
     active = false,
+    accessibilityLabel: string = label,
   ) => (
     <Pressable
       key={label}
       onPress={() => pageTarget && !disabled && onChange?.(pageTarget)}
       disabled={disabled || !pageTarget}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active, disabled: disabled || !pageTarget }}
+      accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => ({
         minWidth: 36,
         height: 36,
@@ -66,13 +89,13 @@ export function Pagination({ page, total, onChange, windowSize = 5 }: Pagination
 
   return (
     <View style={{ flexDirection: "row", gap: scales.spacing.scale[1], alignSelf: "center" }}>
-      {renderBtn("‹", page > 1 ? page - 1 : null, page <= 1)}
+      {renderBtn("‹", page > 1 ? page - 1 : null, page <= 1, false, previousLabel)}
       {start > 1 && renderBtn("1", 1)}
-      {start > 2 && renderBtn("…", null, true)}
+      {start > 2 && renderBtn("…", null, true, false, ellipsisLabel)}
       {items.map((p) => renderBtn(String(p), p, false, p === page))}
-      {end < total - 1 && renderBtn("…", null, true)}
+      {end < total - 1 && renderBtn("…", null, true, false, ellipsisLabel)}
       {end < total && renderBtn(String(total), total)}
-      {renderBtn("›", page < total ? page + 1 : null, page >= total)}
+      {renderBtn("›", page < total ? page + 1 : null, page >= total, false, nextLabel)}
     </View>
   )
 }
