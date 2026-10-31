@@ -7,6 +7,17 @@ name: Publish
 #
 # 前提: npmjs.com の ksk-design-system パッケージ設定で Trusted Publisher に
 # このリポジトリ (ekusiek716/ksk-design-system) + workflow "publish.yml" を登録しておくこと。
+#
+# 権限の分け方（issue #801）:
+#   公開権限（id-token: write）と書き込み権限（contents: write）を持つ job では、
+#   依存のインストールやビルド（= 外部ライブラリのコード）を一切動かさない。
+#   依存が 1 つ乗っ取られただけで、正規の経路（provenance 付き）から不正な版を
+#   公開されるのを防ぐため。
+#   - build job（読み取りだけ）: 版の判定 → npm ci --ignore-scripts → build:lib → npm pack
+#     → tarball を artifact に上げる
+#   - publish job（公開・書き込み）: リポジトリを checkout せず、artifact の tarball を
+#     `npm publish <tgz> --ignore-scripts` で公開し、検証とタグ/Release 作成だけを行う
+#   この分け方は __tests__/publish-workflow-permissions.test.ts が固定している。
 
 on:
   push:
@@ -20,21 +31,28 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# 既定は読み取りだけ。書き込み権限は publish job にだけ job 単位で付ける（issue #801）。
 permissions:
-  contents: write # git tag + GitHub Release 作成に必須
-  id-token: write # OIDC トークン発行に必須（Trusted Publishing の要）
+  contents: read
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      publish: ${{ steps.version.outputs.publish }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # 認証情報を .git/config に残さない（この job は push しない）
+          persist-credentials: false
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24 # npm >= 11.5.1 が Trusted Publishing に必須
+          node-version: 24
           cache: npm
-          registry-url: https://registry.npmjs.org
 
       - name: Check exact version and monotonicity
         id: version
@@ -66,18 +84,82 @@ jobs:
             echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # 依存の install スクリプトは実行しない（esbuild・rollup はオプション依存の
+      # プラットフォーム別パッケージのバイナリで動くので、install スクリプト無しでも build:lib が通る）。
       - name: Install
         if: steps.version.outputs.publish == 'true'
-        run: npm ci
+        run: npm ci --ignore-scripts
 
-      - name: Publish (prepack が build:lib を実行)
+      - name: Build
         if: steps.version.outputs.publish == 'true'
-        run: npm publish
+        run: npm run build:lib
+
+      # prepack（= build:lib）は直前で済ませているので --ignore-scripts で二重実行しない。
+      - name: Pack
+        if: steps.version.outputs.publish == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          PACK_DIR="$RUNNER_TEMP/package"
+          mkdir -p "$PACK_DIR"
+          npm pack --ignore-scripts --pack-destination "$PACK_DIR"
+          TARBALL="$PACK_DIR/ksk-design-system-$VERSION.tgz"
+          test -f "$TARBALL"
+          tar -tzf "$TARBALL" | grep -q 'package/dist/types/index.d.ts'
+          tar -tzf "$TARBALL" | grep -q 'package/src/themes/default.css'
+
+      - name: Upload tarball
+        if: steps.version.outputs.publish == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: package-tarball
+          path: ${{ runner.temp }}/package/ksk-design-system-${{ steps.version.outputs.version }}.tgz
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    # publish=false（npm に該当版が既にある）でもこの job は走らせる。
+    # 下の「Create git tag + GitHub Release」を、publish 済みでタグ/Release だけ未作成の
+    # 再実行でも動かすため（#269）。公開系のステップだけを publish=true で絞る。
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # git tag + GitHub Release 作成に必須
+      id-token: write # OIDC トークン発行に必須（Trusted Publishing の要）
+    # リポジトリは checkout しない。この job が扱うのは build job の tarball だけで、
+    # 依存のインストール・ビルド・リポジトリ内スクリプトを実行しない（issue #801）。
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24 # npm >= 11.5.1 が Trusted Publishing に必須
+          registry-url: https://registry.npmjs.org
+
+      - name: Download tarball
+        if: needs.build.outputs.publish == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: package-tarball
+          path: ${{ runner.temp }}/package
+
+      - name: Publish tarball
+        if: needs.build.outputs.publish == 'true'
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          TARBALL="$RUNNER_TEMP/package/ksk-design-system-$VERSION.tgz"
+          # 取り違え防止: tarball の中の版が build job の判定した版と一致することを確かめる
+          PACKED=$(tar -xzOf "$TARBALL" package/package.json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).version))')
+          if [ "$PACKED" != "$VERSION" ]; then
+            echo "tarball version $PACKED does not match $VERSION" >&2
+            exit 1
+          fi
+          npm publish "$RUNNER_TEMP/package/ksk-design-system-$VERSION.tgz" --ignore-scripts
 
       - name: Verify registry metadata and tarball
-        if: steps.version.outputs.publish == 'true'
+        if: needs.build.outputs.publish == 'true'
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
           PACK_DIR="$(mktemp -d)"
           TARBALL="$PACK_DIR/ksk-design-system-$VERSION.tgz"
           # npm view が新バージョンを返しても、tarball の解決はワンテンポ遅れることがある
@@ -122,10 +204,14 @@ jobs:
         # タグが既にあればそれを使って Release だけ作るため、
         # 「タグは存在するが Release だけ無い」状態（旧ロジックがタグ存在だけで
         # 早期 exit していたために取り残していたケース）もここで解消される。
+        #
+        # checkout しないので、対象リポジトリは GH_REPO で渡す（issue #801）。
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.build.outputs.version }}
         run: |
-          TAG="v${{ steps.version.outputs.version }}"
+          TAG="v$VERSION"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "release $TAG already exists, skipping"
             exit 0
