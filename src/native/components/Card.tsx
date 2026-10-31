@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, View, Platform, type ViewProps, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 
 export interface CardProps extends ViewProps {
   /** spacing.scale のインデックス。既定 4 = 16px */
@@ -86,6 +87,9 @@ export function Card({ padding = 4, elevation, radius = "lg", style, children, o
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ disabled, ...(selected !== undefined ? { selected } : {}) }}
+        // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）。
+        // Web の Card と同じく、押せる Card の selected は aria-pressed。
+        {...webAriaFromState("button", { disabled, selected })}
         disabled={disabled}
         onPress={onPress}
         style={({ pressed }) => [

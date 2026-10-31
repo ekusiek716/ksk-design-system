@@ -8,6 +8,7 @@ import {
 } from "react-native"
 
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveIconButtonMetrics, type IconButtonSize } from "../icon-button-metrics"
 
 /**
@@ -153,16 +154,22 @@ export function IconButton({
               foreground: toneColor,
             }
 
+  const state = {
+    disabled: Boolean(effectiveDisabled),
+    busy: loading || undefined,
+    ...accessibilityState,
+  }
+
   return (
     <Pressable
       disabled={effectiveDisabled}
       accessibilityRole={accessibilityRole ?? "button"}
       accessibilityLabel={accessibilityLabel}
-      accessibilityState={{
-        disabled: Boolean(effectiveDisabled),
-        busy: loading || undefined,
-        ...accessibilityState,
-      }}
+      accessibilityState={state}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）。
+      // 呼び出し側が selected / checked を渡したトグルは aria-pressed、expanded は aria-expanded になる。
+      // 呼び出し側の明示 aria-* は後ろの {...rest} が優先する。
+      {...webAriaFromState(accessibilityRole ?? "button", state)}
       hitSlop={hitSlop ?? fallbackHitSlop}
       style={({ pressed }) => [
         {

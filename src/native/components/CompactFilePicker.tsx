@@ -9,6 +9,7 @@ import {
   type ViewStyle,
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 import { Button } from "./Button"
 
@@ -62,6 +63,8 @@ export function CompactFilePicker({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: loading }}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+      {...webAriaFromState("button", { disabled: isDisabled, busy: loading })}
       style={[
         {
           minHeight: 56,

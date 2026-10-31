@@ -17,13 +17,16 @@ const chipSource = readFileSync(
 
 describe("Chip の a11y 既定値（#311）", () => {
   it("既定で accessibilityRole=button を持ち、呼び出し側の明示が優先される", () => {
-    expect(chipSource).toContain('accessibilityRole={accessibilityRole ?? "button"}')
+    // role / state は Web 用 aria-* の算出（issue #808）と共有するため変数にまとめている
+    expect(chipSource).toContain('const role = accessibilityRole ?? "button"')
+    expect(chipSource).toContain("accessibilityRole={role}")
   })
 
   it("selected / disabled を accessibilityState へ反映し、呼び出し側の明示が優先される", () => {
-    expect(chipSource).toContain(
-      "accessibilityState={{ selected, disabled, ...accessibilityState }}",
-    )
+    expect(chipSource).toContain("const state = { selected, disabled, ...accessibilityState }")
+    expect(chipSource).toContain("accessibilityState={state}")
+    // Web（react-native-web）にも同じ state から aria-* を出す（issue #808）
+    expect(chipSource).toContain("{...webAriaFromState(role, state)}")
   })
 
   it("removable の×ボタンは role とラベルを既定で持つ（×だけでは読み上げで意味が取れない）", () => {

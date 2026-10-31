@@ -9,6 +9,7 @@ import {
   type ViewStyle,
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 export type StatusActionBadgeState = "idle" | "pending" | "syncing" | "success" | "warning" | "error" | "offline"
@@ -139,6 +140,8 @@ export function StatusActionBadge({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ busy: loading || state === "syncing" }}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+      {...webAriaFromState("button", { busy: loading || state === "syncing" })}
       onPress={onPress}
       style={({ pressed }) => [baseStyle, pressed && { opacity: 0.82 }]}
       {...rest}

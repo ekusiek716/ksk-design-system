@@ -1,6 +1,7 @@
 import React, { useMemo } from "react"
 import { Pressable, Text as RNText, View, type ViewStyle } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 
 export interface CountdownHeroProps {
   targetDate: Date | string
@@ -126,6 +127,8 @@ export function CountdownHero({
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel ?? (isToday ? `${displayLabel} ${valueText}` : `${displayLabel} ${valueText} ${unit}`)}
         accessibilityState={{ disabled }}
+        // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+        {...webAriaFromState("button", { disabled })}
         style={({ pressed }) => [
           { position: "relative", opacity: disabled ? 0.5 : pressed ? 0.7 : 1 },
           style,

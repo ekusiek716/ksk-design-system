@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, View, Text as RNText, Platform } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { useSafeAreaInsets } from "../theme/SafeAreaInsetsProvider"
 import { resolveBottomBarPaddingBottom } from "../safe-area"
 import { resolveTypo } from "../typography"
@@ -76,6 +77,8 @@ export function NavigationBar({ items, value, onChange, safeArea = true }: Navig
             key={it.key}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
+            // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+            {...webAriaFromState("tab", { selected: active })}
             accessibilityLabel={navItemAccessibilityLabel(it)}
             onPress={() => {
               it.onPress?.()

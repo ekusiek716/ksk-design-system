@@ -2,6 +2,7 @@ import React from "react"
 import { Pressable, View, Text as RNText, type PressableProps } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
+import { webAriaFromState } from "../web-aria"
 
 export type ChipVariant = "filled" | "accent" | "outline"
 export type ChipSize = "sm" | "md" | "lg"
@@ -54,6 +55,12 @@ export function Chip({
       ? `削除: ${children}`
       : "削除"
 
+  // 支援技術への既定値（issue #311）。role が無いとスクリーンリーダーが
+  // ただのテキストとして扱い、selected も読み上げられない。呼び出し側の
+  // 明示値が常に優先される（後方互換）。
+  const role = accessibilityRole ?? "button"
+  const state = { selected, disabled, ...accessibilityState }
+
   const bg = selected ? theme.brand.primary : palette.bg
   const fg = selected ? theme.text["on-inverse"] : disabled ? theme.text.disable : palette.fg
   const border = selected ? theme.brand.primary : palette.border
@@ -62,11 +69,13 @@ export function Chip({
     <View style={{ flexDirection: "row", alignSelf: "flex-start" }}>
       <Pressable
         disabled={disabled}
-        // 支援技術への既定値（issue #311）。role が無いとスクリーンリーダーが
-        // ただのテキストとして扱い、selected も読み上げられない。呼び出し側の
-        // 明示値が常に優先される（後方互換）。
-        accessibilityRole={accessibilityRole ?? "button"}
-        accessibilityState={{ selected, disabled, ...accessibilityState }}
+        accessibilityRole={role}
+        accessibilityState={state}
+        // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）。
+        // role が radio / checkbox / switch なら aria-checked、button なら aria-pressed になる
+        // （ChipSelector の単一選択・CollapsibleChipField の展開中は radio で渡ってくる）。
+        // 呼び出し側の明示 aria-* は後ろの {...rest} が優先する。
+        {...webAriaFromState(role, state)}
         style={({ pressed }) => [
           {
             height: heightMap[size],
@@ -116,6 +125,7 @@ export function Chip({
           accessibilityRole="button"
           accessibilityLabel={removeLabel}
           accessibilityState={{ disabled }}
+          {...webAriaFromState("button", { disabled })}
           style={({ pressed }) => ({
             height: heightMap[size],
             paddingHorizontal: 10,

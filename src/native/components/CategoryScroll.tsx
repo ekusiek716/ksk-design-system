@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, ScrollView, View, Text as RNText } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 export interface CategoryScrollItem {
@@ -39,6 +40,8 @@ export function CategoryScroll({ items, value, onChange }: CategoryScrollProps) 
             key={it.key}
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
+            // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）
+            {...webAriaFromState("tab", { selected: active })}
             onPress={() => onChange?.(it.key)}
             style={({ pressed }) => ({
               flexDirection: "row",

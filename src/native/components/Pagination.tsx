@@ -1,6 +1,7 @@
 import React from "react"
 import { Pressable, View, Text as RNText } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { webAriaFromState } from "../web-aria"
 import { resolveTypo } from "../typography"
 
 export interface PaginationProps {
@@ -61,6 +62,9 @@ export function Pagination({
       disabled={disabled || !pageTarget}
       accessibilityRole="button"
       accessibilityState={{ selected: active, disabled: disabled || !pageTarget }}
+      // react-native-web は accessibilityState を aria-* に変換しないため併記する（issue #808）。
+      // Web の Pagination と同じく、現在ページは aria-current="page"（トグルの aria-pressed にしない）。
+      {...webAriaFromState("button", { selected: active, disabled: disabled || !pageTarget }, { selectedAs: "current" })}
       accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => ({
         minWidth: 36,
