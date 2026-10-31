@@ -1946,6 +1946,12 @@ function SnapBottomSheetContent({
 
     // Dismiss if dragged well below the lowest snap
     if (dismissible && newRatio < minSnap * 0.5) {
+      // #821: ドラッグ中は途中の比率（例 0.15）を setActiveSnapPoint へ流して
+      // いるため、そのまま閉じると制御版の親に snapPoints に無い値が残り、
+      // 次に開いたときシートがほぼ画面外に出る（↑/↓ キーも効かない）。
+      // 閉じる前に最下段（非制御版の既定と同じ）へ戻す。閉じるボタン・Esc の
+      // 経路（handleOpenChange）は変えない＝親が最後の段を覚える使い方は保つ。
+      setActiveSnapPoint(snapPoints[0])
       close()
       return
     }
