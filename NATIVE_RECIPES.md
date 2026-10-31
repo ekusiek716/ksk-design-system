@@ -179,6 +179,8 @@ function DsInsets({ children }: { children: React.ReactNode }) {
 
 - 下余白は、inset が渡されていれば `StickyActionBar` が「16 + inset」、`NavigationBar` が「inset」です。渡されていなければ従来の決め打ち（`StickyActionBar` は iOS 32 / Android 16、`NavigationBar` は iOS 24 / Android 0）のままです。
 - iOS で inset を渡すと、Face ID 機では従来より余白が大きくなります（例: `StickyActionBar` は 32 → 50）。
+- 逆に、inset が 0 の端末（ホームボタンのある iPhone など）では従来より余白が小さくなります（`StickyActionBar` は 32 → 16、`NavigationBar` は 24 → 0）。
+- 余白が変わるのは inset を流し込んだ画面だけではありません。ほかの部品（`AppHeader` など）のために `SafeAreaInsetsProvider` を既にルートで流しているアプリは、このバージョンに上げただけで上の 2 点のとおり見た目が変わります。上げたら下端のバーを実機で確認し、従来値に戻したい画面は `safeArea={false}` を渡してください。
 - `SafeAreaView` の `edges` に `bottom` を含めている画面や、自前で下余白を足している画面では二重になります。どちらか片方に寄せ、バー側を使わないときは `safeArea={false}` を渡します（inset を無視して従来値）。
 
 ### Liquid Glass の FAB
