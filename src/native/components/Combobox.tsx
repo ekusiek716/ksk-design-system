@@ -70,7 +70,9 @@ export function Combobox({
       </Pressable>
       <Sheet open={open} onClose={() => setOpen(false)} side="bottom" title="選択">
         <Input value={query} onChangeText={setQuery} placeholder={searchPlaceholder} />
-        <View style={{ height: 360, marginTop: scales.spacing.scale[2] }}>
+        {/* iOS でキーボードが出て Sheet が縮んだときは、リストが高さを譲って検索欄を
+            キーボードの上に残す（#791。flexShrink の既定は 0） */}
+        <View style={{ height: 360, flexShrink: 1, marginTop: scales.spacing.scale[2] }}>
           {filtered.length === 0 ? (
             <RNText
               style={[

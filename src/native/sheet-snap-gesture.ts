@@ -127,6 +127,16 @@ export function resolveRelease(
   return { kind: "snap", snap: best }
 }
 
+/**
+ * close を onClose で親へ通知した後、親が open を false にしなかった
+ * （未保存の確認・送信中など閉じ要求を拒否した）ときの復帰先 snap（#797）。
+ * open がまだ true なら、ドラッグ開始時の snap を返す。false なら null（通常の退場）。
+ * 戻さないと、パネルが画面外に残ったまま透明な Modal が全面のタッチを吸い続ける。
+ */
+export function resolveRejectedClose(openStillTrue: boolean, startActive: number): number | null {
+  return openStillTrue ? startActive : null
+}
+
 /** The dedicated handle is draggable even when body content is scrolled. */
 export function shouldStartHandleDrag(animating: boolean, keyboardReducedViewport: boolean): boolean {
   return !animating && !keyboardReducedViewport
