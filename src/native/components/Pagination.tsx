@@ -45,7 +45,10 @@ export function Pagination({
   }
   const items = range(start, end)
 
+  // key はラベルでなく位置で一意に付ける。前後の「…」が同じ key "…" だと、両方が出る
+  // 中間ページを経由して戻ったときに古い「…」が消えず溜まる（issue #813）
   const renderBtn = (
+    key: string,
     label: string,
     pageTarget: number | null,
     disabled = false,
@@ -53,7 +56,7 @@ export function Pagination({
     accessibilityLabel: string = label,
   ) => (
     <Pressable
-      key={label}
+      key={key}
       onPress={() => pageTarget && !disabled && onChange?.(pageTarget)}
       disabled={disabled || !pageTarget}
       accessibilityRole="button"
@@ -89,13 +92,13 @@ export function Pagination({
 
   return (
     <View style={{ flexDirection: "row", gap: scales.spacing.scale[1], alignSelf: "center" }}>
-      {renderBtn("‹", page > 1 ? page - 1 : null, page <= 1, false, previousLabel)}
-      {start > 1 && renderBtn("1", 1)}
-      {start > 2 && renderBtn("…", null, true, false, ellipsisLabel)}
-      {items.map((p) => renderBtn(String(p), p, false, p === page))}
-      {end < total - 1 && renderBtn("…", null, true, false, ellipsisLabel)}
-      {end < total && renderBtn(String(total), total)}
-      {renderBtn("›", page < total ? page + 1 : null, page >= total, false, nextLabel)}
+      {renderBtn("prev", "‹", page > 1 ? page - 1 : null, page <= 1, false, previousLabel)}
+      {start > 1 && renderBtn("page-1", "1", 1)}
+      {start > 2 && renderBtn("ellipsis-start", "…", null, true, false, ellipsisLabel)}
+      {items.map((p) => renderBtn(`page-${p}`, String(p), p, false, p === page))}
+      {end < total - 1 && renderBtn("ellipsis-end", "…", null, true, false, ellipsisLabel)}
+      {end < total && renderBtn(`page-${total}`, String(total), total)}
+      {renderBtn("next", "›", page < total ? page + 1 : null, page >= total, false, nextLabel)}
     </View>
   )
 }
