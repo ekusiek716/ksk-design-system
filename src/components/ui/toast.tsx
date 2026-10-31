@@ -314,6 +314,22 @@ function useToast(): ToastContextValue {
 // Viewport (shared between Toaster と auto-mounted root)
 // =============================================================
 
+/**
+ * トーストの表示が外れたとき（Toaster の unmount・container の切り替え・auto-mount viewport から
+ * 明示 Toaster への引き継ぎ）に、その表示が掛けていた一時停止を解く。表示ごと消えると
+ * pointerleave / blur が届かず、store に停止が残って二度と消えなくなるため（issue #798）。
+ */
+function ReleaseToastHoldsOnUnmount({ id }: { id: string }) {
+  React.useEffect(
+    () => () => {
+      toastStore.release(id, "hover")
+      toastStore.release(id, "focus")
+    },
+    [id]
+  )
+  return null
+}
+
 function ToastViewport({ regionLabel, closeLabel, container, position }: { regionLabel?: string; closeLabel?: string; container?: PortalContainer; position?: ToastViewportPosition } = {}) {
   const defaultLabels = useKskLabels()
   const resolvedPosition = position ?? toastLabels.position
@@ -373,6 +389,7 @@ function ToastViewport({ regionLabel, closeLabel, container, position }: { regio
             toastStore.release(t.id, "focus")
           }}
         >
+          <ReleaseToastHoldsOnUnmount id={t.id} />
           <div className="flex-1 min-w-0">
             <p className="typo-label-md">{t.title}</p>
             {t.description && (

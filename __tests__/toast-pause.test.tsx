@@ -18,7 +18,11 @@ let root: Root | undefined
 let show: ReturnType<typeof useToast>["toast"] | undefined
 
 function Capture() {
-  show = useToast().toast
+  const { toast: t } = useToast()
+  // 描画中に外の変数へ代入すると react-hooks/globals に触れるため、effect で受け渡す
+  React.useEffect(() => {
+    show = t
+  }, [t])
   return null
 }
 
@@ -119,6 +123,22 @@ describe("Toast の自動消去の一時停止（#798）", () => {
     document.body.append(outside)
     act(() => outside.focus())
     advance(3499)
+    expect(toasts()).toHaveLength(1)
+    advance(1)
+    expect(toasts()).toHaveLength(0)
+  })
+
+  it("一時停止中に表示先（Toaster）ごと外れたら停止を解き、残り時間で消える", () => {
+    showUndoToast(4000)
+    advance(1000)
+    hover(firstToast())
+    // pointerleave が届かないまま表示が外れる
+    act(() => root!.unmount())
+    advance(2999)
+    const host = document.createElement("div")
+    document.body.append(host)
+    root = createRoot(host)
+    act(() => root!.render(<Toaster><Capture /></Toaster>))
     expect(toasts()).toHaveLength(1)
     advance(1)
     expect(toasts()).toHaveLength(0)

@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest"
-import { act } from "react"
+import { act, useEffect } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { userEvent } from "vitest/browser"
 import { Toaster, useToast } from "@/components/ui/toast"
@@ -24,7 +24,11 @@ let outside: HTMLButtonElement | undefined
 let show: ReturnType<typeof useToast>["toast"] | undefined
 
 function Capture() {
-  show = useToast().toast
+  const { toast: t } = useToast()
+  // 描画中に外の変数へ代入すると react-hooks/globals に触れるため、effect で受け渡す
+  useEffect(() => {
+    show = t
+  }, [t])
   return null
 }
 
