@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { View, type LayoutChangeEvent } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { sliderRatio, sliderValueFromX } from "../slider-value"
 
 export interface SliderProps {
   value: number
@@ -22,20 +23,14 @@ export function Slider({
   const { theme, scales } = useTheme()
   const [width, setWidth] = useState(0)
 
-  const clamp = (v: number) => Math.max(min, Math.min(max, v))
-  const snap = (v: number) => {
-    if (!step) return v
-    return Math.round(v / step) * step
-  }
-
+  // x は外側コンテナ左端からの距離。子 View を pointerEvents="none" にしているので
+  // locationX は常にコンテナ基準になる（issue #817）。
   const updateFromX = (x: number) => {
-    if (!width) return
-    const ratio = Math.max(0, Math.min(1, x / width))
-    const next = clamp(snap(min + (max - min) * ratio))
-    onChange?.(next)
+    const next = sliderValueFromX({ x, width, min, max, step })
+    if (next !== null) onChange?.(next)
   }
 
-  const ratio = (clamp(value) - min) / (max - min)
+  const ratio = sliderRatio({ value, min, max })
   const onLayout = (e: LayoutChangeEvent) => {
     setWidth(e.nativeEvent.layout.width)
   }
@@ -56,7 +51,10 @@ export function Slider({
         opacity: disabled ? 0.5 : 1,
       }}
     >
+      {/* 溝・塗り・つまみは pointerEvents="none"。子がタッチ対象になると locationX が
+          その子の左端基準になり、つまみを押した瞬間に値が最小値付近へ飛ぶ（issue #817）。 */}
       <View
+        pointerEvents="none"
         style={{
           height: 6,
           borderRadius: scales.borderRadius.full,
@@ -64,6 +62,7 @@ export function Slider({
         }}
       />
       <View
+        pointerEvents="none"
         style={{
           position: "absolute",
           left: 0,
@@ -74,6 +73,7 @@ export function Slider({
         }}
       />
       <View
+        pointerEvents="none"
         style={{
           position: "absolute",
           left: width * ratio - 10,
