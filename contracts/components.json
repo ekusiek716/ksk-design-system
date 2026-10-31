@@ -3349,6 +3349,7 @@
         "暗色サイドバーは sidebarTone=\"inverse\"（aside を Surface-Inverse にする）。中のナビは SidebarNav tone=\"inverse\"、ロゴ・フッターの文字も Text-on-Inverse 系にする（issue #680）",
         "lg 未満でナビへ辿れるようにするときは mobileDrawer（issue #705）。ヘッダー左端のメニューボタン（44px・aria-expanded・aria-label 既定「メニューを開く」）から左の Sheet に同じ sidebar を開く。ハンバーガーと Sheet side=\"left\" を consumer で自作しない",
         "ドロワー内のリンク（a[href]）と SidebarNav の項目を押すと閉じる（closeMobileDrawerOnNavigate 既定 false、明示 true で有効）。開閉の制御は mobileDrawerOpen / onMobileDrawerOpenChange",
+        "closeMobileDrawerOnNavigate は next/link・React Router の Link のようにクリックで preventDefault する SPA リンクでも閉じる（defaultPrevented は閉じるのを止める口ではない）。修飾キー付き・左以外のボタン・target が _self 以外のリンク・aria-expanded を持つ親項目では閉じない。閉じたくない項目は data-keep-mobile-drawer 属性を持つ要素の中に置く（issue #795）",
         "上端の safe-area は safeAreaTop（ヘッダーは下線込み 64px + 安全領域、lg 以上のサイドバーと mobileDrawer のドロワーも上に足す。header が無いときは本文の列）。アプリ内で全画面に重ねるときは className=\"h-full\" と組み、外枠に pt-[var(--Safe-Area-Inset-Top)] や背景を書かない（外枠は fixed と重ね順だけ。issue #724）",
         "アプリ内で全画面に重ねるときは overlay（fixed inset-0 z-[var(--Z-Overlay)] h-full を DS が持つ。Sheet / Dialog の overlay と同じ層で、後に開いたものが上に出る）。背景の inert は重ねる側が付ける。className で fixed / z-index を書かない（issue #737）"
       ]

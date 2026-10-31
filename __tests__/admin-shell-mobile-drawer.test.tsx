@@ -136,6 +136,81 @@ describe("AdminShell mobileDrawer（#705）", () => {
     expect(drawer()).not.toBeNull()
   })
 
+  describe("SPA リンク（クリックで preventDefault する）でも閉じる（#795）", () => {
+    const click = (el: Element, init: MouseEventInit = {}) =>
+      act(() => {
+        el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0, ...init }))
+      })
+
+    it("onClick が preventDefault する SidebarNav の項目（href あり）を押すと閉じる", () => {
+      const spaSidebar = <SidebarNav items={[{ label: "A", href: "/a", onClick: (e) => e.preventDefault() }]} />
+      act(() => root.render(<AdminShell sidebar={spaSidebar} mobileDrawer closeMobileDrawerOnNavigate>本文</AdminShell>))
+      act(() => menuButton().click())
+      click(drawer()!.querySelector('a[href="/a"]')!)
+      expect(drawer()).toBeNull()
+    })
+
+    it("render スロットで next/link 相当（preventDefault する a[href]）を描いても閉じる", () => {
+      const RouterLink = (p: React.ComponentProps<"a">) => (
+        <a {...p} onClick={(e) => { p.onClick?.(e); e.preventDefault() }} />
+      )
+      const spaSidebar = <SidebarNav items={[{ label: "B", href: "/b", render: (p) => <RouterLink {...p} href={p.href!} /> }]} />
+      act(() => root.render(<AdminShell sidebar={spaSidebar} mobileDrawer closeMobileDrawerOnNavigate>本文</AdminShell>))
+      act(() => menuButton().click())
+      click(drawer()!.querySelector('a[href="/b"]')!)
+      expect(drawer()).toBeNull()
+    })
+
+    it("onClick が preventDefault する素の a[href] を押すと閉じる", () => {
+      const raw = <a href="/c" onClick={(e) => e.preventDefault()}>C</a>
+      act(() => root.render(<AdminShell sidebar={raw} mobileDrawer closeMobileDrawerOnNavigate>本文</AdminShell>))
+      act(() => menuButton().click())
+      click(drawer()!.querySelector('a[href="/c"]')!)
+      expect(drawer()).toBeNull()
+    })
+
+    it.each([
+      ["Ctrl", { ctrlKey: true }],
+      ["Cmd", { metaKey: true }],
+      ["Shift", { shiftKey: true }],
+      ["Alt", { altKey: true }],
+      ["中ボタン", { button: 1 }],
+    ] as const)("%s 付きのクリックでは閉じない（新しいタブ等で開く操作）", (_, init) => {
+      const raw = <a href="/d" onClick={(e) => e.preventDefault()}>D</a>
+      act(() => root.render(<AdminShell sidebar={raw} mobileDrawer closeMobileDrawerOnNavigate>本文</AdminShell>))
+      act(() => menuButton().click())
+      click(drawer()!.querySelector('a[href="/d"]')!, init)
+      expect(drawer()).not.toBeNull()
+    })
+
+    it("target=_blank のリンクでは閉じない（_self は閉じる）", () => {
+      const links = (
+        <div>
+          <a href="#ext" target="_blank" onClick={(e) => e.preventDefault()}>外部</a>
+          <a href="#self" target="_self" onClick={(e) => e.preventDefault()}>同じタブ</a>
+        </div>
+      )
+      act(() => root.render(<AdminShell sidebar={links} mobileDrawer closeMobileDrawerOnNavigate>本文</AdminShell>))
+      act(() => menuButton().click())
+      click(drawer()!.querySelector('a[href="#ext"]')!)
+      expect(drawer()).not.toBeNull()
+      click(drawer()!.querySelector('a[href="#self"]')!)
+      expect(drawer()).toBeNull()
+    })
+
+    it("data-keep-mobile-drawer を持つ要素（とその中）では閉じない", () => {
+      const keep = (
+        <div data-keep-mobile-drawer="">
+          <a href="#keep" onClick={(e) => e.preventDefault()}>残す</a>
+        </div>
+      )
+      act(() => root.render(<AdminShell sidebar={keep} mobileDrawer closeMobileDrawerOnNavigate>本文</AdminShell>))
+      act(() => menuButton().click())
+      click(drawer()!.querySelector('a[href="#keep"]')!)
+      expect(drawer()).not.toBeNull()
+    })
+  })
+
   describe("開いたまま lg 以上になったら閉じる", () => {
     const original = window.matchMedia
     let matches = false
