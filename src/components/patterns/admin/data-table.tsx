@@ -249,10 +249,17 @@ function getCellEditTriggerProps<TRow, TValue>(
   column: DataTableColumn<TRow, TValue>,
   context: DataTableCellContext<TRow, TValue>
 ): React.ComponentProps<"td"> {
+  // editCell も edit 指定も無い列は表示専用。編集トリガーを付けず、行クリックの当たり判定も
+  // そのまま残す（issue #793 / #814）。
+  if (!column.editCell && !column.edit) return {}
   const trigger = column.edit?.trigger ?? "doubleClick"
   if (trigger === "manual") return {}
 
-  const keyProps: React.ComponentProps<"td"> = {
+  // 編集を始める操作（クリック・ダブルクリック・フォーカス）は行クリックではない。
+  // 編集できるセル全体を行クリックの当たり判定から外す（issue #793）。
+  // doubleClick も 1 回目のクリックが行クリックになるため対象に含める。
+  const keyProps: React.ComponentProps<"td"> & { "data-table-ignore-row-click": true } = {
+    "data-table-ignore-row-click": true,
     onKeyDown: (event) => {
       if (event.key === "Escape" && context.isEditing) {
         event.stopPropagation()
@@ -300,16 +307,35 @@ const DATA_TABLE_INTERACTIVE_SELECTOR = [
   "[role='menuitem']",
   "[role='checkbox']",
   "[role='radio']",
+  "[role='option']",
+  "[role='listbox']",
+  "[role='dialog']",
   "[data-table-ignore-row-click]",
 ].join(",")
 
+/**
+ * 行（やセル）のクリック・Enter が、入れ子の操作要素から来たものかを判定する。
+ *
+ * Select・DatePicker・Popover・Sheet などの中身は body へ Portal されるため、DOM 上は
+ * 行の子孫ではないが、React の合成イベントは Portal を越えて行まで届く。`closest()` だけでは
+ * 判定できないので、`currentTarget` の DOM の外から来たイベントはすべて入れ子の操作として
+ * 扱う（issue #793）。
+ *
+ * `closest()` で見つかった要素は `currentTarget` の内側にあるものだけを数える。表ごと
+ * Dialog（`role="dialog"`）の中に置いたときに、外側の祖先に当たって行クリックが
+ * 全部止まるのを防ぐため。
+ */
 function isFromNestedInteractive(
   event: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>
 ) {
   const target = event.target
+  const currentTarget = event.currentTarget
+  if (!(target instanceof Node)) return false
+  if (target === currentTarget) return false
+  if (!currentTarget.contains(target)) return true
   if (!(target instanceof Element)) return false
-  if (target === event.currentTarget) return false
-  return Boolean(target.closest(DATA_TABLE_INTERACTIVE_SELECTOR))
+  const interactive = target.closest(DATA_TABLE_INTERACTIVE_SELECTOR)
+  return Boolean(interactive && interactive !== currentTarget && currentTarget.contains(interactive))
 }
 
 function getColumnSortValue<TRow, TValue>(
