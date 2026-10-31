@@ -1745,7 +1745,8 @@
       ],
       "rules": [
         "FormRoot は送信とフォーム全体の gap、FormActions は末尾アクション行を担う",
-        "短いフォームは FormSection、3 セクション以上または legend / group semantics が必要なフォームは FieldSet を使う"
+        "短いフォームは FormSection、3 セクション以上または legend / group semantics が必要なフォームは FieldSet を使う",
+        "FormSection も title を fieldset の名前として公開する（title は fieldset 直下の最初の legend。description は legend の後ろの p で aria-describedby に結ぶ）。title 無しは名前なし (issue #792)"
       ]
     },
     {
@@ -1777,6 +1778,7 @@
       ],
       "rules": [
         "Use for multi-value text input (tags, emails, keywords)",
+        "フォーカスが外れると入力中の文字がタグになる（Enter を押さずに保存ボタンへ移っても失われない）。Enter で確定した直後の blur だけは二重追加を防ぐため何もしない (issue #790)",
         "FormField と使うときは id を渡して htmlFor で結ぶ。inputLabel を label の代わりに使わない（lint P026 の例外が要らなくなる）"
       ],
       "accessibility": [
@@ -2002,6 +2004,7 @@
         "単一選択(selectionMode=\"single\")の value/onChange はスカラー(T | null)。配列形は v1.61 以前との後方互換でのみ受け付け、開発ビルドで console.warn する(issue #418)。",
         "単一選択ではグループが role=\"radiogroup\"、チップが role=\"radio\" + aria-checked になり、矢印キー移動と roving tabindex が有効になる(native は accessibilityRole radiogroup / radio + accessibilityState.checked)。",
         "単一選択で選択中の値が 2 つ以上あると開発ビルドで console.warn する(issue #39 の footgun 検出)",
+        "複数選択は選択中だけ × 付き（removable）で、トグルのたびにチップの要素が作り直される。フォーカスがグループ内にあったときは、トグル・× の後に押したチップの本体ボタンへフォーカスを戻す(issue #810)",
         "Use selectionMode=\"single\" for single-select (multiple=false は非推奨). Use max to limit selection count.",
         "Do not patch selected flicker in consumer CSS; Chip handles Android tap highlight and touch transition behavior.",
         "PillToggle は 2〜4 択の segmented control 専用。5択以上・折り返しが要る単一選択はこの selectionMode=\"single\" を使う(issue #418)。",
@@ -2045,6 +2048,7 @@
       "rules": [
         "commerce/FilterBar（filters/sortOptions 統合型）とは別コンポーネント。children に任意の Chip 群を渡すシンプルなラッパー。",
         "sticky 時の top オフセットは stickyOffset prop で指定する（固定ヘッダー高さの相殺用）。",
+        "sticky は根の要素（data-slot=\"chip-filter-bar\"）に付き、チップ行と件数をまとめて固定する。貼り付く範囲は呼び出し側の親ブロックなので、その親が一覧全体を含む高さを持つこと（issue #807）",
         "resultCountLabel 未指定時は \"{n}件\" を表示。i18n が必要な場合は関数 props で差し替える。",
         "bare=true 時は overflow/padding ラッパーを付けない。外側スクロールコンテナと共有する場合に使う。",
         "チップ列と件数の左右余白は gutter（none | tight=16px | default=24px・Container と同じ語彙）か contentClassName で付ける(issue #667)。sticky の背景は全幅のまま。外側 className に px-* を付けたり [&>div]: 等の子孫セレクタで DS 内部の DOM に依存したりしない。native も gutter を持つ",
@@ -2470,7 +2474,7 @@
       "sizes": [],
       "accessibility": [],
       "rules": [
-        "isActive 切替時に key を変えて Chip を強制再マウント (selected キャッシュ残り防止)"
+        "key を isActive に紐付けない。isActive を切り替えても同一の button を保ち、フォーカスと aria-pressed の変化を維持する (issue #784)"
       ]
     },
     {
