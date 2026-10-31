@@ -1,4 +1,4 @@
-import { getActiveElement } from "@/lib/active-element"
+import { captureOpener, restoreOpenerFocus, takeOpener } from "@/lib/focus-restore"
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -52,11 +52,6 @@ function focusLayerTarget(container: HTMLElement | null, target: LayerAutoFocusT
     el.tabIndex = -1
   }
   el.focus()
-}
-
-function captureRestoreFocus(ref: React.RefObject<HTMLElement | null> | undefined) {
-  if (!ref || ref.current != null || typeof document === "undefined") return
-  ref.current = getActiveElement() as HTMLElement | null
 }
 
 // ============================================================================
@@ -765,7 +760,12 @@ interface SheetContentProps
    * - false: 自動フォーカスを抑制
    */
   autoFocus?: LayerAutoFocusTarget
-  /** close 後に open 前の要素へ focus を戻す。既定 true。 */
+  /**
+   * close 後に、その回に開く直前の要素へ focus を戻す。既定 true。
+   * 開くたびに記録し直すため、一覧の行ごとのボタンから同じ Sheet を開いても
+   * 毎回その行へ戻る（issue #789。snap / swipe の各版も同じ）。戻り先が DOM から
+   * 消えている・disabled・inert のときは強制復帰せず Radix の既定に任せる。
+   */
   restoreFocusOnClose?: boolean
   /** Esc キーで閉じる。既定 true。 */
   closeOnEsc?: boolean
@@ -891,7 +891,7 @@ function SheetContent({
   // the early-return branches below.
   const { keyboardInset, visibleHeight } = useVisualViewportInset()
   const handleOpenAutoFocus = (event: Event) => {
-    captureRestoreFocus(restoreFocusRef)
+    captureOpener(restoreFocusRef)
     props.onOpenAutoFocus?.(event)
     if (event.defaultPrevented || autoFocus == null) return
     event.preventDefault()
@@ -901,16 +901,15 @@ function SheetContent({
     })
   }
   const handleCloseAutoFocus = (event: Event) => {
+    // #789: 記録は開閉ごとに使い切る（SheetContent は常時マウントのため ref が次回へ残る）。
+    const opener = takeOpener(restoreFocusRef)
     props.onCloseAutoFocus?.(event)
     if (event.defaultPrevented) return
     if (!restoreFocusOnClose) {
       event.preventDefault()
       return
     }
-    if (restoreFocusRef.current) {
-      event.preventDefault()
-      restoreFocusRef.current.focus()
-    }
+    restoreOpenerFocus(event, opener)
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
@@ -1387,7 +1386,7 @@ function SwipeToCloseBottomSheet({
   // height to the visible region (maxHeight). undefined when no keyboard.
   const keyboardStyle = resolveBottomSheetKeyboardStyle(keyboardInset, visibleHeight, false, safeArea)
   const handleOpenAutoFocus = (event: Event) => {
-    captureRestoreFocus(restoreFocusRef)
+    captureOpener(restoreFocusRef)
     props.onOpenAutoFocus?.(event)
     if (event.defaultPrevented || autoFocus == null) return
     event.preventDefault()
@@ -1397,16 +1396,15 @@ function SwipeToCloseBottomSheet({
     })
   }
   const handleCloseAutoFocus = (event: Event) => {
+    // #789: 記録は開閉ごとに使い切る（ref は常時マウントの SheetContent が持つ）。
+    const opener = takeOpener(restoreFocusRef)
     props.onCloseAutoFocus?.(event)
     if (event.defaultPrevented) return
     if (!restoreFocusOnClose) {
       event.preventDefault()
       return
     }
-    if (restoreFocusRef?.current) {
-      event.preventDefault()
-      restoreFocusRef.current.focus()
-    }
+    restoreOpenerFocus(event, opener)
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
@@ -1807,7 +1805,7 @@ function SwipeToCloseSideDrawer({
   }, [rootCtx])
 
   const handleOpenAutoFocus = (event: Event) => {
-    captureRestoreFocus(restoreFocusRef)
+    captureOpener(restoreFocusRef)
     props.onOpenAutoFocus?.(event)
     if (event.defaultPrevented || autoFocus == null) return
     event.preventDefault()
@@ -1817,16 +1815,15 @@ function SwipeToCloseSideDrawer({
     })
   }
   const handleCloseAutoFocus = (event: Event) => {
+    // #789: 記録は開閉ごとに使い切る（ref は常時マウントの SheetContent が持つ）。
+    const opener = takeOpener(restoreFocusRef)
     props.onCloseAutoFocus?.(event)
     if (event.defaultPrevented) return
     if (!restoreFocusOnClose) {
       event.preventDefault()
       return
     }
-    if (restoreFocusRef?.current) {
-      event.preventDefault()
-      restoreFocusRef.current.focus()
-    }
+    restoreOpenerFocus(event, opener)
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)
@@ -2149,7 +2146,7 @@ function SnapBottomSheetContent({
   // #822: consumer の ref と合成する。
   const composedSheetRef = useComposedRef<HTMLDivElement>(setContentNode, ref)
   const handleOpenAutoFocus = (event: Event) => {
-    captureRestoreFocus(restoreFocusRef)
+    captureOpener(restoreFocusRef)
     props.onOpenAutoFocus?.(event)
     if (event.defaultPrevented || autoFocus == null) return
     event.preventDefault()
@@ -2159,16 +2156,15 @@ function SnapBottomSheetContent({
     })
   }
   const handleCloseAutoFocus = (event: Event) => {
+    // #789: 記録は開閉ごとに使い切る（ref は常時マウントの SheetContent が持つ）。
+    const opener = takeOpener(restoreFocusRef)
     props.onCloseAutoFocus?.(event)
     if (event.defaultPrevented) return
     if (!restoreFocusOnClose) {
       event.preventDefault()
       return
     }
-    if (restoreFocusRef?.current) {
-      event.preventDefault()
-      restoreFocusRef.current.focus()
-    }
+    restoreOpenerFocus(event, opener)
   }
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     props.onEscapeKeyDown?.(event)

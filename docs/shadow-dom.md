@@ -12,9 +12,11 @@ DS は Document.prototype.activeElement の書き換えを行いません。一�
 
 closed な Shadow root を document から辿ることはできません。DS のオーバーレイの復帰先の自動取得は open な root が対象です。独自の closed root の利用者は onOpenAutoFocus / onCloseAutoFocus で明示的なフォーカス管理を行ってください。
 
-## AlertDialog のフォーカス
+## Dialog・Sheet・AlertDialog のフォーカス
 
-既定では開くとキャンセルへ移動し、閉じると開く前の要素へ戻ります。Trigger を使わず open を状態で制御する構成にも適用します。戻る要素が消滅・disabled・inert の場合は、その要素への強制復帰を行いません。操作後に一覧全体を消すなど別の戻り先が必要な画面は onCloseAutoFocus で preventDefault し、画面に合った位置へ移してください。restoreFocusOnClose={false} で自動復帰を無効にできます。
+AlertDialog は既定で、開くとキャンセルへ移動します。Dialog・Sheet（snap・swipe の各版を含む）・AlertDialog は、閉じるとその回に開く直前の要素へ戻ります。Trigger を使わず open を状態で制御する構成にも適用します。開くたびに戻り先を記録し直すため、一覧の行ごとのボタンから 1 つの Dialog / Sheet を開く構成でも、毎回その行のボタンへ戻ります。戻るときはスクロールさせません。
+
+戻る要素が消滅・disabled・inert の場合や、開く前のフォーカスが body だった場合は、その要素への強制復帰を行わず、Radix の既定（Trigger があれば Trigger）に任せます。操作後に一覧全体を消すなど別の戻り先が必要な画面は onCloseAutoFocus で preventDefault し、画面に合った位置へ移してください。restoreFocusOnClose={false} で自動復帰を無効にできます。
 
 ## Portal と Toast の描画先
 
