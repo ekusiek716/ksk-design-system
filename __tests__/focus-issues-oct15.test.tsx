@@ -272,4 +272,28 @@ describe("shared Dialog / Sheet restore the opener of each open (#789)", () => {
     flush()
     expect(document.activeElement).toBe(rowA)
   })
+  // #789 レビュー指摘: open のまま Sheet ごと / Content だけ外されたのは付け替えではない。
+  // 閉じたときと同じく opener へ戻す（付け替えと誤認すると body に取り残される）。
+  it("sheet: unmounting the whole Sheet while open returns focus to the opener", () => {
+    const { rowA } = setupRows()
+    act(() => root!.render(sharedOverlay("sheet", false)))
+    rowA.focus()
+    act(() => root!.render(sharedOverlay("sheet", true)))
+    flush()
+    expect(document.activeElement).not.toBe(rowA)
+    act(() => root!.render(<div />))
+    flush()
+    expect(document.activeElement).toBe(rowA)
+  })
+  it("sheet: removing only SheetContent while open returns focus to the opener", () => {
+    const { rowA } = setupRows()
+    act(() => root!.render(sharedOverlay("sheet", false)))
+    rowA.focus()
+    act(() => root!.render(sharedOverlay("sheet", true)))
+    flush()
+    expect(document.activeElement).not.toBe(rowA)
+    act(() => root!.render(<Sheet open />))
+    flush()
+    expect(document.activeElement).toBe(rowA)
+  })
 })
