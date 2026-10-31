@@ -3226,6 +3226,8 @@
         "rows/columns API は最短実装向け",
         "DateField / Chip cluster / typed Select などのリッチ列は cell と edit.trigger、または createDataTableDateColumn / createDataTableChipColumn / createDataTableSelectColumn を使う",
         "行全体をクリック可能にする場合は DataTable の onRowClick または DataTableRow の onRowClick を使い、独自の tr/td クリック実装を作らない",
+        "onRowClick は編集できるセル（editCell または edit.trigger が manual 以外の列）と、セル内の操作要素・Portal 先（Select の選択肢・DatePicker・Popover・Sheet など）の操作では発火しない。表示専用の cell 列と行の余白では従来どおり発火する",
+        "編集できるセルの td は Tab 順に入り、Enter で編集を始める（編集中は Tab 順から外れ、確定・Escape 後は同じ td にフォーカスが戻る）。セル内のボタン・リンクの Enter はそれぞれの既定動作のまま。キーボードで操作させたい表示用の操作は cell 内に Button / a[href] で置き、td 自体のクリックやキー処理を自作しない",
         "Select セルは DataTableSelectCell または createDataTableSelectColumn を使い、ポップオーバー位置は contentPosition で調整する",
         "日付編集セルは DataTableDateCell または createDataTableDateColumn を使う",
         "残り幅を受け持つ列は width=\"flex\" を使い、手書き className の w-full/min-w 再実装を避ける",
