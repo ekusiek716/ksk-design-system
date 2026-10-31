@@ -248,6 +248,10 @@ Web では `CompactFilePicker` / `ImageAttachmentPicker` が hidden file input�
 </Sheet>
 ```
 
+### native の `Sheet` に入力欄を置く
+
+native の `Sheet`（`side="bottom"`）は、`snapPoints` の有無にかかわらず入力欄を置いてかまいません。iOS では Sheet 自身がキーボードを避けてパネルを持ち上げ、Android は Modal の adjustResize に任せます。`BottomSheetForm` / スマホ幅の `ResponsiveDialog` / `Combobox` もこの挙動を使います。キーボード分の余白は Sheet が一手に持つので、consumer 側で `KeyboardAvoidingView` や下余白を重ねないでください。キーボードでパネルが収まらないときはパネルが縮み、本文の `ScrollView`（`BottomSheetForm` の本文など）がスクロールして最後の項目とボタンに届きます。
+
 ## Caption / attribution text
 
 出典・著作権表示など、控えめな注釈は `Text` の `variant="caption-strong"` を使います（11px・font-semibold 相当）。`text-[11px] font-semibold leading-4 text-hint` のようなマジックナンバーをローカルに書きません。色は未指定なら自動で hint 相当（`text.low-emphasis`）になります。

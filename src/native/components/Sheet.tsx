@@ -19,7 +19,7 @@ import {
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { useSafeAreaInsets } from "../theme/SafeAreaInsetsProvider"
-import { resolveBottomSheetTopInset, resolveTopSheetPaddingTop } from "../safe-area"
+import { resolveBottomSheetTopInset, resolveInsetEdge, resolveTopSheetPaddingTop } from "../safe-area"
 import { resolveTypo } from "../typography"
 import { resolveSheetViewportLayout } from "../sheet-viewport-layout"
 import { createRevealLifecycle } from "../modal-reveal-lifecycle"
@@ -70,7 +70,8 @@ export interface SheetProps {
    * （未供給なら回避量 0＝従来どおりの見た目）。
    * - `side="top"`: 上端に inset 分の内側余白を確保
    * - `side="bottom"`: パネル上端が safe-area に食い込む分だけ内容を退避
-   *   （ハーフシート等、上端が届かない場合は何もしない）
+   *   （ハーフシート等、上端が届かない場合は何もしない）。通常版（snapPoints なし）は
+   *   キーボードで縮んだパネルが top inset より上へ伸びないようにする（#791）
    * - `side="left"` / `"right"`: 効果を持たない
    */
   safeArea?: boolean
@@ -190,6 +191,63 @@ function PlainSheet({
     right: { alignItems: "flex-end" },
   }
 
+  // side="bottom" はキーボードで作業領域が狭まったとき、パネルを縮めて本文の
+  // ScrollView（BottomSheetForm 等）に高さを譲る。RN の既定 flexShrink は 0 なので
+  // パネル → 内側 Pressable → 本文ラッパーの順に明示する（#791）。
+  const shrinkWhenBottom = side === "bottom" ? { flexShrink: 1 } : null
+
+  const panel = (
+    <Animated.View
+      style={{
+        ...shrinkWhenBottom,
+        transform: revealed
+          ? [{ translateX: 0 }, { translateY: 0 }]
+          : [
+              offset[side].translateX ? { translateX: offset[side].translateX } : { translateX: 0 },
+              offset[side].translateY ? { translateY: offset[side].translateY } : { translateY: 0 },
+            ],
+        backgroundColor: surfaceColor ?? theme.surface.primary,
+        ...(side === "bottom" || side === "top"
+          ? { width: "100%", borderTopLeftRadius: scales.borderRadius["2xl"], borderTopRightRadius: scales.borderRadius["2xl"] }
+          : { height: "100%", width: "85%" }),
+        padding: scales.spacing.scale[4],
+        // side="top" のパネルは画面上端に貼り付くため、ステータスバー／
+        // ダイナミックアイランド分を上端余白に足す（inset 未供給なら加算 0）。
+        ...(side === "top"
+          ? {
+              paddingTop: resolveTopSheetPaddingTop(
+                scales.spacing.scale[4],
+                insets,
+                safeArea,
+              ),
+            }
+          : null),
+        gap: scales.spacing.scale[3],
+      }}
+    >
+      <Pressable onPress={() => {}} style={shrinkWhenBottom}>
+        {side === "bottom" && (
+          <View
+            style={{
+              width: 40,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: theme.border["medium-emphasis"],
+              alignSelf: "center",
+              marginBottom: scales.spacing.scale[2],
+            }}
+          />
+        )}
+        {title && (
+          <RNText style={[resolveTypo("heading.md"), { color: theme.text["high-emphasis"] }]}>
+            {title}
+          </RNText>
+        )}
+        <View style={{ marginTop: scales.spacing.scale[2], ...shrinkWhenBottom }}>{children}</View>
+      </Pressable>
+    </Animated.View>
+  )
+
   return (
     <Modal
       visible={open}
@@ -203,54 +261,27 @@ function PlainSheet({
         onPress={dismissible ? onClose : () => {}}
         style={{ flex: 1, backgroundColor: theme.overlay.dark, ...align[side] }}
       >
-        <Animated.View
-          style={{
-            transform: revealed
-              ? [{ translateX: 0 }, { translateY: 0 }]
-              : [
-                  offset[side].translateX ? { translateX: offset[side].translateX } : { translateX: 0 },
-                  offset[side].translateY ? { translateY: offset[side].translateY } : { translateY: 0 },
-                ],
-            backgroundColor: surfaceColor ?? theme.surface.primary,
-            ...(side === "bottom" || side === "top"
-              ? { width: "100%", borderTopLeftRadius: scales.borderRadius["2xl"], borderTopRightRadius: scales.borderRadius["2xl"] }
-              : { height: "100%", width: "85%" }),
-            padding: scales.spacing.scale[4],
-            // side="top" のパネルは画面上端に貼り付くため、ステータスバー／
-            // ダイナミックアイランド分を上端余白に足す（inset 未供給なら加算 0）。
-            ...(side === "top"
-              ? {
-                  paddingTop: resolveTopSheetPaddingTop(
-                    scales.spacing.scale[4],
-                    insets,
-                    safeArea,
-                  ),
-                }
-              : null),
-            gap: scales.spacing.scale[3],
-          }}
-        >
-          <Pressable onPress={() => {}}>
-            {side === "bottom" && (
-              <View
-                style={{
-                  width: 40,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: theme.border["medium-emphasis"],
-                  alignSelf: "center",
-                  marginBottom: scales.spacing.scale[2],
-                }}
-              />
-            )}
-            {title && (
-              <RNText style={[resolveTypo("heading.md"), { color: theme.text["high-emphasis"] }]}>
-                {title}
-              </RNText>
-            )}
-            <View style={{ marginTop: scales.spacing.scale[2] }}>{children}</View>
-          </Pressable>
-        </Animated.View>
+        {/* iOS overlays the keyboard; Android Modal already uses adjustResize (#791).
+            This wrapper is the sole keyboard inset owner of the plain bottom sheet:
+            consumers (BottomSheetForm, ResponsiveDialog, Combobox, ReviewOverlay)
+            must not add it again. top / left / right sheets keep the old layout. */}
+        {side === "bottom" ? (
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            enabled={Platform.OS === "ios"}
+            pointerEvents="box-none"
+            style={{
+              flex: 1,
+              justifyContent: "flex-end",
+              // 縮んだパネルがステータスバー／ダイナミックアイランドの下に潜らない
+              paddingTop: resolveInsetEdge(insets, "top", safeArea),
+            }}
+          >
+            {panel}
+          </KeyboardAvoidingView>
+        ) : (
+          panel
+        )}
       </Pressable>
     </Modal>
   )
