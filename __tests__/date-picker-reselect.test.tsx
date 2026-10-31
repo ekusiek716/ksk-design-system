@@ -21,6 +21,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { DatePicker, DateRangePicker } from "../src/components/ui/date-picker"
 import { DateField } from "../src/components/ui/date-field"
 import { DateTimePicker } from "../src/components/ui/date-time-picker"
+import { DataTableDateCell, createDataTableDateColumn } from "../src/components/patterns/admin/data-table"
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
@@ -217,5 +218,72 @@ describe("DateRangePicker: 選択中の日の再押下（#803 の確認）", () 
     expect(onChange).not.toHaveBeenCalledWith(undefined)
     const range = onChange.mock.calls[0][0] as { from?: Date; to?: Date }
     expect(range.from?.getDate()).toBe(15)
+  })
+})
+
+describe("DataTableDateCell / createDataTableDateColumn（#803）", () => {
+  it("DataTableDateCell は clearable を DatePicker に素通しし、クリアで onValueChange(undefined)", () => {
+    const onValueChange = vi.fn()
+    render(
+      <table><tbody><tr>
+        <DataTableDateCell value={new Date(2026, 9, 15)} onValueChange={onValueChange} clearable clearLabel="期限を消す" />
+      </tr></tbody></table>
+    )
+    const clear = document.querySelector('[data-slot="date-picker-clear"]')!
+    expect(clear.getAttribute("aria-label")).toBe("期限を消す")
+    click(clear)
+    expect(onValueChange).toHaveBeenCalledWith(undefined)
+  })
+
+  it("DataTableDateCell は clearable を付けなければ従来どおりクリアボタンを出さない", () => {
+    render(
+      <table><tbody><tr>
+        <DataTableDateCell value={new Date(2026, 9, 15)} onValueChange={() => {}} />
+      </tr></tbody></table>
+    )
+    expect(document.querySelector('[data-slot="date-picker-clear"]')).toBeNull()
+  })
+
+  it("createDataTableDateColumn の clearable は編集セルの DatePicker に渡り、クリアで undefined を確定する", () => {
+    const column = createDataTableDateColumn<{ due?: Date }>({
+      id: "due",
+      header: "期限",
+      value: (row) => row.due,
+      clearable: true,
+    })
+    const commitValue = vi.fn()
+    const Edit = () => <>{column.editCell!({ value: new Date(2026, 9, 15), commitValue } as never)}</>
+    render(<Edit />)
+    click(document.querySelector('[data-slot="date-picker-clear"]')!)
+    expect(commitValue).toHaveBeenCalledWith(undefined)
+  })
+})
+
+describe("クリアボタンの位置と当たり判定（#803）", () => {
+  it("トリガー内の空き場所を測って重ね、className で padding が変わっても追従する", () => {
+    const spy = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+      const rect = (x: number, y: number, w: number, h: number) =>
+        ({ left: x, top: y, width: w, height: h, right: x + w, bottom: y + h, x, y, toJSON() {} }) as DOMRect
+      if (this.getAttribute("aria-hidden") === "true" && this.closest('[data-slot="date-picker-trigger"]')) return rect(150, 14, 24, 24)
+      if (this.firstElementChild?.getAttribute("data-slot") === "date-picker-trigger") return rect(10, 10, 200, 32)
+      return rect(0, 0, 0, 0)
+    })
+    try {
+      render(<DatePicker value={new Date(2026, 9, 15)} onChange={() => {}} clearable className="px-2" />)
+      const clear = document.querySelector<HTMLElement>('[data-slot="date-picker-clear"]')!
+      expect(clear.style.left).toBe("140px")
+      expect(clear.style.top).toBe("4px")
+      // 測れたら既定 padding 前提の位置クラスは外す
+      expect(clear.className).not.toContain("top-1/2")
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
+  it("見た目 24px のまま、当たり判定を 44px に広げる", () => {
+    render(<DatePicker value={new Date(2026, 9, 15)} onChange={() => {}} clearable />)
+    const clear = document.querySelector('[data-slot="date-picker-clear"]')!
+    expect(clear.className).toContain("size-6")
+    expect(clear.className).toContain("before:-inset-2.5")
   })
 })

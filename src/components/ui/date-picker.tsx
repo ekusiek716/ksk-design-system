@@ -102,10 +102,9 @@ interface DatePickerProps {
    * 以前は react-day-picker の既定動作で再押下が選択解除になり、確かめるつもりで同じ日を
    * 押しただけで値が消えていた）。disabled のときは出さない。
    *
-   * 制約: クリアボタンはトリガーを包む幅いっぱいの枠の右端を基準に、既定の横 padding
-   * （`--Field-Padding-X-Md`）を前提に重ねる。`clearable` のときは `className` で幅・外側の余白・
-   * 横 padding を変えず、幅や配置は親要素で決める（`className` はトリガーにだけ効くため、
-   * 変えるとクリアボタンがトリガーの右端からずれる）。
+   * クリアボタンは見た目 24px・当たり判定 44px。トリガー内に空けた場所の実位置を測って重ねるので、
+   * `className` で幅・横 padding を変えても追従する。`clearable` のときはトリガーを幅いっぱいの枠
+   * （`relative w-full`）で包むため、flex 行で幅を決めるときは親要素側で決める。
    */
   clearable?: boolean
   /**
@@ -123,6 +122,41 @@ function isSameDay(a: Date, b: Date) {
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate()
   )
+}
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
+
+/**
+ * クリアボタンを、トリガー内に空けた場所（spacer）へ重ねる位置を測る（issue #803）。
+ * className でトリガーの幅・余白・横 padding が変わっても（DataTableDateCell の `px-2` 等）
+ * spacer の実位置に合わせて追従する。測る前（SSR・初回描画）は null で、既定 padding 前提の位置を使う。
+ */
+function useClearButtonPosition(
+  enabled: boolean,
+  wrapperRef: React.RefObject<HTMLDivElement | null>,
+  spacerRef: React.RefObject<HTMLSpanElement | null>
+) {
+  const [pos, setPos] = React.useState<{ left: number; top: number } | null>(null)
+  useIsomorphicLayoutEffect(() => {
+    const wrapper = wrapperRef.current
+    const spacer = spacerRef.current
+    if (!enabled || !wrapper || !spacer) return
+    const measure = () => {
+      const w = wrapper.getBoundingClientRect()
+      const r = spacer.getBoundingClientRect()
+      // 寸法が取れない環境（jsdom 等）では既定位置のままにする
+      if (r.width === 0 && r.height === 0) return
+      const next = { left: r.left - w.left, top: r.top - w.top }
+      setPos((prev) => (prev && prev.left === next.left && prev.top === next.top ? prev : next))
+    }
+    measure()
+    if (typeof ResizeObserver === "undefined") return
+    const observer = new ResizeObserver(measure)
+    observer.observe(wrapper)
+    observer.observe(spacer)
+    return () => observer.disconnect()
+  }, [enabled, wrapperRef, spacerRef])
+  return pos
 }
 
 const clearIcon = (
@@ -161,6 +195,9 @@ function DatePicker({
   const pointerSelectionRef = React.useRef(false)
   const triggerRef = React.useRef<HTMLButtonElement>(null)
   const showClear = clearable && !!value && !disabled
+  const wrapperRef = React.useRef<HTMLDivElement>(null)
+  const spacerRef = React.useRef<HTMLSpanElement>(null)
+  const clearPos = useClearButtonPosition(showClear, wrapperRef, spacerRef)
 
   const trigger = (
     <PopoverTrigger asChild>
@@ -178,7 +215,7 @@ function DatePicker({
       >
         <span>{formatted ?? placeholder}</span>
         {/* クリアボタン（トリガーの兄弟として重ねる）の分だけ文字の右側を空ける */}
-        {showClear && <span aria-hidden className="ml-auto mr-1 size-6 shrink-0" />}
+        {showClear && <span ref={spacerRef} aria-hidden className="ml-auto mr-1 size-6 shrink-0" />}
         {calendarIcon}
       </button>
     </PopoverTrigger>
@@ -189,7 +226,7 @@ function DatePicker({
       {clearable ? (
         // button の中に button は置けないので、クリアはトリガーの兄弟にして上に重ねる
         // （MultiSelect / FilterPill と同じ構成）。clearable でない既定の DOM は変えない。
-        <div className="relative w-full">
+        <div ref={wrapperRef} className="relative w-full">
           {trigger}
           {showClear && (
             <button
@@ -201,7 +238,14 @@ function DatePicker({
                 // 値が空になるとクリアボタン自体が消えるので、フォーカスを body に落とさずトリガーへ戻す
                 triggerRef.current?.focus()
               }}
-              className="absolute right-[calc(var(--Field-Padding-X-Md)_+_1.25rem)] top-1/2 z-[1] flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] transition-colors hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Object-High-Emphasis)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]"
+              // 位置はトリガー内の spacer を測って合わせる（測る前は既定 padding 前提の位置）
+              style={clearPos ? { left: clearPos.left, top: clearPos.top } : undefined}
+              className={cn(
+                "absolute z-[1] flex size-6 items-center justify-center rounded-full text-[var(--Object-Low-Emphasis)] transition-colors hover:bg-[var(--Surface-Secondary)] hover:text-[var(--Object-High-Emphasis)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--Focus-High-Emphasis)]",
+                // 見た目は 24px のまま、当たり判定だけ 44px に広げる（タップ領域 44pt の基準）
+                "before:absolute before:-inset-2.5 before:content-['']",
+                !clearPos && "right-[calc(var(--Field-Padding-X-Md)_+_1.25rem)] top-1/2 -translate-y-1/2"
+              )}
             >
               {clearIcon}
             </button>
