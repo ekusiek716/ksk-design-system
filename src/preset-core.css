@@ -19,6 +19,12 @@
    トークンや base layer を足すときはこのファイルに書く。
    ============================================================= */
 
+/* 開閉アニメ（animate-in / fade-in-0 / zoom-in-95 / animate-accordion-down 等）の
+   定義元（issue #827）。DropdownMenu / Popover / Tooltip / HoverCard / Select /
+   Dialog / Accordion がこのクラスに頼る。dependencies に入れて preset から読み込むので、
+   consumer は tw-animate-css を別途入れなくてよい。Storybook 用の src/index.css にだけ
+   置くと consumer には届かない（scripts/check-preset-classes.mjs が検出する）。 */
+@import "tw-animate-css";
 @import "./styles/primitive.css";
 /* 角丸の意味別トークン（issue #553）。定義元は styles/radius.css の1箇所で、
    product-theme.css からも読み込まれる（個別 subpath 構成の消費側対策）。 */

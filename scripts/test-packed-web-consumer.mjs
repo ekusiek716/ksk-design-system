@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process"
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync, copyFileSync, realpathSync } from "node:fs"
+import { existsSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync, copyFileSync, realpathSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -38,7 +38,11 @@ try {
   write("package.json", JSON.stringify({ name: "ksk-empty-web-consumer", private: true, type: "module" }))
   run("npm", ["install", "--ignore-scripts", join(temp, filename), ...["react", "react-dom", "@types/react", "@types/react-dom", "tailwindcss"].map((name) => `${name}@${lockedVersion(name)}`)])
   mkdirSync(join(temp, "src/styles"), { recursive: true })
-  const readme = readFileSync(join(temp, "node_modules/ksk-design-system/README.md"), "utf8")
+  // #827: preset が読み込む tw-animate-css は consumer が別途入れなくても届くこと。
+  const packedManifest = JSON.parse(readFileSync(join(temp, "node_modules/ksk-design-system/package.json"), "utf8"))
+  assert.ok(packedManifest.dependencies?.["tw-animate-css"], "packed dependencies must include tw-animate-css (#827)")
+  assert.ok(existsSync(join(temp, "node_modules/tw-animate-css/package.json")), "tw-animate-css must be installed with ksk-design-system (#827)")
+  const readme =readFileSync(join(temp, "node_modules/ksk-design-system/README.md"), "utf8")
   const tsx = readReadmeConsumerExample(readme, "tsx")
   const css = readReadmeConsumerExample(readme, "css")
   write("src/readme-example.tsx", tsx)
@@ -69,6 +73,20 @@ try {
   } finally { write("src/styles/app.css", css) }
   // The negative CSS build can clear output before failing; restore the valid artifact.
   await build(viteOptions())
+  // #827: README の CSS 例（tailwindcss + preset）だけで開閉アニメの CSS が作られること。
+  const builtCss = readdirSync(join(temp, "dist/assets")).filter((name) => name.endsWith(".css"))
+    .map((name) => readFileSync(join(temp, "dist/assets", name), "utf8")).join("\n")
+  for (const selector of [
+    /\.animate-in[{,]/,
+    /\.fade-in-0[{,]/,
+    /\.zoom-in-95[{,]/,
+    /\.data-\\\[state\\=open\\\]\\:animate-accordion-down\[data-state=["']?open["']?\]/,
+    /\.data-\\\[state\\=closed\\\]\\:animate-accordion-up\[data-state=["']?closed["']?\]/,
+    /@keyframes enter\{/,
+    /@keyframes accordion-down\{/,
+  ]) {
+    assert.match(builtCss, selector, `README consumer CSS must define ${selector} (#827)`)
+  }
   server = await preview({ root: temp, configFile: false, logLevel: "warn", preview: { host: "127.0.0.1", port: 0, strictPort: true } })
   const address = server.httpServer.address()
   assert.ok(address && typeof address !== "string")
