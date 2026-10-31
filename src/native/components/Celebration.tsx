@@ -8,6 +8,7 @@ import {
   View,
   type ViewStyle,
 } from "react-native"
+import { useLatestRef } from "../../lib/use-latest-ref"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
 import { useReduceMotion } from "./use-reduce-motion"
@@ -63,6 +64,10 @@ export interface CelebrationProps {
   emojiAnimation?: "pop" | "bounce"
   autoDismissMs?: number
   onTapDismiss?: () => void
+  /**
+   * durationMs（autoDismissMs 優先）経過後に 1 回呼ばれる。その場の関数で渡してよい
+   * （参照が変わってもタイマーは巻き戻らず、期限時に最新の関数を呼ぶ。#812）
+   */
   onDone?: () => void
   style?: ViewStyle
   cardStyle?: ViewStyle
@@ -254,11 +259,16 @@ function Celebration({
     reduceMotion,
   })
 
+  const onDoneRef = useLatestRef(onDone)
+  const hasOnDone = Boolean(onDone)
+
   useEffect(() => {
-    if (!active || !onDone) return
-    const id = setTimeout(onDone, resolvedDurationMs)
+    // onDone は ref 越しに呼び、依存から外す。依存に入れると、その場の関数で渡されたとき
+    // 親の再描画のたびにタイマーが巻き戻り、期限が来なくなる（#812。Web 版と同じ形）。
+    if (!active || !hasOnDone) return
+    const id = setTimeout(() => onDoneRef.current?.(), resolvedDurationMs)
     return () => clearTimeout(id)
-  }, [active, onDone, resolvedDurationMs])
+  }, [active, hasOnDone, resolvedDurationMs, onDoneRef])
 
   if (!active || trigger === "none") return null
 

@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useLatestRef } from "@/lib/use-latest-ref"
 import { useKskLabels } from "../ui/ksk-labels"
 
 type CelebrationTrigger = "confetti" | "emoji" | "both" | "none"
@@ -55,6 +56,10 @@ interface CelebrationProps extends React.ComponentProps<"div"> {
   emojiAnimation?: "pop" | "bounce"
   autoDismissMs?: number
   onTapDismiss?: () => void
+  /**
+   * durationMs（autoDismissMs 優先）経過後に 1 回呼ばれる。その場の関数で渡してよい
+   * （参照が変わってもタイマーは巻き戻らず、期限時に最新の関数を呼ぶ。#812）
+   */
   onDone?: () => void
   /** タップで閉じる不可視ボタンの aria-label。省略時は KskLabelsProvider の `celebrationDismiss`（Provider 無しは "閉じる"。locale="en" で "Close"） */
   dismissLabel?: string
@@ -130,6 +135,8 @@ function Celebration({
   const dismissLabel = dismissLabelProp ?? defaultLabels.celebrationDismiss
   const reducedMotion = usePrefersReducedMotion()
   const resolvedDurationMs = autoDismissMs ?? durationMs
+  const onDoneRef = useLatestRef(onDone)
+  const hasOnDone = Boolean(onDone)
   const isBurst = effect === "burst"
   const particleDurationBase = duration ?? (isBurst ? BURST_DURATION_MS : resolvedDurationMs)
   const palette = colors && colors.length > 0 ? colors : CONFETTI_COLORS
@@ -186,10 +193,12 @@ function Celebration({
   )
 
   React.useEffect(() => {
-    if (!active || !onDone) return
-    const id = window.setTimeout(onDone, resolvedDurationMs)
+    // onDone は ref 越しに呼び、依存から外す。依存に入れると、その場の関数で渡されたとき
+    // 親の再描画のたびにタイマーが巻き戻り、期限が来なくなる（#812）。有無だけは従来どおり見る。
+    if (!active || !hasOnDone) return
+    const id = window.setTimeout(() => onDoneRef.current?.(), resolvedDurationMs)
     return () => window.clearTimeout(id)
-  }, [active, onDone, resolvedDurationMs])
+  }, [active, hasOnDone, resolvedDurationMs, onDoneRef])
 
   if (!active || trigger === "none") return null
 
