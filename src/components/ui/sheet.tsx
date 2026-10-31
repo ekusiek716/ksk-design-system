@@ -97,9 +97,9 @@ interface SheetRootContextValue {
    */
   openRef: React.RefObject<boolean>
   /**
-   * #789（レビュー指摘）: いまマウントされている Content の変種の数。付け替えでは古い側の
-   * 破棄と新しい側のマウントが同じ commit で起きるため、onCloseAutoFocus の発火時点で 1 以上残る。
-   * 0 なら Content だけが外された（open のまま）ので、閉じたときと同じく opener へ戻す。
+   * #789（レビュー指摘）: いまマウントされている SheetContent の数。変種の付け替えでは
+   * 外側の SheetContent は残り内側の分岐だけが入れ替わるため、1 以上のまま変わらない。
+   * 0 なら SheetContent ごと外された（Sheet ごとの破棄を含む）ので、閉じたときと同じく opener へ戻す。
    */
   contentCountRef: React.RefObject<number>
 }
@@ -108,7 +108,7 @@ const SheetRootContext = React.createContext<SheetRootContextValue | null>(null)
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? React.useLayoutEffect : React.useEffect
 
-/** #789: Content の変種がマウントされている間、Sheet 側の数に 1 を足す。 */
+/** #789: SheetContent がマウントされている間、Sheet 側の数に 1 を足す。 */
 function useSheetContentPresence(contentCountRef: React.RefObject<number> | undefined) {
   useIsomorphicLayoutEffect(() => {
     if (!contentCountRef) return
@@ -528,14 +528,12 @@ function Sheet({
   // #789: Content 側が「付け替え」と「実際に閉じた」を見分けるための開閉状態。
   // Radix の FocusScope は破棄後に setTimeout で onCloseAutoFocus を発火するため、
   // commit 後の effect で同期すれば発火時点には最新の値になっている。
-  // Sheet ごと外されたときは閉じた扱いにする（cleanup で false に戻す）。
+  // Sheet ごと外されたときは配下の SheetContent も外れて contentCountRef が 0 になるため、
+  // openRef を戻さなくても閉じた扱いになる。
   const openRef = React.useRef(actualOpen)
   const contentCountRef = React.useRef(0)
   React.useEffect(() => {
     openRef.current = actualOpen
-    return () => {
-      openRef.current = false
-    }
   }, [actualOpen])
 
   const rootCtx = React.useMemo<SheetRootContextValue>(
@@ -1422,7 +1420,6 @@ function SwipeToCloseBottomSheet({
     ...contentProps
   } = props
   const rootCtx = React.useContext(SheetRootContext)
-  useSheetContentPresence(rootCtx?.contentCountRef)
   const [dragY, setDragY] = React.useState(0)
   const [dragging, setDragging] = React.useState(false)
   // transform transition は「ドラッグのスプリングバック」専用。マウント直後は
@@ -1859,7 +1856,6 @@ function SwipeToCloseSideDrawer({
     ...contentProps
   } = props
   const rootCtx = React.useContext(SheetRootContext)
-  useSheetContentPresence(rootCtx?.contentCountRef)
   const [dragDist, setDragDist] = React.useState(0)
   const [dragging, setDragging] = React.useState(false)
   // Enable the spring-back transform transition only after the first drag, so
@@ -2192,7 +2188,6 @@ function SnapBottomSheetContent({
 }: SnapBottomSheetContentProps) {
   const isModal = useModality()
   const sheetRoot = React.useContext(SheetRootContext)
-  useSheetContentPresence(sheetRoot?.contentCountRef)
   const hasInternalDesc = description != null && description !== false
   const {
     "aria-describedby": ariaDescribedBy,
