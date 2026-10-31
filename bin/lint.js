@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
-import { basename, extname, isAbsolute, join, relative, resolve } from "node:path"
+import { existsSync, readFileSync, readdirSync, realpathSync, statSync } from "node:fs"
+import { basename, extname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { spawnSync } from "node:child_process"
 import {
   inspectParallelPaletteCandidates,
@@ -392,9 +392,18 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
     }
   }
 
-  const files = options.changed
-    ? getChangedFiles(cwd, options)
+  const { files, missing: missingTargets } = options.changed
+    ? getChangedFiles(cwd, options.targets, options)
     : collectTargetFiles(cwd, options.targets, options)
+  // 存在しない検査対象は stderr に 1 件ずつ出す（issue #833）。--format json でも
+  // stdout の JSON を汚さないよう stderr だけに書く。
+  for (const target of missingTargets) {
+    console.error(`[ksk-ds lint] 検査対象が見つかりません: ${target}`)
+  }
+  // 指定した target がすべて存在しないなら、1 ファイルも検査していないので
+  // 「違反なし」にせず失敗にする（--strict の有無に関係なく）。既定 target の `.` は
+  // 常に存在するので、この分岐に入るのは対象パスを明示したときだけ。
+  const allTargetsMissing = missingTargets.length > 0 && missingTargets.length === options.targets.length
   const findings = []
   // 自動生成ヘッダで skip したファイルは無言にせず件数を報告する（issue #408。
   // 手書きファイルにマーカーを書けば lint を丸ごと回避できる構造のため、
@@ -441,7 +450,27 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
 
   const summary = summarize(findings)
   if (options.format === "json") {
-    console.log(JSON.stringify({ results: findings, summary, generatedSkipped, missingSkipped }, null, 2))
+    // summary.files は「違反のあったファイル数」なので、0 件検査と「違反なし」を
+    // JSON で区別できるよう実際に検査したファイル数を scannedFiles に足す（issue #831）。
+    // 既存キーの意味は変えない（後方互換）。
+    const scannedFiles = files.length - generatedSkipped.length - missingSkipped.length
+    if (options.changed && files.length === 0) {
+      // stdout の JSON を汚さないよう stderr に出す
+      console.error("[ksk-ds lint] 検査対象の変更ファイルが 0 件のため検査していません")
+    }
+    console.log(
+      JSON.stringify(
+        { results: findings, summary: { ...summary, scannedFiles }, generatedSkipped, missingSkipped, missingTargets },
+        null,
+        2,
+      ),
+    )
+  } else if (allTargetsMissing) {
+    // 走査 0 件で「違反は見つかりませんでした」と出すと検査したように読めるため出さない
+    console.log("ksk-ds lint: 検査対象が 1 件も見つからないため検査していません")
+  } else if (options.changed && files.length === 0) {
+    // --changed で 0 件のときも「違反なし」と区別する（issue #831）。exit 0 は維持
+    console.log("ksk-ds lint: 検査対象の変更ファイルが 0 件のため検査していません")
   } else {
     printText(findings, summary)
     if (generatedSkipped.length > 0) {
@@ -460,7 +489,11 @@ export async function runLintCli(argv, { cwd = process.cwd(), pkgRoot = resolve(
     }
   }
 
+  if (allTargetsMissing) return 1
   if (summary.errors > 0) return 1
+  // 一部の target だけ存在しないときは警告のみ（「あれば検査」の使い方を壊さない）。
+  // CI で締めたい --strict のときは失敗にする（issue #833）。
+  if (options.strict && missingTargets.length > 0) return 1
   // warning は既定では exit code に影響しない。CI で締めたい場合は
   // --strict / --max-warnings=N を使う（issue #406）。
   if (options.strict && summary.warnings > 0) return 1
@@ -477,7 +510,10 @@ const USAGE = `ksk-ds lint
   ksk-ds lint src --strict
 
 オプション:
-  --changed          Git の変更ファイルのみ検査
+  --changed          Git の変更ファイルのみ検査。origin/main との差分・未コミット・
+                     未追跡（未 add の新規ファイル）が対象で、path（既定は実行
+                     ディレクトリ）の配下に絞る。origin/main が無いときは警告して
+                     未コミット分と未追跡だけを検査する
   --format json      JSON 出力
   --exclude TEXT     パスに TEXT を含むファイルを除外
   --platform P       web / native を強制（既定はファイルごとに自動判定）
@@ -628,14 +664,23 @@ function warnUnknownAppliesTo(rules) {
   }
 }
 
+/**
+ * targets 配下の検査対象ファイルを集める。存在しない target は黙って捨てず
+ * missing に積んで返す（issue #833。打ち間違い・改名で検査が丸ごと抜けたまま
+ * 「違反なし」exit 0 になるのを防ぐ。警告と終了コードは runLintCli が決める）。
+ */
 function collectTargetFiles(cwd, targets, options) {
   const files = []
+  const missing = []
   for (const target of targets) {
     const abs = resolve(cwd, target)
-    if (!existsSync(abs)) continue
+    if (!existsSync(abs)) {
+      missing.push(target)
+      continue
+    }
     collect(abs, cwd, options, files)
   }
-  return files
+  return { files, missing }
 }
 
 function collect(abs, cwd, options, out) {
@@ -660,24 +705,87 @@ function collect(abs, cwd, options, out) {
   if (stat.isFile() && isLintableFile(abs)) out.push(abs)
 }
 
-function getChangedFiles(cwd, options) {
+/**
+ * --changed の検査対象（issue #831）。
+ *
+ * - git の出力はリポジトリ直下基準なので、`git rev-parse --show-toplevel` を基準に解決する
+ *   （実行ディレクトリ基準だとサブディレクトリ実行で全件が消えていた）。
+ * - `-z` と `core.quotePath=false` で、日本語名が引用符付き 8 進エスケープにならないようにする。
+ * - 未追跡ファイル（`git ls-files --others --exclude-standard`）も含める。新規ファイルは未 add が普通。
+ * - targets（既定は `.`）の配下に絞る。`lint src --changed` の `src` を無視しない。
+ * - git が失敗したときは黙って捨てず stderr に警告する（origin/main の無い浅い clone 等）。
+ *
+ * 返すパスは実行ディレクトリ基準の絶対パス（出力の file が cwd 相対になるように）。
+ */
+function getChangedFiles(cwd, targets, options) {
+  const git = (args, gitCwd) =>
+    spawnSync("git", ["-c", "core.quotePath=false", ...args], { cwd: gitCwd, encoding: "utf8" })
+  const files = []
+  const missing = []
+
+  const top = git(["rev-parse", "--show-toplevel"], cwd)
+  if (top.status !== 0) {
+    console.error("[ksk-ds lint] Git リポジトリではないため、--changed で検査できるファイルがありません")
+    return { files, missing }
+  }
+  const root = top.stdout.trim()
+
   const names = new Set()
-  for (const args of [
-    ["diff", "--name-only", "--diff-filter=ACMR", "origin/main...HEAD"],
-    ["diff", "--name-only", "--diff-filter=ACMR"],
-    ["diff", "--name-only", "--diff-filter=ACMR", "--cached"],
-  ]) {
-    const result = spawnSync("git", args, { cwd, encoding: "utf8" })
-    if (result.status !== 0) continue
-    for (const line of result.stdout.split(/\r?\n/)) {
-      if (line.trim()) names.add(line.trim())
+  const addNames = (stdout) => {
+    for (const name of stdout.split("\0")) {
+      if (name) names.add(name)
     }
   }
-  return [...names]
-    .map((name) => resolve(cwd, name))
-    .filter((abs) => existsSync(abs))
-    .filter((abs) => !shouldIgnorePath(normalize(relative(cwd, abs)), options))
-    .filter((abs) => isLintableFile(abs))
+  const base = git(["diff", "--name-only", "-z", "--diff-filter=ACMR", "origin/main...HEAD"], root)
+  if (base.status === 0) {
+    addNames(base.stdout)
+  } else {
+    console.error(
+      "[ksk-ds lint] ベース ref（origin/main）が取れないため、作業ツリー・ステージの差分と未追跡ファイルだけを検査します",
+    )
+  }
+  for (const args of [
+    ["diff", "--name-only", "-z", "--diff-filter=ACMR"],
+    ["diff", "--name-only", "-z", "--diff-filter=ACMR", "--cached"],
+    ["ls-files", "--others", "--exclude-standard", "-z"],
+  ]) {
+    const result = git(args, root)
+    if (result.status !== 0) {
+      const reason = String(result.stderr ?? "").trim().split(/\r?\n/)[0] ?? ""
+      console.error(`[ksk-ds lint] git ${args[0]} に失敗したため一部の変更を検査できません: ${reason}`)
+      continue
+    }
+    addNames(result.stdout)
+  }
+
+  // macOS の /var → /private/var のようなシンボリックリンク差を吸収するため、
+  // 比較は実体パスで行い、返すパスは cwd 基準へ戻す。
+  const realCwd = realpathSync(cwd)
+  const scopes = []
+  for (const target of targets) {
+    const abs = resolve(cwd, target)
+    if (!existsSync(abs)) {
+      missing.push(target)
+      continue
+    }
+    scopes.push(realpathSync(abs))
+  }
+  const isInside = (scope, absReal) => {
+    const rel = relative(scope, absReal)
+    return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
+  }
+
+  for (const name of names) {
+    const absReal = resolve(root, name)
+    if (!scopes.some((scope) => isInside(scope, absReal))) continue
+    const abs = resolve(cwd, relative(realCwd, absReal))
+    if (!existsSync(abs)) continue
+    if (shouldIgnorePath(normalize(relative(cwd, abs)), options)) continue
+    if (!isLintableFile(abs)) continue
+    files.push(abs)
+  }
+  files.sort()
+  return { files, missing }
 }
 
 function isLintableFile(abs) {
@@ -813,7 +921,16 @@ function lintFile(file, cwd, rules, options = {}) {
       }
       continue
     }
-    const isFullFileRule = rule.pattern.includes("[\\s\\S]")
+    // scope: "tag" は「タグ内の属性を見る」ルール（issue #805）。`[^>]*` は改行にも
+    // 一致するので、ファイル全体モードで照合すれば Prettier が折り返した複数行の
+    // タグでも 1 行と同じ判定になる。行単位だと P033 / P044 を見逃し、alt が
+    // 次の行にある <img> を P025 と誤検知していた。
+    // scope: "tag" のパターンを書くときの約束（PR #842 のレビュー指摘）: ファイル全体に
+    // 照合するため、`<Tag\b` で始まらない分岐は `[^>\n]*` のように改行で止めること。
+    // 止めないと import 行や props 型の語から後ろの無関係なタグまでを 1 マッチにする
+    // （P042 の `SheetContent[^>]*` / P033 の `aria-pressed[^>]*<Button` で実際に起きた）。
+    const isTagScope = rule.scope === "tag"
+    const isFullFileRule = isTagScope || rule.pattern.includes("[\\s\\S]")
     let regex
     try {
       // 全ファイル横断ルールは matchAll で複数件拾うため g フラグを必須にする
@@ -829,11 +946,22 @@ function lintFile(file, cwd, rules, options = {}) {
       for (const match of maskedSource.matchAll(regex)) {
         if (match.index == null) continue
         const lineNumber = lineForIndex(maskedSource, match.index)
+        // scope: "tag" はマッチしたタグの行範囲（開始行〜タグを閉じる > の行）を
+        // 判定の単位にする（issue #805）。P002 の excludeLines `type="file"` が
+        // <input の次の行にあっても効き、行スコープ ignore はタグの直上にも
+        // 属性の直上（タグの途中）にも置ける。それ以外のルールは従来どおり開始行だけ。
+        const endLine = isTagScope
+          ? lineForIndex(maskedSource, tagRangeEnd(maskedSource, match.index, match.index + match[0].length))
+          : lineNumber
         // excludes（ksk-ds-allow-* 等）はコメントに書かれることが多いため、
         // 判定は常にマスク前の生の行に対して行う。
-        const rawLine = lines[lineNumber - 1] ?? ""
-        if (matchesRuleExclude(rule, { file: rel, line: rawLine, isDsFile })) continue
-        if (ignores.suppresses(rule.id ?? "UNKNOWN", lineNumber)) continue
+        const rangeLines = lines.slice(lineNumber - 1, Math.max(endLine, lineNumber))
+        if (rangeLines.some((rawLine) => matchesRuleExclude(rule, { file: rel, line: rawLine, isDsFile }))) continue
+        let suppressed = false
+        for (let line = lineNumber; line <= endLine && !suppressed; line++) {
+          suppressed = ignores.suppresses(rule.id ?? "UNKNOWN", line)
+        }
+        if (suppressed) continue
         findings.push(toFinding(rule, rel, lineNumber, platform))
       }
       continue
@@ -959,6 +1087,55 @@ function collectRuleIgnores(source, file) {
 
 function lineForIndex(source, index) {
   return source.slice(0, index).split(/\r?\n/).length
+}
+
+/** タグを閉じる > を探す上限（壊れたソースで末尾まで走査し続けないため） */
+const TAG_SCAN_LIMIT = 4000
+
+/**
+ * マッチが属するタグの開き `<` の位置を返す。マッチが `<` で始まればその位置、
+ * そうでなければマッチの終端から TAG_SCAN_LIMIT 文字まで手前へ遡った最も近い `<` + 英字。
+ * 見つからなければ -1。
+ */
+function tagOpenIndex(source, matchStart, matchEnd) {
+  if (source[matchStart] === "<") return matchStart
+  const stop = Math.max(0, matchEnd - TAG_SCAN_LIMIT)
+  for (let i = matchEnd - 1; i >= stop; i--) {
+    if (source[i] === "<" && /[A-Za-z]/.test(source[i + 1] ?? "")) return i
+  }
+  return -1
+}
+
+/**
+ * scope: "tag" のマッチについて、タグの行範囲の終端（文字インデックス）を返す（issue #805）。
+ *
+ * 走査はタグの開き `<` の直後から始め、タグを閉じる `>` を探す。マッチが `<Tag` で
+ * 始まらない逆向きの分岐（`aria-pressed[^>\n]*<Button` 等）は、マッチの終端から手前へ
+ * 遡って最も近い `<` + 英字を開きとみなす。マッチの終端から走査すると、終端が属性値の
+ * 引用符の中にあるとき閉じ引用符を開きと取り違え、範囲が縮んだり後ろの別タグまで
+ * 伸びたりする（PR #842 のレビュー指摘）。`{...}` の中の `>`（アロー関数の `=>` や
+ * 属性に渡した JSX）と文字列の中身は飛ばす。見つからないときはマッチの終端までを
+ * 範囲にする。どちらの場合もマッチ自体より短くはしない。
+ */
+function tagRangeEnd(source, matchStart, matchEnd) {
+  const matchLast = Math.max(matchStart, matchEnd - 1)
+  const from = tagOpenIndex(source, matchStart, matchEnd) + 1
+  if (from <= 0) return matchLast
+  const limit = Math.min(source.length, from + TAG_SCAN_LIMIT)
+  let depth = 0
+  for (let i = from; i < limit; i++) {
+    const ch = source[i]
+    if (ch === '"' || ch === "'" || ch === "`") {
+      const close = source.indexOf(ch, i + 1)
+      if (close === -1 || close >= limit) return matchLast
+      i = close
+      continue
+    }
+    if (ch === "{") depth += 1
+    else if (ch === "}") depth = Math.max(0, depth - 1)
+    else if (ch === ">" && depth === 0 && source[i - 1] !== "=") return Math.max(matchLast, i)
+  }
+  return matchLast
 }
 
 // ソース全体を1文字ずつ走査し、コメント本文だけを同じ文字数の空白に
