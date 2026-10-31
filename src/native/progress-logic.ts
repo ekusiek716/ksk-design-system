@@ -28,6 +28,25 @@ export function resolveProgressPct(value: number, max: number, masked: boolean |
   return max === 0 ? 0 : Math.min(100, Math.max(0, (value / max) * 100))
 }
 
+/**
+ * ルート View の既定の読み上げ値（issue #796）。ProgressRing（#564）と同じ尺度で、
+ * `{ min: 0, max, now: <0〜max にクランプした value> }` を返す。
+ * `max` が 0 以下・非有限のときは見た目（バー幅 0）と合わせて `{ min: 0, max: 100, now: 0 }`、
+ * value が非有限なら now は 0。
+ * masked=true のときは value / max を一切見ず `{ min: 0, max: 100 }`（now なし）を返す
+ * （#147 の逆算防止。読み上げからも実値を出さない）。
+ */
+export function getProgressAccessibilityValue(
+  value: number,
+  max: number,
+  masked: boolean | undefined
+): { min: number; max: number; now?: number } {
+  if (masked) return { min: 0, max: 100 }
+  if (!Number.isFinite(max) || max <= 0) return { min: 0, max: 100, now: 0 }
+  const now = Number.isFinite(value) ? Math.min(max, Math.max(0, value)) : 0
+  return { min: 0, max, now }
+}
+
 export function toneToVariant(tone: ProgressTone): ProgressVariant {
   if (tone === "accent") return "default"
   return tone

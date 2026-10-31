@@ -619,6 +619,14 @@
         "transition-duration",
         "auto-color-thresholds"
       ],
+      "props": {
+        "accessible / accessibilityLabel / accessibilityRole / accessibilityValue": "（Native のみ）ルート View へ渡す読み上げ系 props。既定は accessible=true / accessibilityRole=\"progressbar\" / accessibilityValue={ min: 0, max, now: 0〜max にクランプした value }（masked 時は { min: 0, max: 100 } で now なし）/ accessibilityLabel=\"進捗\" で、Web の role=\"progressbar\" と対称（issue #796）。指定した値は必ず優先される。周りのカードが説明文を持つ場合は accessible={false} を渡すと役割・値・名前の既定ごと外れる"
+      },
+      "accessibility": [
+        "Web: role=\"progressbar\" に 0〜100 へクランプした値を aria-valuenow として付け、data-state は loading（100 で complete）。範囲外の値でも Radix の console.error は出ない。aria-label 未指定時は KskLabels の progress（既定「進捗」）（issue #796）",
+        "masked 時は Web / Native とも実値を読み上げに出さない（Web は aria-valuenow なし・data-state=indeterminate、Native は accessibilityValue に now を含めない。#147 の逆算防止）。Web で value 未指定・null のときも aria-valuenow を付けない",
+        "Native: 既定で accessibilityRole=\"progressbar\" + accessibilityValue を持つ（ProgressRing #564 と同じ方式）。accessible={false} で外せる（issue #796）"
+      ],
       "rules": [
         "値に応じた色切替は autoColor を使い、consumer 側で個別に if 文と className を重ねない",
         "autoColor=true の既定閾値は 80% 以上 warning、100% 以上 caution",
