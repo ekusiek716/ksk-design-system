@@ -19,8 +19,19 @@ describe("native Celebration Modal lifecycle contract (#250)", () => {
     expect(celebration).toContain("revealLifecycle.onOpen(revealCard)")
   })
 
-  it("inline 配置は Modal を挟まないので即開始する", () => {
-    expect(celebration).toContain("startCardEntrance(() => {})")
+  it("inline 配置は Modal を挟まないので、OS のモーション設定を取得しだい開始する（#802）", () => {
+    // onShow を待つのは overlay だけ。inline は resolved になった effect で始める。
+    // 実際に始まることは __tests__/native-celebration-reduce-motion.test.tsx で描いて確かめる
+    expect(celebration).toContain("if (!active || !resolved) return")
+    expect(celebration).toContain("if (overlay && !modalShownRef.current) return")
+    expect(celebration).toContain("beginCardEntrance()")
+  })
+
+  it("紙吹雪は「視差効果を減らす」がオンの間と取得前は出さない（#802）", () => {
+    expect(celebration).toContain("const suppressMotion = !resolved || reduceMotion")
+    expect(celebration).toContain(
+      'const showConfetti = !suppressMotion && (trigger === "confetti" || trigger === "both")',
+    )
   })
 
   it("emoji bounce は共通フックに集約し、両コンポーネントで挙動を分岐させない", () => {

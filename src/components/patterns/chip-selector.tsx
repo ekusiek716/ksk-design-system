@@ -265,6 +265,39 @@ function ChipSelector<T extends string = string>({
     }
   }, [selectedValues, emit, isMultiple, max])
 
+  // issue #810: 複数選択では「選択中だけ removable（× 付き）」なので、トグルのたびに Chip の根が
+  // <button> と <span> の間で入れ替わり、要素が作り直される。キーボードで押した直後にフォーカスが
+  // body（Dialog / Sheet ならフォーカストラップの先頭）へ落ちるため、押したチップの本体ボタンへ戻す。
+  // フォーカスがこのグループ内にあったときだけ記録する（Safari のマウスクリックのように、
+  // もともとフォーカスが無い押下でフォーカスを奪わない）。
+  const pendingFocusRef = React.useRef<{ value: T } | null>(null)
+  const rememberFocus = (v: T) => {
+    if (!isMultiple) return
+    const container = containerRef.current
+    const active = typeof document === "undefined" ? null : document.activeElement
+    if (container && active && container.contains(active)) pendingFocusRef.current = { value: v }
+  }
+
+  // 依存配列なし: 記録した直後のコミットで 1 回だけ判定し、記録は必ず消す。
+  // フォーカスが失われた（body / null / DOM から外れた要素）ときだけ戻す。
+  React.useLayoutEffect(() => {
+    const pending = pendingFocusRef.current
+    if (!pending) return
+    pendingFocusRef.current = null
+    const container = containerRef.current
+    if (!container) return
+    const active = document.activeElement
+    if (active && active !== document.body && active.isConnected) return
+    const index = options.findIndex((opt) => opt.value === pending.value)
+    const root = index >= 0 ? container.children[index] : undefined
+    if (!root) return
+    const target =
+      root instanceof HTMLButtonElement
+        ? root
+        : root.querySelector<HTMLButtonElement>('button:not([data-slot="chip-remove"])')
+    target?.focus()
+  })
+
   // roving tabindex: 選択中のチップだけ tabIndex=0（未選択なら先頭の有効チップ）。
   // 依存配列を持たせず毎レンダー同期する（#318 と同じ）。
   React.useEffect(() => {
@@ -358,8 +391,14 @@ function ChipSelector<T extends string = string>({
             selected={selected}
             disabled={disabled}
             removable={selected && isMultiple}
-            onRemove={() => emit(selectedValues.filter((x) => x !== opt.value))}
-            onClick={() => toggle(opt.value)}
+            onRemove={() => {
+              rememberFocus(opt.value)
+              emit(selectedValues.filter((x) => x !== opt.value))
+            }}
+            onClick={() => {
+              rememberFocus(opt.value)
+              toggle(opt.value)
+            }}
             role={isSingle ? "radio" : undefined}
             aria-checked={isSingle ? selected : undefined}
             // radio に aria-pressed を併記すると意味論が二重になるので排他にする。

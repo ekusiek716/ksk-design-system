@@ -24,6 +24,15 @@ export function CheckboxCard({
     <Pressable
       onPress={() => !disabled && onChange?.(!checked)}
       disabled={disabled}
+      // カード全体を 1 つの checkbox として読ませる（issue #799。CheckboxField と同じ構成）
+      accessible
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked, disabled }}
+      accessibilityLabel={title}
+      accessibilityHint={description}
+      // react-native-web 0.21 は accessibilityState を aria-* に変換しないため併記する
+      aria-checked={checked}
+      aria-disabled={disabled || undefined}
       style={{
         flexDirection: "row",
         gap: scales.spacing.scale[3],
@@ -36,8 +45,19 @@ export function CheckboxCard({
         opacity: disabled ? 0.6 : 1,
       }}
     >
-      <View style={{ paddingTop: 2 }}>
-        <Checkbox checked={checked} disabled={disabled} onChange={onChange} />
+      {/*
+        チェック枠は見た目だけの装飾にし、タップはカードの onPress に任せる（issue #799）。
+        以前は枠が名前の無い checkbox として別要素に読まれていた。
+      */}
+      <View
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        // react-native-web は上記2つを尊重しないため、web でも効く aria-hidden を併記する
+        aria-hidden
+        style={{ paddingTop: 2 }}
+      >
+        <Checkbox checked={checked} disabled={disabled} decorative />
       </View>
       <View style={{ flex: 1, gap: 2 }}>
         <RNText style={[resolveTypo("label.md"), { color: theme.text["high-emphasis"] }]}>{title}</RNText>

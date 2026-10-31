@@ -759,6 +759,7 @@
 @source inline("max-h-[calc(100dvh_-_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px)))]");
 @source inline("max-h-[inherit]");
 @source inline("max-h-[max(0px,calc(100dvh_-_1.5rem_-_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))))]");
+@source inline("max-h-[min(24rem,var(--radix-select-content-available-height))]");
 @source inline("max-h-[min(85dvh,40rem)]");
 @source inline("max-h-[min(85dvh,46rem)]");
 @source inline("max-h-[min(85dvh,calc(100dvh_-_1.5rem_-_var(--Safe-Area-Inset-Top,env(safe-area-inset-top,0px))))]");
