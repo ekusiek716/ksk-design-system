@@ -59,31 +59,45 @@ const KATAKANA_TO_HIRAGANA = 0x60
 const KE_CANONICAL = String.fromCharCode(0x3096)
 const KE_VARIANTS = new Set([0x3096, 0x3051, 0x3095, 0x304c].map((c) => String.fromCharCode(c)))
 
-/**
- * 既定の絞り込み用の正規化。表記ゆれの吸収は「ひらがな/カタカナ」と
- * 漢字に挟まれた「ヶ/ケ/ヵ/が」だけに留める（ノ/の・長音等は広げすぎになるため扱わない）。
- * 「ヶ」系は直後が文字列の終わりでも同一視する（「市ヶ」まで打った途中でも当たるように）。
- */
-function normalizeForSearch(text: string): string {
-  const chars = Array.from(text.normalize("NFKC").toLowerCase(), (c) => {
+/** 文脈に依らない正規化: 大文字小文字・全角半角（NFKC）・カタカナ→ひらがな。 */
+function normalizeBase(text: string): string {
+  return Array.from(text.normalize("NFKC").toLowerCase(), (c) => {
     const code = c.charCodeAt(0)
     return code >= KATAKANA_FIRST && code <= KATAKANA_LAST ? String.fromCharCode(code - KATAKANA_TO_HIRAGANA) : c
-  })
+  }).join("")
+}
+
+/**
+ * 表記ゆれ用の正規化。normalizeBase に加えて、漢字に挟まれた「ヶ/ケ/ヵ/が」を同じ字にする
+ * （ノ/の・長音等は広げすぎになるため扱わない）。直後が文字列の終わりでも同一視する
+ * （「市ヶ」まで打った途中でも当たるように）。`isQuery` のときは先頭の直前を漢字とみなす
+ * （「ヶ谷」「が関」と打っても候補側の「漢字 + ケ」に当たるように）。
+ */
+function normalizeKeVariants(base: string, isQuery: boolean): string {
+  const chars = Array.from(base)
   return chars
     .map((c, i) => {
       if (!KE_VARIANTS.has(c)) return c
       const prev = chars[i - 1]
       const next = chars[i + 1]
-      const prevIsHan = prev != null && HAN.test(prev)
+      const prevIsHan = prev == null ? isQuery : HAN.test(prev)
       const nextIsHanOrEnd = next == null || HAN.test(next)
       return prevIsHan && nextIsHanOrEnd ? KE_CANONICAL : c
     })
     .join("")
 }
 
+/**
+ * 既定の絞り込み。表記ゆれの同一視は「追加で当てる」だけにし、素の部分一致は失わない:
+ * 文脈に依らない正規化での部分一致、または「ヶ/ケ/ヵ/が」もそろえた正規化での部分一致のどちらかで当てる。
+ */
 function defaultFilter(option: ComboboxOption, query: string): boolean {
-  const q = normalizeForSearch(query)
-  return [option.label, ...(option.keywords ?? [])].some((s) => normalizeForSearch(s).includes(q))
+  const qBase = normalizeBase(query)
+  const qKe = normalizeKeVariants(qBase, true)
+  return [option.label, ...(option.keywords ?? [])].some((s) => {
+    const sBase = normalizeBase(s)
+    return sBase.includes(qBase) || normalizeKeVariants(sBase, false).includes(qKe)
+  })
 }
 
 function Combobox({

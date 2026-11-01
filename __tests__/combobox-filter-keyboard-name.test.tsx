@@ -101,6 +101,25 @@ describe("issue #783: 絞り込み", () => {
     expect(optionLabels()).toEqual(["千駄ケ谷"])
   })
 
+  it("表記ゆれの同一視は追加で当てるだけで、素の部分一致は失わない（ケ谷 → 市ケ谷・が関 → 霞が関）", () => {
+    const options: ComboboxOption[] = [
+      { value: "ichigaya", label: "市ケ谷" },
+      { value: "kasumigaseki", label: "霞が関" },
+      { value: "kw", label: "駅A", keywords: ["千駄ケ谷"] },
+    ]
+    mount(<Controlled options={options} />)
+    const search = openAndGetSearch()
+    type(search, "ケ谷")
+    expect(optionLabels()).toEqual(["市ケ谷", "駅A"])
+    type(search, "が関")
+    expect(optionLabels()).toEqual(["霞が関"])
+    // 検索語の先頭のヶ系も、候補側の「漢字 + ケ」に当たる
+    type(search, "ヶ谷")
+    expect(optionLabels()).toEqual(["市ケ谷", "駅A"])
+    type(search, "ケ関")
+    expect(optionLabels()).toEqual(["霞が関"])
+  })
+
   it("ヶ系の同一視は漢字に挟まれたときだけ（語頭のケは が と同一視しない）", () => {
     mount(<Controlled />)
     const search = openAndGetSearch()
