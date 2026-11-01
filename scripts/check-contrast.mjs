@@ -108,8 +108,8 @@ for (const theme of themes) {
     ["Text-Success", "text", "success", "Surface-Success", "surface", "success"],
     ["Text-Caution", "text", "caution", "Surface-Caution", "surface", "caution"],
     ["Text-Accent-Primary", "text", "accent-primary", "Surface-Accent-Primary-Light", "surface", "accent-primary-light"],
-    ["Brand-Primary", "brand", "primary", "Brand-Ultra-Light", "brand", "ultra-light"],
-    ["Brand-Primary", "brand", "primary", "Surface-Accent-Primary-Light", "surface", "accent-primary-light"],
+    ["Text-Accent-Primary", "text", "accent-primary", "Brand-Ultra-Light", "brand", "ultra-light"],
+    ["Text-Accent-Primary", "text", "accent-primary", "Active-Secondary-Button（Native ShareButtons の押下）", "active", "secondary-button", "darkOnly"],
     ["Text-Accent-Primary", "text", "accent-primary", "Hover-Secondary-Button（Chip accent の hover）", "hover", "secondary-button"],
   ]
   const themeRamps = [["default", brandRamp]]
@@ -118,7 +118,8 @@ for (const theme of themes) {
   }
   for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
     for (const [themeName, ramp] of themeRamps) {
-      for (const [fgLabel, fgGroup, fgKey, bgLabel, bgGroup, bgKey] of toneOnSurface) {
+      for (const [fgLabel, fgGroup, fgKey, bgLabel, bgGroup, bgKey, darkOnly] of toneOnSurface) {
+        if (darkOnly && mode === "light") continue // light の Active-Secondary-Button は既存の別件（4.24）で、今回の対象外
         pairs.push([
           resolveTokenColor(s[fgGroup][fgKey], prim, ramp),
           resolveTokenColor(s[bgGroup][bgKey], prim, ramp),

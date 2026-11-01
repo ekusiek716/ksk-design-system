@@ -118,7 +118,7 @@ function ChartControls({
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[var(--Border-Control,var(--Border-Medium-Emphasis))] typo-label-xs transition-colors",
               showComparison
-                ? "bg-[var(--Brand-Ultra-Light)] border-[var(--Brand-Primary)] text-[var(--Brand-Primary)]"
+                ? "bg-[var(--Brand-Ultra-Light)] border-[var(--Brand-Primary)] text-[var(--Text-Accent-Primary)]"
                 : "border-[var(--Border-Control,var(--Border-Medium-Emphasis))] text-[var(--Text-Medium-Emphasis)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"
             )}
           >

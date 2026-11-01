@@ -260,8 +260,8 @@ export function loadThemeContext(pkgRoot) {
  *   `--Focus-High-Emphasis`（:root / .dark）から読むので、割当を変えれば検査対象の段も追従する。
  *
  * ダーク（.dark）
- * - 400 の文字 / ダーク背景: Brand-400（Object / Border-Accent-Primary。Text-Accent-Primary と
- *   Brand-Primary は issue #830 で 300 に上げたので、この検査を通れば 300 も通る）を
+ * - 400 の文字 / ダーク背景: Brand-Primary(=400) / Object・Border-Accent-Primary（Text-Accent-Primary は
+ *   issue #830 で 300 に上げたので、この検査を通れば 300 も通る）を
  *   Surface-Primary(Gray-900) に載せる（error）
  * - 400 / ダーク背景（フォーカスリング 3:1）: Focus-High-Emphasis(=400)。非テキスト基準 1.4.11（error）。
  *   上の文字 4.5:1 を満たせば必ず通るが、リングの根拠として別に出す
@@ -273,8 +273,9 @@ export function loadThemeContext(pkgRoot) {
  *   （輝度 ≦ 0.183）」と「ダークの 600 が Gray-900 文字 4.5 以上（輝度 ≧ 0.216）」が
  *   同時に成り立たない（数式上の矛盾）ため、どちらかを優先する必要があり、
  *   ライトを優先している。押している間だけの状態なので注意表示に留める
- * - 300 の文字 / 900: Text-Accent-Primary / Brand-Primary(=300) を Surface-Accent-Primary-Light /
- *   Brand-Light(=900) に載せる（issue #830 で 400 から 300 に変更）。advisory: 通らないテーマは
+ * - 300 の文字 / 900: Text-Accent-Primary(=300) を Surface-Accent-Primary-Light /
+ *   Brand-Ultra-Light・Brand-Light(=900) に載せる（issue #830 で 400 から 300 に変更。Brand-Primary(=400)
+ *   は淡いブランド面の上に文字として載せない）。advisory: 通らないテーマは
  *   900 をページ背景並みに暗くする必要があり、淡いブランド面として区別できなくなるため自動補正しない
  */
 export function evaluateChecks(ramp, ctx) {

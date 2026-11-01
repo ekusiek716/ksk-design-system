@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:265cd3d4ba59)
+// source: tokens.json v2.1.0 (sha256:a45815e50d3d)
 // =============================================================
 
 export const themes = {
@@ -204,7 +204,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#93C5FD",
+        "primary": "#60A5FA",
         "action": "#93C5FD",
         "light": "#1E3A8A",
         "ultra-light": "#1E3A8A",
@@ -451,7 +451,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#93C5FD",
+        "primary": "#60A5FA",
         "action": "#93C5FD",
         "light": "#1E3A8A",
         "ultra-light": "#1E3A8A",
@@ -698,7 +698,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#7FAAFB",
+        "primary": "#4398F8",
         "action": "#7FAAFB",
         "light": "#03155A",
         "ultra-light": "#03155A",
@@ -945,7 +945,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#FDBA74",
+        "primary": "#FB923C",
         "action": "#FDBA74",
         "light": "#431407",
         "ultra-light": "#431407",
@@ -1192,7 +1192,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#86EFAC",
+        "primary": "#4ADE80",
         "action": "#86EFAC",
         "light": "#052E16",
         "ultra-light": "#052E16",
@@ -1439,7 +1439,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#C4B5FD",
+        "primary": "#A78BFA",
         "action": "#C4B5FD",
         "light": "#3B0764",
         "ultra-light": "#3B0764",
