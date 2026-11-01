@@ -66,7 +66,7 @@ interface ToastOptions {
 //   サーバー側で import されても何も起きない。実際の DOM 操作は
 //   `toast()` を呼んだ瞬間（クライアント側）に発生する。
 // - `<Toaster />` が既にマウントされている場合は、auto-mounted viewport
-//   は自分で何も描画しない（hasMountedToaster フラグで切り替え）。
+//   は自分で何も描画しない（mountedToasterCount が 0 より大きいかで切り替え）。
 // =============================================================
 
 /** 自動消去を止めている理由（issue #798）。両方が外れるまで再開しない */
@@ -333,7 +333,7 @@ function ReleaseToastHoldsOnUnmount({ id }: { id: string }) {
   return null
 }
 
-function ToastViewport({ regionLabel, closeLabel, container, position }: { regionLabel?: string; closeLabel?: string; container?: PortalContainer; position?: ToastViewportPosition } = {}) {
+function ToastViewport({ regionLabel, closeLabel, container, position, holdContent }: { regionLabel?: string; closeLabel?: string; container?: PortalContainer; position?: ToastViewportPosition; holdContent?: boolean } = {}) {
   const defaultLabels = useKskLabels()
   const resolvedPosition = position ?? toastLabels.position
   const portalContainer = usePortalContainer(container)
@@ -363,7 +363,7 @@ function ToastViewport({ regionLabel, closeLabel, container, position }: { regio
           : "sm:left-auto sm:w-full sm:max-w-[var(--Toast-Viewport-Max-Width)]"
       )}
     >
-      {toasts.map((t) => (
+      {(holdContent ? [] : toasts).map((t) => (
         <div
           key={t.id}
           data-slot="toast"
@@ -476,8 +476,15 @@ function Toaster({ children, regionLabel, closeLabel, container, position }: Toa
 
 function AutoToastViewport() {
   const isToasterMounted = useIsToasterMounted()
+  // live region は中身より先に DOM にある必要がある（同時に入ると読み上げない SR がある）。
+  // 最初の commit は空の region だけ描き、次の tick でトーストを入れる。
+  const [contentReady, setContentReady] = React.useState(false)
+  React.useEffect(() => {
+    const timer = window.setTimeout(() => setContentReady(true), 0)
+    return () => window.clearTimeout(timer)
+  }, [])
   if (isToasterMounted) return null
-  return <ToastViewport />
+  return <ToastViewport holdContent={!contentReady} />
 }
 
 interface AutoRoot {
@@ -536,6 +543,9 @@ function unmountAutoRoot(): void {
   if (!handle) return
   autoRoot = null
   handle.disposed = true
+  // 破棄待ちの container が mountAutoRoot の「既存 auto-root あり」ガードに当たらないよう、
+  // 目印は同期で外す（DOM 削除と root.unmount だけ microtask へ回す）
+  handle.container.removeAttribute("data-ksk-toast-auto-root")
   // 呼び出し元は React のイベントハンドラ / effect の中のことがあるので、unmount は次の microtask へ逃がす
   queueMicrotask(() => {
     handle.root?.unmount()

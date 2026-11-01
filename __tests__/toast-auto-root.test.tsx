@@ -10,10 +10,13 @@ import { Toaster, toast } from "../src/components/ui/toast"
 
 const AUTO = "[data-ksk-toast-auto-root]"
 const autoRoot = () => document.querySelector(AUTO)
-const flush = () =>
-  act(async () => {
-    await new Promise((r) => setTimeout(r, 20))
-  })
+const flush = async () => {
+  for (let i = 0; i < 3; i++) {
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 30))
+    })
+  }
+}
 
 let roots: Root[] = []
 function render(ui: React.ReactNode, host: Element = document.body.appendChild(document.createElement("div"))) {
@@ -24,6 +27,7 @@ function render(ui: React.ReactNode, host: Element = document.body.appendChild(d
 }
 
 async function dismissAll() {
+  await flush()
   await act(async () => {
     document.querySelectorAll<HTMLButtonElement>("[data-slot='toast'] button[aria-label]").forEach((b) => b.click())
   })
@@ -159,6 +163,35 @@ describe("toast() の auto-root（#771）", () => {
     expect(autoRoot()).not.toBeNull()
     await dismissAll()
     expect(autoRoot()).toBeNull()
+  })
+
+  it("dismiss と同じ tick の toast() でもトーストが失われない", async () => {
+    const id = toast("loading", { duration: 0 })
+    await flush()
+    act(() => {
+      toast.dismiss(id)
+      toast.success("done", { duration: 0 })
+    })
+    await flush()
+    expect(document.body.textContent).toContain("done")
+    expect(autoRoot()).not.toBeNull()
+  })
+
+  it("region が先に DOM に入り、その後にトーストの中身が入る", async () => {
+    const seen: Array<{ region: boolean; toast: boolean }> = []
+    const mo = new MutationObserver(() => {
+      seen.push({
+        region: !!document.querySelector("[role='region']"),
+        toast: !!document.querySelector("[data-slot='toast']"),
+      })
+    })
+    mo.observe(document.body, { childList: true, subtree: true })
+    toast("order", { duration: 0 })
+    await flush()
+    mo.disconnect()
+    expect(seen.some((s) => s.region && !s.toast)).toBe(true)
+    expect(seen.some((s) => s.toast)).toBe(true)
+    expect(seen.every((s) => !s.toast || s.region)).toBe(true)
   })
 
   it("fake timer を使う自動消去でも壊れない", async () => {
