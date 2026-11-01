@@ -58,7 +58,7 @@ const INTENTIONAL_NATIVE_GAPS = new Map([
   ["SkipLink", "skip navigation targets DOM landmarks and is Web-only"],
   ["SideDrawerFrame", "side detail drawer is a desktop/web layout; native mobile uses BottomSheetFrame snap sheet instead"],
   ["StatusTabs", "admin status tabs are Web-only"],
-  ["Toast", "native exposes ToastProvider/useToast instead of a Toast component export。ToastProvider は既定（presentation=\"modal\"）で、表示中の通知があるあいだだけ透明な RN Modal の中に通知を描き、Sheet / Dialog / Popover の Modal より前面に出す（issue #820）。通知の表示中は下の画面・下の Sheet にタッチが届かず（通知以外に触れると通知を閉じる）、Android の戻るは通知を閉じるだけ。react-native-web と presentation=\"inline\" は従来どおり Modal を使わない"],
+  ["Toast", "native exposes ToastProvider/useToast instead of a Toast component export。ToastProvider は既定（presentation=\"auto\"）で、DS の native Modal 系（Sheet / Dialog / Popover 等）が開いていて表示中の通知があるあいだだけ透明な RN Modal の中に通知を描き、その前面に出す（issue #820）。Modal 系が閉じていれば従来どおり画面内に描き、タッチを奪わない。Modal に描いている間は下の Sheet にタッチが届かず（通知以外に触れると通知を閉じる）、Android の戻るは通知を閉じるだけ。自前の RN Modal を使う consumer は presentation=\"modal\" を指定する。react-native-web と presentation=\"inline\" は従来どおり Modal を使わない"],
   ["Tooltip", "hover/focus tooltip is Web-only"],
 ])
 

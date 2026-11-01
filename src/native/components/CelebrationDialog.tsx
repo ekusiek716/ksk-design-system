@@ -6,6 +6,7 @@ import { resolveTypo } from "../typography"
 import { Celebration, type CelebrationProps } from "./Celebration"
 import { useReduceMotion } from "./use-reduce-motion"
 import { useEmojiBounce } from "./use-emoji-bounce"
+import { useModalPresence } from "../modal-presence"
 
 function useAnimatedValue(initialValue: number) {
   const [value] = useState(() => new Animated.Value(initialValue))
@@ -62,6 +63,7 @@ export function CelebrationDialog({
   testID,
 }: CelebrationDialogProps) {
   const { theme, scales } = useTheme()
+  useModalPresence(open)
   const reduceMotion = useReduceMotion()
   const emojiScale = useAnimatedValue(0)
 

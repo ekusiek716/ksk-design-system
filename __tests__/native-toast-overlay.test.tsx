@@ -79,6 +79,9 @@ vi.mock("react-native", async () => {
 })
 
 import { Dialog } from "../src/native/components/Dialog"
+import { Popover } from "../src/native/components/Popover"
+import { Sheet } from "../src/native/components/Sheet"
+import { getVisibleModalCountForTest } from "../src/native/modal-presence"
 import { ToastProvider, toast, type ToastPresentation } from "../src/native/components/Toast"
 import { ThemeProvider } from "../src/native/theme/ThemeProvider"
 
@@ -140,14 +143,14 @@ describe.each(["ios", "android"] as const)("native Toast の描画先（%s / #82
     rn.os = os
   })
 
-  it("通知が 0 件のあいだは Modal を描かない（下の画面のタッチを奪わない）", () => {
-    render(<span>本文</span>)
+  it("presentation=\"modal\" でも通知が 0 件のあいだは Modal を描かない（下の画面のタッチを奪わない）", () => {
+    render(<span>本文</span>, "modal")
     expect(modalElements()).toHaveLength(0)
     expect(rn.modals.size).toBe(0)
   })
 
-  it("通知がある間だけ透明・アニメなし・全向き許可の Modal の中に描き、消えたら Modal ごと外す", () => {
-    render(<span>本文</span>)
+  it("presentation=\"modal\": 通知がある間だけ透明・アニメなし・全向き許可の Modal の中に描き、消えたら Modal ごと外す", () => {
+    render(<span>本文</span>, "modal")
     act(() => {
       toast("保存しました")
     })
@@ -205,7 +208,7 @@ describe.each(["ios", "android"] as const)("native Toast の描画先（%s / #82
   })
 
   it("閉じるボタンはその通知だけを閉じ、残りがある間は Modal を保つ", () => {
-    render(<span>本文</span>)
+    render(<span>本文</span>, "modal")
     act(() => {
       toast("1件目")
       toast("2件目")
@@ -238,7 +241,7 @@ describe.each(["ios", "android"] as const)("native Toast の描画先（%s / #82
   })
 
   it("通知以外の場所に触れたら通知をすべて閉じて Modal を外す（次のタッチから下の画面へ届く）", () => {
-    render(<span>本文</span>)
+    render(<span>本文</span>, "modal")
     act(() => {
       toast("保存しました", { duration: 0 })
     })
@@ -263,10 +266,101 @@ describe.each(["ios", "android"] as const)("native Toast の描画先（%s / #82
   })
 })
 
+describe.each(["ios", "android"] as const)('presentation="auto"（既定）の切り替え（%s / #820）', (os) => {
+  beforeEach(() => {
+    rn.os = os
+  })
+
+  it("DS の Modal 系が閉じている間は通知を Modal に描かない（普段の画面のタッチを奪わない）", () => {
+    render(<Dialog open={false} onClose={() => {}} title="下書きを保存" />)
+    act(() => {
+      toast("保存しました")
+    })
+    expect(host.textContent).toContain("保存しました")
+    expect(modalContaining("保存しました")).toBeNull()
+    // 閉じた Dialog の Modal（visible=false）だけが記録され、通知用の Modal は無い
+    expect(rn.modals.size).toBe(1)
+    expect(getVisibleModalCountForTest()).toBe(0)
+  })
+
+  it("Sheet を開いている間は通知を Sheet とは別の Modal に描く", () => {
+    render(
+      <Sheet open onClose={() => {}} title="編集">
+        <span>シート本文</span>
+      </Sheet>,
+    )
+    expect(getVisibleModalCountForTest()).toBe(1)
+    act(() => {
+      toast.caution("保存に失敗しました")
+    })
+    const toastModal = modalContaining("保存に失敗しました")
+    expect(toastModal).not.toBeNull()
+    expect(toastModal?.textContent).not.toContain("シート本文")
+    expect(toastModalProps("保存に失敗しました")).toMatchObject({ visible: true, transparent: true })
+  })
+
+  it("通知の表示中に Dialog が閉じたら、通知を消さずに Modal の外へ戻し、再び開いたら Modal へ移す", () => {
+    const dialog = (open: boolean) => <Dialog open={open} onClose={() => {}} title="下書きを保存" />
+    render(dialog(true))
+    act(() => {
+      toast("保存しました", { duration: 0 })
+    })
+    expect(modalContaining("保存しました")).not.toBeNull()
+
+    render(dialog(false))
+    expect(getVisibleModalCountForTest()).toBe(0)
+    expect(modalContaining("保存しました")).toBeNull()
+    expect(host.textContent).toContain("保存しました")
+    // 通知用の Modal は外れている（閉じた Dialog の Modal だけが残る）
+    expect(rn.modals.size).toBe(1)
+
+    render(dialog(true))
+    expect(modalContaining("保存しました")).not.toBeNull()
+    const modals = modalElements()
+    expect(modals).toHaveLength(2)
+    expect(modals[1].textContent).toContain("保存しました")
+  })
+
+  it("通知の表示中に Dialog を開いたら Modal へ移す", () => {
+    const dialog = (open: boolean) => <Dialog open={open} onClose={() => {}} title="確認" />
+    render(dialog(false))
+    act(() => {
+      toast("同期しました", { duration: 0 })
+    })
+    expect(modalContaining("同期しました")).toBeNull()
+    render(dialog(true))
+    expect(modalContaining("同期しました")).not.toBeNull()
+  })
+
+  it("StrictMode の二重 effect でも開いている数がずれない", () => {
+    const tree = (open: boolean) => (
+      <React.StrictMode>
+        <ThemeProvider>
+          <ToastProvider>
+            <Dialog open={open} onClose={() => {}} title="A" />
+            <Popover open={open} onClose={() => {}} anchor={{ x: 0, y: 0 }}>
+              <span>B</span>
+            </Popover>
+          </ToastProvider>
+        </ThemeProvider>
+      </React.StrictMode>
+    )
+    act(() => root.render(tree(true)))
+    expect(getVisibleModalCountForTest()).toBe(2)
+    act(() => root.render(tree(false)))
+    expect(getVisibleModalCountForTest()).toBe(0)
+    act(() => root.render(tree(true)))
+    expect(getVisibleModalCountForTest()).toBe(2)
+    act(() => root.unmount())
+    expect(getVisibleModalCountForTest()).toBe(0)
+    root = createRoot(host)
+  })
+})
+
 describe("native Toast の描画先（web / #820）", () => {
-  it("react-native-web では Modal を使わない（Modal のフォーカス閉じ込めで下の入力欄のフォーカスを奪わないため）", () => {
+  it("react-native-web では presentation=\"modal\" でも Modal を使わない（Modal のフォーカス閉じ込めで下の入力欄のフォーカスを奪わないため）", () => {
     rn.os = "web"
-    render(<span>本文</span>)
+    render(<span>本文</span>, "modal")
     act(() => {
       toast("保存しました")
     })

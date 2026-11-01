@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { Animated, Modal, Platform, View, Text as RNText, Pressable } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
+import { useAnyModalVisible } from "../modal-presence"
 
 /**
  * Toast (native) — 正本: src/components/ui/toast.tsx（Web 版）。
@@ -135,22 +136,26 @@ export { toast }
 
 /**
  * 通知の描き方。
- * - `"modal"`（既定）: iOS / Android では、表示中の通知があるあいだだけ透明な RN `<Modal>` の中に描く。
- *   Sheet / Dialog / Popover（いずれも RN の `<Modal>`）を開いていても、その前面に出る（issue #820）。
+ * - `"auto"`（既定）: DS の native Modal 系（Sheet / Dialog / AlertDialog / ConfirmDialog / Popover /
+ *   BottomSheetForm / CoachMarkOverlay / CelebrationDialog など、src/native 配下で RN の `<Modal>` を描く部品）が
+ *   1 つ以上開いている間だけ `"modal"`、それ以外は `"inline"` と同じ描き方にする。通知の表示中に Sheet が
+ *   開閉したら、通知を消さずに描き先だけ切り替える。Modal 系を開いていない普段の画面では下のタッチを一切奪わない。
+ * - `"modal"`: iOS / Android では、表示中の通知があるあいだ常に透明な RN `<Modal>` の中に描く（issue #820）。
+ *   **consumer が自前で RN の `<Modal>` を描く場合**は、DS からはその開閉が見えないので `"modal"` を指定する。
  * - `"inline"`: children の兄弟の absolute View に描く（#820 以前の描き方）。下の画面のタッチを一切奪わないが、
- *   RN の `<Modal>` を開いている間はその下に隠れる。Modal の上で通知を出さないと分かっている画面向けの逃げ道。
+ *   RN の `<Modal>` を開いている間はその下に隠れる。
  *
- * Web（react-native-web）は `"modal"` でも `"inline"` と同じ描き方にする。react-native-web の Modal は
+ * Web（react-native-web）はどれを指定しても `"inline"` と同じ描き方にする。react-native-web の Modal は
  * 開くと一番上の Modal にフォーカスを移して閉じ込め、Esc もそちらへ回すため、通知を出すたびに
  * 下の Sheet の入力欄からフォーカスを奪ってしまう。Web アプリは Web 版の `<Toaster>` を使う前提。
  */
-export type ToastPresentation = "modal" | "inline"
+export type ToastPresentation = "auto" | "modal" | "inline"
 
 export interface ToastProviderProps {
   children: React.ReactNode
   /**
-   * 通知の描き方。既定は `"modal"`（Sheet / Dialog を開いていても前面に出る）。
-   * 詳細と制約は {@link ToastProvider} を参照。
+   * 通知の描き方。既定は `"auto"`（DS の Sheet / Dialog などを開いている間だけ Modal に描いて前面に出す）。
+   * 自前の RN `<Modal>` の上にも通知を出したいなら `"modal"`。詳細と制約は {@link ToastProvider} を参照。
    */
   presentation?: ToastPresentation
 }
@@ -169,11 +174,12 @@ const ALL_ORIENTATIONS = [
  *
  * ## Modal との前後関係（issue #820）
  * native の Sheet / Dialog / Popover は RN の `<Modal>`（iOS は別の view controller、Android は別のウィンドウ）で、
- * アプリ本体の View に `zIndex` を付けても前に出られない。そのため既定（`presentation="modal"`）では、
- * 表示中の通知があるあいだだけ、透明な `<Modal transparent animationType="none">` を重ねてその中に通知を描く。
- * 通知が 0 件になったら Modal ごと外すので、通知が無いときは下の画面のタッチを奪わない。
+ * アプリ本体の View に `zIndex` を付けても前に出られない。そのため既定（`presentation="auto"`）では、
+ * DS の Modal 系が開いていて、かつ表示中の通知があるあいだだけ、透明な `<Modal transparent animationType="none">`
+ * を重ねてその中に通知を描く。通知が 0 件、または Modal 系が 1 つも開いていなければ Modal を描かないので、
+ * 下の画面のタッチを奪わない。`"modal"` は Modal 系の開閉を見ずに、通知があるあいだ常に Modal に描く。
  *
- * ## 通知を表示しているあいだの制約（iOS / Android）
+ * ## 通知を Modal に描いているあいだの制約（iOS / Android）
  * - **下の画面・下の Sheet のタッチは届かない。** RN の `<Modal>` は常に画面全体を覆い、通知の大きさだけに
  *   縮められず、`pointerEvents="box-none"` でも下の view controller / ウィンドウへタッチを通さない。
  *   そのため通知以外の場所に触れると、その時点の通知をすべて閉じて Modal を外す（下へ届かなかった 1 回の
@@ -184,11 +190,12 @@ const ALL_ORIENTATIONS = [
  * - iOS の VoiceOver は Modal の中だけを読む状態になり、通知を表示しているあいだは下の画面へ移れない。
  * - 通知の `action`（「再試行」など）と閉じるボタンは Modal の中にあるので、Sheet を開いたままでも押せる。
  *
- * 上の制約が困る画面（通知の表示中も下のリストを操作させたい等）で、かつ Modal の上に通知を出さないなら
- * `presentation="inline"` を使う。
+ * 自前の RN `<Modal>` を描く consumer は、その上に通知を出すなら `presentation="modal"` を指定する
+ * （`"auto"` は DS 部品の Modal しか数えないため、自前の Modal の下に隠れる）。
  */
-export function ToastProvider({ children, presentation = "modal" }: ToastProviderProps) {
+export function ToastProvider({ children, presentation = "auto" }: ToastProviderProps) {
   const { scales } = useTheme()
+  const anyModalVisible = useAnyModalVisible()
   const [items, setItems] = useState<ToastItem[]>([])
 
   const dismiss = useCallback((id: string) => {
@@ -233,7 +240,9 @@ export function ToastProvider({ children, presentation = "modal" }: ToastProvide
     </View>
   )
 
-  const renderInModal = presentation === "modal" && Platform.OS !== "web"
+  const renderInModal =
+    Platform.OS !== "web" &&
+    (presentation === "modal" || (presentation === "auto" && anyModalVisible))
 
   return (
     <ToastContext.Provider value={{ show, dismiss }}>

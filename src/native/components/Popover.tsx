@@ -1,6 +1,7 @@
 import React from "react"
 import { Modal, Pressable, View } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { useModalPresence } from "../modal-presence"
 
 export interface PopoverProps {
   open: boolean
@@ -12,6 +13,7 @@ export interface PopoverProps {
 
 export function Popover({ open, onClose, anchor, children }: PopoverProps) {
   const { theme, scales } = useTheme()
+  useModalPresence(open)
 
   const top = anchor ? anchor.y + (anchor.height ?? 0) + 4 : 100
   const left = anchor ? anchor.x : 0

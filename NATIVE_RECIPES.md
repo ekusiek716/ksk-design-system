@@ -312,14 +312,18 @@ native の `Sheet`（`side="bottom"`）は、`snapPoints` の有無にかかわ�
 
 ### Sheet / Dialog の上で通知を出す（Toast）
 
-`<ToastProvider>` をアプリのルートに 1 つ置けば、Sheet / Dialog / Popover を開いたまま `toast.caution("保存に失敗しました", { action: { label: "再試行", onPress: retry } })` を呼んでも、通知はそれらの前面に出て「再試行」も押せます（#820）。iOS / Android では、表示中の通知があるあいだだけ透明な RN `Modal` を重ねて描くためです。通知が 0 件のときは何も重ねません。
+`<ToastProvider>` をアプリのルートに 1 つ置けば、Sheet / Dialog / Popover を開いたまま `toast.caution("保存に失敗しました", { action: { label: "再試行", onPress: retry } })` を呼んでも、通知はそれらの前面に出て「再試行」も押せます（#820）。既定の `presentation="auto"` は、DS の Modal 系（Sheet / Dialog / AlertDialog / ConfirmDialog / Popover / BottomSheetForm / CoachMarkOverlay / CelebrationDialog など）が 1 つ以上開いている間だけ、通知を透明な RN `Modal` に描きます。それ以外の普段の画面では従来どおり画面の中に描き、下のタッチを奪いません。通知の表示中に Sheet が開閉したら、通知は消えずに描き先だけ切り替わります。
 
-通知を表示しているあいだの制約:
+通知を Modal に描いているあいだ（DS の Modal 系を開いている間）の制約:
 
-- 下の画面・下の Sheet にタッチが届きません（RN の `Modal` は画面全体を覆い、下へタッチを通さないため）。通知以外の場所に触れると通知をすべて閉じ、次のタッチから下へ届きます。
+- 下の Sheet にタッチが届きません（RN の `Modal` は画面全体を覆い、下へタッチを通さないため）。通知以外の場所に触れると通知をすべて閉じ、次のタッチから下へ届きます。
 - Android の戻るボタンは通知を閉じるだけです。下の Sheet は次の戻る操作で閉じます。
-- 通知の表示中も下のリストを操作させたい画面で、かつ Modal の上に通知を出さないなら `<ToastProvider presentation="inline">` を使います（Modal を開いている間は通知がその下に隠れる、従来の描き方）。
-- react-native-web では Modal を使いません（Modal のフォーカス閉じ込めで下の入力欄のフォーカスを奪うため）。Web アプリは Web 版の `<Toaster>` を使ってください。
+
+描き方を固定したいとき:
+
+- **自前で RN の `Modal` を描いている**なら `<ToastProvider presentation="modal">` を指定します。`"auto"` は DS 部品の Modal しか数えないため、自前の Modal の下に通知が隠れます。`"modal"` は通知があるあいだ常に Modal に描きます（普段の画面でも上の制約がかかります）。
+- `<ToastProvider presentation="inline">` は Modal を一切使わない従来の描き方です（Modal を開いている間は通知がその下に隠れます）。
+- react-native-web ではどれを指定しても Modal を使いません（Modal のフォーカス閉じ込めで下の入力欄のフォーカスを奪うため）。Web アプリは Web 版の `<Toaster>` を使ってください。
 
 ## Search field + candidate list
 

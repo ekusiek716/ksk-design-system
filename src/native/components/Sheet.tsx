@@ -31,6 +31,7 @@ import {
   shouldStartHandleDrag,
   type SnapGestureConfig,
 } from "../sheet-snap-gesture"
+import { useModalPresence } from "../modal-presence"
 
 export type SheetSide = "bottom" | "top" | "left" | "right"
 
@@ -123,6 +124,7 @@ function PlainSheet({
 }: SheetProps) {
   const { theme, scales } = useTheme()
   const insets = useSafeAreaInsets()
+  useModalPresence(open)
   // useRef(new Animated.Value()).current は render 中の ref 読み取りになるため
   // useState の lazy initializer で一度だけ生成する（react-hooks/refs）
   const [anim] = useState(() => new Animated.Value(0))
@@ -316,6 +318,7 @@ function SnapBottomSheet({
 }: SheetProps) {
   const { theme, scales } = useTheme()
   const insets = useSafeAreaInsets()
+  useModalPresence(open)
   const points = useMemo(() => {
     const sorted = [...(snapPoints ?? [0.55, 0.92])]
       .map((p) => clamp(p, 0.1, 0.99))

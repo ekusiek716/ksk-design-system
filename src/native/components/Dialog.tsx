@@ -4,6 +4,7 @@ import { useTheme } from "../theme/ThemeProvider"
 import { useSafeAreaInsets } from "../theme/SafeAreaInsetsProvider"
 import { resolveFullscreenDialogPadding, resolveInsetEdge } from "../safe-area"
 import { resolveTypo } from "../typography"
+import { useModalPresence } from "../modal-presence"
 
 export type DialogPosition = "center" | "top" | "fullscreen"
 
@@ -45,6 +46,7 @@ export function Dialog({
   safeArea = true,
 }: DialogProps) {
   const { theme, scales, mode } = useTheme()
+  useModalPresence(open)
   const insets = useSafeAreaInsets()
   const isFullscreen = position === "fullscreen"
   const fullscreenPadding = resolveFullscreenDialogPadding(

@@ -1,6 +1,7 @@
 import React from "react"
 import { Modal, View, Pressable } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { useModalPresence } from "../modal-presence"
 
 export interface CoachMarkOverlayProps {
   open: boolean
@@ -16,6 +17,7 @@ export interface CoachMarkOverlayProps {
  */
 export function CoachMarkOverlay({ open, onClose, highlight, children }: CoachMarkOverlayProps) {
   const { theme } = useTheme()
+  useModalPresence(open)
   const overlay = theme.overlay.dark
 
   return (
