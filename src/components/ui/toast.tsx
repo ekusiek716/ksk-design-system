@@ -480,7 +480,9 @@ function AutoToastViewport() {
   // 最初の commit は空の region だけ描き、次の tick でトーストを入れる。
   const [contentReady, setContentReady] = React.useState(false)
   React.useEffect(() => {
-    const timer = window.setTimeout(() => setContentReady(true), 0)
+    const timer = window.setTimeout(() => {
+      if (typeof window !== "undefined") setContentReady(true)
+    }, 0)
     return () => window.clearTimeout(timer)
   }, [])
   if (isToasterMounted) return null
@@ -529,8 +531,17 @@ function mountAutoRoot(): void {
   // 解決を遅延させる（ただし当パッケージ自体が "use client" バナー付き
   // なのでサーバー側でこのコードパスに来ることはないはず）。
   void import("react-dom/client").then(({ createRoot }) => {
-    if (handle.disposed) {
-      container.remove()
+    // 動的 import の解決を待つ間に破棄された・DOM 環境が片付いた（テストの teardown 等）・
+    // container が外されたときは描画しない（片付いた後の React の予約が window 参照で落ちるため）
+    if (
+      handle.disposed ||
+      typeof window === "undefined" ||
+      typeof document === "undefined" ||
+      !container.isConnected
+    ) {
+      handle.disposed = true
+      if (autoRoot === handle) autoRoot = null
+      if (typeof document !== "undefined") container.remove()
       return
     }
     handle.root = createRoot(container)

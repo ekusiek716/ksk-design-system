@@ -39,6 +39,13 @@ let root: Root | null = null
 let host: HTMLElement | null = null
 
 afterEach(() => {
+  // 残ったトーストを閉じる（Toaster の unmount 後に store が空でないと auto-root が作られ、
+  // テスト環境の teardown 後に React の描画が予約されてしまう）
+  act(() => {
+    document
+      .querySelectorAll<HTMLButtonElement>("[data-slot='toast'] button[aria-label]")
+      .forEach((b) => b.click())
+  })
   act(() => {
     root?.unmount()
   })
