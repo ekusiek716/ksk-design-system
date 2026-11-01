@@ -123,6 +123,8 @@ export {
   type ToastAction,
   type ToastOptions,
   type ToastFn,
+  type ToastPresentation,
+  type ToastProviderProps,
 } from "./Toast"
 export { ErrorBoundary, type ErrorBoundaryProps } from "./ErrorBoundary"
 export { MenuDrawer, type MenuDrawerProps, type MenuDrawerItem, type MenuDrawerSection } from "./MenuDrawer"
