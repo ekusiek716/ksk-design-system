@@ -93,6 +93,86 @@ export const FiltersAndSelects: Story = {
   },
 }
 
+const stations = [
+  { value: "ichigaya", label: "市ケ谷", keywords: ["いちがや"] },
+  { value: "kasumigaseki", label: "霞ケ関", keywords: ["かすみがせき"] },
+  { value: "shibuya", label: "渋谷", keywords: ["しぶや"] },
+  { value: "shinjuku", label: "新宿", keywords: ["しんじゅく"] },
+  { value: "ikebukuro", label: "池袋（休止中）", keywords: ["いけぶくろ"], disabled: true },
+]
+
+/**
+ * 検索用の別名（keywords）と表記ゆれ。読み（しぶや）や「市ヶ谷」「霞が関」でも当たる。
+ * triggerLabel は読み上げ用の補足で、選んだ値と合わせて「駅を選ぶ 渋谷」と読まれる（issue #783）。
+ */
+export const WithKeywords: Story = {
+  render: () => {
+    const [value, setValue] = React.useState("")
+    return (
+      <div className="w-64">
+        <Combobox
+          options={stations}
+          value={value}
+          onChange={setValue}
+          placeholder="駅を選択"
+          searchPlaceholder="駅名・読みで検索"
+          triggerLabel="駅を選ぶ"
+        />
+      </div>
+    )
+  },
+}
+
+/** 検索欄で読みを打ち、矢印キーと Enter だけで選べる。選んだ値がトリガーの読み上げ名に入る。 */
+export const KeyboardSelect: Story = {
+  tags: ["interaction", "!autodocs"],
+  render: () => {
+    const [value, setValue] = React.useState("")
+    return (
+      <div className="w-64 p-6">
+        <Combobox
+          options={stations}
+          value={value}
+          onChange={setValue}
+          placeholder="駅を選択"
+          searchPlaceholder="駅名・読みで検索"
+          triggerLabel="駅を選ぶ"
+        />
+        <p data-testid="value">{value}</p>
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const body = within(document.body)
+
+    const trigger = canvas.getByRole("button", { name: "駅を選ぶ" })
+    await userEvent.click(trigger)
+    const search = await body.findByRole("combobox")
+    await waitFor(() => expect(search).toHaveFocus())
+
+    // 表記ゆれ: 「霞が関」で「霞ケ関」が当たり、先頭がアクティブになる
+    await userEvent.type(search, "霞が関")
+    await waitFor(async () => {
+      await expect(body.getAllByRole("option").map((o) => o.textContent)).toEqual(["霞ケ関"])
+    })
+    await userEvent.clear(search)
+
+    // 読み + 矢印 + Enter
+    await userEvent.type(search, "し")
+    await waitFor(() => expect(body.getAllByRole("option")).toHaveLength(2))
+    await userEvent.keyboard("{ArrowDown}")
+    const activeId = search.getAttribute("aria-activedescendant")
+    await expect(activeId).toBeTruthy()
+    await expect(document.getElementById(activeId!)).toHaveTextContent("新宿")
+    await userEvent.keyboard("{Enter}")
+
+    await waitFor(() => expect(canvas.getByTestId("value")).toHaveTextContent("shinjuku"))
+    await expect(trigger).toHaveAttribute("aria-expanded", "false")
+    await expect(canvas.getByRole("button", { name: "駅を選ぶ 新宿" })).toBe(trigger)
+  },
+}
+
 export const WithDisabledOption: Story = {
   render: () => {
     const [value, setValue] = React.useState("")

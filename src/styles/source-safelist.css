@@ -339,6 +339,7 @@
 @source inline("cursor-grabbing");
 @source inline("cursor-not-allowed");
 @source inline("cursor-pointer");
+@source inline("data-[active]:bg-[var(--Surface-Secondary)]");
 @source inline("data-[disabled]:opacity-50");
 @source inline("data-[disabled]:pointer-events-none");
 @source inline("data-[error=true]:text-[var(--Text-Caution)]");

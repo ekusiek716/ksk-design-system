@@ -1258,18 +1258,26 @@
     {
       "name": "Combobox",
       "path": "src/components/ui/combobox.tsx",
-      "description": "コンボボックス。リスト + 検索の組合せ入力。Radix Combobox + cmdk ベース。",
+      "description": "コンボボックス。リスト + 検索の組合せ入力（Radix Popover ベース）。候補の keywords（読み・別名）でも絞り込め、検索欄の矢印キー + Enter で選べる。",
       "variants": [],
       "sizes": [],
       "accessibility": [
-        "aria-expanded",
-        "role=combobox",
+        "トリガーは button（aria-expanded）。読み上げ名は aria-labelledby で「外部 <label htmlFor> → triggerLabel → 選択中の値」を並べる（未選択で他に名前が無いときだけ placeholder）",
+        "検索欄は role=combobox + aria-expanded / aria-controls（listbox）/ aria-autocomplete=list / aria-activedescendant。ArrowDown / ArrowUp で候補移動（disabled は飛ばす・端で回る）、Enter で確定。日本語入力の変換中の Enter は無視",
+        "候補一覧は role=listbox、候補は role=option + aria-selected（選択中）。Tab で候補ボタンへ移って Enter / マウスでも選べる",
         "aria-invalid=true でトリガーにエラー枠（Border-Caution）。FormField の error から自動で届く",
         "枠は var(--Border-Control, var(--Border-Medium-Emphasis))。通常 light/dark から3:1以上（light=Gray-500、dark=White-Alpha-500）。非操作区切りはMediumを維持し、prefers-contrast: more / data-contrast指定でも同じ専用値を使う（issue #636）"
       ],
       "rules": [
-        "select で代替できない検索付きセレクトに使う"
-      ]
+        "select で代替できない検索付きセレクトに使う",
+        "読み・表記ゆれは label に括弧書きで足さず options[].keywords に入れる",
+        "triggerLabel に選択中の値を含めない（値は自動で読み上げ名に入る）"
+      ],
+      "props": {
+        "options[].keywords": "string[] — 検索で当てたい別名（読み・表記ゆれ・略称）。画面には出ない",
+        "filter": "(option, query) => boolean — 絞り込みの差し替え。query は trim 済みの入力そのまま。既定は label と keywords の部分一致（大文字小文字・NFKC・ひらがな/カタカナ・漢字に挟まれた ヶ/ケ/ヵ/が を同一視）",
+        "triggerLabel": "string — トリガーの読み上げ用の補足（画面に出ない）。選択中の値の前に読まれる"
+      }
     },
     {
       "name": "DropdownFilter",

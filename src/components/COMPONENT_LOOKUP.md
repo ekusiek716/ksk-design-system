@@ -28,7 +28,7 @@
 | CoachMark | `@/components/ui/coach-mark` | — | Default, Brand, Placements, Onboarding, Hover |
 | CodeInput | `@/components/ui/code-input` | — | Otp, Invalid, LongInviteCode, Disabled |
 | Collapsible, CollapsibleTrigger, CollapsibleContent | `@/components/ui/collapsible` | — | Default, FAQ |
-| Combobox | `@/components/ui/combobox` | — | Default, FiltersAndSelects, WithDisabledOption, InvalidInFormField |
+| Combobox | `@/components/ui/combobox` | — | Default, FiltersAndSelects, WithKeywords, KeyboardSelect, WithDisabledOption, InvalidInFormField |
 | CommitAutoGrowTextarea | `@/components/ui/commit-auto-grow-textarea` | — | Default, MinRows |
 | CommitInput | `@/components/ui/commit-input` | — | InputCommitTiming |
 | CommitTextarea | `@/components/ui/commit-textarea` | — | Default, Empty, Disabled |
