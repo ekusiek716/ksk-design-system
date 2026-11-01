@@ -3,9 +3,14 @@
 メジャーバージョン間の移行ガイド。
 patch / minor は原則破壊変更なし、自動アップグレード可（例外: **v1.34.0 で npm パッケージ名を変更**。import の置換が必要。下記参照）。
 
-## 未リリース（次回の minor）の導入注意
+## v2.23.0 の導入注意
 
-以下は次回リリースに含まれる変更の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
+以下はv2.23.0の導入注意です。consumerへの展開・アプリ配布は別工程で、次回のまとめ展開で反映します。
+
+- **見た目の変更: ダークの情報・警告・淡いブランド面の上の文字を一段明るくした（#830）**: ダークで `Text-Info`（Blue-400 → 300）・`Text-Warning`（Orange-400 → 300）・`Text-Accent-Primary`（Brand-400 → 300）を変え、Banner / Toast / Tag / StatusActionBadge の info・warning、Badge subtle・Chip accent・SidebarNav の選択行などの文字が WCAG AA 4.5:1 以上になりました（旧 4.0〜4.07:1）。ライトの値と、ダークの `Brand-Primary`（塗り）は変えていません。淡いブランド面（`Brand-Ultra-Light` / `Surface-Accent-Primary-Light`）の上の文字は `Text-Accent-Primary` を使ってください（`Brand-Primary` はダークで 4.07:1 になります）。生成トークン（`src/tokens/native/`）も同じ値です。導入時の作業は不要です。
+- **挙動の変更: Combobox の絞り込み・キーボード操作・読み上げ名（#783）**: 候補ごとの別名 `options[].keywords` と絞り込みの差し替え `filter` を追加し、既定の絞り込みは表記ゆれ（全角半角・ひらがな/カタカナ・漢字に挟まれた ヶ/ケ/が）でも当たるようになりました。検索欄で ArrowDown / ArrowUp と Enter で選べます。**トリガーの読み上げ名に選択中の値が入るようになり、`triggerLabel` は aria-label の置き換えではなく読み上げの補足になりました**（例: 「駅を選ぶ 渋谷」）。`triggerLabel` に選択値を足していた回避は外してください。Native の Combobox には `keywords` / `filter` は未移植です。
+- **不具合修正: native の Toast が Sheet / Dialog の下に隠れていた（#820）**: DS の Sheet / Dialog / Popover などを開いている間は、その中に置いた出口（`ToastOutlet`）へ通知を描くようにしました。普段の画面の挙動は変わりません。**自前の RN `<Modal>` の上に通知を出したい画面は、その Modal の中身の最後に `<ToastOutlet active={open} />` を置いてください**。出口を使わず常に Provider 直下に描くなら `<ToastProvider presentation="inline">`。
+- **不具合修正: `toast()` が `<Toaster>` のある画面でも body 直下に置き場を作っていた（#771）**: `<Toaster>` がマウントされている間は body に何も作らず、`<Toaster>` が無いときの仮の置き場もトーストが 0 件になれば片付けます。Shadow DOM の consumer でホストページに無装飾の通知・空の通知領域が残る問題が直ります。導入時の作業は不要です。
 
 - **不具合修正（操作の変化）: DataTable の行クリックとセルのキーボード操作（#793 / #814）**: rows/columns API と `DataTableRow` の `onRowClick` が、セル内の Select の選択肢（Enter・タップ）、DatePicker などの Portal 先の操作、編集できるセル（`editCell` または `edit.trigger` が `manual` 以外の列。`createDataTableDateColumn` / `createDataTableChipColumn` / `createDataTableSelectColumn` を含む）のクリックでは**呼ばれなくなりました**。表示専用の `cell` 列と行の余白では従来どおり呼ばれます。編集できるセルの `td` は Tab 順に入り（`tabIndex=0`、フォーカスリング付き）、Enter で編集を始め、確定・Escape の後は同じ `td` にフォーカスが戻ります。セル内の `<button>` / `<a href>` は Enter で押せるようになりました。**`editCell` も `edit` も指定していない `cell` 列は、ダブルクリック・Enter で `isEditing` が true にならなくなりました**（これまでも既定の doubleClick で編集状態だけが変わっていた。`cell` の中で `isEditing` を見て編集 UI を出している列は、`edit: { trigger: "doubleClick" }` を明示してください）。編集できるセルを押して行の詳細を開く挙動に頼っていた画面は、行の余白・表示専用の列から開くか、`edit.trigger: "manual"` にしてセル内のボタンから `startEdit` を呼んでください。
 - **見た目の変更: Select の一覧の高さが画面の使える高さまでに縮む（#826）**: `SelectContent`（既定の `position="popper"`）の高さの上限を、固定の 384px から「384px と画面の使える高さの小さいほう」にしました。広い画面の見た目は変わりません。横向きのスマホや画面中ほどの Select では一覧が低くなり、中でスクロールして全項目に届きます。`position="item-aligned"` は従来どおりです。導入時の作業は不要です。

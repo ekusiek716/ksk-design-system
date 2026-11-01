@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "KSK Design System — Component Contracts",
-    "version": "2.22.0",
+    "version": "2.23.0",
     "description": "全コンポーネントの構造化定義。バリアント・アクセシビリティ要件・使用ルールを機械可読形式で管理。",
     "counts": {
       "ui": 73,
@@ -325,7 +325,10 @@
       "formBinding": "controller",
       "path": "src/components/ui/radio-group.tsx",
       "description": "ラジオボタングループ。単一選択に使用。defaultは円とラベル、cardは淡い面の行全体が押せて右端に丸印を置く。",
-      "variants": ["default", "card"],
+      "variants": [
+        "default",
+        "card"
+      ],
       "accessibility": [
         "default の丸だけの用法は各項目を <Label> と関連付ける。card は各 RadioGroupItem の children が内包ラベルになる（aria-labelledby を自動設定）。明示 aria-label / aria-labelledby は呼び出し側を優先する。",
         "RadioGroupItem は見た目 20px の円のまま ::before で 44x44px の当たり判定を内蔵する。消費側で [role=\"radio\"] のグローバル寸法上書きを追加しない（issue #470）",
