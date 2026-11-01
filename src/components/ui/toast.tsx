@@ -66,7 +66,7 @@ interface ToastOptions {
 //   サーバー側で import されても何も起きない。実際の DOM 操作は
 //   `toast()` を呼んだ瞬間（クライアント側）に発生する。
 // - `<Toaster />` が既にマウントされている場合は、auto-mounted viewport
-//   は自分で何も描画しない（hasMountedToaster フラグで切り替え）。
+//   は自分で何も描画しない（mountedToasterCount が 0 より大きいかで切り替え）。
 // =============================================================
 
 /** 自動消去を止めている理由（issue #798）。両方が外れるまで再開しない */
@@ -235,6 +235,9 @@ const mountedToasterListeners = new Set<() => void>()
 function setToasterMounted(delta: 1 | -1) {
   mountedToasterCount += delta
   mountedToasterListeners.forEach((l) => l())
+  // StrictMode の effect 二重実行（+1 → -1 → +1）は同期で終わるので、microtask に回して
+  // 最終的な数だけで判断する（一瞬 0 になっても auto-root を作らない）。
+  queueMicrotask(syncAutoRoot)
 }
 function subscribeToasterMounted(listener: () => void) {
   mountedToasterListeners.add(listener)
@@ -330,7 +333,7 @@ function ReleaseToastHoldsOnUnmount({ id }: { id: string }) {
   return null
 }
 
-function ToastViewport({ regionLabel, closeLabel, container, position }: { regionLabel?: string; closeLabel?: string; container?: PortalContainer; position?: ToastViewportPosition } = {}) {
+function ToastViewport({ regionLabel, closeLabel, container, position, holdContent }: { regionLabel?: string; closeLabel?: string; container?: PortalContainer; position?: ToastViewportPosition; holdContent?: boolean } = {}) {
   const defaultLabels = useKskLabels()
   const resolvedPosition = position ?? toastLabels.position
   const portalContainer = usePortalContainer(container)
@@ -360,7 +363,7 @@ function ToastViewport({ regionLabel, closeLabel, container, position }: { regio
           : "sm:left-auto sm:w-full sm:max-w-[var(--Toast-Viewport-Max-Width)]"
       )}
     >
-      {toasts.map((t) => (
+      {(holdContent ? [] : toasts).map((t) => (
         <div
           key={t.id}
           data-slot="toast"
@@ -465,55 +468,115 @@ function Toaster({ children, regionLabel, closeLabel, container, position }: Toa
 // =============================================================
 // AutoToastViewport — fire-and-forget API 用の自動マウント viewport
 // -------------------------------------------------------------
-// `toast()` が初回呼び出しされたとき、`document.body` 直下に
-// `<div data-slot="toast-auto-root">` を作成し、その中で react-dom の
-// createRoot で render する。`<Toaster />` が既にあれば自分は何も
-// 描画しない（= 既存 viewport がそのまま表示する）。
+// `<Toaster />` が無く、表示中のトーストがあるときだけ `document.body` 直下に
+// `<div data-ksk-toast-auto-root>` を作り、その中で react-dom の
+// createRoot で render する。0 件になる・Toaster がマウントされると外す（#771）。
+// Toaster がある間は何も作らない（= 既存 viewport がそのまま表示する）。
 // =============================================================
 
 function AutoToastViewport() {
   const isToasterMounted = useIsToasterMounted()
+  // live region は中身より先に DOM にある必要がある（同時に入ると読み上げない SR がある）。
+  // 最初の commit は空の region だけ描き、次の tick でトーストを入れる。
+  const [contentReady, setContentReady] = React.useState(false)
+  React.useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (typeof window !== "undefined") setContentReady(true)
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
   if (isToasterMounted) return null
-  return <ToastViewport />
+  return <ToastViewport holdContent={!contentReady} />
 }
 
-let autoMountPromise: Promise<void> | null = null
+interface AutoRoot {
+  container: HTMLElement
+  /** createRoot の完了前に破棄されたら true（完了後に root を作らず container だけ外す） */
+  disposed: boolean
+  root: { render: (node: React.ReactNode) => void; unmount: () => void } | null
+}
 
-function ensureAutoMounted(): void {
-  if (typeof window === "undefined" || typeof document === "undefined") return
-  if (autoMountPromise) return
+let autoRoot: AutoRoot | null = null
+let autoRootRetryScheduled = false
+
+/**
+ * auto-root が要る状態か。`<Toaster>` が 1 つも無く、かつ表示中のトーストがあるときだけ。
+ * 退場アニメーションは無く store から消えた時点で表示も消えるため、0 件判定は store の件数で足りる。
+ */
+function isAutoRootWanted(): boolean {
+  return mountedToasterCount === 0 && toastStore.toasts.length > 0
+}
+
+function mountAutoRoot(): void {
   // body が存在しない（<head> 内で実行された等）場合は次の tick で再試行
   if (!document.body) {
-    autoMountPromise = new Promise<void>((resolve) => {
-      const tryMount = () => {
-        if (document.body) {
-          autoMountPromise = null
-          ensureAutoMounted()
-          resolve()
-        } else {
-          window.setTimeout(tryMount, 0)
-        }
-      }
-      tryMount()
-    })
+    if (autoRootRetryScheduled) return
+    autoRootRetryScheduled = true
+    window.setTimeout(() => {
+      autoRootRetryScheduled = false
+      syncAutoRoot()
+    }, 0)
     return
   }
-
-  // 既に他の場所で auto-root が作られていれば（HMR 等）何もしない
+  // 別モジュールインスタンス（HMR 等）が作った auto-root が残っていれば何もしない
   if (document.querySelector("[data-ksk-toast-auto-root]")) return
 
   const container = document.createElement("div")
   container.setAttribute("data-ksk-toast-auto-root", "")
   document.body.appendChild(container)
+  const handle: AutoRoot = { container, disposed: false, root: null }
+  autoRoot = handle
 
   // react-dom/client は client-only。動的 import で SSR バンドル時の
   // 解決を遅延させる（ただし当パッケージ自体が "use client" バナー付き
   // なのでサーバー側でこのコードパスに来ることはないはず）。
-  autoMountPromise = import("react-dom/client").then(({ createRoot }) => {
-    const root = createRoot(container)
-    root.render(<AutoToastViewport />)
+  void import("react-dom/client").then(({ createRoot }) => {
+    // 動的 import の解決を待つ間に破棄された・DOM 環境が片付いた（テストの teardown 等）・
+    // container が外されたときは描画しない（片付いた後の React の予約が window 参照で落ちるため）
+    if (
+      handle.disposed ||
+      typeof window === "undefined" ||
+      typeof document === "undefined" ||
+      !container.isConnected
+    ) {
+      handle.disposed = true
+      if (autoRoot === handle) autoRoot = null
+      if (typeof document !== "undefined") container.remove()
+      return
+    }
+    handle.root = createRoot(container)
+    handle.root.render(<AutoToastViewport />)
   })
 }
+
+function unmountAutoRoot(): void {
+  const handle = autoRoot
+  if (!handle) return
+  autoRoot = null
+  handle.disposed = true
+  // 破棄待ちの container が mountAutoRoot の「既存 auto-root あり」ガードに当たらないよう、
+  // 目印は同期で外す（DOM 削除と root.unmount だけ microtask へ回す）
+  handle.container.removeAttribute("data-ksk-toast-auto-root")
+  // 呼び出し元は React のイベントハンドラ / effect の中のことがあるので、unmount は次の microtask へ逃がす
+  queueMicrotask(() => {
+    handle.root?.unmount()
+    handle.container.remove()
+  })
+}
+
+/**
+ * auto-root（`document.body` 直下の fallback viewport）の有無を「今要るか」に合わせる。
+ * `<Toaster>` がある間と、トーストが 0 件のときは作らず、残さない。
+ */
+function syncAutoRoot(): void {
+  if (typeof window === "undefined" || typeof document === "undefined") return
+  const wanted = isAutoRootWanted()
+  if (wanted && !autoRoot) mountAutoRoot()
+  else if (!wanted && autoRoot) unmountAutoRoot()
+}
+
+// store の増減で追従する。モジュール読み込み時の副作用は購読の登録だけ（DOM には触れない）。
+toastStore.subscribe(syncAutoRoot)
 
 // =============================================================
 // Fire-and-forget API
@@ -537,7 +600,6 @@ function showToast(title: string, options: ToastOptions = {}, variant?: ToastVar
   // SSR ガード: サーバー側で呼ばれた場合は no-op（dummy id を返す）。
   // Next.js App Router で Server Action 内から呼ばれても落ちないように。
   if (typeof window === "undefined") return ""
-  ensureAutoMounted()
   return toastStore.add({
     title,
     description: options.description,
