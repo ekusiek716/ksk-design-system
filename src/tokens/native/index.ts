@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:9d3132fc2504)
+// source: tokens.json v2.1.0 (sha256:a45815e50d3d)
 // =============================================================
 
 import { themes } from './themes';

@@ -54,7 +54,7 @@ function CheckboxGroup({
       <legend className="flex items-center gap-2">
         <span className="typo-label-md text-[var(--Text-High-Emphasis)]">{label}</span>
         {required && (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[var(--Surface-Accent-Primary-Light)] typo-label-xs text-[var(--Brand-Primary)]">
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-[var(--Surface-Accent-Primary-Light)] typo-label-xs text-[var(--Text-Accent-Primary)]">
             {defaultLabels.required}
           </span>
         )}

@@ -145,7 +145,7 @@ function FormField({
           className={cn(
             "typo-label-xs px-1.5 py-0.5 rounded",
             required
-              ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Brand-Primary)]"
+              ? "bg-[var(--Surface-Accent-Primary-Light)] text-[var(--Text-Accent-Primary)]"
               : "bg-[var(--Surface-Tertiary)] text-[var(--Text-Medium-Emphasis)]"
           )}
           aria-hidden="true"

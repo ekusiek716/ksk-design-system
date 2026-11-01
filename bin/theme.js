@@ -260,7 +260,8 @@ export function loadThemeContext(pkgRoot) {
  *   `--Focus-High-Emphasis`（:root / .dark）から読むので、割当を変えれば検査対象の段も追従する。
  *
  * ダーク（.dark）
- * - 400 の文字 / ダーク背景: Text-Accent-Primary / Brand-Primary(=400) を
+ * - 400 の文字 / ダーク背景: Brand-Primary(=400) / Object・Border-Accent-Primary（Text-Accent-Primary は
+ *   issue #830 で 300 に上げたので、この検査を通れば 300 も通る）を
  *   Surface-Primary(Gray-900) に載せる（error）
  * - 400 / ダーク背景（フォーカスリング 3:1）: Focus-High-Emphasis(=400)。非テキスト基準 1.4.11（error）。
  *   上の文字 4.5:1 を満たせば必ず通るが、リングの根拠として別に出す
@@ -272,9 +273,10 @@ export function loadThemeContext(pkgRoot) {
  *   （輝度 ≦ 0.183）」と「ダークの 600 が Gray-900 文字 4.5 以上（輝度 ≧ 0.216）」が
  *   同時に成り立たない（数式上の矛盾）ため、どちらかを優先する必要があり、
  *   ライトを優先している。押している間だけの状態なので注意表示に留める
- * - 400 の文字 / 900: Text-Accent-Primary(=400) を Surface-Accent-Primary-Light /
- *   Brand-Light(=900) に載せる。advisory: 通すには 900 をページ背景並みに暗くする
- *   必要があり、淡いブランド面として区別できなくなるため自動補正しない
+ * - 300 の文字 / 900: Text-Accent-Primary(=300) を Surface-Accent-Primary-Light /
+ *   Brand-Ultra-Light・Brand-Light(=900) に載せる（issue #830 で 400 から 300 に変更。Brand-Primary(=400)
+ *   は淡いブランド面の上に文字として載せない）。advisory: 通らないテーマは
+ *   900 をページ背景並みに暗くする必要があり、淡いブランド面として区別できなくなるため自動補正しない
  */
 export function evaluateChecks(ramp, ctx) {
   const checks = []
@@ -315,10 +317,10 @@ export function evaluateChecks(ramp, ctx) {
     "ライトの 600 が白文字 4.5 以上（輝度 0.183 以下）という条件と同時に満たせない（数式上の矛盾）",
   )
   add(
-    "dark-text-400-on-900",
+    "dark-text-300-on-900",
     "dark",
-    "Brand-400 の文字 / Brand-900（淡いブランド面）",
-    ramp[400],
+    "Brand-300 の文字 / Brand-900（淡いブランド面）",
+    ramp[300],
     ramp[900],
     4.5,
     "advisory",
@@ -632,7 +634,7 @@ const HELP = `ksk-ds theme — ブランド色 1 色から Brand ランプ（50�
   ライト: 白文字 on 600 / 600 の文字 on 白 / 600 の文字 on 50 / 白文字 on 700・800  >= 4.5
   ダーク: 400 の文字 on ダーク背景 / ダーク文字 on 400  >= 4.5
   参考（注意表示のみ・exit code に影響しない）: フォーカス 400 on 白 >= 3.0、
-          ダーク hover/active（500/600 の面）、ダークの 400 on 900
+          ダーク hover/active（500/600 の面）、ダークの 300 on 900
 
 段差: 隣接段の明度差（OKLCH L）が 0.015 未満（明度が下がらない・hover/active がボタン面と同色）は
       必須エラー。生成側は段を押し広げて確保し、それでも足りない色（ほぼ黒・ほぼ白）は exit 1。

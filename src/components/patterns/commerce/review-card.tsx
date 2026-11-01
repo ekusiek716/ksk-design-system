@@ -88,7 +88,7 @@ function ReviewCard({
           className={cn(
             "inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full border border-[var(--Border-Medium-Emphasis)] typo-label-xs transition-colors",
             helpful
-              ? "border-[var(--Brand-Primary)] text-[var(--Brand-Primary)] bg-[var(--Brand-Ultra-Light)]"
+              ? "border-[var(--Brand-Primary)] text-[var(--Text-Accent-Primary)] bg-[var(--Brand-Ultra-Light)]"
               : "border-[var(--Border-Medium-Emphasis)] text-[var(--Text-Low-Emphasis)] hover:border-[var(--Brand-Primary)] hover:text-[var(--Brand-Primary)]"
           )}
         >
