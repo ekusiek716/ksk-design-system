@@ -104,11 +104,12 @@ describe("toast() の auto-root（#771）", () => {
   })
 
   it("自動消去（duration）でも 0 件で外れる", async () => {
-    toast("short", { duration: 100 })
+    // flush（約 90ms）より十分長い duration にして、確認前に自動消去されないようにする
+    toast("short", { duration: 500 })
     await flush()
     expect(autoRoot()).not.toBeNull()
     await act(async () => {
-      await new Promise((r) => setTimeout(r, 200))
+      await new Promise((r) => setTimeout(r, 600))
     })
     await flush()
     expect(autoRoot()).toBeNull()
