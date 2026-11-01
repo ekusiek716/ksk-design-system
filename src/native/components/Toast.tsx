@@ -1,8 +1,8 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react"
-import { Animated, Modal, Platform, View, Text as RNText, Pressable } from "react-native"
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { Animated, View, Text as RNText, Pressable } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
-import { useAnyModalVisible } from "../modal-presence"
+import { createToastOutletId, useToastOutletRegistration, useTopToastOutlet } from "../toast-outlet-stack"
 
 /**
  * Toast (native) — 正本: src/components/ui/toast.tsx（Web 版）。
@@ -136,73 +136,59 @@ export { toast }
 
 /**
  * 通知の描き方。
- * - `"auto"`（既定）: DS の native Modal 系（Sheet / Dialog / AlertDialog / ConfirmDialog / Popover /
- *   BottomSheetForm / CoachMarkOverlay / CelebrationDialog など、src/native 配下で RN の `<Modal>` を描く部品）が
- *   1 つ以上開いている間だけ `"modal"`、それ以外は `"inline"` と同じ描き方にする。通知の表示中に Sheet が
- *   開閉したら、通知を消さずに描き先だけ切り替える。Modal 系を開いていない普段の画面では下のタッチを一切奪わない。
- * - `"modal"`: iOS / Android では、表示中の通知があるあいだ常に透明な RN `<Modal>` の中に描く（issue #820）。
- *   **consumer が自前で RN の `<Modal>` を描く場合**は、DS からはその開閉が見えないので `"modal"` を指定する。
- * - `"inline"`: children の兄弟の absolute View に描く（#820 以前の描き方）。下の画面のタッチを一切奪わないが、
- *   RN の `<Modal>` を開いている間はその下に隠れる。
- *
- * Web（react-native-web）はどれを指定しても `"inline"` と同じ描き方にする。react-native-web の Modal は
- * 開くと一番上の Modal にフォーカスを移して閉じ込め、Esc もそちらへ回すため、通知を出すたびに
- * 下の Sheet の入力欄からフォーカスを奪ってしまう。Web アプリは Web 版の `<Toaster>` を使う前提。
+ * - `"auto"`（既定）: 開いている `ToastOutlet`（通知の出口）があれば、一番最後に開いた出口にだけ描く。
+ *   出口が無ければ children の兄弟の absolute View（Provider 直下）に描く。
+ * - `"inline"`: 出口を無視して、常に Provider 直下に描く（#820 以前の描き方）。RN の `<Modal>` を開いている間は
+ *   その下に隠れる。Sheet の上に通知を重ねたくない画面向けの逃げ道。
  */
-export type ToastPresentation = "auto" | "modal" | "inline"
+export type ToastPresentation = "auto" | "inline"
 
 export interface ToastProviderProps {
   children: React.ReactNode
-  /**
-   * 通知の描き方。既定は `"auto"`（DS の Sheet / Dialog などを開いている間だけ Modal に描いて前面に出す）。
-   * 自前の RN `<Modal>` の上にも通知を出したいなら `"modal"`。詳細と制約は {@link ToastProvider} を参照。
-   */
+  /** 通知の描き方。既定は `"auto"`。詳細は {@link ToastProvider} を参照。 */
   presentation?: ToastPresentation
 }
 
-/** iOS の Modal は既定で縦向きしか許さず、横向きの端末で開くと画面を縦へ回してしまう。通知で回転させないよう全向きを許す。 */
-const ALL_ORIENTATIONS = [
-  "portrait",
-  "portrait-upside-down",
-  "landscape",
-  "landscape-left",
-  "landscape-right",
-] as const
+/** 出口と Provider 直下の描画に渡す、表示中の通知と閉じる関数（内部用）。 */
+interface ToastRenderContextValue {
+  items: ToastItem[]
+  dismiss: (id: string) => void
+  presentation: ToastPresentation
+}
+
+const ToastRenderContext = createContext<ToastRenderContextValue | null>(null)
 
 /**
  * 通知の Provider。アプリのルートに 1 つ置く。
  *
  * ## Modal との前後関係（issue #820）
  * native の Sheet / Dialog / Popover は RN の `<Modal>`（iOS は別の view controller、Android は別のウィンドウ）で、
- * アプリ本体の View に `zIndex` を付けても前に出られない。そのため既定（`presentation="auto"`）では、
- * DS の Modal 系が開いていて、かつ表示中の通知があるあいだだけ、透明な `<Modal transparent animationType="none">`
- * を重ねてその中に通知を描く。通知が 0 件、または Modal 系が 1 つも開いていなければ Modal を描かないので、
- * 下の画面のタッチを奪わない。`"modal"` は Modal 系の開閉を見ずに、通知があるあいだ常に Modal に描く。
+ * アプリ本体の View に `zIndex` を付けても前に出られない。また iOS の RN は、すでに Sheet を present している
+ * 画面の上に、ルート直下の兄弟の `<Modal>` をもう 1 枚 present できない（UIKit が拒否して何も出ない）。
  *
- * ## 通知を Modal に描いているあいだの制約（iOS / Android）
- * - **下の画面・下の Sheet のタッチは届かない。** RN の `<Modal>` は常に画面全体を覆い、通知の大きさだけに
- *   縮められず、`pointerEvents="box-none"` でも下の view controller / ウィンドウへタッチを通さない。
- *   そのため通知以外の場所に触れると、その時点の通知をすべて閉じて Modal を外す（下へ届かなかった 1 回の
- *   タッチが無駄にならないよう、次のタッチから下の画面へ届く）。「元に戻す」付きの通知も閉じる。
- * - **Android の戻るボタン**は一番上のウィンドウ＝通知の Modal に届く。何もしないと下の Sheet が閉じられず
- *   （`duration: 0` の通知なら閉じるまでずっと）戻る操作を握りつぶすため、通知をすべて閉じる。
- *   下の Sheet は次の戻る操作で閉じる（1 回で両方は閉じない）。
- * - iOS の VoiceOver は Modal の中だけを読む状態になり、通知を表示しているあいだは下の画面へ移れない。
- * - 通知の `action`（「再試行」など）と閉じるボタンは Modal の中にあるので、Sheet を開いたままでも押せる。
+ * そこで通知用の Modal は作らず、DS の Modal 系部品（Sheet / Dialog / AlertDialog / ConfirmDialog / Popover /
+ * BottomSheetForm / ResponsiveDialog / CoachMarkOverlay / CelebrationDialog / Celebration の overlay /
+ * ImageGallery のビューア）が、自分の `<Modal>` の中身の最前面に {@link ToastOutlet} を置いている。
+ * 既定（`presentation="auto"`）では、開いている出口があれば一番最後に開いた出口にだけ通知を描き、
+ * Provider 直下には描かない。出口が無ければ Provider 直下に描く。
  *
- * 自前の RN `<Modal>` を描く consumer は、その上に通知を出すなら `presentation="modal"` を指定する
- * （`"auto"` は DS 部品の Modal しか数えないため、自前の Modal の下に隠れる）。
+ * - 出口は `pointerEvents="box-none"` なので、通知以外の場所のタッチは下の Sheet / Dialog にそのまま届く。
+ * - Android の戻るボタンは、これまでどおり一番上の Sheet / Dialog の `onRequestClose` に届く。
+ * - 通知の表示中に Sheet が閉じたら、通知は消えずに Provider 直下（または 1 つ下の出口）へ移る。
+ *   表示時間のタイマーと `action` は Provider が持つので、描き先が変わっても途切れない
+ *   （描き先が変わると入場アニメはもう一度流れる）。
+ * - 通知の `action`（「再試行」など）と閉じるボタンは出口の中にあるので、Sheet を開いたままでも押せる。
+ *
+ * consumer が自前で RN の `<Modal>` を描く場合は、その中身の最後に `<ToastOutlet />` を置くと、
+ * 開いている間の通知がその Modal の前面に出る。
  */
 export function ToastProvider({ children, presentation = "auto" }: ToastProviderProps) {
-  const { scales } = useTheme()
-  const anyModalVisible = useAnyModalVisible()
   const [items, setItems] = useState<ToastItem[]>([])
+  const topOutlet = useTopToastOutlet()
 
   const dismiss = useCallback((id: string) => {
     setItems((prev) => prev.filter((t) => t.id !== id))
   }, [])
-
-  const dismissAll = useCallback(() => setItems([]), [])
 
   const show = useCallback(
     (toastItem: Omit<ToastItem, "id">) => {
@@ -221,7 +207,65 @@ export function ToastProvider({ children, presentation = "auto" }: ToastProvider
     return () => registerProvider(null)
   }, [show, dismiss])
 
-  const stack = (
+  const api = useMemo(() => ({ show, dismiss }), [show, dismiss])
+  const renderValue = useMemo(() => ({ items, dismiss, presentation }), [items, dismiss, presentation])
+  const renderInline = presentation === "inline" || topOutlet === null
+
+  return (
+    <ToastContext.Provider value={api}>
+      <ToastRenderContext.Provider value={renderValue}>
+        {children}
+        {renderInline ? <ToastStack items={items} dismiss={dismiss} /> : null}
+      </ToastRenderContext.Provider>
+    </ToastContext.Provider>
+  )
+}
+
+export interface ToastOutletProps {
+  /**
+   * この出口を使うか。置き場所の Modal の `visible` と同じ値を渡す（既定 true）。
+   * RN の Modal は閉じるアニメの間など `visible=false` でも中身を描き続けることがあり、
+   * その間に通知を閉じかけの Modal へ描かないようにするため。
+   */
+  active?: boolean
+}
+
+/**
+ * 通知の出口。RN の `<Modal>` の中身の**最後**（最前面）に置くと、その Modal を開いている間の通知が
+ * Modal の前面に描かれる（issue #820）。DS の Sheet / Dialog / Popover などは内部で置いているので、
+ * consumer が置く必要があるのは自前で描く RN `<Modal>` の中だけ。
+ *
+ * - 画面全体を覆う absolute の View だが `pointerEvents="box-none"` で、通知以外の場所のタッチは下へ届く。
+ * - 出口が複数マウントされていれば、一番最後に開いた出口にだけ描く（入れ子の Modal の一番上）。
+ * - 表示中の通知が無いとき・`ToastProvider` の外に置いたとき・Provider が `presentation="inline"` のときは何も描かない。
+ *
+ * @example
+ * <Modal visible={open} transparent onRequestClose={close}>
+ *   <MyPanel />
+ *   <ToastOutlet active={open} />
+ * </Modal>
+ */
+export function ToastOutlet({ active = true }: ToastOutletProps = {}) {
+  const ctx = useContext(ToastRenderContext)
+  const [id] = useState(createToastOutletId)
+  const enabled = active && ctx !== null && ctx.presentation === "auto"
+  useToastOutletRegistration(id, enabled)
+  const topOutlet = useTopToastOutlet()
+  if (!ctx || !enabled || topOutlet !== id || ctx.items.length === 0) return null
+  return (
+    <View
+      pointerEvents="box-none"
+      style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0 }}
+    >
+      <ToastStack items={ctx.items} dismiss={ctx.dismiss} />
+    </View>
+  )
+}
+
+function ToastStack({ items, dismiss }: { items: ToastItem[]; dismiss: (id: string) => void }) {
+  const { scales } = useTheme()
+  if (items.length === 0) return null
+  return (
     <View
       pointerEvents="box-none"
       style={{
@@ -238,43 +282,6 @@ export function ToastProvider({ children, presentation = "auto" }: ToastProvider
         <ToastView key={t.id} toast={t} onDismiss={() => dismiss(t.id)} />
       ))}
     </View>
-  )
-
-  const renderInModal =
-    Platform.OS !== "web" &&
-    (presentation === "modal" || (presentation === "auto" && anyModalVisible))
-
-  return (
-    <ToastContext.Provider value={{ show, dismiss }}>
-      {children}
-      {!renderInModal ? (
-        stack
-      ) : items.length > 0 ? (
-        <Modal
-          visible
-          transparent
-          animationType="none"
-          statusBarTranslucent
-          supportedOrientations={[...ALL_ORIENTATIONS]}
-          onRequestClose={dismissAll}
-        >
-          <View pointerEvents="box-none" style={{ flex: 1 }}>
-            {/*
-              通知以外の場所。RN の Modal は下へタッチを通さないため、触れたら通知を閉じて Modal を外し、
-              次のタッチから下の画面へ届くようにする。読み上げの対象にはしない（通知と閉じるボタンだけを読ませる）。
-            */}
-            <Pressable
-              testID="ksk-toast-outside"
-              onPressIn={dismissAll}
-              accessible={false}
-              importantForAccessibility="no"
-              style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0 }}
-            />
-            {stack}
-          </View>
-        </Modal>
-      ) : null}
-    </ToastContext.Provider>
   )
 }
 

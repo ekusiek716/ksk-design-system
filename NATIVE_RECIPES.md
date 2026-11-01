@@ -312,18 +312,24 @@ native の `Sheet`（`side="bottom"`）は、`snapPoints` の有無にかかわ�
 
 ### Sheet / Dialog の上で通知を出す（Toast）
 
-`<ToastProvider>` をアプリのルートに 1 つ置けば、Sheet / Dialog / Popover を開いたまま `toast.caution("保存に失敗しました", { action: { label: "再試行", onPress: retry } })` を呼んでも、通知はそれらの前面に出て「再試行」も押せます（#820）。既定の `presentation="auto"` は、DS の Modal 系（Sheet / Dialog / AlertDialog / ConfirmDialog / Popover / BottomSheetForm / CoachMarkOverlay / CelebrationDialog など）が 1 つ以上開いている間だけ、通知を透明な RN `Modal` に描きます。それ以外の普段の画面では従来どおり画面の中に描き、下のタッチを奪いません。通知の表示中に Sheet が開閉したら、通知は消えずに描き先だけ切り替わります。
+`<ToastProvider>` をアプリのルートに 1 つ置けば、Sheet / Dialog / Popover を開いたまま `toast.caution("保存に失敗しました", { action: { label: "再試行", onPress: retry } })` を呼んでも、通知はそれらの前面に出て「再試行」も押せます（#820）。DS の Modal 系（Sheet / Dialog / AlertDialog / ConfirmDialog / Popover / BottomSheetForm / ResponsiveDialog / CoachMarkOverlay / CelebrationDialog / Celebration の overlay / ImageGallery のビューア）は、自分の RN `Modal` の中身の最前面に通知の出口 `ToastOutlet` を置いていて、Provider は一番最後に開いた出口にだけ通知を描きます。開いている出口が無ければ、従来どおり画面の中に描きます。
 
-通知を Modal に描いているあいだ（DS の Modal 系を開いている間）の制約:
+- 通知用の Modal は追加しません（iOS の RN は、Sheet を出している画面の上にもう 1 枚の Modal を重ねられないため）。
+- 出口は `pointerEvents="box-none"` なので、通知以外の場所のタッチは下の Sheet にそのまま届きます。Android の戻るボタンも、これまでどおり Sheet / Dialog を閉じます。
+- 通知の表示中に Sheet が開閉したら、通知は消えずに描き先だけ移ります（表示時間と `action` は途切れません）。
 
-- 下の Sheet にタッチが届きません（RN の `Modal` は画面全体を覆い、下へタッチを通さないため）。通知以外の場所に触れると通知をすべて閉じ、次のタッチから下へ届きます。
-- Android の戻るボタンは通知を閉じるだけです。下の Sheet は次の戻る操作で閉じます。
+自前で RN の `Modal` を描いている場合は、その中身の最後に `ToastOutlet` を置くと、開いている間の通知がその Modal の前面に出ます。
 
-描き方を固定したいとき:
+```tsx
+import { ToastOutlet } from "ksk-design-system/native/ui"
 
-- **自前で RN の `Modal` を描いている**なら `<ToastProvider presentation="modal">` を指定します。`"auto"` は DS 部品の Modal しか数えないため、自前の Modal の下に通知が隠れます。`"modal"` は通知があるあいだ常に Modal に描きます（普段の画面でも上の制約がかかります）。
-- `<ToastProvider presentation="inline">` は Modal を一切使わない従来の描き方です（Modal を開いている間は通知がその下に隠れます）。
-- react-native-web ではどれを指定しても Modal を使いません（Modal のフォーカス閉じ込めで下の入力欄のフォーカスを奪うため）。Web アプリは Web 版の `<Toaster>` を使ってください。
+<Modal visible={open} transparent onRequestClose={close}>
+  <View>{/* パネルの中身 */}</View>
+  <ToastOutlet active={open} />
+</Modal>
+```
+
+Sheet の上に通知を重ねたくない場合は `<ToastProvider presentation="inline">` で出口を使わない従来の描き方にできます（Modal を開いている間は通知がその下に隠れます）。react-native-web でも同じ仕組みで動き、Modal を追加しないので下の入力欄のフォーカスを奪いません。
 
 ## Search field + candidate list
 

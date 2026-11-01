@@ -13,7 +13,7 @@ import {
 } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
 import { resolveTypo } from "../typography"
-import { useModalPresence } from "../modal-presence"
+import { ToastOutlet } from "./Toast"
 
 export interface ImageGalleryProps {
   images: ImageSourcePropType[]
@@ -24,7 +24,6 @@ export interface ImageGalleryProps {
 export function ImageGallery({ images, initialIndex = 0, thumbnailSize = 80 }: ImageGalleryProps) {
   const { theme, scales } = useTheme()
   const [viewer, setViewer] = useState<{ open: boolean; index: number }>({ open: false, index: initialIndex })
-  useModalPresence(viewer.open)
   const screenWidth = Dimensions.get("window").width
 
   return (
@@ -102,6 +101,8 @@ export function ImageGallery({ images, initialIndex = 0, thumbnailSize = 80 }: I
             </RNText>
           </View>
         </View>
+        {/* 開いている間の通知をこの Modal の最前面に描く（issue #820） */}
+        <ToastOutlet active={viewer.open} />
       </Modal>
     </>
   )

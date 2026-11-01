@@ -1,7 +1,7 @@
 import React from "react"
 import { Modal, View, Pressable } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
-import { useModalPresence } from "../modal-presence"
+import { ToastOutlet } from "./Toast"
 
 export interface CoachMarkOverlayProps {
   open: boolean
@@ -17,7 +17,6 @@ export interface CoachMarkOverlayProps {
  */
 export function CoachMarkOverlay({ open, onClose, highlight, children }: CoachMarkOverlayProps) {
   const { theme } = useTheme()
-  useModalPresence(open)
   const overlay = theme.overlay.dark
 
   return (
@@ -85,6 +84,8 @@ export function CoachMarkOverlay({ open, onClose, highlight, children }: CoachMa
           <Pressable onPress={() => {}}>{children}</Pressable>
         </View>
       </Pressable>
+      {/* 開いている間の通知をこの Modal の最前面に描く（issue #820） */}
+      <ToastOutlet active={open} />
     </Modal>
   )
 }

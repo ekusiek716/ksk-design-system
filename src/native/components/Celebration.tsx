@@ -14,7 +14,7 @@ import { resolveTypo } from "../typography"
 import { useReduceMotionState } from "./use-reduce-motion"
 import { useEmojiBounce } from "./use-emoji-bounce"
 import { createRevealLifecycle } from "../modal-reveal-lifecycle"
-import { useModalPresence } from "../modal-presence"
+import { ToastOutlet } from "./Toast"
 
 export type CelebrationTrigger = "confetti" | "emoji" | "both" | "none"
 export type CelebrationPlacement = "overlay" | "inline"
@@ -149,7 +149,6 @@ function Celebration({
   const showMessage = !cardless && (trigger === "confetti" || trigger === "emoji" || trigger === "both")
   const canTapDismiss = Boolean(onTapDismiss || interactive)
   const overlay = placement === "overlay"
-  useModalPresence(overlay && active && trigger !== "none")
   const pop = useAnimatedValue(0.94)
   const opacity = useAnimatedValue(0)
   const emojiScale = useAnimatedValue(0)
@@ -459,6 +458,8 @@ function Celebration({
       onRequestClose={handleTapDismiss}
     >
       <View style={{ flex: 1, backgroundColor: "transparent" }}>{content}</View>
+      {/* 開いている間の通知をこの Modal の最前面に描く（issue #820） */}
+      <ToastOutlet />
     </Modal>
   )
 }
