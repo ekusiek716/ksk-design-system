@@ -31,6 +31,7 @@ import {
   shouldStartHandleDrag,
   type SnapGestureConfig,
 } from "../sheet-snap-gesture"
+import { ToastOutlet } from "./Toast"
 
 export type SheetSide = "bottom" | "top" | "left" | "right"
 
@@ -290,6 +291,8 @@ function PlainSheet({
           panel
         )}
       </Pressable>
+      {/* 開いている間の通知をこの Modal の最前面に描く（issue #820） */}
+      <ToastOutlet active={open} />
     </Modal>
   )
 }
@@ -735,6 +738,8 @@ function SnapBottomSheet({
           )}
         </View>
       </KeyboardAvoidingView>
+      {/* 開いている間の通知をこの Modal の最前面に描く（issue #820） */}
+      <ToastOutlet active={open} />
     </Modal>
   )
 }

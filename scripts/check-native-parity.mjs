@@ -58,7 +58,7 @@ const INTENTIONAL_NATIVE_GAPS = new Map([
   ["SkipLink", "skip navigation targets DOM landmarks and is Web-only"],
   ["SideDrawerFrame", "side detail drawer is a desktop/web layout; native mobile uses BottomSheetFrame snap sheet instead"],
   ["StatusTabs", "admin status tabs are Web-only"],
-  ["Toast", "native exposes ToastProvider/useToast instead of a Toast component export"],
+  ["Toast", "native exposes ToastProvider/useToast instead of a Toast component export。ToastProvider は通知用の Modal を作らず、DS の native Modal 系（Sheet / Dialog / Popover 等）が自分の RN Modal の中身の最前面に置く ToastOutlet のうち、一番最後に開いた出口に通知を描く（issue #820。iOS の RN はルート直下の兄弟 Modal を既存の Modal の上に出せないため）。出口が無ければ従来どおり Provider 直下に描く。出口は pointerEvents=box-none で下の操作を妨げない。自前の RN Modal を使う consumer は中身の最後に <ToastOutlet /> を置く。presentation=\"inline\" は出口を使わない"],
   ["Tooltip", "hover/focus tooltip is Web-only"],
 ])
 

@@ -116,6 +116,7 @@ export { Popover, type PopoverProps } from "./Popover"
 export { DropdownMenu, type DropdownMenuProps, type DropdownMenuItem } from "./DropdownMenu"
 export {
   ToastProvider,
+  ToastOutlet,
   useToast,
   toast,
   type ToastItem,
@@ -123,6 +124,9 @@ export {
   type ToastAction,
   type ToastOptions,
   type ToastFn,
+  type ToastPresentation,
+  type ToastProviderProps,
+  type ToastOutletProps,
 } from "./Toast"
 export { ErrorBoundary, type ErrorBoundaryProps } from "./ErrorBoundary"
 export { MenuDrawer, type MenuDrawerProps, type MenuDrawerItem, type MenuDrawerSection } from "./MenuDrawer"

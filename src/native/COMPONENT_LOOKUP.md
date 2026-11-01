@@ -4,7 +4,7 @@
 
 React Native / Expo consumer は、新規 UI を作る前にこの一覧で既存コンポーネントを確認してください。すべて `ksk-design-system/native/ui` から import します。
 
-- Public native component exports: 160
+- Public native component exports: 161
 - Import: `import { Button, Screen } from "ksk-design-system/native/ui"`
 
 | Component | Source | Section |
@@ -80,6 +80,7 @@ React Native / Expo consumer は、新規 UI を作る前にこの一覧で既�
 | `ReviewOverlay` | `src/native/components/ReviewOverlay.tsx` | Phase 3: Overlay |
 | `Scrim` | `src/native/components/Scrim.tsx` | Phase 3: Overlay |
 | `Sheet` | `src/native/components/Sheet.tsx` | Phase 3: Overlay |
+| `ToastOutlet` | `src/native/components/Toast.tsx` | Phase 3: Overlay |
 | `ToastProvider` | `src/native/components/Toast.tsx` | Phase 3: Overlay |
 | `Accordion` | `src/native/components/Accordion.tsx` | Phase 4: Selection / Disclosure |
 | `Calendar` | `src/native/components/Calendar.tsx` | Phase 4: Selection / Disclosure |

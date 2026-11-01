@@ -4,6 +4,7 @@ import { useTheme } from "../theme/ThemeProvider"
 import { useSafeAreaInsets } from "../theme/SafeAreaInsetsProvider"
 import { resolveFullscreenDialogPadding, resolveInsetEdge } from "../safe-area"
 import { resolveTypo } from "../typography"
+import { ToastOutlet } from "./Toast"
 
 export type DialogPosition = "center" | "top" | "fullscreen"
 
@@ -110,6 +111,8 @@ export function Dialog({
           )}
         </Pressable>
       </Pressable>
+      {/* 開いている間の通知をこの Modal の最前面に描く（issue #820） */}
+      <ToastOutlet active={open} />
     </Modal>
   )
 }

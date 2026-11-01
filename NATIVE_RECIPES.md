@@ -310,6 +310,27 @@ Web では `CompactFilePicker` / `ImageAttachmentPicker` が hidden file input�
 
 native の `Sheet`（`side="bottom"`）は、`snapPoints` の有無にかかわらず入力欄を置いてかまいません。iOS では Sheet 自身がキーボードを避けてパネルを持ち上げ、Android は Modal の adjustResize に任せます。`BottomSheetForm` / スマホ幅の `ResponsiveDialog` / `Combobox` もこの挙動を使います。キーボード分の余白は Sheet が一手に持つので、consumer 側で `KeyboardAvoidingView` や下余白を重ねないでください。キーボードでパネルが収まらないときはパネルが縮み、本文の `ScrollView`（`BottomSheetForm` の本文など）がスクロールして最後の項目とボタンに届きます。
 
+### Sheet / Dialog の上で通知を出す（Toast）
+
+`<ToastProvider>` をアプリのルートに 1 つ置けば、Sheet / Dialog / Popover を開いたまま `toast.caution("保存に失敗しました", { action: { label: "再試行", onPress: retry } })` を呼んでも、通知はそれらの前面に出て「再試行」も押せます（#820）。DS の Modal 系（Sheet / Dialog / AlertDialog / ConfirmDialog / Popover / BottomSheetForm / ResponsiveDialog / CoachMarkOverlay / CelebrationDialog / Celebration の overlay / ImageGallery のビューア）は、自分の RN `Modal` の中身の最前面に通知の出口 `ToastOutlet` を置いていて、Provider は一番最後に開いた出口にだけ通知を描きます。開いている出口が無ければ、従来どおり画面の中に描きます。
+
+- 通知用の Modal は追加しません（iOS の RN は、Sheet を出している画面の上にもう 1 枚の Modal を重ねられないため）。
+- 出口は `pointerEvents="box-none"` なので、通知以外の場所のタッチは下の Sheet にそのまま届きます。Android の戻るボタンも、これまでどおり Sheet / Dialog を閉じます。
+- 通知の表示中に Sheet が開閉したら、通知は消えずに描き先だけ移ります（表示時間と `action` は途切れません）。
+
+自前で RN の `Modal` を描いている場合は、その中身の最後に `ToastOutlet` を置くと、開いている間の通知がその Modal の前面に出ます。
+
+```tsx
+import { ToastOutlet } from "ksk-design-system/native/ui"
+
+<Modal visible={open} transparent onRequestClose={close}>
+  <View>{/* パネルの中身 */}</View>
+  <ToastOutlet active={open} />
+</Modal>
+```
+
+Sheet の上に通知を重ねたくない場合は `<ToastProvider presentation="inline">` で出口を使わない従来の描き方にできます（Modal を開いている間は通知がその下に隠れます）。react-native-web でも同じ仕組みで動き、Modal を追加しないので下の入力欄のフォーカスを奪いません。
+
 ## Search field + candidate list
 
 検索欄の下に候補の一覧を置く部品（`Combobox` / `MultiSelect` と同じ形）を作るときは、一覧の `FlatList` / `ScrollView` に `keyboardShouldPersistTaps="handled"` を付けます。未指定だと、ソフトキーボード表示中の最初のタップはキーボードを閉じるだけに使われ、候補が 2 回押さないと選べません（issue #815）。

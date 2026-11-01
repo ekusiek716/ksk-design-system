@@ -1,6 +1,7 @@
 import React from "react"
 import { Modal, Pressable, View } from "react-native"
 import { useTheme } from "../theme/ThemeProvider"
+import { ToastOutlet } from "./Toast"
 
 export interface PopoverProps {
   open: boolean
@@ -40,6 +41,8 @@ export function Popover({ open, onClose, anchor, children }: PopoverProps) {
           <Pressable onPress={() => {}}>{children}</Pressable>
         </View>
       </Pressable>
+      {/* 開いている間の通知をこの Modal の最前面に描く（issue #820） */}
+      <ToastOutlet active={open} />
     </Modal>
   )
 }

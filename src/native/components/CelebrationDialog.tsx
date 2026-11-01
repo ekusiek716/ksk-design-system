@@ -6,6 +6,7 @@ import { resolveTypo } from "../typography"
 import { Celebration, type CelebrationProps } from "./Celebration"
 import { useReduceMotion } from "./use-reduce-motion"
 import { useEmojiBounce } from "./use-emoji-bounce"
+import { ToastOutlet } from "./Toast"
 
 function useAnimatedValue(initialValue: number) {
   const [value] = useState(() => new Animated.Value(initialValue))
@@ -202,6 +203,8 @@ export function CelebrationDialog({
           )}
         </Pressable>
       </Pressable>
+      {/* 開いている間の通知をこの Modal の最前面に描く（issue #820） */}
+      <ToastOutlet active={open} />
     </Modal>
   )
 }
