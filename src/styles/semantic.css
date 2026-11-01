@@ -222,11 +222,11 @@
   --Text-on-Media-Secondary: var(--Primitive-White-Alpha-800);
   --Text-on-Media-Shadow:  0 1px 3px rgba(0, 0, 0, 0.85);
   --Text-Shadow-on-Image:  0 2px 8px rgba(0, 0, 0, 0.45);
-  --Text-Accent-Primary:   var(--Primitive-Brand-400);
+  --Text-Accent-Primary:   var(--Primitive-Brand-300);
   --Text-Success:          var(--Primitive-Green-400);
   --Text-Caution:          var(--Primitive-Red-400);
-  --Text-Warning:          var(--Primitive-Orange-400);
-  --Text-Info:             var(--Primitive-Blue-400);
+  --Text-Warning:          var(--Primitive-Orange-300);
+  --Text-Info:             var(--Primitive-Blue-300);
   /* Dark では Surface-Inverse が白になるため、その上の destructive は濃赤。 */
   --Text-Caution-on-Inverse: var(--Primitive-Red-700);
 
@@ -251,7 +251,7 @@
   --Border-Warning:         var(--Primitive-Orange-400);
   --Border-Info:            var(--Primitive-Blue-400);
 
-  --Brand-Primary:           var(--Primitive-Brand-400);
+  --Brand-Primary:           var(--Primitive-Brand-300);
   --Brand-Action:            var(--Primitive-Brand-300);
   --Brand-Light:             var(--Primitive-Brand-900);
   --Brand-Ultra-Light:       var(--Primitive-Brand-900);

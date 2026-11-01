@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:9d3132fc2504)
+// source: tokens.json v2.1.0 (sha256:265cd3d4ba59)
 // =============================================================
 
 export const themes = {
@@ -171,11 +171,11 @@ export const themes = {
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
-        "accent-primary": "#60A5FA",
+        "accent-primary": "#93C5FD",
         "success": "#4ADE80",
         "caution": "#F87171",
-        "warning": "#FB923C",
-        "info": "#60A5FA",
+        "warning": "#FDBA74",
+        "info": "#93C5FD",
         "caution-on-inverse": "#B91C1C",
         "on-inverse-secondary": "#3F3F46"
       },
@@ -204,7 +204,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#60A5FA",
+        "primary": "#93C5FD",
         "action": "#93C5FD",
         "light": "#1E3A8A",
         "ultra-light": "#1E3A8A",
@@ -418,11 +418,11 @@ export const themes = {
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
-        "accent-primary": "#60A5FA",
+        "accent-primary": "#93C5FD",
         "success": "#4ADE80",
         "caution": "#F87171",
-        "warning": "#FB923C",
-        "info": "#60A5FA",
+        "warning": "#FDBA74",
+        "info": "#93C5FD",
         "caution-on-inverse": "#B91C1C",
         "on-inverse-secondary": "#3F3F46"
       },
@@ -451,7 +451,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#60A5FA",
+        "primary": "#93C5FD",
         "action": "#93C5FD",
         "light": "#1E3A8A",
         "ultra-light": "#1E3A8A",
@@ -665,11 +665,11 @@ export const themes = {
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
-        "accent-primary": "#4398F8",
+        "accent-primary": "#7FAAFB",
         "success": "#4ADE80",
         "caution": "#F87171",
-        "warning": "#FB923C",
-        "info": "#60A5FA",
+        "warning": "#FDBA74",
+        "info": "#93C5FD",
         "caution-on-inverse": "#B91C1C",
         "on-inverse-secondary": "#3F3F46"
       },
@@ -698,7 +698,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#4398F8",
+        "primary": "#7FAAFB",
         "action": "#7FAAFB",
         "light": "#03155A",
         "ultra-light": "#03155A",
@@ -912,11 +912,11 @@ export const themes = {
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
-        "accent-primary": "#FB923C",
+        "accent-primary": "#FDBA74",
         "success": "#4ADE80",
         "caution": "#F87171",
-        "warning": "#FB923C",
-        "info": "#60A5FA",
+        "warning": "#FDBA74",
+        "info": "#93C5FD",
         "caution-on-inverse": "#B91C1C",
         "on-inverse-secondary": "#3F3F46"
       },
@@ -945,7 +945,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#FB923C",
+        "primary": "#FDBA74",
         "action": "#FDBA74",
         "light": "#431407",
         "ultra-light": "#431407",
@@ -1159,11 +1159,11 @@ export const themes = {
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
-        "accent-primary": "#4ADE80",
+        "accent-primary": "#86EFAC",
         "success": "#4ADE80",
         "caution": "#F87171",
-        "warning": "#FB923C",
-        "info": "#60A5FA",
+        "warning": "#FDBA74",
+        "info": "#93C5FD",
         "caution-on-inverse": "#B91C1C",
         "on-inverse-secondary": "#3F3F46"
       },
@@ -1192,7 +1192,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#4ADE80",
+        "primary": "#86EFAC",
         "action": "#86EFAC",
         "light": "#052E16",
         "ultra-light": "#052E16",
@@ -1406,11 +1406,11 @@ export const themes = {
         "on-media-secondary": "rgba(255, 255, 255, 0.80)",
         "on-media-shadow": "0 1px 3px rgba(0, 0, 0, 0.85)",
         "shadow-on-image": "0 2px 8px rgba(0, 0, 0, 0.45)",
-        "accent-primary": "#A78BFA",
+        "accent-primary": "#C4B5FD",
         "success": "#4ADE80",
         "caution": "#F87171",
-        "warning": "#FB923C",
-        "info": "#60A5FA",
+        "warning": "#FDBA74",
+        "info": "#93C5FD",
         "caution-on-inverse": "#B91C1C",
         "on-inverse-secondary": "#3F3F46"
       },
@@ -1439,7 +1439,7 @@ export const themes = {
         "control": "rgba(255, 255, 255, 0.36)"
       },
       "brand": {
-        "primary": "#A78BFA",
+        "primary": "#C4B5FD",
         "action": "#C4B5FD",
         "light": "#3B0764",
         "ultra-light": "#3B0764",

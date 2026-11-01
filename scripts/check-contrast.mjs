@@ -17,13 +17,14 @@
 import { readFileSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { dirname, join } from "node:path"
-import { loadDefaultBrandRamp, resolveTokenColor } from "./lib/resolve-token-color.mjs"
+import { loadDefaultBrandRamp, parseBrandRamp, resolveTokenColor } from "./lib/resolve-token-color.mjs"
 import { LEDGER_PATH, loadKnownExceptions, validateSection } from "./lib/known-exceptions.mjs"
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 const tokens = JSON.parse(readFileSync(join(root, "tokens.json"), "utf8"))
 const prim = tokens.colors.primitive
 const sem = tokens.colors.semantic
+const semDark = tokens.colors.semanticDark
 // デフォルトテーマの Brand ランプの正本は src/styles/primitive.css
 const brandRamp = loadDefaultBrandRamp(root)
 
@@ -95,10 +96,43 @@ for (const theme of themes) {
   ])
 }
 
+// 状態色・淡いブランド面の「文字 × 面」（Banner / Toast / Tag / StatusActionBadge / Badge subtle /
+// Chip accent / SidebarNav 選択行など、面と文字を同じ組で使う部品・issue #830）。light / dark の両方、全テーマで AA。
+// ダークで Text-Info / Text-Warning / Text-Accent-Primary / Brand-Primary が 400 だった頃は、Blue-900 / Amber-900 /
+// Brand-900 の面の上で 4.07 / 4.01 / 4.07 と AA を割った（ライトだけを見ていて検出できなかった）。
+// 淡いブランド面は Brand ランプに依存するので、default 以外は各テーマの Brand ランプで解決し直す。
+{
+  const toneOnSurface = [
+    ["Text-Info", "text", "info", "Surface-Info", "surface", "info"],
+    ["Text-Warning", "text", "warning", "Surface-Warning", "surface", "warning"],
+    ["Text-Success", "text", "success", "Surface-Success", "surface", "success"],
+    ["Text-Caution", "text", "caution", "Surface-Caution", "surface", "caution"],
+    ["Text-Accent-Primary", "text", "accent-primary", "Surface-Accent-Primary-Light", "surface", "accent-primary-light"],
+    ["Brand-Primary", "brand", "primary", "Brand-Ultra-Light", "brand", "ultra-light"],
+    ["Brand-Primary", "brand", "primary", "Surface-Accent-Primary-Light", "surface", "accent-primary-light"],
+    ["Text-Accent-Primary", "text", "accent-primary", "Hover-Secondary-Button（Chip accent の hover）", "hover", "secondary-button"],
+  ]
+  const themeRamps = [["default", brandRamp]]
+  for (const theme of themes) {
+    themeRamps.push([theme, parseBrandRamp(readFileSync(join(root, "src/themes", `${theme}.css`), "utf8"))])
+  }
+  for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+    for (const [themeName, ramp] of themeRamps) {
+      for (const [fgLabel, fgGroup, fgKey, bgLabel, bgGroup, bgKey] of toneOnSurface) {
+        pairs.push([
+          resolveTokenColor(s[fgGroup][fgKey], prim, ramp),
+          resolveTokenColor(s[bgGroup][bgKey], prim, ramp),
+          `${mode}: ${fgLabel} / ${bgLabel}（${themeName}）`,
+          4.5,
+        ])
+      }
+    }
+  }
+}
+
 // 状態色ボタン（Button variant info / warning / success・issue #598）。
 // 文字は Text-on-Inverse。背景・hover・active の全段を light / dark の両方で検査する
 // （dark は Text-on-Inverse が濃色になるので、背景を濃くする方向だと AA を割る）。
-const semDark = tokens.colors.semanticDark
 for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   const fg = resolve(s.text["on-inverse"])
   for (const kind of ["info", "warning", "success"]) {
