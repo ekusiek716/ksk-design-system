@@ -6,7 +6,7 @@
 > 公開経路は `.github/workflows/publish.yml` の Trusted Publishing (OIDC) に
 > 一本化しており、`main` への version 変更 push が公開の唯一のトリガー。
 > 各消費リポジトリの `package.json` は `ksk-design-system@X.Y.Z` を参照する。
-> 対象の消費リポ一覧は `scripts/update-consumers.sh` の `DEFAULT_REPOS` が正本
+> 対象の消費リポ一覧は `scripts/update-consumers.sh` の `DEFAULT_REPO_NAMES` が正本
 > （単体リポ・monorepo が混在する。ExamKit 本体と資格アプリは含めず、ExamKit で
 > `npm i ksk-design-system@X.Y.Z --save-exact` → `kit:bump` → `kit:rollout` の順で届ける。
 > 資格アプリは DS を ExamKit と同じ版に完全固定しているため、`^X.Y.Z` を書く一括 bump を流すと版がずれる）。
@@ -14,14 +14,15 @@
 ## 前提
 
 - main ブランチが clean (`git status` で何もない)、リモートと一致
-- 消費リポが `DEFAULT_REPOS` の実配置（`~/LocalDev/todo-apps/{belle-todo,trip-todo,ninshin-todo,okuno-todo-suite}`・
-  `~/LocalDev/apps/{yokoku-app,pawly,camera-app,aikoibito}`）に clone 済みで、`gh` CLI が使えること（PR 自動作成に使用）
+- 消費リポ（`belle-todo` `trip-todo` `ninshin-todo` `okuno-todo-suite` `yokoku-app` `pawly` `camera-app` `aikoibito`）が
+  `~/LocalDev/<name>` か `~/LocalDev/<カテゴリ>/<name>` に clone 済みで、`gh` CLI が使えること（PR 自動作成に使用）
+  - 既定は名前だけで持ち、置き場所は実行時にルート直下と 1 階層下から名前の完全一致で探す。
+    配置がフラット⇔カテゴリ別と変わってもスクリプトを直す必要はない（#403・#785 で直書きのパスが2度ずれた）
   - ルートだけ違う環境では `KSK_CONSUMER_ROOT=<ルート>` で差し替える（既定 `~/LocalDev`）
-  - 引数なし実行は、処理前に既定の全件が実在するかを確かめ、1 件でも欠けていれば一覧を出して何もせず止まる。
-    配置を変えたら `scripts/update-consumers.sh` の `DEFAULT_REPO_PATHS` とこの節を一緒に直す（#403・#785）
-  - リポ名だけを渡したとき（例: `belle-todo pawly`）は、まず `DEFAULT_REPOS` の末尾名と照合する。
-    無ければルート直下と 1 階層下（`todo-apps/`・`apps/`・`Examination/` 等）を名前の完全一致でまとめて集め、
-    1 件ならそれを使い、複数あれば（直下とカテゴリ配下の両方にある場合も）曖昧としてフルパス指定を求めて止まる
+  - 引数なし実行は、処理前に既定の全件がちょうど 1 か所ずつ見つかるかを確かめ、欠けている・複数の場所にある
+    ものが 1 件でもあれば一覧を出して何もせず止まる
+  - リポ名だけを渡したとき（例: `belle-todo pawly`）も同じ探し方で、1 件ならそれを使い、
+    複数あれば（直下とカテゴリ配下の両方にある場合も）曖昧としてフルパス指定を求めて止まる
 
 ## 最短手順（推奨）
 
