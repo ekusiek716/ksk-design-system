@@ -91,18 +91,22 @@ function run(env, args = [env.consumer], extraEnv = {}) {
   });
 }
 
-// 既定の配布先の実配置（issue #785）。DEFAULT_REPOS がここからずれると、
-// 下の「全件解決」テストの事前チェックで落ちる。配置を変えたら両方を直す。
-const DEFAULT_LAYOUT = [
-  'todo-apps/belle-todo',
-  'todo-apps/trip-todo',
-  'todo-apps/ninshin-todo',
-  'todo-apps/okuno-todo-suite',
-  'apps/yokoku-app',
-  'apps/pawly',
-  'apps/camera-app',
-  'apps/aikoibito',
+// 既定の配布先（issue #785）。スクリプトは名前だけを持ち、置き場所は実行時に探す。
+// 配置はカテゴリ別⇔フラットと何度も変わったので、両方の配置で全件解決することを確かめる。
+const DEFAULT_NAMES = [
+  'belle-todo',
+  'trip-todo',
+  'ninshin-todo',
+  'okuno-todo-suite',
+  'yokoku-app',
+  'pawly',
+  'camera-app',
+  'aikoibito',
 ];
+// 2026-11 時点の実配置（~/LocalDev/<name>）。trip-todo だけフォルダ名が trip_todo（"-" と "_" は同一視する）
+const DEFAULT_LAYOUT = DEFAULT_NAMES.map((n) => (n === 'trip-todo' ? 'trip_todo' : n));
+// 以前のカテゴリ別配置（~/LocalDev/{todo-apps,apps}/<name>）
+const CATEGORY_LAYOUT = DEFAULT_NAMES.map((n, i) => (i < 4 ? `todo-apps/${n}` : `apps/${n}`));
 
 // 一時ディレクトリの下に擬似的な配置（KSK_CONSUMER_ROOT）を作り、各パスへ origin を clone する。
 function setupLayout(paths) {
@@ -115,16 +119,34 @@ function setupLayout(paths) {
   return { ...env, consumerRoot };
 }
 
-test('引数なし: 既定の配布先 8 件が todo-apps/・apps/ 配下で全件解決される (#785)', () => {
-  const env = setupLayout(DEFAULT_LAYOUT);
+for (const [label, layout] of [
+  ['ルート直下（現在のフラット配置）', DEFAULT_LAYOUT],
+  ['todo-apps/・apps/ 配下（以前のカテゴリ配置）', CATEGORY_LAYOUT],
+]) {
+  test(`引数なし: 既定の配布先 8 件が${label}で全件解決される (#785)`, () => {
+    const env = setupLayout(layout);
+    try {
+      const r = run(env, [], { KSK_CONSUMER_ROOT: env.consumerRoot });
+      assert.equal(r.status, 0, r.stdout + r.stderr);
+      assert.doesNotMatch(r.stdout, /missing dir|FAIL/);
+      for (const rel of layout) {
+        assert.ok(r.stdout.includes(`   ${join(env.consumerRoot, rel)}\n`), `${rel} が処理されていない\n${r.stdout}`);
+      }
+      assert.equal(r.stdout.match(/DRY_RUN \(commit のみ・push なし\)/g)?.length, layout.length);
+    } finally {
+      rmSync(env.root, { recursive: true, force: true });
+    }
+  });
+}
+
+test('引数なし: 既定の配布先が直下とカテゴリ配下の両方にあれば、処理前に曖昧として止まる (#785)', () => {
+  const env = setupLayout([...DEFAULT_LAYOUT, 'apps/pawly']);
   try {
     const r = run(env, [], { KSK_CONSUMER_ROOT: env.consumerRoot });
-    assert.equal(r.status, 0, r.stdout + r.stderr);
-    assert.doesNotMatch(r.stdout, /missing dir|FAIL/);
-    for (const rel of DEFAULT_LAYOUT) {
-      assert.ok(r.stdout.includes(`   ${join(env.consumerRoot, rel)}\n`), `${rel} が処理されていない\n${r.stdout}`);
-    }
-    assert.equal(r.stdout.match(/DRY_RUN \(commit のみ・push なし\)/g)?.length, DEFAULT_LAYOUT.length);
+    assert.equal(r.status, 1, r.stdout + r.stderr);
+    assert.match(r.stdout, /既定の配布先のうち 1 件が複数の場所に見つかりました/);
+    assert.ok(r.stdout.includes(join(env.consumerRoot, 'apps/pawly')), r.stdout);
+    assert.doesNotMatch(r.stdout, /===|DRY_RUN \(commit/);
   } finally {
     rmSync(env.root, { recursive: true, force: true });
   }
@@ -138,7 +160,7 @@ test('名前指定: belle-todo pawly がカテゴリ配下から解決され、�
     assert.equal(r.status, 0, r.stdout + r.stderr);
     assert.ok(r.stdout.includes(`   ${join(env.consumerRoot, 'todo-apps/belle-todo')}\n`), r.stdout);
     assert.ok(r.stdout.includes(`   ${join(env.consumerRoot, 'apps/pawly')}\n`), r.stdout);
-    // DEFAULT_REPOS に無い名前は 1 階層下のカテゴリ（Examination/ 等）から探す
+    // 既定に無い名前も同じく 1 階層下のカテゴリ（Examination/ 等）から探す
     assert.ok(r.stdout.includes(`   ${join(env.consumerRoot, 'Examination/some-exam-app')}\n`), r.stdout);
     assert.doesNotMatch(r.stdout, /aikoibito_codex|not found/);
 
@@ -164,12 +186,12 @@ test('名前指定: 同名が複数カテゴリにあれば曖昧として FAIL 
 });
 
 test('引数なし: 既定の配布先が 1 件でも欠けていたら、処理前に一覧付きで止まる (#785)', () => {
-  const env = setupLayout(DEFAULT_LAYOUT.filter((rel) => rel !== 'apps/pawly'));
+  const env = setupLayout(DEFAULT_LAYOUT.filter((rel) => rel !== 'pawly'));
   try {
     const r = run(env, [], { KSK_CONSUMER_ROOT: env.consumerRoot });
     assert.equal(r.status, 1, r.stdout + r.stderr);
     assert.match(r.stdout, /既定の配布先のうち 1 件が git リポとして見つかりません/);
-    assert.ok(r.stdout.includes(`  - ${join(env.consumerRoot, 'apps/pawly')}\n`), r.stdout);
+    assert.ok(r.stdout.includes('  - pawly\n'), r.stdout);
     // 1 件も処理していない（他の 7 件の bump にも進まない）
     assert.doesNotMatch(r.stdout, /===|DRY_RUN \(commit/);
   } finally {
