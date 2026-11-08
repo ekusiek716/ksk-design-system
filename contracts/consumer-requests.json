@@ -60,6 +60,11 @@
       "dsIssue": 781,
       "consumerIssue": "https://github.com/ekusiek716/exam-kit/issues/1640",
       "fixPr": 782
+    },
+    {
+      "dsIssue": 858,
+      "consumerIssue": "https://github.com/ekusiek716/bundletube/issues/124",
+      "fixPr": null
     }
   ]
 }
