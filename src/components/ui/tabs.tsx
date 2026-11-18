@@ -5,6 +5,7 @@ import {
   PILL_ITEM_HIT_AREA,
   PILL_ITEM_SHAPE,
   PILL_LIST_SHAPE,
+  PILL_LIST_SURFACE,
   SEGMENT_ITEM_BASE,
   SEGMENT_ITEM_FOCUS_DISABLED,
   SEGMENT_LIST_BASE,
@@ -60,9 +61,10 @@ function TabsList({
           // pill の class は PillToggle semantics="radio" と共有する（src/lib/pill-segment-classes.ts。issue #741）
           SEGMENT_LIST_BASE,
           // 高さ・角丸は product theme の公開変数を参照する（issue #364 追補。pill の 44px の理由は共有定数側）
+          // 面の色も variant ごと。pill は切り替え専用の面（dark で選んだ側を外枠より明るくする。issue #863）
           variant === "pill"
-            ? PILL_LIST_SHAPE
-            : "h-[var(--Control-Height-Md)] rounded-[var(--Field-Radius)]",
+            ? cn(PILL_LIST_SHAPE, PILL_LIST_SURFACE)
+            : "h-[var(--Control-Height-Md)] rounded-[var(--Field-Radius)] bg-[var(--Surface-Tertiary)]",
           VERTICAL_LIST,
           className
         )}
@@ -85,7 +87,13 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
         // pill は当たり判定だけを透明な before で 44px に広げる（共有定数側に理由）
         variant === "pill" && PILL_ITEM_HIT_AREA,
         SEGMENT_ITEM_FOCUS_DISABLED,
-        "data-[state=active]:bg-[var(--Surface-Primary)] data-[state=active]:text-[var(--Text-High-Emphasis)] data-[state=active]:shadow-sm",
+        "data-[state=active]:text-[var(--Text-High-Emphasis)] data-[state=active]:shadow-sm",
+        // pill の選んだ側は切り替え専用の面（issue #863。トラックの PILL_LIST_SURFACE と対）。
+        // 文字の太さは変えない: typo-* に同じ大きさで太さだけ変える段が無く（font-bold の直書きは P016）、
+        // w-fit の項目は太字で幅が変わって選ぶたびに隣が動くため。選んだ側は面（dark 3.08:1）と文字色で示す
+        variant === "pill"
+          ? "data-[state=active]:bg-[var(--Surface-Pill-Selected,var(--Surface-Primary))]"
+          : "data-[state=active]:bg-[var(--Surface-Primary)]",
         // forced-colors（Windows ハイコントラスト）では背景色・box-shadow が消え、選択中の
         // 白地（Surface-Primary + shadow-sm）が描画されず、どのタブが選択中か分からなくなる。
         // 選択中だけ OS の選択色（Highlight / HighlightText）で反転させる。通常表示には当たらない。

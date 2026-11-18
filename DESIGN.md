@@ -168,6 +168,13 @@ KSK の必須正本・publish 依存にせず、KSK 固有の multi-theme / nati
   `colors.semanticContrastMore` は高コントラスト指定時の同値ミラーで、契約テストが同期を保証する。
   `scripts/check-contrast.mjs` が通常表示・高コントラスト指定とも例外なしで 3:1 を必須にする。
   dark の枠は hover（`--Border-High-Emphasis`）と同値のため、フォーカスの枠・リングで状態を示す。
+- **切り替えの面（issue #863）**: PillToggle / Tabs `variant="pill"`（web・native）は、トラック `--Surface-Pill-Track`・
+  選んだ側 `--Surface-Pill-Selected` の専用ロールを使う。light は Gray-100 / White（従来の Surface-Tertiary /
+  Surface-Primary と同値。選んだ側は shadow-sm で浮かせる）、dark は Gray-800 / Gray-500。dark で Surface-Primary
+  （Gray-900）を選んだ側にすると外枠（Gray-700）より暗く、light と明暗が逆になるため（1.70:1）。dark の面どうし 3.08:1、
+  選んだ側の文字 4.83:1、外枠の上の文字 10.05:1（`scripts/check-contrast.mjs` が検査）。文字の太さは native だけが
+  変える（700 / 500）。Web は typo-* に同じ大きさで太さだけ変える段が無く、`w-fit` の項目が選ぶたびに幅を変えて
+  隣が動くため変えない。Tabs の既定の形（`variant="default"`）は従来の Surface-Tertiary / Surface-Primary のまま。
 - **Categorical（質的）**: `var(--Categorical-{1..16})` ＋ `-Subtle`(背景) / `-Bold`(文字)。
   カテゴリの色分け専用でテーマ非依存。WCAG/色覚多様性を検証済み。文字には必ず `-Bold`。
 

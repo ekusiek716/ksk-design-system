@@ -8,6 +8,7 @@ import {
   PILL_ITEM_HIT_AREA,
   PILL_ITEM_SHAPE,
   PILL_LIST_SHAPE,
+  PILL_LIST_SURFACE,
   SEGMENT_ITEM_BASE,
   SEGMENT_ITEM_FOCUS_DISABLED,
   SEGMENT_LIST_BASE,
@@ -147,6 +148,13 @@ type PillToggleProps<T extends string = string> =
  * 長いラベルは省略記号で畳まれる（折り返しはしない）ので、`fullWidth` では
  * 短いラベルを使うこと。
  *
+ * ### 選んだ側の見た目（issue #863）
+ * トラックは `--Surface-Pill-Track`、選んだ側は `--Surface-Pill-Selected` ＋ shadow-sm と文字色
+ * （High / Medium）。light は Gray-100 の上に白（従来と同じ色）。dark は外枠 Gray-800 の上に Gray-500 で、
+ * 選んだ側を外枠より明るくする（3.08:1）。文字の太さは変えない（native は 700 / 500。Web は typo-* に
+ * 同じ大きさで太さだけ変える段が無く、`w-fit` の項目が選ぶたびに幅を変えて隣が動くため）。
+ * 色を変えたいプロダクトはこの 2 つのロールを上書きし、面どうしの 3:1 と文字の 4.5:1 を再確認する。
+ *
  * ### 名前と読み上げの役割（issue #741）
  * `aria-label` / `aria-labelledby` で「何を選ぶ欄か」を名付ける。FormField `as="group"` の中では
  * 省いてよい（`semantics="radio"` は radiogroup をそのラベルで名付ける。tabs は外側の group の名前に任せる）。
@@ -172,13 +180,14 @@ const TRIGGER_SIZE = {
 
 // semantics="radio"（issue #741）の見た目は TabsList / TabsTrigger の variant="pill" と同じ。
 // 共通部分は src/lib/pill-segment-classes.ts を tabs.tsx と共有し、選択状態の属性（data-state=checked）だけここに書く
-const RADIO_LIST = cn(SEGMENT_LIST_BASE, PILL_LIST_SHAPE)
+const RADIO_LIST = cn(SEGMENT_LIST_BASE, PILL_LIST_SHAPE, PILL_LIST_SURFACE)
 const RADIO_ITEM = cn(
   SEGMENT_ITEM_BASE,
   PILL_ITEM_SHAPE,
   PILL_ITEM_HIT_AREA,
   SEGMENT_ITEM_FOCUS_DISABLED,
-  "data-[state=checked]:bg-[var(--Surface-Primary)] data-[state=checked]:text-[var(--Text-High-Emphasis)] data-[state=checked]:shadow-sm",
+  // 選んだ側の面は TabsTrigger の pill と同じ（issue #863。太さを変えない理由も tabs.tsx の同じ箇所）
+  "data-[state=checked]:bg-[var(--Surface-Pill-Selected,var(--Surface-Primary))] data-[state=checked]:text-[var(--Text-High-Emphasis)] data-[state=checked]:shadow-sm",
   "forced-colors:data-[state=checked]:bg-[Highlight] forced-colors:data-[state=checked]:text-[HighlightText]",
   "data-[state=unchecked]:hover:text-[var(--Text-High-Emphasis)]"
 )

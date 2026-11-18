@@ -227,6 +227,7 @@
 @source inline("bg-[var(--Surface-Info)]");
 @source inline("bg-[var(--Surface-Info-Subtle)]");
 @source inline("bg-[var(--Surface-Inverse)]");
+@source inline("bg-[var(--Surface-Pill-Track,var(--Surface-Tertiary))]");
 @source inline("bg-[var(--Surface-Primary)]");
 @source inline("bg-[var(--Surface-Primary)]/80");
 @source inline("bg-[var(--Surface-Primary)]/95");
@@ -375,10 +376,12 @@
 @source inline("data-[side=top]:slide-in-from-bottom-2");
 @source inline("data-[size=default]:sm:max-w-lg");
 @source inline("data-[size=sm]:max-w-xs");
+@source inline("data-[state=active]:bg-[var(--Surface-Pill-Selected,var(--Surface-Primary))]");
 @source inline("data-[state=active]:bg-[var(--Surface-Primary)]");
 @source inline("data-[state=active]:shadow-sm");
 @source inline("data-[state=active]:text-[var(--Text-High-Emphasis)]");
 @source inline("data-[state=checked]:bg-[var(--Brand-Primary)]");
+@source inline("data-[state=checked]:bg-[var(--Surface-Pill-Selected,var(--Surface-Primary))]");
 @source inline("data-[state=checked]:bg-[var(--Surface-Primary)]");
 @source inline("data-[state=checked]:border-[var(--Brand-Primary)]");
 @source inline("data-[state=checked]:border-[var(--Object-Accent-Primary)]");
