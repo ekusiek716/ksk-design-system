@@ -879,7 +879,7 @@
         "pill の trigger は透明な before 擬似要素でタップ領域を44pxまで確保済み。消費側で [role=\"tab\"] に追加の min-height を当てないこと(見えている面がトラックより高くなる)。",
         "semantics=\"radio\" の項目（[role=\"radio\"] / data-slot=\"pill-toggle-item\"）も同じ before でタップ領域を確保済み。追加の min-height を当てない(issue #741)。",
         "名前を付ける: 見える見出しがあれば aria-labelledby、無ければ aria-label。フォームの値選び（性別・単位など）は semantics=\"radio\" にし、FormField as=\"group\" で包む（radiogroup 自身もそのラベルで名付けるので aria-label は不要）。画面内の表示の切り替え（一覧の絞り込み・週/月）は既定の tabs のまま(issue #741)",
-        "面は切り替え専用のロール: トラック var(--Surface-Pill-Track, var(--Surface-Tertiary))、選んだ側 var(--Surface-Pill-Selected, var(--Surface-Primary)) + shadow-sm、選んだ側の文字は太字。light は Gray-100 の上に白（従来と同じ色）、dark は外枠 Gray-800 の上に Gray-500 で選んだ側を明るくする（3.08:1・選んだ側の文字 4.83:1）。Tabs variant=\"pill\" を直接使う場合も同じ。色を変えるときはこの 2 ロールを上書きし、面どうしの 3:1 と文字の 4.5:1 を再確認する(issue #863)",
+        "面は切り替え専用のロール: トラック var(--Surface-Pill-Track, var(--Surface-Tertiary))、選んだ側 var(--Surface-Pill-Selected, var(--Surface-Primary)) + shadow-sm と文字色（Web は文字の太さを変えない。native は 700 / 500）。light は Gray-100 の上に白（従来と同じ色）、dark は外枠 Gray-800 の上に Gray-500 で選んだ側を明るくする（3.08:1・選んだ側の文字 4.83:1）。Tabs variant=\"pill\" を直接使う場合も同じ。色を変えるときはこの 2 ロールを上書きし、面どうしの 3:1 と文字の 4.5:1 を再確認する(issue #863)",
         "native の PillToggle は項目の高さ 36 を下限に文字に合わせて伸び、ラベルを省略せず折り返す。OS の文字の倍率で 1 行が 36 を超える大きさ（label.sm の行 18 × fontScale > 36）では縦に積む形へ自動で切り替える。消費側で高さを固定したり numberOfLines を足したりしない(issue #861)"
       ]
     },

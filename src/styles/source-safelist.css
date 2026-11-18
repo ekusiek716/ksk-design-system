@@ -378,7 +378,6 @@
 @source inline("data-[size=sm]:max-w-xs");
 @source inline("data-[state=active]:bg-[var(--Surface-Pill-Selected,var(--Surface-Primary))]");
 @source inline("data-[state=active]:bg-[var(--Surface-Primary)]");
-@source inline("data-[state=active]:font-bold");
 @source inline("data-[state=active]:shadow-sm");
 @source inline("data-[state=active]:text-[var(--Text-High-Emphasis)]");
 @source inline("data-[state=checked]:bg-[var(--Brand-Primary)]");
@@ -386,7 +385,6 @@
 @source inline("data-[state=checked]:bg-[var(--Surface-Primary)]");
 @source inline("data-[state=checked]:border-[var(--Brand-Primary)]");
 @source inline("data-[state=checked]:border-[var(--Object-Accent-Primary)]");
-@source inline("data-[state=checked]:font-bold");
 @source inline("data-[state=checked]:shadow-sm");
 @source inline("data-[state=checked]:text-[var(--Text-High-Emphasis)]");
 @source inline("data-[state=checked]:text-[var(--Text-on-Inverse)]");

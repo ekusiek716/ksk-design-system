@@ -89,11 +89,10 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
         SEGMENT_ITEM_FOCUS_DISABLED,
         "data-[state=active]:text-[var(--Text-High-Emphasis)] data-[state=active]:shadow-sm",
         // pill の選んだ側は切り替え専用の面（issue #863。トラックの PILL_LIST_SURFACE と対）。
-        // 文字は native の PillToggle と同じく選んだ側だけ太くし、色（面の明暗）だけに頼らない。
-        // typo-* に「同じ大きさで太さだけ変える」段は無いので、状態の variant で weight だけを上書きする
-        // （native は label.sm に fontWeight 700 / 500 を重ねている）。
+        // 文字の太さは変えない: typo-* に同じ大きさで太さだけ変える段が無く（font-bold の直書きは P016）、
+        // w-fit の項目は太字で幅が変わって選ぶたびに隣が動くため。選んだ側は面（dark 3.08:1）と文字色で示す
         variant === "pill"
-          ? "data-[state=active]:bg-[var(--Surface-Pill-Selected,var(--Surface-Primary))] data-[state=active]:font-bold"
+          ? "data-[state=active]:bg-[var(--Surface-Pill-Selected,var(--Surface-Primary))]"
           : "data-[state=active]:bg-[var(--Surface-Primary)]",
         // forced-colors（Windows ハイコントラスト）では背景色・box-shadow が消え、選択中の
         // 白地（Surface-Primary + shadow-sm）が描画されず、どのタブが選択中か分からなくなる。

@@ -149,9 +149,10 @@ type PillToggleProps<T extends string = string> =
  * 短いラベルを使うこと。
  *
  * ### 選んだ側の見た目（issue #863）
- * トラックは `--Surface-Pill-Track`、選んだ側は `--Surface-Pill-Selected` ＋ shadow-sm で、
- * 選んだ側の文字だけ太くする（native と同じ）。light は Gray-100 の上に白（従来と同じ色）。
- * dark は外枠 Gray-800 の上に Gray-500 で、選んだ側を外枠より明るくする（3.08:1）。
+ * トラックは `--Surface-Pill-Track`、選んだ側は `--Surface-Pill-Selected` ＋ shadow-sm と文字色
+ * （High / Medium）。light は Gray-100 の上に白（従来と同じ色）。dark は外枠 Gray-800 の上に Gray-500 で、
+ * 選んだ側を外枠より明るくする（3.08:1）。文字の太さは変えない（native は 700 / 500。Web は typo-* に
+ * 同じ大きさで太さだけ変える段が無く、`w-fit` の項目が選ぶたびに幅を変えて隣が動くため）。
  * 色を変えたいプロダクトはこの 2 つのロールを上書きし、面どうしの 3:1 と文字の 4.5:1 を再確認する。
  *
  * ### 名前と読み上げの役割（issue #741）
@@ -185,8 +186,8 @@ const RADIO_ITEM = cn(
   PILL_ITEM_SHAPE,
   PILL_ITEM_HIT_AREA,
   SEGMENT_ITEM_FOCUS_DISABLED,
-  // 選んだ側の面・太字は TabsTrigger の pill と同じ（issue #863。理由は tabs.tsx の同じ箇所）
-  "data-[state=checked]:bg-[var(--Surface-Pill-Selected,var(--Surface-Primary))] data-[state=checked]:text-[var(--Text-High-Emphasis)] data-[state=checked]:font-bold data-[state=checked]:shadow-sm",
+  // 選んだ側の面は TabsTrigger の pill と同じ（issue #863。太さを変えない理由も tabs.tsx の同じ箇所）
+  "data-[state=checked]:bg-[var(--Surface-Pill-Selected,var(--Surface-Primary))] data-[state=checked]:text-[var(--Text-High-Emphasis)] data-[state=checked]:shadow-sm",
   "forced-colors:data-[state=checked]:bg-[Highlight] forced-colors:data-[state=checked]:text-[HighlightText]",
   "data-[state=unchecked]:hover:text-[var(--Text-High-Emphasis)]"
 )

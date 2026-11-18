@@ -241,7 +241,7 @@ describe("native PillToggle — 文字の大きさ（#861）", () => {
               expect(item).toMatchObject({ flex: 1, minWidth: 0 })
             } else {
               // 行より長いラベルは行の幅まで縮めて折り返す（RN の flexShrink 既定 0 だと横にはみ出す）
-              expect(item).toMatchObject({ flexShrink: 1, maxWidth: "100%" })
+              expect(item).toMatchObject({ flexShrink: 1 })
             }
           }
 

@@ -45,6 +45,8 @@ export function PillToggle({
   fullWidth = false,
 }: PillToggleProps) {
   const { theme, scales } = useTheme()
+  // 倍率は OS の設定（useWindowDimensions）で見る。ラベルは allowFontScaling 既定（true）・上限なしで描くので、
+  // アプリ全体で Text の拡大を止めている consumer では、文字は大きくならずに縦に積むだけになる
   const { fontScale } = useWindowDimensions()
   const labelTypo = resolveTypo("label.sm")
   // 縦に積む形: 横並びのまま文字だけ大きくすると、項目が潰れて 1〜2 文字ごとに折り返すか重なる
@@ -67,12 +69,13 @@ export function PillToggle({
   })
 
   // 項目の幅の決め方。縦: 横幅いっぱい / fullWidth: 等幅 / それ以外: ラベル幅（行より長いときは
-  // 行の幅まで縮めて折り返す。RN の flexShrink 既定は 0 なので明示しないと横にはみ出す）
+  // 行の幅まで縮めて折り返す。RN の flexShrink 既定は 0 なので明示しないと横にはみ出す。
+  // flexWrap の行ごとに Yoga が縮めるので、% の maxWidth は要らない）
   const itemSizing: ViewStyle = stacked
     ? { alignSelf: "stretch" }
     : fullWidth
     ? { flex: 1, minWidth: 0 }
-    : { flexShrink: 1, maxWidth: "100%" }
+    : { flexShrink: 1 }
 
   return (
     <View

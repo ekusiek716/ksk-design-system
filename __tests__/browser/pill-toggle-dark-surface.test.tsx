@@ -121,10 +121,9 @@ describe("切り替えの選んだ側の面（#863）", () => {
       expect(contrast(selected.color, selected.background)).toBeGreaterThanOrEqual(4.5)
     })
 
-    it(`${shape}: 選んだ側の文字だけ太い（色だけに頼らない。native の 700 / 500 と同じ）`, () => {
+    it(`${shape}: 文字の太さは選択で変えない（w-fit の項目が選ぶたびに幅を変えて隣が動かないように）`, () => {
       const { selected, unselected } = render(shape)
-      expect(selected.weight).toBe(700)
-      expect(unselected.weight).toBe(500)
+      expect(selected.weight).toBe(unselected.weight)
     })
   }
 
