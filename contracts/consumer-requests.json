@@ -65,6 +65,21 @@
       "dsIssue": 858,
       "consumerIssue": "https://github.com/ekusiek716/bundletube/issues/124",
       "fixPr": null
+    },
+    {
+      "dsIssue": 861,
+      "consumerIssue": "https://github.com/ekusiek716/pita-diy/issues/218",
+      "fixPr": null
+    },
+    {
+      "dsIssue": 862,
+      "consumerIssue": "https://github.com/ekusiek716/pita-diy/issues/218",
+      "fixPr": null
+    },
+    {
+      "dsIssue": 863,
+      "consumerIssue": "https://github.com/ekusiek716/pita-diy/issues/218",
+      "fixPr": null
     }
   ]
 }
