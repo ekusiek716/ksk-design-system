@@ -80,6 +80,8 @@
       "--Surface-Switch-Off",
       "--Surface-Switch-Off-Hover",
       "--Surface-Slider-Track",
+      "--Surface-Pill-Track",
+      "--Surface-Pill-Selected",
       "--Border-Accent-Primary",
       "--Brand-Primary",
       "--Brand-Action",

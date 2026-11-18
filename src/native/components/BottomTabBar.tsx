@@ -17,6 +17,15 @@ import { resolveTypo } from "../typography"
 
 export type BottomTabBarKeyboardBehavior = "hide" | "lift" | "stay"
 
+/**
+ * タブ名・件数バッジの文字の倍率の上限（issue #862）。
+ * iOS の標準のタブバーは Dynamic Type でタブ名を大きくせず、アクセシビリティの大きさでは長押しの
+ * 拡大表示（Large Content Viewer）で読ませる。上限が無いと幅 72 の 1 行に収まらず「ホ…」「寸…」になる。
+ * 値は iOS の「標準の最大（アクセシビリティ外の最大）」の fontScale 実測 1.353（iPhone 16e シミュレーター・
+ * 2026-11-13）付近。4 文字の和文タブ名（body.xs 12px × 1.35 ≒ 65px）が幅 72 に収まる。
+ */
+const TAB_LABEL_MAX_FONT_SIZE_MULTIPLIER = 1.35
+
 export interface BottomTabBarProps {
   items: NavigationBarItem[]
   value?: string
@@ -191,6 +200,10 @@ export function LiquidBottomTabBar({
             // Web の BottomTabBar と同じく、表示中のタブは aria-current="page"。
             {...webAriaFromState("button", { selected: focused }, { selectedAs: "current" })}
             accessibilityLabel={options.tabBarAccessibilityLabel ?? resolveTabLabel(route, options)}
+            // iOS: アクセシビリティの文字の大きさのとき、長押しでタブ名を拡大表示する（標準のタブバーと同じ。
+            // タブ名は上の上限で大きくならないため。issue #862）。iOS 以外では使われない
+            accessibilityShowsLargeContentViewer={showLabels}
+            accessibilityLargeContentTitle={showLabels ? resolveTabLabel(route, options) : undefined}
             testID={options.tabBarButtonTestID}
             onPress={() => {
               const event = navigation.emit?.({
@@ -231,7 +244,8 @@ export function LiquidBottomTabBar({
                     top: -4,
                     right: -10,
                     minWidth: 16,
-                    height: 16,
+                    // 高さは下限。上限付きでも 1.35 倍の文字（行 20）は 16 を超えるので固定しない（issue #862）
+                    minHeight: 16,
                     paddingHorizontal: 4,
                     borderRadius: scales.borderRadius.full,
                     backgroundColor: theme.caution.base,
@@ -239,7 +253,10 @@ export function LiquidBottomTabBar({
                     justifyContent: "center",
                   }}
                 >
-                  <RNText style={[resolveTypo("label.xs"), { color: theme.text["on-inverse"] }]}>
+                  <RNText
+                    maxFontSizeMultiplier={TAB_LABEL_MAX_FONT_SIZE_MULTIPLIER}
+                    style={[resolveTypo("label.xs"), { color: theme.text["on-inverse"] }]}
+                  >
                     {options.tabBarBadge}
                   </RNText>
                 </View>
@@ -248,6 +265,8 @@ export function LiquidBottomTabBar({
             {showLabels && (
               <RNText
                 numberOfLines={1}
+                // 文字の倍率に上限を付ける（issue #862）。読み上げ名（accessibilityLabel）は全文のまま
+                maxFontSizeMultiplier={TAB_LABEL_MAX_FONT_SIZE_MULTIPLIER}
                 style={[
                   resolveTypo(focused ? "label.xs" : "body.xs"),
                   { color, maxWidth: 72 },

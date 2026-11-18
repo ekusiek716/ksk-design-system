@@ -157,7 +157,9 @@
           "disable": "#F4F4F5",
           "switch-off": "#71717A",
           "switch-off-hover": "#52525B",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#F4F4F5",
+          "pill-selected": "#FFFFFF"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -283,7 +285,9 @@
           "disable": "#27272A",
           "switch-off": "#71717A",
           "switch-off-hover": "#A1A1AA",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#27272A",
+          "pill-selected": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -404,7 +408,9 @@
           "disable": "#F4F4F5",
           "switch-off": "#71717A",
           "switch-off-hover": "#52525B",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#F4F4F5",
+          "pill-selected": "#FFFFFF"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -530,7 +536,9 @@
           "disable": "#27272A",
           "switch-off": "#71717A",
           "switch-off-hover": "#A1A1AA",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#27272A",
+          "pill-selected": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -651,7 +659,9 @@
           "disable": "#F4F4F5",
           "switch-off": "#71717A",
           "switch-off-hover": "#52525B",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#F4F4F5",
+          "pill-selected": "#FFFFFF"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -777,7 +787,9 @@
           "disable": "#27272A",
           "switch-off": "#71717A",
           "switch-off-hover": "#A1A1AA",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#27272A",
+          "pill-selected": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -898,7 +910,9 @@
           "disable": "#F4F4F5",
           "switch-off": "#71717A",
           "switch-off-hover": "#52525B",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#F4F4F5",
+          "pill-selected": "#FFFFFF"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -1024,7 +1038,9 @@
           "disable": "#27272A",
           "switch-off": "#71717A",
           "switch-off-hover": "#A1A1AA",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#27272A",
+          "pill-selected": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -1145,7 +1161,9 @@
           "disable": "#F4F4F5",
           "switch-off": "#71717A",
           "switch-off-hover": "#52525B",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#F4F4F5",
+          "pill-selected": "#FFFFFF"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -1271,7 +1289,9 @@
           "disable": "#27272A",
           "switch-off": "#71717A",
           "switch-off-hover": "#A1A1AA",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#27272A",
+          "pill-selected": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -1392,7 +1412,9 @@
           "disable": "#F4F4F5",
           "switch-off": "#71717A",
           "switch-off-hover": "#52525B",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#F4F4F5",
+          "pill-selected": "#FFFFFF"
         },
         "text": {
           "high-emphasis": "#18181B",
@@ -1518,7 +1540,9 @@
           "disable": "#27272A",
           "switch-off": "#71717A",
           "switch-off-hover": "#A1A1AA",
-          "slider-track": "#71717A"
+          "slider-track": "#71717A",
+          "pill-track": "#27272A",
+          "pill-selected": "#71717A"
         },
         "text": {
           "high-emphasis": "rgba(255, 255, 255, 1.00)",

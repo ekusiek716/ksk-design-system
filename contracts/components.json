@@ -878,7 +878,9 @@
         "等幅・全幅にしたいときは fullWidth を使う。className=\"grid w-full grid-cols-N\" で TabsList に届かせる回避策は内部構造依存なので使わない(issue #500)。",
         "pill の trigger は透明な before 擬似要素でタップ領域を44pxまで確保済み。消費側で [role=\"tab\"] に追加の min-height を当てないこと(見えている面がトラックより高くなる)。",
         "semantics=\"radio\" の項目（[role=\"radio\"] / data-slot=\"pill-toggle-item\"）も同じ before でタップ領域を確保済み。追加の min-height を当てない(issue #741)。",
-        "名前を付ける: 見える見出しがあれば aria-labelledby、無ければ aria-label。フォームの値選び（性別・単位など）は semantics=\"radio\" にし、FormField as=\"group\" で包む（radiogroup 自身もそのラベルで名付けるので aria-label は不要）。画面内の表示の切り替え（一覧の絞り込み・週/月）は既定の tabs のまま(issue #741)"
+        "名前を付ける: 見える見出しがあれば aria-labelledby、無ければ aria-label。フォームの値選び（性別・単位など）は semantics=\"radio\" にし、FormField as=\"group\" で包む（radiogroup 自身もそのラベルで名付けるので aria-label は不要）。画面内の表示の切り替え（一覧の絞り込み・週/月）は既定の tabs のまま(issue #741)",
+        "面は切り替え専用のロール: トラック var(--Surface-Pill-Track, var(--Surface-Tertiary))、選んだ側 var(--Surface-Pill-Selected, var(--Surface-Primary)) + shadow-sm、選んだ側の文字は太字。light は Gray-100 の上に白（従来と同じ色）、dark は外枠 Gray-800 の上に Gray-500 で選んだ側を明るくする（3.08:1・選んだ側の文字 4.83:1）。Tabs variant=\"pill\" を直接使う場合も同じ。色を変えるときはこの 2 ロールを上書きし、面どうしの 3:1 と文字の 4.5:1 を再確認する(issue #863)",
+        "native の PillToggle は項目の高さ 36 を下限に文字に合わせて伸び、ラベルを省略せず折り返す。OS の文字の倍率で 1 行が 36 を超える大きさ（label.sm の行 18 × fontScale > 36）では縦に積む形へ自動で切り替える。消費側で高さを固定したり numberOfLines を足したりしない(issue #861)"
       ]
     },
     {
@@ -3141,6 +3143,7 @@
         "Set maxWidth to the mobile web shell width when the app is centered in a desktop viewport.",
         "Use floatingPosition='left'|'right' (variant='pill' only) when a FAB is placed on the opposite side; default 'center' keeps the existing centered float.",
         "Native Expo Router / React Navigation consumers should use createExpoRouterTabBar instead of local floating tab bars.",
+        "native の LiquidBottomTabBar / createExpoRouterTabBar のタブ名・件数バッジは、iOS の標準のタブバーと同じく文字の倍率に上限（maxFontSizeMultiplier 1.35 ≒ iOS の標準の最大）を持つ。読み上げ名は全文のまま、iOS のアクセシビリティの大きさでは長押しで拡大表示（Large Content Viewer）。消費側で自前のタブバーに置き換えて上限を外さない(issue #862)",
         "寸法・面のプロダクト差分は公開 CSS 変数 --Nav-*（--Nav-Pill-* / --Nav-Item-* / --Nav-Center-Action-* / --Nav-Selected-*）で表現する。contracts/product-theme-overrides.json の nav グループが正本（issue #471）。",
         "選択面（選択中のタブの下に敷くプラッター）のぼかしは --Nav-Selected-Backdrop（既定 none・例: var(--glass-blur-sm)）。[data-slot=\"bottom-nav-selected-surface\"] に backdrop-filter を直書きしない（issue #726）",
         "消費側は DS の内部マークアップ（[data-slot=\"bottom-nav-pill\"] > :is(a, button)、span:first-child / span:last-child、[data-global-nav-add-icon]）を !important や :has() で叩かない。DOM を狙う場合も公開 data-slot だけを使う。",

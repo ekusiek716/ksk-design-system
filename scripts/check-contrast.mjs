@@ -298,6 +298,21 @@ for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
   }
 }
 
+// 切り替え（PillToggle / Tabs variant="pill"。web・native 共通のロール）の面と文字（issue #863）。
+// dark は選んだ側の面と外枠の面を非テキスト 3:1 以上にする（旧: Surface-Primary Gray-900 が外枠
+// Surface-Tertiary Gray-700 より暗く 1.70:1 で、light と明暗が逆だった）。light は従来の見た目
+// （白 / Gray-100 = 1.10:1 を影で浮かせる）を変えない判断で、選んだ側は文字の太さ（700 / 500）でも
+// 示すため、面どうしの組は dark だけを検査する。文字は light / dark とも 4.5:1。
+for (const [mode, s] of [["light", sem], ["dark", semDark]]) {
+  const track = resolve(s.surface["pill-track"])
+  const selected = resolve(s.surface["pill-selected"])
+  pairs.push([resolveOver(s.text["high-emphasis"], selected), selected, `${mode}: Text-High / Surface-Pill-Selected（切り替えの選んだ側）`, 4.5])
+  pairs.push([resolveOver(s.text["medium-emphasis"], track), track, `${mode}: Text-Medium / Surface-Pill-Track（切り替えの選んでいない側）`, 4.5])
+  if (mode === "dark") {
+    pairs.push([selected, track, "dark: Surface-Pill-Selected / Surface-Pill-Track（切り替えの面どうし・非テキスト）", 3])
+  }
+}
+
 // 高コントラスト指定でも操作部品は3:1以上を維持する。既定値にも例外は不要。
 const contrastMore = tokens.colors.semanticContrastMore
 for (const [mode, s] of [["light", sem], ["dark", semDark]]) {

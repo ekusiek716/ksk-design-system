@@ -2,7 +2,7 @@
 // このファイルは scripts/generate-platform-tokens.mjs により自動生成されています。
 // 直接編集しないでください。tokens.json / src/themes/*.css を変更し、
 // `npm run generate:tokens` を実行してください。
-// source: tokens.json v2.1.0 (sha256:a45815e50d3d)
+// source: tokens.json v2.1.0 (sha256:57a799e9a79c)
 // =============================================================
 
 export const themes = {
@@ -32,7 +32,9 @@ export const themes = {
         "disable": "#F4F4F5",
         "switch-off": "#71717A",
         "switch-off-hover": "#52525B",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#F4F4F5",
+        "pill-selected": "#FFFFFF"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -158,7 +160,9 @@ export const themes = {
         "disable": "#27272A",
         "switch-off": "#71717A",
         "switch-off-hover": "#A1A1AA",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#27272A",
+        "pill-selected": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -279,7 +283,9 @@ export const themes = {
         "disable": "#F4F4F5",
         "switch-off": "#71717A",
         "switch-off-hover": "#52525B",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#F4F4F5",
+        "pill-selected": "#FFFFFF"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -405,7 +411,9 @@ export const themes = {
         "disable": "#27272A",
         "switch-off": "#71717A",
         "switch-off-hover": "#A1A1AA",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#27272A",
+        "pill-selected": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -526,7 +534,9 @@ export const themes = {
         "disable": "#F4F4F5",
         "switch-off": "#71717A",
         "switch-off-hover": "#52525B",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#F4F4F5",
+        "pill-selected": "#FFFFFF"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -652,7 +662,9 @@ export const themes = {
         "disable": "#27272A",
         "switch-off": "#71717A",
         "switch-off-hover": "#A1A1AA",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#27272A",
+        "pill-selected": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -773,7 +785,9 @@ export const themes = {
         "disable": "#F4F4F5",
         "switch-off": "#71717A",
         "switch-off-hover": "#52525B",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#F4F4F5",
+        "pill-selected": "#FFFFFF"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -899,7 +913,9 @@ export const themes = {
         "disable": "#27272A",
         "switch-off": "#71717A",
         "switch-off-hover": "#A1A1AA",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#27272A",
+        "pill-selected": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -1020,7 +1036,9 @@ export const themes = {
         "disable": "#F4F4F5",
         "switch-off": "#71717A",
         "switch-off-hover": "#52525B",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#F4F4F5",
+        "pill-selected": "#FFFFFF"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -1146,7 +1164,9 @@ export const themes = {
         "disable": "#27272A",
         "switch-off": "#71717A",
         "switch-off-hover": "#A1A1AA",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#27272A",
+        "pill-selected": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",
@@ -1267,7 +1287,9 @@ export const themes = {
         "disable": "#F4F4F5",
         "switch-off": "#71717A",
         "switch-off-hover": "#52525B",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#F4F4F5",
+        "pill-selected": "#FFFFFF"
       },
       "text": {
         "high-emphasis": "#18181B",
@@ -1393,7 +1415,9 @@ export const themes = {
         "disable": "#27272A",
         "switch-off": "#71717A",
         "switch-off-hover": "#A1A1AA",
-        "slider-track": "#71717A"
+        "slider-track": "#71717A",
+        "pill-track": "#27272A",
+        "pill-selected": "#71717A"
       },
       "text": {
         "high-emphasis": "rgba(255, 255, 255, 1.00)",

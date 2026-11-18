@@ -5,9 +5,9 @@
  * 選択中・hover の class はそれぞれの部品側に置く。Tailwind が拾えるよう文字列はすべてリテラルで書く。
  */
 
-/** トラック（Surface-Tertiary の面）の共通部分。高さ・角丸は variant ごとに足す */
+/** トラックの共通部分。面の色・高さ・角丸は variant ごとに足す（pill は切り替え専用の面。issue #863） */
 export const SEGMENT_LIST_BASE =
-  "inline-flex w-fit max-w-full overflow-x-auto items-center gap-1 bg-[var(--Surface-Tertiary)] p-1 text-[var(--Text-Medium-Emphasis)]"
+  "inline-flex w-fit max-w-full overflow-x-auto items-center gap-1 p-1 text-[var(--Text-Medium-Emphasis)]"
 
 /**
  * pill のトラックの高さ・角丸。
@@ -17,6 +17,15 @@ export const SEGMENT_LIST_BASE =
  * 固定値のまま据え置き、角丸だけ Button と同じ --Control-Radius を共有する。
  */
 export const PILL_LIST_SHAPE = "h-11 rounded-[var(--Control-Radius)]"
+
+/**
+ * pill のトラックの面（issue #863）。選んだ側の面（`--Surface-Pill-Selected`）と対で使う。
+ * light は従来の Surface-Tertiary と同じ値。dark は選んだ側を外枠より明るくするため別の値
+ * （値と根拠は src/styles/semantic.css）。フォールバックは専用ロールが無い旧プリセットとの互換用。
+ * 選択中の面は状態の属性が tabs（data-state=active）と radio（data-state=checked）で違うので、
+ * それぞれの部品側に書く。
+ */
+export const PILL_LIST_SURFACE = "bg-[var(--Surface-Pill-Track,var(--Surface-Tertiary))]"
 
 /** 項目の共通部分（並び・文字・遷移） */
 export const SEGMENT_ITEM_BASE = "inline-flex items-center justify-center whitespace-nowrap typo-label-sm transition-all"

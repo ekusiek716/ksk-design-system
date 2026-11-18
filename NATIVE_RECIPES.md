@@ -93,6 +93,8 @@ export default function Layout() {
 
 個別画面で tab bar を隠す場合は `options={{ tabBarStyle: { display: "none" } }}` を使います。画面をルーティング対象から隠す場合は Expo Router の `href: null` を使います。
 
+タブ名は iOS の標準のタブバーと同じく、OS の文字の大きさに上限（`maxFontSizeMultiplier` 1.35 ≒ iOS の「標準の最大」）を持ちます（issue #862）。アクセシビリティの大きさでは、長押しで iOS の拡大表示（Large Content Viewer）にタブ名が出ます。読み上げ名は全文のままです。タブ名を欠けさせないため、和文は 4 文字程度までにします。
+
 React Navigation でも同じ factory を `tabBar` に渡せます。
 
 ```tsx
