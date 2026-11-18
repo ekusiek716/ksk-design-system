@@ -380,6 +380,23 @@ describe("Android（edge-to-edge ではキーボードで画面が縮まない�
     expect(rn.state.scrollTo).toEqual([REVEAL_LOWER])
   })
 
+  it("キーボードが出たまま本文の外の欄（Sheet 等）へ移ったら（本文の欄の blur）、重なりの余白を外す", () => {
+    render(<Screen>{form}</Screen>)
+    focus(lowerField)
+    showKeyboard()
+    flushFrames()
+    expect(contentPaddingBottom()).toBe(324)
+    focus({ ...lowerField, inside: false })
+    handler("onBlur")()
+    flushFrames()
+    expect(contentPaddingBottom()).toBe(24)
+    // 本文の欄へ戻ったら（focus）、また足す
+    focus(lowerField)
+    handler("onFocus")()
+    flushFrames()
+    expect(contentPaddingBottom()).toBe(324)
+  })
+
   it("本文の外（Sheet 等）の欄でキーボードが出ても、重なりの余白は足さない", () => {
     render(<Screen>{form}</Screen>)
     focus({ ...lowerField, inside: false })
@@ -400,6 +417,7 @@ describe("避けないとき（従来どおり）", () => {
     expect(props.onLayout).toBeUndefined()
     expect(props.onContentSizeChange).toBeUndefined()
     expect(props.onScrollBeginDrag).toBeUndefined()
+    expect(props.onBlur).toBeUndefined()
     expect(listenerCount()).toBe(0)
     focus(lowerField)
     showKeyboard()

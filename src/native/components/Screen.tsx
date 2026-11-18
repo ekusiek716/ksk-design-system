@@ -173,6 +173,7 @@ function useScreenKeyboardAvoidance(
       followRef.current = false
       setKeyboardTop(null)
       setOwnsFocus(false)
+      setOverlap(0)
     }
     // keyboardDidShow は iOS ではキーボードが出きった後（RN の自動調整が終わった後）に届く。
     // Android は出る・高さが変わる（絵文字の切り替え等）たびに届く
@@ -204,6 +205,11 @@ function useScreenKeyboardAvoidance(
         if (keyboardTopRef.current == null) return
         followRef.current = true
         scheduleReveal()
+      },
+      // 本文の欄が外れた（blur も親へ伝わる）。キーボードが出たまま本文の外の欄（Sheet 等）へ移ったときに
+      // 余白を外せるよう、次の描画で入力中の欄を測り直す（本文の別の欄へ移ったときは onFocus と同じく送る）
+      onBlur: () => {
+        if (keyboardTopRef.current != null) scheduleReveal()
       },
       // 余白を足した後（Android は足した後でないと送り先まで届かない）・入力で中身の高さが変わった後に送り直す
       onContentSizeChange: () => {
