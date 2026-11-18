@@ -2329,7 +2329,8 @@
         "アドレスバーの出入りで高さを揺らしたくない画面は height=\"svh\"、高さの決まった親の中では height=\"fill\"（既定 dvh）",
         "オンボーディング・ログイン等の 1 画面フローを PC で中央カードにするときは desktopLayout=\"card\"（md = 768px 以上で Surface-Secondary の背景の中央に枠・角丸のカード。cardMaxWidth 既定 30rem / cardMaxHeight 既定 47.5rem）。md:w-[480px] md:rounded-2xl 等を className で自作しない",
         "他の <main> の中に置くときは landmark=\"none\"（本文を div にし、id とスキップリンクを既定で出さない）",
-        "React Native consumer は ksk-design-system/native/ui の Screen を使い、header/body/footer shell をローカル再実装しない"
+        "React Native consumer は ksk-design-system/native/ui の Screen を使い、header/body/footer shell をローカル再実装しない",
+        "React Native の Screen（scroll=true）は、入力中の欄をソフトキーボード（と上に出る「完了」「次へ」の帯）の上端から 24 上まで自動で送る（iOS は ScrollView の automaticallyAdjustKeyboardInsets＋不足分のスクロール、Android は edge-to-edge で縮まない画面に重なりぶんの余白を足す）。consumer 側で KeyboardAvoidingView で包んだり scrollTo で送ったりしない。アプリ側で自前に避けている画面だけ avoidKeyboard={false} にする"
       ]
     },
     {

@@ -226,6 +226,34 @@ import { Button, PhotoHero, Screen } from "ksk-design-system/native/ui"
 </Screen>
 ```
 
+### 入力欄とソフトキーボード（Screen の scroll）
+
+`Screen`（`scroll` 既定 true）は、入力中の欄をソフトキーボードと、その上に出る「完了」「次へ」の帯に
+隠れない位置（帯を含むキーボードの上端から 24 上）まで本文を送ります。consumer 側で `KeyboardAvoidingView` で包んだり、
+`onFocus` で `scrollTo` したりしないでください（二重に送られ、キーボードの上に空白が出ます）。
+
+- iOS: 本文の ScrollView に `automaticallyAdjustKeyboardInsets` を付け、足りない分だけ追加で送ります。
+- Android: edge-to-edge（RN 0.81+ / targetSdk 35+ で既定）ではキーボードで画面が縮まないため、
+  本文とキーボードが重なる高さぶん本文の下の余白（`paddingBottom`。`contentContainerStyle` の値に足す）を広げて送ります。
+  画面が縮む環境では足しません。
+- キーボードが出たまま別の欄へ移ったとき（「次へ」・別の欄に触れる）も送り直します。
+  指で本文を動かした後は、中身の高さが変わっても入力中の欄へ引き戻しません。
+- 入力欄が `Sheet` / `Dialog` の中にあるとき（`Screen` の children の中に置いた場合も含む）は、
+  そちらの部品がキーボードを避けます（Screen は送らず、余白も足しません）。
+  - iOS の RN の ScrollView は、Modal の中の数字キーボードの欄に「完了」等の帯があると、
+    キーボードが出ている間だけ後ろの Screen の本文をキーボードの高さぶん動かし、閉じると戻します（RN 本体の動き）。
+
+アプリ側ですでにキーボードを避けている画面（画面全体を `KeyboardAvoidingView` で包んでいる等）だけ、
+`avoidKeyboard={false}` で従来どおりにします。`scroll={false}` の画面は本文がスクロールしないため対象外です。
+
+```tsx
+<Screen>
+  <FormField label="段数">
+    <Input keyboardType="number-pad" inputAccessoryViewButtonLabel="完了" />
+  </FormField>
+</Screen>
+```
+
 ## Media action cluster
 
 動画・写真上の Like / Share / Save などの操作群は `MediaActionCluster` を使います。`position="fixed"` は RN では absolute と同等に扱い、`href` は `Linking.openURL` に委譲します。
