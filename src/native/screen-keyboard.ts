@@ -21,6 +21,31 @@ export function resolveKeyboardOverlap(scroll: WindowSpan, keyboardTop: number):
   return Math.max(0, scroll.y + scroll.height - keyboardTop)
 }
 
+/**
+ * 入力中の欄が、本文の ScrollView の中身として描かれているか。
+ *
+ * measureLayout（中身の View からの相対位置）は、途中に RN の Modal（Sheet・Dialog・Combobox の候補シート等）が
+ * あると Modal を境に計算を打ち切り、Modal の中での位置を「成功」として返す。Screen の children の中に
+ * Sheet を置くと、その入力欄も中身の View の子孫になるため、成功・失敗だけでは見分けられない。
+ * window 上の位置（measureInWindow）が「中身の View の window 上の位置 + 相対位置」と一致するときだけ本文の欄とみなす。
+ * 欄が transform で動いているときも一致しないが、その場合も送らない（従来どおり）側に倒す。
+ * 中身の View の window 上の位置がちょうど 0（見出しの無い全画面の Screen でスクロール 0）のときは見分けられない。
+ * その場合、計算に使う位置は Modal の欄の本当の位置と同じになるため、その欄が見えていれば送らない。
+ */
+export function isInsideScrollContent(inputWindowY: number, innerWindowY: number, contentY: number): boolean {
+  return Math.abs(inputWindowY - (innerWindowY + contentY)) <= 1
+}
+
+/**
+ * キーボードが出ている間の本文の下の余白。
+ * 最後の欄も「キーボードの上端から gap 上」まで送れるよう、元の余白が gap より小さければ gap まで広げ、
+ * Android では本文とキーボードの重なり（overlap）を足す。iOS の重なりは RN の automaticallyAdjustKeyboardInsets が
+ * contentInset で持つので足さない（overlap に 0 を渡す）。
+ */
+export function resolveKeyboardPaddingBottom(basePaddingBottom: number, gap: number, overlap: number): number {
+  return Math.max(basePaddingBottom, gap) + overlap
+}
+
 export interface FocusedInputScrollInput {
   /** 本文の ScrollView の枠（window 座標） */
   scroll: WindowSpan
